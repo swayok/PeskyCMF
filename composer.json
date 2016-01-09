@@ -35,6 +35,7 @@
   "require": {
     "php": ">=5.3",
     "swayok/utils": "master@dev",
-	"swayok/peskyorm": "master@dev"
+	"swayok/peskyorm": "master@dev",
+	"laravel/framework": "5.2.*"
   }
 }
