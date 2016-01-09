@@ -1,0 +1,40 @@
+{
+  "name": "swayok/peskycmf",
+  "type": "library",
+  "description": "PeskyCMF - CMF based on Laravel Framework 5, PeskyORM and AdminLTE UI template",
+  "keywords": [
+    "php",
+	"cmf",
+	"laravel",
+	"admin",
+    "database",
+    "web"
+  ],
+  "authors": [
+    {
+      "name": "Alexander Filippov"
+    }
+  ],
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/swayok/PeskyCMF/issues"
+  },
+  "autoload": {
+    "psr-0": {"PeskyCMF": "/src"}
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/swayok/utils.git"
+    },
+	{
+      "type": "vcs",
+      "url": "https://github.com/swayok/peskyorm.git"
+    }
+  ],
+  "require": {
+    "php": ">=5.3",
+    "swayok/utils": "master@dev",
+	"swayok/peskyorm": "master@dev"
+  }
+}

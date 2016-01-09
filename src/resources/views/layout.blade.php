@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>@section('page-title') {{ trans('admin_area.default_page_title') }} @show</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @yield('html-head')
+
+    <link href="/packages/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/adminlte/plugins/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/fonts/source_sans_pro/source_sans_pro.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/adminlte/css/skins/skin-blue.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/bootstrap-datepicker3.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/js/lib/bootstrap-select/bootstrap-select.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/js/lib/toastr/toastr.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/js/lib/query_builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/admin.app.css" rel="stylesheet" type="text/css"/>
+
+    @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->layout_css_includes() as $cssPath)
+        <link href="{{ $cssPath }}" rel="stylesheet" type="text/css"/>
+    @endforeach
+
+    @yield('css')
+    @yield('css2')
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="skin-blue">
+    <div class="wrapper has-preloader loading" id="page-wrapper">
+
+    </div>
+
+    <script type="application/javascript">
+        <?php $urlPrefix = \PeskyCMF\Config\CmfConfig::getInstance()->url_prefix(); ?>
+        var CmfSettings = {
+            isDebug: {{ env('APP_DEBUG') ? 'true' : 'false' }},
+            rootUrl: '/{{ $urlPrefix }}',
+            uiUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_main_ui', [], false)) }}',
+            userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}'
+        };
+    </script>
+
+    <script src="/packages/cmf/js/lib/jquery/jquery-2.1.3.min.js" type="text/javascript"></script>
+
+    <script src="/packages/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/packages/adminlte/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src='/packages/adminlte/plugins/fastclick/fastclick.min.js'></script>
+    <script src="/packages/adminlte/plugins/datatables/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="/packages/adminlte/plugins/datatables/dataTables.bootstrap.min.js" type="text/javascript"></script>
+    <script src="/packages/adminlte/plugins/datepicker/bootstrap-datepicker.js" type="text/javascript"></script>
+    <script src="/packages/adminlte/plugins/datepicker/locales/bootstrap-datepicker.ru.js" type="text/javascript"></script>
+    <script src="/packages/adminlte/js/app.js" type="text/javascript"></script>
+
+    <script src="/packages/cmf/js/lib/modernizr.custom.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/pilot.router.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/jquery.observable.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/rison.object.coder.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/dotjs/doT.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/moment/moment.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/moment/locale/ru.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/jQuery.extendext.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/query_builder/query-builder.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/query_builder/i18n/query-builder.ru.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/jquery.plugins.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/jquery.form.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/toastr/toastr.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/base64.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/admin.global.vars.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/admin.helpers.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/admin.utils.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/admin.controllers.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/scaffold/scaffold.controllers.js?_=20151008" type="text/javascript"></script>
+    <script src="/packages/cmf/js/scaffold/scaffold.manager.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/admin.app.js" type="text/javascript"></script>
+
+    @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->layout_js_includes() as $jsPath)
+        <script src="{{ $jsPath }}" rel="stylesheet" type="text/javascript"></script>
+    @endforeach
+
+    @yield('js')
+    @yield('js2')
+
+</body>
+</html>

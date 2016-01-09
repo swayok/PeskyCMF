@@ -1,0 +1,163 @@
+<?php
+/**
+ * @var \App\Db\BaseDbModel $model
+ * @var \App\Admin\Scaffold\DataGrid\DataGridConfig $dataGridConfig
+ * @var \App\Admin\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
+ * @var string $translationPrefix
+ * @var string $idSuffix
+ */
+$dataGridId = "scaffold-data-grid-{$idSuffix}";
+$gridColumnsConfigs = $dataGridConfig->getFields();
+?>
+
+<div id="data-grid-tpl">
+    <div class="content-header">
+        <h1><?php echo trans("$translationPrefix.datagrid.header"); ?></h1>
+        <ol class="breadcrumb">
+            <li>
+                <a href="#" data-nav="reload">
+                    <i class="glyphicon glyphicon-refresh"></i>
+                    <?php echo trans('cmf::cmf.action.reload_page'); ?>
+                </a>
+            </li>
+        </ol>
+    </div>
+    <div class="content">
+        <div class="row"><div class="col-xs-12">
+            <div class="box"><div class="box-body">
+                <table class="table table-bordered table-hover table-striped" id="<?php echo $dataGridId ?>">
+                <thead>
+                    <tr>
+                        <?php
+                            foreach ($gridColumnsConfigs as $config) {
+                                echo \Swayok\Html\Tag::th()
+                                    ->setContent($config->getLabel(trans("$translationPrefix.datagrid.column.{$config->getName()}")))
+                                    ->setClass('text-nowrap')
+                                    ->setDataAttr('orderable', $config->isSortable() ? 'true' : 'false')
+                                    ->setDataAttr('visible', $config->isVisible() ? null : 'false')
+                                    ->setDataAttr('name', $config->getName())
+                                    ->setDataAttr('data', $config->getName());
+                            }
+                        ?>
+                    </tr>
+                </thead>
+                </table>
+            </div></div>
+        </div></div>
+
+    </div>
+
+    <?php
+        $toolbar = [];
+        $pkName = $model->getPkColumnName();
+        $dblClickUrl = null;
+        if ($dataGridConfig->isCreateAllowed()) {
+            $toolbar['create'] = \Swayok\Html\Tag::a()
+                ->setContent(trans("cmf::cmf.datagrid.toolbar.create"))
+                ->setClass('btn btn-primary')
+                ->setHref(route('cmf_item_add_form', [$model->getTableName()], false))
+                ->build();
+        }
+
+        $actionsTpl = '';
+        if ($dataGridConfig->isItemDetailsAllowed()) {
+            $url = $dblClickUrl = route('cmf_item_details', [$model->getTableName(), ":{$pkName}:"], false);
+            $actionsTpl .= \Swayok\Html\Tag::a()
+                ->setClass('row-action text-light-blue')
+                ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
+                ->setTitle(trans('cmf::cmf.datagrid.actions.view_item'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setHref($url)
+                ->build();
+        }
+        if ($dataGridConfig->isEditAllowed()) {
+            $url = $dblClickUrl = route('cmf_item_edit_form', [$model->getTableName(), ":{$pkName}:"], false);
+            $actionsTpl .= \Swayok\Html\Tag::a()
+                ->setClass('row-action text-green')
+                ->setContent('<i class="glyphicon glyphicon-edit"></i>')
+                ->setTitle(trans('cmf::cmf.datagrid.actions.edit_item'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setHref($url)
+                ->build();
+        }
+        if ($dataGridConfig->isDeleteAllowed()) {
+            $actionsTpl .= \Swayok\Html\Tag::a()
+                ->setContent('<i class="glyphicon glyphicon-trash"></i>')
+                ->setClass('row-action text-red')
+                ->setTitle(trans('cmf::cmf.datagrid.actions.delete_item'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setDataAttr('block-datagrid', '1')
+                ->setDataAttr('action', 'request')
+                ->setDataAttr('method', 'delete')
+                ->setDataAttr('url', route('cmf_api_delete_item', [$model->getTableName(), ":{$pkName}:"], false))
+                ->setDataAttr('confirm', trans('cmf::cmf.action.delete.please_confirm'))
+                ->setHref('#')
+                ->build();
+        }
+        $customRowActions = $dataGridConfig->getRowActions();
+        if (!empty($customRowActions)) {
+            foreach ($customRowActions as $rowAction) {
+                $actionsTpl .= $rowAction;
+            }
+        }
+        $actionsTpl = '<div class="row-actions">' . preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $actionsTpl) . '</div>'
+    ?>
+
+    <script type="application/javascript">
+        (function() {
+            var dataTablesConfig = {
+                processing: true,
+                serverSide: true,
+                scrollX: true,
+                scrollY: '55vh',
+                scrollCollapse: true,
+                ajax: '<?php echo route('cmf_api_get_items', ['model' => $model->getTableName()], false) ?>',
+                order: [[
+                    '<?php echo $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(); ?>',
+                    '<?php echo $dataGridConfig->getOrderDirection(); ?>'
+                ]],
+                pageLength: <?php echo $dataGridConfig->getLimit() ?>,
+                toolbarItems: <?php echo json_encode(array_values($toolbar)); ?>,
+                multiselect: false,
+                <?php if (!empty($dblClickUrl)): ?>
+                    doubleClickUrl: Utils.makeTemplateFromText(
+                        '<?php echo addslashes(preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $dblClickUrl)); ?>',
+                        'Double click URL template'
+                    ),
+                <?php endif; ?>
+                rowActions: Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template')
+            };
+
+            <?php
+                $defaultConditions = $dataGridFilterConfig->getDefaultConditions();
+                if (empty($defaultConditions['rules'])) {
+                    $defaultConditions = 'null';
+                } else {
+                    $defaultConditions = json_encode($dataGridFilterConfig->getDefaultConditions(), JSON_UNESCAPED_UNICODE);
+                }
+            ?>
+
+            var defaultSearchRules = <?php echo $defaultConditions; ?>;
+            if (!!defaultSearchRules) {
+                dataTablesConfig.search = {search: DataGridSearchHelper.encodeRulesForDataTable(defaultSearchRules)};
+            }
+            <?php
+                $fitlers = [];
+                foreach($dataGridFilterConfig->getFilters() as $filterConfig) {
+                    if (!$filterConfig->hasFilterLabel()) {
+                        $path = "$translationPrefix.datagrid.filter." . \Swayok\Utils\StringUtils::underscore($filterConfig->getColumnName());
+                        $filterConfig->setFilterLabel(trans($path));
+                    }
+                    $fitlers[] = $filterConfig->buildConfig();
+                }
+            ?>
+            var queryBuilderConfig = {
+                filters: <?php echo json_encode($fitlers, JSON_UNESCAPED_UNICODE); ?>
+            };
+            DataGridSearchHelper.locale = <?php echo json_encode(trans('cmf::cmf.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
+            var dataGrid = ScaffoldDataGridHelper.init('#<?php echo $dataGridId; ?>', dataTablesConfig);
+            DataGridSearchHelper.init(queryBuilderConfig, defaultSearchRules, dataGrid);
+        })();
+    </script>
+
+</div>

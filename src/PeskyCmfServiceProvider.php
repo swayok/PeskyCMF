@@ -1,0 +1,168 @@
+<?php
+
+namespace PeskyCMF;
+
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\ServiceProvider;
+use PeskyCMF\Config\CmfConfig;
+use Swayok\Utils\File;
+
+class PeskyCmfServiceProvider extends ServiceProvider {
+
+    /** @var string */
+    protected $cmfConfigsClass = CmfConfig::class;
+
+    /** @var CmfConfig */
+    protected $cmfConfig = null;
+
+    public function __construct(Application $app) {
+        $this->cmfConfig = new $this->cmfConfigsClass;
+        parent::__construct($app);
+    }
+
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register() {
+        $this->app->singleton(CmfConfig::class, function () {
+            return $this->cmfConfig;
+        });
+        $this->app->singleton(\PeskyCMF\Http\Request::class, function () {
+            return new \PeskyCMF\Http\Request(request());
+        });
+//        $this->app->alias('request', \PeskyCMF\Http\Request::class);
+    }
+
+    public function provides() {
+        return [
+            CmfConfig::class,
+            \PeskyCMF\Http\Request::class
+        ];
+    }
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot() {
+
+        $this->configurePublicFilesRoutes();
+
+        $basePath = '/' . $this->cmfConfig->url_prefix();
+        if (empty($_SERVER['REQUEST_URI']) || starts_with($_SERVER['REQUEST_URI'], $basePath)) {
+
+            $this->loadConfigs();
+
+            // alter auth config
+            $this->configureAuth();
+            // alter session config
+            $this->configureSession($basePath);
+            // custom configurations
+            $this->configure();
+
+            $this->configureViewsLoading();
+
+            $this->configureTranslationsLoading();
+
+            $this->configurePublishes();
+
+            $this->setLocale();
+
+            $this->loadRoutes();
+        }
+    }
+
+    /**
+     * @return \Config
+     */
+    public function appConfigs() {
+        return $this->app['config'];
+    }
+
+    /**
+     * Sets the locale if it exists in the session and also exists in the locales option
+     *
+     * @return void
+     */
+    public function setLocale() {
+        $locale = session()->get($this->cmfConfig->locale_session_key());
+        app()->setLocale($locale ? $locale : $this->cmfConfig->default_locale());
+    }
+
+    protected function loadConfigs() {
+        $key = 'cmf';
+        $config = $this->appConfigs()->get($key, []);
+        $this->appConfigs()->set($key, array_merge($config, $this->cmfConfig->toArray()));
+    }
+
+    protected function configureAuth() {
+        $config = $this->appConfigs()->get('auth', []);
+        $this->appConfigs()->set('auth', array_replace_recursive($config, $this->cmfConfig->auth_configs()));
+        \Auth::shouldUse($this->cmfConfig->auth_guard_name());
+    }
+
+    protected function configureSession($basePath) {
+        $config = $this->appConfigs()->get('session', ['table' => 'sessions', 'cookie' => 'session']);
+        $this->appConfigs()->set('session', array_merge($config, [
+            'table' => $config['table'] . '_admin',
+            'cookie' => $config['cookie'] . '_admin',
+            'lifetime' => 1440,
+            'connection' => 'admin',
+            'path' => $basePath
+        ]));
+    }
+
+    /**
+     * Custom configurations
+     */
+    protected function configure() {
+
+    }
+
+    protected function configureViewsLoading() {
+        $this->loadViewsFrom($this->cmfConfig->views_path(), 'cmf');
+    }
+
+    protected function configureTranslationsLoading() {
+        $this->loadTranslationsFrom($this->cmfConfig->cmf_translations_path(), 'cmf');
+    }
+
+    protected function configurePublishes() {
+        $this->publishes([
+            base_path('vendor/almasaeed2010/adminlte/dist') => public_path('packages/adminlte'),
+            base_path('vendor/almasaeed2010/adminlte/plugins') => public_path('packages/adminlte/plugins'),
+            base_path('vendor/almasaeed2010/adminlte/bootstrap') => public_path('packages/bootstrap'),
+            base_path('vendor/fortawesome/font-awesome/css') => public_path('packages/font-awesome/css'),
+            base_path('vendor/fortawesome/font-awesome/fonts') => public_path('packages/font-awesome/fonts'),
+            base_path('vendor/driftyco/ionicons/css') => public_path('packages/ionicons/css'),
+            base_path('vendor/driftyco/ionicons/fonts') => public_path('packages/ionicons/fonts'),
+            __DIR__ . '/public' => public_path('packages/cmf'),
+        ], 'public');
+
+    }
+
+    protected function loadRoutes() {
+        foreach ($this->cmfConfig->routes_config_files() as $filePath) {
+            require_once $filePath;
+        }
+        foreach ($this->cmfConfig->cmf_routes_cofig_files() as $filePath) {
+            require_once $filePath;
+        }
+    }
+
+    static public function configurePublicFilesRoutes() {
+        \Route::get('packages/cmf/{file_path}', function ($filePath) {
+            $filePath = __DIR__ . '/public/' . $filePath;
+            if (File::exist($filePath)) {
+                return response(File::contents(), 200, ['Content-Type' => File::load()->mime()]);
+            } else {
+                return response('File not found');
+            }
+        })->where(['file_path' => '(js|css|img)\/.+\.[a-z0-9]+$']);
+    }
+
+
+}
