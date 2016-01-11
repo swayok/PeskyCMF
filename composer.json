@@ -36,6 +36,9 @@
     "php": ">=5.3",
     "swayok/utils": "master@dev",
 	"swayok/peskyorm": "master@dev",
-	"laravel/framework": "5.2.*"
+	"laravel/framework": "5.2.*",
+	"almasaeed2010/adminlte": "~2.0",
+	"FortAwesome/Font-Awesome": "*",
+    "driftyco/ionicons": "*"
   }
 }
