@@ -22,7 +22,7 @@ trait CacheableDbObject {
     }
 
     /**
-     * @inheritdoc
+     * @return $this
      */
     public function find($conditions, $fieldNames = '*', $relations = array()) {
         if ($this->_cacheOnceTimeout !== false) {
@@ -36,7 +36,7 @@ trait CacheableDbObject {
     }
 
     /**
-     * @inheritdoc
+     * @return $this
      */
     public function reload($fieldNames = '*', $relations = null) {
         $this->_cacheOnceTimeout = false;
