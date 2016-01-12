@@ -55,7 +55,7 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      */
     private function getModel($tableName) {
         /** @var CmfDbModel $baseClass */
-        $baseClass = CmfConfig::getInstance()->base_db_model_class();
+        $baseClass = app()->make('base_db_model_class');
         return $baseClass::getModelByClassName($baseClass::getFullModelClassByTableName($tableName));
     }
 

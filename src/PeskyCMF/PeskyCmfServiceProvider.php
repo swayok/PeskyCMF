@@ -5,6 +5,7 @@ namespace PeskyCMF;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\CmfDbObject;
 use Swayok\Utils\File;
 
 class PeskyCmfServiceProvider extends ServiceProvider {
@@ -32,7 +33,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->app->singleton(\PeskyCMF\Http\Request::class, function () {
             return new \PeskyCMF\Http\Request(request());
         });
-//        $this->app->alias('request', \PeskyCMF\Http\Request::class);
+        $this->app->singleton('base_db_model_class', function () {
+            return CmfConfig::getInstance()->base_db_model_class();
+        });
     }
 
     public function provides() {
