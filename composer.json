@@ -30,13 +30,18 @@
 	{
       "type": "vcs",
       "url": "https://github.com/swayok/peskyorm.git"
-    }
+    },
+	{
+		"type": "vcs",
+		"url": "https://github.com/swayok/laravel_extended_errors.git"
+	}
   ],
   "require": {
     "php": ">=5.3",
+	"laravel/framework": "5.2.*",
     "swayok/utils": "master@dev",
 	"swayok/peskyorm": "master@dev",
-	"laravel/framework": "5.2.*",
+	"swayok/laravel_extended_errors": "master@dev",
 	"almasaeed2010/adminlte": "~2.0",
 	"FortAwesome/Font-Awesome": "*",
     "driftyco/ionicons": "*"
