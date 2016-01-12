@@ -39,6 +39,16 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Suffix for scaffold config class name.
+     * If DbObject class is named "Admin" and sufix is "ScaffoldConfig"
+     * then scaffold config class name will be "AdminScaffoldConfig"
+     * @return string
+     */
+    static public function scaffold_config_class_suffix() {
+        return 'ScaffoldConfig';
+    }
+
+    /**
      * Auth configs for cmf
      * For examples - look for /config/auth.php
      * This configs will be recursively merged over configs from /config/auth.php
@@ -229,6 +239,14 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function cmf_translations_path() {
         return __DIR__ . '/../resources/lang';
+    }
+
+    /**
+     * Name for custom cmf dictionary
+     * @return string
+     */
+    static public function custom_dictionary_name() {
+        return 'cmf::cmf';
     }
 
     /**

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>@section('page-title') {{ trans('admin_area.default_page_title') }} @show</title>
+    <title>@section('page-title') {{ trans(\PeskyCMF\Config\CmfConfig::getInstance()->custom_dictionary_name() . '.default_page_title') }} @show</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 

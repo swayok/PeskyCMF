@@ -1,4 +1,9 @@
-<?php echo "<?php\n"; ?>
+<?php
+/**
+ * @var bool|null $withoutTrigger
+ */
+echo "<?php\n";
+?>
 
 class CreateAdminsTable extends PeskyCMF\Db\MigrationForTableCreation {
 
@@ -37,8 +42,10 @@ ALTER TABLE ":schema".":table" ADD UNIQUE ("email");
 
 ALTER TABLE ":schema".":table" ADD FOREIGN KEY ("parent_id") REFERENCES "public".":table" ("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
+<?php if (empty($withoutTrigger)) : ?>
 CREATE TRIGGER "trigger_timestamp_renew" BEFORE UPDATE OF "remember_token" ON ":schema".":table"
 FOR EACH ROW EXECUTE PROCEDURE "for_trigger_timestamp_renew"();
+<?php endif; ?>
 EOF;
         }
     }

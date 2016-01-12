@@ -1,19 +1,21 @@
 <?php
 
 return [
-    'error' => [
-        'db_record_not_exists' => 'Объект не найден в базе данных'
-    ],
+    'default_page_title' => 'PeskyCMF',
     'language' => [
         'en' => 'English',
         'ru' => 'Русский'
     ],
+    'error' => [
+        'db_record_not_exists' => 'Объект не найден в базе данных'
+    ],
     'login_form' => [
+        'header' => 'Авторизация',
         'email_label' => 'E-mail',
         'password_label' => 'Пароль',
         'button_label' => 'Войти',
         'forgot_password_label' => 'Забыли пароль?',
-        'login_failed' => 'Неправильный E-mail или пароль'
+        'login_failed' => 'Неправильный E-mail или пароль',
     ],
     'ui' => [
         'main_menu_header' => 'Навигация',
@@ -47,7 +49,10 @@ return [
     ],
     'user' => [
         'profile_label' => 'Профиль',
-        'logout_label' => 'Выйти'
+        'logout_label' => 'Выйти',
+    ],
+    'admins' => [
+        'menu_title' => 'Администраторы'
     ],
     'datagrid' => [
         'toolbar' => [
@@ -134,9 +139,7 @@ return [
                 'language' => 'Язык',
                 'name' => 'Имя',
             ],
-            'saved' => 'Профиль изменен',
-            'validation_errors' => 'Найдены некорректные данные',
-            'failed_to_save' => 'Не удалось сохранить данные профиля',
+            'saved' => 'Профиль Администратора изменен',
             'errors' => [
                 'new_password' => [
                     'min' => 'Минимальная длина пароля :max символов'
@@ -154,9 +157,7 @@ return [
                     'required' => 'Выберите язык',
                     'in' => 'Язык не входит в список разрешенных. Выберите другой язык.',
                 ]
-
             ]
-
         ]
     ]
 ];

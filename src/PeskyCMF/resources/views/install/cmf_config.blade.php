@@ -2,11 +2,12 @@
 /**
  * @var string $sectionName
  * @var string $urlPrefix
+ * @var string $dbClassesAppSubfolder
  */
 if (empty($urlPrefix)) {
     $urlPrefix = strtolower($sectionName);
 }
-$lowersavesSectionName = snake_case($sectionName);
+$lowercasedSectionName = snake_case($sectionName);
 echo "<?php\n";
 ?>
 
@@ -32,25 +33,29 @@ class {{ $sectionName }}Config extends CmfConfig {
      * @return string
      */
     static public function custom_views_prefix() {
-        return '{{ $viewsNs }}.';
+        return '{{ $lowercasedSectionName }}.';
     }
 
     static public function routes_config_files() {
         return [
-            __DIR__ . '/{{ $lowersavesSectionName }}.routes.php'
+            __DIR__ . '/{{ $lowercasedSectionName }}.routes.php'
         ];
     }
 
     static public function layout_css_includes() {
         return [
-            '/packages/admin/css/{{ $lowersavesSectionName }}.custom.css'
+            '/packages/admin/css/{{ $lowercasedSectionName }}.custom.css'
         ];
     }
 
     static public function layout_js_includes() {
         return [
-            '/packages/admin/js/{{ $lowersavesSectionName }}.custom.js'
+            '/packages/admin/js/{{ $lowercasedSectionName }}.custom.js'
         ];
+    }
+
+    static public function base_db_model_class() {
+        return \App\{{ str_replace('/', '\\', $dbClassesAppSubfolder) }}\BaseDbModel::class;
     }
 
     /**
@@ -73,21 +78,21 @@ class {{ $sectionName }}Config extends CmfConfig {
     static public function menu() {
         return [
             [
-                'label' => '{{ $lowersavesSectionName }}.dashboard.menu_title',
+                'label' => '{{ $lowercasedSectionName }}.dashboard.menu_title',
                 'url' => '/page/dashboard',
                 'icon' => 'glyphicon glyphicon-dashboard',
             ],
             /*[
-                'label' => '{{ $lowersavesSectionName }}.users.menu_title',
+                'label' => '{{ $lowercasedSectionName }}.users.menu_title',
                 'url' => '/resource/users',
                 'icon' => 'fa fa-group'
             ],*/
             /*[
-                'label' => '{{ $lowersavesSectionName }}.menu.section_utils',
+                'label' => '{{ $lowercasedSectionName }}.menu.section_utils',
                 'icon' => 'glyphicon glyphicon-align-justify',
                 'submenu' => [
                     [
-                        'label' => '{{ $lowersavesSectionName }}.admins.menu_title',
+                        'label' => '{{ $lowercasedSectionName }}.admins.menu_title',
                         'url' => '/resource/admins',
                         'icon' => 'glyphicon glyphicon-user'
                     ],

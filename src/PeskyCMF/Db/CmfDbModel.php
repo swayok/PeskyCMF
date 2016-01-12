@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Db;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Traits\CacheHelpersTrait;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\DbModel;
@@ -13,12 +14,11 @@ abstract class CmfDbModel extends DbModel {
 
     /** @var null|ScaffoldSectionConfig */
     protected $scaffoldConfig = null;
-    static protected $scaffoldConfigClassSuffix = 'ScaffoldConfig';
 
     static public function getScaffoldConfigClassSuffix() {
         /** @var CmfDbModel $calledClass */
         $calledClass = get_called_class();
-        return $calledClass::$scaffoldConfigClassSuffix;
+        return CmfConfig::getInstance()->scaffold_config_class_suffix();
     }
 
     static public function getScaffoldConfigNameByTableName($tableName) {
@@ -80,7 +80,7 @@ abstract class CmfDbModel extends DbModel {
         /** @var CmfDbModel $calledClass */
         $calledClass = get_called_class();
         if (empty($this->scaffoldConfig)) {
-            $className = $this->getNamespace() . $this->getAlias() . $calledClass::$scaffoldConfigClassSuffix;
+            $className = $this->getNamespace() . $this->getAlias() . $this->getScaffoldConfigClassSuffix();
             $this->scaffoldConfig = new $className($this);
         }
         return $this->scaffoldConfig;

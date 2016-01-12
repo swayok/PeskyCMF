@@ -21,14 +21,15 @@ class CmfInstall extends BaseCommand {
         $folder = Folder::load($folderPath, true, 0755);
         $dataForViews = [
             'sectionName' => $appSubfolder,
-            'urlPrefix' => trim(trim($this->input->getArgument('url_prefix'), '/\\'))
+            'urlPrefix' => trim(trim($this->input->getArgument('url_prefix'), '/\\')),
+            'dbClassesAppSubfolder' => $this->input->getArgument('database_classes_app_subfolder')
         ];
         // copy service provider
         $file = File::load($folder->pwd() . '/' . $appSubfolder . 'ServiceProvider.php', true, 0755, 0644);
         $file->write(view('cmf::install.cmf_service_provider', $dataForViews)->render());
         // copy configs
         $subfolder = Folder::load($folder->pwd() . '/Config', true, 0755);
-        $file = File::load($subfolder->pwd() . '/' . $lowercasedSubfolder . '.config.php', true, 0755, 0644);
+        $file = File::load($subfolder->pwd() . '/' . $appSubfolder . 'Config.php', true, 0755, 0644);
         $file->write(view('cmf::install.cmf_config', $dataForViews)->render());
         $file = File::load($subfolder->pwd() . '/' . $lowercasedSubfolder . '.routes.php', true, 0755, 0644);
         $file->write(view('cmf::install.cmf_routes', $dataForViews)->render());
@@ -37,7 +38,7 @@ class CmfInstall extends BaseCommand {
         $file = File::load($subfolder->pwd() . '/PagesController.php', true, 0755, 0644);
         $file->write(view('cmf::install.pages_controller', $dataForViews)->render());
         // create middleware folder
-        Folder::load($folder->pwd() . '/Http/Middleware', true, 0755);
+        File::load($folder->pwd() . '/Http/Middleware/empty', true, 0755, 0644);
         // make folder in resources
         File::load(resource_path('/views/' . $lowercasedSubfolder . '/empty'), true, 0755, 0644);
         // copy base db classes
@@ -49,7 +50,7 @@ class CmfInstall extends BaseCommand {
         // copy admin table classes
         $subfolder = Folder::load($dbFolder->pwd() . '/Admin', true, 0755);
         $file = File::load($subfolder->pwd() . '/Admin.php', true, 0755, 0644);
-        $file->write(view('cmf::install.db.admin_objcet')->render());
+        $file->write(view('cmf::install.db.admin_object')->render());
         $file = File::load($subfolder->pwd() . '/AdminModel.php', true, 0755, 0644);
         $file->write(view('cmf::install.db.admin_model')->render());
         $file = File::load($subfolder->pwd() . '/AdminTableConfig.php', true, 0755, 0644);

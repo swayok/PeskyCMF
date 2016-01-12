@@ -69,7 +69,7 @@ class CmfGeneralController extends Controller {
             return response()->json(
                 [
                     'errors' => $errors,
-                    'message' => trans('cmf::cmf.page.profile.validation_errors')
+                    'message' => trans('cmf::cmf.form.validation_errors')
                 ],
                 HttpCode::INVALID
             );
@@ -88,7 +88,7 @@ class CmfGeneralController extends Controller {
             } else {
                 return response()->json(
                     [
-                        '_message' => trans('cmf::cmf.page.profile.failed_to_save'),
+                        '_message' => trans('cmf::cmf.form.failed_to_save_resource_data'),
                         'redirect' => 'reload'
                     ],
                     HttpCode::SERVER_ERROR
