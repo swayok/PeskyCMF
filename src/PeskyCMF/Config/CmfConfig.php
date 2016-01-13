@@ -183,6 +183,14 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * View that shows show admin info in sidebar
+     * @return string
+     */
+    static public function sidebar_admin_info_view() {
+        return 'cmf::ui.sidebar_admin_info';
+    }
+
+    /**
      * View name for CMF menu
      * @return string
      */
