@@ -15,6 +15,7 @@ function __cmf_scaffold_api_controller_class() {
 Route::group(
     [
         'prefix' => \PeskyCMF\Config\CmfConfig::getInstance()->url_prefix(),
+        'middleware' => ['web']
     ],
     function () {
         Route::get('login', [

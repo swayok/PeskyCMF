@@ -11,6 +11,7 @@ Route::group(
         'prefix' => \App\{{ $sectionName }}\Config\{{ $sectionName }}Config::url_prefix(),
         'namespace' => 'App\{{ $sectionName }}\Http\Controllers',
         'middleware' => [
+            'web',
             PeskyCMF\Http\Middleware\ValidateAdmin::class
         ]
     ],
