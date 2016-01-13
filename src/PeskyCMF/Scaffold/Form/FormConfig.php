@@ -3,6 +3,7 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
 use Swayok\Utils\Set;
@@ -209,7 +210,7 @@ class FormConfig extends ScaffoldActionConfig {
             return [];
         }
         if (empty($messages)) {
-            $messages = trans('admin_area.' . $this->getModel()->getTableName() . '.form.validation');
+            $messages = trans(CmfConfig::getInstance()->custom_dictionary_name() . '.' . $this->getModel()->getTableName() . '.form.validation');
         }
         if (!is_array($messages)) {
             $messages = [];

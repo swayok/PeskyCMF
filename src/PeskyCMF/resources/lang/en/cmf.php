@@ -52,7 +52,53 @@ return [
         'logout_label' => 'Log Out'
     ],
     'admins' => [
-        'menu_title' => 'Administrators'
+        'menu_title' => 'Administrators',
+        'role' => [
+            'admin' => 'Administrator'
+        ],
+        'datagrid' => [
+            'header' => 'System administrators',
+            'column' => [
+                'id' => 'ID',
+                'parent_id' => 'Creator',
+                'email' => 'E-mail',
+                'name' => 'Name',
+                'is_active' => 'Active?',
+                'is_superadmin' => 'Superadmin?',
+                'role' => 'Role',
+                'language' => 'Language',
+                'ip' => 'IP',
+                'created_at' => 'Created'
+            ]
+        ],
+        'form' => [
+            'header_create' => 'Adding administrator',
+            'header_edit' => 'Editing administrator',
+            'field' => [
+                'email' => 'E-mail',
+                'password' => 'Password',
+                'name' => 'Name',
+                'language' => 'Language',
+                'is_active' => 'Active?',
+                'role' => 'Role',
+                'is_superadmin' => 'Has full access (superadmin)?'
+            ]
+        ],
+        'item_details' => [
+            'header' => 'Administrator details',
+            'field' => [
+                'email' => 'E-mail',
+                'password' => 'Password',
+                'name' => 'Name',
+                'language' => 'Language',
+                'is_active' => 'Active?',
+                'role' => 'Role',
+                'is_superadmin' => 'Has full access (superadmin)?',
+                'parent_id' => 'Administrator who created this account',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated'
+            ]
+        ]
     ],
     'datagrid' => [
         'toolbar' => [
@@ -128,7 +174,8 @@ return [
             'link_label' => 'About project'
         ],
         'dashboard' => [
-            'header' => 'Welcome to administration panel based on PeskyCMF'
+            'header' => 'Welcome to administration panel based on PeskyCMF',
+            'menu_title' => 'Home'
         ],
         'profile' => [
             'header' => 'Administrator profile',

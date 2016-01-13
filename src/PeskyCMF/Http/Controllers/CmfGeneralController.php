@@ -176,7 +176,10 @@ class CmfGeneralController extends Controller {
     }
 
     public function getAdminInfo() {
-        return response()->json($this->getAdmin()->toPublicArray());
+        $admin = $this->getAdmin()->toPublicArray();
+        $admin['_role'] = $admin['role'];
+        $admin['role'] = trans(CmfConfig::getInstance()->custom_dictionary_name() . '.admins.role.' . $admin['role']);
+        return response()->json($admin);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Scaffold\ItemDetails;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
 use PeskyORM\DbColumnConfig;
 
@@ -28,7 +29,7 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
                             unset($value['url']['source']);
                         }
                         $images = [];
-                        $translationPath = 'admin_area.' . $columnConfig->getDbTableConfig()->getName()
+                        $translationPath = CmfConfig::getInstance()->custom_dictionary_name() . '.' . $columnConfig->getDbTableConfig()->getName()
                             . '.item_details.field.' . $columnConfig->getName() . '_version.';
                         foreach ($value['url'] as $key => $url) {
                             $images[] = [

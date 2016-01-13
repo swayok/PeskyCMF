@@ -78,21 +78,26 @@ class {{ $sectionName }}Config extends CmfConfig {
     static public function menu() {
         return [
             [
-                'label' => '{{ $lowercasedSectionName }}.dashboard.menu_title',
+                'label' => self::getInstance()->custom_dictionary_name() . '.page.dashboard.menu_title',
                 'url' => '/page/dashboard',
                 'icon' => 'glyphicon glyphicon-dashboard',
             ],
+            [
+                'label' => self::getInstance()->custom_dictionary_name() . '.admins.menu_title',
+                'url' => '/resource/admins',
+                'icon' => 'fa fa-group'
+            ]
             /*[
-                'label' => '{{ $lowercasedSectionName }}.users.menu_title',
+                'label' => self::custom_dictionary_name() . '.users.menu_title',
                 'url' => '/resource/users',
                 'icon' => 'fa fa-group'
             ],*/
             /*[
-                'label' => '{{ $lowercasedSectionName }}.menu.section_utils',
+                'label' => self::custom_dictionary_name() . '.menu.section_utils',
                 'icon' => 'glyphicon glyphicon-align-justify',
                 'submenu' => [
                     [
-                        'label' => '{{ $lowercasedSectionName }}.admins.menu_title',
+                        'label' => self::custom_dictionary_name() . '.admins.menu_title',
                         'url' => '/resource/admins',
                         'icon' => 'glyphicon glyphicon-user'
                     ],

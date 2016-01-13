@@ -8,7 +8,7 @@
  */
 $data = [
     'model' => $model,
-    'translationPrefix' => "admin_area.{$model->getTableName()}",
+    'translationPrefix' => \PeskyCMF\Config\CmfConfig::getInstance()->custom_dictionary_name() . ".{$model->getTableName()}",
     'idSuffix' => preg_replace('%[^a-z0-9]%is', '-', strtolower($model->getTableName()))
 ];
 ?>

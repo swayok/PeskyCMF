@@ -52,7 +52,54 @@ return [
         'logout_label' => 'Выйти',
     ],
     'admins' => [
-        'menu_title' => 'Администраторы'
+        'menu_title' => 'Администраторы',
+        'role' => [
+            'admin' => 'Администратор'
+        ],
+        'datagrid' => [
+            'header' => 'Администраторы системы',
+            'column' => [
+                'id' => 'ID',
+                'parent_id' => 'Создатель',
+                'email' => 'E-mail',
+                'name' => 'Имя',
+                'is_active' => 'Действующий?',
+                'is_superadmin' => 'Суперадмин?',
+                'role' => 'Роль',
+                'language' => 'Язык',
+                'ip' => 'IP',
+                'created_at' => 'Создан'
+            ]
+        ],
+        'form' => [
+            'header_create' => 'Добавление администратора',
+            'header_edit' => 'Редактирование администратора',
+            'field' => [
+                'email' => 'E-mail',
+                'password' => 'Пароль',
+                'name' => 'Имя',
+                'language' => 'Язык',
+                'is_active' => 'Действующий?',
+                'role' => 'Роль',
+                'is_superadmin' => 'Имеет доступ ко всему (суперадмин)'
+            ]
+
+        ],
+        'item_details' => [
+            'header' => 'Информация об администраторе',
+            'field' => [
+                'email' => 'E-mail',
+                'password' => 'Пароль',
+                'name' => 'Имя',
+                'language' => 'Язык',
+                'is_active' => 'Действующий?',
+                'role' => 'Роль',
+                'is_superadmin' => 'Имеет доступ ко всему (суперадмин)?',
+                'parent_id' => 'Админ, создавший этот акаунт',
+                'created_at' => 'Создан',
+                'updated_at' => 'Изменен'
+            ]
+        ]
     ],
     'datagrid' => [
         'toolbar' => [
@@ -128,7 +175,8 @@ return [
             'link_label' => 'О проекте'
         ],
         'dashboard' => [
-            'header' => 'Добро пожаловать в Административную панель на основе PeskyCMF'
+            'header' => 'Добро пожаловать в Административную панель на основе PeskyCMF',
+            'menu_title' => 'Главная'
         ],
         'profile' => [
             'header' => 'Профиль Администратора',

@@ -210,21 +210,26 @@ class CmfConfig extends ConfigsContainer {
     static public function menu() {
         return [
             [
-                'label' => 'admin_area.dashboard.menu_title',
+                'label' => 'cmf::cmf.page.dashboard.menu_title',
                 'url' => '/page/dashboard',
                 'icon' => 'glyphicon glyphicon-dashboard',
             ],
+            [
+                'label' => 'cmf::cmf.admins.menu_title',
+                'url' => '/resource/admins',
+                'icon' => 'fa fa-group'
+            ]
             /*[
-                'label' => 'admin_area.users.menu_title',
+                'label' => self::getInstance()->custom_dictionary_name() . '.users.menu_title',
                 'url' => '/resource/users',
                 'icon' => 'fa fa-group'
             ],*/
             /*[
-                'label' => 'admin_area.menu.section_utils',
+                'label' => self::getInstance()->custom_dictionary_name() . '.menu.section_utils',
                 'icon' => 'glyphicon glyphicon-align-justify',
                 'submenu' => [
                     [
-                        'label' => 'admin_area.admins.menu_title',
+                        'label' => self::getInstance()->custom_dictionary_name() . '.admins.menu_title',
                         'url' => '/resource/admins',
                         'icon' => 'glyphicon glyphicon-user'
                     ],
