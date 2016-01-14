@@ -60,28 +60,14 @@ abstract class ScaffoldActionConfig {
      * @throws ScaffoldActionException
      */
     public function setFields(array $fields) {
-        $model = $this->getModel();
-        $index = 0;
-        $processedFields = [];
-        /** @var ScaffoldFieldConfig $config */
+        /** @var ScaffoldFieldConfig|null $config */
         foreach ($fields as $name => $config) {
             if (is_integer($name)) {
                 $name = $config;
                 $config = null;
             }
-            if (!$model->hasTableColumn($name)) {
-                throw new ScaffoldActionException($this, "Unknown table column [$name]");
-            }
-            if (empty($config)) {
-                $config = $this->createFieldConfig($name);
-            }
-            $config->setName($name);
-            $config->setPosition($index);
-            $config->setScaffoldActionConfig($this);
-            $processedFields[$name] = $config;
-            $index++;
+            $this->addField($name, $config);
         }
-        $this->fields = $processedFields;
         return $this;
     }
 
@@ -111,6 +97,26 @@ abstract class ScaffoldActionConfig {
             throw new ScaffoldActionException($this, "Unknown field [$name]");
         }
         return $this->fields[$name];
+    }
+
+    /**
+     * @param string $name
+     * @param null|ScaffoldFieldConfig $config
+     * @return $this
+     * @throws ScaffoldActionException
+     */
+    public function addField($name, $config = null) {
+        if (!$this->getModel()->hasTableColumn($name)) {
+            throw new ScaffoldActionException($this, "Unknown table column [$name]");
+        }
+        if (empty($config)) {
+            $config = $this->createFieldConfig($name);
+        }
+        $config->setName($name);
+        $config->setPosition(count($this->fields));
+        $config->setScaffoldActionConfig($this);
+        $this->fields[$name] = $config;
+        return $this;
     }
 
     /**

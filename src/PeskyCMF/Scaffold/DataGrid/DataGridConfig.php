@@ -54,6 +54,17 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
+     * @param array $fieldNames
+     * @return $this
+     */
+    public function setInvisibleFields(array $fieldNames) {
+        foreach ($fieldNames as $fieldName) {
+            $this->addField($fieldName, DataGridFieldConfig::create()->setIsVisible(false));
+        }
+        return $this;
+    }
+
+    /**
      * @return int
      */
     public function getLimit() {
