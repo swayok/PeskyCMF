@@ -77,16 +77,7 @@ try {
                             <?php endif; ?>
                             <?php
                                 foreach ($itemDetailsConfig->getToolbarItems() as $toolbarItem) {
-                                    if (is_string($toolbarItem)) {
-                                        echo $toolbarItem;
-                                    } elseif (is_object($toolbarItem)) {
-                                        if ($toolbarItem instanceof \Swayok\Html\Tag) {
-                                            echo $toolbarItem->build();
-                                        } else if (method_exists($toolbarItem, '__toString')) {
-                                            echo $toolbarItem->__toString();
-                                        }
-                                    }
-                                    echo ' ';
+                                    echo ' ' . preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $toolbarItem) . ' ';
                                 }
                             ?>
                             <?php if ($itemDetailsConfig->isDeleteAllowed()) : ?>
