@@ -41,6 +41,6 @@ class CmfExceptionHandler extends ExceptionHandler {
     }
 
     protected function defaultConvertExceptionToResponse(\Exception $exc) {
-        return parent::convertExceptionToResponse($exc);
+        return parent::_convertExceptionToResponse($exc);
     }
 }
