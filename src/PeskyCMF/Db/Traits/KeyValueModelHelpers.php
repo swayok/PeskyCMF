@@ -103,7 +103,7 @@ trait KeyValueModelHelpers {
             throw new DbModelException($this, '$record does not contain [value] key');
         }
         $object = $this->getOwnDbObject()->find([
-            'apartment_id' => $record[$fkName],
+            $fkName => $record[$fkName],
             'key' => $record['key']
         ]);
         if ($object->exists()) {
