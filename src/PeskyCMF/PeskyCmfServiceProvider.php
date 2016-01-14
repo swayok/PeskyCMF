@@ -16,6 +16,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     /** @var CmfConfig */
     protected $cmfConfig = null;
 
+    static protected $alreadyLoaded = false;
+
     public function __construct(Application $app) {
         $this->cmfConfig = new $this->cmfConfigsClass;
         parent::__construct($app);
@@ -54,6 +56,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
         $this->configurePublicFilesRoutes();
 
+        if (self::$alreadyLoaded) {
+            return; //< to prevent 2 different providers overwrite each other
+        }
+
         $basePath = '/' . $this->cmfConfig->url_prefix();
         if (empty($_SERVER['REQUEST_URI']) || starts_with($_SERVER['REQUEST_URI'], $basePath)) {
 
@@ -75,6 +81,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             $this->setLocale();
 
             $this->loadRoutes();
+
+            self::$alreadyLoaded = true;
         }
     }
 

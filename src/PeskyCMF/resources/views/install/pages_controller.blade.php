@@ -6,7 +6,7 @@
 echo "<?php\n";
 ?>
 
-namespace App\Admin\Http\Controllers;
+namespace App\{{ $sectionName }}\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
