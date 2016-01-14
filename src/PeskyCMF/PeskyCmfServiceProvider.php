@@ -60,7 +60,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             return; //< to prevent 2 different providers overwrite each other
         }
 
-        $basePath = '/' . $this->cmfConfig->url_prefix();
+        $basePath = '/' . trim($this->cmfConfig->url_prefix(), '/');
         if (empty($_SERVER['REQUEST_URI']) || starts_with($_SERVER['REQUEST_URI'], $basePath)) {
 
             $this->loadConfigs();
