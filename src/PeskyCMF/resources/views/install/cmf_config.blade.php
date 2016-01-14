@@ -44,13 +44,13 @@ class {{ $sectionName }}Config extends CmfConfig {
 
     static public function layout_css_includes() {
         return [
-            '/packages/admin/css/{{ $lowercasedSectionName }}.custom.css'
+            '/packages/{{ $lowercasedSectionName }}/css/{{ $lowercasedSectionName }}.custom.css'
         ];
     }
 
     static public function layout_js_includes() {
         return [
-            '/packages/admin/js/{{ $lowercasedSectionName }}.custom.js'
+            '/packages/{{ $lowercasedSectionName }}/js/{{ $lowercasedSectionName }}.custom.js'
         ];
     }
 
