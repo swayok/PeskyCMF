@@ -61,12 +61,12 @@ try {
                 </div>
                 <div class="box-footer">
                     <div class="row">
-                        <div class="col-xs-5">
+                        <div class="col-xs-2">
                             <a class="btn btn-default" href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
                                 <?php echo trans('cmf::cmf.item_details.toolbar.cancel'); ?>
                             </a>
                         </div>
-                        <div class="col-xs-2 text-center">
+                        <div class="col-xs-10 text-right">
                             <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
                                 <?php
                                     $createUrl = route('cmf_item_add_form', [$model->getTableName()]);
@@ -75,8 +75,20 @@ try {
                                     <?php echo trans('cmf::cmf.item_details.toolbar.create'); ?>
                                 </a>
                             <?php endif; ?>
-                        </div>
-                        <div class="col-xs-5 text-right">
+                            <?php
+                                foreach ($itemDetailsConfig->getToolbarItems() as $toolbarItem) {
+                                    if (is_string($toolbarItem)) {
+                                        echo $toolbarItem;
+                                    } elseif (is_object($toolbarItem)) {
+                                        if ($toolbarItem instanceof \Swayok\Html\Tag) {
+                                            echo $toolbarItem->build();
+                                        } else if (method_exists($toolbarItem, '__toString')) {
+                                            echo $toolbarItem->__toString();
+                                        }
+                                    }
+                                    echo ' ';
+                                }
+                            ?>
                             <?php if ($itemDetailsConfig->isDeleteAllowed()) : ?>
                                 <?php
                                     $deleteUrl = str_ireplace(
