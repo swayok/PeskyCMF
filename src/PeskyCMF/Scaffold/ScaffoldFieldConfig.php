@@ -26,7 +26,7 @@ abstract class ScaffoldFieldConfig {
     const TYPE_MULTILINE = 'multiline'; //< for non-html multiline text
     const TYPE_IMAGE = 'image';
     const TYPE_JSON = DbColumnConfig::TYPE_JSON;
-    const TYPE_JSONB = DbColumnConfig::TYPE_JSON;
+    const TYPE_JSONB = DbColumnConfig::TYPE_JSONB;
     const TYPE_LINK = 'link';
     /**
      * @var null|string
