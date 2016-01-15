@@ -83,22 +83,42 @@ var ScaffoldControllers = {
 };
 
 var ScaffoldActionsHelper = {
-    initActions: function (container) {
-        $(container).on('click tap', '[data-action]', function (event) {
-            var $el = $(this);
-            var action = String($el.attr('data-action')).toLowerCase();
-            switch (action) {
-                case 'request':
-                    Utils.showPreloader(container);
-                    ScaffoldActionsHelper.handleRequestAction($el)
-                        .done(ScaffoldActionsHelper.onSuccess)
-                        .always(function () {
-                            Utils.hidePreloader(container);
-                        });
-                    break;
-            }
-            return false;
-        });
+    initActions: function (container, useLiveEvents) {
+        if (useLiveEvents) {
+            $(container).on('click tap', '[data-action]', function (event) {
+                ScaffoldActionsHelper.handleDataAction(this, container);
+                return false;
+            });
+        } else {
+            $(container).find('[data-action]').on('click tap', function (event) {
+                ScaffoldActionsHelper.handleDataAction(this, container);
+                return false;
+            });
+        }
+    },
+    handleDataAction: function (el, container) {
+        var $el = $(el);
+        var action = String($el.attr('data-action')).toLowerCase();
+        switch (action) {
+            case 'request':
+                Utils.showPreloader(container);
+                ScaffoldActionsHelper.handleRequestAction($el)
+                    .done(ScaffoldActionsHelper.onSuccess)
+                    .always(function () {
+                        Utils.hidePreloader(container);
+                    });
+                break;
+            case 'redirect':
+                ScaffoldsManager.app.nav($el.attr('data-url'));
+                break;
+            case 'reload':
+                ScaffoldsManager.app.reload();
+                break;
+            case 'back':
+                var defaultUrl = $el.attr('data-url') || GlobalVars.rootUrl;
+                ScaffoldsManager.app.back(defaultUrl);
+                break;
+        }
     },
     handleRequestAction: function ($el) {
         var url = $el.attr('data-url') || $el.attr('href');
