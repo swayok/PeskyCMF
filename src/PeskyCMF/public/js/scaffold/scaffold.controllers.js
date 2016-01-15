@@ -177,7 +177,26 @@ var ScaffoldDataGridHelper = {
                 try {
                     return rison.decode_object(window.adminApp.request.query[settings.sTableId]);
                 } catch (e) {
+                    if (GlobalVars.isDebug) {
+                        console.log('Invalid Rison object');
+                    }
                 }
+            } else if (window.adminApp.request.query.filter) {
+                try {
+                    var filters = JSON.parse(window.adminApp.request.query.filter);
+                    if (filters) {
+                        var search = DataGridSearchHelper.convertKeyValueFiltersToRules(filters);
+                        if (search) {
+                            this.api().search(search);
+                        }
+                        return {};
+                    }
+                } catch (e) {
+                    if (GlobalVars.isDebug) {
+                        console.log('Invalid json for "filter" query arg');
+                    }
+                }
+
             }
             return {};
         }
@@ -404,14 +423,15 @@ var DataGridSearchHelper = {
             var $runFilteringBtn = $('<button class="btn btn-success pull-right">' + DataGridSearchHelper.locale.submit + '</button>');
             $runFilteringBtn.on('click', function () {
                 var rules = builder.queryBuilder('getRules');
+                var encoded;
                 if (!rules.rules) {
                     // empty rules set
                     builder.queryBuilder('reset');
-                    tableApi.search(DataGridSearchHelper.encodeRulesForDataTable(DataGridSearchHelper.emptyRules)).draw();
+                    encoded = DataGridSearchHelper.encodeRulesForDataTable(DataGridSearchHelper.emptyRules)
                 } else if (builder.queryBuilder('validate')) {
-                    var encoded = DataGridSearchHelper.encodeRulesForDataTable(rules);
-                    tableApi.search(encoded).draw();
+                    encoded = DataGridSearchHelper.encodeRulesForDataTable(rules);
                 }
+                tableApi.search(encoded).draw();
             });
             var $resetFilteringBtn = $('<button class="btn btn-danger pull-right">' + DataGridSearchHelper.locale.reset + '</button>');
             $resetFilteringBtn.on('click', function () {
@@ -474,6 +494,29 @@ var DataGridSearchHelper = {
             }
         }
         return ret;
+    },
+    convertKeyValueFiltersToRules: function (filters) {
+        var rules = [];
+        if (!filters) {
+            return false;
+        }
+        for (var field in filters) {
+            if (typeof field === 'string') {
+                rules.push({
+                    field: field,
+                    operator: 'equal',
+                    value: filters[field]
+                });
+            }
+        }
+        if (rules.length) {
+            return DataGridSearchHelper.encodeRulesForDataTable({
+                condition: 'AND',
+                rules: rules
+            });
+        } else {
+            return false;
+        }
     }
 };
 

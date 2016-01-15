@@ -61,12 +61,10 @@ try {
                 </div>
                 <div class="box-footer">
                     <div class="row">
-                        <div class="col-xs-2">
+                        <div class="col-xs-3">
                             <a class="btn btn-default" href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
                                 <?php echo trans('cmf::cmf.item_details.toolbar.cancel'); ?>
                             </a>
-                        </div>
-                        <div class="col-xs-10 text-right">
                             <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
                                 <?php
                                     $createUrl = route('cmf_item_add_form', [$model->getTableName()]);
@@ -75,9 +73,11 @@ try {
                                     <?php echo trans('cmf::cmf.item_details.toolbar.create'); ?>
                                 </a>
                             <?php endif; ?>
+                        </div>
+                        <div class="col-xs-9 text-right">
                             <?php
                                 foreach ($itemDetailsConfig->getToolbarItems() as $toolbarItem) {
-                                    echo ' ' . preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $toolbarItem) . ' ';
+                                    echo ' ' . preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $toolbarItem) . ' ';
                                 }
                             ?>
                             <?php if ($itemDetailsConfig->isDeleteAllowed()) : ?>

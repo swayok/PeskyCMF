@@ -131,6 +131,15 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                     <button type="submit" class="btn btn-success pull-right"><?php echo trans('cmf::cmf.form.toolbar.submit'); ?></button>
                                 </div>
                             </div>
+                            <?php if (count($formConfig->getToolbarItems()) > 0) : ?>
+                                <div class="mt10 text-center">
+                                    <?php
+                                        foreach ($formConfig->getToolbarItems() as $toolbarItem) {
+                                            echo ' ' . preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $toolbarItem) . ' ';
+                                        }
+                                    ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </div>

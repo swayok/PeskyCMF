@@ -287,4 +287,29 @@ class DataGridFilterConfig {
         return $filterColumnConfig->buildConditionFromSearchRule($searchRule['o'], $searchRule['v']);
     }
 
+    /**
+     * Convert $keyValueArray to valid url query args accepted by route()
+     * Note: keys - column name in one of formats: 'column_name' or 'Relation.column_name'
+     * @param array $keyValueArray
+     * @param array $otherArgs
+     * @return string
+     */
+    public function makeFilterFromData(array $keyValueArray, array $otherArgs = []) {
+        $filters = [];
+        foreach ($keyValueArray as $column => $value) {
+            $column = $this->getColumnNameWithAlias($column);
+            if (!array_key_exists($column, $this->filters) || is_object($value)) {
+                continue;
+            }
+            if (is_array($value)) {
+                $value = implode(',', $value);
+            }
+            $filters[$column] = $value;
+        }
+        if (!empty($filters)) {
+            $otherArgs['filter'] = json_encode($filters, JSON_UNESCAPED_UNICODE);
+        }
+        return $otherArgs;
+    }
+
 }

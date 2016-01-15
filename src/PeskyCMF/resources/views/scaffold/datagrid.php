@@ -121,7 +121,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 multiselect: false,
                 <?php if (!empty($dblClickUrl)): ?>
                     doubleClickUrl: Utils.makeTemplateFromText(
-                        '<?php echo addslashes(preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $dblClickUrl)); ?>',
+                        '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $dblClickUrl)); ?>',
                         'Double click URL template'
                     ),
                 <?php endif; ?>
