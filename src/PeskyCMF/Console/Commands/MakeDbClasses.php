@@ -68,7 +68,7 @@ class MakeDbClasses extends Command {
         if (!$only || $only === 'table_config') {
             $this->createDbTableConfig($dataForViews);
         }
-        if (!$only || $only === 'scaffold' || $this->option('with-scaffold')) {
+        if ((!$only && $this->option('with-scaffold')) || $only === 'scaffold') {
             $this->createScaffoldConfig($dataForViews);
         }
 

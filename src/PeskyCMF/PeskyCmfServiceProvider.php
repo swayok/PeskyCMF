@@ -5,13 +5,14 @@ namespace PeskyCMF;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbObject;
 use Swayok\Utils\File;
 
 class PeskyCmfServiceProvider extends ServiceProvider {
 
     /** @var string */
     protected $cmfConfigsClass = CmfConfig::class;
+    /** @var bool */
+    protected $sendConfigsToLaravelContainer = false;
 
     /** @var CmfConfig */
     protected $cmfConfig = null;
@@ -63,6 +64,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $basePath = '/' . trim($this->cmfConfig->url_prefix(), '/');
         if (empty($_SERVER['REQUEST_URI']) || starts_with($_SERVER['REQUEST_URI'], $basePath)) {
 
+            $this->cmfConfig->replaceConfigInstance(CmfConfig::class, $this->cmfConfig);
+
             $this->loadConfigs();
 
             // alter auth config
@@ -81,6 +84,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             $this->setLocale();
 
             $this->loadRoutes();
+
+            $this->storeConfigsInLaravelContainer();
 
             self::$alreadyLoaded = true;
         }
@@ -104,9 +109,15 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function loadConfigs() {
-        $key = 'cmf';
-        $config = $this->appConfigs()->get($key, []);
-        $this->appConfigs()->set($key, array_merge($config, $this->cmfConfig->toArray()));
+
+    }
+
+    protected function storeConfigsInLaravelContainer() {
+        if ($this->sendConfigsToLaravelContainer) {
+            $key = 'cmf';
+            $config = $this->appConfigs()->get($key, []);
+            $this->appConfigs()->set($key, array_merge($config, $this->cmfConfig->toArray()));
+        }
     }
 
     protected function configureAuth() {
@@ -116,14 +127,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function configureSession($basePath) {
-        $config = $this->appConfigs()->get('session', ['table' => 'sessions', 'cookie' => 'session']);
-        $this->appConfigs()->set('session', array_merge($config, [
-            'table' => $config['table'] . '_admin',
-            'cookie' => $config['cookie'] . '_admin',
-            'lifetime' => 1440,
-            'connection' => 'admin',
-            'path' => $basePath
-        ]));
+        $config = $this->appConfigs()->get('session', []);
+        $config['path'] = $basePath;
+        $this->appConfigs()->set('session', array_merge($config, $this->cmfConfig->session_configs()));
     }
 
     /**

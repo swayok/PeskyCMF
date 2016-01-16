@@ -1,8 +1,8 @@
 <?php
 /**
- * @var \App\Db\BaseDbModel $model
- * @var \App\Admin\Scaffold\DataGrid\DataGridConfig $dataGridConfig
- * @var \App\Admin\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
+ * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
+ * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
  * @var string $translationPrefix
  * @var string $idSuffix
  */
@@ -17,7 +17,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             <li>
                 <a href="#" data-nav="reload">
                     <i class="glyphicon glyphicon-refresh"></i>
-                    <?php echo trans('cmf::cmf.action.reload_page'); ?>
+                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.reload_page'); ?>
                 </a>
             </li>
         </ol>
@@ -53,7 +53,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
         $dblClickUrl = null;
         if ($dataGridConfig->isCreateAllowed()) {
             $toolbar['create'] = \Swayok\Html\Tag::a()
-                ->setContent(trans("cmf::cmf.datagrid.toolbar.create"))
+                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.create'))
                 ->setClass('btn btn-primary')
                 ->setHref(route('cmf_item_add_form', [$model->getTableName()], false))
                 ->build();
@@ -65,7 +65,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             $actionsTpl .= \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
-                ->setTitle(trans('cmf::cmf.datagrid.actions.view_item'))
+                ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref($url)
                 ->build();
@@ -75,7 +75,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             $actionsTpl .= \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
-                ->setTitle(trans('cmf::cmf.datagrid.actions.edit_item'))
+                ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref($url)
                 ->build();
@@ -84,13 +84,13 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             $actionsTpl .= \Swayok\Html\Tag::a()
                 ->setContent('<i class="glyphicon glyphicon-trash"></i>')
                 ->setClass('row-action text-red')
-                ->setTitle(trans('cmf::cmf.datagrid.actions.delete_item'))
+                ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.delete_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
                 ->setDataAttr('url', route('cmf_api_delete_item', [$model->getTableName(), ":{$pkName}:"], false))
-                ->setDataAttr('confirm', trans('cmf::cmf.action.delete.please_confirm'))
+                ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'))
                 ->setHref('#')
                 ->build();
         }
@@ -154,7 +154,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             var queryBuilderConfig = {
                 filters: <?php echo json_encode($fitlers, JSON_UNESCAPED_UNICODE); ?>
             };
-            DataGridSearchHelper.locale = <?php echo json_encode(trans('cmf::cmf.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
+            DataGridSearchHelper.locale = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
             var dataGrid = ScaffoldDataGridHelper.init('#<?php echo $dataGridId; ?>', dataTablesConfig);
             DataGridSearchHelper.init(queryBuilderConfig, defaultSearchRules, dataGrid);
         })();

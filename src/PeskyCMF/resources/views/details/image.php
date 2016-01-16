@@ -1,8 +1,8 @@
 <?php
 /**
- * @var \App\Admin\Scaffold\Form\InputRendererConfig $rendererConfig
- * @var \App\Admin\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
- * @var \App\Admin\Scaffold\ItemDetails\ItemDetailsFieldConfig $fieldConfig
+ * @var \PeskyCMF\Scaffold\Form\InputRendererConfig $rendererConfig
+ * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
+ * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig $fieldConfig
  * @var \App\Db\BaseDbModel $model
  * @var string $translationPrefix
  */

@@ -1,10 +1,10 @@
 <?php
 /**
  * @var \App\Db\BaseDbModel $model
- * @var \App\Admin\Scaffold\DataGrid\DataGridConfig $dataGridConfig
- * @var \App\Admin\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
- * @var \App\Admin\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
- * @var \App\Admin\Scaffold\Form\FormConfig $formConfig
+ * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
+ * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
+ * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  */
 $data = [
     'model' => $model,

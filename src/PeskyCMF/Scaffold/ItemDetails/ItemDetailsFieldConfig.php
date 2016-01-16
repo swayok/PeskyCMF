@@ -16,7 +16,7 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
         switch ($this->type) {
             case self::TYPE_BOOL:
                 $this->setValueConverter(function ($value) {
-                    return trans('cmf::cmf.item_details.field.bool.' . ($value ? 'yes' : 'no'));
+                    return CmfConfig::transBase('.item_details.field.bool.' . ($value ? 'yes' : 'no'));
                 });
                 break;
             case self::TYPE_IMAGE:

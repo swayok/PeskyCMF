@@ -76,6 +76,15 @@ class CmfConfig extends ConfigsContainer {
         ];
     }
 
+    static public function session_configs() {
+        return [
+            'table' => 'sessions_admin',
+            'cookie' => 'session_admin',
+            'lifetime' => 1440,
+            'connection' => 'admin',
+        ];
+    }
+
     /**
      * Set Auth guard to use
      * @return string
@@ -218,26 +227,26 @@ class CmfConfig extends ConfigsContainer {
     static public function menu() {
         return [
             [
-                'label' => 'cmf::cmf.page.dashboard.menu_title',
-                'url' => '/page/dashboard',
+                'label' => self::transCustom('.page.dashboard.menu_title'),
+                'url' => route('cmf_page', ['dashboard']),
                 'icon' => 'glyphicon glyphicon-dashboard',
             ],
             [
-                'label' => 'cmf::cmf.admins.menu_title',
-                'url' => '/resource/admins',
+                'label' => self::transCustom('.admins.menu_title'),
+                'url' => route('cmf_items_table', ['admins']),
                 'icon' => 'fa fa-group'
             ]
             /*[
-                'label' => self::getInstance()->custom_dictionary_name() . '.users.menu_title',
+                'label' => self::transCustom('.users.menu_title'),
                 'url' => '/resource/users',
                 'icon' => 'fa fa-group'
             ],*/
             /*[
-                'label' => self::getInstance()->custom_dictionary_name() . '.menu.section_utils',
+                'label' => self::transCustom('.menu.section_utils'),
                 'icon' => 'glyphicon glyphicon-align-justify',
                 'submenu' => [
                     [
-                        'label' => self::getInstance()->custom_dictionary_name() . '.admins.menu_title',
+                        'label' => self::transCustom('.admins.menu_title'),
                         'url' => '/resource/admins',
                         'icon' => 'glyphicon glyphicon-user'
                     ],
@@ -255,11 +264,36 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Name for custom cmf dictionary
+     * Name for custom CMF dictionary that contains translation for CMF resource sections and pages
      * @return string
      */
     static public function custom_dictionary_name() {
+        return 'cmf::custom';
+    }
+
+    /**
+     * Translate from custom dictionary. Uses CmfConfig::getInstance()
+     * @param $path - must strat with '.'
+     * @return string
+     */
+    static public function transCustom($path) {
+        return trans(CmfConfig::getInstance()->custom_dictionary_name() . $path);
+    }
+
+    /**
+     * Dictionary that contains general ui translations for CMF
+     * @return string
+     */
+    static public function cmf_base_dictionary_name() {
         return 'cmf::cmf';
+    }
+
+    /**
+     * @param $path - must strat with '.'
+     * @return string
+     */
+    static public function transBase($path) {
+        return trans(CmfConfig::getInstance()->cmf_base_dictionary_name() . $path);
     }
 
     /**

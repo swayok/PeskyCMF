@@ -18,13 +18,13 @@ try {
             <li>
                 <a href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
                     <i class="fa fa-reply"></i>
-                    <?php echo trans('cmf::cmf.action.back'); ?>
+                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.back'); ?>
                 </a>
             </li>
             <li>
                 <a href="#" data-nav="reload">
                     <i class="glyphicon glyphicon-refresh"></i>
-                    <?php echo trans('cmf::cmf.action.reload_page'); ?>
+                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.reload_page'); ?>
                 </a>
             </li>
         </ol>
@@ -63,14 +63,14 @@ try {
                     <div class="row">
                         <div class="col-xs-3">
                             <a class="btn btn-default" href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
-                                <?php echo trans('cmf::cmf.item_details.toolbar.cancel'); ?>
+                                <?php echo \PeskyCMF\Config\CmfConfig::transBase('.item_details.toolbar.cancel'); ?>
                             </a>
                             <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
                                 <?php
                                     $createUrl = route('cmf_item_add_form', [$model->getTableName()]);
                                 ?>
                                 <a class="btn btn-primary" href="<?php echo $createUrl; ?>">
-                                    <?php echo trans('cmf::cmf.item_details.toolbar.create'); ?>
+                                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.item_details.toolbar.create'); ?>
                                 </a>
                             <?php endif; ?>
                         </div>
@@ -90,8 +90,8 @@ try {
                                 ?>
                                 <a class="btn btn-danger" href="#"
                                 data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
-                                data-confirm="<?php echo trans('cmf::cmf.action.delete.please_confirm'); ?>">
-                                    <?php echo trans('cmf::cmf.item_details.toolbar.delete'); ?>
+                                data-confirm="<?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'); ?>">
+                                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.item_details.toolbar.delete'); ?>
                                 </a>
                             <?php endif; ?>
                             <?php if ($itemDetailsConfig->isEditAllowed()) : ?>
@@ -103,7 +103,7 @@ try {
                                     );
                                 ?>
                                 <a class="btn btn-success" href="<?php echo $editUrl; ?>">
-                                    <?php echo trans('cmf::cmf.item_details.toolbar.edit'); ?>
+                                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.item_details.toolbar.edit'); ?>
                                 </a>
                             <?php endif; ?>
                         </div>

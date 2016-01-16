@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 
 class DataGridFieldConfig extends ScaffoldFieldConfig {
@@ -81,7 +82,7 @@ class DataGridFieldConfig extends ScaffoldFieldConfig {
         switch ($this->type) {
             case self::TYPE_BOOL:
                 $this->setValueConverter(function ($value) {
-                    return trans('cmf::cmf.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
+                    return CmfConfig::transBase('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
                 });
                 break;
         }

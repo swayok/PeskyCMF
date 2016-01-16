@@ -1,7 +1,7 @@
 <?php
 /**
  * @var \App\Db\BaseDbModel $model
- * @var \App\Admin\Scaffold\Form\FormConfig $formConfig
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  * @var string $translationPrefix
  * @var string $idSuffix
  */
@@ -29,13 +29,13 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
             <li>
                 <a href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
                     <i class="glyphicon fa fa-reply"></i>
-                    <?php echo trans('cmf::cmf.action.back'); ?>
+                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.back'); ?>
                 </a>
             </li>
             <li>
                 <a href="#" data-nav="reload">
                     <i class="glyphicon glyphicon-refresh"></i>
-                    <?php echo trans('cmf::cmf.action.reload_page'); ?>
+                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.reload_page'); ?>
                 </a>
             </li>
         </ol>
@@ -98,7 +98,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                             <div class="row">
                                 <div class="col-xs-3">
                                     <a class="btn btn-default" href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
-                                        <?php echo trans('cmf::cmf.form.toolbar.cancel'); ?>
+                                        <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.cancel'); ?>
                                     </a>
                                 </div>
                                 <div class="col-xs-6 text-center">
@@ -108,7 +108,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                             $createUrl = route('cmf_item_add_form', [$model->getTableName()]);
                                         ?>
                                         <a class="btn btn-primary" href="<?php echo $createUrl; ?>">
-                                            <?php echo trans('cmf::cmf.form.toolbar.create'); ?>
+                                            <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.create'); ?>
                                         </a>
                                     <?php endif; ?>
                                     <?php if ($formConfig->isDeleteAllowed()) : ?>
@@ -121,14 +121,14 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                         ?>
                                         <a class="btn btn-danger" href="#"
                                         data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
-                                        data-confirm="<?php echo trans('cmf::cmf.action.delete.please_confirm'); ?>">
-                                            <?php echo trans('cmf::cmf.form.toolbar.delete'); ?>
+                                        data-confirm="<?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'); ?>">
+                                            <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.delete'); ?>
                                         </a>
                                     <?php endif; ?>
                                 <?php echo $endIf; ?>
                                 </div>
                                 <div class="col-xs-3">
-                                    <button type="submit" class="btn btn-success pull-right"><?php echo trans('cmf::cmf.form.toolbar.submit'); ?></button>
+                                    <button type="submit" class="btn btn-success pull-right"><?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?></button>
                                 </div>
                             </div>
                             <?php if (count($formConfig->getToolbarItems()) > 0) : ?>

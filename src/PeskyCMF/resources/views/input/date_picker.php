@@ -1,8 +1,8 @@
 <?php
 /**
- * @var \App\Admin\Scaffold\Form\InputRendererConfig $rendererConfig
- * @var \App\Admin\Scaffold\Form\FormFieldConfig $fieldConfig
- * @var \App\Admin\Scaffold\Form\FormConfig $actionConfig
+ * @var \PeskyCMF\Scaffold\Form\InputRendererConfig $rendererConfig
+ * @var \PeskyCMF\Scaffold\Form\FormFieldConfig $fieldConfig
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \App\Db\BaseDbModel $model
  * @var array $config
  * @var array $enabler

@@ -5,19 +5,19 @@
 ?>
 <div class="content-header">
     <h1>
-        {{ trans('cmf::cmf.page.profile.header') }}
+        {{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.header') }}
     </h1>
     <ol class="breadcrumb">
         <li>
             <a href="#" data-nav="back" data-default-url="{{ route('cmf_start_page') }}">
                 <i class="glyphicon fa fa-reply"></i>
-                {{ trans('cmf::cmf.action.back') }}
+                {{ \PeskyCMF\Config\CmfConfig::transBase('.action.back') }}
             </a>
         </li>
         <li>
             <a href="#" data-nav="reload">
                 <i class="glyphicon glyphicon-refresh"></i>
-                {{ trans('cmf::cmf.action.reload_page') }}
+                {{ \PeskyCMF\Config\CmfConfig::transBase('.action.reload_page') }}
             </a>
         </li>
     </ol>
@@ -34,27 +34,27 @@
                 <!-- end of autofill disabler -->
                 <div class="box-body">
                     <div class="form-group">
-                        <label for="email-input">{{ trans('cmf::cmf.page.profile.input.email') }}*</label>
+                        <label for="email-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.email') }}*</label>
                         <input class="form-control" value="{{ $admin->email }}" name="email" id="email-input" type="email" required="required">
                     </div>
                     <div class="form-group">
-                        <label for="new-password-input">{{ trans('cmf::cmf.page.profile.input.new_password') }}</label>
+                        <label for="new-password-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.new_password') }}</label>
                         <input class="form-control" value="" name="new_password" id="new-password-input" type="password" autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <label for="name-input">{{ trans('cmf::cmf.page.profile.input.name') }}</label>
+                        <label for="name-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.name') }}</label>
                         <input class="form-control" value="{{ $admin->name }}" name="name" id="name-input" type="text">
                     </div>
                     <div class="form-group">
-                        <label for="language-input">{{ trans('cmf::cmf.page.profile.input.language') }}</label>
+                        <label for="language-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.language') }}</label>
                         <select class="form-control" data-value=" {{ $admin->language }}" name="language" id="language-input" required="required">
                             @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->locales() as $lang)
-                                <option value="{{ $lang }}">{{ trans('cmf::cmf.language.' . $lang) }}</option>
+                                <option value="{{ $lang }}">{{ \PeskyCMF\Config\CmfConfig::transCustom('.language.' . $lang) }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="old-password-input">{{ trans('cmf::cmf.page.profile.input.old_password') }}*</label>
+                        <label for="old-password-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.old_password') }}*</label>
                         <input class="form-control" value="" name="old_password" id="old-password-input" type="password" autocomplete="off" required="required">
                     </div>
                 </div>
@@ -62,12 +62,12 @@
                     <div class="row">
                         <div class="col-xs-6">
                             <a class="btn btn-default" href="#" data-nav="back" data-default-url="{{ route('cmf_start_page') }}">
-                                {{ trans('cmf::cmf.form.toolbar.cancel') }}
+                                {{ \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.cancel') }}
                             </a>
                         </div>
                         <div class="col-xs-6">
                             <button type="submit" class="btn btn-success pull-right">
-                                {{ trans('cmf::cmf.form.toolbar.submit') }}
+                                {{ \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit') }}
                             </button>
                         </div>
                     </div>

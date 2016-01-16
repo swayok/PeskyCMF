@@ -3,6 +3,7 @@
 namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Routing\Route;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\HttpCode;
 
@@ -48,7 +49,7 @@ trait InjectsDbObjects {
      * Abort with HTTP code 404
      */
     protected function sendRecordNotFoundResponse() {
-        abort(HttpCode::NOT_FOUND, trans('cmf::cmf.error.db_record_not_exists'));
+        abort(HttpCode::NOT_FOUND, CmfConfig::transBase('.error.db_record_not_exists'));
     }
 
     /**

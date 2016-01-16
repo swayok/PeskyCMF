@@ -3,8 +3,12 @@
 
     </div>
     <div class="actions">
-        <a href="{{ route('cmf_profile', [], false) }}"><i class="fa fa-fw fa-user"></i>{{ trans('cmf::cmf.user.profile_label') }}</a>
-        <a href="{{ route(\PeskyCMF\Config\CmfConfig::getInstance()->logout_route(), [], false) }}"><i class="fa fa-fw fa-sign-out"></i>{{ trans('cmf::cmf.user.logout_label') }}</a>
+        <a href="{{ route('cmf_profile', [], false) }}">
+            <i class="fa fa-fw fa-user"></i>{{ \PeskyCMF\Config\CmfConfig::transCustom('.user.profile_label') }}
+        </a>
+        <a href="{{ route(\PeskyCMF\Config\CmfConfig::getInstance()->logout_route(), [], false) }}">
+            <i class="fa fa-fw fa-sign-out"></i>{{ \PeskyCMF\Config\CmfConfig::transCustom('.user.logout_label') }}
+        </a>
     </div>
 </div>
 

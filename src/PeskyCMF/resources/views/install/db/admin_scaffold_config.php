@@ -31,7 +31,7 @@ class AdminScaffoldConfig extends BaseScaffoldConfig {
                 'role' => DataGridFieldConfig::create()
                     ->setIsSortable(true)
                     ->setValueConverter(function ($value, DbColumnConfig $columnConfig, $record) {
-                        return trans(CmfConfig::getInstance()->custom_dictionary_name() . ".admins.role.$value");
+                        return CmfConfig::transCustom(".admins.role.$value");
                     }),
                 'parent_id' => DataGridFieldConfig::create()
                     ->setType(ItemDetailsFieldConfig::TYPE_LINK),
@@ -48,12 +48,12 @@ class AdminScaffoldConfig extends BaseScaffoldConfig {
                 'name',
                 'language' => ItemDetailsFieldConfig::create()
                     ->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
-                        return trans(CmfConfig::getInstance()->custom_dictionary_name() . ".language.$value");
+                        return CmfConfig::transCustom(".language.$value");
                     }),
                 'is_active',
                 'role' => ItemDetailsFieldConfig::create()
                     ->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
-                        return trans(CmfConfig::getInstance()->custom_dictionary_name() . ".admins.role.$value");
+                        return CmfConfig::transCustom(".admins.role.$value");
                     }),
                 'is_superadmin' => ItemDetailsFieldConfig::create(),
                 'parent_id' => ItemDetailsFieldConfig::create()
@@ -82,7 +82,7 @@ class AdminScaffoldConfig extends BaseScaffoldConfig {
                     ->setOptions(function () {
                         $options = array();
                         foreach (CmfConfig::getInstance()->locales() as $lang) {
-                            $options[$lang] = trans(CmfConfig::getInstance()->custom_dictionary_name() . ".language.$lang");
+                            $options[$lang] = CmfConfig::transCustom(".language.$lang");
                         }
                         return $options;
                     })
@@ -97,7 +97,7 @@ class AdminScaffoldConfig extends BaseScaffoldConfig {
                     ->setOptions(function () {
                         $options = array();
                         foreach (CmfConfig::getInstance()->roles_list() as $roleId) {
-                            $options[$roleId] = trans(CmfConfig::getInstance()->custom_dictionary_name() . ".admins.role.$roleId");
+                            $options[$roleId] = CmfConfig::transCustom(".admins.role.$roleId");
                         }
                         return $options;
                     })

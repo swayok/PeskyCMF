@@ -2,11 +2,11 @@
 
 namespace PeskyCMF\Console\Commands;
 
-use App\Db\MigrationByQuery;
-use App\Db\MigrationForTableCreation;
 use Illuminate\Database\Console\Migrations\BaseCommand;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Str;
+use PeskyCMF\Db\MigrationByQuery;
+use PeskyCMF\Db\MigrationForTableCreation;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 
@@ -69,10 +69,14 @@ class MakeMigration extends BaseCommand {
             'tables' => preg_split('%\s*,\s*%', $this->input->getArgument('table')),
             'isCreateTable' => $isCreateTable,
             'schema' => $this->input->getArgument('schema'),
-            'parentClass' => $isCreateTable ? MigrationForTableCreation::class : MigrationByQuery::class,
+            'parentClass' => $this->getMigrationParentClass($isCreateTable),
             'title' => ucfirst(str_replace('_', ' ', $name))
         ];
         return $dataForView;
+    }
+
+    protected function getMigrationParentClass($isCreateTable) {
+        return $isCreateTable ? MigrationForTableCreation::class : MigrationByQuery::class;
     }
 
     protected function getFilePath($name, $forSqlFile = false, $forRollbackSqlFile = false) {

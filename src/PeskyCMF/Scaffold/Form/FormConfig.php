@@ -100,7 +100,7 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * @return array[]
-     * @throws \App\Admin\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     public function loadOptions() {
         $options = array();
@@ -210,7 +210,7 @@ class FormConfig extends ScaffoldActionConfig {
             return [];
         }
         if (empty($messages)) {
-            $messages = trans(CmfConfig::getInstance()->custom_dictionary_name() . '.' . $this->getModel()->getTableName() . '.form.validation');
+            $messages = CmfConfig::transCustom('.' . $this->getModel()->getTableName() . '.form.validation');
         }
         if (!is_array($messages)) {
             $messages = [];

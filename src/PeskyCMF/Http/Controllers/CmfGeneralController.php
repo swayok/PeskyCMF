@@ -57,19 +57,19 @@ class CmfGeneralController extends Controller {
         $validator = \Validator::make(
             $request->data(),
             $validationRules,
-            Set::flatten(trans('cmf::cmf.page.profile.errors'))
+            Set::flatten(CmfConfig::transCustom('.page.profile.errors'))
         );
         $errors = [];
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
         } else if (!\Hash::check($request->data('old_password'), $admin->password)) {
-            $errors['old_password'] = trans('cmf::cmf.page.profile.errors.old_password.match');
+            $errors['old_password'] = CmfConfig::transCustom('.page.profile.errors.old_password.match');
         }
         if (!empty($errors)) {
             return response()->json(
                 [
                     'errors' => $errors,
-                    'message' => trans('cmf::cmf.form.validation_errors')
+                    'message' => CmfConfig::transBase('.form.validation_errors')
                 ],
                 HttpCode::INVALID
             );
@@ -82,13 +82,13 @@ class CmfGeneralController extends Controller {
             }
             if ($admin->commit()) {
                 return response()->json([
-                    '_message' => trans('cmf::cmf.page.profile.saved'),
+                    '_message' => CmfConfig::transCustom('.page.profile.saved'),
                     'redirect' => 'reload'
                 ]);
             } else {
                 return response()->json(
                     [
-                        '_message' => trans('cmf::cmf.form.failed_to_save_resource_data'),
+                        '_message' => CmfConfig::transBase('.form.failed_to_save_resource_data'),
                         'redirect' => 'reload'
                     ],
                     HttpCode::SERVER_ERROR
@@ -163,7 +163,7 @@ class CmfGeneralController extends Controller {
 
     public function doLogin(Request $request) {
         if (!Auth::guard()->attempt(['email' => mb_strtolower(trim($request->data('email'))), 'password' => $request->data('password')])) {
-            return response()->json(['_message' => trans('cmf::cmf.login_form.login_failed')], HttpCode::INVALID);
+            return response()->json(['_message' => CmfConfig::transCustom('.login_form.login_failed')], HttpCode::INVALID);
         } else {
             return response()->json(['redirect' => $this->getIntendedUrl()]);
         }
@@ -178,7 +178,7 @@ class CmfGeneralController extends Controller {
     public function getAdminInfo() {
         $admin = $this->getAdmin()->toPublicArray();
         $admin['_role'] = $admin['role'];
-        $admin['role'] = trans(CmfConfig::getInstance()->custom_dictionary_name() . '.admins.role.' . $admin['role']);
+        $admin['role'] = CmfConfig::transCustom('.admins.role.' . $admin['role']);
         return response()->json($admin);
     }
 

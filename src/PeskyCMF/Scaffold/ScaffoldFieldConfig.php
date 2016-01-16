@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Scaffold;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyORM\DbColumnConfig;
 use PeskyORM\DbRelationConfig;
@@ -223,7 +224,7 @@ abstract class ScaffoldFieldConfig {
             throw new ScaffoldFieldException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
         if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getDisplayField()])) {
-            return trans('cmf::cmf.item_details.field.no_relation');
+            return CmfConfig::transBase('.item_details.field.no_relation');
         } else {
             return Tag::a(empty($linkLabel) ? $record[$relationAlias][$relationConfig->getDisplayField()] : $linkLabel)
                 ->setHref(route('cmf_item_details', [$relationConfig->getForeignTable(), $record[$columnConfig->getName()]]))

@@ -27,7 +27,7 @@ abstract class ConfigsContainer implements \IteratorAggregate, \Countable, Array
         return self::$instances[$class];
     }
 
-    static protected function replaceConfigInstance($classToReplace, $instance) {
+    static public function replaceConfigInstance($classToReplace, $instance) {
         self::$instances[$classToReplace] = $instance;
     }
 
