@@ -1,49 +1,57 @@
 {
-  "name": "swayok/peskycmf",
-  "type": "library",
-  "description": "PeskyCMF - CMF based on Laravel Framework 5, PeskyORM and AdminLTE UI template",
-  "keywords": [
-    "php",
-	"cmf",
-	"laravel",
-	"admin",
-    "database",
-    "web"
-  ],
-  "authors": [
-    {
-      "name": "Alexander Filippov"
+    "name": "swayok/peskycmf",
+    "type": "library",
+    "description": "PeskyCMF - CMF based on Laravel Framework 5, PeskyORM and AdminLTE UI template",
+    "keywords": [
+        "php",
+        "cmf",
+        "laravel",
+        "admin",
+        "database",
+        "web"
+    ],
+    "authors": [
+        {
+            "name": "Alexander Filippov"
+        }
+    ],
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/swayok/PeskyCMF/issues"
+    },
+    "autoload": {
+        "psr-0": {
+            "PeskyCMF": "/src"
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/swayok/utils.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/swayok/peskyorm.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/swayok/laravel_extended_errors.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/swayok/html-tag-helper.git"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "laravel/framework": "5.2.*",
+        "swayok/utils": "master@dev",
+        "swayok/peskyorm": "master@dev",
+        "swayok/laravel_extended_errors": "master@dev",
+        "swayok/html-tag-helper": "master@dev",
+        "almasaeed2010/adminlte": "~2.0",
+        "FortAwesome/Font-Awesome": "*",
+        "driftyco/ionicons": "*",
+        "nostalgiaz/bootstrap-switch": "*"
     }
-  ],
-  "license": "MIT",
-  "support": {
-    "issues": "https://github.com/swayok/PeskyCMF/issues"
-  },
-  "autoload": {
-    "psr-0": {"PeskyCMF": "/src"}
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/swayok/utils.git"
-    },
-	{
-      "type": "vcs",
-      "url": "https://github.com/swayok/peskyorm.git"
-    },
-	{
-		"type": "vcs",
-		"url": "https://github.com/swayok/laravel_extended_errors.git"
-	}
-  ],
-  "require": {
-    "php": ">=5.3",
-	"laravel/framework": "5.2.*",
-    "swayok/utils": "master@dev",
-	"swayok/peskyorm": "master@dev",
-	"swayok/laravel_extended_errors": "master@dev",
-	"almasaeed2010/adminlte": "~2.0",
-	"FortAwesome/Font-Awesome": "*",
-    "driftyco/ionicons": "*"
-  }
 }

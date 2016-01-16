@@ -11,6 +11,7 @@
     @yield('html-head')
 
     <link href="/packages/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/adminlte/plugins/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
@@ -59,6 +60,7 @@
     <script src="/packages/cmf/js/lib/jquery/jquery-2.1.3.min.js" type="text/javascript"></script>
 
     <script src="/packages/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/packages/bootstrap/switches/js/bootstrap-switch.min.js" type="text/javascript"></script>
     <script src="/packages/adminlte/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
     <script src='/packages/adminlte/plugins/fastclick/fastclick.min.js'></script>
     <script src="/packages/adminlte/plugins/datatables/jquery.dataTables.min.js" type="text/javascript"></script>
