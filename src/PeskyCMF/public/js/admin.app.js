@@ -6,7 +6,7 @@ $(document).ready(function () {
         $.extend(GlobalVars, CmfSettings);
     }
 
-    Utils.configureAjax();
+    Utils.configureAppLibs();
 
     Pilot.pushState = true;
 

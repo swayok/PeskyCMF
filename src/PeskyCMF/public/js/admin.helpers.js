@@ -36,8 +36,10 @@ FormHelper.removeAllFormMessagesAndErrors = function (form) {
 
 FormHelper.setFormMessage = function (form, message, type) {
     if (!type) {
-        type = 'danger';
+        type = 'error';
     }
+    toastr[type](message);
+    /*
     var errorDiv = form.find('.form-error');
     if (!errorDiv.length) {
         errorDiv = $('<div class="form-error text-center"></div>').hide();
@@ -45,14 +47,14 @@ FormHelper.setFormMessage = function (form, message, type) {
     }
     return errorDiv.slideUp(100, function () {
         errorDiv.html('<div class="alert alert-' + type + '">' + message + '</div>').slideDown(100);
-    });
+    });*/
 };
 
 FormHelper.removeFormMessage = function (form) {
-    var errorDiv = form.find('.form-error');
+    /*var errorDiv = form.find('.form-error');
     return errorDiv.slideUp(100, function () {
         errorDiv.html('');
-    })
+    })*/
 };
 
 FormHelper.removeFormValidationMessages = function (form) {
