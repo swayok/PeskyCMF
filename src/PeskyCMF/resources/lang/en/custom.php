@@ -57,6 +57,7 @@ return [
         'item_details' => [
             'header' => 'Administrator details',
             'field' => [
+                'id' => 'ID',
                 'email' => 'E-mail',
                 'password' => 'Password',
                 'name' => 'Name',

@@ -58,6 +58,7 @@ return [
         'item_details' => [
             'header' => 'Информация об администраторе',
             'field' => [
+                'id' => 'ID',
                 'email' => 'E-mail',
                 'password' => 'Пароль',
                 'name' => 'Имя',

@@ -17,29 +17,12 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
 ?>
 
 <script type="text/html" id="item-form-tpl">
-    <div class="content-header">
-        <h1>
-            <?php
-                echo $ifEdit . trans("$translationPrefix.form.header_edit")
+    <?php echo view('cmf::ui.default_page_header', [
+        'header' => $ifEdit . trans("$translationPrefix.form.header_edit")
                     . $else . trans("$translationPrefix.form.header_create")
-                    . $endIf;
-            ?>
-        </h1>
-        <ol class="breadcrumb">
-            <li>
-                <a href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
-                    <i class="glyphicon fa fa-reply"></i>
-                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.back'); ?>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-nav="reload">
-                    <i class="glyphicon glyphicon-refresh"></i>
-                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.reload_page'); ?>
-                </a>
-            </li>
-        </ol>
-    </div>
+                    . $endIf,
+        'defaultBackUrl' => $backUrl,
+    ])->render(); ?>
     <div class="content">
         <?php
             $cols = $formConfig->getWidth() >= 100 ? 12 : ceil(12 * ($formConfig->getWidth() / 100));

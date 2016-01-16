@@ -250,7 +250,7 @@ Utils.setUser = function (userData) {
 
 Utils.highlightLinks = function (url) {
     $('li.current-page, a.current-page, li.treeview').removeClass('current-page active');
-    var links = $('a[href="' + url + '"]');
+    var links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
     links.parent().filter('li').addClass('current-page active')
         .parent().filter('ul.treeview-menu').addClass('menu-open')
         .parent().filter('li.treeview').addClass('active');

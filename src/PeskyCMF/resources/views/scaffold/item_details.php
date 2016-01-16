@@ -12,23 +12,10 @@ try {
 ?>
 
 <script type="text/html" id="item-details-tpl">
-    <div class="content-header">
-        <h1><?php echo trans("$translationPrefix.item_details.header"); ?></h1>
-        <ol class="breadcrumb">
-            <li>
-                <a href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
-                    <i class="fa fa-reply"></i>
-                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.back'); ?>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-nav="reload">
-                    <i class="glyphicon glyphicon-refresh"></i>
-                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.reload_page'); ?>
-                </a>
-            </li>
-        </ol>
-    </div>
+    <?php echo view('cmf::ui.default_page_header', [
+        'header' => trans("$translationPrefix.item_details.header"),
+        'defaultBackUrl' => $backUrl,
+    ])->render(); ?>
     <div class="content">
         <div class="row"><div class="col-xs-12">
             <div class="box">

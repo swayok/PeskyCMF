@@ -81,7 +81,7 @@ trait KeyValueModelHelpers {
      * @param null|array $conditionsAndOptions
      * @return array
      */
-    public function selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions = null) {
+    public function selectAssoc($keysColumn = 'key', $valuesColumn = 'value', $conditionsAndOptions = null) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
         return self::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions));
     }
