@@ -87,25 +87,29 @@ trait KeyValueModelHelpers {
     }
 
     /**
-     * Update existing value or create ne one
+     * Update existing value or create new one
      * @param array $record - must contain: key, foreign_key, value
      * @return bool
      * @throws DbModelException
      */
     public function updateOrCreateRecord(array $record) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
-        $fkName = $this->getMainForeignKeyColumnName();
-        if (empty($record[$fkName])) {
-            throw new DbModelException($this, "\$record does not contain [{$fkName}] key or its value is empty");
-        } else if (empty($record['key'])) {
+        if (empty($record['key'])) {
             throw new DbModelException($this, '$record does not contain [key] key or its value is empty');
         } else if (!array_key_exists('value', $record)) {
             throw new DbModelException($this, '$record does not contain [value] key');
         }
-        $object = $this->getOwnDbObject()->find([
-            $fkName => $record[$fkName],
+        $conditions = [
             'key' => $record['key']
-        ]);
+        ];
+        $fkName = $this->getMainForeignKeyColumnName();
+        if (!empty($fkName)) {
+            if (empty($record[$fkName])) {
+                throw new DbModelException($this, "\$record does not contain [{$fkName}] key or its value is empty");
+            }
+            $conditions[$fkName] = $record[$fkName];
+        }
+        $object = $this->getOwnDbObject()->find($conditions);
         if ($object->exists()) {
             return $object
                 ->begin()
@@ -116,6 +120,31 @@ trait KeyValueModelHelpers {
                 ->reset()
                 ->fromData($record)
                 ->save();
+        }
+    }
+
+    /**
+     * Update existing values and create new
+     * @param array $records
+     * @return bool
+     * @throws \Exception
+     */
+    public function updateOrCreateRecords(array $records) {
+        /** @var CmfDbModel|KeyValueModelHelpers $this */
+        $this->begin();
+        try {
+            foreach ($records as $record) {
+                $success = $this->updateOrCreateRecord($record);
+                if (!$success) {
+                    $this->rollback();
+                    return false;
+                }
+            }
+            $this->commit();
+            return true;
+        } catch (\Exception $exc) {
+            $this->rollback();
+            throw $exc;
         }
     }
 }

@@ -70,7 +70,14 @@ class PeskyOrmUserProvider implements UserProvider {
      * @return mixed|DbObject
      */
     protected function validateUser(DbObject $user, $onFailReturn = null) {
-        return $user->exists() && (!$user->_hasField('is_active') || $user->is_active) ? $user : $onFailReturn;
+        if (
+            $user->exists()
+            && (!$user->_hasField('is_active') || $user->is_active)
+            && (!$user->_hasField('is_banned') || !$user->is_banned)
+        ) {
+            return $user;
+        }
+        return $onFailReturn;
     }
 
     /**

@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
+use PeskyORM\DbExpr;
 use Redirect;
 use Swayok\Utils\Set;
 
@@ -50,10 +51,30 @@ class CmfGeneralController extends Controller {
         $validationRules = [
             'old_password' => 'required',
             'new_password' => 'min:6',
-            'email' => 'required|email|unique:admins,email,' . $admin->id . ',id',
-            'language' => 'required|in:' . implode(CmfConfig::getInstance()->locales()),
-            'name' => 'max:200'
         ];
+        $fieldsToUpdate = [];
+        if ($admin->_hasField('language')) {
+            $validationRules['language'] = 'required|in:' . implode(CmfConfig::getInstance()->locales());
+            $fieldsToUpdate[] = 'language';
+        }
+        if ($admin->_hasField('name')) {
+            $validationRules['name'] = 'max:200';
+            $fieldsToUpdate[] = 'name';
+        }
+        $usersTable = CmfConfig::getInstance()->users_table_name();
+        $userLoginCol = CmfConfig::getInstance()->user_login_column();
+        if ($admin->_hasField('email')) {
+            if ($userLoginCol === 'email') {
+                $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->id},id";
+            } else {
+                $validationRules['email'] = "email";
+            }
+            $fieldsToUpdate[] = 'email';
+        }
+        if ($userLoginCol !== 'email') {
+            $validationRules[$userLoginCol] = "required|alpha_dash|min:4|unique:$usersTable,$userLoginCol,{$admin->id},id";
+            $fieldsToUpdate[] = $userLoginCol;
+        }
         $validator = \Validator::make(
             $request->data(),
             $validationRules,
@@ -76,7 +97,7 @@ class CmfGeneralController extends Controller {
         } else {
             $admin
                 ->begin()
-                ->updateValues($request->only(['email', 'name', 'language']));
+                ->updateValues($request->only($fieldsToUpdate));
             if (!empty(trim($request->data('new_password')))) {
                 $admin->setPassword($request->data('new_password'));
             }
@@ -162,7 +183,12 @@ class CmfGeneralController extends Controller {
     }
 
     public function doLogin(Request $request) {
-        if (!Auth::guard()->attempt(['email' => mb_strtolower(trim($request->data('email'))), 'password' => $request->data('password')])) {
+        $userLoginColumn = CmfConfig::getInstance()->user_login_column();
+        $credentials = [
+            DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($request->data($userLoginColumn)) . '``)'),
+            'password' => $request->data('password')
+        ];
+        if (!Auth::guard()->attempt($credentials)) {
             return response()->json(['_message' => CmfConfig::transCustom('.login_form.login_failed')], HttpCode::INVALID);
         } else {
             return response()->json(['redirect' => $this->getIntendedUrl()]);
@@ -177,8 +203,10 @@ class CmfGeneralController extends Controller {
 
     public function getAdminInfo() {
         $admin = $this->getAdmin()->toPublicArray();
-        $admin['_role'] = $admin['role'];
-        $admin['role'] = CmfConfig::transCustom('.admins.role.' . $admin['role']);
+        if (!empty($admin['role'])) {
+            $admin['_role'] = $admin['role'];
+            $admin['role'] = CmfConfig::transCustom('.admins.role.' . $admin['role']);
+        }
         return response()->json($admin);
     }
 

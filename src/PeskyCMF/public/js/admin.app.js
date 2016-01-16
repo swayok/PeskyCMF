@@ -35,6 +35,10 @@ $(document).ready(function () {
 
     ScaffoldsManager.init(app);
 
+    if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
+        CustomRoutes.init(app);
+    }
+
     app.on('404', function (event, request) {
         if (GlobalVars.isDebug) {
             console.log('Route not found for ' + request.url);

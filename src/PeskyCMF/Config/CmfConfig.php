@@ -49,6 +49,35 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Session configs
+     * @return array
+     */
+    static public function session_configs() {
+        return [
+            'table' => self::getInstance()->sessions_table_name(),
+            'cookie' => self::getInstance()->sessions_table_name(),
+            'lifetime' => 1440,
+            'connection' => self::getInstance()->session_connection(),
+        ];
+    }
+
+    /**
+     * Table name with sessions for db driver. Also cookie key
+     * @return string
+     */
+    static public function sessions_table_name() {
+        return str_plural(self::getInstance()->users_table_name()) . '_sessions';
+    }
+
+    /**
+     * Session connection for redis and db drivers
+     * @return string
+     */
+    static public function session_connection() {
+        return 'cmf';
+    }
+
+    /**
      * Auth configs for cmf
      * For examples - look for /config/auth.php
      * This configs will be recursively merged over configs from /config/auth.php
@@ -57,31 +86,22 @@ class CmfConfig extends ConfigsContainer {
     static public function auth_configs() {
         return [
             'guards' => [
-                self::auth_guard_name() => [
+                self::getInstance()->auth_guard_name() => [
                     'driver' => 'session',
-                    'provider' => 'cmf',
+                    'provider' => self::getInstance()->auth_guard_name(),
                 ],
             ],
 
             'providers' => [
-                'cmf' => [
+                self::getInstance()->auth_guard_name() => [
                     'driver' => 'peskyorm',
-                    'table' => 'admins',
+                    'table' => self::getInstance()->users_table_name(),
                     'model' => call_user_func(
                         [self::getInstance()->base_db_model_class(), 'getFullDbObjectClass'],
-                        'admins'
+                        self::getInstance()->users_table_name()
                     )
                 ],
             ],
-        ];
-    }
-
-    static public function session_configs() {
-        return [
-            'table' => 'sessions_admin',
-            'cookie' => 'session_admin',
-            'lifetime' => 1440,
-            'connection' => 'admin',
         ];
     }
 
@@ -91,6 +111,21 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function auth_guard_name() {
         return 'cmf';
+    }
+
+    /**
+     * Table name where admins/users stored
+     * @return string
+     */
+    static public function users_table_name() {
+        return 'admins';
+    }
+
+    /**
+     * @return string
+     */
+    static public function user_login_column() {
+        return 'email';
     }
 
     /**
@@ -315,11 +350,11 @@ class CmfConfig extends ConfigsContainer {
     }
 
     static public function locale_session_key() {
-        return 'cmf_locale';
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_locale';
     }
 
     static public function session_redirect_key() {
-        return 'cmf_redirect';
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_redirect';
     }
 
     /**
@@ -358,7 +393,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function home_page_url() {
-        return '/' . self::url_prefix() . '/page/dashboard';
+        return '/' . self::getInstance()->url_prefix() . '/page/dashboard';
     }
 
     /**
