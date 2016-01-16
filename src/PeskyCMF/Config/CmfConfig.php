@@ -259,7 +259,7 @@ class CmfConfig extends ConfigsContainer {
      * Path to CMF translations
      * @return string
      */
-    static public function cmf_translations_path() {
+    static public function cmf_dictionaries_path() {
         return __DIR__ . '/../resources/lang';
     }
 

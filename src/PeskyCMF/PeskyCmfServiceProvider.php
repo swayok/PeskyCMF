@@ -144,7 +144,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function configureTranslationsLoading() {
-        $this->loadTranslationsFrom($this->cmfConfig->cmf_translations_path(), 'cmf');
+        $this->loadTranslationsFrom($this->cmfConfig->cmf_dictionaries_path(), 'cmf');
     }
 
     protected function configurePublishes() {
