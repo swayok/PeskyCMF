@@ -30,29 +30,43 @@
                 <input type="hidden" name="_method" value="PUT">
                 <!-- disable chrome email & password autofill -->
                 <input type="email" class="hidden">
+                <input type="text" class="hidden">
                 <input type="password" class="hidden">
                 <!-- end of autofill disabler -->
                 <div class="box-body">
-                    <div class="form-group">
-                        <label for="email-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.email') }}*</label>
-                        <input class="form-control" value="{{ $admin->email }}" name="email" id="email-input" type="email" required="required">
-                    </div>
+                    @if ($admin->_hasField('email'))
+                        <div class="form-group">
+                            <label for="email-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.email') }}*</label>
+                            <input class="form-control" value="{{ $admin->email }}" name="email" id="email-input" type="email" required="required">
+                        </div>
+                    @endif
+                    <?php $loginColumn = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column(); ?>
+                    @if ($loginColumn !== 'email')
+                        <div class="form-group">
+                            <label for="{{ $loginColumn }}-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.' . $loginColumn) }}*</label>
+                            <input class="form-control" value="{{ $admin->$loginColumn }}" name="{{ $loginColumn }}" id="{{ $loginColumn }}-input" type="text" required="required">
+                        </div>
+                    @endif
                     <div class="form-group">
                         <label for="new-password-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.new_password') }}</label>
                         <input class="form-control" value="" name="new_password" id="new-password-input" type="password" autocomplete="off">
                     </div>
-                    <div class="form-group">
-                        <label for="name-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.name') }}</label>
-                        <input class="form-control" value="{{ $admin->name }}" name="name" id="name-input" type="text">
-                    </div>
-                    <div class="form-group">
-                        <label for="language-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.language') }}</label>
-                        <select class="form-control" data-value=" {{ $admin->language }}" name="language" id="language-input" required="required">
-                            @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->locales() as $lang)
-                                <option value="{{ $lang }}">{{ \PeskyCMF\Config\CmfConfig::transCustom('.language.' . $lang) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    @if ($admin->_hasField('name'))
+                        <div class="form-group">
+                            <label for="name-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.name') }}</label>
+                            <input class="form-control" value="{{ $admin->name }}" name="name" id="name-input" type="text">
+                        </div>
+                    @endif
+                    @if ($admin->_hasField('language'))
+                        <div class="form-group">
+                            <label for="language-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.language') }}</label>
+                            <select class="form-control" data-value=" {{ $admin->language }}" name="language" id="language-input" required="required">
+                                @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->locales() as $lang)
+                                    <option value="{{ $lang }}">{{ \PeskyCMF\Config\CmfConfig::transCustom('.language.' . $lang) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
                     <div class="form-group">
                         <label for="old-password-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.old_password') }}*</label>
                         <input class="form-control" value="" name="old_password" id="old-password-input" type="password" autocomplete="off" required="required">
