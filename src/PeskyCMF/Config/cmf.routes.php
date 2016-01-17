@@ -107,92 +107,93 @@ Route::group(
                 Route::get('cache/clean', [
                     'uses' => __cmf_general_controller_class() . '@cleanCache'
                 ]);
+            }
+        );
 
-                Route::pattern('table_name', '[a-z]+([_a-z0-9]*[a-z0-9])?');
-                // Scaffold pages and templates
-                Route::group(
-                    [
-                        'prefix' => 'resource',
-                        'middleware' => [
-                            ValidateModel::class
-                        ]
-                    ],
-                    function () {
-                        Route::get('{table_name}', [
-                            'as' => 'cmf_items_table',
-                            'uses' => __cmf_general_controller_class() . '@loadJsApp',
-                        ]);
+        Route::pattern('table_name', '[a-z]+([_a-z0-9]*[a-z0-9])?');
+        // Scaffold pages and templates
+        Route::group(
+            [
+                'prefix' => 'resource',
+                'middleware' => [
+                    ValidateModel::class,
+                    ValidateAdmin::class
+                ]
+            ],
+            function () {
+                Route::get('{table_name}', [
+                    'as' => 'cmf_items_table',
+                    'uses' => __cmf_general_controller_class() . '@loadJsApp',
+                ]);
 
-                        Route::get('{table_name}/create', [
-                            'as' => 'cmf_item_add_form',
-                            'uses' => __cmf_general_controller_class() . '@loadJsApp',
-                        ]);
+                Route::get('{table_name}/create', [
+                    'as' => 'cmf_item_add_form',
+                    'uses' => __cmf_general_controller_class() . '@loadJsApp',
+                ]);
 
-                        Route::get('{table_name}/details/{id}', [
-                            'as' => 'cmf_item_details',
-                            'uses' => __cmf_general_controller_class() . '@loadJsApp',
-                        ]);
+                Route::get('{table_name}/details/{id}', [
+                    'as' => 'cmf_item_details',
+                    'uses' => __cmf_general_controller_class() . '@loadJsApp',
+                ]);
 
-                        Route::get('{table_name}/edit/{id}', [
-                            'as' => 'cmf_item_edit_form',
-                            'uses' => __cmf_general_controller_class() . '@loadJsApp',
-                        ]);
-                    }
-                );
+                Route::get('{table_name}/edit/{id}', [
+                    'as' => 'cmf_item_edit_form',
+                    'uses' => __cmf_general_controller_class() . '@loadJsApp',
+                ]);
+            }
+        );
 
-                // Scaffold API
-                Route::group(
-                    [
-                        'prefix' => 'api',
-                        'middleware' => [
-                            AjaxOnly::class,
-                            ValidateModel::class,
-                        ]
-                    ],
-                    function () {
+        // Scaffold API
+        Route::group(
+            [
+                'prefix' => 'api',
+                'middleware' => [
+                    AjaxOnly::class,
+                    ValidateModel::class,
+                    ValidateAdmin::class,
+                ]
+            ],
+            function () {
 
-                        Route::get('{table_name}/service/templates', [
-                            'as' => 'cmf_api_get_templates',
-                            'uses' => __cmf_scaffold_api_controller_class() . '@getTemplates'
-                        ]);
+                Route::get('{table_name}/service/templates', [
+                    'as' => 'cmf_api_get_templates',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getTemplates'
+                ]);
 
-                        Route::get('{table_name}/list', [
-                            'as' => 'cmf_api_get_items',
-                            'uses' => __cmf_scaffold_api_controller_class() . '@getItemsList'
-                        ]);
+                Route::get('{table_name}/list', [
+                    'as' => 'cmf_api_get_items',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getItemsList'
+                ]);
 
-                        Route::get('{table_name}/service/options', [
-                            'as' => 'cmf_api_get_options',
-                            'uses' => __cmf_scaffold_api_controller_class() . '@getOptions'
-                        ]);
+                Route::get('{table_name}/service/options', [
+                    'as' => 'cmf_api_get_options',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getOptions'
+                ]);
 
-                        Route::post('{table_name}', [
-                            'as' => 'cmf_api_create_item',
-                            'uses' => __cmf_scaffold_api_controller_class() . '@addItem'
-                        ]);
+                Route::post('{table_name}', [
+                    'as' => 'cmf_api_create_item',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@addItem'
+                ]);
 
-                        Route::get('{table_name}/service/defaults', [
-                            'as' => 'cmf_api_get_item',
-                            'uses' => __cmf_scaffold_api_controller_class() . '@getItemDefaults'
-                        ]);
+                Route::get('{table_name}/service/defaults', [
+                    'as' => 'cmf_api_get_item',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getItemDefaults'
+                ]);
 
-                        Route::get('{table_name}/{id}', [
-                            'as' => 'cmf_api_get_item',
-                            'uses' => __cmf_scaffold_api_controller_class() . '@getItem'
-                        ]);
+                Route::get('{table_name}/{id}', [
+                    'as' => 'cmf_api_get_item',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getItem'
+                ]);
 
-                        Route::put('{table_name}/{id}', [
-                            'as' => 'cmf_api_update_item',
-                            'uses' => __cmf_scaffold_api_controller_class() . '@updateItem'
-                        ]);
+                Route::put('{table_name}/{id}', [
+                    'as' => 'cmf_api_update_item',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@updateItem'
+                ]);
 
-                        Route::delete('{table_name}/{id}', [
-                            'as' => 'cmf_api_delete_item',
-                            'uses' => __cmf_scaffold_api_controller_class() . '@deleteItem'
-                        ]);
-
-                    }
-                );
+                Route::delete('{table_name}/{id}', [
+                    'as' => 'cmf_api_delete_item',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@deleteItem'
+                ]);
             }
         );
     }
