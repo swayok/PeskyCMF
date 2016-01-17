@@ -12,12 +12,13 @@ $id = $fieldConfig->getName() . '-input';
     <?php
         $attributes = array(
             'name' => $fieldConfig->getName(),
-            'id' => $id
+            'id' => $id,
+            'class' => 'form-control'
         );
         $attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
         $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
     ?>
-    <select class="form-control" data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || ''}}"
+    <select data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || ''}}"
         {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
     >
     <?php if (!$fieldConfig->hasOptionsLoader()) : ?>

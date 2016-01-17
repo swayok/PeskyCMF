@@ -157,6 +157,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/driftyco/ionicons/css') => public_path('packages/ionicons/css'),
             base_path('vendor/driftyco/ionicons/fonts') => public_path('packages/ionicons/fonts'),
             base_path('vendor/nostalgiaz/bootstrap-switch/dist') => public_path('packages/bootstrap/switches'),
+            base_path('vendor/eonasdan/bootstrap-datetimepicker/build') => public_path('packages/bootstrap/datetimepicker'),
             __DIR__ . '/public' => public_path('packages/cmf'),
         ], 'public');
 

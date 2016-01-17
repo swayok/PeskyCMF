@@ -12,6 +12,7 @@
 
     <link href="/packages/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/adminlte/plugins/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
@@ -75,14 +76,15 @@
     <script src="/packages/cmf/js/lib/rison.object.coder.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/dotjs/doT.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/moment/moment.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/moment/locale/ru.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/moment/locale/{{ app()->getLocale() }}.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/jQuery.extendext.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/query_builder/query-builder.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/query_builder/i18n/query-builder.ru.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/query_builder/i18n/query-builder.{{ app()->getLocale() }}.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/jquery.plugins.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/jquery.form.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/toastr/toastr.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/base64.js" type="text/javascript"></script>
+    <script src="/packages/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/admin.global.vars.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/admin.helpers.js" type="text/javascript"></script>

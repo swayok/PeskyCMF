@@ -64,20 +64,21 @@ class CmfScaffoldApiController extends Controller {
         if (!$object->_getPkField()->isValidValueFormat($id)) {
             return $this->sendItemNotFoundResponse($model);
         }
-        $conditions = array($model->getPkColumnName() => $id);
-        if (!$model->exists($conditions)) {
-            return $this->sendItemNotFoundResponse($model);
-        }
         $isItemDetails = !!$request->query('details', false);
         if ($isItemDetails) {
             $actionConfig = $this->getScaffoldConfig()->getItemDetailsConfig();
         } else {
             $actionConfig = $this->getScaffoldConfig()->getFormConfig();
         }
+        $conditions = $actionConfig->getSpecialConditions();
+        $conditions[$model->getPkColumnName()] = $id;
+        if (!$object->find($conditions)->exists()) {
+            return $this->sendItemNotFoundResponse($model);
+        }
         if ($actionConfig->hasContains()) {
             $conditions['CONTAIN'] = $actionConfig->getContains();
         }
-        $data = $model->selectOne('*', $conditions, true)->toPublicArray(null, true, false);
+        $data = $object->toPublicArray(null, true, false);
         $actionConfig->prepareRecord($data);
         return response()->json($data);
     }
@@ -168,8 +169,14 @@ class CmfScaffoldApiController extends Controller {
         if (!$request->data($model->getPkColumnName())) {
             return $this->sendItemNotFoundResponse($model);
         }
-        $object = $model->getOwnDbObject($request->data($model->getPkColumnName()));
-        if (!$object->exists()) {
+        $id = $request->data($model->getPkColumnName());
+        $object = $model->getOwnDbObject();
+        if (!$object->_getPkField()->isValidValueFormat($id)) {
+            return $this->sendItemNotFoundResponse($model);
+        }
+        $conditions = $formConfig->getSpecialConditions();
+        $conditions[$model->getPkColumnName()] = $id;
+        if (!$object->find($conditions)->exists()) {
             return $this->sendItemNotFoundResponse($model);
         }
         unset($data[$model->getPkColumnName()]);
@@ -203,8 +210,10 @@ class CmfScaffoldApiController extends Controller {
         if (!$object->_getPkField()->isValidValueFormat($id)) {
             return $this->sendItemNotFoundResponse($model);
         }
-        $object = $model->getOwnDbObject($id);
-        if (!$object->exists()) {
+        $formConfig = $this->getScaffoldConfig()->getFormConfig();
+        $conditions = $formConfig->getSpecialConditions();
+        $conditions[$model->getPkColumnName()] = $id;
+        if (!$object->find($conditions)->exists()) {
             return $this->sendItemNotFoundResponse($model);
         }
         $object->delete();
@@ -233,6 +242,7 @@ class CmfScaffoldApiController extends Controller {
         if ($dataGridConfig->hasContains()) {
             $conditions['CONTAIN'] = $dataGridConfig->getContains();
         }
+        $conditions = array_merge($dataGridConfig->getSpecialConditions(), $conditions);
         $search = $request->query('search');
         if (!empty($search) && !empty($search['value'])) {
             $search = json_decode($search['value'], true);

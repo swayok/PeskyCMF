@@ -13,7 +13,7 @@ $id = $fieldConfig->getName() . '-input';
         $attributes = array(
             'name' => $fieldConfig->getName(),
             'id' => $id,
-            'type' => 'file'
+            'type' => 'file',
         );
         $attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
         $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));

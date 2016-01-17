@@ -36,6 +36,8 @@ abstract class ScaffoldActionConfig {
     protected $isEditAllowed = true;
     /** @var bool */
     protected $isDeleteAllowed = true;
+    /** @var array|callable */
+    protected $specialConditions = [];
 
     /**
      * @param BaseDbModel $model
@@ -375,6 +377,35 @@ abstract class ScaffoldActionConfig {
      */
     public function disallowItemDetails() {
         $this->isItemDetailsAllowed = false;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSpecialConditions() {
+        return !empty($this->specialConditions);
+    }
+
+    /**
+     * @return array
+     */
+    public function getSpecialConditions() {
+        return is_array($this->specialConditions)
+            ? $this->specialConditions
+            : call_user_func($this->specialConditions, $this);
+    }
+
+    /**
+     * @param array|callable $specialConditions - array or function (ScaffoldActionConfig $scaffoldAction) {}
+     * @return $this
+     * @throws ScaffoldActionException
+     */
+    public function setSpecialConditions($specialConditions) {
+        if (!is_array($specialConditions) && !is_callable($specialConditions)) {
+            throw new ScaffoldActionException($this, 'setSpecialConditions expects array or callable');
+        }
+        $this->specialConditions = $specialConditions;
         return $this;
     }
 
