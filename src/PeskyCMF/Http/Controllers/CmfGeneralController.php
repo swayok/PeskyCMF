@@ -54,7 +54,7 @@ class CmfGeneralController extends Controller {
         } else {
             $admin
                 ->begin()
-                ->updateValues($request->only($updates));
+                ->updateValues($updates);
             if (!empty(trim($request->data('new_password')))) {
                 $admin->setPassword($request->data('new_password'));
             }
@@ -108,9 +108,8 @@ class CmfGeneralController extends Controller {
             $validationRules[$userLoginCol] = "required|alpha_dash|min:4|unique:$usersTable,$userLoginCol,{$admin->id},id";
             $fieldsToUpdate[] = $userLoginCol;
         }
-        $updates = $request->only($fieldsToUpdate);
         $validator = \Validator::make(
-            $updates,
+            $request->data(),
             $validationRules,
             Set::flatten(CmfConfig::transCustom('.page.profile.errors'))
         );
@@ -129,7 +128,7 @@ class CmfGeneralController extends Controller {
                 HttpCode::INVALID
             );
         }
-        return $updates;
+        return $request->only($fieldsToUpdate);
     }
 
     protected function getDataForBasicUiView() {
