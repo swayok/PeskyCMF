@@ -72,11 +72,11 @@ class CmfScaffoldApiController extends Controller {
         }
         $conditions = $actionConfig->getSpecialConditions();
         $conditions[$model->getPkColumnName()] = $id;
-        if (!$object->find($conditions)->exists()) {
-            return $this->sendItemNotFoundResponse($model);
-        }
         if ($actionConfig->hasContains()) {
             $conditions['CONTAIN'] = $actionConfig->getContains();
+        }
+        if (!$object->find($conditions)->exists()) {
+            return $this->sendItemNotFoundResponse($model);
         }
         $data = $object->toPublicArray(null, true, false);
         $actionConfig->prepareRecord($data);
