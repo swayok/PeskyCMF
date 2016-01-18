@@ -48,6 +48,39 @@ class CmfGeneralController extends Controller {
 
     public function updateAdminProfile(Request $request) {
         $admin = $this->getAdmin();
+        $updates = $this->validateAndGetAdminProfileUpdates($request, $admin);
+        if (!is_array($updates)) {
+            return $updates;
+        } else {
+            $admin
+                ->begin()
+                ->updateValues($request->only($updates));
+            if (!empty(trim($request->data('new_password')))) {
+                $admin->setPassword($request->data('new_password'));
+            }
+            if ($admin->commit()) {
+                return response()->json([
+                    '_message' => CmfConfig::transCustom('.page.profile.saved'),
+                    'redirect' => 'reload'
+                ]);
+            } else {
+                return response()->json(
+                    [
+                        '_message' => CmfConfig::transBase('.form.failed_to_save_resource_data'),
+                        'redirect' => 'reload'
+                    ],
+                    HttpCode::SERVER_ERROR
+                );
+            }
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Admin $admin
+     * @return array|\Illuminate\Http\JsonResponse
+     */
+    protected function validateAndGetAdminProfileUpdates(Request $request, Admin $admin) {
         $validationRules = [
             'old_password' => 'required',
             'new_password' => 'min:6',
@@ -75,8 +108,9 @@ class CmfGeneralController extends Controller {
             $validationRules[$userLoginCol] = "required|alpha_dash|min:4|unique:$usersTable,$userLoginCol,{$admin->id},id";
             $fieldsToUpdate[] = $userLoginCol;
         }
+        $updates = $request->only($fieldsToUpdate);
         $validator = \Validator::make(
-            $request->data(),
+            $updates,
             $validationRules,
             Set::flatten(CmfConfig::transCustom('.page.profile.errors'))
         );
@@ -94,28 +128,8 @@ class CmfGeneralController extends Controller {
                 ],
                 HttpCode::INVALID
             );
-        } else {
-            $admin
-                ->begin()
-                ->updateValues($request->only($fieldsToUpdate));
-            if (!empty(trim($request->data('new_password')))) {
-                $admin->setPassword($request->data('new_password'));
-            }
-            if ($admin->commit()) {
-                return response()->json([
-                    '_message' => CmfConfig::transCustom('.page.profile.saved'),
-                    'redirect' => 'reload'
-                ]);
-            } else {
-                return response()->json(
-                    [
-                        '_message' => CmfConfig::transBase('.form.failed_to_save_resource_data'),
-                        'redirect' => 'reload'
-                    ],
-                    HttpCode::SERVER_ERROR
-                );
-            }
         }
+        return $updates;
     }
 
     protected function getDataForBasicUiView() {
