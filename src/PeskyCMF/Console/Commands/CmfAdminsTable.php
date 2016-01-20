@@ -13,7 +13,7 @@ class CmfAdminsTable extends BaseCommand {
 
     public function fire() {
         $folder = Folder::load(database_path('/migrations'), true, 0755);
-        $dontRenderTrigger = $this->input->hasOption('without-trigger');
+        $dontRenderTrigger = !!$this->input->getOption('without-trigger');
         if (!$dontRenderTrigger) {
             File::load($folder->pwd() . '/' . date('Y_m_d_His', time()) . '_create_timestsmp_renew_trigger_function.php', true, 0755, 0644)
                 ->write(view('cmf::install.db.create_timestsmp_renew_trigger_function_migration')->render());

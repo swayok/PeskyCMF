@@ -42,7 +42,7 @@ class CmfInstall extends BaseCommand {
         File::load($folder->pwd() . '/Http/Middleware/empty', true, 0755, 0644);
         // make folder in resources
         File::load(resource_path('/views/' . $lowercasedSubfolder . '/empty'), true, 0755, 0644);
-        if (!$this->input->hasOption('no-db-classes')) {
+        if (!$this->input->getOption('no-db-classes')) {
             // copy base db classes
             $dbFolder = Folder::load(app_path('/' . $this->input->getArgument('database_classes_app_subfolder')), true, 0755);
             $file = File::load($dbFolder->pwd() . '/BaseDbModel.php', true, 0755, 0644);
