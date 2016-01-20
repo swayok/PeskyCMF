@@ -26,7 +26,7 @@
     <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/js/lib/toastr/toastr.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/js/lib/query_builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/admin.app.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/cmf.app.css" rel="stylesheet" type="text/css"/>
 
     @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->layout_css_includes() as $cssPath)
         <link href="{{ $cssPath }}" rel="stylesheet" type="text/css"/>
