@@ -85,14 +85,14 @@
     <script src="/packages/cmf/js/lib/toastr/toastr.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/base64.js" type="text/javascript"></script>
     <script src="/packages/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/admin.global.vars.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.global.vars.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/admin.helpers.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/admin.utils.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/admin.controllers.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.helpers.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.utils.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.controllers.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/scaffold/scaffold.controllers.js?_=20151008" type="text/javascript"></script>
     <script src="/packages/cmf/js/scaffold/scaffold.manager.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/admin.app.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.app.js" type="text/javascript"></script>
 
     @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->layout_js_includes() as $jsPath)
         <script src="{{ $jsPath }}" rel="stylesheet" type="text/javascript"></script>
