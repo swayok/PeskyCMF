@@ -179,8 +179,6 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
             case self::TYPE_SELECT:
                 $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
                     $rendererConfig = InputRendererConfig::create('cmf::input/select')
-                        ->setIsRequiredForCreate($fieldConfig->getTableColumnConfig()->isRequiredOn(DbColumnConfig::ON_CREATE))
-                        ->setIsRequiredForEdit($fieldConfig->getTableColumnConfig()->isRequiredOn(DbColumnConfig::ON_UPDATE))
                         ->setOptions($fieldConfig->getOptions());
                     return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
                 });
@@ -212,14 +210,10 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
      * @return InputRendererConfig
      */
     public function _configureRendererByColumnConfig(InputRendererConfig $rendererConfig) {
-        $isRequired = $this->getTableColumnConfig()->getIsRequired();
-        if ($isRequired === DbColumnConfig::ON_ALL) {
-            $rendererConfig->isRequired();
-        } else if ($isRequired == DbColumnConfig::ON_CREATE) {
-            $rendererConfig->isRequiredForCreate();
-        } else if ($isRequired = DbColumnConfig::ON_UPDATE) {
-            $rendererConfig->isRequiredForEdit();
-        }
+        $colConfig = $this->getTableColumnConfig();
+        $rendererConfig
+            ->setIsRequiredForCreate($colConfig->isRequiredOn(DbColumnConfig::ON_CREATE))
+            ->setIsRequiredForEdit($colConfig->isRequiredOn(DbColumnConfig::ON_CREATE));
         return $rendererConfig;
     }
 
