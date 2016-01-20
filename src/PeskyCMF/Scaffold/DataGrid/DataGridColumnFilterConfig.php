@@ -429,21 +429,23 @@ class DataGridColumnFilterConfig {
         ) {
             throw new ScaffoldException("List of allowed values is empty");
         }
-        return $this->allowedValues;
+        return is_callable($this->allowedValues) ? call_user_func($this->allowedValues) : $this->allowedValues;
     }
 
     /**
-     * @param array $allowedValues
+     * @param array|callable $allowedValues
      * @return $this
      * @throws ScaffoldException
      */
     public function setAllowedValues($allowedValues) {
-        $this->allowedValues = $allowedValues;
         if (!in_array($this->inputType, [self::INPUT_TYPE_SELECT, self::INPUT_TYPE_RADIO, self::INPUT_TYPE_CHECKBOX])) {
             throw new ScaffoldException("Cannot set allowed values list to a filter input type: {$this->inputType}");
-        } else if (empty($this->allowedValues)) {
+        } else if (empty($allowedValues)) {
             throw new ScaffoldException("List of allowed values is empty");
+        } else if (!is_array($allowedValues) && !is_callable($allowedValues)) {
+            throw new ScaffoldException("List of allowed values should be array or callable");
         }
+        $this->allowedValues = $allowedValues;
         return $this;
     }
 

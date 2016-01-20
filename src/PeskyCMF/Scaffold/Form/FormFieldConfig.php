@@ -176,6 +176,13 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
                     return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
                 });
                 break;
+            case self::TYPE_SELECT:
+                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
+                    $rendererConfig = InputRendererConfig::create('cmf::input/select')
+                        ->setOptions($fieldConfig->getOptions());
+                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
+                });
+                break;
             case self::TYPE_WYSIWYG:
                 $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
                     $rendererConfig = InputRendererConfig::create('cmf::input/wysiwyg');
