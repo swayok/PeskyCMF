@@ -179,6 +179,8 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
             case self::TYPE_SELECT:
                 $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
                     $rendererConfig = InputRendererConfig::create('cmf::input/select')
+                        ->setIsRequiredForCreate($fieldConfig->getTableColumnConfig()->isRequiredOn(DbColumnConfig::ON_CREATE))
+                        ->setIsRequiredForEdit($fieldConfig->getTableColumnConfig()->isRequiredOn(DbColumnConfig::ON_UPDATE))
                         ->setOptions($fieldConfig->getOptions());
                     return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
                 });

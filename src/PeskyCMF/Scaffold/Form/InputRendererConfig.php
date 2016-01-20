@@ -212,7 +212,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function required() {
-        $this->isRequired = true;
+        $this->setIsRequired(true);
         return $this;
     }
 
@@ -220,7 +220,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function notRequired() {
-        $this->isRequired = false;
+        $this->setIsRequired(false);
         return $this;
     }
 
@@ -235,7 +235,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function requiredForCreate() {
-        $this->isRequiredForCreate = true;
+        $this->setIsRequiredForCreate(true);
         return $this;
     }
 
@@ -243,7 +243,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function notRequiredForCreate() {
-        $this->isRequiredForCreate = false;
+        $this->setIsRequiredForCreate(false);
         return $this;
     }
 
@@ -258,7 +258,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function requiredForEdit() {
-        $this->isRequiredForEdit = true;
+        $this->setIsRequiredForEdit(true);
         return $this;
     }
 
@@ -266,7 +266,41 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function notRequiredForEdit() {
-        $this->isRequiredForEdit = false;
+        $this->setIsRequiredForEdit(false);
+        return $this;
+    }
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function setIsRequired($bool) {
+        $this->isRequired = !!$bool;
+        if ($this->isRequired) {
+            $this->isRequiredForCreate = $this->isRequiredForEdit = true;
+        } else if ($this->isRequiredForCreate && $this->isRequiredForEdit) {
+            $this->isRequiredForCreate = $this->isRequiredForEdit = false;
+        }
+        return $this;
+    }
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function setIsRequiredForCreate($bool) {
+        $this->isRequiredForCreate = !!$bool;
+        $this->isRequired = $this->isRequiredForCreate && $this->isRequiredForEdit;
+        return $this;
+    }
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function setIsRequiredForEdit($bool) {
+        $this->isRequiredForEdit = !!$bool;
+        $this->isRequired = $this->isRequiredForCreate && $this->isRequiredForEdit;
         return $this;
     }
 
