@@ -262,11 +262,11 @@ var ScaffoldDataGridHelper = {
                     }
                     ScaffoldActionsHelper.handleRequestAction($el)
                         .done(function (json) {
-                            if (json.redirect && json.redirect === 'back') {
+                            if (json.redirect && (json.redirect === 'back' || json.redirect === 'reload')) {
                                 $table.dataTable().api().ajax.reload();
-                            } else {
-                                ScaffoldActionsHelper.onSuccess(json);
+                                delete json.redirect;
                             }
+                            ScaffoldActionsHelper.onSuccess(json);
                         })
                         .always(function () {
                             if ($el.attr('data-block-datagrid')) {
