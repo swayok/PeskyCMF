@@ -32,6 +32,8 @@ class FormConfig extends ScaffoldActionConfig {
     protected $validatorsForEdit = [];
 
     const VALIDATOR_FOR_ID = 'required|integer|min:1';
+    /** @var callable */
+    protected $beforeSaveCallback;
 
     /**
      * @return mixed|null
@@ -227,6 +229,17 @@ class FormConfig extends ScaffoldActionConfig {
             return $validator->getMessageBag()->toArray();
         }
         return [];
+    }
+
+    /**
+     * Called after request data validation and before specific callbacks and data saving.
+     * Note: if this callback provided - data will be validated again after was called
+     * @param callable $callback = function ($isCreation, array &$validatedData, FormConfig $formConfig) {}
+     * @return bool - true: proceed; false: stop saving
+     */
+    public function setBeforeSaveCallback(callable $callback) {
+        $this->beforeSaveCallback = $callback;
+        return true;
     }
 
 }
