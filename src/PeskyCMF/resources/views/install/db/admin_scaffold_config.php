@@ -3,7 +3,7 @@
 namespace App\Db\Admin;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\BaseScaffoldConfig;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormFieldConfig;
@@ -11,7 +11,7 @@ use PeskyCMF\Scaffold\Form\InputRendererConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
 use PeskyORM\DbColumnConfig;
 
-class AdminScaffoldConfig extends BaseScaffoldConfig {
+class AdminScaffoldConfig extends ScaffoldSectionConfig {
 
     protected $isItemDetailsAllowed = true;
     protected $isCreateAllowed = true;

@@ -3,7 +3,6 @@
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
-use PeskyCMF\Db\BaseScaffoldConfig;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\Db\Traits\AdminIdColumn;
