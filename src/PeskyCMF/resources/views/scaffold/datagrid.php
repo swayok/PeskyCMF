@@ -53,28 +53,30 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
         }
 
         $actionsTpl = '';
-        if ($dataGridConfig->isItemDetailsAllowed()) {
+        if ($dataGridConfig->isDetailsViewerAllowed()) {
             $url = $dblClickUrl = route('cmf_item_details', [$model->getTableName(), ":{$pkName}:"], false);
-            $actionsTpl .= \Swayok\Html\Tag::a()
+            $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref($url)
                 ->build();
+            $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
         }
         if ($dataGridConfig->isEditAllowed()) {
             $url = $dblClickUrl = route('cmf_item_edit_form', [$model->getTableName(), ":{$pkName}:"], false);
-            $actionsTpl .= \Swayok\Html\Tag::a()
+            $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref($url)
                 ->build();
+            $actionsTpl .= '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
         }
         if ($dataGridConfig->isDeleteAllowed()) {
-            $actionsTpl .= \Swayok\Html\Tag::a()
+            $btn = \Swayok\Html\Tag::a()
                 ->setContent('<i class="glyphicon glyphicon-trash"></i>')
                 ->setClass('row-action text-red')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.delete_item'))
@@ -86,6 +88,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'))
                 ->setHref('#')
                 ->build();
+            $actionsTpl .= '{{? !!it.___delete_allowed }}' . $btn . '{{?}}';
         }
         $customRowActions = $dataGridConfig->getRowActions();
         if (!empty($customRowActions)) {

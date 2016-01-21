@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Db\BaseDbModel $model
+ * @var \PeskyCMF\Db\CmfDbModel $model
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig

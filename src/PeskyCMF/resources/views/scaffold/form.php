@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Db\BaseDbModel $model
+ * @var \PeskyCMF\Db\CmfDbModel $model
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  * @var string $translationPrefix
  * @var string $idSuffix
@@ -53,7 +53,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                             <input type="hidden" name="<?php echo $pkColName; ?>" value="<?php echo $printPk; ?>">
                         <?php echo $endIf ?>
                         <!-- disable chrome email & password autofill -->
-                        <input type="email" class="hidden"><input type="password" class="hidden">
+                        <input type="email" class="hidden"><input type="password" class="hidden"><input type="text" class="hidden">
                         <!-- end of autofill disabler -->
                         <div class="box-body">
                         <?php
@@ -102,11 +102,13 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                                 route('cmf_api_delete_item', [$model->getTableName(), ':id:'])
                                             );
                                         ?>
+                                        {{? !!it.___delete_allowed }}
                                         <a class="btn btn-danger" href="#"
                                         data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
                                         data-confirm="<?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'); ?>">
                                             <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.delete'); ?>
                                         </a>
+                                        {{?}}
                                     <?php endif; ?>
                                 <?php echo $endIf; ?>
                                 </div>

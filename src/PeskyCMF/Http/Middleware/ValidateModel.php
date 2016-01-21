@@ -2,9 +2,10 @@
 
 namespace PeskyCMF\Http\Middleware;
 
-use App\Db\BaseDbModel;
 use Closure;
 use Illuminate\Http\Request;
+use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Http\Controllers\CmfScaffoldApiController;
 use PeskyORM\Exception\DbUtilsException;
 
@@ -21,9 +22,11 @@ class ValidateModel {
         $tableName = $request->route()->parameter('table_name');
         if (!empty($tableName)) {
             try {
-                $modelClass = BaseDbModel::getFullModelClassByTableName($tableName);
-                /** @var BaseDbModel $model */
-                $model = $modelClass::getInstance();
+                /** @var CmfDbModel $model */
+                $model = call_user_func(
+                    [CmfConfig::getInstance()->base_db_model_class(), 'getModelByTableName'],
+                    $tableName
+                );
                 CmfScaffoldApiController::setModel($model);
             } catch (DbUtilsException $exc) {
                 dpr($exc->getMessage());

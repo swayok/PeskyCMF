@@ -54,9 +54,12 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function getItem(Request $request, $tableName, $id = null) {
-        if (!$this->getScaffoldConfig()->isItemDetailsAllowed()) {
+        $isItemDetails = !!$request->query('details', false);
+        if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
             return response()->json([
-                '_message' => CmfConfig::transBase('.action.item_details.forbidden'),
+                '_message' => CmfConfig::transBase(
+                    '.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden'
+                ),
             ], HttpCode::FORBIDDEN);
         }
         $model = self::getModel();
@@ -64,7 +67,6 @@ class CmfScaffoldApiController extends Controller {
         if (!$object->_getPkField()->isValidValueFormat($id)) {
             return $this->sendItemNotFoundResponse($model);
         }
-        $isItemDetails = !!$request->query('details', false);
         if ($isItemDetails) {
             $actionConfig = $this->getScaffoldConfig()->getItemDetailsConfig();
         } else {
@@ -79,12 +81,25 @@ class CmfScaffoldApiController extends Controller {
             return $this->sendItemNotFoundResponse($model);
         }
         $data = $object->toPublicArray(null, true, false);
+        if (
+            (
+                $isItemDetails
+                && !$this->getScaffoldConfig()->isRecordDetailsAllowed($data)
+            )
+            || !$this->getScaffoldConfig()->isRecordEditAllowed($data)
+        ) {
+            return response()->json([
+                '_message' => CmfConfig::transBase(
+                    '.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden_for_record'
+                ),
+            ], HttpCode::FORBIDDEN);
+        }
         $actionConfig->prepareRecord($data);
         return response()->json($data);
     }
 
     public function getItemDefaults() {
-        if (!$this->getScaffoldConfig()->isItemDetailsAllowed()) {
+        if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
             return response()->json([
                 '_message' => CmfConfig::transBase('.action.item_details.forbidden'),
             ], HttpCode::FORBIDDEN);
@@ -179,6 +194,11 @@ class CmfScaffoldApiController extends Controller {
         if (!$object->find($conditions)->exists()) {
             return $this->sendItemNotFoundResponse($model);
         }
+        if (!$this->getScaffoldConfig()->isRecordEditAllowed($object->toPublicArrayWithoutFiles())) {
+            return response()->json([
+                '_message' => CmfConfig::transBase('.action.edit.forbidden_for_record'),
+            ], HttpCode::FORBIDDEN);
+        }
         unset($data[$model->getPkColumnName()]);
         if (!empty($data)) {
             try {
@@ -215,6 +235,11 @@ class CmfScaffoldApiController extends Controller {
         $conditions[$model->getPkColumnName()] = $id;
         if (!$object->find($conditions)->exists()) {
             return $this->sendItemNotFoundResponse($model);
+        }
+        if (!$this->getScaffoldConfig()->isRecordDeleteAllowed($object->toPublicArrayWithoutFiles())) {
+            return response()->json([
+                '_message' => CmfConfig::transBase('.action.delete.forbidden_for_record'),
+            ], HttpCode::FORBIDDEN);
         }
         $object->delete();
         return response()->json([

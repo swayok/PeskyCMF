@@ -11,6 +11,7 @@ use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyCMF\Db\Traits\UserAuthColumns;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\DbExpr;
 use PeskyORM\DbTableConfig;
 use Swayok\Utils\File;
@@ -44,7 +45,7 @@ class MakeDbClasses extends Command {
     protected $modelParentClass = CmfDbModel::class;
     protected $objectParentClass = CmfDbObject::class;
     protected $tableConfigParentClass = DbTableConfig::class;
-    protected $scaffoldConfigParentClass = BaseScaffoldConfig::class;
+    protected $scaffoldConfigParentClass = ScaffoldSectionConfig::class;
 
     /**
      * Execute the console command.

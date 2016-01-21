@@ -2,10 +2,11 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use App\Db\BaseDbModel;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
 
@@ -41,12 +42,8 @@ class DataGridConfig extends ScaffoldActionConfig {
     /** @var Tag[] */
     protected $rowActions = [];
 
-    /**
-     * ScaffoldActionConfig constructor.
-     * @param BaseDbModel $model
-     */
-    public function __construct(BaseDbModel $model) {
-        parent::__construct($model);
+    public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSectionConfig) {
+        parent::__construct($model, $scaffoldSectionConfig);
         $this->limit = CmfConfig::getInstance()->rows_per_page();
         if ($model->getOrderField()) {
             $this->setOrderBy($model->getOrderField(), $model->getOrderDirection());

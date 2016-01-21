@@ -3,7 +3,7 @@
  * @var \PeskyCMF\Scaffold\Form\InputRendererConfig $rendererConfig
  * @var \PeskyCMF\Scaffold\Form\FormFieldConfig $fieldConfig
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \App\Db\BaseDbModel $model
+ * @var \PeskyCMF\Db\CmfDbModel $model
  * @var array $config
  * @var array $enabler
  */

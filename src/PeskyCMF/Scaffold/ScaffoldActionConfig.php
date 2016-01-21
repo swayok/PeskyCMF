@@ -2,14 +2,14 @@
 
 namespace PeskyCMF\Scaffold;
 
-use App\Db\BaseDbModel;
+use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig;
 use PeskyCMF\Scaffold\Form\FormFieldConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
 use phpDocumentor\Reflection\DocBlock\Tag;
 
 abstract class ScaffoldActionConfig {
-    /** @var BaseDbModel */
+    /** @var CmfDbModel */
     protected $model;
     /** @var array */
     protected $fieldsConfigs = array();
@@ -28,32 +28,29 @@ abstract class ScaffoldActionConfig {
      * @var Tag[]
      */
     protected $toolbarItems = array();
-    /** @var bool */
-    protected $isItemDetailsAllowed = true;
-    /** @var bool */
-    protected $isCreateAllowed = true;
-    /** @var bool */
-    protected $isEditAllowed = true;
-    /** @var bool */
-    protected $isDeleteAllowed = true;
     /** @var array|callable */
     protected $specialConditions = [];
+    /** @var ScaffoldSectionConfig */
+    protected $scaffoldSection;
 
     /**
-     * @param BaseDbModel $model
+     * @param CmfDbModel $model
+     * @param ScaffoldSectionConfig $scaffoldSection
      * @return $this
      */
-    static public function create(BaseDbModel $model) {
+    static public function create(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSection) {
         $class = get_called_class();
-        return new $class($model);
+        return new $class($model, $scaffoldSection);
     }
 
     /**
      * ScaffoldActionConfig constructor.
-     * @param BaseDbModel $model
+     * @param CmfDbModel $model
+     * @param ScaffoldSectionConfig $scaffoldSection
      */
-    public function __construct(BaseDbModel $model) {
+    public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSection) {
         $this->model = $model;
+        $this->scaffoldSection = $scaffoldSection;
     }
 
     /**
@@ -122,7 +119,7 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return BaseDbModel
+     * @return CmfDbModel
      */
     public function getModel() {
         return $this->model;
@@ -149,6 +146,20 @@ abstract class ScaffoldActionConfig {
      * @param array $record
      */
     public function prepareRecord(array &$record) {
+        $permissions = [
+            '___delete_allowed' =>(
+                $this->isDeleteAllowed()
+                && $this->scaffoldSection->isRecordDeleteAllowed($record)
+            ),
+            '___edit_allowed' => (
+                $this->isEditAllowed()
+                && $this->scaffoldSection->isRecordEditAllowed($record)
+            ),
+            '___details_allowed' => (
+                $this->isDetailsViewerAllowed()
+                && $this->scaffoldSection->isRecordDetailsAllowed($record)
+            )
+        ];
         $fields = $this->getFields();
         $pkKey = $this->getModel()->getPkColumnName();
         foreach ($record as $key => $value) {
@@ -166,6 +177,7 @@ abstract class ScaffoldActionConfig {
                 $record[$key] = $fields[$key]->convertValue($record[$key], $this->getModel()->getTableColumn($key), $record);
             }
         }
+        $record += $permissions;
     }
 
     /**
@@ -256,128 +268,28 @@ abstract class ScaffoldActionConfig {
      * @return boolean
      */
     public function isCreateAllowed() {
-        return $this->isCreateAllowed;
-    }
-
-    /**
-     * @param bool $isAllowed
-     * @return $this
-     */
-    public function setIsCreationAllowed($isAllowed) {
-        $this->isCreateAllowed = !!$isAllowed;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function allowCreate() {
-        $this->isCreateAllowed = true;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function disallowCreate() {
-        $this->isCreateAllowed = false;
-        return $this;
+        return $this->scaffoldSection->isCreateAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isEditAllowed() {
-        return $this->isEditAllowed;
-    }
-
-    /**
-     * @param bool $isAllowed
-     * @return $this
-     */
-    public function setIsEditingAllowed($isAllowed) {
-        $this->isEditAllowed = !!$isAllowed;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function allowEdit() {
-        $this->isEditAllowed = true;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function disallowEdit() {
-        $this->isEditAllowed = false;
-        return $this;
+        return $this->scaffoldSection->isEditAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isDeleteAllowed() {
-        return $this->isDeleteAllowed;
-    }
-
-    /**
-     * @param bool $isAllowed
-     * @return $this
-     */
-    public function setIsDeleteAllowed($isAllowed) {
-        $this->isDeleteAllowed = !!$isAllowed;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function allowDelete() {
-        $this->isDeleteAllowed = true;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function disallowDelete() {
-        $this->isDeleteAllowed = false;
-        return $this;
+        return $this->scaffoldSection->isDeleteAllowed();
     }
 
     /**
      * @return boolean
      */
-    public function isItemDetailsAllowed() {
-        return $this->isItemDetailsAllowed;
-    }
-
-    /**
-     * @param bool $isAllowed
-     * @return $this
-     */
-    public function setIsItemDetailsAllowed($isAllowed) {
-        $this->isItemDetailsAllowed = !!$isAllowed;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function allowItemDetails() {
-        $this->isItemDetailsAllowed = true;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function disallowItemDetails() {
-        $this->isItemDetailsAllowed = false;
-        return $this;
+    public function isDetailsViewerAllowed() {
+        return $this->scaffoldSection->isDetailsViewerAllowed();
     }
 
     /**

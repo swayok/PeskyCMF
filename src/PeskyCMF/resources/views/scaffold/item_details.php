@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Db\BaseDbModel $model
+ * @var \PeskyCMF\Db\CmfDbModel $model
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
  * @var string $translationPrefix
  * @var string $idSuffix
@@ -75,11 +75,13 @@ try {
                                         route('cmf_api_delete_item', [$model->getTableName(), ':id:'])
                                     );
                                 ?>
+                                {{? !!it.___delete_allowed }}
                                 <a class="btn btn-danger" href="#"
                                 data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
                                 data-confirm="<?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'); ?>">
                                     <?php echo \PeskyCMF\Config\CmfConfig::transBase('.item_details.toolbar.delete'); ?>
                                 </a>
+                                {{?}}
                             <?php endif; ?>
                             <?php if ($itemDetailsConfig->isEditAllowed()) : ?>
                                 <?php
@@ -89,9 +91,11 @@ try {
                                         route('cmf_item_edit_form', [$model->getTableName(), ':id:'])
                                     );
                                 ?>
+                                {{? !!it.___edit_allowed }}
                                 <a class="btn btn-success" href="<?php echo $editUrl; ?>">
                                     <?php echo \PeskyCMF\Config\CmfConfig::transBase('.item_details.toolbar.edit'); ?>
                                 </a>
+                                {{?}}
                             <?php endif; ?>
                         </div>
                     </div>

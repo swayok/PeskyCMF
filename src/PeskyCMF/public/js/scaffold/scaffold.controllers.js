@@ -358,13 +358,17 @@ var ScaffoldDataGridHelper = {
         if (configs && configs.rowActions && rowActionsContainer) {
             var data = $table.dataTable().api().row($row).data();
             if (data) {
-                var $actionsEl = configs.rowActions(data);
-                var position = $row.position();
-                position.top += $row.height();
-                //position.left = 0;
-                $table.data('rowActionsBoxEl').empty().append($actionsEl);
-                rowActionsContainer.removeClass('hidden').width();
-                rowActionsContainer.css(position);
+                var $actionsEl = $(configs.rowActions(data));
+                if ($actionsEl.find('a, button').length) {
+                    var position = $row.position();
+                    position.top += $row.height();
+                    //position.left = 0;
+                    $table.data('rowActionsBoxEl').empty().append($actionsEl);
+                    rowActionsContainer.removeClass('hidden').width();
+                    rowActionsContainer.css(position);
+                } else {
+                    rowActionsContainer.addClass('hidden');
+                }
             } else {
                 ScaffoldDataGridHelper.hideRowActions($table);
             }

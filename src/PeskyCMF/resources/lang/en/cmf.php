@@ -87,16 +87,19 @@ return [
         'delete' => [
             'forbidden' => 'It is forbidden to delete Items from this section',
             'success' => 'Item successfully deleted',
-            'please_confirm' => 'Confirm Item delete action'
+            'please_confirm' => 'Confirm Item delete action',
+            'forbidden_for_record' => 'It is forbidden to delete this Item',
         ],
         'create' => [
             'forbidden' => 'It is forbidden to create Items in this section',
         ],
         'edit' => [
             'forbidden' => 'It is forbidden to edit Items in this section',
+            'forbidden_for_record' => 'It is forbidden to edit this Item',
         ],
         'item_details' => [
             'forbidden' => 'It is forbidden to view Items details in this section',
+            'forbidden_for_record' => 'It is forbidden to view details of this Item',
         ],
         'back' => 'Back',
         'reload_page' => 'Reload page',

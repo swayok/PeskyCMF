@@ -3,7 +3,8 @@
 
 namespace PeskyCMF\Scaffold;
 
-use App\Db\BaseDbModel;
+use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
@@ -13,7 +14,7 @@ use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 
 abstract class ScaffoldSectionConfig {
 
-    /** @var BaseDbModel */
+    /** @var CmfDbModel */
     protected $model;
     /** @var DataGridConfig */
     protected $dataGridConfig = null;
@@ -25,7 +26,7 @@ abstract class ScaffoldSectionConfig {
     protected $formConfig = null;
 
     /** @var bool */
-    protected $isItemDetailsAllowed = true;
+    protected $isDetailsViewerAllowed = true;
     /** @var bool */
     protected $isCreateAllowed = true;
     /** @var bool */
@@ -35,22 +36,29 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * ScaffoldSectionConfig constructor.
-     * @param BaseDbModel $model
+     * @param CmfDbModel $model
      */
-    public function __construct(BaseDbModel $model = null) {
+    public function __construct(CmfDbModel $model = null) {
         $this->model = empty($model) ? $this->loadModel() : $model;
     }
 
     /**
      * @throws ScaffoldActionException
-     * @return BaseDbModel
+     * @return CmfDbModel
      */
     protected function loadModel() {
-        throw new ScaffoldActionException(null, 'ScaffoldSectionConfig->loadModel() method not implemented');
+        $config = CmfConfig::getInstance();
+        $baseDbModelClass = $config->base_db_model_class();
+        $className = str_replace(
+            $config->scaffold_config_class_suffix(),
+            call_user_func([$baseDbModelClass, 'getModelClassSuffix']),
+            get_class($this)
+        );
+        return call_user_func([$baseDbModelClass, 'getModelByClassName'], $className);
     }
 
     /**
-     * @return BaseDbModel
+     * @return CmfDbModel
      */
     public function getModel() {
         return $this->model;
@@ -85,11 +93,7 @@ abstract class ScaffoldSectionConfig {
      * @return DataGridConfig
      */
     protected function createDataGridConfig() {
-        return DataGridConfig::create($this->model)
-            ->setIsCreationAllowed($this->isCreateAllowed)
-            ->setIsEditingAllowed($this->isEditAllowed)
-            ->setIsDeleteAllowed($this->isDeleteAllowed)
-            ->setIsItemDetailsAllowed($this->isItemDetailsAllowed);
+        return DataGridConfig::create($this->model, $this);
     }
 
     /**
@@ -103,11 +107,7 @@ abstract class ScaffoldSectionConfig {
      * @return ItemDetailsConfig
      */
     protected function createItemDetailsConfig() {
-        return ItemDetailsConfig::create($this->model)
-            ->setIsCreationAllowed($this->isCreateAllowed)
-            ->setIsEditingAllowed($this->isEditAllowed)
-            ->setIsDeleteAllowed($this->isDeleteAllowed)
-            ->setIsItemDetailsAllowed($this->isItemDetailsAllowed)
+        return ItemDetailsConfig::create($this->model, $this)
             ->setDefaultFieldRenderer(function ($field, $actionConfig, array $dataForView) {
                 return DataRendererConfig::create('cmf::details/text')->setData($dataForView);
             });
@@ -117,11 +117,7 @@ abstract class ScaffoldSectionConfig {
      * @return FormConfig
      */
     protected function createFormConfig() {
-        return FormConfig::create($this->model)
-            ->setIsCreationAllowed($this->isCreateAllowed)
-            ->setIsEditingAllowed($this->isEditAllowed)
-            ->setIsDeleteAllowed($this->isDeleteAllowed)
-            ->setIsItemDetailsAllowed($this->isItemDetailsAllowed)
+        return FormConfig::create($this->model, $this)
             ->setDefaultFieldRenderer(function () {
                 return InputRendererConfig::create('cmf::input/text');
             });
@@ -184,8 +180,8 @@ abstract class ScaffoldSectionConfig {
     /**
      * @return boolean
      */
-    public function isItemDetailsAllowed() {
-        return $this->isItemDetailsAllowed;
+    public function isDetailsViewerAllowed() {
+        return $this->isDetailsViewerAllowed;
     }
 
     /**
@@ -193,6 +189,36 @@ abstract class ScaffoldSectionConfig {
      */
     public function isDeleteAllowed() {
         return $this->isDeleteAllowed;
+    }
+
+    /**
+     * Detects if $record deletable or not.
+     * Used in child classes to add possibility to disable action depending on record data
+     * @param array $record
+     * @return bool
+     */
+    public function isRecordDeleteAllowed(array $record) {
+        return $this->isDeleteAllowed();
+    }
+
+    /**
+     * Detects if $record editable or not.
+     * Used in child classes to add possibility to disable action depending on record data
+     * @param array $record
+     * @return bool
+     */
+    public function isRecordEditAllowed(array $record) {
+        return $this->isEditAllowed();
+    }
+
+    /**
+     * Detects if $record details can be displayed or not.
+     * Used in child classes to add possibility to disable action depending on record data
+     * @param array $record
+     * @return bool
+     */
+    public function isRecordDetailsAllowed(array $record) {
+        return $this->isDetailsViewerAllowed();
     }
 
 
