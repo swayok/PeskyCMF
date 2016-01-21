@@ -144,6 +144,18 @@ class CmfScaffoldApiController extends Controller {
         }
         $model = self::getModel();
         unset($data[$model->getPkColumnName()]);
+        $data = $formConfig->beforeSave(true, $data);
+        if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(true)) {
+            // revalidate
+            $errors = $formConfig->validateDataForCreate($data);
+            if (!empty($errors)) {
+                return response()->json([
+                    '_message' => CmfConfig::transBase('.form.validation_errors'),
+                    'errors' => $errors
+                ], HttpCode::INVALID);
+            }
+        }
+        unset($data[$model->getPkColumnName()]); //< to be 100% sure =)
         if (!empty($data)) {
             try {
                 $success = $model->getOwnDbObject($data)->save();
@@ -198,6 +210,17 @@ class CmfScaffoldApiController extends Controller {
             return response()->json([
                 '_message' => CmfConfig::transBase('.action.edit.forbidden_for_record'),
             ], HttpCode::FORBIDDEN);
+        }
+        $data = $formConfig->beforeSave(false, $data);
+        if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
+            // revalidate
+            $errors = $formConfig->validateDataForCreate($data);
+            if (!empty($errors)) {
+                return response()->json([
+                    '_message' => CmfConfig::transBase('.form.validation_errors'),
+                    'errors' => $errors
+                ], HttpCode::INVALID);
+            }
         }
         unset($data[$model->getPkColumnName()]);
         if (!empty($data)) {

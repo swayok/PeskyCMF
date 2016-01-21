@@ -34,6 +34,10 @@ class FormConfig extends ScaffoldActionConfig {
     const VALIDATOR_FOR_ID = 'required|integer|min:1';
     /** @var callable */
     protected $beforeSaveCallback;
+    /** @var bool */
+    protected $revalidateDataAfterBeforeSaveCallbackForCreation = false;
+    /** @var bool */
+    protected $revalidateDataAfterBeforeSaveCallbackForUpdate = false;
 
     /**
      * @return mixed|null
@@ -233,13 +237,53 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * Called after request data validation and before specific callbacks and data saving.
-     * Note: if this callback provided - data will be validated again after was called
-     * @param callable $callback = function ($isCreation, array &$validatedData, FormConfig $formConfig) {}
+     * Note: if you need to revalidate data after callback - use
+     * * @param callable $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
      * @return bool - true: proceed; false: stop saving
      */
     public function setBeforeSaveCallback(callable $callback) {
         $this->beforeSaveCallback = $callback;
-        return true;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasBeforeSaveCallback() {
+        return !empty($this->beforeSaveCallback);
+    }
+
+    /**
+     * @param $isCreation
+     * @param $validatedData
+     * @return array
+     */
+    public function beforeSave($isCreation, array $validatedData) {
+        if ($this->hasBeforeSaveCallback()) {
+            return call_user_func($this->beforeSaveCallback, $isCreation, $validatedData, $this);
+        }
+        return $validatedData;
+    }
+
+    /**
+     * @param bool $forCreation
+     * @param bool $forUpdate
+     * @return $this
+     */
+    public function setRevalidateDataAfterBeforeSaveCallback($forCreation, $forUpdate) {
+        $this->revalidateDataAfterBeforeSaveCallbackForCreation = !!$forCreation;
+        $this->revalidateDataAfterBeforeSaveCallbackForUpdate = !!$forUpdate;
+        return $this;
+    }
+
+    /**
+     * @param bool $isCreation
+     * @return bool
+     */
+    public function shouldRevalidateDataAfterBeforeSaveCallback($isCreation) {
+        return $isCreation
+            ? $this->revalidateDataAfterBeforeSaveCallbackForCreation
+            : $this->revalidateDataAfterBeforeSaveCallbackForUpdate;
     }
 
 }
