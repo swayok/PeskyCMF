@@ -38,6 +38,8 @@ class FormConfig extends ScaffoldActionConfig {
     protected $revalidateDataAfterBeforeSaveCallbackForCreation = false;
     /** @var bool */
     protected $revalidateDataAfterBeforeSaveCallbackForUpdate = false;
+    /** @var callable */
+    protected $beforeValidateCallback;
 
     /**
      * @return mixed|null
@@ -186,29 +188,60 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param array $data
      * @param array $messages
+     * @param bool $isRevalitaion
      * @return array
+     * @throws ScaffoldActionException
      */
-    public function validateDataForCreate(array $data, array $messages = []) {
-        return $this->validateData($data, $this->getValidatorsForCreate(), $messages);
+    public function validateDataForCreate(array $data, array $messages = [], $isRevalitaion = false) {
+        return $this->validateData($data, $this->getValidatorsForCreate(), $messages, $isRevalitaion);
     }
 
     /**
      * @param array $data
      * @param array $messages
+     * @param bool $isRevalitaion
      * @return array
+     * @throws ScaffoldActionException
      */
-    public function validateDataForEdit(array $data, array $messages = []) {
-        return $this->validateData($data, $this->getValidatorsForEdit(), $messages);
+    public function validateDataForEdit(array $data, array $messages = [], $isRevalitaion = false) {
+        return $this->validateData($data, $this->getValidatorsForEdit(), $messages, $isRevalitaion);
+    }
+
+    /**
+     * @param callable $callback - function (array $data, $isRevalitaion) { return true; }
+     * Nore: callback MUST return true if everything is ok, otherwise - returned values treated as error
+     * @return $this
+     */
+    public function setBeforeValidateCallback(callable $callback) {
+        $this->beforeValidateCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasBeforeValidateCallback() {
+        return !empty($this->beforeValidateCallback);
     }
 
     /**
      * @param array $data
      * @param array $validators
      * @param array $messages
+     * @param bool $isRevalitaion
      * @return array
      * @throws ScaffoldActionException
      */
-    public function validateData(array $data, array $validators, array $messages = []) {
+    public function validateData(array $data, array $validators, array $messages = [], $isRevalitaion = false) {
+        if ($this->hasBeforeValidateCallback()) {
+            $success = call_user_func($this->beforeValidateCallback, $data, $isRevalitaion);
+            if ($success !== true) {
+                if (!is_array($success)) {
+                    $success = [$success];
+                }
+                return $success;
+            }
+        }
         if (!is_array($validators)) {
             throw new ScaffoldActionException($this, '$validators must be an array');
         }
@@ -238,8 +271,8 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * Called after request data validation and before specific callbacks and data saving.
      * Note: if you need to revalidate data after callback - use
-     * * @param callable $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
-     * @return bool - true: proceed; false: stop saving
+     * @param callable $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
+     * @return $this
      */
     public function setBeforeSaveCallback(callable $callback) {
         $this->beforeSaveCallback = $callback;

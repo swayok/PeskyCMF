@@ -1,9 +1,9 @@
 <?php
 namespace PeskyCMF\Http\Middleware;
 
-use App\AppConstants;
 use Closure;
 use Illuminate\Http\Request;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
 use PeskyORM\Exception\DbObjectValidationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,7 +26,7 @@ class AjaxOnly {
             return $next($request);
         } catch (DbObjectValidationException $exc) {
             return new JsonResponse([
-                '_message' => trans(AppConstants::ERROR_INVALID_DATA),
+                '_message' => trans(CmfConfig::transBase('.error.invalid_data_received')),
                 'errors' => $exc->getValidationErrors()
             ], HttpCode::INVALID);
         } catch (HttpException $exc) {

@@ -100,6 +100,9 @@ Utils.handleAjaxSuccess = function (json) {
     if (json._message) {
         toastr.success(json._message);
     }
+    if (json._reload_user) {
+        Utils.getUser(true);
+    }
 };
 
 Utils.handleMissingContainerError = function () {

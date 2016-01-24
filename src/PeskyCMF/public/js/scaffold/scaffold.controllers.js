@@ -262,7 +262,15 @@ var ScaffoldDataGridHelper = {
                     }
                     ScaffoldActionsHelper.handleRequestAction($el)
                         .done(function (json) {
-                            if (json.redirect && (json.redirect === 'back' || json.redirect === 'reload')) {
+                            if (
+                                json.redirect
+                                && (
+                                    json.redirect === 'back'
+                                    || json.redirect === 'reload'
+                                    || json.redirect === ScaffoldsManager.app.activeRequest.href
+                                    || json.redirect === ScaffoldsManager.app.activeRequest.path
+                                )
+                            ) {
                                 $table.dataTable().api().ajax.reload();
                                 delete json.redirect;
                             }

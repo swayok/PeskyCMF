@@ -25,13 +25,15 @@ abstract class ScaffoldActionConfig {
     /** @var null|callable */
     protected $defaultFieldRenderer = null;
     /**
-     * @var Tag[]
+     * @var Tag[]|callable
      */
     protected $toolbarItems = array();
     /** @var array|callable */
     protected $specialConditions = [];
     /** @var ScaffoldSectionConfig */
     protected $scaffoldSection;
+    /** @var array|callable */
+    protected $dataToAddToRecord;
 
     /**
      * @param CmfDbModel $model
@@ -160,6 +162,7 @@ abstract class ScaffoldActionConfig {
                 && $this->scaffoldSection->isRecordDetailsAllowed($record)
             )
         ];
+        $customData = $this->getCustomDataForRecord($record);
         $fields = $this->getFields();
         $pkKey = $this->getModel()->getPkColumnName();
         foreach ($record as $key => $value) {
@@ -178,6 +181,37 @@ abstract class ScaffoldActionConfig {
             }
         }
         $record += $permissions;
+        if (!empty($customData) && is_array($customData)) {
+            $record += $customData;
+        }
+    }
+
+    /**
+     * @param array|callable $arrayOrCallable
+     *      - callable: funciton (array $record, ScaffoldActionConfig $scaffoldAction) { return []; }
+     * @return $this
+     * @throws ScaffoldException
+     */
+    public function setDataToAddToRecord($arrayOrCallable) {
+        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
+            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
+        }
+        $this->dataToAddToRecord = $arrayOrCallable;
+        return $this;
+    }
+
+    /**
+     * @param array $record
+     * @return array|mixed
+     */
+    public function getCustomDataForRecord(array $record) {
+        if (empty($this->dataToAddToRecord)) {
+            return [];
+        } else if (is_callable($this->dataToAddToRecord)) {
+            return call_user_func($this->dataToAddToRecord, $record, $this);
+        } else {
+            return $this->dataToAddToRecord;
+        }
     }
 
     /**
@@ -240,27 +274,49 @@ abstract class ScaffoldActionConfig {
      * @return Tag[]
      */
     public function getToolbarItems() {
-        return $this->toolbarItems;
+        return is_callable($this->toolbarItems) ? call_user_func($this->toolbarItems, $this) : $this->toolbarItems;
     }
 
     /**
-     * @param Tag[] $toolbarItems
+     * @param Tag[]|callable $arrayOrCallable
+     * Examples:
+     * - call some url via ajax and then run "callback(json)"
+        Tag::a()
+            ->setContent(trans('path.to.translation'))
+            ->setClass('btn btn-warning')
+            ->setDataAttr('action', 'request')
+            ->setDataAttr('url', route('route', [], false))
+            ->setDataAttr('method', 'put')
+            ->setDataAttr('data', 'id=:id:')
+            ->setDataAttr('on-success', 'callback(json);')
+            ->setHref('#');
+     * - redirect to other url
+        Tag::a()
+            ->setContent(trans('path.to.translation'))
+            ->setClass('btn btn-warning')
+            ->setHref('url', route('route', [], false))
+            ->setTarget('_blank')
      * @return $this
      * @throws ScaffoldActionException
      */
-    public function setToolbarItems(array $toolbarItems) {
-        foreach ($toolbarItems as &$toolbarItem) {
-            if (is_object($toolbarItem)) {
-                if (method_exists($toolbarItem, 'build')) {
-                    $toolbarItem = $toolbarItem->build();
-                } else if (method_exists($toolbarItem, '__toString')) {
-                    $toolbarItem = $toolbarItem->__toString();
-                } else {
-                    throw new ScaffoldActionException($this, 'Toolbar item is an object without possibility to convert it to string');
+    public function setToolbarItems($arrayOrCallable) {
+        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
+            throw new ScaffoldActionException($this, 'setRowActions($arrayOrCallable) accepts only array or callable');
+        }
+        if (!is_callable($arrayOrCallable)) {
+            foreach ($arrayOrCallable as &$toolbarItem) {
+                if (is_object($toolbarItem)) {
+                    if (method_exists($toolbarItem, 'build')) {
+                        $toolbarItem = $toolbarItem->build();
+                    } else if (method_exists($toolbarItem, '__toString')) {
+                        $toolbarItem = $toolbarItem->__toString();
+                    } else {
+                        throw new ScaffoldActionException($this, 'Toolbar item is an object without possibility to convert it to string');
+                    }
                 }
             }
         }
-        $this->toolbarItems = $toolbarItems;
+        $this->toolbarItems = $arrayOrCallable;
         return $this;
     }
 
@@ -303,9 +359,9 @@ abstract class ScaffoldActionConfig {
      * @return array
      */
     public function getSpecialConditions() {
-        return is_array($this->specialConditions)
-            ? $this->specialConditions
-            : call_user_func($this->specialConditions, $this);
+        return is_callable($this->specialConditions)
+            ? call_user_func($this->specialConditions, $this)
+            : $this->specialConditions;
     }
 
     /**

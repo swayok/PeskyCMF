@@ -20,8 +20,12 @@ trait InjectsDbObjects {
     protected function readDbObjectForInjection($parameters) {
         /** @var Route $route */
         $route = \Request::route();
-        if ($route->parameter('id', false) !== false) {
-            if (empty($route->parameter('id'))) {
+        $id = $route->parameter('id', false);
+        if ($id === false && \Request::method() !== 'GET') {
+             $id = \Request::get('id', false);
+        }
+        if ($id !== false) {
+            if (empty($id)) {
                 $this->sendRecordNotFoundResponse();
             }
             $object = null;
@@ -33,7 +37,7 @@ trait InjectsDbObjects {
             }
             if (!empty($object)) {
                 $conditions = [
-                    'id' => $route->parameter('id'),
+                    'id' => $id,
                 ];
                 $this->addConditionsForDbObjectInjection($route, $object, $conditions);
                 $this->addParentIdsConditionsForDbObjectInjection($route, $object, $conditions);
