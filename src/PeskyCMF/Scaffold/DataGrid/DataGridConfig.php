@@ -39,7 +39,7 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @var bool
      */
     protected $allowMultiRowSelection = false;
-    /** @var Tag[] */
+    /** @var Tag[]|callable */
     protected $rowActions = [];
 
     public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSectionConfig) {
@@ -185,27 +185,55 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @return Tag[]
      */
     public function getRowActions() {
-        return $this->rowActions;
+        return is_callable($this->rowActions) ? call_user_func($this->rowActions, $this) : $this->rowActions;
     }
 
     /**
-     * @param Tag[] $rowActions
+     * @param Tag[]|callable $arrayOrCallable - callable: function (ScaffolActionConfig $scaffoldAction) { return []; }
+     * Examples:
+     * - call some url via ajax blocking data grid while waiting for response and then run "callback(json)"
+        Tag::a()
+            ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
+            ->setClass('row-action text-success')
+            ->setTitle(trans('path.to.translation'))
+            ->setDataAttr('toggle', 'tooltip')
+            ->setDataAttr('block-datagrid', '1')
+            ->setDataAttr('action', 'request')
+            ->setDataAttr('method', 'put')
+            ->setDataAttr('url', route('route', [], false))
+            ->setDataAttr('data', 'id=:id:')
+            ->setDataAttr('on-success', 'callback(json);')
+            ->setHref('#')
+     * - redirect
+        Tag::a()
+            ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
+            ->setClass('row-action text-primary')
+            ->setTitle(trans('path.to.translation'))
+            ->setDataAttr('toggle', 'tooltip')
+            ->setHref(route('route', [], false))
+            ->setTarget('_blank')
+     *
      * @return $this
      * @throws ScaffoldActionException
      */
-    public function setRowActions(array $rowActions) {
-        foreach ($rowActions as &$rowAction) {
-            if (is_object($rowAction)) {
-                if (method_exists($rowAction, 'build')) {
-                    $rowAction = $rowAction->build();
-                } else if (method_exists($rowAction, '__toString')) {
-                    $rowAction = $rowAction->__toString();
-                } else {
-                    throw new ScaffoldActionException($this, 'Row action is an object without possibility to convert it to string');
+    public function setRowActions($arrayOrCallable) {
+        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
+            throw new ScaffoldActionException($this, 'setRowActions($arrayOrCallable) accepts only array or callable');
+        }
+        if (!is_callable($arrayOrCallable)) {
+            foreach ($arrayOrCallable as &$rowAction) {
+                if (is_object($rowAction)) {
+                    if (method_exists($rowAction, 'build')) {
+                        $rowAction = $rowAction->build();
+                    } else if (method_exists($rowAction, '__toString')) {
+                        $rowAction = $rowAction->__toString();
+                    } else {
+                        throw new ScaffoldActionException($this, 'Row action is an object without possibility to convert it to string');
+                    }
                 }
             }
         }
-        $this->rowActions = $rowActions;
+        $this->rowActions = $arrayOrCallable;
         return $this;
     }
 
