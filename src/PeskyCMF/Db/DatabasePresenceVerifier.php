@@ -77,4 +77,8 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
         }
     }
 
+    public function setConnection($connection) {
+        // don't need this but may come
+    }
+
 }
