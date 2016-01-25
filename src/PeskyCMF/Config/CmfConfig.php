@@ -393,7 +393,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function home_page_url() {
-        return '/' . self::getInstance()->url_prefix() . '/page/dashboard';
+        return route('cmf_start_page');
     }
 
     /**
