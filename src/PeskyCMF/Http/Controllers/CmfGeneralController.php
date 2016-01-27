@@ -166,8 +166,21 @@ class CmfGeneralController extends Controller {
         }
     }
 
+    public function getReplacePassword(Request $request, $accessKey) {
+        // todo: validate access key
+        return $this->loadJsApp($request, ['accessKey' => $accessKey, 'userId' => '0']);
+    }
+
     public function getLoginTpl() {
         return view(CmfConfig::getInstance()->login_view())->render();
+    }
+
+    public function getForgotPasswordTpl() {
+        return view(CmfConfig::getInstance()->forgot_password_view())->render();
+    }
+
+    public function getReplacePasswordTpl() {
+        return view(CmfConfig::getInstance()->replace_password_view())->render();
     }
 
     private function getIntendedUrl() {
@@ -206,6 +219,21 @@ class CmfGeneralController extends Controller {
         } else {
             return response()->json(['redirect' => $this->getIntendedUrl()]);
         }
+    }
+
+    public function sendPasswordReplacingInstructions(Request $request) {
+        return response()->json([
+            '_message' => CmfConfig::transCustom('.forgot_password_form.forgot_password_form'),
+            'redirect' => route(CmfConfig::getInstance()->login_route())
+        ]);
+    }
+
+    public function replacePassword(Request $request, $accessKey) {
+        // todo: validate access key
+        return response()->json([
+            '_message' => CmfConfig::transCustom('.replace_password_form.password_replaced'),
+            'redirect' => route(CmfConfig::getInstance()->login_route())
+        ]);
     }
 
     public function logout() {

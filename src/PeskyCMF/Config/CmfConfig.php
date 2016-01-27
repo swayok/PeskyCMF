@@ -199,11 +199,35 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * View for CMF UI
+     * View for CMF login form
      * @return string
      */
     static public function login_view() {
         return 'cmf::ui.login';
+    }
+
+    /**
+     * Enable/disable password restore link in login form
+     * @return bool
+     */
+    static public function is_password_restore_allowed() {
+        return true;
+    }
+
+    /**
+     * View for CMF forgot password form
+     * @return string
+     */
+    static public function forgot_password_view() {
+        return 'cmf::ui.forgot_password';
+    }
+
+    /**
+     * View for CMF replace password form
+     * @return string
+     */
+    static public function replace_password_view() {
+        return 'cmf::ui.replace_password';
     }
 
     /**

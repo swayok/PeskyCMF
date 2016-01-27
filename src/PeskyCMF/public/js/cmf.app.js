@@ -24,8 +24,10 @@ $(document).ready(function () {
     });
 
     app
-        .route('/login', AdminControllers.loginController)
-        .route('/page/:uri', AdminControllers.pageController)
+        .route('/login', CmfControllers.loginController)
+        .route('/forgot_password', CmfControllers.forgotPasswordController)
+        .route('/replace_password', CmfControllers.replacePasswordController)
+        .route('/page/:uri', CmfControllers.pageController)
         .route('/logout', function (event, request) {
             app.disableUrlChangeOnce = true;
             Utils.showPreloader(document.body);

@@ -17,6 +17,20 @@ return [
         'forgot_password_label' => 'Forgot password?',
         'login_failed' => 'Invalid E-mail or password',
     ],
+    'forgot_password_form' => [
+        'header' => 'Password restoration',
+        'email_label' => 'Your E-mail',
+        'button_label' => 'Send instructions',
+        'instructions_sent' => 'Instructions were sent to your E-mail',
+    ],
+    'replace_password_form' => [
+        'header' => 'Replace password',
+        'password_label' => 'New password',
+        'password_confirm_label' => 'Confirm new password',
+        'button_label' => 'Save',
+        'invalid_access_key' => 'Access key to this page is invalid or outdated',
+        'password_replaced' => 'New password saved',
+    ],
     'user' => [
         'profile_label' => 'Profile',
         'logout_label' => 'Log Out'

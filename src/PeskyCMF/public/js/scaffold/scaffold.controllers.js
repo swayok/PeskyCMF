@@ -1,5 +1,5 @@
 var ScaffoldControllers = {
-    dataGrid: AdminView.extend({
+    dataGrid: CmfView.extend({
         getContainer: Utils.getContentContainer,
         sigleton: true,
         switchBodyClass: function (request) {
@@ -12,7 +12,7 @@ var ScaffoldControllers = {
 
         }
     }),
-    itemForm: AdminView.extend({
+    itemForm: CmfView.extend({
         getContainer: Utils.getContentContainer,
         sigleton: true,
         switchBodyClass: function (request) {
@@ -55,7 +55,7 @@ var ScaffoldControllers = {
             });
         }
     }),
-    itemDetails: AdminView.extend({
+    itemDetails: CmfView.extend({
         getContainer: Utils.getContentContainer,
         sigleton: true,
         switchBodyClass: function (request) {
