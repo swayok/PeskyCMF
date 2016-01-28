@@ -14,12 +14,23 @@ class CmfAddAdmin extends BaseCommand {
     public function fire() {
         $db = new Db(Db::PGSQL, env('DB_DATABASE'), env('DB_USERNAME'), env('DB_PASSWORD'), env('DB_HOST', 'localhost'));
         $args = $this->input->getArguments();
+        $email = strtolower(trim($args['email']));
         $password = \Hash::make($args['password']);
-        $query = "INSERT INTO `{$args['schema']}`.`{$args['table']}` (`email`, `password`, `role`) VALUES (``{$args['email']}``,``{$password}``, ``{$args['role']}``)";
+        $table = "`{$args['schema']}`.`{$args['table']}`";
+        $exists = $db->processRecords(
+            $db->query(DbExpr::create("SELECT 1 FROM {$table} WHERE `email`=``{$email}``")),
+            $db::FETCH_VALUE
+        );
+        if ($exists > 0) {
+            $query = "UPDATE {$table} SET `password`=``{$password}``, `role`=``{$args['role']}`` WHERE `email`=``{$email}``";
+        } else {
+            $query = "INSERT INTO {$table} (`email`, `password`, `role`) VALUES (``{$email}``,``{$password}``, ``{$args['role']}``)";
+        }
+
         try {
             $result = $db->exec(DbExpr::create($query));
             if ($result > 0) {
-                $this->line('Done');
+                $this->line($exists ? 'Admin updated' : 'Admin created');
             } else {
                 $this->line('Fail. DB returned "0 rows updated"');
             }

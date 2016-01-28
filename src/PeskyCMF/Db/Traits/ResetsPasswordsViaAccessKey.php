@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Db\Traits;
 
+use Illuminate\Contracts\Encryption\DecryptException;
 use PeskyCMF\Db\CmfDbObject;
 
 trait ResetsPasswordsViaAccessKey {
@@ -39,7 +40,11 @@ trait ResetsPasswordsViaAccessKey {
      * @return CmfDbObject|bool - false = failed to parse access key, validate data or load user
      */
     static public function loadFromPasswordRecoveryAccessKey($accessKey) {
-        $data = \Crypt::decrypt($accessKey);
+        try {
+            $data = \Crypt::decrypt($accessKey);
+        } catch (DecryptException $exc) {
+            return false;
+        }
         if (empty($data)) {
             return false;
         }

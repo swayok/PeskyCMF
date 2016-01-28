@@ -6,14 +6,18 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
-use Swayok\Utils\Set;
+use PeskyCMF\Traits\DataValidationHelper;
 
 class ValidateData {
 
+    use DataValidationHelper;
+
     protected $errorMessage;
 
-    public function __construct() {
-        $this->errorMessage = CmfConfig::getInstance()->cmf_base_dictionary_name() . '.error.invalid_data_received';
+    protected function getValidationErrorsResponseMessage() {
+        return isset($this->errorMessage)
+            ? trans($this->errorMessage)
+            : CmfConfig::transBase('.error.invalid_data_received');
     }
 
     /**
@@ -33,36 +37,18 @@ class ValidateData {
                 $messages = trans($actionInfo['validation_messages']);
                 if (!is_array($messages)) {
                     $messages = [];
-                } else {
-                    $messages = Set::flatten($messages);
                 }
             }
-            $validator = \Validator::make($request->all(), $actionInfo['validate'], $messages);
-            if ($validator->fails()) {
-                return response()->json([
-                    '_message' => trans($this->errorMessage),
-                    'errors' => $this->fixErrorsKeys($validator->getMessageBag()->toArray())
-                ], HttpCode::INVALID);
+            $response = $this->validate($request->all(), $actionInfo['validate'], $messages);
+            if ($response !== true) {
+                return $response;
             }
         }
-
         return $next($request);
     }
 
-    /**
-     * Replace keys like 'some.column' by 'some[column]' to fit <input> names
-     * @param array $errors
-     * @return array
-     */
-    protected function fixErrorsKeys(array $errors) {
-        foreach ($errors as $key => $messages) {
-            if (strstr($key, '.') !== false) {
-                $newKey = preg_replace('%^([^\]]+)\]%', '$1', str_replace('.', '][', $key) . ']');
-                $errors[$newKey] = $messages;
-                unset($errors[$key]);
-            }
-        }
-        return $errors;
+    protected function sendValidationErrorsResponse($errors) {
+        return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::INVALID);
     }
 
 }

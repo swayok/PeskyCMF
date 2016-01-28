@@ -121,8 +121,18 @@ class PeskyOrmUserProvider implements UserProvider {
      * @return bool
      */
     public function validateCredentials(UserContract $user, array $credentials) {
-        $plain = $credentials['password'];
-        return Hash::check($plain, $user->getAuthPassword());
+        foreach ($credentials as $fieldName => $value) {
+            if (is_string($fieldName) && !is_numeric($fieldName)) {
+                if ($fieldName === 'password') {
+                    if (!Hash::check($value, $user->getAuthPassword())) {
+                        return false;
+                    }
+                } else if ($user->$fieldName != $value) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**

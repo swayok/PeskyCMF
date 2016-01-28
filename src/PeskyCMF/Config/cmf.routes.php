@@ -18,21 +18,6 @@ Route::group(
         'middleware' => ['web']
     ],
     function () {
-        Route::get('login', [
-            'as' => 'cmf_login',
-            'uses' => __cmf_general_controller_class() . '@getLogin'
-        ]);
-
-        Route::get('forgot_password', [
-            'as' => 'cmf_forgot_password',
-            'uses' => __cmf_general_controller_class() . '@loadJsApp'
-        ]);
-
-        Route::get('replace_password/{access_key}', [
-            'as' => 'cmf_replace_password',
-            'uses' => __cmf_general_controller_class() . '@loadJsApp'
-        ]);
-
         Route::group(
             [
                 'middleware' => AjaxOnly::class
@@ -52,25 +37,32 @@ Route::group(
 
                 Route::post('forgot_password', [
                     'uses' => __cmf_general_controller_class() . '@sendPasswordReplacingInstructions',
-                    'validate' => [
-                        'email' => 'required|email'
-                    ]
                 ]);
 
-                Route::get('replace_password.html', [
+                Route::get('replace_password/{access_key}.html', [
                     'uses' => __cmf_general_controller_class() . '@getReplacePasswordTpl'
                 ]);
 
                 Route::put('replace_password/{access_key}', [
                     'uses' => __cmf_general_controller_class() . '@replacePassword',
-                    'validate' => [
-                        'id' => 'required|integer|min:1',
-                        'password' => 'required|min:6',
-                        'password_confirm' => 'required|min:6|same:password'
-                    ]
                 ]);
             }
         );
+
+        Route::get('login', [
+            'as' => 'cmf_login',
+            'uses' => __cmf_general_controller_class() . '@getLogin'
+        ]);
+
+        Route::get('forgot_password', [
+            'as' => 'cmf_forgot_password',
+            'uses' => __cmf_general_controller_class() . '@loadJsApp'
+        ]);
+
+        Route::get('replace_password/{access_key}', [
+            'as' => 'cmf_replace_password',
+            'uses' => __cmf_general_controller_class() . '@loadJsApp'
+        ]);
 
         Route::get('logout', [
             'as' => 'cmf_logout',

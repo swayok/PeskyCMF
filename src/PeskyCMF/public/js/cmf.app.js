@@ -26,7 +26,7 @@ $(document).ready(function () {
     app
         .route('/login', CmfControllers.loginController)
         .route('/forgot_password', CmfControllers.forgotPasswordController)
-        .route('/replace_password', CmfControllers.replacePasswordController)
+        .route('/replace_password/:access_key', CmfControllers.replacePasswordController)
         .route('/page/:uri', CmfControllers.pageController)
         .route('/logout', function (event, request) {
             app.disableUrlChangeOnce = true;
@@ -42,10 +42,16 @@ $(document).ready(function () {
     }
 
     app.on('404', function (event, request) {
-        if (GlobalVars.isDebug) {
-            console.log('Route not found for ' + request.url);
+        if (request.path === GlobalVars.rootUrl) {
+            // only CMF knows where to redirect from root url
+            document.location = GlobalVars.rootUrl;
+            return;
         }
-        document.location = request.url;
+        if (GlobalVars.isDebug) {
+            console.log('No route found for: ' + request.url);
+            toastr.error('Page not found')
+        }
+        app.back(GlobalVars.rootUrl + '/login');
     }).on('route:found', function (event, request) {
         if (request.routeDetected && !app.disableUrlChangeOnce && request.url !== document.location.href) {
             Pilot.setLocation(request);

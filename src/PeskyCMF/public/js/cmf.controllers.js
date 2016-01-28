@@ -121,7 +121,7 @@ var NotAuthorisedCmfView = CmfView.extend({
             var form = container.find(this.formSelector);
             FormHelper.initForm(form, container, function (json, form, container) {
                 Utils.cleanCache();
-                Utils.handleAjaxJsonResponse(json);
+                Utils.handleAjaxSuccess(json);
             });
         }
     }

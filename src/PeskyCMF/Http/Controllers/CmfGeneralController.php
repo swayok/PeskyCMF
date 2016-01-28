@@ -11,11 +11,14 @@ use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
+use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\DbExpr;
 use Redirect;
 use Swayok\Utils\Set;
 
 class CmfGeneralController extends Controller {
+
+    use DataValidationHelper;
 
     public function __construct() {
 
@@ -240,6 +243,10 @@ class CmfGeneralController extends Controller {
 
     public function doLogin(Request $request) {
         $userLoginColumn = CmfConfig::getInstance()->user_login_column();
+        $this->validate($request->data(), [
+            $userLoginColumn => 'required' . ($userLoginColumn === 'email' ? '|email' : ''),
+            'password' => 'required'
+        ]);
         $credentials = [
             DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($request->data($userLoginColumn)) . '``)'),
             'password' => $request->data('password')
@@ -252,6 +259,9 @@ class CmfGeneralController extends Controller {
     }
 
     public function sendPasswordReplacingInstructions(Request $request) {
+        $this->validate($request->data(), [
+            'email' => 'required|email',
+        ]);
         $email = strtolower(trim($request->data('email')));
         if (Auth::guard()->attempt(['email' => $email], false, false)) {
             /** @var CmfDbObject|ResetsPasswordsViaAccessKey $user */
@@ -277,8 +287,13 @@ class CmfGeneralController extends Controller {
     }
 
     public function replacePassword(Request $request, $accessKey) {
+        $this->validate($request->data(), [
+            'id' => 'required|integer|min:1',
+            'password' => 'required|min:6',
+            'password_confirm' => 'required|min:6|same:password'
+        ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
-        if (!empty($user) && $user->id !== $request->data('id')) {
+        if (!empty($user) && $user->_getPkValue() !== $request->data('id')) {
             $user->begin()->_setFieldValue('password', $request->data('password'));
             if ($user->commit()) {
                 return response()->json([
