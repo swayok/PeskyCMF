@@ -17,19 +17,23 @@ return [
         'forgot_password_label' => 'Забыли пароль?',
         'login_failed' => 'Неправильный E-mail или пароль',
     ],
-    'forgot_password_form' => [
+    'forgot_password' => [
         'header' => 'Восстановление пароля',
         'email_label' => 'Ваш E-mail',
         'button_label' => 'Выслать инструкции',
         'instructions_sent' => 'Инструкции по восстановлению пароля высланы на Ваш E-mail',
+        'email_subject' => 'Инструкции по восстановлению пароля',
+        'email_content' => '<p>Для задания нового пароля, пройдите по ссылке <a href=":url" target="_blank">Восстановить пароль</a></p>
+            <p>Восстановление пароля будет доступно в течении часа</p>',
     ],
-    'replace_password_form' => [
+    'replace_password' => [
         'header' => 'Задание нового пароля',
         'password_label' => 'Новый нароль',
         'password_confirm_label' => 'Подтвердите новый пароль',
         'button_label' => 'Сохранить',
         'invalid_access_key' => 'Неправильный или просроченный ключ доступа к странице',
         'password_replaced' => 'Новый пароль сохранен',
+        'failed_to_save' => 'Не удалось сохранить новый пароль',
     ],
     'user' => [
         'profile_label' => 'Профиль',

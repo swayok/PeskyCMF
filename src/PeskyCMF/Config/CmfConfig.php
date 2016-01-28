@@ -54,10 +54,10 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function session_configs() {
         return [
-            'table' => self::getInstance()->sessions_table_name(),
-            'cookie' => self::getInstance()->sessions_table_name(),
+            'table' => static::sessions_table_name(),
+            'cookie' => static::sessions_table_name(),
             'lifetime' => 1440,
-            'connection' => self::getInstance()->session_connection(),
+            'connection' => static::session_connection(),
         ];
     }
 
@@ -66,7 +66,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function sessions_table_name() {
-        return str_plural(self::getInstance()->users_table_name()) . '_sessions';
+        return str_plural(static::users_table_name()) . '_sessions';
     }
 
     /**
@@ -86,22 +86,25 @@ class CmfConfig extends ConfigsContainer {
     static public function auth_configs() {
         return [
             'guards' => [
-                self::getInstance()->auth_guard_name() => [
+                static::auth_guard_name() => [
                     'driver' => 'session',
-                    'provider' => self::getInstance()->auth_guard_name(),
+                    'provider' => static::auth_guard_name(),
                 ],
             ],
 
             'providers' => [
-                self::getInstance()->auth_guard_name() => [
+                static::auth_guard_name() => [
                     'driver' => 'peskyorm',
-                    'table' => self::getInstance()->users_table_name(),
-                    'model' => call_user_func(
-                        [self::getInstance()->base_db_model_class(), 'getFullDbObjectClass'],
-                        self::getInstance()->users_table_name()
-                    )
+                    'table' => static::users_table_name(),
+                    'model' => static::user_object_class()
                 ],
             ],
+
+            'passwords' => [
+                static::auth_guard_name() => [
+                    'expire' => 60,
+                ]
+            ]
         ];
     }
 
@@ -111,6 +114,24 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function auth_guard_name() {
         return 'cmf';
+    }
+
+    /**
+     * Class name of user db object
+     * @return string
+     */
+    static public function user_object_class() {
+        return call_user_func(
+            [static::base_db_model_class(), 'getFullDbObjectClass'],
+            static::users_table_name()
+        );
+    }
+
+    /**
+     * @return string
+     */
+    static public function password_recovery_email_view() {
+        return 'cmf::emails.password_restore_instructions';
     }
 
     /**
@@ -126,6 +147,22 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function user_login_column() {
         return 'email';
+    }
+
+    /**
+     * Email address used in "From" header for emails sent to users
+     * @return string
+     */
+    static public function system_email_address() {
+        return 'noreply@' . static::domain();
+    }
+
+    /**
+     * Domain name
+     * @return string
+     */
+    static public function domain() {
+        return request()->getHost();
     }
 
     /**
@@ -333,10 +370,13 @@ class CmfConfig extends ConfigsContainer {
     /**
      * Translate from custom dictionary. Uses CmfConfig::getInstance()
      * @param $path - must strat with '.'
+     * @param array $parameters
+     * @param string $domain
+     * @param null|string $locale
      * @return string
      */
-    static public function transCustom($path) {
-        return trans(CmfConfig::getInstance()->custom_dictionary_name() . $path);
+    static public function transCustom($path, $parameters = [], $domain = 'messages', $locale = null) {
+        return trans(CmfConfig::getInstance()->custom_dictionary_name() . $path, $parameters, $domain, $locale);
     }
 
     /**
@@ -349,10 +389,13 @@ class CmfConfig extends ConfigsContainer {
 
     /**
      * @param $path - must strat with '.'
+     * @param array $parameters
+     * @param string $domain
+     * @param null|string $locale
      * @return string
      */
-    static public function transBase($path) {
-        return trans(CmfConfig::getInstance()->cmf_base_dictionary_name() . $path);
+    static public function transBase($path, $parameters = [], $domain = 'messages', $locale = null) {
+        return trans(CmfConfig::getInstance()->cmf_base_dictionary_name() . $path, $parameters, $domain, $locale);
     }
 
     /**
