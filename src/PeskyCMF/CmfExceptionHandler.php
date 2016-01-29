@@ -4,6 +4,7 @@ namespace PeskyCMF;
 
 use Illuminate\Http\JsonResponse;
 use LaravelExtendedErrors\ExceptionHandler;
+use PeskyCMF\Config\CmfConfig;
 use PeskyORM\Exception\DbObjectValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,11 +24,13 @@ class CmfExceptionHandler extends ExceptionHandler {
             case DbObjectValidationException::class:
                 /** @var DbObjectValidationException $exc */
                 return new JsonResponse([
-                    '_message' => trans(ApiConstants::ERROR_INVALID_DATA),
+                    '_message' => CmfConfig::transBase('.error.invalid_data_received'),
                     'errors' => $exc->getValidationErrors()
                 ], HttpCode::INVALID);
             case NotFoundHttpException::class:
-                return new JsonResponse([], HttpCode::NOT_FOUND);
+                return new JsonResponse([
+                    '_message' => CmfConfig::transBase('.error.http404')
+                ], HttpCode::NOT_FOUND);
             case HttpException::class:
                 /** @var HttpException $exc */
                 $data = json_decode($exc->getMessage(), true);

@@ -33,7 +33,8 @@ return [
     'error' => [
         'resource_item_not_found' => 'Requested Item not found',
         'db_record_not_exists' => 'Item not found in database',
-        'invalid_data_received' => 'Invalid data received'
+        'invalid_data_received' => 'Invalid data received',
+        'http404' => 'Requested page not found'
     ],
     'datagrid' => [
         'toolbar' => [

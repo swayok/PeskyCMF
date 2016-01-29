@@ -33,7 +33,8 @@ return [
     'error' => [
         'resource_item_not_found' => 'Данные запрошенного объекта не найдены',
         'db_record_not_exists' => 'Объект не найден в базе данных',
-        'invalid_data_received' => 'Получены недопустимые данные'
+        'invalid_data_received' => 'Получены недопустимые данные',
+        'http404' => 'Запрошенная страница не найдена'
     ],
     'datagrid' => [
         'toolbar' => [
