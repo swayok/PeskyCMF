@@ -10,7 +10,6 @@ CKEDITOR.editorConfig = function( config ) {
     // http://docs.ckeditor.com/#!/api/CKEDITOR.config
 
     // toolbar configurator: /packages/cmf/js/lib/ckeditor/samples/toolbarconfigurator/index.html#basic
-    console.log('wtf?');
 
     // The toolbar groups arrangement, optimized for two toolbar rows.
     config.toolbarGroups = [
