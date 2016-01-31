@@ -43,7 +43,7 @@
     <![endif]-->
 </head>
 
-<body class="skin-blue">
+<body class="skin-blue" data-locale="{{ app()->getLocale() }}">
     <div class="wrapper has-preloader loading" id="page-wrapper">
 
     </div>
@@ -84,6 +84,9 @@
     <script src="/packages/cmf/js/lib/jquery.form.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/toastr/toastr.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/base64.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/ckeditor/ckeditor.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/ckeditor/adapters/jquery.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/ckeditor/config.js" type="text/javascript"></script>
     <script src="/packages/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.global.vars.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
