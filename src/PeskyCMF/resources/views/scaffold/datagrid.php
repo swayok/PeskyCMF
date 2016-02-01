@@ -7,8 +7,13 @@
  * @var string $idSuffix
  * @var array $includes - views to include into this template.
  *      Possible use: add datatable cell templates and use them in $dataTablesInitializer
+ *      All views receive:
+            * var string $translationPrefix
+            * var string $idSuffix
+            * var \PeskyCMF\Db\CmfDbModel $model
+            * var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var string|null $dataTablesInitializer - js function like
-        funciton (dataGridSelector, dataTablesConfig, originalInitializer) {
+        funciton (containerSelector, dataTablesConfig, originalInitializer) {
             return originalInitializer(dataGridSelector, dataTablesConfig);
         }
  */

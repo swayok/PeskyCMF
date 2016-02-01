@@ -39,6 +39,8 @@ abstract class ScaffoldActionConfig {
     protected $scaffoldSection;
     /** @var array|callable */
     protected $dataToAddToRecord;
+    /** @var array|callable */
+    protected $dataToSendToView;
 
     /**
      * @param CmfDbModel $model
@@ -216,6 +218,32 @@ abstract class ScaffoldActionConfig {
             return call_user_func($this->dataToAddToRecord, $record, $this);
         } else {
             return $this->dataToAddToRecord;
+        }
+    }
+
+    /**
+     * @param array|callable $arrayOrCallable - function (ScaffoldActionConfig $actionConfig) { return [] }
+     * @return $this
+     * @throws ScaffoldException
+     */
+    public function sendDataToView($arrayOrCallable) {
+        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
+            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
+        }
+        $this->dataToSendToView = $arrayOrCallable;
+        return $this;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function getAdditionalDataForView() {
+        if (empty($this->dataToSendToView)) {
+            return [];
+        } else if (is_callable($this->dataToSendToView)) {
+            return call_user_func($this->dataToSendToView, $this);
+        } else {
+            return $this->dataToSendToView;
         }
     }
 

@@ -14,12 +14,27 @@ $data = [
 ?>
 
 
-<?php echo view('cmf::scaffold/datagrid', $data, ['dataGridConfig' => $dataGridConfig, 'dataGridFilterConfig' => $dataGridFilterConfig])->render(); ?>
+<?php echo view(
+    'cmf::scaffold/datagrid',
+    $data + $dataGridConfig->getAdditionalDataForView(),
+    [
+        'dataGridConfig' => $dataGridConfig,
+        'dataGridFilterConfig' => $dataGridFilterConfig
+    ]
+)->render(); ?>
 
 
-<?php echo view('cmf::scaffold/form', $data, ['formConfig' => $formConfig])->render(); ?>
+<?php echo view(
+    'cmf::scaffold/form',
+    $data + $formConfig->getAdditionalDataForView(),
+    ['formConfig' => $formConfig]
+)->render(); ?>
 
 
-<?php echo view('cmf::scaffold/item_details', $data, ['itemDetailsConfig' => $itemDetailsConfig])->render(); ?>
+<?php echo view(
+    'cmf::scaffold/item_details',
+    $data + $itemDetailsConfig->getAdditionalDataForView(),
+    ['itemDetailsConfig' => $itemDetailsConfig]
+)->render(); ?>
 
 
