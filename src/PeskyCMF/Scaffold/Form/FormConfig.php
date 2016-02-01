@@ -12,6 +12,7 @@ use Swayok\Utils\StringUtils;
 
 class FormConfig extends ScaffoldActionConfig {
 
+    protected $view = 'cmf::scaffold/form';
     /**
      * @var null|mixed
      */

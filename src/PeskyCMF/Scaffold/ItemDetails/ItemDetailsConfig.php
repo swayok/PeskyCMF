@@ -6,6 +6,8 @@ use PeskyCMF\Scaffold\ScaffoldActionConfig;
 
 class ItemDetailsConfig extends ScaffoldActionConfig {
 
+    protected $view = 'cmf::scaffold/item_details';
+
     /**
      * @inheritdoc
      */

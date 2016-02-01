@@ -12,6 +12,7 @@ use Swayok\Utils\ValidateValue;
 
 class DataGridConfig extends ScaffoldActionConfig {
 
+    protected $view = 'cmf::scaffold/datagrid';
     /**
      * @var int
      */

@@ -13,8 +13,8 @@
             * var \PeskyCMF\Db\CmfDbModel $model
             * var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var string|null $dataTablesInitializer - js function like
-        funciton (containerSelector, dataTablesConfig, originalInitializer) {
-            return originalInitializer(dataGridSelector, dataTablesConfig);
+        funciton (tableSelector, dataTablesConfig, originalInitializer) {
+            return originalInitializer(tableSelector, dataTablesConfig);
         }
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
@@ -33,36 +33,43 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 <thead>
                     <tr>
                         <?php
+                            $invisibleColumns = [];
                             foreach ($gridColumnsConfigs as $config) {
-                                echo \Swayok\Html\Tag::th()
+                                $th = \Swayok\Html\Tag::th()
                                     ->setContent($config->getLabel(trans("$translationPrefix.datagrid.column.{$config->getName()}")))
                                     ->setClass('text-nowrap')
                                     ->setDataAttr('orderable', $config->isSortable() ? 'true' : 'false')
                                     ->setDataAttr('visible', $config->isVisible() ? null : 'false')
                                     ->setDataAttr('name', $config->getName())
                                     ->setDataAttr('data', $config->getName());
+                                if ($config->isVisible()) {
+                                    echo $th;
+                                } else {
+                                    $invisibleColumns[] = $th;
+                                }
                             }
+                            echo implode("\n", $invisibleColumns);
                         ?>
                     </tr>
                 </thead>
                 </table>
+
+                <?php
+                    if (!empty($includes)) {
+                        if (!is_array($includes)) {
+                            $includes = [$includes];
+                        }
+                        $dataForViews = compact('translationPrefix', 'idSuffix', 'model', 'dataGridConfig');
+                        foreach ($includes as $include) {
+                            echo view($include, $dataForViews)->render();
+                            echo "\n\n";
+                        }
+                    }
+                ?>
             </div></div>
         </div></div>
 
     </div>
-
-    <?php
-        if (!empty($includes)) {
-            if (!is_array($includes)) {
-                $includes = [$includes];
-            }
-            $dataForViews = compact('translationPrefix', 'idSuffix', 'model', 'dataGridConfig');
-            foreach ($includes as $include) {
-                echo view($include, $dataForViews)->render();
-                echo "\n\n";
-            }
-        }
-    ?>
 
     <?php
         $toolbar = [];

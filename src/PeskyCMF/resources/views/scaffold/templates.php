@@ -15,7 +15,7 @@ $data = [
 
 
 <?php echo view(
-    'cmf::scaffold/datagrid',
+    $dataGridConfig->getView(),
     $data + $dataGridConfig->getAdditionalDataForView(),
     [
         'dataGridConfig' => $dataGridConfig,
@@ -25,14 +25,14 @@ $data = [
 
 
 <?php echo view(
-    'cmf::scaffold/form',
+    $formConfig->getView(),
     $data + $formConfig->getAdditionalDataForView(),
     ['formConfig' => $formConfig]
 )->render(); ?>
 
 
 <?php echo view(
-    'cmf::scaffold/item_details',
+    $itemDetailsConfig->getView(),
     $data + $itemDetailsConfig->getAdditionalDataForView(),
     ['itemDetailsConfig' => $itemDetailsConfig]
 )->render(); ?>

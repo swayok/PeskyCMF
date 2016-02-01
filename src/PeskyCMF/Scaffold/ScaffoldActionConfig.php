@@ -41,6 +41,8 @@ abstract class ScaffoldActionConfig {
     protected $dataToAddToRecord;
     /** @var array|callable */
     protected $dataToSendToView;
+    /** @var string */
+    protected $view = null;
 
     /**
      * @param CmfDbModel $model
@@ -60,6 +62,18 @@ abstract class ScaffoldActionConfig {
     public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSection) {
         $this->model = $model;
         $this->scaffoldSection = $scaffoldSection;
+    }
+
+    public function setView($view) {
+        $this->view = $view;
+        return $this;
+    }
+
+    public function getView() {
+        if (empty($this->view)) {
+            throw new ScaffoldActionException($this, 'Scaffold action view file not set');
+        }
+        return $this->view;
     }
 
     /**

@@ -85,6 +85,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
             $this->loadRoutes();
 
+            $this->includeFiles();
+
             $this->storeConfigsInLaravelContainer();
 
             self::$alreadyLoaded = true;
@@ -106,6 +108,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     public function setLocale() {
         $locale = session()->get($this->cmfConfig->locale_session_key());
         app()->setLocale($locale ? $locale : $this->cmfConfig->default_locale());
+    }
+
+    protected function includeFiles() {
+        require_once __DIR__ . '/Config/helpers.php';
     }
 
     protected function loadConfigs() {

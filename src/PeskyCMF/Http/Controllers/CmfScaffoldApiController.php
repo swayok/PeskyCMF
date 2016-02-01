@@ -46,7 +46,10 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function getTemplates() {
-        return view(CmfConfig::getInstance()->scaffold_templates_view(), $this->getScaffoldConfig()->getConfigs())->render();
+        return view(
+            CmfConfig::getInstance()->scaffold_templates_view(),
+            $this->getScaffoldConfig()->getConfigs()
+        )->render();
     }
 
     public function getItemsList(Request $request) {
