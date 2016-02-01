@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldException;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
 use PeskyORM\DbColumnConfig;
@@ -13,8 +12,7 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     protected $showOnCreate = true;
     /** @var bool */
     protected $showOnEdit = true;
-    /** @var string */
-    protected $type = self::TYPE_STRING;
+
     const TYPE_STRING = DbColumnConfig::TYPE_STRING;
     const TYPE_PASSWORD = DbColumnConfig::TYPE_PASSWORD;
     const TYPE_EMAIL = DbColumnConfig::TYPE_EMAIL;
@@ -150,71 +148,7 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
      */
     public function setType($type) {
         parent::setType($type);
-        switch ($this->type) {
-            case self::TYPE_BOOL:
-                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
-                    $rendererConfig = InputRendererConfig::create('cmf::input/checkbox');
-                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
-                });
-                break;
-            case self::TYPE_EMAIL:
-            case self::TYPE_PASSWORD:
-                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
-                    $rendererConfig = InputRendererConfig::create('cmf::input/text', ['type' => $fieldConfig->getType()]);
-                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
-                });
-                break;
-            case self::TYPE_HIDDEN:
-                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
-                    $rendererConfig = InputRendererConfig::create('cmf::input/hidden');
-                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
-                });
-                break;
-            case self::TYPE_TEXT:
-                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
-                    $rendererConfig = InputRendererConfig::create('cmf::input/textarea');
-                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
-                });
-                break;
-            case self::TYPE_SELECT:
-                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
-                    $rendererConfig = InputRendererConfig::create('cmf::input/select')
-                        ->setOptions($fieldConfig->getOptions());
-                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
-                });
-                break;
-            case self::TYPE_WYSIWYG:
-                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
-                    $rendererConfig = InputRendererConfig::create('cmf::input/wysiwyg');
-                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
-                });
-                break;
-            case self::TYPE_IMAGE:
-                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
-                    $rendererConfig = InputRendererConfig::create('cmf::input/image');
-                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
-                });
-                break;
-            case self::TYPE_DATETIME:
-                $this->setRenderer(function (FormFieldConfig $fieldConfig, ScaffoldActionConfig $actionConfig, array $dataForView) {
-                    $rendererConfig = InputRendererConfig::create('cmf::input/datetime');
-                    return $fieldConfig->_configureRendererByColumnConfig($rendererConfig);
-                });
-                break;
-        }
         return $this;
-    }
-
-    /**
-     * @param InputRendererConfig $rendererConfig
-     * @return InputRendererConfig
-     */
-    public function _configureRendererByColumnConfig(InputRendererConfig $rendererConfig) {
-        $colConfig = $this->getTableColumnConfig();
-        $rendererConfig
-            ->setIsRequiredForCreate($colConfig->isRequiredOn(DbColumnConfig::ON_CREATE))
-            ->setIsRequiredForEdit($colConfig->isRequiredOn(DbColumnConfig::ON_CREATE));
-        return $rendererConfig;
     }
 
 }

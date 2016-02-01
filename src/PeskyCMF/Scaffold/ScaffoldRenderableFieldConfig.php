@@ -15,6 +15,8 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
      * @var null|callable
      */
     protected $renderer = null;
+    /** @var null+callable */
+    protected $defaultRendererConfigurator = null;
 
     /**
      * @return callable|null
@@ -57,6 +59,24 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
             ]))->render();
         } else {
             throw new ScaffoldFieldException($this, 'Renderer function returned unsopported result. String or ScaffoldFieldRendererConfig object expected');
+        }
+    }
+
+    /**
+     * @param callable $configurator = function (ScaffoldFieldRendererConfig $renderer, ScaffoldRenderableFieldConfig $field) {}
+     * @return $this
+     */
+    public function setDefaultRendererConfigurator(callable $configurator) {
+        $this->defaultRendererConfigurator = $configurator;
+        return $this;
+    }
+
+    /**
+     * @param ScaffoldFieldRendererConfig $renderer
+     */
+    public function configureDefaultRenderer(ScaffoldFieldRendererConfig $renderer) {
+        if (!empty($this->defaultRendererConfigurator)) {
+            call_user_func($this->defaultRendererConfigurator, $renderer, $this);
         }
     }
 

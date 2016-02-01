@@ -82,10 +82,10 @@ abstract class ScaffoldActionConfig {
     /**
      * @param string $fieldName
      * @return ScaffoldFieldConfig
-     * @throws ScaffoldActionException
+     * @throws ScaffoldException
      */
-    public function createFieldConfig($fieldName) {
-        throw new ScaffoldActionException($this, 'createFieldConfig() mthod not implemented');
+    static public function createFieldConfig($fieldName) {
+        throw new ScaffoldException(get_called_class() . '::createFieldConfig() method not implemented');
     }
 
     /**
@@ -111,7 +111,7 @@ abstract class ScaffoldActionConfig {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
         }
         if (empty($config)) {
-            $config = $this->createFieldConfig($name);
+            $config = static::createFieldConfig($name);
         }
         $config->setName($name);
         $config->setPosition(count($this->fields));

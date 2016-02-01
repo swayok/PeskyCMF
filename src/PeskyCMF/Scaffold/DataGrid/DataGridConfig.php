@@ -174,11 +174,8 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @inheritdoc
      */
-    public function createFieldConfig($fieldName) {
-        $columnConfig = $this->getModel()->getTableColumn($fieldName);
-        $config = DataGridFieldConfig::create()
-            ->setType($columnConfig->getType());
-        return $config;
+    static public function createFieldConfig($fieldName) {
+        return DataGridFieldConfig::create();
     }
 
     /**

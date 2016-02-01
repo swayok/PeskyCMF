@@ -17,7 +17,7 @@ abstract class ScaffoldFieldConfig {
     protected $name = null;
 
     /** @var string */
-    protected $type = self::TYPE_STRING;
+    protected $type = null;
     const TYPE_STRING = DbColumnConfig::TYPE_STRING;
     const TYPE_DATE = DbColumnConfig::TYPE_DATE;
     const TYPE_TIME = DbColumnConfig::TYPE_TIME;
@@ -103,6 +103,9 @@ abstract class ScaffoldFieldConfig {
      * @return string
      */
     public function getType() {
+        if (empty($this->type)) {
+            $this->setType($this->getTableColumnConfig()->getType());
+        }
         return $this->type;
     }
 
@@ -182,16 +185,16 @@ abstract class ScaffoldFieldConfig {
             $value = call_user_func_array($this->valueConverter, [$value, $columnConfig, $record, $this]);
         } else if (!empty($value)) {
             switch ($this->getType()) {
-                case self::TYPE_DATETIME:
-                    return date(self::FORMAT_DATETIME, is_numeric($value) ? $value : strtotime($value));
-                case self::TYPE_DATE:
-                    return date(self::FORMAT_DATE, is_numeric($value) ? $value : strtotime($value));
-                case self::TYPE_TIME:
-                    return date(self::FORMAT_TIME, is_numeric($value) ? $value : strtotime($value));
-                case self::TYPE_MULTILINE:
+                case static::TYPE_DATETIME:
+                    return date(static::FORMAT_DATETIME, is_numeric($value) ? $value : strtotime($value));
+                case static::TYPE_DATE:
+                    return date(static::FORMAT_DATE, is_numeric($value) ? $value : strtotime($value));
+                case static::TYPE_TIME:
+                    return date(static::FORMAT_TIME, is_numeric($value) ? $value : strtotime($value));
+                case static::TYPE_MULTILINE:
                     return '<pre class="multiline-text">' . $value . '</pre>';
-                case self::TYPE_JSON:
-                case self::TYPE_JSONB:
+                case static::TYPE_JSON:
+                case static::TYPE_JSONB:
                     if (!is_array($value)) {
                         $value = json_decode($value, true);
                         if ($value === false) {
@@ -199,7 +202,7 @@ abstract class ScaffoldFieldConfig {
                         }
                     }
                     return '<pre class="json-text">' . json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . '</pre>';
-                case self::TYPE_LINK:
+                case static::TYPE_LINK:
                     return $this->buildLinkToExternalRecord($columnConfig, $record);
                     break;
             }

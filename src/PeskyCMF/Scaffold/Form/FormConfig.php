@@ -6,6 +6,7 @@ namespace PeskyCMF\Scaffold\Form;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
+use PeskyORM\DbColumnConfig;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
 
@@ -40,6 +41,94 @@ class FormConfig extends ScaffoldActionConfig {
     protected $revalidateDataAfterBeforeSaveCallbackForUpdate = false;
     /** @var callable */
     protected $beforeValidateCallback;
+
+    /**
+     * @return callable|\Closure
+     */
+    public function getDefaultFieldRenderer() {
+        if (!empty($this->defaultFieldRenderer)) {
+            return $this->defaultFieldRenderer;
+        } else {
+            return function ($field, $actionConfig, array $dataForView) {
+                return $this->_getDefaultFieldRendererConfig($field, $actionConfig, $dataForView);
+            };
+        }
+    }
+
+    /**
+     * @param FormFieldConfig $fieldConfig
+     * @param FormConfig $actionConfig
+     * @param array $dataForView
+     * @return mixed
+     */
+    protected function _getDefaultFieldRendererConfig(
+        FormFieldConfig $fieldConfig,
+        FormConfig $actionConfig,
+        array $dataForView
+    ) {
+        $rendererConfig = InputRendererConfig::create()->setData($dataForView);
+        $this->configureDefaultRenderer($rendererConfig, $fieldConfig);
+        return $rendererConfig;
+    }
+
+    /**
+     * @param InputRendererConfig $rendererConfig
+     * @param FormFieldConfig $fieldConfig
+     */
+    protected function configureDefaultRenderer(InputRendererConfig $rendererConfig, FormFieldConfig $fieldConfig) {
+        switch ($fieldConfig->getType()) {
+            case $fieldConfig::TYPE_BOOL:
+                $rendererConfig->setView('cmf::input/checkbox');
+                break;
+            case $fieldConfig::TYPE_HIDDEN:
+                $rendererConfig->setView('cmf::input/hidden');
+                break;
+            case $fieldConfig::TYPE_TEXT:
+                $rendererConfig->setView('cmf::input/textarea');
+                break;
+            case $fieldConfig::TYPE_WYSIWYG:
+                $rendererConfig->setView('cmf::input/wysiwyg');
+                break;
+            case $fieldConfig::TYPE_SELECT:
+                $rendererConfig
+                    ->setView('cmf::input/select')
+                    ->setOptions($fieldConfig->getOptions());
+                break;
+            case $fieldConfig::TYPE_IMAGE:
+                $rendererConfig->setView('cmf::input/image');
+                break;
+            case $fieldConfig::TYPE_DATETIME:
+                $rendererConfig->setView('cmf::input/datetime');
+                break;
+            case $fieldConfig::TYPE_DATE:
+                $rendererConfig->setView('cmf::input/date');
+                break;
+            case $fieldConfig::TYPE_EMAIL:
+            case $fieldConfig::TYPE_PASSWORD:
+                $rendererConfig
+                    ->setView('cmf::input/text')
+                    ->setAttributes(['type' => $fieldConfig->getType()]);
+                break;
+            default:
+                $rendererConfig->setView('cmf::input/text');
+        }
+        $this->configureRendererByColumnConfig($rendererConfig, $fieldConfig->getTableColumnConfig());
+        $fieldConfig->configureDefaultRenderer($rendererConfig);
+    }
+
+    /**
+     * @param InputRendererConfig $rendererConfig
+     * @param DbColumnConfig $columnConfig
+     * @throws \PeskyORM\Exception\DbColumnConfigException
+     */
+    protected function configureRendererByColumnConfig(
+        InputRendererConfig $rendererConfig,
+        DbColumnConfig $columnConfig
+    ) {
+        $rendererConfig
+            ->setIsRequiredForCreate($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE))
+            ->setIsRequiredForEdit($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE));
+    }
 
     /**
      * @return mixed|null
@@ -123,11 +212,8 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @inheritdoc
      */
-    public function createFieldConfig($fieldName) {
-        $columnConfig = $this->getModel()->getTableColumn($fieldName);
-        $config = FormFieldConfig::create()
-            ->setType($columnConfig->getType());
-        return $config;
+    static public function createFieldConfig($fieldName) {
+        return FormFieldConfig::create();
     }
 
     /**

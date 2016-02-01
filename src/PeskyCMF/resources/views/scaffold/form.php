@@ -25,11 +25,13 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
     ])->render(); ?>
     <div class="content">
         <?php
-            $cols = $formConfig->getWidth() >= 100 ? 12 : ceil(12 * ($formConfig->getWidth() / 100));
-            $colsLeft = floor((12 - $cols) / 2);
+            $colsXl = $formConfig->getWidth() >= 100 ? 12 : ceil(12 * ($formConfig->getWidth() / 100));
+            $colsXlLeft = floor((12 - $colsXl) / 2);
+            $colsLg = $colsXl >= 10 ? 12 : $colsXl + 2;
+            $colsLgLeft = floor((12 - $colsLg) / 2);
         ?>
         <div class="row">
-            <div class="col-xs-<?php echo $cols; ?> col-xs-offset-<?php echo $colsLeft; ?>">
+            <div class="col-sx-12 <?php echo "col-xl-{$colsXl} col-lg-{$colsLg} col-xl-offset-{$colsXlLeft} col-lg-offset-{$colsLgLeft}"; ?>">
                 <div class="box box-primary">
                     <?php
                         $formAttributes = [
@@ -65,7 +67,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                     $config->setLabel($config->getLabel() . '*');
                                 }
                                 try {
-                                    $renderedInput = $config->render();
+                                    $renderedInput = $config->render(['translationPrefix' => $translationPrefix]);
                                     // replace <script> tags to be able to render that template
                                     echo preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
                                         return "{{= '<' + 'script{$matches[1]}>' }}$matches[2]{{= '</' + 'script>'}}";

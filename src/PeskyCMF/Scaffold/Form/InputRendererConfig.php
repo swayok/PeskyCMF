@@ -63,6 +63,10 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function setAttributes($attributes) {
+        if (array_key_exists('options', $attributes)) {
+            $this->setOptions($attributes['options']);
+            unset($attributes['options']);
+        }
         $this->attributes = $attributes;
         return $this;
     }

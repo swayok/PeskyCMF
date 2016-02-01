@@ -107,20 +107,14 @@ abstract class ScaffoldSectionConfig {
      * @return ItemDetailsConfig
      */
     protected function createItemDetailsConfig() {
-        return ItemDetailsConfig::create($this->model, $this)
-            ->setDefaultFieldRenderer(function ($field, $actionConfig, array $dataForView) {
-                return DataRendererConfig::create('cmf::details/text')->setData($dataForView);
-            });
+        return ItemDetailsConfig::create($this->model, $this);
     }
 
     /**
      * @return FormConfig
      */
     protected function createFormConfig() {
-        return FormConfig::create($this->model, $this)
-            ->setDefaultFieldRenderer(function () {
-                return InputRendererConfig::create('cmf::input/text');
-            });
+        return FormConfig::create($this->model, $this);
     }
 
     /**
