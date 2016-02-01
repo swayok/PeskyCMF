@@ -129,25 +129,16 @@ var NotAuthorisedCmfView = CmfView.extend({
 
 var CmfControllers = {
     loginController: NotAuthorisedCmfView.extend({
-        getContainer: Utils.getPageWrapper,
-        sigleton: true,
-        showUI: false,
         bodyClass: 'login-form',
         formSelector: 'form#login-form',
         formContainerSelector: '#login-form-container'
     }),
     forgotPasswordController: NotAuthorisedCmfView.extend({
-        getContainer: Utils.getPageWrapper,
-        sigleton: true,
-        showUI: false,
         bodyClass: 'forgot-password-form',
         formSelector: 'form#forgot-password-form',
         formContainerSelector: '#forgot-password-form-container'
     }),
     replacePasswordController: NotAuthorisedCmfView.extend({
-        getContainer: Utils.getPageWrapper,
-        sigleton: true,
-        showUI: false,
         bodyClass: 'replace-password-form',
         formSelector: 'form#replace-password-form',
         formContainerSelector: '#replace-password-form-container'

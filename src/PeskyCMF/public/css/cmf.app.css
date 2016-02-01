@@ -124,6 +124,12 @@ div.dataTables_processing.overlay:before,
   -o-transition: opacity 0.2s linear, height step-start;
   transition: opacity 0.2s linear, height step-start;
 }
+#page-wrapperdiv.dataTables_processing.loading:before,
+#page-wrapper.has-preloader.loading:before,
+#page-wrapperdiv.dataTables_processing.overlay:before,
+#page-wrapper.has-preloader.overlay:before {
+  height: 100vh;
+}
 div.dataTables_processing.loading:after,
 .has-preloader.loading:after {
   opacity: 1;
