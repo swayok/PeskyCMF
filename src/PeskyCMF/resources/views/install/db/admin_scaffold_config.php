@@ -13,7 +13,7 @@ use PeskyORM\DbColumnConfig;
 
 class AdminScaffoldConfig extends ScaffoldSectionConfig {
 
-    protected $isItemDetailsAllowed = true;
+    protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
     protected $isEditAllowed = true;
     protected $isDeleteAllowed = true;

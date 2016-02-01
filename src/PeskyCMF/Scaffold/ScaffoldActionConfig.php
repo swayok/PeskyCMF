@@ -25,6 +25,11 @@ abstract class ScaffoldActionConfig {
     /** @var null|callable */
     protected $defaultFieldRenderer = null;
     /**
+     * Container width (percents)
+     * @var int
+     */
+    protected $width = 100;
+    /**
      * @var Tag[]|callable
      */
     protected $toolbarItems = array();
@@ -375,6 +380,35 @@ abstract class ScaffoldActionConfig {
         }
         $this->specialConditions = $specialConditions;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWidth() {
+        return min($this->width, 100);
+    }
+
+    /**
+     * @param string $width
+     * @return $this
+     */
+    public function setWidth($width) {
+        $this->width = $width;
+        return $this;
+    }
+
+    /**
+     * Get css classes for content container.
+     * Uses witdh to collect col-??-?? and col-??-offset?? classes
+     * @return string
+     */
+    public function getCssClassesForContainer() {
+        $colsXl = $this->getWidth() >= 100 ? 12 : ceil(12 * ($this->getWidth() / 100));
+        $colsXlLeft = floor((12 - $colsXl) / 2);
+        $colsLg = $colsXl >= 10 ? 12 : $colsXl + 2;
+        $colsLgLeft = floor((12 - $colsLg) / 2);
+        return "col-xs-12 col-xl-{$colsXl} col-lg-{$colsLg} col-xl-offset-{$colsXlLeft} col-lg-offset-{$colsLgLeft}";
     }
 
 }

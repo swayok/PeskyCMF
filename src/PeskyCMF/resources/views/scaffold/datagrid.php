@@ -5,6 +5,12 @@
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
  * @var string $translationPrefix
  * @var string $idSuffix
+ * @var array $includes - views to include into this template.
+ *      Possible use: add datatable cell templates and use them in $dataTablesInitializer
+ * @var string|null $dataTablesInitializer - js function like
+        funciton (dataGridSelector, dataTablesConfig, originalInitializer) {
+            return originalInitializer(dataGridSelector, dataTablesConfig);
+        }
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 $gridColumnsConfigs = $dataGridConfig->getFields();
@@ -16,7 +22,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
         'defaultBackUrl' => route('cmf_start_page'),
     ])->render(); ?>
     <div class="content">
-        <div class="row"><div class="col-xs-12">
+        <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">
             <div class="box"><div class="box-body">
                 <table class="table table-bordered table-hover table-striped" id="<?php echo $dataGridId ?>">
                 <thead>
@@ -39,6 +45,19 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
         </div></div>
 
     </div>
+
+    <?php
+        if (!empty($includes)) {
+            if (!is_array($includes)) {
+                $includes = [$includes];
+            }
+            $dataForViews = compact('translationPrefix', 'idSuffix', 'model', 'dataGridConfig');
+            foreach ($includes as $include) {
+                echo view($include, $dataForViews)->render();
+                echo "\n\n";
+            }
+        }
+    ?>
 
     <?php
         $toolbar = [];
@@ -151,7 +170,11 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 filters: <?php echo json_encode($fitlers, JSON_UNESCAPED_UNICODE); ?>
             };
             DataGridSearchHelper.locale = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
-            var dataGrid = ScaffoldDataGridHelper.init('#<?php echo $dataGridId; ?>', dataTablesConfig);
+            <?php if (empty($dataTablesInitializer)): ?>
+                var dataGrid = ScaffoldDataGridHelper.init('#<?php echo $dataGridId; ?>', dataTablesConfig);
+            <?php else: ?>
+                var dataGrid = <?php echo $dataTablesInitializer; ?>('#<?php echo $dataGridId; ?>', dataTablesConfig, ScaffoldDataGridHelper.init);
+            <?php endif; ?>
             DataGridSearchHelper.init(queryBuilderConfig, defaultSearchRules, dataGrid);
         })();
     </script>

@@ -29,7 +29,7 @@ use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
 
 class {{ $scaffoldConfigClassName }} extends {{ class_basename($scaffoldConfigParentClass) }} {
 
-    protected $isItemDetailsAllowed = true;
+    protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
     protected $isEditAllowed = true;
     protected $isDeleteAllowed = true;

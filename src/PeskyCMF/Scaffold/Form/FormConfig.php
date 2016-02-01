@@ -20,11 +20,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @var bool
      */
     protected $hasFiles = false;
-    /**
-     * Form width (percents)
-     * @var int
-     */
-    protected $width = 100;
+
     /** @var bool */
     protected $hasOptionsLoader = null;
     /** @var array  */
@@ -144,22 +140,6 @@ class FormConfig extends ScaffoldActionConfig {
      */
     public function setItemId($itemId) {
         $this->itemId = $itemId;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getWidth() {
-        return $this->width;
-    }
-
-    /**
-     * @param string $width
-     * @return $this
-     */
-    public function setWidth($width) {
-        $this->width = $width;
         return $this;
     }
 

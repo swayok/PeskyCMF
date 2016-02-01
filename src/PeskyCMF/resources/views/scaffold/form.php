@@ -24,14 +24,8 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
         'defaultBackUrl' => $backUrl,
     ])->render(); ?>
     <div class="content">
-        <?php
-            $colsXl = $formConfig->getWidth() >= 100 ? 12 : ceil(12 * ($formConfig->getWidth() / 100));
-            $colsXlLeft = floor((12 - $colsXl) / 2);
-            $colsLg = $colsXl >= 10 ? 12 : $colsXl + 2;
-            $colsLgLeft = floor((12 - $colsLg) / 2);
-        ?>
         <div class="row">
-            <div class="col-sx-12 <?php echo "col-xl-{$colsXl} col-lg-{$colsLg} col-xl-offset-{$colsXlLeft} col-lg-offset-{$colsLgLeft}"; ?>">
+            <div class="<?php echo $formConfig->getCssClassesForContainer() ?>">
                 <div class="box box-primary">
                     <?php
                         $formAttributes = [
@@ -74,7 +68,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                     }, $renderedInput);
                                 } catch (Exception $exc) {
                                     echo '<div>' . $exc->getMessage() . '</div>';
-                                    echo '<pre>' . $exc->getTraceAsString() . '</pre>';
+                                    echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
                                 }
                             }
                         ?>

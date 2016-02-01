@@ -17,7 +17,7 @@ try {
         'defaultBackUrl' => $backUrl,
     ])->render(); ?>
     <div class="content">
-        <div class="row"><div class="col-xs-12">
+        <div class="row"><div class="<?php echo $itemDetailsConfig->getCssClassesForContainer() ?>">
             <div class="box">
                 <div class="box-body">
                     <table class="table table-striped table-bordered">
@@ -106,5 +106,5 @@ try {
 </script>
 <?php } catch (Exception $exc) {
     echo $exc->getMessage();
-    echo '<pre>' . $exc->getTraceAsString() . '</pre>';
+    echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
 }?>

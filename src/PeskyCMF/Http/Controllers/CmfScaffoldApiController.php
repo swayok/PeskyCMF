@@ -55,14 +55,16 @@ class CmfScaffoldApiController extends Controller {
 
     public function getItem(Request $request, $tableName, $id = null) {
         $isItemDetails = !!$request->query('details', false);
+        $model = self::getModel();
         if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
             return response()->json([
                 '_message' => CmfConfig::transBase(
                     '.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden'
                 ),
+                'redirect' => 'back',
+                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
             ], HttpCode::FORBIDDEN);
         }
-        $model = self::getModel();
         $object = $model->getOwnDbObject();
         if (!$object->_getPkField()->isValidValueFormat($id)) {
             return self::sendItemNotFoundResponse($model);
@@ -105,13 +107,15 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function getItemDefaults() {
+        $model = self::getModel();
         if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
             return response()->json([
                 '_message' => CmfConfig::transBase('.action.item_details.forbidden'),
+                'redirect' => 'back',
+                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
             ], HttpCode::FORBIDDEN);
         }
-        $object = self::getModel()->getOwnDbObject();
-        $data = $object->getDefaultsArray();
+        $data = $model->getOwnDbObject()->getDefaultsArray();
         $this->getScaffoldConfig()->getFormConfig()->prepareRecord($data);
         return response()->json($data);
     }
@@ -120,6 +124,8 @@ class CmfScaffoldApiController extends Controller {
         if (!$this->getScaffoldConfig()->isEditAllowed() && !$this->getScaffoldConfig()->isCreateAllowed()) {
             return response()->json([
                 '_message' => CmfConfig::transBase('.action.edit.forbidden'),
+                'redirect' => 'back',
+                'redirect_fallback' => route('cmf_items_table', [self::getModel()->getTableName()]),
             ], HttpCode::FORBIDDEN);
         }
         $optionsByFields = $this->getScaffoldConfig()->getFormConfig()->loadOptions();
@@ -134,9 +140,12 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function addItem(Request $request) {
+        $model = self::getModel();
         if (!$this->getScaffoldConfig()->isCreateAllowed()) {
             return response()->json([
                 '_message' => CmfConfig::transBase('.action.create.forbidden'),
+                'redirect' => 'back',
+                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
             ], HttpCode::FORBIDDEN);
         }
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
@@ -148,7 +157,6 @@ class CmfScaffoldApiController extends Controller {
                 'errors' => $errors
             ], HttpCode::INVALID);
         }
-        $model = self::getModel();
         unset($data[$model->getPkColumnName()]);
         $data = $formConfig->beforeSave(true, $data);
         if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(true)) {
@@ -182,12 +190,14 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function updateItem(Request $request) {
+        $model = self::getModel();
         if (!$this->getScaffoldConfig()->isEditAllowed()) {
             return response()->json([
                 '_message' => CmfConfig::transBase('.action.edit.forbidden'),
+                'redirect' => 'back',
+                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
             ], HttpCode::FORBIDDEN);
         }
-        $model = self::getModel();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
         $expectedFields = array_keys($formConfig->getFields());
         $expectedFields[] = $model->getPkColumnName();
@@ -251,12 +261,14 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function deleteItem($tableName, $id) {
+        $model = self::getModel();
         if (!$this->getScaffoldConfig()->isDeleteAllowed()) {
             return response()->json([
                 '_message' => CmfConfig::transBase('.action.delete.forbidden'),
+                'redirect' => 'back',
+                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
             ], HttpCode::FORBIDDEN);
         }
-        $model = self::getModel();
         $object = $model->getOwnDbObject();
         if (!$object->_getPkField()->isValidValueFormat($id)) {
             return self::sendItemNotFoundResponse($model);
