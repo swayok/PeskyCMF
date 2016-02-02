@@ -85,6 +85,9 @@ Utils.handleAjaxError = function (xhr) {
 };
 
 Utils.handleAjaxSuccess = function (json) {
+    if (json._message) {
+        toastr.success(json._message);
+    }
     if (json.redirect) {
         switch (json.redirect) {
             case 'back':
@@ -96,9 +99,6 @@ Utils.handleAjaxSuccess = function (json) {
             default:
                 ScaffoldsManager.app.nav(json.redirect);
         }
-    }
-    if (json._message) {
-        toastr.success(json._message);
     }
     if (json._reload_user) {
         Utils.getUser(true);
