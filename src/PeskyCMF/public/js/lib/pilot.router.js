@@ -912,7 +912,6 @@
     function Request(url, referrer, router) {
         if (!_rhttp.test(url)) {
             if ('/' == url.charAt(0)) {
-                console.log(location);
                 url = '//' + location.host + url;
             } else {
                 url = location.pathname.substr(0, location.pathname.lastIndexOf('/') + 1) + url;
