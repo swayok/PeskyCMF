@@ -90,6 +90,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             $this->storeConfigsInLaravelContainer();
 
             self::$alreadyLoaded = true;
+        } else {
+            $this->whenConfigsShouldNotBeLoaded();
         }
     }
 
@@ -170,9 +172,17 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function loadRoutes() {
+        $this->loadCustomRoutes();
+        $this->loadCmfRoutes();
+    }
+
+    protected function loadCustomRoutes() {
         foreach ($this->cmfConfig->routes_config_files() as $filePath) {
             require_once $filePath;
         }
+    }
+
+    protected function loadCmfRoutes() {
         foreach ($this->cmfConfig->cmf_routes_cofig_files() as $filePath) {
             require_once $filePath;
         }
@@ -187,6 +197,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
                 return response('File not found');
             }
         })->where(['file_path' => '(js|css|img)\/.+\.[a-z0-9]+$']);
+    }
+
+    protected function whenConfigsShouldNotBeLoaded() {
+
     }
 
 

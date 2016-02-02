@@ -8,6 +8,7 @@
         function (textareaSelector) {
             $(textareaSelector).ckeditor();
         }
+ * @var string|null $insertJsCode - any js code to be inserted before editor init
  */
 $id = $fieldConfig->getName() . '-input';
 include 'textarea.php';
@@ -15,6 +16,9 @@ include 'textarea.php';
 
 <script type="application/javascript">
     $(document).ready(function () {
+        <?php if (!empty($insertJsCode)) : ?>
+            <?php echo $insertJsCode; ?>
+        <?php endif; ?>
         <?php if (empty($ckeditorInitializer)) : ?>
             $('#<?php echo $id ?>').ckeditor();
         <?php else: ?>
