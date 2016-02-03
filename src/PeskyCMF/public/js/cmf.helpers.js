@@ -115,6 +115,7 @@ AdminUI.destroyUI = function () {
         wrapper.show();
         AdminUI.visible = false;
         deferred.resolve();
+        $(document).trigger('appui:hidden');
     });
     return deferred;
 };
@@ -137,6 +138,7 @@ AdminUI.showUI = function () {
             Utils.hidePreloader(wrapper);
             Utils.highlightLinks(window.adminApp.request.path);
             deferred.resolve();
+            $(document).trigger('appui:shown');
         });
     }
     return deferred;
@@ -149,6 +151,7 @@ AdminUI.loadUI = function () {
             .done(function (html) {
                 AdminUI.$el = $('<div class="ui-container">' + html + '</div>');
                 deferred.resolve(AdminUI.$el);
+                $(document).trigger('appui:loaded');
             });
     } else {
         deferred.resolve(AdminUI.$el);

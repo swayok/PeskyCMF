@@ -43,7 +43,7 @@ class CmfGeneralController extends Controller {
         $configName = $viewName . '_view';
         $configs = CmfConfig::getInstance();
         if (!method_exists($configs, $configName)) {
-            abort(404, "Config [$configName] not defined");
+            abort(HttpCode::NOT_FOUND, "Config [$configName] not defined");
         }
         return view(CmfConfig::getInstance()->$configName)->render();
     }

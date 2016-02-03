@@ -14,3 +14,19 @@ if (!function_exists('routeTpl')) {
         return preg_replace(array_keys($replacements), array_values($replacements), $url);
     }
 }
+
+if (!function_exists('notFoundJsonResponse')) {
+    function notFoundJsonResponse($fallbackUrl = null, $message = null) {
+        if (empty($message)) {
+            $message = \PeskyCMF\Config\CmfConfig::transBase('.error.http404');
+        }
+        if (empty($fallbackUrl)) {
+            $fallbackUrl = route('cmf_start_page');
+        }
+        return response()->json([
+            '_message' => $message,
+            'redirect' => 'back',
+            'redirect_fallback' => $fallbackUrl
+        ], 404);
+    }
+}

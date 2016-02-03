@@ -370,9 +370,12 @@ class CmfScaffoldApiController extends Controller {
         return $ret;
     }
 
-    static public function sendItemNotFoundResponse(CmfDbModel $model) {
+    static public function sendItemNotFoundResponse(CmfDbModel $model, $message = null) {
+        if (empty($message)) {
+            $message = CmfConfig::transBase('.error.resource_item_not_found');
+        }
         return response()->json([
-            '_message' => CmfConfig::transBase('.error.resource_item_not_found'),
+            '_message' => $message,
             'redirect' => 'back',
             'redirect_fallback' => route('cmf_items_table', ['table_name' => $model->getTableName()])
         ], 404);

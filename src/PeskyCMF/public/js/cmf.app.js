@@ -27,7 +27,7 @@ $(document).ready(function () {
         .route('/login', CmfControllers.loginController)
         .route('/forgot_password', CmfControllers.forgotPasswordController)
         .route('/replace_password/:access_key', CmfControllers.replacePasswordController)
-        .route('/page/:uri', CmfControllers.pageController)
+        .route('/page/:uri*', CmfControllers.pageController)
         .route('/logout', function (event, request) {
             app.disableUrlChangeOnce = true;
             Utils.showPreloader(document.body);
@@ -58,8 +58,8 @@ $(document).ready(function () {
         }
         Utils.highlightLinks(request.path);
         app.disableUrlChangeOnce = false;
-    }).on('useraction:navigate', function () {
-    });
+    })/*.on('useraction:navigate', function () {
+    })*/;
 
     window.addEventListener('popstate', function(event) {
         if (document.location.pathname.match(new RegExp('^' + GlobalVars.rootUrl + '(/|$)'))) {
