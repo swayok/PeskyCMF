@@ -4,6 +4,7 @@ namespace PeskyCMF\Http\Controllers;
 
 use App\Db\Admin\Admin;
 use Auth;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
@@ -13,6 +14,7 @@ use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\DbExpr;
+use PeskyORM\DbObject;
 use Redirect;
 use Swayok\Utils\Set;
 
@@ -65,28 +67,23 @@ class CmfGeneralController extends Controller {
                 $admin->setPassword($request->data('new_password'));
             }
             if ($admin->commit()) {
-                return response()->json([
-                    '_message' => CmfConfig::transCustom('.page.profile.saved'),
-                    'redirect' => 'reload'
-                ]);
+                return cmfServiceJsonResponse()
+                    ->setMessage(CmfConfig::transCustom('.page.profile.saved'))
+                    ->reloadPage();
             } else {
-                return response()->json(
-                    [
-                        '_message' => CmfConfig::transBase('.form.failed_to_save_resource_data'),
-                        'redirect' => 'reload'
-                    ],
-                    HttpCode::SERVER_ERROR
-                );
+                return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
+                    ->setMessage(CmfConfig::transBase('.form.failed_to_save_resource_data'))
+                    ->reloadPage();
             }
         }
     }
 
     /**
      * @param Request $request
-     * @param Admin $admin
+     * @param DbObject|Authenticatable $admin
      * @return array|\Illuminate\Http\JsonResponse
      */
-    protected function validateAndGetAdminProfileUpdates(Request $request, Admin $admin) {
+    protected function validateAndGetAdminProfileUpdates(Request $request, DbObject $admin) {
         $validationRules = [
             'old_password' => 'required',
             'new_password' => 'min:6',
@@ -104,14 +101,14 @@ class CmfGeneralController extends Controller {
         $userLoginCol = CmfConfig::getInstance()->user_login_column();
         if ($admin->_hasField('email')) {
             if ($userLoginCol === 'email') {
-                $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->id},id";
+                $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->getAuthIdentifier()},id";
             } else {
                 $validationRules['email'] = "email";
             }
             $fieldsToUpdate[] = 'email';
         }
         if ($userLoginCol !== 'email') {
-            $validationRules[$userLoginCol] = "required|alpha_dash|min:4|unique:$usersTable,$userLoginCol,{$admin->id},id";
+            $validationRules[$userLoginCol] = "required|regex:%^[a-zA-Z0-9_@.-]+$%is|min:4|unique:$usersTable,$userLoginCol,{$admin->getAuthIdentifier()},id";
             $fieldsToUpdate[] = $userLoginCol;
         }
         $validator = \Validator::make(
@@ -122,17 +119,11 @@ class CmfGeneralController extends Controller {
         $errors = [];
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
-        } else if (!\Hash::check($request->data('old_password'), $admin->password)) {
+        } else if (!\Hash::check($request->data('old_password'), $admin->getAuthPassword())) {
             $errors['old_password'] = CmfConfig::transCustom('.page.profile.errors.old_password.match');
         }
         if (!empty($errors)) {
-            return response()->json(
-                [
-                    'errors' => $errors,
-                    'message' => CmfConfig::transBase('.form.validation_errors')
-                ],
-                HttpCode::INVALID
-            );
+            return cmfJsonResponseForValidationErrors($errors);
         }
         return $request->only($fieldsToUpdate);
     }
@@ -175,11 +166,11 @@ class CmfGeneralController extends Controller {
     public function getReplacePassword(Request $request, $accessKey) {
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (empty($user)) {
-            return Redirect::to(route(CmfConfig::getInstance()->login_route()))
-                ->with(CmfConfig::getInstance()->session_message_key(), [
-                    'message' => CmfConfig::transCustom('.replace_password.invalid_access_key'),
-                    'type' => 'error'
-                ]);
+            return cmfRedirectResponseWithMessage(
+                route(CmfConfig::getInstance()->login_route()),
+                CmfConfig::transCustom('.replace_password.invalid_access_key'),
+                'error'
+            );
         }
         return $this->loadJsApp($request);
     }
@@ -210,10 +201,9 @@ class CmfGeneralController extends Controller {
                 'userId' => $user->_getPkValue()
             ])->render();
         } else {
-            return response()->json([
-                '_message' => CmfConfig::transCustom('.replace_password.invalid_access_key'),
-                'redirect' => route(CmfConfig::getInstance()->login_route())
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transCustom('.replace_password.invalid_access_key'))
+                ->setRedirect(route(CmfConfig::getInstance()->login_route()));
         }
     }
 
@@ -253,9 +243,10 @@ class CmfGeneralController extends Controller {
             'password' => $request->data('password')
         ];
         if (!Auth::guard()->attempt($credentials)) {
-            return response()->json(['_message' => CmfConfig::transCustom('.login_form.login_failed')], HttpCode::INVALID);
+            return cmfServiceJsonResponse(HttpCode::INVALID)
+                ->setMessage(CmfConfig::transCustom('.login_form.login_failed'));
         } else {
-            return response()->json(['redirect' => $this->getIntendedUrl()]);
+            return cmfServiceJsonResponse()->setRedirect($this->getIntendedUrl());
         }
     }
 
@@ -281,10 +272,9 @@ class CmfGeneralController extends Controller {
                     ->subject($subject);
             });
         }
-        return response()->json([
-            '_message' => CmfConfig::transCustom('.forgot_password.instructions_sent'),
-            'redirect' => route(CmfConfig::getInstance()->login_route())
-        ]);
+        return cmfServiceJsonResponse()
+            ->setMessage(CmfConfig::transCustom('.forgot_password.instructions_sent'))
+            ->setRedirect(route(CmfConfig::getInstance()->login_route()));
     }
 
     public function replacePassword(Request $request, $accessKey) {
@@ -297,20 +287,17 @@ class CmfGeneralController extends Controller {
         if (!empty($user) && $user->_getPkValue() !== $request->data('id')) {
             $user->begin()->_setFieldValue('password', $request->data('password'));
             if ($user->commit()) {
-                return response()->json([
-                    '_message' => CmfConfig::transCustom('.replace_password.password_replaced'),
-                    'redirect' => route(CmfConfig::getInstance()->login_route())
-                ]);
+                return cmfServiceJsonResponse()
+                    ->setMessage(CmfConfig::transCustom('.replace_password.password_replaced'))
+                    ->setRedirect(route(CmfConfig::getInstance()->login_route()));
             } else {
-                return response()->json([
-                    '_message' => CmfConfig::transCustom('.replace_password.failed_to_save'),
-                ], HttpCode::SERVER_ERROR);
+                return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
+                    ->setMessage(CmfConfig::transCustom('.replace_password.failed_to_save'));
             }
         } else {
-            return response()->json([
-                '_message' => CmfConfig::transCustom('.replace_password.invalid_access_key'),
-                'redirect' => route(CmfConfig::getInstance()->login_route())
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transCustom('.replace_password.invalid_access_key'))
+                ->setRedirect(route(CmfConfig::getInstance()->login_route()));
         }
     }
 

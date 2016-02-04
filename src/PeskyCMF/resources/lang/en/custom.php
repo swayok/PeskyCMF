@@ -120,6 +120,12 @@ return [
                     'email' => 'Enter valid E-mail address',
                     'unique' => 'Entered E-mail address already in use by another Administrator'
                 ],
+                'login' => [
+                    'required' => 'Enter login',
+                    'regex' => 'Login may only contain latin letters, digits, "_", "-", "@", "."',
+                    'min' => 'Lugin must contain at least :min symbols',
+                    'unique' => 'Entered login already in use by another Administrator',
+                ],
                 'language' => [
                     'required' => 'Select language',
                     'in' => 'Selected language is not in list of allowed languages. Select another language.',

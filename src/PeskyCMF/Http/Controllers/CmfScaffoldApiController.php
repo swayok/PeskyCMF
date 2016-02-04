@@ -60,13 +60,11 @@ class CmfScaffoldApiController extends Controller {
         $isItemDetails = !!$request->query('details', false);
         $model = self::getModel();
         if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
-            return response()->json([
-                '_message' => CmfConfig::transBase(
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase(
                     '.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden'
-                ),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+                ))
+                ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $object = $model->getOwnDbObject();
         if (!$object->_getPkField()->isValidValueFormat($id)) {
@@ -97,13 +95,11 @@ class CmfScaffoldApiController extends Controller {
                 && !$this->getScaffoldConfig()->isRecordEditAllowed($data)
             )
         ) {
-            return response()->json([
-                '_message' => CmfConfig::transBase(
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase(
                     '.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden_for_record'
-                ),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+                ))
+                ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $actionConfig->prepareRecord($data);
         return response()->json($data);
@@ -112,11 +108,9 @@ class CmfScaffoldApiController extends Controller {
     public function getItemDefaults() {
         $model = self::getModel();
         if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.action.item_details.forbidden'),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.item_details.forbidden'))
+                ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $data = $model->getOwnDbObject()->getDefaultsArray();
         $this->getScaffoldConfig()->getFormConfig()->prepareRecord($data);
@@ -125,11 +119,9 @@ class CmfScaffoldApiController extends Controller {
 
     public function getOptions() {
         if (!$this->getScaffoldConfig()->isEditAllowed() && !$this->getScaffoldConfig()->isCreateAllowed()) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.action.edit.forbidden'),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [self::getModel()->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
+                ->goBack(route('cmf_items_table', [self::getModel()->getTableName()]));
         }
         $optionsByFields = $this->getScaffoldConfig()->getFormConfig()->loadOptions();
         foreach ($optionsByFields as $fieldName => $fieldOptions) {
@@ -145,20 +137,15 @@ class CmfScaffoldApiController extends Controller {
     public function addItem(Request $request) {
         $model = self::getModel();
         if (!$this->getScaffoldConfig()->isCreateAllowed()) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.action.create.forbidden'),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.create.forbidden'))
+                ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
         $data = array_intersect_key($request->data(), $formConfig->getFields());
         $errors = $formConfig->validateDataForCreate($data);
         if (!empty($errors)) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.form.validation_errors'),
-                'errors' => $errors
-            ], HttpCode::INVALID);
+            return cmfJsonResponseForValidationErrors($errors);
         }
         unset($data[$model->getPkColumnName()]);
         $data = $formConfig->beforeSave(true, $data);
@@ -166,10 +153,7 @@ class CmfScaffoldApiController extends Controller {
             // revalidate
             $errors = $formConfig->validateDataForCreate($data, [], true);
             if (!empty($errors)) {
-                return response()->json([
-                    '_message' => CmfConfig::transBase('.form.validation_errors'),
-                    'errors' => $errors
-                ], HttpCode::INVALID);
+                return cmfJsonResponseForValidationErrors($errors);
             }
         }
         unset($data[$model->getPkColumnName()]); //< to be 100% sure =)
@@ -177,29 +161,23 @@ class CmfScaffoldApiController extends Controller {
             try {
                 $success = $model->getOwnDbObject($data)->save();
                 if (!$success) {
-                    return response()->json(
-                        ['_message' => CmfConfig::transBase('.form.failed_to_save_data')],
-                        HttpCode::SERVER_ERROR
-                    );
+                    return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
+                        ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
                 }
             } catch (DbObjectValidationException $exc) {
-                return response()->json([
-                    '_message' => CmfConfig::transBase('.form.validation_errors'),
-                    'errors' => $exc->getValidationErrors()
-                ], HttpCode::INVALID);
+                return cmfJsonResponseForValidationErrors($exc->getValidationErrors());
             }
         }
-        return response()->json(['_message' => CmfConfig::transBase('.form.resource_created_successfully')]);
+        return cmfServiceJsonResponse()
+            ->setMessage(CmfConfig::transBase('.form.resource_created_successfully'));
     }
 
     public function updateItem(Request $request) {
         $model = self::getModel();
         if (!$this->getScaffoldConfig()->isEditAllowed()) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.action.edit.forbidden'),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
+                ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
         $expectedFields = array_keys($formConfig->getFields());
@@ -207,10 +185,7 @@ class CmfScaffoldApiController extends Controller {
         $data = array_intersect_key($request->data(), array_flip($expectedFields));
         $errors = $formConfig->validateDataForEdit($data);
         if (!empty($errors)) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.form.validation_errors'),
-                'errors' => $errors
-            ], HttpCode::INVALID);
+            return cmfJsonResponseForValidationErrors($errors);
         }
         if (!$request->data($model->getPkColumnName())) {
             return self::sendItemNotFoundResponse($model);
@@ -226,21 +201,16 @@ class CmfScaffoldApiController extends Controller {
             return self::sendItemNotFoundResponse($model);
         }
         if (!$this->getScaffoldConfig()->isRecordEditAllowed($object->toPublicArrayWithoutFiles())) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.action.edit.forbidden_for_record'),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.edit.forbidden_for_record'))
+                ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $data = $formConfig->beforeSave(false, $data);
         if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
             // revalidate
             $errors = $formConfig->validateDataForCreate($data);
             if (!empty($errors)) {
-                return response()->json([
-                    '_message' => CmfConfig::transBase('.form.validation_errors'),
-                    'errors' => $errors
-                ], HttpCode::INVALID);
+                return cmfJsonResponseForValidationErrors($errors);
             }
         }
         unset($data[$model->getPkColumnName()]);
@@ -248,29 +218,23 @@ class CmfScaffoldApiController extends Controller {
             try {
                 $success = $object->begin()->updateValues($data)->commit();
                 if (!$success) {
-                    return response()->json(
-                        ['_message' => CmfConfig::transBase('.form.failed_to_save_data')],
-                        HttpCode::SERVER_ERROR
-                    );
+                    return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
+                        ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
                 }
             } catch (DbObjectValidationException $exc) {
-                return response()->json([
-                    '_message' => CmfConfig::transBase('.form.validation_errors'),
-                    'errors' => $exc->getValidationErrors()
-                ], HttpCode::INVALID);
+                return cmfJsonResponseForValidationErrors($exc->getValidationErrors());
             }
         }
-        return response()->json(['_message' => CmfConfig::transBase('.form.resource_updated_successfully')]);
+        return cmfServiceJsonResponse()
+            ->setMessage(CmfConfig::transBase('.form.resource_updated_successfully'));
     }
 
     public function deleteItem($tableName, $id) {
         $model = self::getModel();
         if (!$this->getScaffoldConfig()->isDeleteAllowed()) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.action.delete.forbidden'),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.delete.forbidden'))
+                ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $object = $model->getOwnDbObject();
         if (!$object->_getPkField()->isValidValueFormat($id)) {
@@ -283,18 +247,14 @@ class CmfScaffoldApiController extends Controller {
             return self::sendItemNotFoundResponse($model);
         }
         if (!$this->getScaffoldConfig()->isRecordDeleteAllowed($object->toPublicArrayWithoutFiles())) {
-            return response()->json([
-                '_message' => CmfConfig::transBase('.action.delete.forbidden_for_record'),
-                'redirect' => 'back',
-                'redirect_fallback' => route('cmf_items_table', [$model->getTableName()]),
-            ], HttpCode::FORBIDDEN);
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.delete.forbidden_for_record'))
+                ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $object->delete();
-        return response()->json([
-            '_message' => CmfConfig::transBase('.action.delete.success'),
-            'redirect' => 'back',
-            'redirect_fallback' => route('cmf_items_table', ['table_name' => $model->getTableName()])
-        ]);
+        return cmfServiceJsonResponse()
+            ->setMessage(CmfConfig::transBase('.action.delete.success'))
+            ->goBack(route('cmf_items_table', ['table_name' => $model->getTableName()]));
     }
 
     /**
@@ -374,11 +334,10 @@ class CmfScaffoldApiController extends Controller {
         if (empty($message)) {
             $message = CmfConfig::transBase('.error.resource_item_not_found');
         }
-        return response()->json([
-            '_message' => $message,
-            'redirect' => 'back',
-            'redirect_fallback' => route('cmf_items_table', ['table_name' => $model->getTableName()])
-        ], 404);
+        return cmfJsonResponseForHttp404(
+            route('cmf_items_table', ['table_name' => $model->getTableName()]),
+            $message
+        );
     }
 
 }
