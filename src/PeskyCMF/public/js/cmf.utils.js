@@ -85,20 +85,26 @@ Utils.handleAjaxError = function (xhr) {
 };
 
 Utils.handleAjaxSuccess = function (json) {
-    if (json._message) {
-        toastr.success(json._message);
-    }
-    if (json.redirect) {
-        switch (json.redirect) {
-            case 'back':
-                ScaffoldsManager.app.back(json.redirect_fallback);
-                break;
-            case 'reload':
-                ScaffoldsManager.app.reload();
-                break;
-            default:
-                ScaffoldsManager.app.nav(json.redirect);
+    try {
+        if (json.redirect) {
+            switch (json.redirect) {
+                case 'back':
+                    ScaffoldsManager.app.back(json.redirect_fallback);
+                    break;
+                case 'reload':
+                    ScaffoldsManager.app.reload();
+                    break;
+                default:
+                    ScaffoldsManager.app.nav(json.redirect);
+            }
         }
+    } catch (exc) {
+        console.error(exc.name + ': ' + exc.message);
+        console.error(exc.stack);
+    }
+    if (json._message) {
+        // do not place before json.redirect!!! message may be suppressed as soon as redirection starts
+        toastr.success(json._message);
     }
     if (json._reload_user) {
         Utils.getUser(true);

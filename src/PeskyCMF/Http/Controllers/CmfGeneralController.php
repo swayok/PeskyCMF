@@ -175,10 +175,11 @@ class CmfGeneralController extends Controller {
     public function getReplacePassword(Request $request, $accessKey) {
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (empty($user)) {
-            return response()->json([
-                '_message' => CmfConfig::transCustom('.replace_password.invalid_access_key'),
-                'redirect' => route(CmfConfig::getInstance()->login_route())
-            ], HttpCode::FORBIDDEN);
+            return Redirect::to(route(CmfConfig::getInstance()->login_route()))
+                ->with(CmfConfig::getInstance()->session_message_key(), [
+                    'message' => CmfConfig::transCustom('.replace_password.invalid_access_key'),
+                    'type' => 'error'
+                ]);
         }
         return $this->loadJsApp($request);
     }
@@ -311,7 +312,6 @@ class CmfGeneralController extends Controller {
                 'redirect' => route(CmfConfig::getInstance()->login_route())
             ], HttpCode::FORBIDDEN);
         }
-
     }
 
     public function logout() {

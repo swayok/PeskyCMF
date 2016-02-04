@@ -61,7 +61,7 @@ Route::group(
 
         Route::get('replace_password/{access_key}', [
             'as' => 'cmf_replace_password',
-            'uses' => __cmf_general_controller_class() . '@loadJsApp'
+            'uses' => __cmf_general_controller_class() . '@getReplacePassword'
         ]);
 
         Route::get('logout', [

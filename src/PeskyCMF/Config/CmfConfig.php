@@ -424,6 +424,10 @@ class CmfConfig extends ConfigsContainer {
         return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_redirect';
     }
 
+    static public function session_message_key() {
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_message';
+    }
+
     /**
      * The permission option is the highest-level authentication check that lets you define a closure that should return true if the current user
      * is allowed to view the admin section. Any "falsey" response will send the user back to the 'login_path' defined below.

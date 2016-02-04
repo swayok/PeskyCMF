@@ -104,5 +104,16 @@
     @yield('js')
     @yield('js2')
 
+    <?php $message = Session::pull(\PeskyCMF\Config\CmfConfig::getInstance()->session_message_key(), false); ?>
+    @if (!empty($message) && (is_string($message) || is_array($message) && !empty($message['message'])))
+        <script type="application/javascript">
+            <?php $type = is_string($message) || empty($message['type']) || !in_array($message['type'], ['success', 'info', 'warning', 'error']) ? 'info' : $message['type'] ?>
+            $(document).ready(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.{{ $type }}('{{ is_string($message) ? $message : $message['message'] }}');
+                }
+            });
+        </script>
+    @endif
 </body>
 </html>
