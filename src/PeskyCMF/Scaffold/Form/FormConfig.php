@@ -6,6 +6,8 @@ namespace PeskyCMF\Scaffold\Form;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
+use PeskyCMF\Scaffold\ScaffoldFieldConfig;
+use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 use PeskyORM\DbColumnConfig;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
@@ -41,40 +43,18 @@ class FormConfig extends ScaffoldActionConfig {
     /** @var callable|null */
     protected $validationSuccessCallback;
 
-    /**
-     * @return callable|\Closure
-     */
-    public function getDefaultFieldRenderer() {
-        if (!empty($this->defaultFieldRenderer)) {
-            return $this->defaultFieldRenderer;
-        } else {
-            return function ($field, $actionConfig, array $dataForView) {
-                return $this->_getDefaultFieldRendererConfig($field, $actionConfig, $dataForView);
-            };
-        }
+    protected function createFieldRendererConfig() {
+        return InputRendererConfig::create();
     }
 
     /**
-     * @param FormFieldConfig $fieldConfig
-     * @param FormConfig $actionConfig
-     * @param array $dataForView
-     * @return mixed
+     * @param InputRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
+     * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
      */
-    protected function _getDefaultFieldRendererConfig(
-        FormFieldConfig $fieldConfig,
-        FormConfig $actionConfig,
-        array $dataForView
+    protected function configureDefaultRenderer(
+        ScaffoldFieldRendererConfig $rendererConfig,
+        ScaffoldFieldConfig $fieldConfig
     ) {
-        $rendererConfig = InputRendererConfig::create()->setData($dataForView);
-        $this->configureDefaultRenderer($rendererConfig, $fieldConfig);
-        return $rendererConfig;
-    }
-
-    /**
-     * @param InputRendererConfig $rendererConfig
-     * @param FormFieldConfig $fieldConfig
-     */
-    protected function configureDefaultRenderer(InputRendererConfig $rendererConfig, FormFieldConfig $fieldConfig) {
         switch ($fieldConfig->getType()) {
             case $fieldConfig::TYPE_BOOL:
                 $rendererConfig->setView('cmf::input/checkbox');
@@ -195,7 +175,7 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @inheritdoc
      */
-    static public function createFieldConfig($fieldName) {
+    public function createFieldConfig() {
         return FormFieldConfig::create();
     }
 

@@ -8,8 +8,6 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
-use PeskyCMF\Scaffold\Form\InputRendererConfig;
-use PeskyCMF\Scaffold\ItemDetails\DataRendererConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 
 abstract class ScaffoldSectionConfig {

@@ -6,6 +6,8 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
+use PeskyCMF\Scaffold\ScaffoldFieldConfig;
+use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
@@ -48,6 +50,25 @@ class DataGridConfig extends ScaffoldActionConfig {
         $this->limit = CmfConfig::getInstance()->rows_per_page();
         if ($model->getOrderField()) {
             $this->setOrderBy($model->getOrderField(), $model->getOrderDirection());
+        }
+    }
+
+    protected function createFieldRendererConfig() {
+        return CellRendererConfig::create();
+    }
+
+    /**
+     * @param CellRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
+     * @param DataGridFieldConfig|ScaffoldFieldConfig $fieldConfig
+     */
+    protected function configureDefaultRenderer(
+        ScaffoldFieldRendererConfig $rendererConfig,
+        ScaffoldFieldConfig $fieldConfig
+    ) {
+        switch ($fieldConfig->getType()) {
+            case $fieldConfig::TYPE_IMAGE:
+                $rendererConfig->setView('cmf::details/image');
+                break;
         }
     }
 
@@ -175,7 +196,7 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @inheritdoc
      */
-    static public function createFieldConfig($fieldName) {
+    public function createFieldConfig() {
         return DataGridFieldConfig::create();
     }
 

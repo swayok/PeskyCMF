@@ -101,13 +101,10 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @param string $fieldName
      * @return ScaffoldFieldConfig
      * @throws ScaffoldException
      */
-    static public function createFieldConfig($fieldName) {
-        throw new ScaffoldException(get_called_class() . '::createFieldConfig() method not implemented');
-    }
+    abstract public function createFieldConfig();
 
     /**
      * @param string $name
@@ -132,7 +129,7 @@ abstract class ScaffoldActionConfig {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
         }
         if (empty($config)) {
-            $config = static::createFieldConfig($name);
+            $config = $this->createFieldConfig();
         }
         $config->setName($name);
         $config->setPosition(count($this->fields));
@@ -298,7 +295,33 @@ abstract class ScaffoldActionConfig {
      * @return callable|null
      */
     public function getDefaultFieldRenderer() {
-        return $this->defaultFieldRenderer;
+        if (!empty($this->defaultFieldRenderer)) {
+            return $this->defaultFieldRenderer;
+        } else {
+            $this->setDefaultFieldRenderer(function (ScaffoldFieldConfig $fieldConfig, $actionConfig, array $dataForView) {
+                $rendererConfig = $this->createFieldRendererConfig()->setData($dataForView);
+                $this->configureDefaultRenderer($rendererConfig, $fieldConfig);
+                return $rendererConfig;
+            });
+            return $this->defaultFieldRenderer;
+        }
+    }
+
+    /**
+     * @return ScaffoldFieldRendererConfig
+     * @throws ScaffoldActionException
+     */
+    abstract protected function createFieldRendererConfig();
+
+    /**
+     * @param ScaffoldFieldRendererConfig $rendererConfig
+     * @param ScaffoldFieldConfig $fieldConfig
+     */
+    protected function configureDefaultRenderer(
+        ScaffoldFieldRendererConfig $rendererConfig,
+        ScaffoldFieldConfig $fieldConfig
+    ) {
+
     }
 
     /**

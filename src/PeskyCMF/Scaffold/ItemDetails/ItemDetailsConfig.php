@@ -3,6 +3,8 @@
 namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
+use PeskyCMF\Scaffold\ScaffoldFieldConfig;
+use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 
 class ItemDetailsConfig extends ScaffoldActionConfig {
 
@@ -11,37 +13,23 @@ class ItemDetailsConfig extends ScaffoldActionConfig {
     /**
      * @inheritdoc
      */
-    static public function createFieldConfig($fieldName) {
+    public function createFieldConfig() {
         return ItemDetailsFieldConfig::create();
     }
 
-    /**
-     * @return callable|\Closure
-     */
-    public function getDefaultFieldRenderer() {
-        if (!empty($this->defaultFieldRenderer)) {
-            return $this->defaultFieldRenderer;
-        } else {
-            return function ($fieldConfig, $actionConfig, array $dataForView) {
-                return $this->_getDefaultFieldRendererConfig($fieldConfig, $actionConfig, $dataForView);
-            };
-        }
+    protected function createFieldRendererConfig() {
+        return DataRendererConfig::create();
     }
 
     /**
-     * @param ItemDetailsFieldConfig $fieldConfig
-     * @param ItemDetailsConfig $actionConfig
-     * @param array $dataForView
-     * @return $this
+     * @param ScaffoldFieldRendererConfig|DataRendererConfig $rendererConfig
+     * @param ScaffoldFieldConfig|ItemDetailsFieldConfig $fieldConfig
      */
-    protected function _getDefaultFieldRendererConfig(
-        ItemDetailsFieldConfig $fieldConfig,
-        ItemDetailsConfig $actionConfig,
-        array $dataForView
+    protected function configureDefaultRenderer(
+        ScaffoldFieldRendererConfig $rendererConfig,
+        ScaffoldFieldConfig $fieldConfig
     ) {
-        $rendererConfig = DataRendererConfig::create('cmf::details/text')->setData($dataForView);
-        $fieldConfig->configureDefaultRenderer($rendererConfig);
-        return $rendererConfig;
+        $rendererConfig->setView('cmf::details/text');
     }
 
 }

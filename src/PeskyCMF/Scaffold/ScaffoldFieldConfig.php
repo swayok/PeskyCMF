@@ -181,9 +181,10 @@ abstract class ScaffoldFieldConfig {
      * @throws \PeskyORM\Exception\DbColumnConfigException
      */
     public function convertValue($value, DbColumnConfig $columnConfig, array $record, $ignoreValueConverter = false) {
-        if (!$ignoreValueConverter && !empty($this->valueConverter)) {
-            $value = call_user_func_array($this->valueConverter, [$value, $columnConfig, $record, $this]);
-        } else if (!empty($value)) {
+        $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
+        if (!empty($valueConverter)) {
+            $value = call_user_func($valueConverter, $value, $columnConfig, $record, $this);
+        } else if (!empty($value) || is_bool($value)) {
             switch ($this->getType()) {
                 case static::TYPE_DATETIME:
                     return date(static::FORMAT_DATETIME, is_numeric($value) ? $value : strtotime($value));

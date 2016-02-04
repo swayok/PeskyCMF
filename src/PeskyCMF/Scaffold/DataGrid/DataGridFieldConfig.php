@@ -74,19 +74,18 @@ class DataGridFieldConfig extends ScaffoldFieldConfig {
     }
 
     /**
-     * @param string $type
-     * @return $this
+     * @return callable|null
      */
-    public function setType($type) {
-        parent::setType($type);
-        switch ($this->type) {
-            case self::TYPE_BOOL:
-                $this->setValueConverter(function ($value) {
-                    return CmfConfig::transBase('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
-                });
-                break;
+    public function getValueConverter() {
+        if (empty($this->valueConverter)) {
+            switch ($this->getType()) {
+                case self::TYPE_BOOL:
+                    return function ($value) {
+                        return CmfConfig::transBase('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
+                    };
+            }
         }
-        return $this;
+        return $this->valueConverter;
     }
 
 }
