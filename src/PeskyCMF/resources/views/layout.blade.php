@@ -87,6 +87,7 @@
     <script src="/packages/cmf/js/lib/ckeditor/ckeditor.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/ckeditor/adapters/jquery.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/ckeditor/config.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/bootstrap-select/bootstrap-select.min.js" type="text/javascript"></script>
     <script src="/packages/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.global.vars.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
