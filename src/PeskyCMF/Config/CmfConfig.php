@@ -275,6 +275,9 @@ class CmfConfig extends ConfigsContainer {
         return 'cmf::ui.ui';
     }
 
+    /**
+     * @return string
+     */
     static public function footer_view() {
         return 'cmf::ui.footer';
     }
