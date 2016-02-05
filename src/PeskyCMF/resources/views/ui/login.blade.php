@@ -20,11 +20,11 @@ $loginInputName = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column()
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
             <div class="row login-submit">
-                @if (\PeskyCMF\Config\CmfConfig::getInstance()->is_password_restore_allowed())
-                    <div class="col-xs-8 forgot-password">
+                <div class="col-xs-8 forgot-password">
+                    @if (\PeskyCMF\Config\CmfConfig::getInstance()->is_password_restore_allowed())
                         <a href="{{ route('cmf_forgot_password') }}">{{ trans("{$dictionary}.login_form.forgot_password_label") }}</a>
-                    </div>
-                @endif
+                    @endif
+                </div>
                 <div class="col-xs-4">
                     <button type="submit" class="btn btn-primary btn-block btn-flat">
                         {{ trans("{$dictionary}.login_form.button_label") }}

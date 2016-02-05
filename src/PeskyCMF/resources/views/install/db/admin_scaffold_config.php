@@ -116,7 +116,25 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
                             return $value;
                         }
                     })
-            ]);
+            ])
+            ->setValidators([
+                'role' => 'required|in:' . implode(',', CmfConfig::getInstance()->roles_list()),
+                'language' => 'required|in:' . implode(',', CmfConfig::getInstance()->locales()),
+                'is_active' => 'boolean',
+                'is_superadmin' => 'boolean',
+            ])
+            ->addValidatorsForCreate([
+                'email' => 'required|email|min:4|max:100|unique:' . AdminTableConfig::TABLE_NAME . ',email',
+                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . AdminTableConfig::TABLE_NAME . ',login',
+                'password' => 'required|min:6',
+            ])
+            ->addValidatorsForEdit([
+                'id' => FormConfig::VALIDATOR_FOR_ID,
+                'email' => 'required|email|min:4|max:100|unique:' . AdminTableConfig::TABLE_NAME . ',email,{{id}},id',
+                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . AdminTableConfig::TABLE_NAME . ',login,{{id}},id',
+                'password' => 'min:6',
+            ])
+            ;
     }
 
 }

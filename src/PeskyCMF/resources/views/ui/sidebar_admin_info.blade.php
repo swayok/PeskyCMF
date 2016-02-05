@@ -13,6 +13,8 @@
 </div>
 
 <script type="text/html" id="user-panel-tpl">
-    <div class="name">@{{? it.name.length }}@{{= it.name }}@{{??}}@{{= it.role }}@{{?}}</div>
-    <div class="email">@{{= it.email }}</div>
+    <div class="user-name">@{{? it.name.length }}@{{= it.name }}@{{??}}@{{= it.role }}@{{?}}</div>
+    <div class="user-{{ \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column() }}">
+        <?php echo '{{= it.' . \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column() . ' }}'; ?>
+    </div>
 </script>

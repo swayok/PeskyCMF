@@ -5,7 +5,7 @@ namespace App\Db\Admin;
 use App\Db\BaseDbObject;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use PeskyCMF\Db\Traits\Authenticatable;
-use PeskyORM\DbObjectField;
+use PeskyCMF\Db\Traits\UserDataSavingHelper;
 
 /**
  * @package App\DbObject
@@ -45,29 +45,7 @@ use PeskyORM\DbObjectField;
  */
 class Admin extends BaseDbObject implements AuthenticatableContract {
 
-    use Authenticatable;
-
-    /**
-     * @param bool $verifyDbExistance
-     * @param bool $createIfNotExists
-     * @param bool $saveRelations
-     * @return bool
-     * @throws \PeskyORM\Exception\DbObjectException
-     * @throws \PeskyORM\Exception\DbObjectValidationException
-     */
-    public function save($verifyDbExistance = false, $createIfNotExists = false, $saveRelations = false) {
-        $passwordField = $this->_getField('password');
-        if ($this->exists() && !$passwordField->hasNotEmptyValue()) {
-            // to avoid overwriting by empty or already hashed password
-            $passwordField->resetValue();
-        }
-        $emailField = $this->_getField('email');
-        if ($emailField->hasNotEmptyValue()) {
-            $this->setEmail(mb_strtolower(trim($this->email)));
-        }
-        return parent::save($verifyDbExistance, $createIfNotExists, $saveRelations);
-    }
-
-
+    use Authenticatable,
+        UserDataSavingHelper;
 
 }

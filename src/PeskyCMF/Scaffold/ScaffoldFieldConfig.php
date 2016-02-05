@@ -224,13 +224,20 @@ abstract class ScaffoldFieldConfig {
                 break;
             }
         }
-        if (empty($relation)) {
+        if (empty($relationConfig)) {
             throw new ScaffoldFieldException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
-        if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getDisplayField()])) {
+        if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getForeignColumn()])) {
             return CmfConfig::transBase('.item_details.field.no_relation');
         } else {
-            return Tag::a(empty($linkLabel) ? $record[$relationAlias][$relationConfig->getDisplayField()] : $linkLabel)
+            if (empty($linkLabel)) {
+                $displayField = $relationConfig->getDisplayField();
+                if (empty($record[$relationAlias][$displayField])) {
+                    $displayField = $relationConfig->getForeignColumn();
+                }
+                $linkLabel = $record[$relationAlias][$displayField];
+            }
+            return Tag::a($linkLabel)
                 ->setHref(route('cmf_item_details', [$relationConfig->getForeignTable(), $record[$columnConfig->getName()]]))
                 ->build();
         }
