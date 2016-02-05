@@ -3,7 +3,6 @@
 namespace PeskyCMF\Http;
 
 use Illuminate\Http\JsonResponse;
-use PeskyCMF\Config\CmfConfig;
 
 class CmfJsonResponse extends JsonResponse {
 

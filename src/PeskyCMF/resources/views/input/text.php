@@ -28,7 +28,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 
 <div class="form-group">
     <label for="<?php echo $id; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
-    <input value="{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}"
+    <input value="{{! it.<?php echo $fieldConfig->getName(); ?> || (it.<?php echo $fieldConfig->getName(); ?> === 0 ? '0' : '') }}"
         {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
 </div>
 
