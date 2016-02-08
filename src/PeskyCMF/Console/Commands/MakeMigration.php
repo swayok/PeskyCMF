@@ -25,6 +25,7 @@ class MakeMigration extends BaseCommand {
     protected $sqlSubdir = 'sql';
     protected $sqlRollbackSubdir = 'rollback';
     protected $migrationClassView = 'cmf::console.db_migration';
+    protected $fileTime = null;
 
     public function __construct(Composer $composer) {
         parent::__construct();
@@ -90,7 +91,14 @@ class MakeMigration extends BaseCommand {
         if (!Folder::exist($basePath)) {
             Folder::add($basePath, 0775);
         }
-        return $basePath . date('Y_m_d_His') . '_' . $name . ($forSqlFile ? '.sql' : '.php');
+        return $basePath . $this->getFileTime() . '_' . $name . ($forSqlFile ? '.sql' : '.php');
+    }
+
+    protected function getFileTime() {
+        if (!$this->fileTime) {
+            $this->fileTime = date('Y_m_d_His');
+        }
+        return $this->fileTime;
     }
 
 }
