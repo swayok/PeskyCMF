@@ -599,3 +599,51 @@ aside.main-sidebar {
 .checkbox input[type=checkbox]:checked + label:after {
     text-align: left !important;
 }
+
+.bootstrap-select {
+    ul.dropdown-menu.inner li {
+        a {
+            color: #000000;
+            padding-right: 40px;
+        }
+
+        &.disabled {
+            a {
+                color: #777777;
+
+                & span.check-mark {
+                    display: inline-block;
+                    float: right;
+                    margin: 0 -20px 0 0;
+                }
+            }
+
+            &.active,
+            &.selected {
+                a {
+                    background-color: transparent;
+                    color: #777777;
+                }
+            }
+        }
+
+        &.active,
+        &.selected {
+            a {
+                color: #FFFFFF;
+            }
+        }
+    }
+}
+
+.cke {
+    .cke_combo {
+
+        &.cke_combo_full_width {
+            .cke_combo_button .cke_combo_text {
+                width: auto !important;
+            }
+        }
+
+    }
+}

@@ -309,14 +309,14 @@ form .error-text {
 }
 .dataTables_wrapper table.dataTable thead .sorting:after {
   opacity: 0.3;
-  filter: alpha(opacity=30%);
+  filter: alpha(opacity=30);
 }
 .dataTables_wrapper table.dataTable thead .sorting_desc:after,
 .dataTables_wrapper table.dataTable thead .sorting_asc:after {
   font-size: 12px;
   top: 10px;
   opacity: 0.6;
-  filter: alpha(opacity=60%);
+  filter: alpha(opacity=60);
 }
 .dataTables_wrapper table.dataTable thead .sorting_desc:after {
   content: "\e094";
@@ -375,7 +375,7 @@ form .error-text {
 }
 .dataTables_wrapper .row-actions-container .row-actions-block .row-actions .row-action:hover {
   opacity: 0.8;
-  filter: alpha(opacity=80%);
+  filter: alpha(opacity=80);
 }
 .dataTables_wrapper .row-actions-container.hidden {
   display: block !important;
@@ -520,4 +520,28 @@ aside.main-sidebar #secondary-menu #sidebar-company-badge a:hover {
 }
 .checkbox input[type=checkbox]:checked + label:after {
   text-align: left !important;
+}
+.bootstrap-select ul.dropdown-menu.inner li a {
+  color: #000000;
+  padding-right: 40px;
+}
+.bootstrap-select ul.dropdown-menu.inner li.disabled a {
+  color: #777777;
+}
+.bootstrap-select ul.dropdown-menu.inner li.disabled a span.check-mark {
+  display: inline-block;
+  float: right;
+  margin: 0 -20px 0 0;
+}
+.bootstrap-select ul.dropdown-menu.inner li.disabled.active a,
+.bootstrap-select ul.dropdown-menu.inner li.disabled.selected a {
+  background-color: transparent;
+  color: #777777;
+}
+.bootstrap-select ul.dropdown-menu.inner li.active a,
+.bootstrap-select ul.dropdown-menu.inner li.selected a {
+  color: #FFFFFF;
+}
+.cke .cke_combo.cke_combo_full_width .cke_combo_button .cke_combo_text {
+  width: auto !important;
 }

@@ -118,7 +118,7 @@
 
 ._fade-to (@value) {
     opacity: @value;
-    @percents: percentage(@value);
+    @percents: @value * 100;
     filter: ~"alpha(opacity=@{percents})";
 }
 
