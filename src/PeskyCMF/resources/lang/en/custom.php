@@ -42,7 +42,8 @@ return [
     'admins' => [
         'menu_title' => 'Administrators',
         'role' => [
-            'admin' => 'Administrator'
+            'admin' => 'Administrator',
+            'superadmin' => 'Superadmin'
         ],
         'datagrid' => [
             'header' => 'System administrators',

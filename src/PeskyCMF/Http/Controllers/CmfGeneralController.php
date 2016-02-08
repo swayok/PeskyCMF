@@ -308,12 +308,14 @@ class CmfGeneralController extends Controller {
     }
 
     public function getAdminInfo() {
-        $admin = $this->getAdmin()->toPublicArray();
-        if (!empty($admin['role'])) {
-            $admin['_role'] = $admin['role'];
-            $admin['role'] = CmfConfig::transCustom('.admins.role.' . $admin['role']);
+        $admin = $this->getAdmin();
+        $adminData = $admin->toPublicArray();
+        if (!empty($adminData['role'])) {
+            $adminData['_role'] = $admin->role;
+            $role = ($admin->is_superadmin ? 'superadmin' : $admin->role);
+            $adminData['role'] = CmfConfig::transCustom('.admins.role.' . $role);
         }
-        return response()->json($admin);
+        return response()->json($adminData);
     }
 
     /**

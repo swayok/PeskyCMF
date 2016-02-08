@@ -34,17 +34,18 @@
                 <input type="password" class="hidden">
                 <!-- end of autofill disabler -->
                 <div class="box-body">
-                    @if ($admin->_hasField('email'))
-                        <div class="form-group">
-                            <label for="email-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.email') }}*</label>
-                            <input class="form-control" value="{{ $admin->email }}" name="email" id="email-input" type="email" required="required">
-                        </div>
-                    @endif
                     <?php $loginColumn = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column(); ?>
                     @if ($loginColumn !== 'email')
                         <div class="form-group">
                             <label for="{{ $loginColumn }}-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.' . $loginColumn) }}*</label>
                             <input class="form-control" value="{{ $admin->$loginColumn }}" name="{{ $loginColumn }}" id="{{ $loginColumn }}-input" type="text" required="required">
+                        </div>
+                    @endif
+                    @if ($admin->_hasField('email'))
+                        <?php $emailRequired = $admin->_getField('email')->isRequiredOnAnyAction(); ?>
+                        <div class="form-group">
+                            <label for="email-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.email') . ($emailRequired ? '*' : '') }}</label>
+                            <input class="form-control" value="{{ $admin->email }}" name="email" id="email-input" type="email" @if($emailRequired) required="required" @endif>
                         </div>
                     @endif
                     <div class="form-group">

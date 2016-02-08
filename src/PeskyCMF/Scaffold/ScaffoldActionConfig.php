@@ -194,8 +194,10 @@ abstract class ScaffoldActionConfig {
                 continue;
             }
             if (is_object($fields[$key]) && method_exists($fields[$key], 'convertValue')) {
-                $record['__' . $key] = $record[$key];
-                $record[$key] = $fields[$key]->convertValue($record[$key], $this->getModel()->getTableColumn($key), $record);
+                if (!method_exists($fields[$key], 'isVisible') || $fields[$key]->isVisible()) {
+                    $record['__' . $key] = $record[$key];
+                    $record[$key] = $fields[$key]->convertValue($record[$key], $this->getModel()->getTableColumn($key), $record);
+                }
             }
         }
         $record += $permissions;
