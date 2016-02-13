@@ -327,6 +327,10 @@ form .error-text {
 .dataTables_wrapper table.dataTable tbody tr.selected {
   background-color: rgba(54, 127, 169, 0.4);
 }
+.dataTables_wrapper .dataTables_paginate .paginate_button.active a {
+  border-left-color: #ddd;
+  border-right-color: #ddd;
+}
 .dataTables_wrapper .row-actions-container {
   position: absolute;
   height: 0;

@@ -132,28 +132,33 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
 
     <script type="application/javascript">
         (function() {
-            var dataTablesConfig = {
-                processing: true,
-                serverSide: true,
-                scrollX: true,
-                scrollY: '55vh',
-                scrollCollapse: true,
-                ajax: '<?php echo route('cmf_api_get_items', ['model' => $model->getTableName()], false) ?>',
-                order: [[
-                    '<?php echo $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(); ?>',
-                    '<?php echo $dataGridConfig->getOrderDirection(); ?>'
-                ]],
-                pageLength: <?php echo $dataGridConfig->getLimit() ?>,
-                toolbarItems: <?php echo json_encode(array_values($toolbar)); ?>,
-                multiselect: false,
-                <?php if (!empty($dblClickUrl)): ?>
-                    doubleClickUrl: Utils.makeTemplateFromText(
-                        '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $dblClickUrl)); ?>',
-                        'Double click URL template'
-                    ),
-                <?php endif; ?>
-                rowActions: Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template')
-            };
+            <?php
+                $dataTablesConfig = array_replace(
+                    \PeskyCMF\Config\CmfConfig::getInstance()->data_tables_config(),
+                    $dataGridConfig->getAdditionalDataTablesConfig(),
+                    [
+                        'processing' => true,
+                        'serverSide' => true,
+                        'ajax' => route('cmf_api_get_items', ['model' => $model->getTableName()], false),
+                        'order' => [
+                            [
+                                $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(),
+                                $dataGridConfig->getOrderDirection()
+                            ]
+                        ],
+                        'pageLength' => $dataGridConfig->getLimit(),
+                        'toolbarItems' => json_encode(array_values($toolbar)),
+                    ]
+                );
+            ?>
+            var dataTablesConfig = <?php echo json_encode($dataTablesConfig, JSON_UNESCAPED_UNICODE); ?>;
+            dataTablesConfig.rowActions = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
+            <?php if (!empty($dblClickUrl)): ?>
+                dataTablesConfig.doubleClickUrl = Utils.makeTemplateFromText(
+                    '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $dblClickUrl)); ?>',
+                    'Double click URL template'
+                );
+            <?php endif; ?>
 
             <?php
                 $defaultConditions = $dataGridFilterConfig->getDefaultConditions();

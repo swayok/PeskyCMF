@@ -213,9 +213,9 @@ class CmfGeneralController extends Controller {
             return CmfConfig::getInstance()->home_page_url();
         } else {
             if (preg_match('%/api/([^/]+?)/list/?$%is', $intendedUrl, $matches)) {
-                return route('cmf_resource_show_list', [$matches[1]]);
+                return route('cmf_items_table', [$matches[1]]);
             } else if (preg_match('%/api/([^/]+?)/service/%is', $intendedUrl, $matches)) {
-                return route('cmf_resource_show_list', [$matches[1]]);
+                return route('cmf_items_table', [$matches[1]]);
             } else if (preg_match('%/api/([^/]+?)/([^/]+?)/?(?:details=(\d)|$)%is', $intendedUrl, $matches)) {
                 if ($matches[3] === '1') {
                     return route('cmf_item_details', [$matches[1], $matches[2]]);
@@ -223,7 +223,7 @@ class CmfGeneralController extends Controller {
                     return route('cmf_item_edit_form', [$matches[1], $matches[2]]);
                 }
             } else if (preg_match('%/api/([^/]+?)%is', $intendedUrl, $matches)) {
-                return route('cmf_resource_show_list', [$matches[1]]);
+                return route('cmf_items_table', [$matches[1]]);
             } else if (preg_match('%/page/([^/]+)\.html$%is', $intendedUrl, $matches)) {
                 return route('cmf_page', [$matches[1]]);
             } else {

@@ -521,4 +521,17 @@ class CmfConfig extends ConfigsContainer {
         return '<img src="/packages/cmf/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
     }
 
+    /**
+     * Additional configs for jQuery Data Tables lib
+     * @return array
+     */
+    static public function data_tables_config() {
+        return [
+            'scrollX' => true,
+            'scrollY' => '55vh',
+            'scrollCollapse' => true,
+            'multiselect' => false,
+        ];
+    }
+
 }

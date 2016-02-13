@@ -44,6 +44,8 @@ class DataGridConfig extends ScaffoldActionConfig {
     protected $allowMultiRowSelection = false;
     /** @var Tag[]|callable */
     protected $rowActions = [];
+    /** @var array */
+    protected $additionalDataTablesConfig = [];
 
     public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSectionConfig) {
         parent::__construct($model, $scaffoldSectionConfig);
@@ -256,5 +258,20 @@ class DataGridConfig extends ScaffoldActionConfig {
         return $this;
     }
 
+    /**
+     * @return array
+     */
+    public function getAdditionalDataTablesConfig() {
+        return $this->additionalDataTablesConfig;
+    }
+
+    /**
+     * @param array $additionalDataTablesConfig
+     * @return $this
+     */
+    public function setAdditionalDataTablesConfig(array $additionalDataTablesConfig) {
+        $this->additionalDataTablesConfig = $additionalDataTablesConfig;
+        return $this;
+    }
 
 }
