@@ -28,16 +28,11 @@ class CmfExceptionHandler extends ExceptionHandler {
                     'errors' => $exc->getValidationErrors()
                 ], HttpCode::INVALID);
             case NotFoundHttpException::class:
-                return new JsonResponse([
+                /*return new JsonResponse([
                     '_message' => CmfConfig::transBase('.error.http404')
-                ], HttpCode::NOT_FOUND);
+                ], HttpCode::NOT_FOUND);*/
             case HttpException::class:
-                /** @var HttpException $exc */
-                $data = json_decode($exc->getMessage(), true);
-                if ($data === false) {
-                    $data = ['_message' => $exc->getMessage()];
-                }
-                return new JsonResponse($data, $exc->getStatusCode());
+                return $this->renderHttpException($exc);
             default:
                 return $this->defaultConvertExceptionToResponse($exc);
         }
