@@ -18,10 +18,9 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
         // image validation: 'img', 'img:jpeg,png'
         Validator::extend('img', function ($attribute, $value, $parameters) {
             $file = new UploadedFile($value['tmp_name'], $value['name'], $value['type'], $value['size'], $value['error']);
-            if (empty($parameters)) {
-                $validators = 'required|image';
-            } else {
-                $validators =  'required|mimes:' . (is_array($parameters) ? implode(',', $parameters) : $parameters);
+            $validators = 'required|image';
+            if (!empty($parameters)) {
+                $validators .= '|mimes:' . (is_array($parameters) ? implode(',', $parameters) : $parameters);
             }
             $isValid = Validator::make(
                 [$attribute => $file],
