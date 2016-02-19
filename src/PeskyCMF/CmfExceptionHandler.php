@@ -24,7 +24,7 @@ class CmfExceptionHandler extends ExceptionHandler {
             case DbObjectValidationException::class:
                 /** @var DbObjectValidationException $exc */
                 return new JsonResponse([
-                    '_message' => CmfConfig::transBase('.error.invalid_data_received'),
+                    '_message' => $this->errorCodeToMessage('invalid_data_received'),
                     'errors' => $exc->getValidationErrors()
                 ], HttpCode::INVALID);
             case NotFoundHttpException::class:
@@ -40,5 +40,9 @@ class CmfExceptionHandler extends ExceptionHandler {
 
     protected function defaultConvertExceptionToResponse(\Exception $exc) {
         return parent::_convertExceptionToResponse($exc);
+    }
+
+    protected function errorCodeToMessage($code, $parameters = []) {
+        return CmfConfig::transBase('.error.' . $code, $parameters);
     }
 }
