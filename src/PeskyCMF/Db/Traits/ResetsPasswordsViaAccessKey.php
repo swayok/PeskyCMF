@@ -19,6 +19,7 @@ trait ResetsPasswordsViaAccessKey {
             'account_id' => $this->_getPkValue(),
             'expires_at' => time() + config('auth.passwords.' . \Auth::getDefaultDriver() . 'expire', 60) * 60,
         ];
+        $this->reload(); //< needed to exclude situation with outdated data
         foreach ($this->getAdditionalFieldsForPasswordRecoveryAccessKey() as $fieldName) {
             $data[$fieldName] = $this->_getFieldValue($fieldName);
         }
