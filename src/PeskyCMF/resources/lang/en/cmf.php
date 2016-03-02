@@ -34,6 +34,7 @@ return [
         'resource_item_not_found' => 'Requested Item not found',
         'db_record_not_exists' => 'Item not found in database',
         'invalid_data_received' => 'Invalid data received',
+        'csrf_token_missmatch' => 'Current session is outdated or invalid. Page reloading is required.',
         'http404' => 'Requested page not found'
     ],
     'datagrid' => [

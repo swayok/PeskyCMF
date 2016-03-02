@@ -3,6 +3,7 @@
 namespace PeskyCMF;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Session\TokenMismatchException;
 use LaravelExtendedErrors\ExceptionHandler;
 use PeskyCMF\Config\CmfConfig;
 use PeskyORM\Exception\DbObjectValidationException;
@@ -33,16 +34,38 @@ class CmfExceptionHandler extends ExceptionHandler {
                 ], HttpCode::NOT_FOUND);*/
             case HttpException::class:
                 return $this->renderHttpException($exc);
+            case TokenMismatchException::class:
+                $message = $this->errorCodeToMessage('csrf_token_missmatch');
+                $this->saveErrorMessageToSession($message);
+                return new JsonResponse([
+                    '_message' => $message,
+                    'redirect' => 'reload',
+                    'redirect_fallback' => $this->getStartPageUrl()
+                ], HttpCode::INVALID);
             default:
                 return $this->defaultConvertExceptionToResponse($exc);
         }
     }
 
     protected function defaultConvertExceptionToResponse(\Exception $exc) {
+        switch (get_class($exc)) {
+            case TokenMismatchException::class:
+                $message = $this->errorCodeToMessage('csrf_token_missmatch');
+                $this->saveErrorMessageToSession($message);
+                return redirect($_SERVER['REQUEST_URI']);
+        }
         return parent::_convertExceptionToResponse($exc);
     }
 
     protected function errorCodeToMessage($code, $parameters = []) {
         return CmfConfig::transBase('.error.' . $code, $parameters);
+    }
+
+    protected function getStartPageUrl() {
+        return '/';
+    }
+
+    protected function saveErrorMessageToSession($message) {
+
     }
 }
