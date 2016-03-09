@@ -69,9 +69,17 @@ trait KeyValueModelHelpers {
      */
     static public function decodeValues(array $settingsAssoc) {
         foreach ($settingsAssoc as $key => &$value) {
-            $value = json_decode($value, true);
+            $value = self::decodeValue($value);
         }
         return $settingsAssoc;
+    }
+
+    /**
+     * @param string $encodedValue
+     * @return mixed
+     */
+    static public function decodeValue($encodedValue) {
+        return json_decode($encodedValue, true);
     }
 
     /**
@@ -171,6 +179,6 @@ trait KeyValueModelHelpers {
             throw new DbModelException($this, 'Foreign key value provided for model that does not have main foreign key column');
         }
         $record = $this->selectOne('*', $conditions, false);
-        return empty($record) ? $default : $record;
+        return empty($record) ? $default : self::decodeValue($record['value']);
     }
 }
