@@ -13,7 +13,7 @@ trait KeyValueModelHelpers {
 
     /**
      * Override if you wish to provide key manually
-     * @return string
+     * @return string|null - null returned when there is no foreign key
      * @throws DbModelException
      */
     protected function getMainForeignKeyColumnName() {
@@ -146,5 +146,31 @@ trait KeyValueModelHelpers {
             $this->rollback();
             throw $exc;
         }
+    }
+
+    /**
+     * @param string $key
+     * @param string|null $foreignKeyValue - use null if there is no main foreign key column and
+     *      getMainForeignKeyColumnName() method returns null
+     * @param array $default
+     * @return array
+     * @throws DbModelException
+     */
+    public function selectOneByKeyAndForeignKeyValue($key, $foreignKeyValue = null, $default = []) {
+        /** @var CmfDbModel|KeyValueModelHelpers $this */
+        $conditions = [
+            'key' => $key
+        ];
+        $fkName = $this->getMainForeignKeyColumnName();
+        if ($fkName !== null) {
+            if (empty($foreignKeyValue)) {
+                throw new DbModelException($this, 'Foreign key value is required');
+            }
+            $conditions[$fkName] = $foreignKeyValue;
+        } else if (!empty($foreignKeyValue)) {
+            throw new DbModelException($this, 'Foreign key value provided for model that does not have main foreign key column');
+        }
+        $record = $this->selectOne('*', $conditions);
+        return empty($record) ? $default : $record;
     }
 }
