@@ -170,7 +170,7 @@ trait KeyValueModelHelpers {
         } else if (!empty($foreignKeyValue)) {
             throw new DbModelException($this, 'Foreign key value provided for model that does not have main foreign key column');
         }
-        $record = $this->selectOne('*', $conditions);
+        $record = $this->selectOne('*', $conditions, false);
         return empty($record) ? $default : $record;
     }
 }

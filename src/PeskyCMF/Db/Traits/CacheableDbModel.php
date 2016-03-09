@@ -392,7 +392,7 @@ trait CacheableDbModel {
      * @param bool $withRootAlias
      * @return array|bool|Object
      */
-    public function selectOneFromCache($columns, $conditionsAndOptions = null, $asObject = true, $withRootAlias = false) {
+    public function selectOneFromCache($columns, $conditionsAndOptions = null, $asObject = false, $withRootAlias = false) {
         /** @var CmfDbModel|CacheableDbModel $this */
         if (is_numeric($conditionsAndOptions) || is_int($conditionsAndOptions)) {
             $conditionsAndOptions = array($this->getPkColumnName() => $conditionsAndOptions);
@@ -405,7 +405,7 @@ trait CacheableDbModel {
      * @inheritdoc
      * Also you can use 'CACHE' option. See description of select() method
      */
-    public function selectOne($columns, $conditionsAndOptions, $asObject = true, $withRootAlias = false) {
+    public function selectOne($columns, $conditionsAndOptions, $asObject = false, $withRootAlias = false) {
         /** @var CmfDbModel|CacheableDbModel $this */
         if (empty($conditionsAndOptions)){
             throw new DbModelException($this, 'Selecting one record without conditions is not allowed');
