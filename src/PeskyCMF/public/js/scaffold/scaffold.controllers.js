@@ -409,7 +409,7 @@ var DataGridSearchHelper = {
     },
     init: function (config, defaultRules, $dataGrid) {
         if (config && config.filters && config.filters.length > 0) {
-            var builder = $(DataGridSearchHelper.container);
+            var $builder = $(DataGridSearchHelper.container);
             var tableApi = $dataGrid.dataTable().api();
             for (var i in config.filters) {
                 if (
@@ -419,7 +419,7 @@ var DataGridSearchHelper = {
                     config.filters[i].color = 'primary';
                 }
             }
-            builder.queryBuilder($.extend({rules: defaultRules}, DataGridSearchHelper.defaultConfig, config));
+            $builder.queryBuilder($.extend({rules: defaultRules}, DataGridSearchHelper.defaultConfig, config));
             try {
                 var currentSearch = JSON.parse(tableApi.search());
                 var decoded = DataGridSearchHelper.decodeRulesForDataTable(
@@ -427,32 +427,54 @@ var DataGridSearchHelper = {
                     DataGridSearchHelper.getFieldNameToFilterIdMap(config.filters)
                 );
                 if (decoded.rules && decoded.rules.length) {
-                    builder.queryBuilder('setRules', decoded);
+                    $builder.queryBuilder('setRules', decoded);
                 } else {
-                    builder.queryBuilder('reset');
+                    $builder.queryBuilder('reset');
                 }
             } catch (ignore) {}
             var $runFilteringBtn = $('<button class="btn btn-success pull-right">' + DataGridSearchHelper.locale.submit + '</button>');
             $runFilteringBtn.on('click', function () {
-                var rules = builder.queryBuilder('getRules');
-                var encoded;
-                if (!rules.rules) {
-                    // empty rules set
-                    builder.queryBuilder('reset');
-                    encoded = DataGridSearchHelper.encodeRulesForDataTable(DataGridSearchHelper.emptyRules)
-                } else if (builder.queryBuilder('validate')) {
-                    encoded = DataGridSearchHelper.encodeRulesForDataTable(rules);
+                // clean empty filters
+                $builder.find('.rule-container').each(function () {
+                    var model = $builder.queryBuilder('getModel', $(this));
+                    if (model && !model.filter) {
+                        model.drop();
+                    }
+                });
+                // clean empty filter groups
+                $builder.find('.rules-group-container').each(function () {
+                    var group = $builder.queryBuilder('getModel', $(this));
+                    if (group && group.length() <= 0) {
+                        var parentGroup = group.parent;
+                        group.drop();
+                        while (parentGroup && parentGroup.length() <= 0) {
+                            var parent = parentGroup.parent;
+                            parentGroup.drop();
+                            parentGroup = parent;
+                        }
+                    }
+                });
+                if ($builder.queryBuilder('validate')) {
+                    var rules = $builder.queryBuilder('getRules');
+                    var encoded;
+                    if (!rules.rules) {
+                        // empty rules set
+                        $builder.queryBuilder('reset');
+                        encoded = DataGridSearchHelper.encodeRulesForDataTable(DataGridSearchHelper.emptyRules)
+                    } else if ($builder.queryBuilder('validate')) {
+                        encoded = DataGridSearchHelper.encodeRulesForDataTable(rules);
+                    }
+                    tableApi.search(encoded).draw();
                 }
-                tableApi.search(encoded).draw();
             });
             var $resetFilteringBtn = $('<button class="btn btn-danger pull-right">' + DataGridSearchHelper.locale.reset + '</button>');
             $resetFilteringBtn.on('click', function () {
-                builder.queryBuilder('reset');
+                $builder.queryBuilder('reset');
                 if (defaultRules) {
-                    builder.queryBuilder('setRules', defaultRules);
+                    $builder.queryBuilder('setRules', defaultRules);
                 }
             });
-            builder.prepend('<h4>' + DataGridSearchHelper.locale.header + '</h4>')
+            $builder.prepend('<h4>' + DataGridSearchHelper.locale.header + '</h4>')
                 .closest('.dataTables_wrapper')
                 .find('.filter-toolbar')
                 .append($resetFilteringBtn)
