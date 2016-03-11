@@ -26,6 +26,7 @@ class DataGridFilterConfig {
         DbColumnConfig::DB_TYPE_TIME => DataGridColumnFilterConfig::TYPE_TIME,
         DbColumnConfig::DB_TYPE_IP_ADDRESS => DataGridColumnFilterConfig::TYPE_STRING,
     ];
+    protected $defaultDataGridColumnFilterConfigClass = DataGridColumnFilterConfig::class;
 
     /**
      * @param CmfDbModel $model
@@ -109,16 +110,18 @@ class DataGridFilterConfig {
     public function createColumnFilterConfig($columnName) {
         $model = $this->getModel();
         $columnConfig = $this->findColumnConfig($columnName);
+        /** @var DataGridColumnFilterConfig $configClass */
+        $configClass = $this->defaultDataGridColumnFilterConfigClass;
         if (
             $columnConfig->getDbTableConfig()->getName() === $model->getTableName()
             && $model->getPkColumnName() === $columnConfig->getName()
             && $columnConfig->getDbType() === DbColumnConfig::DB_TYPE_INT
         ) {
             // Primary key integer column
-            return DataGridColumnFilterConfig::forPositiveInteger()
+            return $configClass::forPositiveInteger()
                 ->setColumnName($this->getColumnNameWithAlias($columnName));
         } else {
-            return DataGridColumnFilterConfig::create(
+            return $configClass::create(
                 self::$dbTypeToFilterType[$columnConfig->getDbType()],
                 $columnConfig->isNullable(),
                 $this->getColumnNameWithAlias($columnName)
@@ -230,13 +233,15 @@ class DataGridFilterConfig {
      * @throws ScaffoldException
      */
     public function addDefaultCondition($columnName, $operator, $value) {
-        if (!DataGridColumnFilterConfig::hasOperator($operator)) {
+        /** @var DataGridColumnFilterConfig $configClass */
+        $configClass = $this->defaultDataGridColumnFilterConfigClass;
+        if (!$configClass::hasOperator($operator)) {
             throw new ScaffoldException("Unknown filter operator: $operator");
         }
         $columnName = $this->getColumnNameWithAlias($columnName);
         $this->defaultConditions['rules'][] = [
             'field' => $columnName,
-            'id' => DataGridColumnFilterConfig::buildFilterId($columnName),
+            'id' => $configClass::buildFilterId($columnName),
             'operator' => $operator,
             'value' => $value
         ];
@@ -248,9 +253,11 @@ class DataGridFilterConfig {
      * @throws ScaffoldException
      */
     public function addDefaultConditionForPk() {
+        /** @var DataGridColumnFilterConfig $configClass */
+        $configClass = $this->defaultDataGridColumnFilterConfigClass;
         return $this->addDefaultCondition(
             $this->getModel()->getPkColumnName(),
-            DataGridColumnFilterConfig::OPERATOR_GREATER,
+            $configClass::OPERATOR_GREATER,
             0
         );
     }
@@ -310,6 +317,16 @@ class DataGridFilterConfig {
             $otherArgs['filter'] = json_encode($filters, JSON_UNESCAPED_UNICODE);
         }
         return $otherArgs;
+    }
+
+    /**
+     * Replace default DataGridColumnFilterConfig class
+     * @param string $className
+     * @return $this
+     */
+    public function setdefaultDataGridColumnFilterConfigClass($className) {
+        $this->defaultDataGridColumnFilterConfigClass = $className;
+        return $this;
     }
 
 }

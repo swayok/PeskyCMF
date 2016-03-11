@@ -210,7 +210,7 @@ class DataGridColumnFilterConfig {
      * @return DataGridColumnFilterConfig
      */
     static public function create($dataType = self::TYPE_STRING, $canBeNull = false, $columnName = null) {
-        return new DataGridColumnFilterConfig($dataType, $canBeNull, $columnName);
+        return new static($dataType, $canBeNull, $columnName);
     }
 
     /**
@@ -221,7 +221,7 @@ class DataGridColumnFilterConfig {
      * @return DataGridColumnFilterConfig
      */
     static public function forPositiveInteger($excludeZero = false, $canBeNull = false, $columnName = null) {
-        return self::create(self::TYPE_INTEGER, $canBeNull, $columnName)->setMin($excludeZero ? 1 : 0);
+        return static::create(static::TYPE_INTEGER, $canBeNull, $columnName)->setMin($excludeZero ? 1 : 0);
     }
 
     /**
@@ -243,7 +243,7 @@ class DataGridColumnFilterConfig {
      * @return bool
      */
     static public function hasOperator($operator) {
-        return in_array($operator, self::$operatorGroups[self::OPERATOR_GROUP_ALL]);
+        return in_array($operator, static::$operatorGroups[static::OPERATOR_GROUP_ALL]);
     }
 
     /**
@@ -287,27 +287,27 @@ class DataGridColumnFilterConfig {
      * @throws ScaffoldException
      */
     public function setDataType($type, $canBeNull = false) {
-        if (!array_key_exists($type, self::$dataTypeDefaultOperatorsGroup)) {
+        if (!array_key_exists($type, static::$dataTypeDefaultOperatorsGroup)) {
             throw new ScaffoldException("Unknown filter type: $type");
         }
         $this->dataType = $type;
-        $this->operators = self::$operatorGroups[self::$dataTypeDefaultOperatorsGroup[$type]];
+        $this->operators = static::$operatorGroups[static::$dataTypeDefaultOperatorsGroup[$type]];
         if ($canBeNull) {
             $this->canBeNull();
         }
-        $this->setInputType(self::$dataTypeToDefaultInputType[$type]);
+        $this->setInputType(static::$dataTypeToDefaultInputType[$type]);
         switch ($type) {
-            case self::TYPE_BOOL:
+            case static::TYPE_BOOL:
                 $this->setAllowedValues([
                     't' => trans('global.bool.yes'),
                     'f' => trans('global.bool.no'),
                 ]);
                 break;
-            case self::TYPE_TIME:
+            case static::TYPE_TIME:
                 $this->setFormat('HH:mm:ss');
                 break;
-            case self::TYPE_DATE:
-            case self::TYPE_TIMESTAMP:
+            case static::TYPE_DATE:
+            case static::TYPE_TIMESTAMP:
                 $this->setFormat('YYYY-MM-DD')
                     ->setPlugin('datepicker')
                     ->setPluginConfig([
@@ -327,7 +327,7 @@ class DataGridColumnFilterConfig {
      * @return $this
      */
     public function canBeNull() {
-        $this->operators = array_merge($this->operators, self::$operatorGroups[self::OPERATOR_GROUP_NULLS]);
+        $this->operators = array_merge($this->operators, static::$operatorGroups[static::OPERATOR_GROUP_NULLS]);
         return $this;
     }
 
@@ -345,7 +345,7 @@ class DataGridColumnFilterConfig {
      */
     public function setOperators(array $operators) {
         foreach ($operators as $operator) {
-            if (!in_array($operator, self::$operatorGroups[self::OPERATOR_GROUP_ALL])) {
+            if (!in_array($operator, static::$operatorGroups[static::OPERATOR_GROUP_ALL])) {
                 throw new ScaffoldException("Unknown filter operator: $operator");
             }
         }
@@ -389,12 +389,12 @@ class DataGridColumnFilterConfig {
      * @throws ScaffoldException
      */
     public function setInputType($inputType) {
-        if (!in_array($inputType, self::$inputTypes)) {
+        if (!in_array($inputType, static::$inputTypes)) {
             throw new ScaffoldException("Unknown filter input type: $inputType");
         }
         switch ($inputType) {
-            case self::INPUT_TYPE_MULTISELECT:
-                $inputType = self::INPUT_TYPE_SELECT;
+            case static::INPUT_TYPE_MULTISELECT:
+                $inputType = static::INPUT_TYPE_SELECT;
                 $this->multiselect = true;
                 break;
         }
@@ -424,7 +424,7 @@ class DataGridColumnFilterConfig {
      */
     public function getAllowedValues() {
         if (
-            in_array($this->inputType, [self::INPUT_TYPE_SELECT, self::INPUT_TYPE_RADIO, self::INPUT_TYPE_CHECKBOX])
+            in_array($this->inputType, [static::INPUT_TYPE_SELECT, static::INPUT_TYPE_RADIO, static::INPUT_TYPE_CHECKBOX])
             && empty($this->allowedValues)
         ) {
             throw new ScaffoldException("List of allowed values is empty");
@@ -438,7 +438,7 @@ class DataGridColumnFilterConfig {
      * @throws ScaffoldException
      */
     public function setAllowedValues($allowedValues) {
-        if (!in_array($this->inputType, [self::INPUT_TYPE_SELECT, self::INPUT_TYPE_RADIO, self::INPUT_TYPE_CHECKBOX])) {
+        if (!in_array($this->inputType, [static::INPUT_TYPE_SELECT, static::INPUT_TYPE_RADIO, static::INPUT_TYPE_CHECKBOX])) {
             throw new ScaffoldException("Cannot set allowed values list to a filter input type: {$this->inputType}");
         } else if (empty($allowedValues)) {
             throw new ScaffoldException("List of allowed values is empty");
@@ -568,7 +568,7 @@ class DataGridColumnFilterConfig {
      */
     public function buildConfig() {
         return array_merge([
-            'id' => self::buildFilterId($this->getColumnName()),
+            'id' => static::buildFilterId($this->getColumnName()),
             'field' => $this->getColumnName(),
             'label' => $this->getFilterLabel(),
             'type' => $this->getDataType(),
@@ -605,8 +605,8 @@ class DataGridColumnFilterConfig {
         }
          // resolve multivalues
         switch ($operator) {
-            case self::OPERATOR_IN_ARRAY:
-            case self::OPERATOR_NOT_IN_ARRAY:
+            case static::OPERATOR_IN_ARRAY:
+            case static::OPERATOR_NOT_IN_ARRAY:
                 $value = preg_split('%\s*,\s*%s', $value);
                 break;
         }
@@ -619,16 +619,16 @@ class DataGridColumnFilterConfig {
             $colReplacement = $this->getColumnNameReplacementForCondition();
             if ($colReplacement instanceof DbExpr) {
                 switch ($operator) {
-                    case self::OPERATOR_IN_ARRAY:
-                    case self::OPERATOR_NOT_IN_ARRAY:
+                    case static::OPERATOR_IN_ARRAY:
+                    case static::OPERATOR_NOT_IN_ARRAY:
                         $value = '(``' . implode('``,``', $value) . '``)';
                         break;
-                    case self::OPERATOR_BETWEEN:
-                    case self::OPERATOR_NOT_BETWEEN:
+                    case static::OPERATOR_BETWEEN:
+                    case static::OPERATOR_NOT_BETWEEN:
                         $value = "``{$value[0]}`` AND ``{$value[1]}``";
                         break;
-                    case self::OPERATOR_IS_NULL:
-                    case self::OPERATOR_IS_NOT_NULL:
+                    case static::OPERATOR_IS_NULL:
+                    case static::OPERATOR_IS_NOT_NULL:
                         $value = 'NULL';
                         break;
                     default:
@@ -654,7 +654,7 @@ class DataGridColumnFilterConfig {
             $value === null || $value === ''
             && in_array(
                 $operator,
-                [self::OPERATOR_IS_NULL, self::OPERATOR_IS_NOT_NULL, self::OPERATOR_IS_NOT_EMPTY, self::OPERATOR_IS_EMPTY]
+                [static::OPERATOR_IS_NULL, static::OPERATOR_IS_NOT_NULL, static::OPERATOR_IS_NOT_EMPTY, static::OPERATOR_IS_EMPTY]
             )
         ) {
             return; //< no value needed
@@ -670,7 +670,7 @@ class DataGridColumnFilterConfig {
             if (empty($value)) {
                 throw new ScaffoldException("Empty filter value is not allowed for [$operator] operator");
             }
-            if (in_array($operator, [self::OPERATOR_BETWEEN, self::OPERATOR_NOT_BETWEEN]) && count($value) != 2) {
+            if (in_array($operator, [static::OPERATOR_BETWEEN, static::OPERATOR_NOT_BETWEEN]) && count($value) != 2) {
                 throw new ScaffoldException("There should be exactly 2 filter values for [$operator] operator");
             }
             return;
@@ -684,21 +684,21 @@ class DataGridColumnFilterConfig {
             $validatorRule .= '|max:' . $validators['max'];
         }
         switch ($this->getDataType()) {
-            case self::TYPE_INTEGER:
+            case static::TYPE_INTEGER:
                 $validatorRule .= '|integer';
                 break;
-            case self::TYPE_BOOL:
+            case static::TYPE_BOOL:
                 $validatorRule .= '|in:t,f,0,1';
                 break;
-            case self::TYPE_FLOAT:
+            case static::TYPE_FLOAT:
                 $validatorRule .= '|numeric';
                 break;
-            case self::TYPE_DATE:
-            case self::TYPE_TIME:
-            case self::TYPE_TIMESTAMP:
+            case static::TYPE_DATE:
+            case static::TYPE_TIME:
+            case static::TYPE_TIMESTAMP:
                 $validatorRule .= '|date';
                 break;
-            case self::TYPE_STRING:
+            case static::TYPE_STRING:
                 if (!empty($validators['format'])) {
                     $validatorRule .= '|regex:' . $validators['format'];
                 }
@@ -721,28 +721,28 @@ class DataGridColumnFilterConfig {
                 $val = trim($this->convertRuleValueToConditionValue($val, null));
             }
             if (
-                $this->getDataType() === self::TYPE_STRING
-                && in_array($operator, [self::OPERATOR_IN_ARRAY, self::OPERATOR_NOT_IN_ARRAY])
+                $this->getDataType() === static::TYPE_STRING
+                && in_array($operator, [static::OPERATOR_IN_ARRAY, static::OPERATOR_NOT_IN_ARRAY])
             ) {
                 $value = '^(' . implode('|', array_map('preg_quote', $value)) . ')$';
             }
             return array_values($value);
         }
         switch ($this->getDataType()) {
-            case self::TYPE_TIME:
+            case static::TYPE_TIME:
                 $value = date(AppConstants::DB_TIME_FORMAT, strtotime($value));
                 break;
-            case self::TYPE_DATE:
-            case self::TYPE_TIMESTAMP:
+            case static::TYPE_DATE:
+            case static::TYPE_TIMESTAMP:
                 $value = date(AppConstants::DB_DATE_FORMAT, strtotime($value));
                 break;
-            case self::TYPE_INTEGER:
+            case static::TYPE_INTEGER:
                 $value = intval($value);
                 break;
-            case self::TYPE_FLOAT:
+            case static::TYPE_FLOAT:
                 $value = floatval($value);
                 break;
-            case self::TYPE_BOOL:
+            case static::TYPE_BOOL:
                 if (is_numeric($value)) {
                     $value = floatval($value) > 0;
                 } else if ($value === 't' || $value === 'f') {
@@ -753,29 +753,29 @@ class DataGridColumnFilterConfig {
                 break;
         }
         switch ($operator) {
-            case self::OPERATOR_BEGINS_WITH:
-            case self::OPERATOR_NOT_BEGINS_WITH:
+            case static::OPERATOR_BEGINS_WITH:
+            case static::OPERATOR_NOT_BEGINS_WITH:
                 return '^' . preg_quote($value);
                 break;
-            case self::OPERATOR_ENDS_WITH:
-            case self::OPERATOR_NOT_ENDS_WITH:
+            case static::OPERATOR_ENDS_WITH:
+            case static::OPERATOR_NOT_ENDS_WITH:
                 return preg_quote($value) . '$';
                 break;
-            case self::OPERATOR_CONTAINS:
-            case self::OPERATOR_NOT_CONTAINS:
+            case static::OPERATOR_CONTAINS:
+            case static::OPERATOR_NOT_CONTAINS:
                 return preg_quote($value);
                 break;
-            case self::OPERATOR_EQUAL:
-            case self::OPERATOR_NOT_EQUAL:
-                if ($this->getDataType() === self::TYPE_STRING) {
+            case static::OPERATOR_EQUAL:
+            case static::OPERATOR_NOT_EQUAL:
+                if ($this->getDataType() === static::TYPE_STRING) {
                     return '^' . preg_quote($value) . '$';
                 }
                 break;
-            case self::OPERATOR_IS_NULL:
-            case self::OPERATOR_IS_NOT_NULL:
+            case static::OPERATOR_IS_NULL:
+            case static::OPERATOR_IS_NOT_NULL:
                 return null;
-            case self::OPERATOR_IS_EMPTY:
-            case self::OPERATOR_IS_NOT_EMPTY:
+            case static::OPERATOR_IS_EMPTY:
+            case static::OPERATOR_IS_NOT_EMPTY:
                 return '';
         }
         return $value;
@@ -787,20 +787,20 @@ class DataGridColumnFilterConfig {
      */
     protected function convertRuleOperatorToDbOperator($operator) {
         switch ($operator) {
-            case self::OPERATOR_EQUAL:
-            case self::OPERATOR_IN_ARRAY:
-                if ($this->getDataType() === self::TYPE_STRING) {
-                    return self::$ruleOperatorToDbOperator[self::OPERATOR_CONTAINS]; //< for case-insensitive search
+            case static::OPERATOR_EQUAL:
+            case static::OPERATOR_IN_ARRAY:
+                if ($this->getDataType() === static::TYPE_STRING) {
+                    return static::$ruleOperatorToDbOperator[static::OPERATOR_CONTAINS]; //< for case-insensitive search
                 }
                 break;
-            case self::OPERATOR_NOT_EQUAL:
-            case self::OPERATOR_NOT_IN_ARRAY:
-                if ($this->getDataType() === self::TYPE_STRING) {
-                    return self::$ruleOperatorToDbOperator[self::OPERATOR_NOT_CONTAINS]; //< for case-insensitive search
+            case static::OPERATOR_NOT_EQUAL:
+            case static::OPERATOR_NOT_IN_ARRAY:
+                if ($this->getDataType() === static::TYPE_STRING) {
+                    return static::$ruleOperatorToDbOperator[static::OPERATOR_NOT_CONTAINS]; //< for case-insensitive search
                 }
                 break;
         }
-        return self::$ruleOperatorToDbOperator[$operator];
+        return static::$ruleOperatorToDbOperator[$operator];
     }
 
     /**
@@ -809,10 +809,10 @@ class DataGridColumnFilterConfig {
      */
     protected function getValueDataTypeConverterForDb() {
         switch ($this->getDataType()) {
-            case self::TYPE_TIME:
+            case static::TYPE_TIME:
                 return '::time';
-            case self::TYPE_DATE:
-            case self::TYPE_TIMESTAMP:
+            case static::TYPE_DATE:
+            case static::TYPE_TIMESTAMP:
                 return '::date';
         }
         return '';
