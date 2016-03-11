@@ -147,7 +147,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                             ]
                         ],
                         'pageLength' => $dataGridConfig->getLimit(),
-                        'toolbarItems' => json_encode(array_values($toolbar)),
+                        'toolbarItems' => array_values($toolbar),
                     ]
                 );
             ?>

@@ -444,10 +444,10 @@ var DataGridSearchHelper = {
                 // clean empty filter groups
                 $builder.find('.rules-group-container').each(function () {
                     var group = $builder.queryBuilder('getModel', $(this));
-                    if (group && group.length() <= 0) {
+                    if (group && group.length() <= 0 && !group.isRoot()) {
                         var parentGroup = group.parent;
                         group.drop();
-                        while (parentGroup && parentGroup.length() <= 0) {
+                        while (parentGroup && parentGroup.length() <= 0 && !parentGroup.isRoot()) {
                             var parent = parentGroup.parent;
                             parentGroup.drop();
                             parentGroup = parent;
