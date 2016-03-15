@@ -74,14 +74,10 @@ Utils.handleAjaxError = function (xhr) {
             }
         } catch (e) {}
     }
-    if (GlobalVars.isDebug) {
-        GlobalVars.debugDialog.showDebug(
-            xhr.status + ' ' + xhr.statusText,
-            xhr.responseText
-        );
-    } else {
-        toastr.error('HTTP Error ' + xhr.status + ': ' + xhr.statusText);
-    }
+    GlobalVars.getDebugDialog().showDebug(
+        'HTTP Error ' + xhr.status + ' ' + xhr.statusText,
+        xhr.responseText
+    );
 };
 
 Utils.handleAjaxSuccess = function (json) {
@@ -199,7 +195,7 @@ Utils.makeTemplateFromText = function (text, clarification) {
     } catch (exc) {
         var title = 'Failed to convert text into doT.js template' + (!clarification ? '' : ' (' + clarification + ')');
         var content = '<h1>' + exc.name + ': ' + exc.message + '</h1><pre>' + exc.stack + '</pre><h2>Template:</h2>';
-        GlobalVars.debugDialog.showDebug(title, content + '<pre>' + $('<div/>').text(text).html() + '</pre>');
+        GlobalVars.getDebugDialog().showDebug(title, content + '<pre>' + $('<div/>').text(text).html() + '</pre>');
         return '';
     }
 };

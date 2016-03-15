@@ -1,5 +1,6 @@
 var GlobalVars = {
-    isDebug: true,
+    isDebug: false,
+    debugDialog: null,
     rootUrl: '/',
     scaffoldApiUrlSection: 'api',
     uiUrl: null,
@@ -30,6 +31,25 @@ var GlobalVars = {
     getLocalizationStringsForComponent: function (componentName) {
         return (componentName && !!Cache.localization[componentName]) ? Cache.localization[componentName] : {};
     }
+};
+
+/**
+ * @return DebugDialog
+ */
+GlobalVars.getDebugDialog = function () {
+    if (GlobalVars.debugDialog === null) {
+        if (GlobalVars.isDebug && typeof DebugDialog === 'function') {
+            GlobalVars.debugDialog = new DebugDialog();
+        } else {
+            GlobalVars.debugDialog = {
+                showDebug: function (title, content) {
+                    toastr.error(title);
+                },
+                toggleVisibility: function () {}
+            }
+        }
+    }
+    return GlobalVars.debugDialog;
 };
 
 var Cache = {
