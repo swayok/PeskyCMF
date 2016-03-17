@@ -33,7 +33,7 @@ class CmfExceptionHandler extends ExceptionHandler {
                     '_message' => CmfConfig::transBase('.error.http404')
                 ], HttpCode::NOT_FOUND);*/
             case HttpException::class:
-                return $this->renderHttpException($exc);
+                return $this->convertHttpExceptionToJson($exc);
             case TokenMismatchException::class:
                 $message = $this->errorCodeToMessage('csrf_token_missmatch');
                 $this->saveErrorMessageToSession($message);
