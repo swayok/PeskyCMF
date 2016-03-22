@@ -5,7 +5,7 @@ namespace PeskyCMF;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 
-abstract class BaseAccessManager {
+abstract class BaseAccessManager implements AccessManagerInterface {
 
     const REQUIRES_ACCESS_TO = 'requires_access_to';
     /**
@@ -42,158 +42,360 @@ abstract class BaseAccessManager {
      *          ['get', 'delete'],
      *          ['get', 'post', 'put', 'delete'],
      */
-    protected $rolesToRights = [
+    static protected $rolesToRights = [
 
     ];
-
-    /** @var null|$this */
-    static public $instance = null;
-
-    static public function getInstance() {
-        $class = get_called_class();
-        if (empty($class::$instance)) {
-            $class::$instance = new $class();
-        }
-        return $class::$instance;
-    }
+    /**
+     * @var array
+     */
+    private static $cachedPermissions = [];
 
     /**
      * @param Request $request
      * @return bool
+     * @throws \InvalidArgumentException
      */
     static public function isAuthorised(Request $request) {
         /** @var Route $route */
         $route = $request->route();
-        /** @var BaseAccessManager $instance */
-        $instance = call_user_func([get_called_class(), 'getInstance']);
         $routeInfo = $route->getAction();
         if (!empty($routeInfo[self::HTTP_METHOD_OVERRIDE_KEY])) {
             $httpMethod = $routeInfo[self::HTTP_METHOD_OVERRIDE_KEY];
         } else {
             $httpMethod = $request->getMethod();
         }
-        return $instance->_hasAccessToRoute($route, $httpMethod);
+        return static::isRoleHasAccessToRoute(static::getUserRole(), $route, $httpMethod);
     }
 
     /**
-     * @param string $routeAlias
+     * @param string $routeName
      * @param string $httpMethod
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    static public function hasAccessToRoute($routeAlias, $httpMethod) {
-        $route = self::findRoute($routeAlias);
-        /** @var BaseAccessManager $instance */
-        $instance = call_user_func([get_called_class(), 'getInstance']);
-        return empty($route) ? false : $instance->_hasAccessToRoute($route, $httpMethod);
+    static public function hasAccessToRoute($routeName, $httpMethod) {
+        $route = self::findRoute($routeName);
+        return empty($route) ? false : static::isRoleHasAccessToRoute(static::getUserRole(), $route, $httpMethod);
     }
 
     /**
-     * @param $routeAlias
-     * @return Route|null
+     * @param string $role
+     * @param Route $route
+     * @param string $httpMethod
+     * @return bool
+     * @throws \InvalidArgumentException
      */
-    static protected function findRoute($routeAlias) {
-        return \Route::getRoutes()->getByName($routeAlias);
+    static public function isRoleHasAccessToRoute($role, Route $route, $httpMethod) {
+        $httpMethod = static::validateAndNormalizeHttpMethod($httpMethod);
+        if (!in_array($httpMethod, static::getAllowedHttpMethods(), true)) {
+            return false;
+        }
+        static::validateRole($role);
+        $permissions = static::getCachedPermissions($role);
+        return !empty($permissions[static::getPermissionKey($route, $httpMethod)]);
     }
 
     /**
      * @return array
      */
     static public function getRolesList() {
-        /** @var BaseAccessManager $instance */
-        $instance = call_user_func([get_called_class(), 'getInstance']);
-        return $instance->_getRolesList();
+        return array_keys(static::getAccessRightsForAllRoles());
     }
 
     /**
-     * @return string|null
+     * @return array
      */
-    abstract protected function getUserRole();
+    static public function getAllowedHttpMethods() {
+        return ['get', 'post', 'put', 'delete'];
+    }
 
     /**
-     * @param $role
+     * If provided - any route that has prefix other then provided prefixes will be ignored
+     * @return null|string|array - null: no restriction | string: single route prefix | array: list of route prefixes
+     */
+    static protected function getAllowedRoutePrefixes() {
+        return null;
+    }
+
+    /**
+     * @param $routeName
+     * @return Route|null
+     */
+    static protected function findRoute($routeName) {
+        return \Route::getRoutes()->getByName($routeName);
+    }
+
+    /**
+     * @param string $role
      * @return bool|array
      */
-    protected function getAccessRightsFor($role) {
-        return empty($this->getAccessRights()[$role]) ? false : self::getAccessRights()[$role];
+    static protected function getAccessRightsFor($role) {
+        $rights = static::getAccessRightsForAllRoles();
+        return empty($rights[$role]) ? false : $rights[$role];
     }
 
-    protected function getAccessRights() {
-        return $this->rolesToRights;
+    /**
+     * @return array
+     */
+    static protected function getAccessRightsForAllRoles() {
+        return static::$rolesToRights;
     }
 
-    public function _getRolesList() {
-        return array_keys($this->getAccessRights());
+    /**
+     * @return string
+     */
+    static public function getCacheKey() {
+        return get_called_class() . '_access_rights';
     }
 
-    public function _hasAccessToRoute(Route $route, $httpMethod) {
-        $role = $this->getUserRole();
+    /**
+     * @param string $httpMethod
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    static protected function validateAndNormalizeHttpMethod($httpMethod) {
+        $httpMethod = strtolower($httpMethod);
+        if ($httpMethod === 'head') {
+            return 'get';
+        }
+        if (!in_array($httpMethod, ['get', 'post', 'put', 'delete'], true)) {
+            throw new \InvalidArgumentException("Invalid http method passed: $httpMethod");
+        }
+        return $httpMethod;
+    }
+
+    /**
+     * @param string $role
+     * @throws \InvalidArgumentException
+     */
+    static protected function validateRole($role) {
         if (empty($role)) {
-            return false;
+            throw new \InvalidArgumentException('Empty role name passed');
         }
-        // is there any access rights required?
-        $routeInfo = $route->getAction();
-        /** @var array|string $routeRequiresAccessToOtherRoutes */
-        $routeRequiresAccessToOtherRoutes = empty($routeInfo[self::REQUIRES_ACCESS_TO_ROUTES]) ? [] : $routeInfo[self::REQUIRES_ACCESS_TO_ROUTES];
-        $routeRequiresRightsTo = empty($routeInfo[self::REQUIRES_ACCESS_TO]) ? false : $routeInfo[self::REQUIRES_ACCESS_TO];
-        if (empty($routeRequiresAccessToOtherRoutes) && !$routeRequiresRightsTo) {
-            return true;
+    }
+
+    /**
+     * @param null|string $role
+     * @return mixed
+     * @throws \InvalidArgumentException
+     */
+    static protected function getCachedPermissions($role = null) {
+        $cacheKey = static::getCacheKey();
+        if (!array_key_exists($cacheKey, self::$cachedPermissions)) {
+            self::$cachedPermissions[$cacheKey] = \Cache::get($cacheKey, function () use ($cacheKey) {
+                return static::collectAndCachePermissionsForAllRoutesAndRoles($cacheKey);
+            });
         }
-        // is superuser?
-        $accessRights = $this->getAccessRightsFor($role);
-        if (empty($accessRights)) {
-            return false;
-        } else if ($accessRights === true) {
-            return true;
+        if ($role) {
+            static::validateRole($role);
+            return empty(self::$cachedPermissions[$cacheKey][$role]) ? [] : self::$cachedPermissions[$cacheKey][$role];
+        } else {
+            return self::$cachedPermissions[$cacheKey];
         }
-        // normalize access rules
-        if (!is_array($routeRequiresRightsTo)) {
-            $routeRequiresRightsTo = [$routeRequiresRightsTo];
+    }
+
+    /**
+     * @param Route $route
+     * @param string $httpMethod
+     * @return string
+     */
+    static protected function getPermissionKey(Route $route, $httpMethod) {
+//        return str_pad($httpMethod, 6, ' ') . ' -> /' . ltrim($route->getPath(), '/');
+        return $httpMethod . '->' . $route->getPath();
+    }
+
+    static protected function collectAndCachePermissionsForAllRoutesAndRoles($cacheKey) {
+        $roles = static::getRolesList();
+        $accessRightsPerRouteAndMethod = [];
+        foreach ($roles as $role) {
+            $accessRightsPerRouteAndMethod[$role] = [];
         }
-        if (!is_array($routeRequiresAccessToOtherRoutes)) {
-            $routeRequiresAccessToOtherRoutes = [$routeRequiresAccessToOtherRoutes => 'get'];
+        $routePrefixesRestriction = static::getAllowedRoutePrefixes();
+        if (is_string($routePrefixesRestriction)) {
+            $routePrefixesRestriction = [$routePrefixesRestriction];
+        } else if (!is_array($routePrefixesRestriction)) {
+            $routePrefixesRestriction = false;
         }
-        // test access to other rules
-        foreach ($routeRequiresAccessToOtherRoutes as $otherRouteAlias => $otherRouteHttpMethods) {
-            if (is_numeric($otherRouteAlias)) {
-                $otherRouteAlias = $otherRouteHttpMethods;
-                $otherRouteHttpMethods = ['get'];
-            } else if (!is_array($otherRouteHttpMethods)) {
-                $otherRouteHttpMethods = [$otherRouteHttpMethods];
-            }
-            $hasAccessToRequiredMethod = false;
-            foreach ($otherRouteHttpMethods as $routeHttpMethod) {
-                $otherRoute = self::findRoute($otherRouteAlias);
-                if (!empty($otherRoute) && $this->_hasAccessToRoute($otherRoute, $routeHttpMethod)) {
-                    $hasAccessToRequiredMethod = true;
-                    break;
-                }
-            }
-            if (!$hasAccessToRequiredMethod) {
-                return false;
-            }
-        }
-        unset($otherRoute, $otherRouteAlias, $otherRouteHttpMethods);
-        // is access forbidden to a right?
-        $hasAccess = false;
-        foreach ($routeRequiresRightsTo as $requiredRight) {
-            if (empty($accessRights[$requiredRight])) {
-                if (array_key_exists($requiredRight, $accessRights) || empty($accessRights[self::OTHERS])) {
-                    return false;
-                } else {
-                    $hasAccess = true;
-                    continue; //< allow others rule
-                }
-            } else if ($accessRights[$requiredRight] === true) {
-                $hasAccess = true;
+        /** @var Route $route */
+        foreach (\Route::getRoutes()->getRoutes() as $route) {
+            if ($routePrefixesRestriction !== false && !in_array($route->getPrefix(), $routePrefixesRestriction, true)) {
                 continue;
-            } else if (in_array(strtolower($httpMethod), $accessRights[$requiredRight])){
-                $hasAccess = true;
-                continue;
+            }
+            $routeHttpMethodOverride = array_get($route->getAction(), self::HTTP_METHOD_OVERRIDE_KEY, false);
+            if ($routeHttpMethodOverride) {
+                $routeHttpMethodOverride = static::validateAndNormalizeHttpMethod($routeHttpMethodOverride);
+                $routeHttpMethods = [$routeHttpMethodOverride];
             } else {
-                return false;
+                $routeHttpMethods = $route->getMethods();
+            }
+            foreach ($routeHttpMethods as $httpMethod) {
+                // note: 'head' and 'patch' http methods are ignored
+                if (in_array(strtolower($httpMethod), ['get', 'post', 'put', 'delete'], true)) {
+                    foreach ($roles as $role) {
+                        static::testRoleAccessToRoute(
+                            $role,
+                            $route,
+                            $httpMethod,
+                            $accessRightsPerRouteAndMethod[$role]
+                        );
+                    }
+                }
             }
         }
-        return $hasAccess;
+        \Cache::put($cacheKey, $accessRightsPerRouteAndMethod, 180);
+        // dpr($accessRightsPerRouteAndMethod); exit;
+        return $accessRightsPerRouteAndMethod;
+    }
+
+    /**
+     * @param string $role
+     * @param Route $route
+     * @param string $httpMethod
+     * @param array $collectedPermissions
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    static protected function testRoleAccessToRoute(
+        $role,
+        Route $route,
+        $httpMethod,
+        array &$collectedPermissions
+    ) {
+        $httpMethod = static::validateAndNormalizeHttpMethod($httpMethod);
+        static::validateRole($role);
+        $permissionKey = self::getPermissionKey($route, $httpMethod);
+        if (!array_key_exists($permissionKey, $collectedPermissions)) {
+            $accessRights = static::getAccessRightsFor($role);
+            // is all forbidden?
+            if (empty($accessRights)) {
+                return ($collectedPermissions[$permissionKey] = false);
+            }
+            // is there any access rights required?
+            $routeInfo = $route->getAction();
+            // normalize access rules
+            $routeRequiresAccessToSections = static::normalizeAccessRequirements(
+                $routeInfo,
+                self::REQUIRES_ACCESS_TO,
+                $httpMethod
+            );
+            $routeRequiresAccessToOtherRoutes = static::normalizeAccessRequirements(
+                $routeInfo,
+                self::REQUIRES_ACCESS_TO_ROUTES,
+                'get'
+            );
+            // test if there are any access requirements in route
+            if (empty($routeRequiresAccessToOtherRoutes) && empty($routeRequiresAccessToSections)) {
+                // there is no requirements for this route so we need to analyze $accessRights in order to
+                // find preferred strategy via self::OTHERS key or by $accessRights if it is not an array
+                if (is_array($accessRights)) {
+                    /** @var array $accessRights */
+                    $collectedPermissions[$permissionKey] = array_key_exists(self::OTHERS, $accessRights)
+                        ? (bool) $accessRights[self::OTHERS]
+                        : true;
+                } else {
+                    $collectedPermissions[$permissionKey] = (bool) $accessRights;
+                }
+                return $collectedPermissions[$permissionKey];
+            }
+            // test access to other rules
+            foreach ($routeRequiresAccessToOtherRoutes as $otherRouteAlias => $otherRouteHttpMethods) {
+                if (is_numeric($otherRouteAlias)) {
+                    $otherRouteAlias = $otherRouteHttpMethods;
+                    $otherRouteHttpMethods = ['get'];
+                } else if (!is_array($otherRouteHttpMethods)) {
+                    $otherRouteHttpMethods = [$otherRouteHttpMethods];
+                }
+                $hasAccessToRequiredMethod = false;
+                $otherRoute = self::findRoute($otherRouteAlias);
+                if (!empty($otherRoute)) {
+                    foreach ($otherRouteHttpMethods as $routeHttpMethod) {
+                        if (static::testRoleAccessToRoute($role, $otherRoute, $routeHttpMethod, $collectedPermissions)) {
+                            $hasAccessToRequiredMethod = true;
+                            break;
+                        }
+                    }
+                }
+                if (!$hasAccessToRequiredMethod) {
+                    return ($collectedPermissions[$permissionKey] = false);
+                }
+            }
+            // is superadmin?
+            // placed here to firstly perform access validation to other routes where there are
+            // possibly some specific item-related rights are tested
+            if ($accessRights === true) {
+                return ($collectedPermissions[$permissionKey] = true);
+            }
+            /** @var array $accessRights */
+            unset($otherRoute, $otherRouteAlias, $otherRouteHttpMethods);
+            // is access forbidden to a right?
+            $hasAccess = false;
+            foreach ($routeRequiresAccessToSections as $requiredRight => $requiredMethods) {
+                if (empty($accessRights[$requiredRight])) {
+                    if (array_key_exists($requiredRight, $accessRights) || empty($accessRights[self::OTHERS])) {
+                        return ($collectedPermissions[$permissionKey] = false);
+                    } else {
+                        $hasAccess = true;
+                        continue; //< allow others rule
+                    }
+                } else if ($accessRights[$requiredRight] === true) {
+                    $hasAccess = true;
+                    continue;
+                } else {
+                    foreach ($requiredMethods as $requiredMethod) {
+                        if (in_array($requiredMethod, $accessRights[$requiredRight], true)) {
+                            $hasAccess = true;
+                        } else {
+                            return ($collectedPermissions[$permissionKey] = false);
+                        }
+                    }
+                }
+            }
+            $collectedPermissions[$permissionKey] = $hasAccess;
+        }
+        return $collectedPermissions[$permissionKey];
+    }
+
+    /**
+     * @param array $routeInfo
+     * @param string $requirementsKey - key in $routeInfo that stores requirements
+     * @param string|array $defaultHttpMethods - HTTP method(s) to use as default when requirements has no its own methods
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    static protected function normalizeAccessRequirements(array $routeInfo, $requirementsKey, $defaultHttpMethods) {
+        if (empty($routeInfo[$requirementsKey])) {
+            return [];
+        }
+        $requirements = $routeInfo[$requirementsKey];
+        if (is_string($defaultHttpMethods)) {
+            $normalizedDefaultHttpMethods = [strtolower($defaultHttpMethods)];
+        } else {
+            $normalizedDefaultHttpMethods = [];
+            foreach ($defaultHttpMethods as $httpMethod) {
+                $normalizedDefaultHttpMethods[] = static::validateAndNormalizeHttpMethod($httpMethod);
+            }
+        }
+        if (is_string($requirements)) {
+            return [$requirements => $normalizedDefaultHttpMethods];
+        } else if (is_array($requirements)) {
+            $normalizedRequirements = [];
+            foreach ($requirements as $subject => $httpMethods) {
+                if (is_numeric($subject)) {
+                    $subject = $httpMethods;
+                    $httpMethods = $normalizedDefaultHttpMethods;
+                } elseif (!is_array($httpMethods)) {
+                    $httpMethods = [$httpMethods];
+                }
+                $normalizedHttpMethods = [];
+                foreach ($httpMethods as $httpMethod) {
+                    $normalizedHttpMethods[] = static::validateAndNormalizeHttpMethod($httpMethod);
+                }
+                $normalizedRequirements[$subject] = $normalizedHttpMethods;
+            }
+            return $normalizedRequirements;
+        } else {
+            throw new \InvalidArgumentException("Invalid access rights for route [{$routeInfo['as']} -> {$routeInfo['uses']}]");
+        }
     }
 
 }

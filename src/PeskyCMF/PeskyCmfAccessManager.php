@@ -11,7 +11,7 @@ class PeskyCmfAccessManager extends BaseAccessManager {
         return true;
     }
 
-    protected function getUserRole() {
+    static public function getUserRole() {
         return self::getAdmin()->role;
     }
 
