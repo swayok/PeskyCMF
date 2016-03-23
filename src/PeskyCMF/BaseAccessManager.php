@@ -74,7 +74,7 @@ abstract class BaseAccessManager implements AccessManagerInterface {
      * @throws \InvalidArgumentException
      */
     static public function hasAccessToRoute($routeName, $httpMethod) {
-        $route = self::findRoute($routeName);
+        $route = static::findRoute($routeName);
         return empty($route) ? false : static::isRoleHasAccessToRoute(static::getUserRole(), $route, $httpMethod);
     }
 
@@ -91,6 +91,9 @@ abstract class BaseAccessManager implements AccessManagerInterface {
             return false;
         }
         static::validateRole($role);
+        if (static::roleHasUnlimitedAccess($role)) {
+            return true;
+        }
         $permissions = static::getCachedPermissions($role);
         return !empty($permissions[static::getPermissionKey($route, $httpMethod)]);
     }
@@ -100,6 +103,14 @@ abstract class BaseAccessManager implements AccessManagerInterface {
      */
     static public function getRolesList() {
         return array_keys(static::getAccessRightsForAllRoles());
+    }
+
+    /**
+     * @param string $role
+     * @return bool
+     */
+    static public function roleHasUnlimitedAccess($role) {
+        return static::getAccessRightsFor($role) === true;
     }
 
     /**
