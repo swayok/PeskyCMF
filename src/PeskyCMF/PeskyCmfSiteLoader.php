@@ -32,22 +32,20 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
 
     public function boot() {
 
-        if (static::canBeUsed()) {
-            static::getCmfConfig()->replaceConfigInstance(CmfConfig::class, static::getCmfConfig());
+        static::getCmfConfig()->replaceConfigInstance(CmfConfig::class, static::getCmfConfig());
 
-            $this->loadConfigs();
-            // alter auth config
-            $this->configureAuth();
-            // alter session config
-            $this->configureSession();
-            // custom configurations
-            $this->configure();
-            $this->configurePublishes();
-            static::setLocale();
-            $this->loadRoutes();
-            $this->includeFiles();
-            $this->storeConfigsInLaravelContainer();
-        }
+        $this->loadConfigs();
+        // alter auth config
+        $this->configureAuth();
+        // alter session config
+        $this->configureSession();
+        // custom configurations
+        $this->configure();
+        $this->configurePublishes();
+        static::setLocale();
+        $this->loadRoutes();
+        $this->includeFiles();
+        $this->storeConfigsInLaravelContainer();
 
         $this->configureViewsLoading();
         $this->configureTranslationsLoading();
@@ -164,6 +162,11 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
 
     static public function getDefaultLocale() {
         return static::getCmfConfig()->default_locale();
+    }
+
+    static public function setLocale() {
+        $locale = session()->get(static::$cmfConfig->locale_session_key());
+        app()->setLocale($locale ?: static::getDefaultLocale());
     }
 
 }

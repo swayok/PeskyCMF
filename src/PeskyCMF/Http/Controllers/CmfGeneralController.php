@@ -103,7 +103,7 @@ class CmfGeneralController extends Controller {
             if ($userLoginCol === 'email') {
                 $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->getAuthIdentifier()},id";
             } else {
-                $validationRules['email'] = "email";
+                $validationRules['email'] = 'email';
             }
             $fieldsToUpdate[] = 'email';
         }
@@ -139,8 +139,12 @@ class CmfGeneralController extends Controller {
         return view(CmfConfig::getInstance()->ui_view(), $viewData)->render();
     }
 
+    /**
+     * @param null|string $locale
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function switchLocale($locale = null) {
-        if (is_string($locale) && strlen($locale) && in_array($locale, CmfConfig::getInstance()->locales())) {
+        if (is_string($locale) && $locale !== '' && in_array($locale, CmfConfig::getInstance()->locales(), true)) {
             \Session::set(CmfConfig::getInstance()->locale_session_key(), strtolower($locale));
         }
         return \Redirect::back();
@@ -212,19 +216,19 @@ class CmfGeneralController extends Controller {
         if (!$intendedUrl) {
             return CmfConfig::getInstance()->home_page_url();
         } else {
-            if (preg_match('%/api/([^/]+?)/list/?$%is', $intendedUrl, $matches)) {
+            if (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
                 return route('cmf_items_table', [$matches[1]]);
-            } else if (preg_match('%/api/([^/]+?)/service/%is', $intendedUrl, $matches)) {
+            } else if (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
                 return route('cmf_items_table', [$matches[1]]);
-            } else if (preg_match('%/api/([^/]+?)/([^/]+?)/?(?:details=(\d)|$)%is', $intendedUrl, $matches)) {
+            } else if (preg_match('%/api/([^/]+?)/([^/]+?)/?(?:details=(\d)|$)%i', $intendedUrl, $matches)) {
                 if ($matches[3] === '1') {
                     return route('cmf_item_details', [$matches[1], $matches[2]]);
                 } else {
                     return route('cmf_item_edit_form', [$matches[1], $matches[2]]);
                 }
-            } else if (preg_match('%/api/([^/]+?)%is', $intendedUrl, $matches)) {
+            } else if (preg_match('%/api/([^/]+?)%i', $intendedUrl, $matches)) {
                 return route('cmf_items_table', [$matches[1]]);
-            } else if (preg_match('%/page/([^/]+)\.html$%is', $intendedUrl, $matches)) {
+            } else if (preg_match('%/page/([^/]+)\.html$%i', $intendedUrl, $matches)) {
                 return route('cmf_page', [$matches[1]]);
             } else {
                return $intendedUrl;
@@ -285,6 +289,7 @@ class CmfGeneralController extends Controller {
         ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (!empty($user) && $user->_getPkValue() !== $request->data('id')) {
+            /** @var CmfDbObject $user */
             $user->begin()->_setFieldValue('password', $request->data('password'));
             if ($user->commit()) {
                 return cmfServiceJsonResponse()
