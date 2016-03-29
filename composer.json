@@ -40,6 +40,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/swayok/html-tag-helper.git"
+        },
+		{
+            "type": "vcs",
+            "url": "https://github.com/swayok/LaravelSiteLoader.git"
         }
     ],
     "require": {
@@ -49,6 +53,7 @@
         "swayok/peskyorm": "master@dev",
         "swayok/laravel_extended_errors": "master@dev",
         "swayok/html-tag-helper": "master@dev",
+		"swayok/LaravelSiteLoader": "master@dev",
         "almasaeed2010/adminlte": "~2.0",
         "FortAwesome/Font-Awesome": "*",
         "driftyco/ionicons": "*",

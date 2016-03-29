@@ -2,7 +2,6 @@
 
 namespace PeskyCMF;
 
-use App\AppSiteLoaderInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
