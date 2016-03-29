@@ -2,25 +2,27 @@
 
 namespace PeskyCMF;
 
+use App\AppSiteLoaderInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
+use PeskyORM\DbModel;
 use Swayok\Utils\File;
 
 class PeskyCmfServiceProvider extends ServiceProvider {
 
     /** @var string */
-    protected $cmfConfigsClass = CmfConfig::class;
+    static protected $cmfConfigsClass = CmfConfig::class;
     /** @var bool */
     protected $sendConfigsToLaravelContainer = false;
 
     /** @var CmfConfig */
-    protected $cmfConfig = null;
+    static protected $cmfConfig = null;
 
     static protected $alreadyLoaded = false;
 
     public function __construct(Application $app) {
-        $this->cmfConfig = new $this->cmfConfigsClass;
+
         parent::__construct($app);
     }
 
@@ -31,12 +33,12 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      */
     public function register() {
         $this->app->singleton(CmfConfig::class, function () {
-            return $this->cmfConfig;
+            return static::$cmfConfig;
         });
         $this->app->singleton(\PeskyCMF\Http\Request::class, function () {
             return new \PeskyCMF\Http\Request(request());
         });
-        $this->app->singleton('base_db_model_class', function () {
+        $this->app->singleton(DbModel::class, function () {
             return CmfConfig::getInstance()->base_db_model_class();
         });
     }
@@ -44,7 +46,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     public function provides() {
         return [
             CmfConfig::class,
-            \PeskyCMF\Http\Request::class
+            \PeskyCMF\Http\Request::class,
+            DbModel::class
         ];
     }
 
@@ -55,23 +58,22 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      */
     public function boot() {
 
-        $this->configurePublicFilesRoutes();
+        static::configurePublicFilesRoutes();
 
         if (self::$alreadyLoaded) {
             return; //< to prevent 2 different providers overwrite each other
         }
 
-        $basePath = '/' . trim($this->cmfConfig->url_prefix(), '/');
-        if (empty($_SERVER['REQUEST_URI']) || starts_with($_SERVER['REQUEST_URI'], $basePath)) {
+        if (static::canBeUsed()) {
 
-            $this->cmfConfig->replaceConfigInstance(CmfConfig::class, $this->cmfConfig);
+            static::$cmfConfig->replaceConfigInstance(CmfConfig::class, static::$cmfConfig);
 
             $this->loadConfigs();
 
             // alter auth config
             $this->configureAuth();
             // alter session config
-            $this->configureSession($basePath);
+            $this->configureSession();
             // custom configurations
             $this->configure();
 
@@ -99,7 +101,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      * @return \Config
      */
     public function appConfigs() {
-        return $this->app['config'];
+        return config();
     }
 
     /**
@@ -108,8 +110,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      * @return void
      */
     public function setLocale() {
-        $locale = session()->get($this->cmfConfig->locale_session_key());
-        app()->setLocale($locale ? $locale : $this->cmfConfig->default_locale());
+        $locale = session()->get(static::$cmfConfig->locale_session_key());
+        app()->setLocale($locale ?: static::$cmfConfig->default_locale());
     }
 
     protected function includeFiles() {
@@ -124,20 +126,20 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         if ($this->sendConfigsToLaravelContainer) {
             $key = 'cmf';
             $config = $this->appConfigs()->get($key, []);
-            $this->appConfigs()->set($key, array_merge($config, $this->cmfConfig->toArray()));
+            $this->appConfigs()->set($key, array_merge($config, static::$cmfConfig->toArray()));
         }
     }
 
     protected function configureAuth() {
         $config = $this->appConfigs()->get('auth', []);
-        $this->appConfigs()->set('auth', array_replace_recursive($config, $this->cmfConfig->auth_configs()));
-        \Auth::shouldUse($this->cmfConfig->auth_guard_name());
+        $this->appConfigs()->set('auth', array_replace_recursive($config, static::$cmfConfig->auth_configs()));
+        \Auth::shouldUse(static::$cmfConfig->auth_guard_name());
     }
 
-    protected function configureSession($basePath) {
+    protected function configureSession() {
         $config = $this->appConfigs()->get('session', []);
-        $config['path'] = $basePath;
-        $this->appConfigs()->set('session', array_merge($config, $this->cmfConfig->session_configs()));
+        $config['path'] = static::getBaseUrl();
+        $this->appConfigs()->set('session', array_merge($config, static::$cmfConfig->session_configs()));
     }
 
     /**
@@ -148,11 +150,11 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function configureViewsLoading() {
-        $this->loadViewsFrom($this->cmfConfig->views_path(), 'cmf');
+        $this->loadViewsFrom(static::$cmfConfig->views_path(), 'cmf');
     }
 
     protected function configureTranslationsLoading() {
-        $this->loadTranslationsFrom($this->cmfConfig->cmf_dictionaries_path(), 'cmf');
+        $this->loadTranslationsFrom(static::$cmfConfig->cmf_dictionaries_path(), 'cmf');
     }
 
     protected function configurePublishes() {
@@ -177,13 +179,13 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function loadCustomRoutes() {
-        foreach ($this->cmfConfig->routes_config_files() as $filePath) {
+        foreach (static::$cmfConfig->routes_config_files() as $filePath) {
             require_once $filePath;
         }
     }
 
     protected function loadCmfRoutes() {
-        foreach ($this->cmfConfig->cmf_routes_cofig_files() as $filePath) {
+        foreach (static::$cmfConfig->cmf_routes_cofig_files() as $filePath) {
             require_once $filePath;
         }
     }
@@ -203,5 +205,19 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
     }
 
+    static public function canBeUsed() {
+        return empty($_SERVER['REQUEST_URI']) || starts_with($_SERVER['REQUEST_URI'], self::getBaseUrl());
+    }
 
+    static public function getBaseUrl() {
+        return '/' . trim(static::$cmfConfig->url_prefix(), '/');
+    }
+
+    /**
+     * Get default locale code (RU, EN, FR, etc)
+     * @return string
+     */
+    static public function getDefaultLocale() {
+
+    }
 }

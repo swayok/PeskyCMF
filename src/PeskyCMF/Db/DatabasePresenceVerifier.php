@@ -3,7 +3,7 @@
 namespace PeskyCMF\Db;
 
 use Illuminate\Validation\PresenceVerifierInterface;
-use PeskyCMF\Config\CmfConfig;
+use PeskyORM\DbModel;
 
 class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
@@ -17,10 +17,11 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      * @param  string $idColumn
      * @param  array $extra
      * @return int
+     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function getCount($tableName, $column, $value, $excludeId = null, $idColumn = null, array $extra = []) {
         $conditions = [$column => $value];
-        if (!is_null($excludeId) && $excludeId != 'NULL') {
+        if ($excludeId !== null && $excludeId !== 'NULL') {
             $conditions[($idColumn ?: 'id') . ' !='] = $excludeId;
         }
         foreach ($extra as $key => $extraValue) {
@@ -37,6 +38,7 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      * @param  array $values
      * @param  array $extra
      * @return int
+     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function getMultiCount($tableName, $column, array $values, array $extra = []) {
         $conditions = [$column => $values];
@@ -55,7 +57,7 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      */
     private function getModel($tableName) {
         /** @var CmfDbModel $baseClass */
-        $baseClass = app()->make('base_db_model_class');
+        $baseClass = app()->make(DbModel::class);
         return $baseClass::getModelByClassName($baseClass::getFullModelClassByTableName($tableName));
     }
 

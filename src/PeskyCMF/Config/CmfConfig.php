@@ -419,10 +419,6 @@ class CmfConfig extends ConfigsContainer {
         ];
     }
 
-    static public function locale_session_key() {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_locale';
-    }
-
     static public function session_redirect_key() {
         return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_redirect';
     }
