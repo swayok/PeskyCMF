@@ -12,13 +12,20 @@ class CmfAddAdmin extends BaseCommand {
     protected $signature = 'cmf:add_admin {email_or_login} {password} {role=admin} {table=admins} {schema=public} {--login : use [login] field instead of [email]}';
 
     public function fire() {
-        $db = new Db(Db::PGSQL, env('DB_DATABASE'), env('DB_USERNAME'), env('DB_PASSWORD'), env('DB_HOST', 'localhost'));
+        $driver = config('database.default');
+        $db = new Db(
+            $driver,
+            config("database.connections.$driver.database"),
+            config("database.connections.$driver.username"),
+            config("database.connections.$driver.password"),
+            config("database.connections.$driver.host") ?: 'localhost'
+        );
         $args = $this->input->getArguments();
         $emailOrLogin = strtolower(trim($args['email_or_login']));
         $authField = $this->input->getOption('login') ? 'login' : 'email';
         $password = \Hash::make($args['password']);
         $table = "`{$args['schema']}`.`{$args['table']}`";
-        $exists = $db->processRecords(
+        $exists = $db::processRecords(
             $db->query(DbExpr::create("SELECT 1 FROM {$table} WHERE `{$authField}`=``{$emailOrLogin}``")),
             $db::FETCH_VALUE
         );

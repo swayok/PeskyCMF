@@ -51,7 +51,7 @@
     <script type="application/javascript">
         <?php $urlPrefix = \PeskyCMF\Config\CmfConfig::getInstance()->url_prefix(); ?>
         var CmfSettings = {
-            isDebug: {{ env('APP_DEBUG') ? 'true' : 'false' }},
+            isDebug: {{ config('app.debug') ? 'true' : 'false' }},
             rootUrl: '/{{ $urlPrefix }}',
             uiUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_main_ui', [], false)) }}',
             userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}'

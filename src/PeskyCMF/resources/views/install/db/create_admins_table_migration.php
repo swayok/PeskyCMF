@@ -14,7 +14,7 @@ class CreateAdminsTable extends PeskyCMF\Db\MigrationForTableCreation {
         if ($rollback) {
             return 'DROP TABLE "' . $this->table . '";';
         } else {
-            $timezone = env('TIME_ZONE', 'UTC');
+            $timezone = config('app.timezone', 'UTC');
             return <<<EOF
 CREATE TABLE ":schema".":table" (
     "id" serial4 NOT NULL,

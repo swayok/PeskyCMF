@@ -21,7 +21,7 @@ class CreateTimestampRenewTriggerFunction extends PeskyCMF\Db\MigrationByQuery {
         if ($rollback) {
             return 'DROP FUNCTION ":schema"."' . $this->triggerName . '"();';
         } else {
-            $timezone = env('TIME_ZONE', 'UTC');
+            $timezone = config('app.timezone', 'UTC');
             return <<<EOF
 CREATE FUNCTION ":schema"."{$this->triggerName}"()
   RETURNS "pg_catalog"."trigger" AS \$BODY\$BEGIN

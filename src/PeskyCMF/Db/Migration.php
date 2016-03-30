@@ -11,7 +11,14 @@ use Swayok\Utils\StringUtils;
 class Migration extends Base {
 
     public function getConnection() {
-        return new Db(Db::PGSQL, env('DB_DATABASE'), env('DB_USERNAME'), env('DB_PASSWORD'), env('DB_HOST', 'localhost'));
+        $driver = config('database.default');
+        return new Db(
+            $driver,
+            config("database.connections.$driver.database"),
+            config("database.connections.$driver.username"),
+            config("database.connections.$driver.password"),
+            config("database.connections.$driver.host") ?: 'localhost'
+        );
     }
 
     protected function out($string) {

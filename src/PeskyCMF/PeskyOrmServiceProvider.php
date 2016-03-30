@@ -14,15 +14,17 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      * Bootstrap any application services.
      *
      * @return void
+     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function boot() {
+        $driver = config('database.default');
         CmfDbModel::setDbConnectionConfig(
             DbConnectionConfig::create()
-                ->setDriver(env('DB_CONNECTION', 'pgsql'))
-                ->setHost(env('DB_HOST', 'localhost'))
-                ->setDbName(env('DB_DATABASE'))
-                ->setUserName(env('DB_USERNAME'))
-                ->setPassword(env('DB_PASSWORD'))
+                ->setDriver($driver)
+                ->setHost(config("database.connections.$driver.host"))
+                ->setDbName(config("database.connections.$driver.database"))
+                ->setUserName(config("database.connections.$driver.username"))
+                ->setPassword(config("database.connections.$driver.password"))
         );
         DbColumnConfig::registerType('password', DbColumnConfig::DB_TYPE_VARCHAR, PasswordField::class);
 
@@ -45,6 +47,7 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      * Register any application services.
      *
      * @return void
+     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function register() {
         Auth::provider('peskyorm', function($app, array $config) {
