@@ -9,22 +9,23 @@ use PeskyORM\DbExpr;
 class CmfAddAdmin extends BaseCommand {
 
     protected $description = 'Create administrator in DB';
-    protected $signature = 'cmf:add_admin {email} {password} {role=admin} {table=admins} {schema=public}';
+    protected $signature = 'cmf:add_admin {email_or_login} {password} {role=admin} {table=admins} {schema=public} {--login : use [login] field instead of [email]}';
 
     public function fire() {
         $db = new Db(Db::PGSQL, env('DB_DATABASE'), env('DB_USERNAME'), env('DB_PASSWORD'), env('DB_HOST', 'localhost'));
         $args = $this->input->getArguments();
-        $email = strtolower(trim($args['email']));
+        $emailOrLogin = strtolower(trim($args['email_or_login']));
+        $authField = $this->input->getOption('login') ? 'login' : 'email';
         $password = \Hash::make($args['password']);
         $table = "`{$args['schema']}`.`{$args['table']}`";
         $exists = $db->processRecords(
-            $db->query(DbExpr::create("SELECT 1 FROM {$table} WHERE `email`=``{$email}``")),
+            $db->query(DbExpr::create("SELECT 1 FROM {$table} WHERE `{$authField}`=``{$emailOrLogin}``")),
             $db::FETCH_VALUE
         );
         if ($exists > 0) {
-            $query = "UPDATE {$table} SET `password`=``{$password}``, `role`=``{$args['role']}`` WHERE `email`=``{$email}``";
+            $query = "UPDATE {$table} SET `password`=``{$password}``, `role`=``{$args['role']}`` WHERE `{$authField}`=``{$emailOrLogin}``";
         } else {
-            $query = "INSERT INTO {$table} (`email`, `password`, `role`) VALUES (``{$email}``,``{$password}``, ``{$args['role']}``)";
+            $query = "INSERT INTO {$table} (`{$authField}`, `password`, `role`) VALUES (``{$emailOrLogin}``,``{$password}``, ``{$args['role']}``)";
         }
 
         try {
