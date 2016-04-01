@@ -103,7 +103,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         \Auth::shouldUse(static::getCmfConfig()->auth_guard_name());
     }
 
-    protected function configureSession() {
+    public function configureSession($connection = null, $lifetime = null) {
         $config = $this->getAppConfig()->get('session', []);
         $config['path'] = static::getBaseUrl();
         $this->getAppConfig()->set('session', array_merge($config, static::getCmfConfig()->session_configs()));

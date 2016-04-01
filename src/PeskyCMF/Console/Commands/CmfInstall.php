@@ -25,9 +25,9 @@ class CmfInstall extends BaseCommand {
             'urlPrefix' => trim(trim($this->input->getArgument('url_prefix'), '/\\')),
             'dbClassesAppSubfolder' => $this->input->getArgument('database_classes_app_subfolder')
         ];
-        // copy service provider
-        $file = File::load($folder->pwd() . '/' . $appSubfolder . 'ServiceProvider.php', true, 0755, 0644);
-        $file->write(view('cmf::install.cmf_service_provider', $dataForViews)->render());
+        // create site loader
+        $file = File::load($folder->pwd() . '/' . $appSubfolder . 'SiteLoader.php', true, 0755, 0644);
+        $file->write(view('cmf::install.cmf_site_loader', $dataForViews)->render());
         // copy configs
         $subfolder = Folder::load($folder->pwd() . '/Config', true, 0755);
         $file = File::load($subfolder->pwd() . '/' . $appSubfolder . 'Config.php', true, 0755, 0644);
