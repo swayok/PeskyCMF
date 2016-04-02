@@ -148,7 +148,9 @@ class CmfScaffoldApiController extends Controller {
             return cmfJsonResponseForValidationErrors($errors);
         }
         unset($data[$model->getPkColumnName()]);
-        $data = $formConfig->beforeSave(true, $data);
+        if ($formConfig->hasBeforeSaveCallback()) {
+            $data = call_user_func($formConfig->getBeforeSaveCallback(), true, $data, $formConfig);
+        }
         if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(true)) {
             // revalidate
             $errors = $formConfig->validateDataForCreate($data, [], true);
@@ -205,7 +207,9 @@ class CmfScaffoldApiController extends Controller {
                 ->setMessage(CmfConfig::transBase('.action.edit.forbidden_for_record'))
                 ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
-        $data = $formConfig->beforeSave(false, $data);
+        if ($formConfig->hasBeforeSaveCallback()) {
+            $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
+        }
         if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
             // revalidate
             $errors = $formConfig->validateDataForCreate($data);

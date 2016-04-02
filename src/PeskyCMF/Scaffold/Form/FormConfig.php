@@ -349,15 +349,10 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param $isCreation
-     * @param $validatedData
-     * @return array
+     * @return callable - function ($isCreation, array $validatedData, FormConfig $formConfig) {}
      */
-    public function beforeSave($isCreation, array $validatedData) {
-        if ($this->hasBeforeSaveCallback()) {
-            return call_user_func($this->beforeSaveCallback, $isCreation, $validatedData, $this);
-        }
-        return $validatedData;
+    public function getBeforeSaveCallback() {
+        return $this->beforeSaveCallback;
     }
 
     /**
