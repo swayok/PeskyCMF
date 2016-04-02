@@ -46,7 +46,7 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
      * @return null|array|callable
      */
     public function getOptions() {
-        return $this->options;
+        return $this->hasOptionsLoader() ? [] : $this->options;
     }
 
     /**
@@ -63,7 +63,7 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     }
 
     /**
-     * @param callable $loader
+     * @param callable $loader = function (FormFieldConfig $fieldConfig, FormConfig $formConfig) { return [] }
      * @return $this
      */
     public function setOptionsLoader(callable $loader) {
@@ -83,17 +83,6 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
      */
     public function hasOptionsLoader() {
         return !empty($this->optionsLoader);
-    }
-
-    /**
-     * @return array
-     * @throws ScaffoldFieldException
-     */
-    public function loadOptions() {
-        if (empty($this->optionsLoader)) {
-            throw new ScaffoldFieldException($this, 'FormFieldConfig->optionsLoader is empty');
-        }
-        return call_user_func_array($this->optionsLoader, [$this, $this->getScaffoldActionConfig()->getModel()]);
     }
 
     /**

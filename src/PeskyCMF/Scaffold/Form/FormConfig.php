@@ -164,9 +164,13 @@ class FormConfig extends ScaffoldActionConfig {
      */
     public function loadOptions() {
         $options = array();
-        foreach ($this->getFields() as $field) {
-            if ($field->hasOptionsLoader()) {
-                $options[$field->getName()] = $field->loadOptions();
+        foreach ($this->getFields() as $fieldConfig) {
+            if ($fieldConfig->hasOptionsLoader()) {
+                $options[$fieldConfig->getName()] = call_user_func(
+                    $fieldConfig->getOptionsLoader(),
+                    $fieldConfig,
+                    $this
+                );
             }
         }
         return $options;
