@@ -7,10 +7,9 @@
  * @var array $config
  * @var array $enabler
  */
-$id = $fieldConfig->getName() . '-input';
 $attributes = array(
     'name' => $fieldConfig->getName(),
-    'id' => $id,
+    'id' => $fieldConfig->getDefaultId(),
     'type' => 'text',
     'class' => 'form-control'
 );
@@ -29,7 +28,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <?php endif; ?>
 
 <div class="form-group">
-    <label for="<?php echo $id; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
+    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
     <div class="input-group w200">
         <input value="{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}"
             {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
@@ -58,7 +57,7 @@ $config = array_merge([
 
 <script type="application/javascript">
     setTimeout(function () {
-        var $input = $('#<?php echo $id; ?>');
+        var $input = $('#<?php echo $attributes['id']; ?>');
         $input.datetimepicker(<?php echo json_encode($config); ?>);
         <?php if (!empty($enabler)) : ?>
             $('#<?php echo $enabler; ?>-input').on('change', function () {

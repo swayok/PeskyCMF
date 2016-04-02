@@ -7,8 +7,10 @@
  * @var array $config
  * @var array $enabler
  */
-$id = $fieldConfig->getName() . '-input';
 include 'text.php';
+/**
+ * @var array $attributes
+ */
 if (empty($config)) {
     $config = [];
 }
@@ -17,7 +19,7 @@ $config = array_merge(['format' => 'yyyy-mm-dd'], $config);
 
 <script type="application/javascript">
     setTimeout(function () {
-        var input = $('#<?php echo $id; ?>');
+        var input = $('#<?php echo $attributes['id']; ?>');
         input.datepicker(<?php echo json_encode($config); ?>);
         <?php if (!empty($enabler)) : ?>
             $('#<?php echo $enabler; ?>-input').on('change', function () {

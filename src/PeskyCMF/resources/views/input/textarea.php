@@ -5,10 +5,9 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbModel $model
  */
-$id = $fieldConfig->getName() . '-input';
 $attributes = array(
     'name' => $fieldConfig->getName(),
-    'id' => $id,
+    'id' => $fieldConfig->getDefaultId(),
     'type' => 'text',
     'class' => 'form-control'
 );
@@ -27,7 +26,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <?php endif; ?>
 
 <div class="form-group">
-    <label for="<?php echo $id; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
+    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
     <textarea {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
         {{! it.<?php echo $fieldConfig->getName(); ?> || '' }}
     </textarea>

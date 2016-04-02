@@ -43,6 +43,15 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     protected $optionsLoader = null;
 
     /**
+     * Default input id
+     * @return string
+     * @throws ScaffoldFieldException
+     */
+    public function getDefaultId() {
+        return $this->getName() . '_input';
+    }
+
+    /**
      * @return null|array|callable
      */
     public function getOptions() {

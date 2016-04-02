@@ -1,14 +1,14 @@
 <?php
 
-
 namespace PeskyCMF\Scaffold;
-
 
 abstract class ScaffoldFieldRendererConfig {
     /** @var string */
     protected $view = null;
     /** @var array */
     protected $data = [];
+    /** @var string */
+    protected $jsBlocks = '';
 
     /**
      * @param null $view
@@ -72,5 +72,21 @@ abstract class ScaffoldFieldRendererConfig {
     public function setView($view) {
         $this->view = $view;
         return $this;
+    }
+
+    /**
+     * @param string $jsBlockContents
+     * @return $this
+     */
+    public function addJavaScriptBlock($jsBlockContents) {
+        $this->jsBlocks .= '<script type="application/javascript">' . $jsBlockContents . '</script>';
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getJavaScriptBlocks() {
+        return $this->jsBlocks;
     }
 }

@@ -10,8 +10,10 @@
         }
  * @var string|null $insertJsCode - any js code to be inserted before editor init
  */
-$id = $fieldConfig->getName() . '-input';
 include 'textarea.php';
+/**
+ * @var array $attributes
+ */
 ?>
 
 <script type="application/javascript">
@@ -20,9 +22,9 @@ include 'textarea.php';
             <?php echo $insertJsCode; ?>
         <?php endif; ?>
         <?php if (empty($ckeditorInitializer)) : ?>
-            $('#<?php echo $id ?>').ckeditor();
+            $('#<?php echo $attributes['id'] ?>').ckeditor();
         <?php else: ?>
-            <?php echo $ckeditorInitializer; ?>('#<?php echo $id ?>');
+            <?php echo $ckeditorInitializer; ?>('#<?php echo $attributes['id'] ?>');
         <?php endif; ?>
     });
 </script>

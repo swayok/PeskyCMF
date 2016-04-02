@@ -5,22 +5,19 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbModel $model
  */
-$id = $fieldConfig->getName() . '-input';
+$attributes = array(
+    'name' => $fieldConfig->getName(),
+    'type' => 'checkbox',
+    'id' => $fieldConfig->getDefaultId(),
+    'value' => 1,
+    'class' => 'styled'
+);
+$attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
+$attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
 ?>
 <div class="checkbox checkbox-primary">
-    <?php
-        $attributes = array(
-            'name' => $fieldConfig->getName(),
-            'type' => 'checkbox',
-            'id' => $id,
-            'value' => 1,
-            'class' => 'styled'
-        );
-        $attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
-        $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
-    ?>
-    <input name="<?php echo $fieldConfig->getName(); ?>" id="_<?php echo $id; ?>" type="hidden" value="0">
+    <input name="<?php echo $fieldConfig->getName(); ?>" id="_<?php echo $attributes['id']; ?>" type="hidden" value="0">
     <input {{? !!it.<?php echo $fieldConfig->getName(); ?> }}checked{{?}}
             {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
-    <label for="<?php echo $id; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
+    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
 </div>

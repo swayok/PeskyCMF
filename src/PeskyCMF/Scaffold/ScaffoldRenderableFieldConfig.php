@@ -56,14 +56,14 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
                 'rendererConfig' => $configOrString,
                 'actionConfig' => $this->getScaffoldActionConfig(),
                 'model' => $this->getScaffoldActionConfig()->getModel(),
-            ]))->render();
+            ]))->render() . $configOrString->getJavaScriptBlocks();
         } else {
             throw new ScaffoldFieldException($this, 'Renderer function returned unsopported result. String or ScaffoldFieldRendererConfig object expected');
         }
     }
 
     /**
-     * @param callable $configurator = function (ScaffoldFieldRendererConfig $renderer, ScaffoldRenderableFieldConfig $field) {}
+     * @param callable $configurator = function (ScaffoldFieldRendererConfig $renderer, ScaffoldRenderableFieldConfig $fieldConfig) {}
      * @return $this
      */
     public function setDefaultRendererConfigurator(callable $configurator) {

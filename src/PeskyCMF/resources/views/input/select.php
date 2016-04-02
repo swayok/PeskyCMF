@@ -5,19 +5,17 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbModel $model
  */
-$id = $fieldConfig->getName() . '-input';
+
+$attributes = array(
+    'name' => $fieldConfig->getName(),
+    'id' => $fieldConfig->getDefaultId(),
+    'class' => 'form-control'
+);
+$attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
+$attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
 ?>
 <div class="form-group">
-    <label for="<?php echo $id; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
-    <?php
-        $attributes = array(
-            'name' => $fieldConfig->getName(),
-            'id' => $id,
-            'class' => 'form-control'
-        );
-        $attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
-        $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
-    ?>
+    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
     <select data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || ''}}"
         {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
     >
