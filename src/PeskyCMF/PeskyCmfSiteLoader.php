@@ -10,9 +10,9 @@ use Swayok\Utils\File;
 abstract class PeskyCmfSiteLoader extends AppSiteLoader {
 
     /** @var CmfConfig */
-    protected static $cmfConfig;
+    static protected $cmfConfig;
     /** @var string */
-    protected static $cmfConfigsClass = CmfConfig::class;
+    static protected $cmfConfigsClass = CmfConfig::class;
     /** @var bool */
     protected $sendConfigsToLaravelContainer = false;
 
