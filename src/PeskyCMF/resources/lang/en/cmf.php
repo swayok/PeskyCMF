@@ -56,6 +56,12 @@ return [
             'edit_item' => 'Edit',
             'view_item' => 'View',
             'delete_item' => 'Delete'
+        ],
+        'filter' => [
+            'bool' => [
+                'yes' => 'Yes',
+                'no' => 'No'
+            ]
         ]
     ],
     'form' => [

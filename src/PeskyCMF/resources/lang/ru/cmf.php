@@ -56,6 +56,12 @@ return [
             'edit_item' => 'Редактировать',
             'view_item' => 'Просмотр',
             'delete_item' => 'Удалить'
+        ],
+        'filter' => [
+            'bool' => [
+                'yes' => 'Да',
+                'no' => 'Нет'
+            ]
         ]
     ],
     'form' => [

@@ -4,6 +4,7 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use App\AppConstants;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyORM\DbExpr;
@@ -299,8 +300,8 @@ class DataGridColumnFilterConfig {
         switch ($type) {
             case static::TYPE_BOOL:
                 $this->setAllowedValues([
-                    't' => trans('global.bool.yes'),
-                    'f' => trans('global.bool.no'),
+                    't' => CmfConfig::transBase('.datagrid.filter.bool.yes'),
+                    'f' => CmfConfig::transBase('.datagrid.filter.bool.no'),
                 ]);
                 break;
             case static::TYPE_TIME:

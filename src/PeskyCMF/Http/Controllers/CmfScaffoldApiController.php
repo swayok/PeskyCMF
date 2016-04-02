@@ -8,6 +8,7 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\PeskyCmfException;
+use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\Exception\DbObjectValidationException;
 use Swayok\Html\Tag;
@@ -150,6 +151,9 @@ class CmfScaffoldApiController extends Controller {
         unset($data[$model->getPkColumnName()]);
         if ($formConfig->hasBeforeSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeSaveCallback(), true, $data, $formConfig);
+            if (empty($data)) {
+                throw new ScaffoldException('Empty $data received from beforeSave callback');
+            }
         }
         if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(true)) {
             // revalidate
@@ -209,6 +213,9 @@ class CmfScaffoldApiController extends Controller {
         }
         if ($formConfig->hasBeforeSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
+            if (empty($data)) {
+                throw new ScaffoldException('Empty $data received from beforeSave callback');
+            }
         }
         if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
             // revalidate
