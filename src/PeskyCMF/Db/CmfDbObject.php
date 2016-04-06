@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Db;
 
-use PeskyCMF\Db\Traits\CacheableDbModel;
+use PeskyCMF\Db\Traits\CacheForDbSelects;
 use PeskyCMF\Db\Traits\CacheHelpersTrait;
 use PeskyORM\DbObject;
 
@@ -20,7 +20,7 @@ abstract class CmfDbObject extends DbObject {
 
     /**
      * Needed for IDE autocompletion
-     * @return CmfDbModel|CacheableDbModel
+     * @return CmfDbModel|CacheForDbSelects
      */
     public function _getModel() {
         return parent::_getModel();

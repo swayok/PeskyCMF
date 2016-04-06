@@ -2,16 +2,16 @@
 
 namespace PeskyCMF\Db\Traits;
 
-trait AutoCacheableDbModel {
+trait DbSelectsAutoCacheDisabled {
 
-    use CacheForDbSelects;
+    use DbSelectsCacheDefaults;
 
     /**
      * Override to change default value
      * @return boolean
      */
     public function canAutoCacheSelectOneQueries() {
-        return true;
+        return false;
     }
 
     /**
@@ -19,7 +19,7 @@ trait AutoCacheableDbModel {
      * @return boolean
      */
     public function canAutoCacheSelectManyQueries() {
-        return true;
+        return false;
     }
 
 }
