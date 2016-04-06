@@ -250,7 +250,6 @@ trait CacheForDbSelects {
                 || (
                     $this->canAutoCacheSelectManyQueries()
                     && $this->getAutoCacheTimeoutForSelectManyInMinutes() > 0
-                    //&& \Request::getMethod() === 'GET'
                 )
             ) {
                 $cacheSettings = $hasCacheOption
@@ -291,7 +290,7 @@ trait CacheForDbSelects {
     public function selectFromCache($columns = '*', $conditionsAndOptions = null, $asObjects = false, $withRootAlias = false) {
         if ($this->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
-            static::addCacheKeyToConditionsAndOptions($conditionsAndOptions);
+            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
         return $this->select($columns, $conditionsAndOptions, $asObjects, $withRootAlias);
     }
@@ -305,7 +304,7 @@ trait CacheForDbSelects {
     public function selectColumnFromCache($column, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
-            static::addCacheKeyToConditionsAndOptions($conditionsAndOptions);
+            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
         return $this->selectColumn($column, $conditionsAndOptions);
     }
@@ -321,7 +320,7 @@ trait CacheForDbSelects {
     public function selectAssocFromCache($keysColumn, $valuesColumn, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
-            static::addCacheKeyToConditionsAndOptions($conditionsAndOptions);
+            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
         return $this->selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions);
     }
@@ -330,13 +329,74 @@ trait CacheForDbSelects {
      * @param null|array|string $conditionsAndOptions
      * @param bool $cacheSettings
      */
-    static private function addCacheKeyToConditionsAndOptions(&$conditionsAndOptions, $cacheSettings = true) {
+    static private function addCacheOptionToConditionsAndOptions(&$conditionsAndOptions, $cacheSettings = true) {
         if (empty($conditionsAndOptions)) {
             $conditionsAndOptions = array();
         } else if (is_string($conditionsAndOptions)) {
             $conditionsAndOptions = array($conditionsAndOptions);
         }
         $conditionsAndOptions['CACHE'] = $cacheSettings;
+    }
+
+    /**
+     * @param null|array $conditionsAndOptions
+     * @param bool $removeNotInnerJoins
+     * @return int
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbConnectionConfigException
+     */
+    public function count($conditionsAndOptions = null, $removeNotInnerJoins = false) {
+        if ($this->cachingIsPossible()) {
+            /** @var CmfDbModel|CacheForDbSelects $this */
+            $hasCacheOption = is_array($conditionsAndOptions) && array_key_exists('CACHE', $conditionsAndOptions);
+            if (
+                $hasCacheOption
+                || (
+                    $this->canAutoCacheSelectManyQueries()
+                    && $this->getAutoCacheTimeoutForSelectManyInMinutes() > 0
+                )
+            ) {
+                $cacheSettings = $hasCacheOption
+                    ? $conditionsAndOptions['CACHE']
+                    : ['timeout' => $this->getAutoCacheTimeoutForSelectManyInMinutes()];
+                unset($conditionsAndOptions['CACHE']);
+                if ($cacheSettings !== false) {
+                    $conditionsAndOptions = $this->cleanOptionsForCount($conditionsAndOptions, $removeNotInnerJoins);
+                    /** @var array $cacheSettings */
+                    $cacheSettings = $this->resolveCacheSettings(
+                        $cacheSettings,
+                        $this->_getCacheDurationForSelectManyInMinutes(),
+                        function () use ($conditionsAndOptions) {
+                            return $this->buildDefaultCacheKey(false, '__COUNT__', $conditionsAndOptions);
+                        }
+                    );
+                    $cacheSettings['key'] .= '_count';
+                    $count = $this->getCachedData(
+                        false,
+                        $cacheSettings,
+                        function () use ($conditionsAndOptions, $removeNotInnerJoins) {
+                            return parent::count($conditionsAndOptions, $removeNotInnerJoins);
+                        }
+                    );
+                    return $count;
+                }
+            }
+        }
+
+        return parent::count($conditionsAndOptions, $removeNotInnerJoins);
+    }
+
+    /**
+     * @param null|array $conditionsAndOptions
+     * @param bool $removeNotInnerJoins
+     * @return int
+     */
+    public function countFromCache($conditionsAndOptions = null, $removeNotInnerJoins = false) {
+        if ($this->cachingIsPossible()) {
+            /** @var CmfDbModel|CacheForDbSelects $this */
+            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
+        }
+        return $this->count($conditionsAndOptions, $removeNotInnerJoins);
     }
 
     /**
@@ -355,7 +415,7 @@ trait CacheForDbSelects {
             if (is_numeric($conditionsAndOptions) || is_int($conditionsAndOptions)) {
                 $conditionsAndOptions = array($this->getPkColumnName() => $conditionsAndOptions);
             }
-            static::addCacheKeyToConditionsAndOptions($conditionsAndOptions, true);
+            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions, true);
         }
         return $this->selectOne($columns, $conditionsAndOptions, $asObject, $withRootAlias);
     }
