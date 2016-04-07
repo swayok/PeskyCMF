@@ -164,13 +164,39 @@ trait CacheForDbSelects {
     }
 
     /**
-     * Get data from cache or put data from $callback to cache
+     * Get data from cache or put data from $callback to cache (for external use)
      * @param bool $isSingleRecord
-     * @param array $cacheSettings
+     * @param array|string $cacheSettings - array: settings; string: cache key
+     * @param callable $callback
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function getCachedData($isSingleRecord, $cacheSettings, callable $callback) {
+        $defaultTimeout = $isSingleRecord
+                ? $this->_getCacheDurationForSelectOneInMinutes()
+                : $this->_getCacheDurationForSelectManyInMinutes();
+        $resolvedCacheSettings = $this->resolveCacheSettings(
+            $cacheSettings,
+            $defaultTimeout,
+            function () {
+                throw new \InvalidArgumentException('$cacheSettings must contain a "key" key (if array) or be the cache key (if string)');
+            }
+        );
+        if (is_array($cacheSettings)) {
+            return $this->_getCachedData($isSingleRecord, $resolvedCacheSettings, $callback);
+        } else {
+            return $callback();
+        }
+    }
+
+    /**
+     * Get data from cache or put data from $callback to cache (for internal use)
+     * @param bool $isSingleRecord
+     * @param array $cacheSettings - prepared cache settings. Always contains 'key' key
      * @param callable $callback
      * @return array
      */
-    abstract protected function getCachedData($isSingleRecord, array $cacheSettings, callable $callback);
+    abstract protected function _getCachedData($isSingleRecord, array $cacheSettings, callable $callback);
 
     /**
      * @param bool $isSingleRecord
@@ -180,7 +206,7 @@ trait CacheForDbSelects {
      * @throws \PeskyORM\Exception\DbModelException
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
-    protected function buildDefaultCacheKey($isSingleRecord, $columns, $conditionsAndOptions) {
+    public function buildDefaultCacheKey($isSingleRecord, $columns, $conditionsAndOptions) {
         $mid = $isSingleRecord ? 'one.' : 'many.';
         return $this->getModelCachePrefix() . $mid . static::buildCacheKey($columns, $conditionsAndOptions);
     }
@@ -264,7 +290,7 @@ trait CacheForDbSelects {
                             return $this->buildDefaultCacheKey(false, $columns, $conditionsAndOptions);
                         }
                     );
-                    $records = $this->getCachedData(false, $cacheSettings, function () use ($columns, $conditionsAndOptions) {
+                    $records = $this->_getCachedData(false, $cacheSettings, function () use ($columns, $conditionsAndOptions) {
                         return parent::select($columns, $conditionsAndOptions, false, false);
                     });
                     if ($asObjects) {
@@ -371,7 +397,7 @@ trait CacheForDbSelects {
                         }
                     );
                     $cacheSettings['key'] .= '_count';
-                    $count = $this->getCachedData(
+                    $count = $this->_getCachedData(
                         false,
                         $cacheSettings,
                         function () use ($conditionsAndOptions, $removeNotInnerJoins) {
@@ -454,7 +480,7 @@ trait CacheForDbSelects {
                             return $this->buildDefaultCacheKey(true, $columns, $conditionsAndOptions);
                         }
                     );
-                    $record = $this->getCachedData(true, $cacheSettings, function () use ($columns, $conditionsAndOptions) {
+                    $record = $this->_getCachedData(true, $cacheSettings, function () use ($columns, $conditionsAndOptions) {
                         return parent::selectOne($columns, $conditionsAndOptions, false, false);
                     });
                     if ($asObject) {

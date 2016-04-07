@@ -158,7 +158,7 @@ trait TaggedCacheForDbSelects {
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \BadMethodCallException
      */
-    protected function getCachedData($isSingleRecord, array $cacheSettings, callable $callback) {
+    public function _getCachedData($isSingleRecord, array $cacheSettings, callable $callback) {
         $data = \Cache::get($cacheSettings['key'], '{!404!}');
         if ($data === '{!404!}') {
             $data = $callback();
@@ -171,6 +171,9 @@ trait TaggedCacheForDbSelects {
                 $tags[] = $this->getSelectManyCacheTag();
             }
             $cacher = \Cache::tags($tags);
+            if ($data instanceof DbObject) {
+                $data = $data->toPublicArray();
+            }
             if (empty($cacheSettings['timeout'])) {
                 $cacher->forever($cacheSettings['key'], $data);
             } else {
@@ -188,7 +191,7 @@ trait TaggedCacheForDbSelects {
      * @throws \PeskyORM\Exception\DbModelException
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
-    protected function buildDefaultCacheKey($isSingleRecord, $columns, $conditionsAndOptions) {
+    public function buildDefaultCacheKey($isSingleRecord, $columns, $conditionsAndOptions) {
         $prefix = $isSingleRecord ? $this->getSelectOneCacheTag() : $this->getSelectManyCacheTag();
         return $prefix . '.' . static::buildCacheKey($columns, $conditionsAndOptions);
     }
