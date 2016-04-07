@@ -160,7 +160,13 @@ trait CacheForDbSelects {
      */
     public function getModelCachePrefix() {
         /** @var CmfDbModel|CacheForDbSelects $this */
-        return "{$this->getDataSource()->getDbName()}.{$this->getConnectionAlias()}.{$this->getAlias()}.";
+        $parts = [
+            $this->getConnectionAlias(),
+            $this->getTableConfig()->getSchema(),
+            $this->getDataSource()->getDbName(),
+            $this->getAlias()
+        ];
+        return implode('.', $parts) . '.';
     }
 
     /**

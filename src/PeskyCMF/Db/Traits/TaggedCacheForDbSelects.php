@@ -114,16 +114,6 @@ trait TaggedCacheForDbSelects {
     }
 
     /**
-     * @return string
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws DbModelException
-     */
-    public function getModelCachePrefix() {
-        /** @var CmfDbModel|TaggedCacheForDbSelects $this */
-        return "{$this->getDataSource()->getDbName()}.{$this->getConnectionAlias()}.{$this->getAlias()}.";
-    }
-
-    /**
      * @param mixed $record
      * @return string
      * @throws \PeskyORM\Exception\DbObjectException
