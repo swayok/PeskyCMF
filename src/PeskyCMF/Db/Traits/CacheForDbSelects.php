@@ -47,6 +47,16 @@ trait CacheForDbSelects {
     abstract public function canAutoCacheSelectOneQueries();
 
     /**
+     * Allow/disallow cache for DbModel->expression().
+     * Cache timeout provided by $this->getDefaultCacheDurationForSelectOneInMinutes()
+     * Override to change default value
+     * @return boolean
+     */
+    public function canAutoCacheExpressionQueries() {
+        return $this->canAutoCacheSelectOneQueries();
+    }
+
+    /**
      * Override to change default value
      * @return boolean
      */
@@ -402,7 +412,7 @@ trait CacheForDbSelects {
                             return $this->buildDefaultCacheKey(false, '__COUNT__', $conditionsAndOptions);
                         }
                     );
-                    $cacheSettings['key'] .= '_count';
+                    $cacheSettings['key'] .= '_count'; //< for DbModel->selectWithCount() method when cache key provided by user
                     $count = $this->_getCachedData(
                         false,
                         $cacheSettings,
@@ -429,6 +439,63 @@ trait CacheForDbSelects {
             static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
         return $this->count($conditionsAndOptions, $removeNotInnerJoins);
+    }
+
+    /**
+     * @param string $expression - example: 'COUNT(*)', 'SUM(`field`)'
+     * @param array|string|null $conditionsAndOptions
+     * @return string|int|float|bool
+     */
+    public function expression($expression, $conditionsAndOptions = null) {
+        if ($this->cachingIsPossible()) {
+            /** @var CmfDbModel|CacheForDbSelects $this */
+            $hasCacheOption = is_array($conditionsAndOptions) && array_key_exists('CACHE', $conditionsAndOptions);
+            if (
+                $hasCacheOption
+                || (
+                    $this->canAutoCacheExpressionQueries()
+                    && $this->getAutoCacheTimeoutForSelectOneInMinutes() > 0
+                )
+            ) {
+                $cacheSettings = $hasCacheOption
+                    ? $conditionsAndOptions['CACHE']
+                    : ['timeout' => $this->getAutoCacheTimeoutForSelectOneInMinutes()];
+                unset($conditionsAndOptions['CACHE']);
+                if ($cacheSettings !== false) {
+                    /** @var array $cacheSettings */
+                    $cacheSettings = $this->resolveCacheSettings(
+                        $cacheSettings,
+                        $this->getAutoCacheTimeoutForSelectOneInMinutes(),
+                        function () use ($expression, $conditionsAndOptions) {
+                            return $this->buildDefaultCacheKey(false, $expression, $conditionsAndOptions);
+                        }
+                    );
+                    $result = $this->_getCachedData(
+                        false,
+                        $cacheSettings,
+                        function () use ($expression, $conditionsAndOptions) {
+                            return parent::expression($expression, $conditionsAndOptions);
+                        }
+                    );
+                    return $result;
+                }
+            }
+        }
+        unset($conditionsAndOptions['CACHE']);
+        return parent::expression($expression, $conditionsAndOptions);
+    }
+
+    /**
+     * @param string $expression - example: 'COUNT(*)', 'SUM(`field`)'
+     * @param array|string|null $conditionsAndOptions
+     * @return string|int|float|bool
+     */
+    public function expressionFromCache($expression, $conditionsAndOptions = null) {
+        if ($this->cachingIsPossible()) {
+            /** @var CmfDbModel|CacheForDbSelects $this */
+            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
+        }
+        return $this->expression($expression, $conditionsAndOptions);
     }
 
     /**
