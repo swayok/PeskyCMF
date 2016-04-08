@@ -414,7 +414,7 @@ trait CacheForDbSelects {
                 }
             }
         }
-
+        unset($conditionsAndOptions['CACHE']);
         return parent::count($conditionsAndOptions, $removeNotInnerJoins);
     }
 
