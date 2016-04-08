@@ -148,7 +148,7 @@ trait TaggedCacheForDbSelects {
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \BadMethodCallException
      */
-    public function _getCachedData($isSingleRecord, array $cacheSettings, callable $callback) {
+    protected function _getCachedData($isSingleRecord, array $cacheSettings, callable $callback) {
         $data = \Cache::get($cacheSettings['key'], '{!404!}');
         if ($data === '{!404!}') {
             $data = $callback();
