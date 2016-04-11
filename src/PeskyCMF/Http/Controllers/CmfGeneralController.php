@@ -51,7 +51,7 @@ class CmfGeneralController extends Controller {
     }
 
     public function getAdminProfile() {
-        return view('cmf::page.profile', ['admin' => $this->getAdmin()]);
+        return view(CmfConfig::getInstance()->user_profile_view(), ['admin' => $this->getAdmin()]);
     }
 
     public function updateAdminProfile(Request $request) {

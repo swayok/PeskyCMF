@@ -130,6 +130,13 @@ class CmfConfig extends ConfigsContainer {
     /**
      * @return string
      */
+    static public function user_profile_view() {
+        return 'cmf::page.profile';
+    }
+
+    /**
+     * @return string
+     */
     static public function password_recovery_email_view() {
         return 'cmf::emails.password_restore_instructions';
     }
