@@ -149,21 +149,25 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      */
     protected function _getCachedData($isSingleRecord, array $cacheSettings, callable $callback) {
+        /** @var CmfDbModel|TaggedCacheForDbSelects $this */
         $data = \Cache::get($cacheSettings['key'], '{!404!}');
         if ($data === '{!404!}') {
             $data = $callback();
+            if ($data instanceof DbObject) {
+                $data = $data->exists() ? $data->toPublicArray() : [];
+            }
             $tags = $cacheSettings['tags'];
             $tags[] = $this->getModelCachePrefix();
             if ($isSingleRecord) {
                 $tags[] = $this->getSelectOneCacheTag();
-                $tags[] = $this->getRecordCacheTag($data);
+                if (!empty($data) && is_array($data) && !empty($data[$this->getPkColumnName()])) {
+                    // create tag only for record with primary key value
+                    $tags[] = $this->getRecordCacheTag($data);
+                }
             } else {
                 $tags[] = $this->getSelectManyCacheTag();
             }
             $cacher = \Cache::tags($tags);
-            if ($data instanceof DbObject) {
-                $data = $data->toPublicArray();
-            }
             if (empty($cacheSettings['timeout'])) {
                 $cacher->forever($cacheSettings['key'], $data);
             } else {

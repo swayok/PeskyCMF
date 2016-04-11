@@ -445,6 +445,8 @@ trait CacheForDbSelects {
      * @param string $expression - example: 'COUNT(*)', 'SUM(`field`)'
      * @param array|string|null $conditionsAndOptions
      * @return string|int|float|bool
+     * @throws \PeskyORM\Exception\DbConnectionConfigException
+     * @throws \PeskyORM\Exception\DbModelException
      */
     public function expression($expression, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {
