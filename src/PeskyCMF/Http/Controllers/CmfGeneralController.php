@@ -111,6 +111,14 @@ class CmfGeneralController extends Controller {
             $validationRules[$userLoginCol] = "required|regex:%^[a-zA-Z0-9_@.-]+$%is|min:4|unique:$usersTable,$userLoginCol,{$admin->getAuthIdentifier()},id";
             $fieldsToUpdate[] = $userLoginCol;
         }
+        foreach (CmfConfig::getInstance()->additional_user_profile_fields() as $fieldName => $rules) {
+             if (is_int($fieldName)) {
+                $fieldName = $rules;
+             } else {
+                $validationRules[$fieldName] = $rules;
+             }
+             $fieldsToUpdate[] = $fieldName;
+        }
         $validator = \Validator::make(
             $request->data(),
             $validationRules,

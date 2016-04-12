@@ -135,6 +135,15 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Additional user profile fields and validators
+     * Format: ['filed1' => 'validation rules', 'field2', ...]
+     * @return array
+     */
+    static public function additional_user_profile_fields() {
+        return [];
+    }
+
+    /**
      * @return string
      */
     static public function password_recovery_email_view() {
