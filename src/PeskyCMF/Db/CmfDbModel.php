@@ -3,14 +3,11 @@
 namespace PeskyCMF\Db;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\Traits\CacheHelpersTrait;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\DbModel;
 use Swayok\Utils\StringUtils;
 
 abstract class CmfDbModel extends DbModel {
-
-    use CacheHelpersTrait;
 
     /** @var null|ScaffoldSectionConfig */
     protected $scaffoldConfig = null;

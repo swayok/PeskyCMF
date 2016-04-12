@@ -183,6 +183,12 @@ trait CacheForDbSelects {
      * Get data from cache or put data from $callback to cache (for external use)
      * @param bool $isSingleRecord
      * @param array|string $cacheSettings - array: settings; string: cache key
+     *      array: [
+     *          'key' => 'string, cache key',
+     *          'timeout' => 'int (minutes or unix timestamp), \DateTime, null (infinite)',
+     *          'tags' => ['custom', 'cache', 'tags'],
+     *          'recache' => 'bool, ignore cached data and replace it with fresh data'
+     *      ]
      * @param callable $callback
      * @return array
      * @throws \InvalidArgumentException
