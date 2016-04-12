@@ -94,4 +94,7 @@
 
 <script type="application/javascript">
     FormHelper.initForm('#admin-profile-form', '#admin-profile-form');
+    $('#admin-profile-form').find('#language-input').each(function () {
+        $(this).val($(this).attr('data-value'));
+    });
 </script>
