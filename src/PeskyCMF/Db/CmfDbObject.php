@@ -3,12 +3,9 @@
 namespace PeskyCMF\Db;
 
 use PeskyCMF\Db\Traits\CacheForDbSelects;
-use PeskyCMF\Db\Traits\CacheHelpersTrait;
 use PeskyORM\DbObject;
 
 abstract class CmfDbObject extends DbObject {
-
-    use CacheHelpersTrait;
 
     protected $_autoAddPkValueToPublicArray = false;
     protected $_baseModelClass = CmfDbModel::class;

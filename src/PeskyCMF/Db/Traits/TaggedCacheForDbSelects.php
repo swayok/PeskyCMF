@@ -42,8 +42,17 @@ trait TaggedCacheForDbSelects {
 
     /**
      * Clean cache for all related models
-     * @param bool|null $cleanRelatedModelsCache
+     * @param bool|null|array|string $cleanRelatedModelsCache -
+     *      - array: list of relations to clean
+     *      - string: single relation to clean
+     *      - bool: true = clean all relations provided by $this->getRelationsToCleanByDefault(); false - don't clean relations
+     *      - null: if ($this->canCleanRelationsCache() === true) then clean $this->getRelationsToCleanByDefault()
+     *
      * @throws \BadMethodCallException
+     * @throws \PeskyORM\Exception\DbConnectionConfigException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \InvalidArgumentException
      */
     public function cleanRelatedModelsCache($cleanRelatedModelsCache = true) {
         /** @var CmfDbModel|TaggedCacheForDbSelects $this */
@@ -51,8 +60,34 @@ trait TaggedCacheForDbSelects {
             $cleanRelatedModelsCache = $this->canCleanRelationsCache();
         }
         if ($cleanRelatedModelsCache) {
-            \Cache::tags(array_keys($this->getTableRealtaions()))->flush();
+            if (is_array($cleanRelatedModelsCache)) {
+                $relationsToClean = $cleanRelatedModelsCache;
+            } else if (is_string($cleanRelatedModelsCache)) {
+                $relationsToClean = [$cleanRelatedModelsCache];
+            } else {
+                $relationsToClean = $this->getDefaultRelationsForCacheCleaner();
+            }
+            $tags = [];
+            foreach ($relationsToClean as $relationKey) {
+                if (!$this->hasTableRelation($relationKey)) {
+                    throw new \InvalidArgumentException("Model has no relation named $relationKey");
+                }
+                /** @var CmfDbModel|TaggedCacheForDbSelects $model */
+                $model = $this->getRelatedModel($relationKey);
+                $tags[] = $model->getModelCachePrefix();
+            }
+            if (!empty($tags)) {
+                \Cache::tags($tags)->flush();
+            }
         }
+    }
+
+    /**
+     * @return array - relations names
+     */
+    protected function getDefaultRelationsForCacheCleaner() {
+        /** @var CmfDbModel|TaggedCacheForDbSelects $this */
+        return array_keys($this->getTableRealtaions());
     }
 
     /**
@@ -142,8 +177,14 @@ trait TaggedCacheForDbSelects {
     /**
      * Get data from cache or put data from $callback to cache
      * @param bool $isSingleRecord
-     * @param array $cacheSettings
+     * @param array $cacheSettings - [
+     *      'key' => 'string, cache key',
+     *      'timeout' => 'int (minutes or unix timestamp), \DateTime, null (infinite)',
+     *      'tags' => ['custom', 'cache', 'tags'],
+     *      'recache' => 'bool, ignore cached data and replace it with fresh data'
+     * ]
      * @param callable $callback
+     *
      * @return array
      * @throws \PeskyORM\Exception\DbObjectException
      * @throws \PeskyORM\Exception\DbModelException
@@ -152,7 +193,7 @@ trait TaggedCacheForDbSelects {
      */
     protected function _getCachedData($isSingleRecord, array $cacheSettings, callable $callback) {
         /** @var CmfDbModel|TaggedCacheForDbSelects $this */
-        $data = \Cache::get($cacheSettings['key'], '{!404!}');
+        $data = empty($cacheSettings['recache']) ? \Cache::get($cacheSettings['key'], '{!404!}') : '{!404!}';
         if ($data === '{!404!}') {
             $data = $callback();
             if ($data instanceof DbObject) {
