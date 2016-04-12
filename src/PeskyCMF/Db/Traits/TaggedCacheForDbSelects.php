@@ -80,7 +80,7 @@ trait TaggedCacheForDbSelects {
     }
 
     /**
-     * @param int|string|array|Object $record
+     * @param int|string|array|DbObject $record
      * @param bool $cleanRelatedModelsCache
      * @throws DbModelException
      * @throws \BadMethodCallException
@@ -89,7 +89,9 @@ trait TaggedCacheForDbSelects {
      */
     public function cleanRecordCache($record, $cleanRelatedModelsCache = null) {
         /** @var CmfDbModel|TaggedCacheForDbSelects $this */
-        \Cache::tags($this->getRecordCacheTag($record))->flush();
+        if (!($record instanceof DbObject) || $record->exists()) {
+            \Cache::tags($this->getRecordCacheTag($record))->flush();
+        }
         $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
 
