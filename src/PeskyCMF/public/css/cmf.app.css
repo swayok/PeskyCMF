@@ -542,9 +542,13 @@ aside.main-sidebar #secondary-menu #sidebar-company-badge a:hover {
   background-color: transparent;
   color: #777777;
 }
-.bootstrap-select ul.dropdown-menu.inner li.active a,
+.bootstrap-select ul.dropdown-menu.inner li.active a {
+  color: #000000;
+  background-color: #CCCCCC;
+}
 .bootstrap-select ul.dropdown-menu.inner li.selected a {
   color: #FFFFFF;
+  background-color: #367fa9;
 }
 .cke .cke_combo.cke_combo_full_width .cke_combo_button .cke_combo_text {
   width: auto !important;
