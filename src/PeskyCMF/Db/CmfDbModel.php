@@ -4,6 +4,8 @@ namespace PeskyCMF\Db;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyORM\Db;
+use PeskyORM\DbExpr;
 use PeskyORM\DbModel;
 use Swayok\Utils\StringUtils;
 
@@ -11,6 +13,33 @@ abstract class CmfDbModel extends DbModel {
 
     /** @var null|ScaffoldSectionConfig */
     protected $scaffoldConfig = null;
+    /** @var array */
+    static private $timeZonesList = null;
+    /** @var array */
+    static private $timeZonesOptions = null;
+
+    static public function getTimezonesList($asOptions = false) {
+        if (self::$timeZonesList === null) {
+            $ds = self::_getDataSource('default');
+            $query = $ds->replaceQuotes(
+                DbExpr::create('SELECT * from `pg_timezone_names` ORDER BY `utc_offset` ASC')->get()
+            );
+            self::$timeZonesList = Db::processRecords($ds->query($query), Db::FETCH_ALL);
+        }
+        if ($asOptions) {
+            if (self::$timeZonesOptions === null) {
+                self::$timeZonesOptions = [];
+                foreach (self::$timeZonesList as $tzInfo) {
+                    $offset = preg_replace('%:\d\d$%', '', $tzInfo['utc_offset']);
+                    $offsetPrefix = $offset[0] === '-' ? '' : '+';
+                    self::$timeZonesOptions[$tzInfo['name']] = "({$offsetPrefix}{$offset}) {$tzInfo['name']}";
+                }
+            }
+            return self::$timeZonesOptions;
+        } else {
+            return self::$timeZonesList;
+        }
+    }
 
     static public function getScaffoldConfigClassSuffix() {
         /** @var CmfDbModel $calledClass */

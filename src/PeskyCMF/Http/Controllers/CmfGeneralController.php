@@ -8,12 +8,14 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\DbExpr;
+use PeskyORM\DbModel;
 use PeskyORM\DbObject;
 use Redirect;
 use Swayok\Utils\Set;
@@ -96,6 +98,10 @@ class CmfGeneralController extends Controller {
         if ($admin->_hasField('name')) {
             $validationRules['name'] = 'max:200';
             $fieldsToUpdate[] = 'name';
+        }
+        if ($admin->_hasField('timezone')) {
+            $validationRules['timezone'] = 'required|exists2:pg_timezone_names,name';
+            $fieldsToUpdate[] = 'timezone';
         }
         $usersTable = CmfConfig::getInstance()->users_table_name();
         $userLoginCol = CmfConfig::getInstance()->user_login_column();

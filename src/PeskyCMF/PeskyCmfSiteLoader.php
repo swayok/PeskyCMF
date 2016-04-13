@@ -4,6 +4,8 @@ namespace PeskyCMF;
 
 use LaravelSiteLoader\AppSiteLoader;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Event\AdminAuthorised;
+use PeskyCMF\Listeners\AdminAuthorisedEventListener;
 use PeskyORM\DbModel;
 use Swayok\Utils\File;
 
@@ -49,6 +51,8 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
 
         $this->configureViewsLoading();
         $this->configureTranslationsLoading();
+
+        $this->configureEventListeners();
     }
 
     /**
@@ -147,6 +151,10 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         foreach (static::getCmfConfig()->cmf_routes_cofig_files() as $filePath) {
             require_once $filePath;
         }
+    }
+
+    protected function configureEventListeners() {
+        \Event::listen(AdminAuthorised::class, AdminAuthorisedEventListener::class);
     }
 
     static public function configurePublicFilesRoutes() {

@@ -57,7 +57,8 @@ return [
                 'role' => 'Role',
                 'language' => 'Language',
                 'ip' => 'IP',
-                'created_at' => 'Created'
+                'created_at' => 'Created',
+                'timezone' => 'Timezone',
             ]
         ],
         'form' => [
@@ -70,7 +71,8 @@ return [
                 'language' => 'Language',
                 'is_active' => 'Active?',
                 'role' => 'Role',
-                'is_superadmin' => 'Has full access (superadmin)?'
+                'is_superadmin' => 'Has full access (superadmin)?',
+                'timezone' => 'Timezone',
             ]
         ],
         'item_details' => [
@@ -86,7 +88,8 @@ return [
                 'is_superadmin' => 'Has full access (superadmin)?',
                 'parent_id' => 'Administrator who created this account',
                 'created_at' => 'Created',
-                'updated_at' => 'Updated'
+                'updated_at' => 'Updated',
+                'timezone' => 'Timezone',
             ]
         ]
     ],
@@ -106,6 +109,8 @@ return [
                 'old_password' => 'Current passsword',
                 'language' => 'Language',
                 'name' => 'Name',
+                'timezone' => 'Time zone',
+                'timezone_search' => 'Search time zone by name or offset',
             ],
             'saved' => 'Administrator profile updated',
             'errors' => [
@@ -130,6 +135,10 @@ return [
                 'language' => [
                     'required' => 'Select language',
                     'in' => 'Selected language is not in list of allowed languages. Select another language.',
+                ],
+                'timezone' => [
+                    'required' => 'Select time zone',
+                    'exists' => 'Selected time zone is not in list of allowed time zones. Select another time zone.'
                 ]
             ]
         ]

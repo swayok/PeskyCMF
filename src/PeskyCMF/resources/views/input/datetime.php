@@ -47,7 +47,7 @@ if (empty($config)) {
     $config = [];
 }
 $config = array_merge([
-    'useCurrent' => true,
+    'useCurrent' => $rendererConfig->isRequired() ? true : false,
     'minDate' => date('Y-m-d H:i'),
     'format' => 'YYYY-MM-DD HH:mm',
     'locale' => app()->getLocale(),

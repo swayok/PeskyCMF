@@ -68,6 +68,16 @@
                             </select>
                         </div>
                     @endif
+                    @if ($admin->_hasField('timezone'))
+                        <div class="form-group">
+                            <label for="timezone-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.timezone') }}</label>
+                            <select class="form-control" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input" required="required">
+                                @foreach(\PeskyCMF\Db\CmfDbModel::getTimezonesList(true) as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
                     <div class="form-group">
                         <label for="old-password-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.old_password') }}*</label>
                         <input class="form-control" value="" name="old_password" id="old-password-input" type="password" autocomplete="off" required="required">
@@ -94,7 +104,14 @@
 
 <script type="application/javascript">
     FormHelper.initForm('#admin-profile-form', '#admin-profile-form');
-    $('#admin-profile-form').find('#language-input').each(function () {
-        $(this).val($(this).attr('data-value'));
-    });
+    $('#admin-profile-form')
+        .find('#timezone-input, #language-input')
+        .each(function () {
+            $(this).val($(this).attr('data-value'));
+        })
+        .filter('#timezone-input')
+        .selectpicker({
+            liveSearch: true,
+            liveSearchPlaceholder: "{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.timezone_search') }}"
+        });
 </script>

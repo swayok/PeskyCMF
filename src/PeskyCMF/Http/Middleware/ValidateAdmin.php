@@ -5,6 +5,8 @@ use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Event\AdminAuthorised;
 use PeskyCMF\HttpCode;
 
 class ValidateAdmin {
@@ -38,6 +40,9 @@ class ValidateAdmin {
             /** @var RedirectResponse $response */
             return $response->with(CmfConfig::getInstance()->session_redirect_key(), $redirectUri);
         }
+        /** @var CmfDbObject $user */
+        $user = \Auth::guard()->user();
+        \Event::fire(new AdminAuthorised($user));
 
         return $next($request);
     }
