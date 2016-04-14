@@ -202,7 +202,7 @@ abstract class ScaffoldFieldConfig {
                             $value = 'Failed to decode JSON';
                         }
                     }
-                    return '<pre class="json-text">' . json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . '</pre>';
+                    return '<pre class="json-text">' . htmlentities(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</pre>';
                 case static::TYPE_LINK:
                     return $this->buildLinkToExternalRecord($columnConfig, $record);
                     break;

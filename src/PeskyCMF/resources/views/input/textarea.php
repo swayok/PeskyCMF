@@ -27,9 +27,8 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 
 <div class="form-group">
     <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
-    <textarea {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
-        {{! it.<?php echo $fieldConfig->getName(); ?> || '' }}
-    </textarea>
+    <textarea {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
+    >{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}</textarea>
 </div>
 
 <?php if (!$visibleOnCreate || !$visibleOnEdit) : ?>
