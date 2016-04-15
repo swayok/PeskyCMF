@@ -17,7 +17,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
     <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
     <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
     {{? !it.isCreation && !!it.icon }}
-    <div class="image-preview" id="<?php echo $id; ?>-image-preview">
+    <div class="image-preview" id="<?php echo $attributes['id']; ?>-image-preview">
         <img src="{{= it.icon }}?_=<?php echo time() ?>">
     </div>
     {{?}}
