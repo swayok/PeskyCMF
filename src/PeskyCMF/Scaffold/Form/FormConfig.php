@@ -92,7 +92,9 @@ class FormConfig extends ScaffoldActionConfig {
                 $rendererConfig->setView('cmf::input/text');
         }
         $this->configureRendererByColumnConfig($rendererConfig, $fieldConfig->getTableColumnConfig());
-        $fieldConfig->configureDefaultRenderer($rendererConfig);
+        if ($fieldConfig->hasDefaultRendererConfigurator()) {
+            call_user_func($fieldConfig->getDefaultRendererConfigurator(), $rendererConfig, $fieldConfig);
+        }
     }
 
     /**

@@ -72,12 +72,17 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
     }
 
     /**
-     * @param ScaffoldFieldRendererConfig $renderer
+     * @return bool
      */
-    public function configureDefaultRenderer(ScaffoldFieldRendererConfig $renderer) {
-        if (!empty($this->defaultRendererConfigurator)) {
-            call_user_func($this->defaultRendererConfigurator, $renderer, $this);
-        }
+    public function hasDefaultRendererConfigurator() {
+        return !empty($this->defaultRendererConfigurator);
+    }
+
+    /**
+     * @return null|callable
+     */
+    public function getDefaultRendererConfigurator() {
+        return $this->defaultRendererConfigurator;
     }
 
 }
