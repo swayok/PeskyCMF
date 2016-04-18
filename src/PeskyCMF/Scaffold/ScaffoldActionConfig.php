@@ -132,10 +132,18 @@ abstract class ScaffoldActionConfig {
             $config = $this->createFieldConfig();
         }
         $config->setName($name);
-        $config->setPosition(count($this->fields));
+        $config->setPosition($this->getNextFieldPosition($config));
         $config->setScaffoldActionConfig($this);
         $this->fields[$name] = $config;
         return $this;
+    }
+
+    /**
+     * @param ScaffoldFieldConfig $fieldConfig
+     * @return int
+     */
+    protected function getNextFieldPosition(ScaffoldFieldConfig $fieldConfig) {
+        return count($this->fields);
     }
 
     /**

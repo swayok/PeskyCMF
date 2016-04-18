@@ -86,6 +86,25 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
+     * @param ScaffoldFieldConfig|DataGridFieldConfig $fieldConfig
+     * @return int
+     */
+    protected function getNextFieldPosition(ScaffoldFieldConfig $fieldConfig) {
+        if ($fieldConfig->isVisible()) {
+            /** @var DataGridFieldConfig $otherFieldConfig */
+            $count = 0;
+            foreach ($this->fields as $otherFieldConfig) {
+                if ($otherFieldConfig->isVisible()) {
+                    $count++;
+                }
+            }
+            return $count;
+        } else {
+            return -1;
+        }
+    }
+
+    /**
      * @return int
      */
     public function getLimit() {
