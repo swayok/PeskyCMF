@@ -88,4 +88,11 @@ class DataGridFieldConfig extends ScaffoldFieldConfig {
         return $this->valueConverter;
     }
 
+    public function setIsDbField($isDbField) {
+        if (!$isDbField) {
+            $this->setIsSortable(false);
+        }
+        return parent::setIsDbField($isDbField);
+    }
+
 }

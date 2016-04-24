@@ -101,6 +101,34 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
+     * Get field configs only for fields that exist in DB ($fieldConfig->isDbField() === true)
+     * @return array|ScaffoldFieldConfig[]|DataGridFieldConfig[]|ItemDetailsFieldConfig[]|FormFieldConfig[]
+     */
+    public function getDbFields() {
+        $ret = [];
+        foreach ($this->getFields() as $key => $field) {
+            if ($field->isDbField()) {
+                $ret[$key] = $field;
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * Get field configs only for fields that does not exist in DB ($fieldConfig->isDbField() === false)
+     * @return array|ScaffoldFieldConfig[]|DataGridFieldConfig[]|ItemDetailsFieldConfig[]|FormFieldConfig[]
+     */
+    public function getNonDbFields() {
+        $ret = [];
+        foreach ($this->getFields() as $key => $field) {
+            if (!$field->isDbField()) {
+                $ret[$key] = $field;
+            }
+        }
+        return $ret;
+    }
+
+    /**
      * @return ScaffoldFieldConfig
      * @throws ScaffoldException
      */
@@ -125,7 +153,7 @@ abstract class ScaffoldActionConfig {
      * @throws ScaffoldActionException
      */
     public function addField($name, $config = null) {
-        if (!$this->getModel()->hasTableColumn($name)) {
+        if ((!$config || $config->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
         }
         if (empty($config)) {
@@ -172,8 +200,9 @@ abstract class ScaffoldActionConfig {
 
     /**
      * @param array $record
+     * @return array
      */
-    public function prepareRecord(array &$record) {
+    public function prepareRecord(array $record) {
         $permissions = [
             '___delete_allowed' =>(
                 $this->isDeleteAllowed()
@@ -189,29 +218,48 @@ abstract class ScaffoldActionConfig {
             )
         ];
         $customData = $this->getCustomDataForRecord($record);
-        $fields = $this->getFields();
+        $dbFields = $this->getDbFields();
         $pkKey = $this->getModel()->getPkColumnName();
-        foreach ($record as $key => $value) {
+        // backup values
+        $recordWithBackup = [];
+        while ( list($key, $value) = each($record) ) {
+            $recordWithBackup[$key] = $recordWithBackup['__' . $key] = $value;
+        }
+        reset($record);
+        foreach (array_keys($record) as $key) {
             if ($this->getModel()->hasTableRelation($key)) {
                 continue;
             }
-            if (empty($fields[$key])) {
+            if (empty($dbFields[$key])) {
                 if ($key !== $pkKey) {
-                    unset($record[$key]);
+                    unset($recordWithBackup[$key]);
                 }
                 continue;
             }
-            if (is_object($fields[$key]) && method_exists($fields[$key], 'convertValue')) {
-                if (!method_exists($fields[$key], 'isVisible') || $fields[$key]->isVisible()) {
-                    $record['__' . $key] = $record[$key];
-                    $record[$key] = $fields[$key]->convertValue($record[$key], $this->getModel()->getTableColumn($key), $record);
+            $fieldConfig = $dbFields[$key];
+            if (is_object($fieldConfig) && method_exists($fieldConfig, 'convertValue')) {
+                if (!method_exists($fieldConfig, 'isVisible') || $fieldConfig->isVisible()) {
+                    $recordWithBackup[$key] = $fieldConfig->convertValue(
+                        $recordWithBackup[$key],
+                        $this->getModel()->getTableColumn($key),
+                        $recordWithBackup
+                    );
                 }
             }
         }
-        $record += $permissions;
-        if (!empty($customData) && is_array($customData)) {
-            $record += $customData;
+        foreach ($this->getNonDbFields() as $key => $fieldConfig) {
+            $valueConverter = $fieldConfig->getValueConverter();
+            if (is_callable($valueConverter)) {
+                $recordWithBackup[$key] = call_user_func($valueConverter, $recordWithBackup, $fieldConfig, $this);
+            } else {
+                $recordWithBackup[$key] = '';
+            }
         }
+        $recordWithBackup += $permissions;
+        if (!empty($customData) && is_array($customData)) {
+            $recordWithBackup += $customData;
+        }
+        return $recordWithBackup;
     }
 
     /**
@@ -484,6 +532,14 @@ abstract class ScaffoldActionConfig {
         $colsLg = $colsXl >= 10 ? 12 : $colsXl + 2;
         $colsLgLeft = floor((12 - $colsLg) / 2);
         return "col-xs-12 col-xl-{$colsXl} col-lg-{$colsLg} col-xl-offset-{$colsXlLeft} col-lg-offset-{$colsLgLeft}";
+    }
+
+    /**
+     * Finish building config.
+     * This may trigger some actions that should be applied after all configurations were provided
+     */
+    public function finish() {
+
     }
 
 }

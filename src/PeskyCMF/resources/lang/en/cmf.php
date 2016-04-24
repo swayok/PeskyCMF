@@ -53,6 +53,7 @@ return [
             ]
         ],
         'actions' => [
+            'column_label' => 'Actions',
             'edit_item' => 'Edit',
             'view_item' => 'View',
             'delete_item' => 'Delete'

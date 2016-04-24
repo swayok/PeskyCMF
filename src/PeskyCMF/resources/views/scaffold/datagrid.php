@@ -18,6 +18,7 @@
         }
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
+/** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $gridColumnsConfigs */
 $gridColumnsConfigs = $dataGridConfig->getFields();
 ?>
 
@@ -34,6 +35,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                     <tr>
                         <?php
                             $invisibleColumns = [];
+                            /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $config */
                             foreach ($gridColumnsConfigs as $config) {
                                 $th = \Swayok\Html\Tag::th()
                                     ->setContent($config->getLabel(trans("$translationPrefix.datagrid.column.{$config->getName()}")))
@@ -43,7 +45,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                                     ->setDataAttr('name', $config->getName())
                                     ->setDataAttr('data', $config->getName());
                                 if ($config->isVisible()) {
-                                    echo $th;
+                                    echo $th->build();
                                 } else {
                                     $invisibleColumns[] = $th;
                                 }
@@ -152,7 +154,23 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 );
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig, JSON_UNESCAPED_UNICODE); ?>;
-            dataTablesConfig.rowActions = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
+            var rowActionsTpl = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
+            <?php if ($dataGridConfig->isRowActionsFloating()): ?>
+            dataTablesConfig.rowActions = rowActionsTpl;
+            <?php else: ?>
+                <?php
+                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $actionsFieldConfig */
+                    $actionsFieldConfig = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
+                ?>
+                dataTablesConfig.columnDefs = [
+                    {
+                        targets: <?php echo $actionsFieldConfig->getPosition(); ?>,
+                        render: function (data, type, row) {
+                            return rowActionsTpl(row);
+                        }
+                    }
+                ];
+            <?php endif; ?>
             <?php if (!empty($dblClickUrl)): ?>
                 dataTablesConfig.doubleClickUrl = Utils.makeTemplateFromText(
                     '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $dblClickUrl)); ?>',

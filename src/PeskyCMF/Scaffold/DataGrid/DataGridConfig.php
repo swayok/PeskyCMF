@@ -9,6 +9,7 @@ use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyORM\DbColumnConfig;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
 
@@ -46,6 +47,10 @@ class DataGridConfig extends ScaffoldActionConfig {
     protected $rowActions = [];
     /** @var array */
     protected $additionalDataTablesConfig = [];
+    /** @var bool */
+    protected $isRowActionsFloating = true;
+
+    const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
     public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSectionConfig) {
         parent::__construct($model, $scaffoldSectionConfig);
@@ -208,10 +213,11 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param array $records
      * @return array
      */
-    public function prepareRecords(array &$records) {
-        foreach ($records as &$record) {
-            $this->prepareRecord($record);
+    public function prepareRecords(array $records) {
+        foreach ($records as $idx => $record) {
+            $records[$idx] = $this->prepareRecord($record);
         }
+        return $records;
     }
 
     /**
@@ -278,6 +284,29 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
+     * @return bool
+     */
+    public function isRowActionsFloating() {
+        return $this->isRowActionsFloating;
+    }
+
+    /**
+     * @return $this
+     */
+    public function displayRowActionsInActionsColumn() {
+        $this->isRowActionsFloating = false;
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function displayRowActionsInFloatingPanel() {
+        $this->isRowActionsFloating = true;
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getAdditionalDataTablesConfig() {
@@ -291,6 +320,37 @@ class DataGridConfig extends ScaffoldActionConfig {
     public function setAdditionalDataTablesConfig(array $additionalDataTablesConfig) {
         $this->additionalDataTablesConfig = $additionalDataTablesConfig;
         return $this;
+    }
+
+    public function addField($name, $config = null) {
+        $config = !$config && $name === static::ROW_ACTIONS_COLUMN_NAME
+            ? $this->getDataGridFieldConfigForRowActions()
+            : $config;
+        return parent::addField($name, $config);
+    }
+
+    /**
+     * @return DataGridFieldConfig
+     */
+    protected function getDataGridFieldConfigForRowActions() {
+        return DataGridFieldConfig::create()
+            ->setIsDbField(false)
+            ->setName(static::ROW_ACTIONS_COLUMN_NAME)
+            ->setLabel(CmfConfig::transBase('.datagrid.actions.column_label'))
+            ->setType(DataGridFieldConfig::TYPE_STRING);
+    }
+
+    /**
+     * Finish building config.
+     * This may trigger some actions that should be applied after all configurations were provided
+     */
+    public function finish() {
+        if (!$this->isRowActionsFloating()) {
+            $fields = $this->getFields();
+            if (!isset($fields[static::ROW_ACTIONS_COLUMN_NAME])) {
+                $this->addField(static::ROW_ACTIONS_COLUMN_NAME, null);
+            }
+        }
     }
 
 }

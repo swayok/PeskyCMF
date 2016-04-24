@@ -102,8 +102,7 @@ class CmfScaffoldApiController extends Controller {
                 ))
                 ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
-        $actionConfig->prepareRecord($data);
-        return response()->json($data);
+        return response()->json($actionConfig->prepareRecord($data));
     }
 
     public function getItemDefaults() {
@@ -114,8 +113,7 @@ class CmfScaffoldApiController extends Controller {
                 ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
         $data = $model->getOwnDbObject()->getDefaultsArray();
-        $this->getScaffoldConfig()->getFormConfig()->prepareRecord($data);
-        return response()->json($data);
+        return response()->json($this->getScaffoldConfig()->getFormConfig()->prepareRecord($data));
     }
 
     public function getOptions() {
@@ -307,9 +305,9 @@ class CmfScaffoldApiController extends Controller {
                 $conditions['ORDER'][$config['column']] = $config['dir'];
             }
         }
-        $result = self::getModel()->selectWithCount(array_keys($dataGridConfig->getFields()), $conditions);
+        $result = self::getModel()->selectWithCount(array_keys($dataGridConfig->getDbFields()), $conditions);
         if ($result['count'] > 0) {
-            $dataGridConfig->prepareRecords($result['records']);
+            $result['records'] = $dataGridConfig->prepareRecords($result['records']);
         }
         return [
             'draw' => $request->query('draw'),

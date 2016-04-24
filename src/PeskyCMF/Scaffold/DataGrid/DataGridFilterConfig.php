@@ -329,4 +329,12 @@ class DataGridFilterConfig {
         return $this;
     }
 
+    /**
+     * Finish building config.
+     * This may trigger some actions that should be applied after all configurations were provided
+     */
+    public function finish() {
+
+    }
+
 }

@@ -53,6 +53,7 @@ return [
             ]
         ],
         'actions' => [
+            'column_label' => 'Действия',
             'edit_item' => 'Редактировать',
             'view_item' => 'Просмотр',
             'delete_item' => 'Удалить'

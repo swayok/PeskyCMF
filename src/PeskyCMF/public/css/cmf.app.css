@@ -372,15 +372,6 @@ form .error-text {
 .dataTables_wrapper .row-actions-container .row-actions-block .row-actions {
   padding: 5px 10px 5px 10px;
 }
-.dataTables_wrapper .row-actions-container .row-actions-block .row-actions .row-action {
-  display: inline-block;
-  font-size: 16px;
-  margin: 0 5px 0 5px;
-}
-.dataTables_wrapper .row-actions-container .row-actions-block .row-actions .row-action:hover {
-  opacity: 0.8;
-  filter: alpha(opacity=80);
-}
 .dataTables_wrapper .row-actions-container.hidden {
   display: block !important;
   -webkit-transition: top 0.1s step-end;
@@ -395,6 +386,15 @@ form .error-text {
   -o-transform: scale(1, 0);
   -ms-transform: scale(1, 0);
   transform: scale(1, 0);
+}
+.dataTables_wrapper .row-actions .row-action {
+  display: inline-block;
+  font-size: 16px;
+  margin: 0 5px 0 5px;
+}
+.dataTables_wrapper .row-actions .row-action:hover {
+  opacity: 0.8;
+  filter: alpha(opacity=80);
 }
 .dataTables_wrapper .dataTables_paginate {
   text-align: center;

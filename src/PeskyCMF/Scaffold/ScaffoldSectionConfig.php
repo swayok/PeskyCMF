@@ -121,6 +121,7 @@ abstract class ScaffoldSectionConfig {
     public function getDataGridConfig() {
         if (empty($this->dataGridConfig)) {
             $this->dataGridConfig = $this->createDataGridConfig();
+            $this->dataGridConfig->finish();
         }
         return $this->dataGridConfig;
     }
@@ -131,6 +132,7 @@ abstract class ScaffoldSectionConfig {
     public function getDataGridFilterConfig() {
         if (empty($this->dataGridFilterConfig)) {
             $this->dataGridFilterConfig = $this->createDataGridFilterConfig();
+            $this->dataGridFilterConfig->finish();
         }
         return $this->dataGridFilterConfig;
     }
@@ -141,6 +143,7 @@ abstract class ScaffoldSectionConfig {
     public function getItemDetailsConfig() {
         if (empty($this->itemDetailsConfig)) {
             $this->itemDetailsConfig = $this->createItemDetailsConfig();
+            $this->itemDetailsConfig->finish();
         }
         return $this->itemDetailsConfig;
     }
@@ -151,6 +154,7 @@ abstract class ScaffoldSectionConfig {
     public function getFormConfig() {
         if (empty($this->formConfig)) {
             $this->formConfig = $this->createFormConfig();
+            $this->formConfig->finish();
         }
         return $this->formConfig;
     }

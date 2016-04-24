@@ -46,6 +46,10 @@ abstract class ScaffoldFieldConfig {
     const FORMAT_DATE = 'Y-m-d';
     const FORMAT_TIME = 'H:i:s';
     const FORMAT_DATETIME = 'Y-m-d H:i:s';
+    /**
+     * @var bool
+     */
+    protected $isDbField = true;
 
     /**
      * @return $this
@@ -77,6 +81,22 @@ abstract class ScaffoldFieldConfig {
      */
     public function getTableColumnConfig() {
         return $this->getScaffoldActionConfig()->getModel()->getTableColumn($this->getName());
+    }
+
+    /**
+     * @param $isDbField
+     * @return $this
+     */
+    public function setIsDbField($isDbField) {
+        $this->isDbField = $isDbField;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDbField() {
+        return $this->isDbField;
     }
 
     /**
@@ -163,7 +183,9 @@ abstract class ScaffoldFieldConfig {
     }
 
     /**
-     * @param callable $valueConverter - function ($value, DbColumnConfig $columnConfig, array $record, ScaffoldFieldConfig $fieldConfig) {}
+     * @param callable $valueConverter 
+     *      - when $this->isDbField() === true: function ($value, DbColumnConfig $columnConfig, array $record, ScaffoldFieldConfig $fieldConfig) {}
+     *      - when $this->isDbField() === false: function (array $record, ScaffoldFieldConfig $fieldConfig, ScaffolActionConfig $scaffoldActionConfig) {}
      * @return $this
      */
     public function setValueConverter(callable $valueConverter) {
