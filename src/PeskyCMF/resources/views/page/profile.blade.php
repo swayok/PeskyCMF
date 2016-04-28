@@ -30,7 +30,8 @@
                 <input type="hidden" name="_method" value="PUT">
                 <!-- disable chrome email & password autofill -->
                 <input type="text" name="login" class="hidden" formnovalidate>
-                <input type="email" class="hidden" formnovalidate value="test@test.com">
+                <input type="password" class="hidden" formnovalidate>
+                <input type="text" name="email" class="hidden" formnovalidate value="test@test.com">
                 <input type="password" class="hidden" formnovalidate>
                 <!-- end of autofill disabler -->
                 <div class="box-body">
