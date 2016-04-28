@@ -38,16 +38,19 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                             /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $config */
                             foreach ($gridColumnsConfigs as $config) {
                                 $th = \Swayok\Html\Tag::th()
-                                    ->setContent($config->getLabel(trans("$translationPrefix.datagrid.column.{$config->getName()}")))
+                                    ->setContent($config->isVisible()
+                                        ? $config->getLabel(trans("$translationPrefix.datagrid.column.{$config->getName()}"))
+                                        : '&nbsp'
+                                    )
                                     ->setClass('text-nowrap')
-                                    ->setDataAttr('orderable', $config->isSortable() ? 'true' : 'false')
                                     ->setDataAttr('visible', $config->isVisible() ? null : 'false')
+                                    ->setDataAttr('orderable', $config->isVisible() && $config->isSortable() ? 'true' : 'false')
                                     ->setDataAttr('name', $config->getName())
                                     ->setDataAttr('data', $config->getName());
                                 if ($config->isVisible()) {
                                     echo $th->build();
                                 } else {
-                                    $invisibleColumns[] = $th;
+                                    $invisibleColumns[] = $th->build();
                                 }
                             }
                             echo implode("\n", $invisibleColumns);

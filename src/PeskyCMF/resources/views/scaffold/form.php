@@ -49,7 +49,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                             <input type="hidden" name="<?php echo $pkColName; ?>" value="<?php echo $printPk; ?>">
                         <?php echo $endIf ?>
                         <!-- disable chrome email & password autofill -->
-                        <input type="email" class="hidden"><input type="password" class="hidden"><input type="text" class="hidden">
+                        <input type="text" class="hidden" formnovalidate><input type="email" class="hidden" formnovalidate value="test@test.com"><input type="password" class="hidden" formnovalidate>
                         <!-- end of autofill disabler -->
                         <div class="box-body">
                         <?php

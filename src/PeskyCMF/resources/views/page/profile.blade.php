@@ -29,9 +29,9 @@
             <form role="form" method="post" action="{{ route('cmf_profile', [], false) }}" id="admin-profile-form">
                 <input type="hidden" name="_method" value="PUT">
                 <!-- disable chrome email & password autofill -->
-                <input type="email" class="hidden">
-                <input type="text" class="hidden">
-                <input type="password" class="hidden">
+                <input type="text" name="login" class="hidden" formnovalidate>
+                <input type="email" class="hidden" formnovalidate value="test@test.com">
+                <input type="password" class="hidden" formnovalidate>
                 <!-- end of autofill disabler -->
                 <div class="box-body">
                     <?php $loginColumn = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column(); ?>
