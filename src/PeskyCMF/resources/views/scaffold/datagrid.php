@@ -190,7 +190,9 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 }
             ?>
             var defaultSearchRules = <?php echo $defaultConditions; ?>;
-            dataTablesConfig.search = {search: DataGridSearchHelper.encodeRulesForDataTable(defaultSearchRules)};
+            if (defaultSearchRules.rules) {
+                dataTablesConfig.search = {search: DataGridSearchHelper.encodeRulesForDataTable(defaultSearchRules)};
+            }
             <?php
                 $fitlers = [];
                 foreach($dataGridFilterConfig->getFilters() as $filterConfig) {
