@@ -163,7 +163,7 @@ var ScaffoldDataGridHelper = {
     defaultConfig: {
         filter: true,
         stateSave: true,
-        dom: "<'row'<'col-sm-12'<'#query-builder'>>><'row'<'col-sm-8'<'toolbar btn-toolbar'>><'col-sm-4'<'filter-toolbar btn-toolbar'>>><'row'<'col-sm-12'tr>><'row'<'col-sm-3'i><'col-sm-6'p><'col-sm-3'l>>",
+        dom: "<'row'<'col-sm-12'<'#query-builder'>>><'row'<'col-sm-4'<'filter-toolbar btn-toolbar text-left'>><'col-sm-8'<'toolbar btn-toolbar text-right'>>><'row'<'col-sm-12'tr>><'row'<'col-sm-3'i><'col-sm-6'p><'col-sm-3'l>>",
         stateSaveCallback: function (settings, state) {
             if (settings.iDraw > 1) {
                 var newUrl = window.adminApp.request.path + '?' + settings.sTableId + '=' + rison.encode_object(state);
@@ -236,11 +236,16 @@ var ScaffoldDataGridHelper = {
     },
     initToolbar: function ($tableWrapper, customToolbarItems) {
         var $toolbarEl = $tableWrapper.find('.toolbar');
+        var $filterToolbar = $tableWrapper.find('.filter-toolbar');
+        var $reloadBtn = $('<button class="btn btn-default" data-action="reload"></button>')
+            .html(GlobalVars.getLocalizationStringsForComponent('data_tables').toolbar.reloadData);
+        if ($filterToolbar.length) {
+            $filterToolbar.prepend($reloadBtn);
+        }
         if ($toolbarEl.length) {
-            $toolbarEl.append(
-                $('<button class="btn btn-default" data-action="reload"></button>')
-                    .html(GlobalVars.getLocalizationStringsForComponent('data_tables').toolbar.reloadData)
-            );
+            if (!$filterToolbar.length) {
+                $toolbarEl.prepend($reloadBtn);
+            }
             if ($.isArray(customToolbarItems)) {
                 for (var i = 0; i < customToolbarItems.length; i++) {
                     $toolbarEl.append(customToolbarItems[i]);
@@ -480,9 +485,6 @@ var DataGridSearchHelper = {
             var $toolbar = $builder
                 .closest('.dataTables_wrapper')
                 .find('.filter-toolbar');
-            $toolbar
-                .append($runFilteringBtn)
-                .append($resetFilteringBtn);
             if (!config.is_opened) {
                 var $counterBadge = $('<span class="counter label label-success ml10"></span>');
                 var $filterToggleButton = $('<button class="btn btn-default" type="button"></button>')
@@ -518,6 +520,9 @@ var DataGridSearchHelper = {
                 $builder.addClass('collapse');
                 $toolbar.append($filterToggleButton);
             }
+            $toolbar
+                .append($runFilteringBtn)
+                .append($resetFilteringBtn);
         }
     },
     encodeRulesForDataTable: function (rules, asObject) {

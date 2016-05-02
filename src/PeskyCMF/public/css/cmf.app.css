@@ -434,9 +434,7 @@ form .error-text {
 .dataTables_wrapper .dataTables_scrollHead + .dataTables_scrollFoot table.table .filters th {
   border-top-width: 0;
 }
-.dataTables_wrapper .filter-toolbar {
-  text-align: right;
-}
+.dataTables_wrapper .toolbar .btn,
 .dataTables_wrapper .filter-toolbar .btn {
   float: none;
   display: inline-block;
