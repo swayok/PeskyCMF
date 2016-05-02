@@ -205,7 +205,8 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 }
             ?>
             var queryBuilderConfig = {
-                filters: <?php echo json_encode($fitlers, JSON_UNESCAPED_UNICODE); ?>
+                filters: <?php echo json_encode($fitlers, JSON_UNESCAPED_UNICODE); ?>,
+                is_opened: <?php echo $dataGridConfig->isFilterShownByDefault() ? 'true' : 'false'; ?>
             };
             DataGridSearchHelper.locale = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
             <?php if (empty($dataTablesInitializer)): ?>

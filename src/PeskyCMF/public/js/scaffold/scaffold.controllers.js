@@ -410,6 +410,7 @@ var DataGridSearchHelper = {
     init: function (config, defaultRules, $dataGrid) {
         if (config && config.filters && config.filters.length > 0) {
             var $builder = $(DataGridSearchHelper.container);
+            $builder.prepend('<h4>' + DataGridSearchHelper.locale.header + '</h4>');
             var tableApi = $dataGrid.dataTable().api();
             for (var i in config.filters) {
                 if (
@@ -432,7 +433,8 @@ var DataGridSearchHelper = {
                     $builder.queryBuilder('reset');
                 }
             } catch (ignore) {}
-            var $runFilteringBtn = $('<button class="btn btn-success pull-right">' + DataGridSearchHelper.locale.submit + '</button>');
+            var $runFilteringBtn = $('<button class="btn btn-success" type="button"></button>')
+                .text(DataGridSearchHelper.locale.submit);
             $runFilteringBtn.on('click', function () {
                 // clean empty filters
                 $builder.find('.rule-container').each(function () {
@@ -467,18 +469,55 @@ var DataGridSearchHelper = {
                     tableApi.search(encoded).draw();
                 }
             });
-            var $resetFilteringBtn = $('<button class="btn btn-danger pull-right">' + DataGridSearchHelper.locale.reset + '</button>');
+            var $resetFilteringBtn = $('<button class="btn btn-danger" type="button"></button>')
+                .text(DataGridSearchHelper.locale.reset);
             $resetFilteringBtn.on('click', function () {
                 $builder.queryBuilder('reset');
                 if (defaultRules) {
                     $builder.queryBuilder('setRules', defaultRules);
                 }
             });
-            $builder.prepend('<h4>' + DataGridSearchHelper.locale.header + '</h4>')
+            var $toolbar = $builder
                 .closest('.dataTables_wrapper')
-                .find('.filter-toolbar')
-                .append($resetFilteringBtn)
-                .append($runFilteringBtn);
+                .find('.filter-toolbar');
+            $toolbar
+                .append($runFilteringBtn)
+                .append($resetFilteringBtn);
+            if (!config.is_opened) {
+                var $counterBadge = $('<span class="counter label label-success ml10"></span>');
+                var $filterToggleButton = $('<button class="btn btn-default" type="button"></button>')
+                    .text(DataGridSearchHelper.locale.toggle)
+                    .append($counterBadge)
+                    .attr('data-toggle','collapse')
+                    .attr('data-target', '#' + $builder[0].id);
+                var changeCountInBadge = function () {
+                    var rules = $builder.queryBuilder('getRules');
+                    var count = DataGridSearchHelper.countRules(rules);
+                    if (count) {
+                        $counterBadge.text(count).show();
+                    } else {
+                        $counterBadge.hide();
+                    }
+                };
+                changeCountInBadge();
+                $runFilteringBtn.on('click', function () {
+                    changeCountInBadge();
+                });
+                $runFilteringBtn.hide();
+                $resetFilteringBtn.hide();
+                $filterToggleButton.on('click', function () {
+                    $filterToggleButton.toggleClass('active');
+                    if ($filterToggleButton.hasClass('active')) {
+                        $runFilteringBtn.show();
+                        $resetFilteringBtn.show();
+                    } else {
+                        $runFilteringBtn.hide();
+                        $resetFilteringBtn.hide();
+                    }
+                });
+                $builder.addClass('collapse');
+                $toolbar.append($filterToggleButton);
+            }
         }
     },
     encodeRulesForDataTable: function (rules, asObject) {
@@ -528,6 +567,19 @@ var DataGridSearchHelper = {
             }
         }
         return ret;
+    },
+    countRules: function (rules) {
+        rules = DataGridSearchHelper.encodeRulesForDataTable(rules, true);
+        var count = 0;
+        for (var i = 0; i < rules.r.length; i++) {
+            var rule = rules.r[i];
+            if (rule.c) {
+                count += DataGridSearchHelper.countRules(rule);
+            } else {
+                count++;
+            }
+        }
+        return count;
     },
     convertKeyValueFiltersToRules: function (filters) {
         var rules = [];

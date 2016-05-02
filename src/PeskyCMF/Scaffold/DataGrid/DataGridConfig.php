@@ -49,6 +49,8 @@ class DataGridConfig extends ScaffoldActionConfig {
     protected $additionalDataTablesConfig = [];
     /** @var bool */
     protected $isRowActionsFloating = true;
+    /** @var bool */
+    protected $isFilterShown = true;
 
     const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
@@ -107,6 +109,22 @@ class DataGridConfig extends ScaffoldActionConfig {
         } else {
             return -1;
         }
+    }
+
+    /**
+     * @param bool $shown - true: filter will be opened on data grid load | false: filter will be hidden
+     * @return $this
+     */
+    public function setFilterIsShownByDefault($shown = true) {
+        $this->isFilterShown = $shown;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFilterShownByDefault() {
+        return $this->isFilterShown;
     }
 
     /**

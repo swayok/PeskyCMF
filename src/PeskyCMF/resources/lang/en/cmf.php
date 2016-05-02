@@ -43,7 +43,8 @@ return [
             'filter' => [
                 'header' => 'Filtering rules',
                 'reset' => 'Reset filter',
-                'submit' => 'Filter'
+                'submit' => 'Filter',
+                'toggle' => 'Filtering panel'
             ],
         ],
         'field' => [
