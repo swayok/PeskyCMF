@@ -184,16 +184,13 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             <?php
                 $defaultConditions = $dataGridFilterConfig->getDefaultConditions();
                 if (empty($defaultConditions['rules'])) {
-                    $defaultConditions = 'null';
+                    $defaultConditions = '[]';
                 } else {
-                    $defaultConditions = json_encode($dataGridFilterConfig->getDefaultConditions(), JSON_UNESCAPED_UNICODE);
+                    $defaultConditions = json_encode($defaultConditions, JSON_UNESCAPED_UNICODE);
                 }
             ?>
-
             var defaultSearchRules = <?php echo $defaultConditions; ?>;
-            if (!!defaultSearchRules) {
-                dataTablesConfig.search = {search: DataGridSearchHelper.encodeRulesForDataTable(defaultSearchRules)};
-            }
+            dataTablesConfig.search = {search: DataGridSearchHelper.encodeRulesForDataTable(defaultSearchRules)};
             <?php
                 $fitlers = [];
                 foreach($dataGridFilterConfig->getFilters() as $filterConfig) {

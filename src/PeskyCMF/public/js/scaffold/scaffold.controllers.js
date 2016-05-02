@@ -425,7 +425,14 @@ var DataGridSearchHelper = {
                     config.filters[i].color = 'primary';
                 }
             }
-            $builder.queryBuilder($.extend({rules: defaultRules}, DataGridSearchHelper.defaultConfig, config));
+            var builderConfig = {};
+            if ($.isArray(defaultRules)) {
+                builderConfig = {rules: defaultRules};
+            } else if (defaultRules.rules) {
+                builderConfig = $.extend({}, defaultRules);
+            }
+            builderConfig = $.extend(builderConfig, DataGridSearchHelper.defaultConfig, config);
+            $builder.queryBuilder(builderConfig);
             try {
                 var currentSearch = JSON.parse(tableApi.search());
                 var decoded = DataGridSearchHelper.decodeRulesForDataTable(
@@ -527,19 +534,21 @@ var DataGridSearchHelper = {
     },
     encodeRulesForDataTable: function (rules, asObject) {
         var ret = {
-            c: rules.condition,
+            c: rules.condition || 'AND',
             r: []
         };
-        for (var i = 0; i < rules.rules.length; i++) {
-            var rule = rules.rules[i];
-            if (rule.condition) {
-                ret.r.push(DataGridSearchHelper.encodeRulesForDataTable(rule, true));
-            } else {
-                ret.r.push({
-                    f: rule.field,
-                    o: rule.operator,
-                    v: rule.value
-                });
+        if (rules.rules) {
+            for (var i = 0; i < rules.rules.length; i++) {
+                var rule = rules.rules[i];
+                if (rule.condition) {
+                    ret.r.push(DataGridSearchHelper.encodeRulesForDataTable(rule, true));
+                } else {
+                    ret.r.push({
+                        f: rule.field,
+                        o: rule.operator,
+                        v: rule.value
+                    });
+                }
             }
         }
         return !asObject ? JSON.stringify(ret) : ret;
