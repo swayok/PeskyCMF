@@ -302,11 +302,6 @@ form .error-text {
 #user-panel .actions a:hover {
   text-decoration: underline;
 }
-.dataTables_wrapper table.dataTable.table-bordered {
-  -moz-box-sizing: content-box;
-  -webkit-box-sizing: content-box;
-  box-sizing: content-box;
-}
 .dataTables_wrapper table.dataTable thead .sorting:after {
   opacity: 0.3;
   filter: alpha(opacity=30);
@@ -372,6 +367,15 @@ form .error-text {
 .dataTables_wrapper .row-actions-container .row-actions-block .row-actions {
   padding: 5px 10px 5px 10px;
 }
+.dataTables_wrapper .row-actions-container .row-actions-block .row-actions .row-action {
+  display: inline-block;
+  font-size: 16px;
+  margin: 0 5px 0 5px;
+}
+.dataTables_wrapper .row-actions-container .row-actions-block .row-actions .row-action:hover {
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
 .dataTables_wrapper .row-actions-container.hidden {
   display: block !important;
   -webkit-transition: top 0.1s step-end;
@@ -386,15 +390,6 @@ form .error-text {
   -o-transform: scale(1, 0);
   -ms-transform: scale(1, 0);
   transform: scale(1, 0);
-}
-.dataTables_wrapper .row-actions .row-action {
-  display: inline-block;
-  font-size: 16px;
-  margin: 0 5px 0 5px;
-}
-.dataTables_wrapper .row-actions .row-action:hover {
-  opacity: 0.8;
-  filter: alpha(opacity=80);
 }
 .dataTables_wrapper .dataTables_paginate {
   text-align: center;
@@ -433,11 +428,6 @@ form .error-text {
 }
 .dataTables_wrapper .dataTables_scrollHead + .dataTables_scrollFoot table.table .filters th {
   border-top-width: 0;
-}
-.dataTables_wrapper .toolbar .btn,
-.dataTables_wrapper .filter-toolbar .btn {
-  float: none;
-  display: inline-block;
 }
 .skin-blue .sidebar-menu > li.header {
   color: #678b97;
@@ -547,13 +537,9 @@ aside.main-sidebar #secondary-menu #sidebar-company-badge a:hover {
   background-color: transparent;
   color: #777777;
 }
-.bootstrap-select ul.dropdown-menu.inner li.active a {
-  color: #000000;
-  background-color: #CCCCCC;
-}
+.bootstrap-select ul.dropdown-menu.inner li.active a,
 .bootstrap-select ul.dropdown-menu.inner li.selected a {
   color: #FFFFFF;
-  background-color: #367fa9;
 }
 .cke .cke_combo.cke_combo_full_width .cke_combo_button .cke_combo_text {
   width: auto !important;

@@ -1,13 +1,13 @@
 /*!
- * jQuery QueryBuilder 2.3.2
+ * jQuery QueryBuilder 2.3.0
  * Locale: English (en)
  * Author: Damien "Mistic" Sorel, http://www.strangeplanet.fr
  * Licensed under MIT (http://opensource.org/licenses/MIT)
  */
 
 (function(root, factory) {
-    if (typeof define == 'function' && define.amd) {
-        define(['jquery', 'query-builder'], factory);
+    if (typeof define === 'function' && define.amd) {
+        define(['jquery', 'query-builder.en'], factory);
     }
     else {
         factory(root.jQuery);

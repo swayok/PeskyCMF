@@ -1,12 +1,12 @@
 /*!
- * jQuery QueryBuilder 2.3.2
+ * jQuery QueryBuilder 2.3.0
  * Locale: Russian (ru)
  * Licensed under MIT (http://opensource.org/licenses/MIT)
  */
 
 (function(root, factory) {
-    if (typeof define == 'function' && define.amd) {
-        define(['jquery', 'query-builder'], factory);
+    if (typeof define === 'function' && define.amd) {
+        define(['jquery', 'query-builder.en'], factory);
     }
     else {
         factory(root.jQuery);
@@ -18,10 +18,10 @@ var QueryBuilder = $.fn.queryBuilder;
 
 QueryBuilder.regional['ru'] = {
   "__locale": "Russian (ru)",
-  "add_rule": "Добавить",
-  "add_group": "Добавить группу",
-  "delete_rule": "Удалить",
-  "delete_group": "Удалить",
+  "add_rule": "Добавить условие",
+  "add_group": "Добавить группу условий",
+  "delete_rule": "Удалить условие",
+  "delete_group": "Удалить группу условий",
   "conditions": {
     "AND": "И",
     "OR": "ИЛИ"
@@ -36,6 +36,7 @@ QueryBuilder.regional['ru'] = {
     "greater": "больше",
     "greater_or_equal": "больше или равно",
     "between": "между",
+    "not_between": "не между",
     "begins_with": "начинается с",
     "not_begins_with": "не начинается с",
     "contains": "содержит",
@@ -69,8 +70,7 @@ QueryBuilder.regional['ru'] = {
     "datetime_exceed_max": "Должно быть, до {0}",
     "boolean_not_valid": "Не логическое",
     "operator_not_multiple": "Оператор {0} не поддерживает много значений"
-  },
-  "invert": "Инвертировать"
+  }
 };
 
 QueryBuilder.defaults({ lang_code: 'ru' });
