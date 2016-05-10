@@ -237,6 +237,7 @@ trait CacheForDbSelects {
      * @param mixed $cacheSettings
      * @param int|bool|\DateTime $defaultTimeout
      * @param callable $defaultCacheKey
+     * @param bool $isAutoCache
      * @return array|bool - bool: false - when caching is not possible
      */
     protected function resolveCacheSettings($cacheSettings, $defaultTimeout, callable $defaultCacheKey) {
@@ -258,6 +259,10 @@ trait CacheForDbSelects {
             $cacheSettings['tags'] = [];
         } else if (!is_array($cacheSettings['tags'])) {
             $cacheSettings['tags'] = [$cacheSettings['tags']];
+        }
+        // prevent possible cache-related problems in post/put/delete requests
+        if (in_array(request()->method(), ['POST', 'PUT', 'DELETE'], true)) {
+            $cacheSettings['recache'] = true;
         }
         $this->cleanCacheTimeout();
         return $cacheSettings;
