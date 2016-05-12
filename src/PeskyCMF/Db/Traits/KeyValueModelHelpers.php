@@ -37,16 +37,25 @@ trait KeyValueModelHelpers {
      * @param mixed $value
      * @param null $foreignKeyValue
      * @return array
+     * @throws \PeskyORM\Exception\DbUtilsException
      */
     static public function makeRecord($key, $value, $foreignKeyValue = null) {
         $record = [
             'key' => $key,
-            'value' => is_numeric($value) ? $value : json_encode($value, JSON_UNESCAPED_UNICODE),
+            'value' => static::encodeValue($value),
         ];
-        if ($foreignKeyValue !== null && ($foreignKeyColumn = self::getInstance()->getMainForeignKeyColumnName())) {
+        if ($foreignKeyValue !== null && ($foreignKeyColumn = static::getInstance()->getMainForeignKeyColumnName())) {
             $record[$foreignKeyColumn] = $foreignKeyValue;
         }
         return $record;
+    }
+
+    /**
+     * @param int|float|string|array $value
+     * @return string
+     */
+    static public function encodeValue($value) {
+        return is_numeric($value) ? $value : json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -57,7 +66,7 @@ trait KeyValueModelHelpers {
     static public function makeRecords(array $settingsAssoc, $foreignKeyValue = null) {
         $records = [];
         foreach ($settingsAssoc as $key => $value) {
-            $records[] = self::makeRecord($key, $value, $foreignKeyValue);
+            $records[] = static::makeRecord($key, $value, $foreignKeyValue);
         }
         return $records;
     }
@@ -69,7 +78,7 @@ trait KeyValueModelHelpers {
      */
     static public function decodeValues(array $settingsAssoc) {
         foreach ($settingsAssoc as $key => &$value) {
-            $value = self::decodeValue($value);
+            $value = static::decodeValue($value);
         }
         return $settingsAssoc;
     }
@@ -91,13 +100,17 @@ trait KeyValueModelHelpers {
      */
     public function selectAssoc($keysColumn = 'key', $valuesColumn = 'value', $conditionsAndOptions = null) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
-        return self::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions));
+        return static::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions));
     }
 
     /**
      * Update existing value or create new one
      * @param array $record - must contain: key, foreign_key, value
      * @return bool
+     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \PeskyORM\Exception\DbObjectFieldException
+     * @throws \PeskyORM\Exception\DbObjectValidationException
+     * @throws \PeskyORM\Exception\DbObjectException
      * @throws DbModelException
      */
     public function updateOrCreateRecord(array $record) {
@@ -160,7 +173,7 @@ trait KeyValueModelHelpers {
      * @param string $key
      * @param string|null $foreignKeyValue - use null if there is no main foreign key column and
      *      getMainForeignKeyColumnName() method returns null
-     * @param array $default
+     * @param mixed $default
      * @return array
      * @throws DbModelException
      */
@@ -178,7 +191,8 @@ trait KeyValueModelHelpers {
         } else if (!empty($foreignKeyValue)) {
             throw new DbModelException($this, 'Foreign key value provided for model that does not have main foreign key column');
         }
+        /** @var array $record */
         $record = $this->selectOne('*', $conditions, false);
-        return empty($record) ? $default : self::decodeValue($record['value']);
+        return empty($record) ? $default : static::decodeValue($record['value']);
     }
 }
