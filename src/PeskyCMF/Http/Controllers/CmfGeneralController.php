@@ -323,6 +323,7 @@ class CmfGeneralController extends Controller {
     public function logout() {
         Auth::guard()->logout();
         \Session::flush();
+        \Session::regenerate(true);
         return Redirect::route(CmfConfig::getInstance()->login_route());
     }
 
