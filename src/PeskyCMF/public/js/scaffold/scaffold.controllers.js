@@ -163,7 +163,7 @@ var ScaffoldDataGridHelper = {
     defaultConfig: {
         filter: true,
         stateSave: true,
-        dom: "<'row'<'col-sm-12'<'#query-builder'>>><'row'<'col-sm-4'<'filter-toolbar btn-toolbar text-left'>><'col-sm-8'<'toolbar btn-toolbar text-right'>>><'row'<'col-sm-12'tr>><'row'<'col-sm-3'i><'col-sm-6'p><'col-sm-3'l>>",
+        dom: "<'row'<'col-sm-12'<'#query-builder'>>><'row'<'col-xs-12 col-md-8'<'toolbar btn-toolbar'>><'col-xs-12 col-md-4'<'filter-toolbar btn-toolbar'>>><'row'<'col-xs-12'tr>><'row'<'col-md-3 hidden-xs hidden-sm'i><'col-xs-12 col-md-6'p><'col-md-3 hidden-xs hidden-sm'l>>",
         stateSaveCallback: function (settings, state) {
             if (settings.iDraw > 1) {
                 var newUrl = window.adminApp.request.path + '?' + settings.sTableId + '=' + rison.encode_object(state);
