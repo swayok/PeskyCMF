@@ -3,6 +3,7 @@
 namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\CmfDbModel;
+use PeskyORM\DbExpr;
 use PeskyORM\Exception\DbModelException;
 use Swayok\Utils\Set;
 
@@ -88,8 +89,39 @@ trait CacheForDbSelects {
      * @param string|array $columns
      * @param null|array|string $conditionsAndOptions
      * @return string
+     * @throws \InvalidArgumentException
      */
     static public function buildCacheKey($columns = '*', $conditionsAndOptions = null) {
+        if (is_array($conditionsAndOptions)) {
+            foreach ($conditionsAndOptions as &$value) {
+                if ($value instanceof DbExpr) {
+                    $value = $value->get();
+                } else if (is_object($value)) {
+                    throw new \InvalidArgumentException(
+                        '$conditionsAndOptions argument may contain only strings and objects of class \PeskyORM\DbExpr.'
+                        . ' Object of class ' . get_class($value) . ' detected'
+                    );
+                }
+            }
+            unset($value);
+        } else if ($conditionsAndOptions instanceof DbExpr) {
+            $conditionsAndOptions = $conditionsAndOptions->get();
+        }
+        if (is_array($columns)) {
+            foreach ($columns as &$value) {
+                if ($value instanceof DbExpr) {
+                    $value = $value->get();
+                } else if (is_object($value)) {
+                    throw new \InvalidArgumentException(
+                        '$columns argument may contain only strings and objects of class \PeskyORM\DbExpr.'
+                        . ' Object of class ' . get_class($value) . ' detected'
+                    );
+                }
+            }
+            unset($value);
+        } else if ($columns instanceof DbExpr) {
+            $columns = $columns->get();
+        }
         return hash('sha256', json_encode(array($columns, $conditionsAndOptions)));
     }
 
@@ -165,6 +197,7 @@ trait CacheForDbSelects {
 
     /**
      * @return string
+     * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws DbModelException
      */
@@ -181,7 +214,7 @@ trait CacheForDbSelects {
 
     /**
      * Get data from cache or put data from $callback to cache (for external use)
-     * @param bool $isSingleRecord
+     * @param bool $affectsSingleRecord
      * @param array|string $cacheSettings - array: settings; string: cache key
      *      array: [
      *          'key' => 'string, cache key',
@@ -193,8 +226,8 @@ trait CacheForDbSelects {
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function getCachedData($isSingleRecord, $cacheSettings, callable $callback) {
-        $defaultTimeout = $isSingleRecord
+    public function getCachedData($affectsSingleRecord, $cacheSettings, callable $callback) {
+        $defaultTimeout = $affectsSingleRecord
                 ? $this->_getCacheDurationForSelectOneInMinutes()
                 : $this->_getCacheDurationForSelectManyInMinutes();
         $resolvedCacheSettings = $this->resolveCacheSettings(
@@ -205,7 +238,7 @@ trait CacheForDbSelects {
             }
         );
         if (is_array($cacheSettings)) {
-            return $this->_getCachedData($isSingleRecord, $resolvedCacheSettings, $callback);
+            return $this->_getCachedData($affectsSingleRecord, $resolvedCacheSettings, $callback);
         } else {
             return $callback();
         }
@@ -213,23 +246,25 @@ trait CacheForDbSelects {
 
     /**
      * Get data from cache or put data from $callback to cache (for internal use)
-     * @param bool $isSingleRecord
+     * @param bool $affectsSingleRecord
      * @param array $cacheSettings - prepared cache settings. Always contains 'key' key
      * @param callable $callback
      * @return array
      */
-    abstract protected function _getCachedData($isSingleRecord, array $cacheSettings, callable $callback);
+    abstract protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback);
 
     /**
-     * @param bool $isSingleRecord
+     * @param bool $affectsSingleRecord
      * @param null|string|array $columns
      * @param null|array $conditionsAndOptions
      * @return string
+     * @throws \InvalidArgumentException
+     * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \PeskyORM\Exception\DbModelException
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
-    public function buildDefaultCacheKey($isSingleRecord, $columns, $conditionsAndOptions) {
-        $mid = $isSingleRecord ? 'one.' : 'many.';
+    public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
+        $mid = $affectsSingleRecord ? 'one.' : 'many.';
         return $this->getModelCachePrefix() . $mid . static::buildCacheKey($columns, $conditionsAndOptions);
     }
 
@@ -289,6 +324,7 @@ trait CacheForDbSelects {
      * @param bool $asObjects - true: return DbObject | false: return array
      * @param bool $withRootAlias
      * @return array|Object[]
+     * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \PeskyORM\Exception\DbObjectException
      * @throws \PeskyORM\Exception\DbModelException
      * @throws \BadMethodCallException
@@ -353,6 +389,11 @@ trait CacheForDbSelects {
      * @param string $column
      * @param null|array|string $conditionsAndOptions
      * @return array
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyORM\Exception\DbQueryException
+     * @throws \PeskyORM\Exception\DbException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function selectColumnFromCache($column, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {
@@ -369,6 +410,10 @@ trait CacheForDbSelects {
      * @param string $valuesColumn
      * @param null|array|string $conditionsAndOptions
      * @return array
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyORM\Exception\DbQueryException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function selectAssocFromCache($keysColumn, $valuesColumn, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {

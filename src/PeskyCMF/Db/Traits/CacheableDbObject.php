@@ -22,6 +22,9 @@ trait CacheableDbObject {
     }
 
     /**
+     * @param $conditions
+     * @param string $fieldNames
+     * @param array $relations
      * @return $this
      */
     public function find($conditions, $fieldNames = '*', $relations = array()) {
@@ -36,6 +39,8 @@ trait CacheableDbObject {
     }
 
     /**
+     * @param string $fieldNames
+     * @param null $relations
      * @return $this
      */
     public function reload($fieldNames = '*', $relations = null) {
