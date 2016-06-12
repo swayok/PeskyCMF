@@ -164,7 +164,9 @@ trait KeyValueModelHelpers {
             $this->commit();
             return true;
         } catch (\Exception $exc) {
-            $this->rollback();
+            if ($this->inTransaction()) {
+                $this->rollback();
+            }
             throw $exc;
         }
     }
