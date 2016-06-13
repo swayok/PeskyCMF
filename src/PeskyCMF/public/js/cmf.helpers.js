@@ -7,6 +7,13 @@ var FormHelper = {
 FormHelper.initForm = function (form, container, onSubmitSuccess) {
     form = $(form);
     container = $(container);
+    var customInitiator = form.attr('data-initiator');
+    if (customInitiator) {
+        var ret = eval(customInitiator + '(form, container, onSubmitSuccess);');
+        if (ret === false) {
+            return;
+        }
+    }
 
     form.ajaxForm({
         clearForm: true,

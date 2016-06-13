@@ -39,6 +39,9 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                         if ($formConfig->hasOptionsLoader()) {
                             $formAttributes['data-load-options'] = '1';
                         }
+                        if ($formConfig->hasJsInitiator()) {
+                            $formAttributes['data-initiator'] = addslashes($formConfig->getJsInitiator());
+                        }
                         $editUrl = route('cmf_api_update_item', ['table_name' => $model->getTableName(), 'id' => ''], false) . '/' . $printPk;
                         $createUrl = route('cmf_api_create_item', ['table_name' => $model->getTableName()], false);
                         $formAction = $ifEdit . $editUrl . $else . $createUrl . $endIf;
@@ -71,6 +74,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                     echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
                                 }
                             }
+                            echo $formConfig->getAdditionalHtmlForForm();
                         ?>
                         </div>
                         <div class="box-footer">

@@ -6,7 +6,6 @@ namespace PeskyCMF\Scaffold\Form;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
-use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 use PeskyORM\DbColumnConfig;
@@ -33,6 +32,10 @@ class FormConfig extends ScaffoldActionConfig {
     protected $validatorsForEdit = [];
     /** @var array|callable|null */
     protected $alterDefaultValues = [];
+    /** @var string */
+    protected $jsInitiator = null;
+    /** @var string|Closure */
+    protected $additionalHtmlForForm = '';
 
     const VALIDATOR_FOR_ID = 'required|integer|min:1';
     /** @var callable */
@@ -415,13 +418,13 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * @param array|callable $arrayOrCallable
-     *      - callable: funciton (array $defaults, ScaffoldActionConfig $scaffoldAction) { return $defaults; }
+     *      - callable: funciton (array $defaults, FormConfig $formConfig) { return $defaults; }
      * @return $this
-     * @throws ScaffoldException
+     * @throws ScaffoldActionException
      */
     public function setAlterDefaultValues($arrayOrCallable) {
         if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
-            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
+            throw new ScaffoldActionException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
         }
         $this->alterDefaultValues = $arrayOrCallable;
         return $this;
@@ -430,20 +433,76 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param array $defaults
      * @return array
-     * @throws ScaffoldException
+     * @throws ScaffoldActionException
      */
     public function alterDefaultValues(array $defaults) {
         if (!empty($this->alterDefaultValues)) {
             if (is_callable($this->alterDefaultValues)) {
                 $defaults = call_user_func($this->alterDefaultValues, $defaults, $this);
                 if (!is_array($defaults)) {
-                    throw new ScaffoldException($this, 'Altering default values is invalid. Callback must return an array');
+                    throw new ScaffoldActionException(
+                        $this,
+                        'Altering default values is invalid. Callback must return an array'
+                    );
                 }
             } else {
                 return array_merge($defaults, $this->alterDefaultValues);
             }
         }
         return $defaults;
+    }
+
+    /**
+     * @return string
+     */
+    public function getJsInitiator() {
+        return $this->jsInitiator;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasJsInitiator() {
+        return !empty($this->jsInitiator);
+    }
+
+    /**
+     * @param $jsFunctionName
+     * @return $this
+     * @throws ScaffoldActionException
+     */
+    public function setJsInitiator($jsFunctionName) {
+        if (!is_string($jsFunctionName) && !preg_match('%^[_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%s', $jsFunctionName)) {
+            throw new ScaffoldActionException($this, "Invalid JavaScript funciton name: [$jsFunctionName]");
+        }
+        $this->jsInitiator = $jsFunctionName;
+        return $this;
+    }
+
+    /**
+     * @param $stringOfFunction - function (FormConfig $formConfig) { return '<div>'; }
+     * @return $this
+     * @throws ScaffoldActionException
+     */
+    public function setAdditionalHtmlForForm($stringOfFunction) {
+        if (!is_string($stringOfFunction) && !($stringOfFunction instanceof \Closure)) {
+            throw new ScaffoldActionException($this, 'setAdditionalHtmlForForm($stringOfFunction) accepts only string or function');
+        }
+        $this->additionalHtmlForForm = $stringOfFunction;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAdditionalHtmlForForm() {
+        if (empty($this->additionalHtmlForForm)) {
+            return '';
+        } else if (is_string($this->additionalHtmlForForm)) {
+            return $this->additionalHtmlForForm;
+        } else {
+            return call_user_func($this->additionalHtmlForForm, $this);
+        }
     }
 
 }
