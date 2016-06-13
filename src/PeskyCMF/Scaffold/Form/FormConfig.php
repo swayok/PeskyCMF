@@ -6,6 +6,7 @@ namespace PeskyCMF\Scaffold\Form;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
+use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 use PeskyORM\DbColumnConfig;
@@ -30,6 +31,8 @@ class FormConfig extends ScaffoldActionConfig {
     protected $validatorsForCreate = [];
     /** @var array  */
     protected $validatorsForEdit = [];
+    /** @var array|callable|null */
+    protected $alterDefaultValues = [];
 
     const VALIDATOR_FOR_ID = 'required|integer|min:1';
     /** @var callable */
@@ -408,6 +411,39 @@ class FormConfig extends ScaffoldActionConfig {
             }
         }
         return true;
+    }
+
+    /**
+     * @param array|callable $arrayOrCallable
+     *      - callable: funciton (array $defaults, ScaffoldActionConfig $scaffoldAction) { return $defaults; }
+     * @return $this
+     * @throws ScaffoldException
+     */
+    public function setAlterDefaultValues($arrayOrCallable) {
+        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
+            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
+        }
+        $this->alterDefaultValues = $arrayOrCallable;
+        return $this;
+    }
+
+    /**
+     * @param array $defaults
+     * @return array
+     * @throws ScaffoldException
+     */
+    public function alterDefaultValues(array $defaults) {
+        if (!empty($this->alterDefaultValues)) {
+            if (is_callable($this->alterDefaultValues)) {
+                $defaults = call_user_func($this->alterDefaultValues, $defaults, $this);
+                if (!is_array($defaults)) {
+                    throw new ScaffoldException($this, 'Altering default values is invalid. Callback must return an array');
+                }
+            } else {
+                return array_merge($defaults, $this->alterDefaultValues);
+            }
+        }
+        return $defaults;
     }
 
 }

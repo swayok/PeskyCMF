@@ -8,6 +8,7 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\PeskyCmfException;
+use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\Exception\DbObjectValidationException;
@@ -107,13 +108,15 @@ class CmfScaffoldApiController extends Controller {
 
     public function getItemDefaults() {
         $model = self::getModel();
-        if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
+        /** @var FormConfig $config */
+        if (!$this->getScaffoldConfig()->isCreateAllowed() && !$this->getScaffoldConfig()->isEditAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.item_details.forbidden'))
+                ->setMessage(CmfConfig::transBase('.action.create.forbidden'))
                 ->goBack(route('cmf_items_table', [$model->getTableName()]));
         }
-        $data = $model->getOwnDbObject()->getDefaultsArray();
-        return response()->json($this->getScaffoldConfig()->getFormConfig()->prepareRecord($data));
+        $formConfig = $this->getScaffoldConfig()->getFormConfig();
+        $data = $formConfig->alterDefaultValues($model->getOwnDbObject()->getDefaultsArray());
+        return response()->json($formConfig->prepareRecord($data));
     }
 
     public function getOptions() {
