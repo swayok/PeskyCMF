@@ -334,7 +334,6 @@ form {
 .dataTables_wrapper {
 
     table.dataTable {
-
         thead {
 
             .sorting:after {
@@ -405,16 +404,6 @@ form {
 
             .row-actions {
                 padding: 5px 10px 5px 10px;
-                .row-action {
-                    display: inline-block;
-                    font-size: 16px;
-                    margin: 0 5px 0 5px;
-
-                    &:hover {
-                        ._fade-to(0.8);
-                    }
-
-                }
             }
         }
 
@@ -425,6 +414,18 @@ form {
 
             .row-actions-block {
                 .transform(scale(1, 0));
+            }
+        }
+    }
+
+    .row-actions {
+        .row-action {
+            display: inline-block;
+            font-size: 16px;
+            margin: 0 5px 0 5px;
+
+            &:hover {
+                ._fade-to(0.8);
             }
         }
     }
@@ -479,6 +480,14 @@ form {
 
         .filters th {
             border-top-width: 0;
+        }
+    }
+
+    .toolbar,
+    .filter-toolbar {
+        .btn {
+            float: none;
+            display: inline-block;
         }
     }
 
