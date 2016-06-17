@@ -302,6 +302,11 @@ form .error-text {
 #user-panel .actions a:hover {
   text-decoration: underline;
 }
+.dataTables_wrapper table.dataTable.table-bordered {
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+}
 .dataTables_wrapper table.dataTable thead .sorting:after {
   opacity: 0.3;
   filter: alpha(opacity=30);

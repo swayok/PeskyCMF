@@ -29,19 +29,24 @@ class ValidateAdmin {
         }
         if (!$response) {
             $loginUrl = route($configs->login_route());
-            $redirectUri = $request->url();
+            $currentsUrl = $request->url();
             if ($request->ajax()) {
-                \Session::set(CmfConfig::getInstance()->session_redirect_key(), $redirectUri);
+                \Session::set(CmfConfig::getInstance()->session_redirect_key(), $currentsUrl);
                 return response()->json(['redirect_with_reload' => $loginUrl], HttpCode::UNAUTHORISED);
             } else {
-                return redirect()->guest($loginUrl)->with(CmfConfig::getInstance()->session_redirect_key(), $redirectUri);
+                return redirect()->guest($loginUrl)->with(CmfConfig::getInstance()->session_redirect_key(), $currentsUrl);
             }
         } else if (is_a($response, 'Illuminate\Http\JsonResponse') || is_a($response, 'Illuminate\Http\Response')) {
             return $response;
         } else if (is_a($response, 'Illuminate\\Http\\RedirectResponse')) {
-            $redirectUri = $request->url();
+            $currentsUrl = $request->url();
             /** @var RedirectResponse $response */
-            return $response->with(CmfConfig::getInstance()->session_redirect_key(), $redirectUri);
+            if ($request->ajax()) {
+                \Session::set(CmfConfig::getInstance()->session_redirect_key(), $currentsUrl);
+                return response()->json(['redirect' => $response->getTargetUrl()], HttpCode::UNAUTHORISED);
+            } else {
+                return $response->with(CmfConfig::getInstance()->session_redirect_key(), $currentsUrl);
+            }
         }
         /** @var CmfDbObject $user */
         $user = \Auth::guard()->user();

@@ -336,6 +336,12 @@ form {
     table.dataTable {
         thead {
 
+            &.table-bordered {
+                -moz-box-sizing: content-box;
+                -webkit-box-sizing: content-box;
+                box-sizing: content-box;
+            }
+
             .sorting:after {
                 ._fade-to(0.3);
             }
