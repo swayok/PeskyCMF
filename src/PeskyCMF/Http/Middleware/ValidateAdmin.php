@@ -23,7 +23,10 @@ class ValidateAdmin {
         /** @var CmfConfig $configs */
         $configs = CmfConfig::getInstance();
         //if this is a simple false value, send the user to the login redirect
-        $response = \Auth::guard()->check() && $configs->isAuthorised($request);
+        $response = false;
+        if (\Auth::guard()->check()) {
+            $response = $configs->isAuthorised($request);
+        }
         if (!$response) {
             $loginUrl = route($configs->login_route());
             $redirectUri = $request->url();
