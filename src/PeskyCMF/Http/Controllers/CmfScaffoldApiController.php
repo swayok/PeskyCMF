@@ -119,13 +119,13 @@ class CmfScaffoldApiController extends Controller {
         return response()->json($formConfig->prepareRecord($data));
     }
 
-    public function getOptions() {
+    public function getOptions(Request $request) {
         if (!$this->getScaffoldConfig()->isEditAllowed() && !$this->getScaffoldConfig()->isCreateAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
                 ->goBack(route('cmf_items_table', [self::getModel()->getTableName()]));
         }
-        $optionsByFields = $this->getScaffoldConfig()->getFormConfig()->loadOptions();
+        $optionsByFields = $this->getScaffoldConfig()->getFormConfig()->loadOptions($request->query('id'));
         foreach ($optionsByFields as $fieldName => $fieldOptions) {
             if (is_array($fieldOptions)) {
                 $optionsByFields[$fieldName] = $this->buildFieldOptions($fieldOptions);

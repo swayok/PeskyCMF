@@ -88,7 +88,7 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
                         deferred.resolve();
                     }
                     if (this.url) {
-                        Utils.loadedJsFiles.push(this.url);
+                        Utils.loadedJsFiles.push(this.url.replace(/(\?|&)_=[0-9]+/, ''));
                     }
                 })
                 .fail(function (jqxhr, settings, exception) {

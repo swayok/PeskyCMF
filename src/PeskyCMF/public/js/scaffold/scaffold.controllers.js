@@ -27,7 +27,7 @@ var ScaffoldControllers = {
                 model({id: request.params.id});
             }
             var deferred = $.Deferred();
-            $.when(model.fetch(), ScaffoldFormHelper.loadOptions(request.params.resource))
+            $.when(model.fetch(), ScaffoldFormHelper.loadOptions(request.params.resource, model.get('id')))
                 .done(function (modelResponse, optionsResponse) {
                     model.set('_options', optionsResponse);
                     deferred.resolve(model);
@@ -661,23 +661,25 @@ var ScaffoldFormHelper = {
         ScaffoldFormHelper.models[resourceName]({});
         return ScaffoldFormHelper.models[resourceName];
     },
-    loadOptions: function (resourceName) {
+    loadOptions: function (resourceName, itemId) {
         var deferred = $.Deferred();
+        var query = itemId ? '?id=' + itemId : '';
+        var cacheKey = resourceName + (itemId ? '' : String(itemId));
         if (
-            !ScaffoldFormHelper.options[resourceName]
-            || ScaffoldFormHelper.optionsTs[resourceName] + 30000 < Date.now()
+            !ScaffoldFormHelper.options[cacheKey]
+            || ScaffoldFormHelper.optionsTs[cacheKey] + 30000 < Date.now()
         ) {
             $.ajax({
-                url: ScaffoldsManager.getResourceBaseUrl(resourceName) + '/service/options',
+                url: ScaffoldsManager.getResourceBaseUrl(resourceName) + '/service/options' + query,
                 method: 'GET',
                 cache: false
             }).done(function (data) {
-                ScaffoldFormHelper.optionsTs[resourceName] = Date.now();
-                ScaffoldFormHelper.options[resourceName] = data;
-                deferred.resolve(ScaffoldFormHelper.options[resourceName]);
+                ScaffoldFormHelper.optionsTs[cacheKey] = Date.now();
+                ScaffoldFormHelper.options[cacheKey] = data;
+                deferred.resolve(ScaffoldFormHelper.options[cacheKey]);
             }).fail(Utils.handleAjaxError);
         } else {
-            deferred.resolve(ScaffoldFormHelper.options[resourceName]);
+            deferred.resolve(ScaffoldFormHelper.options[cacheKey]);
         }
         return deferred;
     }

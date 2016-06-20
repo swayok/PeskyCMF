@@ -7,7 +7,7 @@
  */
 
 $attributes = array(
-    'name' => $fieldConfig->getName(),
+    'name' => $fieldConfig->getName() . '[]',
     'id' => $fieldConfig->getDefaultId(),
     'class' => 'form-control select2',
 );
