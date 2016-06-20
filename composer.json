@@ -27,33 +27,17 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/swayok/utils.git"
-        },
-        {
-            "type": "vcs",
             "url": "https://github.com/swayok/peskyorm.git"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/swayok/laravel_extended_errors.git"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/swayok/html-tag-helper.git"
-        },
-		{
-            "type": "vcs",
-            "url": "https://github.com/swayok/laravelsiteloader.git"
         }
     ],
     "require": {
-        "php": ">=5.3",
+        "php": ">=5.6",
         "laravel/framework": "5.2.*",
         "swayok/utils": "master@dev",
         "swayok/peskyorm": "master@dev",
-        "swayok/laravel_extended_errors": "master@dev",
+        "swayok/laravel-extended-errors": "master@dev",
         "swayok/html-tag-helper": "master@dev",
-		"swayok/laravelsiteloader": "master@dev",
+		"swayok/laravel-site-loader": "master@dev",
         "almasaeed2010/adminlte": "~2.0",
         "FortAwesome/Font-Awesome": "*",
         "driftyco/ionicons": "*",
