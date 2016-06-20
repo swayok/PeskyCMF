@@ -334,13 +334,14 @@ form {
 .dataTables_wrapper {
 
     table.dataTable {
-        thead {
 
-            &.table-bordered {
-                -moz-box-sizing: content-box;
-                -webkit-box-sizing: content-box;
-                box-sizing: content-box;
-            }
+        &.table-bordered {
+            -moz-box-sizing: content-box;
+            -webkit-box-sizing: content-box;
+            box-sizing: content-box;
+        }
+
+        thead {
 
             .sorting:after {
                 ._fade-to(0.3);
@@ -666,5 +667,22 @@ aside.main-sidebar {
             }
         }
 
+    }
+}
+
+.select2.select2-container--default {
+
+    .select2-selection {
+        min-height: 34px;
+    }
+
+    .select2-selection--multiple {
+        .select2-search.select2-search--inline input {
+            border: 0 none;
+        }
+    }
+
+    &.select2-container--focus .select2-selection--multiple {
+        border-color: #3c8dbc;
     }
 }

@@ -14,6 +14,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess) {
             return;
         }
     }
+    form.find('.selectpicker').selectpicker();
 
     form.ajaxForm({
         clearForm: true,

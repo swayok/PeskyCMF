@@ -72,7 +72,7 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     }
 
     /**
-     * @param callable $loader = function (FormFieldConfig $fieldConfig, FormConfig $formConfig) { return [] }
+     * @param callable $loader = function (FormFieldConfig $fieldConfig, FormConfig $formConfig, $pkValue = null) { return [] }
      * @return $this
      */
     public function setOptionsLoader(callable $loader) {

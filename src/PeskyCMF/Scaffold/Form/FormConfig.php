@@ -167,17 +167,19 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
+     * @param int|string|null $pkValue - primary key value
      * @return array[]
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
-    public function loadOptions() {
+    public function loadOptions($pkValue) {
         $options = array();
         foreach ($this->getFields() as $fieldConfig) {
             if ($fieldConfig->hasOptionsLoader()) {
                 $options[$fieldConfig->getName()] = call_user_func(
                     $fieldConfig->getOptionsLoader(),
                     $fieldConfig,
-                    $this
+                    $this,
+                    $pkValue
                 );
             }
         }

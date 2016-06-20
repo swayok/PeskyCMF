@@ -554,3 +554,12 @@ aside.main-sidebar #secondary-menu #sidebar-company-badge a:hover {
 .cke .cke_combo.cke_combo_full_width .cke_combo_button .cke_combo_text {
   width: auto !important;
 }
+.select2.select2-container--default .select2-selection {
+  min-height: 34px;
+}
+.select2.select2-container--default .select2-selection--multiple .select2-search.select2-search--inline input {
+  border: 0 none;
+}
+.select2.select2-container--default.select2-container--focus .select2-selection--multiple {
+  border-color: #3c8dbc;
+}
