@@ -70,12 +70,10 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
             ->setFields([
                 'email',
                 'password' => FormFieldConfig::create()
-                    ->setRenderer(function () {
-                        return InputRendererConfig::create('cmf::input/text', [
-                                'type' => 'password',
-                                'autocomplete' => 'off',
-                            ])
-                            ->requiredForCreate();
+                    ->setDefaultRendererConfigurator(function (InputRendererConfig $renderer) {
+                        $renderer
+                            ->setIsRequiredForCreate(true)
+                            ->setIsRequiredForEdit(false);
                     }),
                 'name',
                 'language' => FormFieldConfig::create()

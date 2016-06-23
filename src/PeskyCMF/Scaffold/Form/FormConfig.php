@@ -89,10 +89,12 @@ class FormConfig extends ScaffoldActionConfig {
                 $rendererConfig->setView('cmf::input/date');
                 break;
             case $fieldConfig::TYPE_EMAIL:
-            case $fieldConfig::TYPE_PASSWORD:
                 $rendererConfig
                     ->setView('cmf::input/text')
-                    ->setAttributes(['type' => $fieldConfig->getType()]);
+                    ->setAttributes(['type' => 'email']);
+                break;
+            case $fieldConfig::TYPE_PASSWORD:
+                $rendererConfig->setView('cmf::input/password');
                 break;
             default:
                 $rendererConfig->setView('cmf::input/text');

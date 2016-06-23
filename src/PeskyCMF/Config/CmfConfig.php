@@ -220,6 +220,10 @@ class CmfConfig extends ConfigsContainer {
         ];
     }
 
+    static public function default_page_title() {
+        return static::transCustom('.default_page_title');
+    }
+
     /**
      * @return string
      */
