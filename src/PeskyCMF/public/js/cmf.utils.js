@@ -344,3 +344,13 @@ Utils.highlightLinks = function (url) {
 Utils.cleanCache = function () {
 
 };
+
+Utils.updatePageTitleFromH1 = function ($content) {
+    var $h1 = $content && $content.length ? $content.find('h1').first() : $('#section-content h1, h1').first();
+    var defaultPageTitle = $.trim(String(GlobalVars.defaultPageTitle));
+    if ($h1.length) {
+        document.title = $h1.text() + (defaultPageTitle.length ? ' - ' + defaultPageTitle : '');
+    } else {
+        document.title = defaultPageTitle;
+    }
+};

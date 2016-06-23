@@ -1,6 +1,7 @@
 var GlobalVars = {
     isDebug: false,
     debugDialog: null,
+    defaultPageTitle: '',
     rootUrl: '/',
     scaffoldApiUrlSection: 'api',
     uiUrl: null,

@@ -55,7 +55,8 @@
             isDebug: {{ config('app.debug') ? 'true' : 'false' }},
             rootUrl: '/{{ $urlPrefix }}',
             uiUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_main_ui', [], false)) }}',
-            userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}'
+            userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}',
+            defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getInstance()->default_page_title() }}'
         };
     </script>
 
