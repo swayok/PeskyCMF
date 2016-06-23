@@ -650,6 +650,7 @@ var ScaffoldFormHelper = {
                         data.isCreation = true;
                         ScaffoldFormHelper.deafults[resourceName] = data;
                     }
+                    data.formUUID = Base64.encode(this.url + (new Date()).getTime());
                     model(data);
                     model.trigger('fetch', [model]);
                     deferred.resolve(model);

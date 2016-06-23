@@ -46,7 +46,8 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                         $createUrl = route('cmf_api_create_item', ['table_name' => $model->getTableName()], false);
                         $formAction = $ifEdit . $editUrl . $else . $createUrl . $endIf;
                     ?>
-                    <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>>
+                    <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
+                    data-uuid="{{= it.formUUID }}">
                         <?php echo $ifEdit; ?>
                             <input type="hidden" name="_method" value="PUT">
                             <input type="hidden" name="<?php echo $pkColName; ?>" value="<?php echo $printPk; ?>">
@@ -67,7 +68,13 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                     $renderedInput = $config->render(['translationPrefix' => $translationPrefix]);
                                     // replace <script> tags to be able to render that template
                                     echo preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
-                                        return "{{= '<' + 'script{$matches[1]}>' }}$matches[2]{{= '</' + 'script>'}}";
+                                        if (preg_match('%type="text/html"%is', $matches[1])) {
+                                            // inner dotjs template - needs to be encoded and decoded later
+                                            $encoded = base64_encode($matches[2]);
+                                            return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
+                                        } else {
+                                            return "{{= '<' + 'script{$matches[1]}>' }}$matches[2]{{= '</' + 'script>'}}";
+                                        }
                                     }, $renderedInput);
                                 } catch (Exception $exc) {
                                     echo '<div>' . $exc->getMessage() . '</div>';
