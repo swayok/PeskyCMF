@@ -11,10 +11,13 @@ use PeskyCMF\PeskyCmfException;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\Exception\DbObjectValidationException;
 use Swayok\Html\Tag;
 
 class CmfScaffoldApiController extends Controller {
+
+    use DataValidationHelper;
 
     static protected $model;
 
@@ -147,7 +150,7 @@ class CmfScaffoldApiController extends Controller {
         $data = array_intersect_key($request->data(), $formConfig->getFields());
         $errors = $formConfig->validateDataForCreate($data);
         if (!empty($errors)) {
-            return cmfJsonResponseForValidationErrors($errors);
+            return $this->sendValidationErrorsResponse($errors);
         }
         unset($data[$model->getPkColumnName()]);
         if ($formConfig->hasBeforeSaveCallback()) {
@@ -160,7 +163,7 @@ class CmfScaffoldApiController extends Controller {
             // revalidate
             $errors = $formConfig->validateDataForCreate($data, [], true);
             if (!empty($errors)) {
-                return cmfJsonResponseForValidationErrors($errors);
+                return $this->sendValidationErrorsResponse($errors);
             }
         }
         unset($data[$model->getPkColumnName()]); //< to be 100% sure =)
@@ -172,7 +175,7 @@ class CmfScaffoldApiController extends Controller {
                         ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
                 }
             } catch (DbObjectValidationException $exc) {
-                return cmfJsonResponseForValidationErrors($exc->getValidationErrors());
+                return $this->sendValidationErrorsResponse($exc->getValidationErrors());
             }
         }
         return cmfServiceJsonResponse()
@@ -192,7 +195,7 @@ class CmfScaffoldApiController extends Controller {
         $data = array_intersect_key($request->data(), array_flip($expectedFields));
         $errors = $formConfig->validateDataForEdit($data);
         if (!empty($errors)) {
-            return cmfJsonResponseForValidationErrors($errors);
+            return $this->sendValidationErrorsResponse($errors);
         }
         if (!$request->data($model->getPkColumnName())) {
             return self::sendItemNotFoundResponse($model);
@@ -222,7 +225,7 @@ class CmfScaffoldApiController extends Controller {
             // revalidate
             $errors = $formConfig->validateDataForCreate($data);
             if (!empty($errors)) {
-                return cmfJsonResponseForValidationErrors($errors);
+                return $this->sendValidationErrorsResponse($errors);
             }
         }
         unset($data[$model->getPkColumnName()]);
@@ -234,7 +237,7 @@ class CmfScaffoldApiController extends Controller {
                         ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
                 }
             } catch (DbObjectValidationException $exc) {
-                return cmfJsonResponseForValidationErrors($exc->getValidationErrors());
+                return $this->sendValidationErrorsResponse($exc->getValidationErrors());
             }
         }
         return cmfServiceJsonResponse()

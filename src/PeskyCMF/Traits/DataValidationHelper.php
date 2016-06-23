@@ -36,7 +36,7 @@ trait DataValidationHelper {
      */
     protected function fixValidationErrorsKeys(array $errors) {
         foreach ($errors as $key => $messages) {
-            if (strstr($key, '.') !== false) {
+            if (strpos($key, '.') !== false) {
                 $newKey = preg_replace('%^([^\]]+)\]%', '$1', str_replace('.', '][', $key) . ']');
                 $errors[$newKey] = $messages;
                 unset($errors[$key]);
