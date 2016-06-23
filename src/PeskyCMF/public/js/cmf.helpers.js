@@ -15,6 +15,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess) {
         }
     }
     form.find('.selectpicker').selectpicker();
+    form.find('input.switch[type="checkbox"]').bootstrapSwitch();
 
     form.ajaxForm({
         clearForm: true,
