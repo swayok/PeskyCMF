@@ -44,7 +44,8 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
                         $select.append('<option value="' + tags[i] + '" selected>' + tags[i] + '</option>');
                     }
                     $select.select2({
-                        tags: true
+                        tags: true,
+                        width: '100%'
                     });
                 });
         })
