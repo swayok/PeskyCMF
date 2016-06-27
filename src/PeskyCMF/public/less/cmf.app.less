@@ -712,7 +712,7 @@ aside.main-sidebar {
     }
 }
 
-.select2.select2-container--default {
+.select2-container--default {
 
     .select2-selection {
         min-height: 34px;
@@ -726,5 +726,25 @@ aside.main-sidebar {
 
     &.select2-container--focus .select2-selection--multiple {
         border-color: #3c8dbc;
+    }
+
+    .select2-dropdown {
+
+        li.select2-results__option[aria-selected="true"] {
+            padding-right: 30px;
+            position: relative;
+
+            &:after {
+                content: '\2713';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                top: 4px;
+                right: 6px;
+                font-weight: bold;
+                font-size: 18px;
+            }
+        }
+
     }
 }
