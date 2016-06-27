@@ -81,10 +81,28 @@ class FormConfig extends ScaffoldActionConfig {
                     ->setOptions($fieldConfig->getOptions());
                 break;
             case $fieldConfig::TYPE_MULTISELECT:
-            case $fieldConfig::TYPE_TAGS:
                 $rendererConfig
-                    ->setView('cmf::input/' . $fieldConfig->getType())
+                    ->setView('cmf::input/multiselect')
                     ->setOptions($fieldConfig->getOptions());
+                if (
+                    !$fieldConfig->hasValueConverter()
+                    && in_array(
+                        $fieldConfig->getTableColumnConfig()->getType(),
+                        [FormFieldConfig::TYPE_JSON, FormFieldConfig::TYPE_JSONB],
+                        true
+                    )
+                ) {
+                    $fieldConfig->setValueConverter(function ($value) {
+                        return $value;
+                    });
+                }
+                break;
+            case $fieldConfig::TYPE_TAGS:
+                $rendererConfig->setView('cmf::input/tags');
+                $options = $fieldConfig->getOptions();
+                if (!empty($options)) {
+                    $rendererConfig->setOptions($options);
+                }
                 if (
                     !$fieldConfig->hasValueConverter()
                     && in_array(
