@@ -6,16 +6,17 @@
  * @var \PeskyCMF\Db\CmfDbModel $model
  */
 
-$attributes = array(
-    'name' => $fieldConfig->getName(),
-    'id' => $fieldConfig->getDefaultId(),
-    'class' => 'form-control'
-);
-$attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
-$attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
+$allAttributes = $rendererConfig->getAttributes();
+$rendererConfig
+    ->addAttribute('name', $fieldConfig->getName() . ($rendererConfig->getAttribute('multiple', false) ? '[]' : ''), false)
+    ->addAttribute('id', $fieldConfig->getDefaultId(), false)
+    ->addAttribute('class', 'form-control', false);
+
+$attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
+$attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
 <div class="form-group">
-    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel(); ?></label>
     <select data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || ''}}"
         {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
     >

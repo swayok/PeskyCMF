@@ -20,6 +20,8 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     const TYPE_WYSIWYG = 'wysiwyg';
     const TYPE_BOOL = DbColumnConfig::TYPE_BOOL;
     const TYPE_SELECT = 'select';
+    const TYPE_MULTISELECT = 'multiselect';
+    const TYPE_TAGS = 'tags';
     const TYPE_HIDDEN = 'hidden';
     const TYPE_IMAGE = 'image';
     const TYPE_FILE = 'file';

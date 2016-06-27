@@ -56,6 +56,7 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param InputRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
      * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     protected function configureDefaultRenderer(
         ScaffoldFieldRendererConfig $rendererConfig,
@@ -78,6 +79,24 @@ class FormConfig extends ScaffoldActionConfig {
                 $rendererConfig
                     ->setView('cmf::input/select')
                     ->setOptions($fieldConfig->getOptions());
+                break;
+            case $fieldConfig::TYPE_MULTISELECT:
+            case $fieldConfig::TYPE_TAGS:
+                $rendererConfig
+                    ->setView('cmf::input/' . $fieldConfig->getType())
+                    ->setOptions($fieldConfig->getOptions());
+                if (
+                    !$fieldConfig->hasValueConverter()
+                    && in_array(
+                        $fieldConfig->getTableColumnConfig()->getType(),
+                        [FormFieldConfig::TYPE_JSON, FormFieldConfig::TYPE_JSONB],
+                        true
+                    )
+                ) {
+                    $fieldConfig->setValueConverter(function ($value) {
+                        return $value;
+                    });
+                }
                 break;
             case $fieldConfig::TYPE_IMAGE:
                 $rendererConfig->setView('cmf::input/image');

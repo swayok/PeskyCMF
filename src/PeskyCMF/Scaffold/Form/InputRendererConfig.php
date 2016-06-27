@@ -72,6 +72,30 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
     }
 
     /**
+     * @param string $name
+     * @param string|bool $value
+     * @param bool $owerwrite
+     *  - true: overwrites existing attribute value
+     *  - false: do nothing if attribute value already set
+     * @return $this
+     */
+    public function addAttribute($name, $value, $owerwrite = true) {
+        if ($owerwrite || !array_key_exists($name, $this->attributes)) {
+            $this->attributes[$name] = $value;
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param string|null|bool $default
+     * @return $this
+     */
+    public function getAttribute($name, $default = null) {
+        return array_key_exists($name, $this->attributes) ? $this->attributes[$name] : $default;
+    }
+
+    /**
      * @return array
      */
     public function getAttributesForCreate() {

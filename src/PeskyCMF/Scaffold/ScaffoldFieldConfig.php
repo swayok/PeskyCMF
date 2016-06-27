@@ -176,6 +176,13 @@ abstract class ScaffoldFieldConfig {
     }
 
     /**
+     * @return boolean
+     */
+    public function hasValueConverter() {
+        return !empty($this->valueConverter);
+    }
+
+    /**
      * @return callable|null
      */
     public function getValueConverter() {
