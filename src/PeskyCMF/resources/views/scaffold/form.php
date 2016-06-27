@@ -67,21 +67,13 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                 try {
                                     $renderedInput = $config->render(['translationPrefix' => $translationPrefix]);
                                     // replace <script> tags to be able to render that template
-                                    echo preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
-                                        if (preg_match('%type="text/html"%is', $matches[1])) {
-                                            // inner dotjs template - needs to be encoded and decoded later
-                                            $encoded = base64_encode($matches[2]);
-                                            return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
-                                        } else {
-                                            return "{{= '<' + 'script{$matches[1]}>' }}$matches[2]{{= '</' + 'script>'}}";
-                                        }
-                                    }, $renderedInput);
+                                    echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
                                 } catch (Exception $exc) {
                                     echo '<div>' . $exc->getMessage() . '</div>';
                                     echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
                                 }
                             }
-                            echo $formConfig->getAdditionalHtmlForForm();
+                            echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());
                         ?>
                         </div>
                         <div class="box-footer">

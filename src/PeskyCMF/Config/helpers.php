@@ -53,3 +53,17 @@ if (!function_exists('cmfRedirectResponseWithMessage')) {
         ]);
     }
 }
+
+if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
+    function modifyDotJsTemplateToAllowInnerScriptsAndTemplates($dotJsTemplate) {
+        return preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
+            if (preg_match('%type="text/html"%i', $matches[1])) {
+                // inner dotjs template - needs to be encoded and decoded later
+                $encoded = base64_encode($matches[2]);
+                return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
+            } else {
+                return "{{= '<' + 'script{$matches[1]}>' }}$matches[2]{{= '</' + 'script>'}}";
+            }
+        }, $dotJsTemplate);
+    }
+}
