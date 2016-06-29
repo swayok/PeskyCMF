@@ -64,7 +64,7 @@ class FormConfig extends ScaffoldActionConfig {
     ) {
         switch ($fieldConfig->getType()) {
             case $fieldConfig::TYPE_BOOL:
-                $rendererConfig->setView('cmf::input/checkbox');
+                $rendererConfig->setView('cmf::input/trigger');
                 break;
             case $fieldConfig::TYPE_HIDDEN:
                 $rendererConfig->setView('cmf::input/hidden');

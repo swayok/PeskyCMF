@@ -10,7 +10,7 @@ $allAttributes = $rendererConfig->getAttributes();
 $rendererConfig
     ->addAttribute('name', $fieldConfig->getName() . ($rendererConfig->getAttribute('multiple', false) ? '[]' : ''), false)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
-    ->addAttribute('class', 'form-control', false);
+    ->addAttribute('class', 'form-control selectpicker', false);
 
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());

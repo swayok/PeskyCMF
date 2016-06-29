@@ -62,8 +62,32 @@ if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
                 $encoded = base64_encode($matches[2]);
                 return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
             } else {
-                return "{{= '<' + 'script{$matches[1]}>' }}$matches[2]{{= '</' + 'script>'}}";
+                $script = preg_replace('%//.*$%m', '', $matches[2]);
+                return "{{= '<' + 'script{$matches[1]}>' }}$script{{= '</' + 'script>'}}";
             }
         }, $dotJsTemplate);
     }
+}
+
+if (!function_exists('pickLocalization')) {
+    /**
+     * @param array $translations - format: ['lang1_code' => 'translation1', 'lang2_code' => 'translation2', ...]
+     * @param null|string $default - default value to return when there is no translation for app()->getLocale()
+     *      language and for CmfConfig::getInstance()->default_locale()
+     * @return string|null
+     */
+    function pickLocalization(array $translations, $default = null) {
+        $langCodes = [app()->getLocale(), \PeskyCMF\Config\CmfConfig::getInstance()->default_locale()];
+        foreach ($langCodes as $langCode) {
+            if (
+                array_key_exists($langCode, $translations)
+                && is_string($translations[$langCode])
+                && trim($translations[$langCode]) !== ''
+            ) {
+                return $translations[$langCode];
+            }
+        }
+        return $default;
+    }
+
 }
