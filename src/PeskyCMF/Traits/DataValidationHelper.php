@@ -29,26 +29,12 @@ trait DataValidationHelper {
         return true;
     }
 
-    /**
-     * Replace keys like 'some.column' by 'some[column]' to fit <input> names
-     * @param array $errors
-     * @return array
-     */
-    protected function fixValidationErrorsKeys(array $errors) {
-        foreach ($errors as $key => $messages) {
-            if (strpos($key, '.') !== false) {
-                $newKey = preg_replace('%^([^\]]+)\]%', '$1', str_replace('.', '][', $key) . ']');
-                $errors[$newKey] = $messages;
-                unset($errors[$key]);
-            }
-        }
-        return $errors;
-    }
-
     protected function prepareDataForValidationErrorsResponse(array $errors) {
+        $message = array_get($errors, '_message', $this->getValidationErrorsResponseMessage());
+        unset($errors['_message']);
         return [
-            '_message' => $this->getValidationErrorsResponseMessage(),
-            'errors' => $this->fixValidationErrorsKeys($errors)
+            '_message' => $message,
+            'errors' => fixValidationErrorsKeys($errors)
         ];
     }
 
