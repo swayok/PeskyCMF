@@ -77,6 +77,12 @@ return [
         'validation_errors' => 'Invalid data detected',
         'resource_created_successfully' => 'Item successfully created',
         'resource_updated_successfully' => 'Item successfully updated',
+        'field' => [
+            'bool' => [
+                'yes' => 'Yes',
+                'no' => 'No'
+            ],
+        ],
     ],
     'item_details' => [
         'toolbar' => [
@@ -91,7 +97,7 @@ return [
                 'no' => 'No'
             ],
             'no_relation' => 'Relation not exists'
-        ]
+        ],
     ],
     'action' => [
         'delete' => [

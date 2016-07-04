@@ -1,5 +1,6 @@
 var Utils = {
-    bodyClass: false
+    bodyClass: false,
+    loadedJsFiles: []
 };
 
 Utils.configureAppLibs = function () {
@@ -49,6 +50,84 @@ Utils.configureAjax = function () {
             console.groupEnd();
         });
     }
+};
+
+/**
+ * @param jsFiles
+ * @param cssFiles
+ * @return $.Deferred()
+ */
+Utils.requireFiles = function (jsFiles, cssFiles) {
+    var deferred = $.Deferred();
+    // js
+    var loadedJsFiles = 0;
+    if (typeof jsFiles !== 'undefined') {
+        if (!$.isArray(jsFiles)) {
+            if (typeof jsFiles === 'string') {
+                jsFiles = [jsFiles];
+            } else {
+                console.trace();
+                alert('jsFiles argument in Utils.requireFiles() must be a string or array');
+            }
+        }
+        for (var i = 0; i < jsFiles.length; i++) {
+            if (typeof jsFiles[i] !== 'string') {
+                alert('jsFiles argument in Utils.requireFiles() must contain only strings. Not a string detected in index ' + i);
+            }
+            if ($.inArray(jsFiles[i], Utils.loadedJsFiles) >= 0 || $('script[src="' + jsFiles[i] + '"]').length) {
+                loadedJsFiles++;
+                if (jsFiles.length === loadedJsFiles) {
+                    deferred.resolve();
+                }
+                continue;
+            }
+            $.getScript(jsFiles[i])
+                .done(function (data, textStatus, jqxhr) {
+                    loadedJsFiles++;
+                    if (jsFiles.length === loadedJsFiles) {
+                        deferred.resolve();
+                    }
+                    if (this.url) {
+                        Utils.loadedJsFiles.push(this.url.replace(/(\?|&)_=[0-9]+/, ''));
+                    }
+                })
+                .fail(function (jqxhr, settings, exception) {
+                    alert('Failed to load js file ' + this.url + '. Error: ' + exception);
+                    deferred.reject();
+                });
+        }
+    } else {
+        deferred.resolve();
+    }
+    // css
+    if (typeof cssFiles !== 'undefined') {
+        if (!$.isArray(cssFiles)) {
+            if (typeof cssFiles === 'string') {
+                cssFiles = [cssFiles];
+            } else {
+                console.trace();
+                alert('cssFiles argument in Utils.requireFiles() must be a string or array');
+            }
+        }
+        if (cssFiles && $.isArray(cssFiles)) {
+            for (i = 0; i < cssFiles.length; i++) {
+                if (typeof jsFiles[i] !== 'string') {
+                    alert('cssFiles argument in Utils.requireFiles() must contain only strings. Not a string detected in index ' + i);
+                }
+                if ($('link[href="' + jsFiles[i] + '"]').length) {
+                    continue;
+                }
+                if (document.createStyleSheet) {
+                    document.createStyleSheet(cssFiles[i]);
+                } else {
+                    $('body').before(
+                        $('<link rel="stylesheet" href="' + cssFiles[i] + '" type="text/css" />')
+                    );
+                }
+            }
+        }
+    }
+    return deferred;
 };
 
 Utils.handleAjaxError = function (xhr) {
@@ -264,4 +343,14 @@ Utils.highlightLinks = function (url) {
 
 Utils.cleanCache = function () {
 
+};
+
+Utils.updatePageTitleFromH1 = function ($content) {
+    var $h1 = $content && $content.length ? $content.find('h1').first() : $('#section-content h1, h1').first();
+    var defaultPageTitle = $.trim(String(GlobalVars.defaultPageTitle));
+    if ($h1.length) {
+        document.title = $h1.text() + (defaultPageTitle.length ? ' - ' + defaultPageTitle : '');
+    } else {
+        document.title = defaultPageTitle;
+    }
 };

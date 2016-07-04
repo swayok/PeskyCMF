@@ -22,7 +22,6 @@
 <script type="application/javascript">
     GlobalVars.setLocalizationStrings(<?php echo json_encode(\PeskyCMF\Config\CmfConfig::transBase('.ui.js_component'), JSON_UNESCAPED_UNICODE) ?>);
     $(document).ready(function () {
-        $.AdminLTE.tree('.sidebar');
         setTimeout(function () {
             // without timeout it works not correctly
             $.AdminLTE.layout.fix();

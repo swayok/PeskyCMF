@@ -77,6 +77,12 @@ return [
         'validation_errors' => 'Обнаружены недопустимые данные',
         'resource_created_successfully' => 'Объект успешно создан',
         'resource_updated_successfully' => 'Объект успешно изменен',
+        'field' => [
+            'bool' => [
+                'yes' => 'Да',
+                'no' => 'Нет'
+            ],
+        ],
     ],
     'item_details' => [
         'toolbar' => [
@@ -91,7 +97,7 @@ return [
                 'no' => 'Нет'
             ],
             'no_relation' => 'Связь отсутствует'
-        ]
+        ],
     ],
     'action' => [
         'delete' => [

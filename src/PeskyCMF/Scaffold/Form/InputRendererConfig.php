@@ -42,9 +42,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      */
     public function __construct($view = null, array $attributes = []) {
         parent::__construct($view);
-        if (!empty($attributes)) {
-            $this->attributes = $attributes;
-        }
+        $this->attributes = $attributes;
     }
 
     /**
@@ -54,6 +52,9 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
         $ret = $this->attributes;
         if ($this->isRequired()) {
             $ret['required'] = true;
+        }
+        if (empty($ret['type']) || !in_array($ret['type'], ['checkbox', 'radio'], true)) {
+            unset($ret['value']);
         }
         return $ret;
     }
@@ -72,6 +73,30 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
     }
 
     /**
+     * @param string $name
+     * @param string|bool $value
+     * @param bool $owerwrite
+     *  - true: overwrites existing attribute value
+     *  - false: do nothing if attribute value already set
+     * @return $this
+     */
+    public function addAttribute($name, $value, $owerwrite = true) {
+        if ($owerwrite || !array_key_exists($name, $this->attributes)) {
+            $this->attributes[$name] = $value;
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param string|null|bool $default
+     * @return $this
+     */
+    public function getAttribute($name, $default = null) {
+        return array_key_exists($name, $this->attributes) ? $this->attributes[$name] : $default;
+    }
+
+    /**
      * @return array
      */
     public function getAttributesForCreate() {
@@ -79,7 +104,9 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
         if ($this->isRequiredForCreate()) {
             $ret['required'] = true;
         }
-        unset($ret['value']);
+        if (empty($ret['type']) || !in_array($ret['type'], ['checkbox', 'radio'], true)) {
+            unset($ret['value']);
+        }
         return $ret;
     }
 
@@ -100,7 +127,9 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
         if ($this->isRequiredForEdit()) {
             $ret['required'] = true;
         }
-        unset($ret['value']);
+        if (empty($ret['type']) || !in_array($ret['type'], ['checkbox', 'radio'], true)) {
+            unset($ret['value']);
+        }
         return $ret;
     }
 

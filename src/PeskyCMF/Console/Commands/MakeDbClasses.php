@@ -3,6 +3,7 @@
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\Db\Traits\AdminIdColumn;
@@ -101,7 +102,7 @@ class MakeDbClasses extends Command {
             'modelClassName' => call_user_func([$this->modelParentClass, 'getModelNameByTableName'], $tableName),
             'objectClassName' => call_user_func([$this->modelParentClass, 'getObjectNameByTableName'], $tableName),
             'tableConfigClassName' => call_user_func([$this->modelParentClass, 'getTableConfigNameByTableName'], $tableName),
-            'scaffoldConfigClassName' => call_user_func([$this->modelParentClass, 'getScaffoldConfigNameByTableName'], $tableName),
+            'scaffoldConfigClassName' => CmfConfig::getInstance()->getScaffoldConfigNameByTableName($tableName),
             'traitsForTableConfig' => $this->getTraitsForTableConfig()
         ];
         $dataForViews['modelAlias'] = $dataForViews['objectClassName'];
@@ -133,9 +134,10 @@ class MakeDbClasses extends Command {
             $modelClass
         );
         if (file_exists($folder) && is_dir($folder)) {
-            if ($this->option('overwrite') === '1' || $this->option('overwrite') !== 'yes') {
+            $overwriteOption = $this->option('overwrite');
+            if ($overwriteOption === '1' || $overwriteOption !== 'yes') {
                 // overwrite
-            } else if ($this->option('overwrite') === '0' || $this->option('overwrite') === 'no') {
+            } else if ($overwriteOption === '0' || $overwriteOption === 'no') {
                 $this->line('Overwriting not allowed. Operation rejected.');
                 return false;
             } else if ($this->ask("Classes for table [$tableName] already exist. Overwrite?", 'no') === 'no') {

@@ -9,7 +9,6 @@ use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyORM\DbColumnConfig;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
 

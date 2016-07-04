@@ -56,6 +56,7 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param InputRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
      * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     protected function configureDefaultRenderer(
         ScaffoldFieldRendererConfig $rendererConfig,
@@ -63,7 +64,7 @@ class FormConfig extends ScaffoldActionConfig {
     ) {
         switch ($fieldConfig->getType()) {
             case $fieldConfig::TYPE_BOOL:
-                $rendererConfig->setView('cmf::input/checkbox');
+                $rendererConfig->setView('cmf::input/trigger');
                 break;
             case $fieldConfig::TYPE_HIDDEN:
                 $rendererConfig->setView('cmf::input/hidden');
@@ -79,6 +80,42 @@ class FormConfig extends ScaffoldActionConfig {
                     ->setView('cmf::input/select')
                     ->setOptions($fieldConfig->getOptions());
                 break;
+            case $fieldConfig::TYPE_MULTISELECT:
+                $rendererConfig
+                    ->setView('cmf::input/multiselect')
+                    ->setOptions($fieldConfig->getOptions());
+                if (
+                    !$fieldConfig->hasValueConverter()
+                    && in_array(
+                        $fieldConfig->getTableColumnConfig()->getType(),
+                        [FormFieldConfig::TYPE_JSON, FormFieldConfig::TYPE_JSONB],
+                        true
+                    )
+                ) {
+                    $fieldConfig->setValueConverter(function ($value) {
+                        return $value;
+                    });
+                }
+                break;
+            case $fieldConfig::TYPE_TAGS:
+                $rendererConfig->setView('cmf::input/tags');
+                $options = $fieldConfig->getOptions();
+                if (!empty($options)) {
+                    $rendererConfig->setOptions($options);
+                }
+                if (
+                    !$fieldConfig->hasValueConverter()
+                    && in_array(
+                        $fieldConfig->getTableColumnConfig()->getType(),
+                        [FormFieldConfig::TYPE_JSON, FormFieldConfig::TYPE_JSONB],
+                        true
+                    )
+                ) {
+                    $fieldConfig->setValueConverter(function ($value) {
+                        return $value;
+                    });
+                }
+                break;
             case $fieldConfig::TYPE_IMAGE:
                 $rendererConfig->setView('cmf::input/image');
                 break;
@@ -89,10 +126,12 @@ class FormConfig extends ScaffoldActionConfig {
                 $rendererConfig->setView('cmf::input/date');
                 break;
             case $fieldConfig::TYPE_EMAIL:
-            case $fieldConfig::TYPE_PASSWORD:
                 $rendererConfig
                     ->setView('cmf::input/text')
-                    ->setAttributes(['type' => $fieldConfig->getType()]);
+                    ->setAttributes(['type' => 'email']);
+                break;
+            case $fieldConfig::TYPE_PASSWORD:
+                $rendererConfig->setView('cmf::input/password');
                 break;
             default:
                 $rendererConfig->setView('cmf::input/text');
@@ -167,17 +206,19 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
+     * @param int|string|null $pkValue - primary key value
      * @return array[]
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
-    public function loadOptions() {
+    public function loadOptions($pkValue) {
         $options = array();
         foreach ($this->getFields() as $fieldConfig) {
             if ($fieldConfig->hasOptionsLoader()) {
                 $options[$fieldConfig->getName()] = call_user_func(
                     $fieldConfig->getOptionsLoader(),
                     $fieldConfig,
-                    $this
+                    $this,
+                    $pkValue
                 );
             }
         }
@@ -298,10 +339,11 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * @param array $data
-     * @param array $validators
+     * @param array $validators - supports inserts in format "{{id}}" where "id" can be any key from $data
      * @param array $messages
      * @param bool $isRevalidation
-     * @return array
+     * @return array|string|bool
+     *
      * @throws ScaffoldActionException
      */
     public function validateData(array $data, array $validators, array $messages = [], $isRevalidation = false) {
@@ -324,14 +366,34 @@ class FormConfig extends ScaffoldActionConfig {
         } else {
             $messages = Set::flatten($messages);
         }
-        array_walk($validators, function (&$value, $key) use ($data) {
+        $arrayFields = [];
+        foreach ($validators as $key => &$value) {
             if (is_string($value)) {
                 $value = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
+                if (preg_match('%(^|\|)array%i', $value)) {
+                    $arrayFields[] = $key;
+                }
+            } else if (is_array($value)) {
+                foreach ($value as &$validator) {
+                    if (is_string($validator)) {
+                        $validator = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
+                    }
+                    if ($validator === 'array') {
+                        $arrayFields[] = $key;
+                    }
+                }
             }
-        });
+        };
         $validator = \Validator::make($data, $validators, $messages);
         if ($validator->fails()) {
-            return $validator->getMessageBag()->toArray();
+            $errors = $validator->getMessageBag()->toArray();
+            foreach ($errors as $field => $error) {
+                if (in_array($field, $arrayFields, true)) {
+                    $errors[$field . '[]'] = $error;
+                    unset($errors[$field]);
+                }
+            }
+            return $errors;
         }
 
         $success = $this->onValidationSuccess($data, $isRevalidation);
@@ -391,6 +453,11 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param callable $calback = function (array $data, $isRevalidation) { return true }
      * Note: callback MUST return true if everything is ok, otherwise - returned values treated as error
+     * Values allowed to be returned:
+     *      - true: no errors
+     *      - string: custom "validation failed" message (without errors for certain fields)
+     *      - array: validation errors for certain fields, may contain "_mesasge" key to be displayed instead of
+     *               default "validation failed" message
      * @return $this
      */
     public function setValidationSuccessCallback(callable $calback) {
@@ -401,16 +468,22 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param array $data
      * @param $isRevalidation
-     * @return bool|string|array - true: no errors | other: errors detected
+     * @return array|bool - true: no errors | other - validation errors
+     * @throws \LogicException
      */
     protected function onValidationSuccess(array $data, $isRevalidation) {
         if (!empty($this->validationSuccessCallback)) {
             $success = call_user_func($this->validationSuccessCallback, $data, $isRevalidation);
             if ($success !== true) {
-                if (!is_array($success)) {
-                    $success = [$success];
+                if (is_string($success)) {
+                    return ['_message' => $success];
+                } else if (is_array($success)) {
+                    return $success;
+                } else {
+                    throw new \LogicException(
+                        'validationSuccessCallback must return true, string or array with key-value pairs'
+                    );
                 }
-                return $success;
             }
         }
         return true;

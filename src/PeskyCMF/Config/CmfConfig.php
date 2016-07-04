@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use PeskyCMF\ConfigsContainer;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\PeskyCmfAccessManager;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 
 class CmfConfig extends ConfigsContainer {
 
@@ -218,6 +219,10 @@ class CmfConfig extends ConfigsContainer {
         return [
 //            '/packages/admin/css/admin.custom.js'
         ];
+    }
+
+    static public function default_page_title() {
+        return static::transCustom('.default_page_title');
     }
 
     /**
@@ -548,6 +553,46 @@ class CmfConfig extends ConfigsContainer {
             'scrollCollapse' => true,
             'multiselect' => false,
         ];
+    }
+
+    /**
+     * Get ScaffoldSectionConfig instance
+     * @param CmfDbModel $model - a model to be used in ScaffoldSectionConfig
+     * @param string $tableName - table name passed via route parameter, may differ from $model->getTableName()
+     *      and added here to be used in child configs when you need to use scaffolds with fake table names.
+     *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
+     * @return ScaffoldSectionConfig
+     */
+    static public function getScaffoldConfig(CmfDbModel $model, $tableName) {
+        // $tableName is no tused by default and added here to be used in child configs
+        $className = $model->getNamespace() . $model->getAlias() . static::scaffold_config_class_suffix();
+        return new $className($model);
+    }
+
+    /**
+     * Get scaffold config class name only by table name avoiding model class usage
+     * Used by MakeDbClasses console command
+     * @param $tableName
+     * @return string
+     */
+    static public function getScaffoldConfigNameByTableName($tableName) {
+        $objectName = call_user_func([static::base_db_model_class(), 'getObjectNameByTableName'], $tableName);
+        return $objectName . CmfConfig::getInstance()->scaffold_config_class_suffix();
+    }
+
+    /**
+     * Get CmfDbModel instance for $tableName
+     * Note: can be ovewritted to allow usage of fake tables in resources routes
+     * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
+     * @param string $tableName
+     * @return CmfDbModel
+     * @throws \PeskyORM\Exception\DbUtilsException
+     */
+    static public function getModelByTableName($tableName) {
+        return call_user_func(
+            [static::getInstance()->base_db_model_class(), 'getModelByTableName'],
+            $tableName
+        );
     }
 
 }

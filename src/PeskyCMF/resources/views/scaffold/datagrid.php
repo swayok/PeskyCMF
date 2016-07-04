@@ -1,6 +1,7 @@
 <?php
 /**
  * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var string $tableNameForRoutes
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
  * @var string $translationPrefix
@@ -84,13 +85,13 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             $toolbar['create'] = \Swayok\Html\Tag::a()
                 ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.create'))
                 ->setClass('btn btn-primary')
-                ->setHref(route('cmf_item_add_form', [$model->getTableName()], false))
+                ->setHref(route('cmf_item_add_form', [$tableNameForRoutes], false))
                 ->build();
         }
 
         $actionsTpl = '';
         if ($dataGridConfig->isDetailsViewerAllowed()) {
-            $url = $dblClickUrl = route('cmf_item_details', [$model->getTableName(), ":{$pkName}:"], false);
+            $url = $dblClickUrl = route('cmf_item_details', [$tableNameForRoutes, ":{$pkName}:"], false);
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
@@ -101,7 +102,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
         }
         if ($dataGridConfig->isEditAllowed()) {
-            $url = $dblClickUrl = route('cmf_item_edit_form', [$model->getTableName(), ":{$pkName}:"], false);
+            $url = $dblClickUrl = route('cmf_item_edit_form', [$tableNameForRoutes, ":{$pkName}:"], false);
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
@@ -120,7 +121,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
-                ->setDataAttr('url', route('cmf_api_delete_item', [$model->getTableName(), ":{$pkName}:"], false))
+                ->setDataAttr('url', route('cmf_api_delete_item', [$tableNameForRoutes, ":{$pkName}:"], false))
                 ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'))
                 ->setHref('#')
                 ->build();
@@ -144,7 +145,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                     [
                         'processing' => true,
                         'serverSide' => true,
-                        'ajax' => route('cmf_api_get_items', ['model' => $model->getTableName()], false),
+                        'ajax' => route('cmf_api_get_items', ['model' => $tableNameForRoutes], false),
                         'order' => [
                             [
                                 $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(),

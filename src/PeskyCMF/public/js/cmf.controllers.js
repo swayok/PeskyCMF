@@ -70,6 +70,9 @@ var CmfView = Pilot.View.extend({
     switchBodyClass: function (request) {
 
     },
+    switchPageTitle: function () {
+        Utils.updatePageTitleFromH1(this.$el);
+    },
     loadTemplate: function (request) {
         return Utils.downloadHtml(this.getTemplateUrl(request), this.cacheTemplate, this.convertTemplateToDotJs);
     },
@@ -95,6 +98,7 @@ var CmfView = Pilot.View.extend({
             this.$el.attr('data-detachable', this.detachable ? '1' : '0');
             CmfControllerHelpers.setCurrentContentEl(this.$el);
             this.switchBodyClass(this.request);
+            this.switchPageTitle();
             this.afterRender(event, this.request);
         } else {
             Utils.handleMissingContainerError();

@@ -2,12 +2,13 @@
 /**
  * @var \PeskyCMF\Db\CmfDbModel $model
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
+ * @var string $tableNameForRoutes
  * @var string $translationPrefix
  * @var string $idSuffix
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 $fieldConfigs = $itemDetailsConfig->getFields();
-$backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], false);
+$backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false);
 try {
 ?>
 
@@ -54,7 +55,7 @@ try {
                             </a>
                             <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
                                 <?php
-                                    $createUrl = route('cmf_item_add_form', [$model->getTableName()]);
+                                    $createUrl = route('cmf_item_add_form', [$tableNameForRoutes]);
                                 ?>
                                 <a class="btn btn-primary" href="<?php echo $createUrl; ?>">
                                     <?php echo \PeskyCMF\Config\CmfConfig::transBase('.item_details.toolbar.create'); ?>
@@ -72,7 +73,7 @@ try {
                                     $deleteUrl = str_ireplace(
                                         ':id:',
                                         "{{= it.{$model->getPkColumnName()} }}",
-                                        route('cmf_api_delete_item', [$model->getTableName(), ':id:'])
+                                        route('cmf_api_delete_item', [$tableNameForRoutes, ':id:'])
                                     );
                                 ?>
                                 {{? !!it.___delete_allowed }}
@@ -88,7 +89,7 @@ try {
                                     $editUrl = str_ireplace(
                                         ':id:',
                                         "{{= it.{$model->getPkColumnName()} }}",
-                                        route('cmf_item_edit_form', [$model->getTableName(), ':id:'])
+                                        route('cmf_item_edit_form', [$tableNameForRoutes, ':id:'])
                                     );
                                 ?>
                                 {{? !!it.___edit_allowed }}

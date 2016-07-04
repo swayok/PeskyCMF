@@ -53,3 +53,60 @@ if (!function_exists('cmfRedirectResponseWithMessage')) {
         ]);
     }
 }
+
+if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
+    function modifyDotJsTemplateToAllowInnerScriptsAndTemplates($dotJsTemplate) {
+        return preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
+            if (preg_match('%type="text/html"%i', $matches[1])) {
+                // inner dotjs template - needs to be encoded and decoded later
+                $encoded = base64_encode($matches[2]);
+                return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
+            } else {
+                $script = preg_replace('%//.*$%m', '', $matches[2]);
+                return "{{= '<' + 'script{$matches[1]}>' }}$script{{= '</' + 'script>'}}";
+            }
+        }, $dotJsTemplate);
+    }
+}
+
+if (!function_exists('pickLocalization')) {
+    /**
+     * @param array $translations - format: ['lang1_code' => 'translation1', 'lang2_code' => 'translation2', ...]
+     * @param null|string $default - default value to return when there is no translation for app()->getLocale()
+     *      language and for CmfConfig::getInstance()->default_locale()
+     * @return string|null
+     */
+    function pickLocalization(array $translations, $default = null) {
+        $langCodes = [app()->getLocale(), \PeskyCMF\Config\CmfConfig::getInstance()->default_locale()];
+        foreach ($langCodes as $langCode) {
+            if (
+                array_key_exists($langCode, $translations)
+                && is_string($translations[$langCode])
+                && trim($translations[$langCode]) !== ''
+            ) {
+                return $translations[$langCode];
+            }
+        }
+        return $default;
+    }
+
+}
+
+if (!function_exists('fixValidationErrorsKeys')) {
+    /**
+     * Replace keys like 'some.column' by 'some[column]' to fit <input> names
+     * @param array $errors
+     * @return array
+     */
+    function fixValidationErrorsKeys(array $errors) {
+        foreach ($errors as $key => $messages) {
+            if (strpos($key, '.') !== false) {
+                $newKey = preg_replace('%^([^\]]+)\]%', '$1', str_replace('.', '][', $key) . ']');
+                $errors[$newKey] = $messages;
+//                $errors[$newKey . '[]'] = $messages; //< todo: find a way to make it less hardcore
+                unset($errors[$key]);
+            }
+        }
+        return $errors;
+    }
+}

@@ -20,6 +20,8 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     const TYPE_WYSIWYG = 'wysiwyg';
     const TYPE_BOOL = DbColumnConfig::TYPE_BOOL;
     const TYPE_SELECT = 'select';
+    const TYPE_MULTISELECT = 'multiselect';
+    const TYPE_TAGS = 'tags';
     const TYPE_HIDDEN = 'hidden';
     const TYPE_IMAGE = 'image';
     const TYPE_FILE = 'file';
@@ -72,7 +74,7 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     }
 
     /**
-     * @param callable $loader = function (FormFieldConfig $fieldConfig, FormConfig $formConfig) { return [] }
+     * @param callable $loader = function (FormFieldConfig $fieldConfig, FormConfig $formConfig, $pkValue = null) { return [] }
      * @return $this
      */
     public function setOptionsLoader(callable $loader) {

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::transCustom('.default_page_title') }} @show</title>
+    <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::getInstance()->default_page_title() }} @show</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 
@@ -16,15 +16,16 @@
     <link href="/packages/adminlte/plugins/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/fonts/source_sans_pro/source_sans_pro.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/adminlte/css/skins/skin-blue.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/adminlte/plugins/select2/select2.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/bootstrap-datepicker3.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/js/lib/bootstrap-select/bootstrap-select.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
-
-    <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/js/lib/toastr/toastr.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/adminlte/css/skins/skin-blue.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css" id="place-dynamic-css-files-before"/>
     <link href="/packages/cmf/js/lib/query_builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/cmf.app.css" rel="stylesheet" type="text/css"/>
 
@@ -54,7 +55,8 @@
             isDebug: {{ config('app.debug') ? 'true' : 'false' }},
             rootUrl: '/{{ $urlPrefix }}',
             uiUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_main_ui', [], false)) }}',
-            userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}'
+            userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}',
+            defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getInstance()->default_page_title() }}'
         };
     </script>
 
