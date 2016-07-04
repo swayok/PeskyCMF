@@ -469,6 +469,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $data
      * @param $isRevalidation
      * @return array|bool - true: no errors | other - validation errors
+     * @throws \LogicException
      */
     protected function onValidationSuccess(array $data, $isRevalidation) {
         if (!empty($this->validationSuccessCallback)) {

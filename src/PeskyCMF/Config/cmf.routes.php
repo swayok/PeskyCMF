@@ -2,7 +2,7 @@
 
 use PeskyCMF\Http\Middleware\AjaxOnly;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
-use PeskyCMF\Http\Middleware\ValidateModel;
+use PeskyCMF\Http\Middleware\LoadModelAndScaffoldConfig;
 
 function __cmf_general_controller_class() {
     return \PeskyCMF\Config\CmfConfig::getInstance()->cmf_general_controller_class();
@@ -142,7 +142,7 @@ Route::group(
             [
                 'prefix' => 'resource',
                 'middleware' => [
-                    ValidateModel::class,
+                    LoadModelAndScaffoldConfig::class,
                     ValidateAdmin::class
                 ]
             ],
@@ -175,7 +175,7 @@ Route::group(
                 'prefix' => 'api',
                 'middleware' => [
                     AjaxOnly::class,
-                    ValidateModel::class,
+                    LoadModelAndScaffoldConfig::class,
                     ValidateAdmin::class,
                 ]
             ],

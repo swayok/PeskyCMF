@@ -1,6 +1,7 @@
 <?php
 /**
  * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var string $tableNameForRoutes
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
@@ -8,8 +9,9 @@
  */
 $data = [
     'model' => $model,
-    'translationPrefix' => \PeskyCMF\Config\CmfConfig::getInstance()->custom_dictionary_name() . ".{$model->getTableName()}",
-    'idSuffix' => preg_replace('%[^a-z0-9]%is', '-', strtolower($model->getTableName()))
+    'tableNameForRoutes' => $tableNameForRoutes,
+    'translationPrefix' => \PeskyCMF\Config\CmfConfig::getInstance()->custom_dictionary_name() . ".{$tableNameForRoutes}",
+    'idSuffix' => preg_replace('%[^a-z0-9]%i', '-', strtolower($tableNameForRoutes))
 ];
 ?>
 

@@ -41,18 +41,6 @@ abstract class CmfDbModel extends DbModel {
         }
     }
 
-    static public function getScaffoldConfigClassSuffix() {
-        /** @var CmfDbModel $calledClass */
-        $calledClass = get_called_class();
-        return CmfConfig::getInstance()->scaffold_config_class_suffix();
-    }
-
-    static public function getScaffoldConfigNameByTableName($tableName) {
-        $calledClass = get_called_class();
-        $objectName = call_user_func([$calledClass, 'getObjectNameByTableName'], $tableName);
-        return $objectName . call_user_func([$calledClass, 'getScaffoldConfigClassSuffix']);
-    }
-
     static public function getModelsNamespace() {
         return call_user_func([get_called_class(), 'getRootNamespace']) . '\\';
     }
@@ -103,13 +91,6 @@ abstract class CmfDbModel extends DbModel {
      * @return ScaffoldSectionConfig
      */
     public function getScaffoldConfig() {
-        /** @var CmfDbModel $calledClass */
-        $calledClass = get_called_class();
-        if (empty($this->scaffoldConfig)) {
-            $className = $this->getNamespace() . $this->getAlias() . $this->getScaffoldConfigClassSuffix();
-            $this->scaffoldConfig = new $className($this);
-        }
-        return $this->scaffoldConfig;
     }
 
 }

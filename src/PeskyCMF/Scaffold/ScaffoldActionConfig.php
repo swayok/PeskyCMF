@@ -84,7 +84,7 @@ abstract class ScaffoldActionConfig {
     public function setFields(array $fields) {
         /** @var ScaffoldFieldConfig|null $config */
         foreach ($fields as $name => $config) {
-            if (is_integer($name)) {
+            if (is_int($name)) {
                 $name = $config;
                 $config = null;
             }
@@ -150,6 +150,8 @@ abstract class ScaffoldActionConfig {
      * @param string $name
      * @param null|ScaffoldFieldConfig $config
      * @return $this
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
     public function addField($name, $config = null) {
@@ -201,6 +203,10 @@ abstract class ScaffoldActionConfig {
     /**
      * @param array $record
      * @return array
+     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyORM\Exception\DbColumnConfigException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbTableConfigException
      */
     public function prepareRecord(array $record) {
         $permissions = [
@@ -222,11 +228,11 @@ abstract class ScaffoldActionConfig {
         $pkKey = $this->getModel()->getPkColumnName();
         // backup values
         $recordWithBackup = [];
-        while ( list($key, $value) = each($record) ) {
+        foreach ($record as $key => $value) {
             $recordWithBackup[$key] = $recordWithBackup['__' . $key] = $value;
         }
         reset($record);
-        foreach (array_keys($record) as $key) {
+        foreach ($record as $key => $notUsed) {
             if ($this->getModel()->hasTableRelation($key)) {
                 continue;
             }
@@ -237,14 +243,19 @@ abstract class ScaffoldActionConfig {
                 continue;
             }
             $fieldConfig = $dbFields[$key];
-            if (is_object($fieldConfig) && method_exists($fieldConfig, 'convertValue')) {
-                if (!method_exists($fieldConfig, 'isVisible') || $fieldConfig->isVisible()) {
-                    $recordWithBackup[$key] = $fieldConfig->convertValue(
-                        $recordWithBackup[$key],
-                        $this->getModel()->getTableColumn($key),
-                        $recordWithBackup
-                    );
-                }
+            if (
+                is_object($fieldConfig)
+                && method_exists($fieldConfig, 'convertValue')
+                && (
+                    !method_exists($fieldConfig, 'isVisible')
+                    || $fieldConfig->isVisible()
+                )
+            ) {
+                $recordWithBackup[$key] = $fieldConfig->convertValue(
+                    $recordWithBackup[$key],
+                    $this->getModel()->getTableColumn($key),
+                    $recordWithBackup
+                );
             }
         }
         foreach ($this->getNonDbFields() as $key => $fieldConfig) {
@@ -351,6 +362,7 @@ abstract class ScaffoldActionConfig {
 
     /**
      * @return callable|null
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      */
     public function getDefaultFieldRenderer() {
         if (!empty($this->defaultFieldRenderer)) {
@@ -437,12 +449,13 @@ abstract class ScaffoldActionConfig {
                     if (method_exists($toolbarItem, 'build')) {
                         $toolbarItem = $toolbarItem->build();
                     } else if (method_exists($toolbarItem, '__toString')) {
-                        $toolbarItem = $toolbarItem->__toString();
+                        $toolbarItem = (string) $toolbarItem;
                     } else {
                         throw new ScaffoldActionException($this, 'Toolbar item is an object without possibility to convert it to string');
                     }
                 }
             }
+            unset($toolbarItem);
         }
         $this->toolbarItems = $arrayOrCallable;
         return $this;

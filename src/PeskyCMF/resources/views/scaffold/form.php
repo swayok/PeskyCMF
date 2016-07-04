@@ -2,6 +2,7 @@
 /**
  * @var \PeskyCMF\Db\CmfDbModel $model
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
+ * @var string $tableNameForRoutes
  * @var string $translationPrefix
  * @var string $idSuffix
  */
@@ -13,7 +14,7 @@ $else = '{{??}}';
 $endIf = '{{?}}';
 $printPk = "{{= it.{$pkColName} }}";
 
-$backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], false);
+$backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false);
 ?>
 
 <script type="text/html" id="item-form-tpl">
@@ -42,8 +43,8 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                         if ($formConfig->hasJsInitiator()) {
                             $formAttributes['data-initiator'] = addslashes($formConfig->getJsInitiator());
                         }
-                        $editUrl = route('cmf_api_update_item', ['table_name' => $model->getTableName(), 'id' => ''], false) . '/' . $printPk;
-                        $createUrl = route('cmf_api_create_item', ['table_name' => $model->getTableName()], false);
+                        $editUrl = route('cmf_api_update_item', ['table_name' => $tableNameForRoutes, 'id' => ''], false) . '/' . $printPk;
+                        $createUrl = route('cmf_api_create_item', ['table_name' => $tableNameForRoutes], false);
                         $formAction = $ifEdit . $editUrl . $else . $createUrl . $endIf;
                     ?>
                     <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
@@ -87,7 +88,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                 <?php echo $ifEdit; ?>
                                     <?php if ($formConfig->isCreateAllowed()) : ?>
                                         <?php
-                                            $createUrl = route('cmf_item_add_form', [$model->getTableName()]);
+                                            $createUrl = route('cmf_item_add_form', [$tableNameForRoutes]);
                                         ?>
                                         <a class="btn btn-primary" href="<?php echo $createUrl; ?>">
                                             <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.create'); ?>
@@ -98,7 +99,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $model->getTableName()], fa
                                             $deleteUrl = str_ireplace(
                                                 ':id:',
                                                 "{{= it.{$model->getPkColumnName()} }}",
-                                                route('cmf_api_delete_item', [$model->getTableName(), ':id:'])
+                                                route('cmf_api_delete_item', [$tableNameForRoutes, ':id:'])
                                             );
                                         ?>
                                         {{? !!it.___delete_allowed }}

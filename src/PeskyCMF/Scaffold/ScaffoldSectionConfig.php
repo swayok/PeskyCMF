@@ -35,24 +35,10 @@ abstract class ScaffoldSectionConfig {
     /**
      * ScaffoldSectionConfig constructor.
      * @param CmfDbModel $model
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      */
-    public function __construct(CmfDbModel $model = null) {
-        $this->model = empty($model) ? $this->loadModel() : $model;
-    }
-
-    /**
-     * @throws ScaffoldActionException
-     * @return CmfDbModel
-     */
-    protected function loadModel() {
-        $config = CmfConfig::getInstance();
-        $baseDbModelClass = $config->base_db_model_class();
-        $className = str_replace(
-            $config->scaffold_config_class_suffix(),
-            call_user_func([$baseDbModelClass, 'getModelClassSuffix']),
-            get_class($this)
-        );
-        return call_user_func([$baseDbModelClass, 'getModelByClassName'], $className);
+    public function __construct(CmfDbModel $model) {
+        $this->model = $model;
     }
 
     /**
@@ -63,11 +49,11 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * @return string
+     * @return array
      * @throws ScaffoldActionException
      */
     public function getConfigs() {
-        $configs = ['model' => $this->model];
+        $configs = ['model' => $this->getModel()];
         $configs['dataGridConfig'] = $this->getDataGridConfig();
         if (!($configs['dataGridConfig'] instanceof DataGridConfig)) {
             throw new ScaffoldActionException(null, 'createDataGridConfig() should return instance of DataGridConfig class');
@@ -91,28 +77,28 @@ abstract class ScaffoldSectionConfig {
      * @return DataGridConfig
      */
     protected function createDataGridConfig() {
-        return DataGridConfig::create($this->model, $this);
+        return DataGridConfig::create($this->getModel(), $this);
     }
 
     /**
      * @return DataGridFilterConfig
      */
     protected function createDataGridFilterConfig() {
-        return DataGridFilterConfig::create($this->model);
+        return DataGridFilterConfig::create($this->getModel());
     }
 
     /**
      * @return ItemDetailsConfig
      */
     protected function createItemDetailsConfig() {
-        return ItemDetailsConfig::create($this->model, $this);
+        return ItemDetailsConfig::create($this->getModel(), $this);
     }
 
     /**
      * @return FormConfig
      */
     protected function createFormConfig() {
-        return FormConfig::create($this->model, $this);
+        return FormConfig::create($this->getModel(), $this);
     }
 
     /**
