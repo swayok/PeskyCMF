@@ -50,10 +50,10 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
     }
 
     /**
-     * File validation: 'file:jpeg,png'
+     * File validation: 'filetype:jpeg,png'
      */
     protected function addFileValidator() {
-        Validator::extend('file', function ($attribute, $value, $parameters) {
+        Validator::extend('filetype', function ($attribute, $value, $parameters) {
             if (count($parameters) < 1) {
                 throw new \InvalidArgumentException('Validation rule file requires at least 1 parameter.');
             }
@@ -64,7 +64,7 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
             )->passes();
             return $isValid;
         });
-        Validator::replacer('file', $this->getDefaultReplacer());
+        Validator::replacer('filetype', $this->getDefaultReplacer());
     }
 
     /**
