@@ -40,17 +40,17 @@ trait CacheHelpersTrait {
      * Return data cached via $callback call
      * @param string|array $baseKey - use method name; array - will be jsoned and hashed
      * @param int|\DateTime $minutes
-     * @param callable $callback
+     * @param \Closure $dataCallback
      * @param string|array|null $cacheKeySuffix
      * @param bool $recache - true: update cache forcefully
      * @return mixed
      */
-    public function cacheData($baseKey, $minutes, \Closure $callback, $cacheKeySuffix = '', $recache = false) {
+    public function cachedData($baseKey, $minutes, \Closure $dataCallback, $cacheKeySuffix = '', $recache = false) {
         $cacheKay = $this->generateCacheKey($baseKey, $cacheKeySuffix);
         if ($recache) {
             \Cache::forget($cacheKay);
         }
-        return \Cache::remember($cacheKay, $minutes, $callback);
+        return \Cache::remember($cacheKay, $minutes, $dataCallback);
     }
 
     /**
