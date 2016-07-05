@@ -91,6 +91,10 @@ abstract class CmfDbModel extends DbModel {
      * @return ScaffoldSectionConfig
      */
     public function getScaffoldConfig() {
+        if (!$this->scaffoldConfig) {
+            $this->scaffoldConfig = CmfConfig::getScaffoldConfig($this, $this->getTableName());
+        }
+        return $this->scaffoldConfig;
     }
 
 }
