@@ -21,8 +21,8 @@ trait CacheHelpersTrait {
         }
         $key = get_class($this) . '->' . $baseKey;
         if ($this instanceof CmfDbObject) {
-            $key .= '-id-' . $this->_getPkValue();
             $key .= '-' . $this->_getTableConfig()->getSchema();
+            $key .= '-id-' . $this->_getPkValue();
         } else if ($this instanceof CmfDbModel) {
             $key .= '-' . $this->getTableConfig()->getSchema();
         }
@@ -45,7 +45,7 @@ trait CacheHelpersTrait {
      * @param bool $recache - true: update cache forcefully
      * @return mixed
      */
-    public function cacheData($baseKey, $minutes, callable $callback, $cacheKeySuffix = '', $recache = false) {
+    public function cacheData($baseKey, $minutes, \Closure $callback, $cacheKeySuffix = '', $recache = false) {
         $cacheKay = $this->generateCacheKey($baseKey, $cacheKeySuffix);
         if ($recache) {
             \Cache::forget($cacheKay);
@@ -58,8 +58,19 @@ trait CacheHelpersTrait {
      * @param string|array|null $cacheKeySuffix
      * @return bool
      */
-    public function removeCache($baseKey, $cacheKeySuffix) {
+    public function removeCachedData($baseKey, $cacheKeySuffix = '') {
         return \Cache::forget($this->generateCacheKey($baseKey, $cacheKeySuffix));
+    }
+
+    /**
+     * @param string|array $baseKey - use method name; array - will be jsoned and hashed
+     * @param string|array|null $cacheKeySuffix
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getDataFromCache($baseKey, $cacheKeySuffix = '', $default = null) {
+        $cacheKay = $this->generateCacheKey($baseKey, $cacheKeySuffix);
+        return \Cache::get($cacheKay, $default);
     }
 
 }
