@@ -35,13 +35,15 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
      */
     protected function addImgValidator() {
         Validator::extend('img', function ($attribute, $value, $parameters) {
-            $file = new UploadedFile($value['tmp_name'], $value['name'], $value['type'], $value['size'], $value['error']);
+            if (!($value instanceof UploadedFile)) {
+                $value = new UploadedFile($value['tmp_name'], $value['name'], $value['type'], $value['size'], $value['error']);
+            }
             $validators = 'required|image';
             if (!empty($parameters)) {
                 $validators .= '|mimes:' . (is_array($parameters) ? implode(',', $parameters) : $parameters);
             }
             $isValid = Validator::make(
-                [$attribute => $file],
+                [$attribute => $value],
                 [$attribute => $validators]
             )->passes();
             return $isValid;
@@ -57,9 +59,11 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
             if (count($parameters) < 1) {
                 throw new \InvalidArgumentException('Validation rule file requires at least 1 parameter.');
             }
-            $file = new UploadedFile($value['tmp_name'], $value['name'], $value['type'], $value['size'], $value['error']);
+            if (!($value instanceof UploadedFile)) {
+                $value = new UploadedFile($value['tmp_name'], $value['name'], $value['type'], $value['size'], $value['error']);
+            }
             $isValid = Validator::make(
-                [$attribute => $file],
+                [$attribute => $value],
                 [$attribute => 'required|mimes:' . (is_array($parameters) ? implode(',', $parameters) : $parameters)]
             )->passes();
             return $isValid;
@@ -112,12 +116,18 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
             if ($max > 0 && $min > $max) {
                 throw new \InvalidArgumentException('Validation rule filesize requires that 2nd parameter (max) must be greater then 1st parameter (min) or 0.');
             }
-            if (!is_array($value) || empty($value['size'])) {
+            if (!is_array($value)) {
+                return false;
+            }
+            if (!($value instanceof UploadedFile)) {
+                $value = new UploadedFile($value['tmp_name'], $value['name'], $value['type'], $value['size'], $value['error']);
+            }
+            if (!$value->getSize()) {
                 return false;
             }
             return (
-                $value['size'] / 1024 >= $min
-                && ($max === 0 || $value['size'] / 1024 <= $max)
+                $value->getSize() / 1024 >= $min
+                && ($max === 0 || $value->getSize() / 1024 <= $max)
             );
         });
         Validator::replacer('filesize', function ($message, $attribute, $rule, $parameters) {
