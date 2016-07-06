@@ -151,8 +151,9 @@ var CmfControllers = {
         getContainer: Utils.getContentContainer,
         sigleton: true,
         cacheTemplate: false,
+        bodyClass: null,
         switchBodyClass: function (request) {
-            Utils.switchBodyClass('page-' + request.params.uri);
+            Utils.switchBodyClass(this.bodyClass || 'page-' + request.params.uri);
         },
         afterRender : function (event, request) {
 
