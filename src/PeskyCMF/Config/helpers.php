@@ -91,22 +91,3 @@ if (!function_exists('pickLocalization')) {
     }
 
 }
-
-if (!function_exists('fixValidationErrorsKeys')) {
-    /**
-     * Replace keys like 'some.column' by 'some[column]' to fit <input> names
-     * @param array $errors
-     * @return array
-     */
-    function fixValidationErrorsKeys(array $errors) {
-        foreach ($errors as $key => $messages) {
-            if (strpos($key, '.') !== false) {
-                $newKey = preg_replace('%^([^\]]+)\]%', '$1', str_replace('.', '][', $key) . ']');
-                $errors[$newKey] = $messages;
-//                $errors[$newKey . '[]'] = $messages; //< todo: find a way to make it less hardcore
-                unset($errors[$key]);
-            }
-        }
-        return $errors;
-    }
-}
