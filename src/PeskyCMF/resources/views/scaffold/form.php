@@ -116,10 +116,11 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                                     <button type="submit" class="btn btn-success pull-right"><?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?></button>
                                 </div>
                             </div>
-                            <?php if (count($formConfig->getToolbarItems()) > 0) : ?>
+                            <?php $toolbarItems = $formConfig->getToolbarItems(); ?>
+                            <?php if (count($toolbarItems) > 0) : ?>
                                 <div class="mt10 text-center">
                                     <?php
-                                        foreach ($formConfig->getToolbarItems() as $toolbarItem) {
+                                        foreach ($toolbarItems as $toolbarItem) {
                                             echo ' ' . preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $toolbarItem) . ' ';
                                         }
                                     ?>

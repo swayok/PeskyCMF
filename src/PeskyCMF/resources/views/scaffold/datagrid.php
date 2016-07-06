@@ -81,6 +81,9 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
         $toolbar = [];
         $pkName = $model->getPkColumnName();
         $dblClickUrl = null;
+        foreach ($dataGridConfig->getToolbarItems() as $toolbarItem) {
+            $toolbar[] = $toolbarItem;
+        }
         if ($dataGridConfig->isCreateAllowed()) {
             $toolbar['create'] = \Swayok\Html\Tag::a()
                 ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.create'))
