@@ -4,9 +4,16 @@ var FormHelper = {
     messageAnimDurationMs: 200
 };
 
-FormHelper.initForm = function (form, container, onSubmitSuccess) {
+FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
     form = $(form);
     container = $(container);
+    if (!options) {
+        options = {}
+    }
+    options = $.extend({}, {
+        isJson: true,
+        clearForm: true
+    }, options);
     var customInitiator = form.attr('data-initiator');
     if (customInitiator) {
         var ret = eval(customInitiator + '(form, container, onSubmitSuccess);');
@@ -18,8 +25,8 @@ FormHelper.initForm = function (form, container, onSubmitSuccess) {
     form.find('input.switch[type="checkbox"]').bootstrapSwitch();
 
     form.ajaxForm({
-        clearForm: true,
-        dataType: 'json',
+        clearForm: !!options.clearForm,
+        dataType: !options.isJson ? 'html' : 'json',
         beforeSubmit: function () {
             FormHelper.removeAllFormMessagesAndErrors(form);
             Utils.showPreloader(container);
@@ -28,12 +35,14 @@ FormHelper.initForm = function (form, container, onSubmitSuccess) {
             Utils.hidePreloader(container);
             FormHelper.handleAjaxErrors(form, xhr);
         },
-        success: function (json) {
+        success: function (data) {
             if ($.isFunction(onSubmitSuccess)) {
-                onSubmitSuccess(json, form, container);
+                onSubmitSuccess(data, form, container);
             } else {
                 Utils.hidePreloader(container);
-                Utils.handleAjaxSuccess(json);
+                if (!isHtml) {
+                    Utils.handleAjaxSuccess(data);
+                }
             }
         }
     });
