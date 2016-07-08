@@ -84,10 +84,9 @@ FormHelper.removeFormValidationMessages = function (form) {
 
 FormHelper.handleAjaxErrors = function (form, xhr) {
     FormHelper.removeAllFormMessagesAndErrors(form).done(function () {
-        if (xhr.status === 400 && xhr.responseText[0] === '{') {
-            try {
-                var response = JSON.parse(xhr.responseText);
-            } catch (exc) {
+        if (xhr.status === 400) {
+            var response = Utils.convertXhrResponseToJsonIfPossible(xhr);
+            if (!response) {
                 Utils.handleAjaxError(xhr);
                 return;
             }

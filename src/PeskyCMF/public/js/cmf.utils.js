@@ -37,19 +37,21 @@ Utils.configureAjax = function () {
                 console.groupEnd();
             }
             console.groupCollapsed('Response');
-            if (xhr.responseText[0] === '{') {
-                try {
-                    var json = JSON.parse(xhr.responseText);
-                    console.log(json);
-                } catch (exc) {}
-            }
-            if (!json) {
-                console.log(xhr.responseText);
-            }
+            var json = Utils.convertXhrResponseToJsonIfPossible(xhr);
+            console.log(json || xhr.responseText);
             console.groupEnd();
             console.groupEnd();
         });
     }
+};
+
+Utils.convertXhrResponseToJsonIfPossible = function (xhr) {
+    if (xhr.responseText && xhr.responseText.length >= 2 && (xhr.responseText[0] === '{' || xhr.responseText[0] === '[')) {
+        try {
+            return JSON.parse(xhr.responseText);
+        } catch (exc) {}
+    }
+    return false;
 };
 
 /**
@@ -131,27 +133,25 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
 };
 
 Utils.handleAjaxError = function (xhr) {
-    if (xhr.responseText[0] === '{') {
-        try {
-            var json = JSON.parse(xhr.responseText);
-            if (json.redirect_with_reload) {
-                document.location = json.redirect_with_reload;
-            } else if (json.redirect) {
-                if (json.redirect === 'back') {
-                    window.adminApp.back(json.redirect_fallback);
-                } else if (json.redirect[0] === '/') {
-                    window.adminApp.nav(json.redirect);
-                } else {
-                    document.location = json.redirect;
-                }
+    var json = Utils.convertXhrResponseToJsonIfPossible(xhr);
+    if (json) {
+        if (json.redirect_with_reload) {
+            document.location = json.redirect_with_reload;
+        } else if (json.redirect) {
+            if (json.redirect === 'back') {
+                window.adminApp.back(json.redirect_fallback);
+            } else if (json.redirect[0] === '/') {
+                window.adminApp.nav(json.redirect);
+            } else {
+                document.location = json.redirect;
             }
-            if (json._message) {
-                toastr.error(json._message);
-            }
-            if (json.redirect || json.redirect_with_reload || json._message) {
-                return;
-            }
-        } catch (e) {}
+        }
+        if (json._message) {
+            toastr.error(json._message);
+        }
+        if (json.redirect || json.redirect_with_reload || json._message) {
+            return;
+        }
     }
     GlobalVars.getDebugDialog().showDebug(
         'HTTP Error ' + xhr.status + ' ' + xhr.statusText,
