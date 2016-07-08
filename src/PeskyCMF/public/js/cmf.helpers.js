@@ -1,46 +1,58 @@
 
-
 var FormHelper = {
     messageAnimDurationMs: 200
 };
 
 FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
-    form = $(form);
-    container = $(container);
+    var $form = $(form);
+    var $container = $(container);
     if (!options) {
         options = {}
     }
     options = $.extend({}, {
         isJson: true,
-        clearForm: true
+        clearForm: true,
+        onValidationErrors: null,
+        beforeSubmit: null
     }, options);
-    var customInitiator = form.attr('data-initiator');
+    var customInitiator = $form.attr('data-initiator');
     if (customInitiator) {
         var ret = eval(customInitiator + '(form, container, onSubmitSuccess);');
         if (ret === false) {
             return;
         }
     }
-    form.find('.selectpicker').selectpicker();
-    form.find('input.switch[type="checkbox"]').bootstrapSwitch();
+    $form.find('.selectpicker').selectpicker();
+    $form.find('input.switch[type="checkbox"]').bootstrapSwitch();
 
-    form.ajaxForm({
+    $form.ajaxForm({
         clearForm: !!options.clearForm,
         dataType: !options.isJson ? 'html' : 'json',
         beforeSubmit: function () {
-            FormHelper.removeAllFormMessagesAndErrors(form);
-            Utils.showPreloader(container);
+            var defaultBeforeSubmit = function () {
+                FormHelper.removeAllFormMessagesAndErrors($form);
+                Utils.showPreloader($container);
+            };
+            if (typeof options.beforeSubmit === 'function') {
+                options.beforeSubmit($form, $container, defaultBeforeSubmit);
+            } else {
+                defaultBeforeSubmit();
+            }
         },
         error: function (xhr) {
-            Utils.hidePreloader(container);
-            FormHelper.handleAjaxErrors(form, xhr);
+            Utils.hidePreloader($container);
+            if (xhr.status === 400 && typeof options.onValidationErrors === 'function') {
+                options.onValidationErrors(xhr, $form, $container);
+            } else {
+                FormHelper.handleAjaxErrors($form, xhr);
+            }
         },
         success: function (data) {
             if ($.isFunction(onSubmitSuccess)) {
-                onSubmitSuccess(data, form, container);
+                onSubmitSuccess(data, $form, $container);
             } else {
-                Utils.hidePreloader(container);
-                if (!isHtml) {
+                Utils.hidePreloader($container);
+                if (options.isJson) {
                     Utils.handleAjaxSuccess(data);
                 }
             }
@@ -48,68 +60,73 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
     });
 };
 
-FormHelper.removeAllFormMessagesAndErrors = function (form) {
-    return $.when(FormHelper.removeFormMessage(form), FormHelper.removeFormValidationMessages(form));
+FormHelper.removeAllFormMessagesAndErrors = function ($form) {
+    return $.when(FormHelper.removeFormMessage($form), FormHelper.removeFormValidationMessages($form));
 };
 
-FormHelper.setFormMessage = function (form, message, type) {
+FormHelper.setFormMessage = function ($form, message, type) {
     if (!type) {
         type = 'error';
     }
     toastr[type](message);
     /*
-    var errorDiv = form.find('.form-error');
+    var errorDiv = $form.find('.form-error');
     if (!errorDiv.length) {
         errorDiv = $('<div class="form-error text-center"></div>').hide();
-        form.prepend(errorDiv);
+        $form.prepend(errorDiv);
     }
     return errorDiv.slideUp(100, function () {
         errorDiv.html('<div class="alert alert-' + type + '">' + message + '</div>').slideDown(100);
     });*/
 };
 
-FormHelper.removeFormMessage = function (form) {
-    /*var errorDiv = form.find('.form-error');
+FormHelper.removeFormMessage = function ($form) {
+    /*var errorDiv = $form.find('.form-error');
     return errorDiv.slideUp(100, function () {
         errorDiv.html('');
     })*/
 };
 
-FormHelper.removeFormValidationMessages = function (form) {
-    form.find('.has-error').removeClass('has-error');
-    return form.find('.error-text').slideUp(FormHelper.messageAnimDurationMs, function () {
+FormHelper.removeFormValidationMessages = function ($form) {
+    $form.find('.has-error').removeClass('has-error');
+    return $form.find('.error-text').slideUp(FormHelper.messageAnimDurationMs, function () {
         $(this).html('');
     });
 };
 
-FormHelper.handleAjaxErrors = function (form, xhr) {
-    FormHelper.removeAllFormMessagesAndErrors(form).done(function () {
-        if (xhr.status === 400) {
-            var response = Utils.convertXhrResponseToJsonIfPossible(xhr);
-            if (!response) {
-                Utils.handleAjaxError(xhr);
-                return;
-            }
-            if (response._message) {
-                FormHelper.setFormMessage(form, response._message);
-            }
-            if (response.errors && $.isPlainObject(response.errors)) {
-                for (var inputName in response.errors) {
-                    if (form[0][inputName]) {
-                        var container = $(form[0][inputName]).closest('.form-group, .checkbox').addClass('has-error');
-                        var errorEl = container.find('.error-text');
-                        if (errorEl.length == 0) {
-                            errorEl = $('<div class="error-text bg-danger"></div>').hide();
-                            container.append(errorEl);
-                        }
-                        errorEl.html(response.errors[inputName]).slideDown(FormHelper.messageAnimDurationMs);
+FormHelper.handleAjaxErrors = function ($form, xhr) {
+    FormHelper.removeAllFormMessagesAndErrors($form)
+        .done(function () {
+            if (xhr.status === 400) {
+                var response = Utils.convertXhrResponseToJsonIfPossible(xhr);
+                if (!response) {
+                    Utils.handleAjaxError(xhr);
+                    return;
+                }
+                if (response._message) {
+                    FormHelper.setFormMessage($form, response._message);
+                }
+                if (response.errors && $.isPlainObject(response.errors)) {
+                    for (var inputName in response.errors) {
+                        FormHelper.showErrorForInput($form, inputName, response.errors[inputName]);
                     }
                 }
+                return;
             }
-            return;
+            Utils.handleAjaxError(xhr);
+        });
+};
+
+FormHelper.showErrorForInput = function ($form, inputName, message) {
+    if ($form[0][inputName]) {
+        var container = $($form[0][inputName]).closest('.form-group, .checkbox').addClass('has-error');
+        var errorEl = container.find('.error-text');
+        if (errorEl.length == 0) {
+            errorEl = $('<div class="error-text bg-danger"></div>').hide();
+            container.append(errorEl);
         }
-        Utils.handleAjaxError(xhr);
-    });
+        errorEl.html(message).slideDown(FormHelper.messageAnimDurationMs);
+    }
 };
 
 var AdminUI = {
