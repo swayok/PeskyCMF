@@ -8,11 +8,32 @@ use Swayok\Utils\Set;
 
 trait DataValidationHelper {
 
-    protected function validate($data, $rules, $messages = array(), $customAttributes = array()) {
+    /**
+     * Validate data and send Validation Errors Response (abort(HttpCode::INVALID)) if it is invalid
+     * @param array $data
+     * @param array $rules
+     * @param array $messages
+     * @param array $customAttributes
+     * @return bool
+     */
+    protected function validate(array $data, array $rules, array $messages = array(), array $customAttributes = array()) {
+        $errors = $this->validateWithoutHalt($data, $rules, $messages, $customAttributes);
+        return $errors === true ? true : $this->sendValidationErrorsResponse($errors);
+    }
+
+    /**
+     * Validate data and returm errors array if it is invalid
+     * @param array $data
+     * @param array $rules
+     * @param array $messages
+     * @param array $customAttributes
+     * @return array|bool
+     */
+    protected function validateWithoutHalt(array $data, array $rules, array $messages = array(), array $customAttributes = array()) {
         $messages = Set::flatten($messages);
         $validator = \Validator::make($data, $rules, $messages, $customAttributes);
         if ($validator->fails()) {
-            return $this->sendValidationErrorsResponse($validator->getMessageBag()->toArray());
+            return $validator->getMessageBag()->toArray();
         }
         return true;
     }
