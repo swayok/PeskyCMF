@@ -20,7 +20,8 @@ Route::group(
     function () {
         Route::group(
             [
-                'middleware' => AjaxOnly::class
+                'middleware' => AjaxOnly::class,
+                'fallback' => ['route' => 'cmf_login']
             ],
             function () {
                 Route::get('login.html', [
@@ -30,6 +31,25 @@ Route::group(
                 Route::post('login', [
                     'uses' => __cmf_general_controller_class() . '@doLogin'
                 ]);
+            }
+        );
+
+        Route::get('login', [
+            'as' => 'cmf_login',
+            'uses' => __cmf_general_controller_class() . '@getLogin'
+        ]);
+
+        Route::get('logout', [
+            'as' => 'cmf_logout',
+            'uses' => __cmf_general_controller_class() . '@logout'
+        ]);
+
+        Route::group(
+            [
+                'middleware' => AjaxOnly::class,
+                'fallback' => ['route' => 'cmf_forgot_password']
+            ],
+            function () {
 
                 Route::get('forgot_password.html', [
                     'uses' => __cmf_general_controller_class() . '@getForgotPasswordTpl'
@@ -49,11 +69,6 @@ Route::group(
             }
         );
 
-        Route::get('login', [
-            'as' => 'cmf_login',
-            'uses' => __cmf_general_controller_class() . '@getLogin'
-        ]);
-
         Route::get('forgot_password', [
             'as' => 'cmf_forgot_password',
             'uses' => __cmf_general_controller_class() . '@loadJsApp'
@@ -64,11 +79,6 @@ Route::group(
             'uses' => __cmf_general_controller_class() . '@getReplacePassword'
         ]);
 
-        Route::get('logout', [
-            'as' => 'cmf_logout',
-            'uses' => __cmf_general_controller_class() . '@logout'
-        ]);
-
         Route::group(
             [
                 'middleware' => ValidateAdmin::class
@@ -77,7 +87,8 @@ Route::group(
 
                 Route::group(
                     [
-                        'middleware' => AjaxOnly::class
+                        'middleware' => AjaxOnly::class,
+                        'fallback' => ['route' => 'cmf_login']
                     ],
                     function () {
 
@@ -183,42 +194,74 @@ Route::group(
 
                 Route::get('{table_name}/service/templates', [
                     'as' => 'cmf_api_get_templates',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@getTemplates'
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getTemplates',
+                    'fallback' => [
+                        'route' => 'cmf_items_table',
+                        'params' => true
+                    ]
                 ]);
 
                 Route::get('{table_name}/list', [
                     'as' => 'cmf_api_get_items',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@getItemsList'
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getItemsList',
+                    'fallback' => [
+                        'route' => 'cmf_items_table',
+                        'params' => true
+                    ]
                 ]);
 
                 Route::get('{table_name}/service/options', [
                     'as' => 'cmf_api_get_options',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@getOptions'
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getOptions',
+                    'fallback' => [
+                        'route' => 'cmf_items_table',
+                        'params' => true
+                    ]
                 ]);
 
                 Route::post('{table_name}', [
                     'as' => 'cmf_api_create_item',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@addItem'
+                    'uses' => __cmf_scaffold_api_controller_class() . '@addItem',
+                    'fallback' => [
+                        'route' => 'cmf_item_add_form',
+                        'params' => true
+                    ]
                 ]);
 
                 Route::get('{table_name}/service/defaults', [
                     'as' => 'cmf_api_get_item',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@getItemDefaults'
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getItemDefaults',
+                    'fallback' => [
+                        'route' => 'cmf_item_add_form',
+                        'params' => true
+                    ]
                 ]);
 
                 Route::get('{table_name}/{id}', [
                     'as' => 'cmf_api_get_item',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@getItem'
+                    'uses' => __cmf_scaffold_api_controller_class() . '@getItem',
+                    'fallback' => [
+                        'route' => 'cmf_item_edit_form',
+                        'params' => true
+                    ]
                 ]);
 
                 Route::put('{table_name}/{id}', [
                     'as' => 'cmf_api_update_item',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@updateItem'
+                    'uses' => __cmf_scaffold_api_controller_class() . '@updateItem',
+                    'fallback' => [
+                        'route' => 'cmf_item_edit_form',
+                        'params' => true
+                    ]
                 ]);
 
                 Route::delete('{table_name}/{id}', [
                     'as' => 'cmf_api_delete_item',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@deleteItem'
+                    'uses' => __cmf_scaffold_api_controller_class() . '@deleteItem',
+                    'fallback' => [
+                        'route' => 'cmf_items_table',
+                        'params' => true
+                    ]
                 ]);
             }
         );
