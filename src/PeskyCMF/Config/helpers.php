@@ -47,10 +47,16 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
 
 if (!function_exists('cmfRedirectResponseWithMessage')) {
     function cmfRedirectResponseWithMessage($url, $message, $type = 'info') {
-        return Redirect::to($url)->with(\PeskyCMF\Config\CmfConfig::getInstance()->session_message_key(), [
-            'message' => $message,
-            'type' => $type
-        ]);
+        if (request()->ajax()) {
+            return cmfServiceJsonResponse()
+                ->setMessage($message)
+                ->setRedirect($url);
+        } else {
+            return Redirect::to($url)->with(\PeskyCMF\Config\CmfConfig::getInstance()->session_message_key(), [
+                'message' => $message,
+                'type' => $type
+            ]);
+        }
     }
 }
 
