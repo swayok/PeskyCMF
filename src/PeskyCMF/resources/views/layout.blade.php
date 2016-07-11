@@ -70,7 +70,7 @@
     <script src='/packages/adminlte/plugins/fastclick/fastclick.min.js'></script>
     <script src="/packages/cmf/js/lib/datatables/js/jquery.dataTables.min.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/datatables/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/datatables/extensions/Select/js/Select/js/dataTables.select.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/datatables/extensions/Select/js/dataTables.select.min.js" type="text/javascript"></script>
     <script src="/packages/adminlte/plugins/datepicker/bootstrap-datepicker.js" type="text/javascript"></script>
     <script src="/packages/adminlte/plugins/datepicker/locales/bootstrap-datepicker.ru.js" type="text/javascript"></script>
     <script src="/packages/adminlte/js/app.js" type="text/javascript"></script>
