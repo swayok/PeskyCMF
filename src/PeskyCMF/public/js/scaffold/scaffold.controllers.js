@@ -234,7 +234,7 @@ var ScaffoldDataGridHelper = {
             throw 'Invalid data grid id: ' + dataGrid
         }
     },
-    initToolbar: function ($tableWrapper, customToolbarItems) {
+    initToolbar: function ($tableWrapper, customToolbarItems, customFilterToolbarItems) {
         var $toolbarEl = $tableWrapper.find('.toolbar');
         var $filterToolbar = $tableWrapper.find('.filter-toolbar');
         var $reloadBtn = $('<button class="btn btn-default" data-action="reload"></button>')
@@ -242,12 +242,17 @@ var ScaffoldDataGridHelper = {
         if ($filterToolbar.length) {
             $filterToolbar.prepend($reloadBtn);
         }
+        if ($.isArray(customFilterToolbarItems)) {
+            for (var i = 0; i < customFilterToolbarItems.length; i++) {
+                $filterToolbar.append(customFilterToolbarItems[i]);
+            }
+        }
         if ($toolbarEl.length) {
             if (!$filterToolbar.length) {
                 $toolbarEl.prepend($reloadBtn);
             }
             if ($.isArray(customToolbarItems)) {
-                for (var i = 0; i < customToolbarItems.length; i++) {
+                for (i = 0; i < customToolbarItems.length; i++) {
                     $toolbarEl.append(customToolbarItems[i]);
                 }
             }
@@ -290,6 +295,13 @@ var ScaffoldDataGridHelper = {
             }
             return false;
         });
+        var configs = $table.data('configs');
+        if (configs && configs.doubleClickUrl) {
+            $table.on('dblclick dbltap', 'tbody tr', function (event) {
+                ScaffoldsManager.app.nav(configs.doubleClickUrl($table.dataTable().api().row($(this)).data()));
+                return false;
+            });
+        }
     },
     initRowActions: function ($table) {
         var configs = $table.data('configs');
@@ -358,12 +370,6 @@ var ScaffoldDataGridHelper = {
                 }
             }
         });
-        if (configs && configs.doubleClickUrl) {
-            $table.on('dblclick dbltap', 'tbody tr', function (event) {
-                ScaffoldsManager.app.nav(configs.doubleClickUrl($table.dataTable().api().row($(this)).data()));
-                return false;
-            });
-        }
     },
     showRowActions: function ($row, $table, mouseX) {
         var configs = $table.data('configs');
