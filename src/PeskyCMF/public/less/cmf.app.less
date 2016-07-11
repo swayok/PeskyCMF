@@ -76,7 +76,7 @@ body {
     100%{ -moz-transform: rotate(360deg); transform: rotate(360deg); }
 }
 
-div.dataTables_processing,
+div.dataTables_wrapper div.dataTables_processing,
 .has-preloader {
     position: relative;
     min-height: 50px;
@@ -169,7 +169,7 @@ div.dataTables_processing,
     min-height: 100%;
 }
 
-div.dataTables_processing {
+div.dataTables_wrapper div.dataTables_processing {
     position: absolute;
     top: 0;
     left: 5px;
@@ -180,6 +180,8 @@ div.dataTables_processing {
     width: auto;
     height: auto;
     color: transparent;
+    box-shadow: none;
+    border: 0 none;
 
     &:before {
         height: 100%;
@@ -331,7 +333,7 @@ form {
     }
 }
 
-.dataTables_wrapper {
+div.dataTables_wrapper {
 
     table.dataTable {
 
@@ -367,22 +369,24 @@ form {
             tr {
                 &.selected {
                     background-color: rgba(54, 127, 169, 0.4);
+                    color: #000000;
+
+                    a {
+                        color: #08C;
+
+                        &:hover {
+                            color: #00a1ee;
+                        }
+                    }
                 }
 
+            }
+
+            a:hover {
+                text-decoration: underline;
             }
         }
     } //< .dataTables_wrapper table.dataTable
-
-    .dataTables_paginate {
-        .paginate_button {
-            &.active {
-                a {
-                    border-left-color: #ddd;
-                    border-right-color: #ddd;
-                }
-            }
-        }
-    } //< .dataTables_wrapper .dataTables_paginate
 
     .row-actions-container {
         position: absolute;
@@ -437,17 +441,30 @@ form {
         }
     }
 
-    .dataTables_paginate {
+    div.dataTables_paginate {
         text-align: center;
 
         ul.pagination {
             margin-top: 10px;
             vertical-align: top;
+
+            .paginate_button {
+                &.active {
+                    a {
+                        border-left-color: #ddd;
+                        border-right-color: #ddd;
+                    }
+                }
+            }
         }
     }
 
     .dataTables_info {
         margin-top: 9px;
+
+        .select-info {
+            display: none;
+        }
     }
 
     .dataTables_length {
