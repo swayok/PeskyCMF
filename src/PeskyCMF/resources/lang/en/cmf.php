@@ -47,6 +47,15 @@ return [
                 'toggle' => 'Filters'
             ],
         ],
+        'bulk_actions' => [
+            'dropdown_label' => 'Bulk actions',
+            'delete_selected' => 'Delete selected (:count)',
+            'delete_selected_confirm' => 'Confirm selected Items delete action',
+            'edit_selected' => 'Edit selected (:count)',
+            'delete_filtered' => 'Delete filtered (:count)',
+            'delete_filtered_confirm' => 'Confirm filtered Items delete action',
+            'edit_filtered' => 'Edit filtered (:count)',
+        ],
         'field' => [
             'bool' => [
                 'yes' => 'Yes',

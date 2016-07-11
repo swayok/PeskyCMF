@@ -133,6 +133,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             base_path('vendor/nostalgiaz/bootstrap-switch/dist') => public_path('packages/bootstrap/switches'),
             base_path('vendor/eonasdan/bootstrap-datetimepicker/build') => public_path('packages/bootstrap/datetimepicker'),
             __DIR__ . '/public' => public_path('packages/cmf'),
+            base_path('vendor/datatables/datatables/media') => public_path('packages/cmf/js/lib/datatables'),
         ], 'public');
     }
 

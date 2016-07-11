@@ -550,8 +550,7 @@ class CmfConfig extends ConfigsContainer {
         return [
             'scrollX' => true,
             'scrollY' => '55vh',
-            'scrollCollapse' => true,
-            'multiselect' => false,
+            'scrollCollapse' => true
         ];
     }
 

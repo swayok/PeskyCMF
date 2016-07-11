@@ -95,4 +95,11 @@ class DataGridFieldConfig extends ScaffoldFieldConfig {
         return parent::setIsDbField($isDbField);
     }
 
+    /**
+     * @return int
+     */
+    public function getPosition() {
+        return (int)$this->position + ($this->getScaffoldActionConfig()->isAllowedMultiRowSelection() ? 1 : 0);
+    }
+
 }

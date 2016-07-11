@@ -3,7 +3,6 @@
 
 namespace PeskyCMF\Scaffold;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig;

@@ -47,6 +47,13 @@ return [
                 'toggle' => 'Фильтры'
             ],
         ],
+        'bulk_actions' => [
+            'dropdown_label' => 'Массовые действия',
+            'delete_selected' => 'Удалить выбранные (:count)',
+            'edit_selected' => 'Редактировать выбранные (:count)',
+            'delete_filtered' => 'Удалить отфильтрованные (:count)',
+            'edit_filtered' => 'Редактировать отфильтрованные (:count)',
+        ],
         'field' => [
             'bool' => [
                 'yes' => 'Да',
