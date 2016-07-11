@@ -1,4 +1,4 @@
-/*! Select for DataTables 1.2.1-dev
+/*! Select for DataTables 1.2.0
  * 2015-2016 SpryMedia Ltd - datatables.net/license/mit
  */
 
@@ -6,7 +6,7 @@
  * @summary     Select for DataTables
  * @description A collection of API methods, events and buttons for DataTables
  *   that provides selection options of the items in a DataTable
- * @version     1.2.1-dev
+ * @version     1.2.0
  * @file        dataTables.select.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     datatables.net/forums
@@ -54,7 +54,7 @@ var DataTable = $.fn.dataTable;
 // Version information for debugger
 DataTable.select = {};
 
-DataTable.select.version = '1.2.1-dev';
+DataTable.select.version = '1.2.0';
 
 DataTable.select.init = function ( dt ) {
 	var ctx = dt.settings()[0];
@@ -1000,26 +1000,16 @@ function i18n( label, def ) {
 	};
 }
 
-// Common events with suitable namespaces
-function namespacedEvents ( config ) {
-	var unique = config._eventNamespace;
-
-	return 'draw.dt.DT'+unique+' select.dt.DT'+unique+' deselect.dt.DT'+unique;
-}
-
-var _buttonNamespace = 0;
-
 $.extend( DataTable.ext.buttons, {
 	selected: {
 		text: i18n( 'selected', 'Selected' ),
 		className: 'buttons-selected',
-		init: function ( dt, node, config ) {
+		init: function ( dt ) {
 			var that = this;
-			config._eventNamespace = '.select'+(_buttonNamespace++);
 
 			// .DT namespace listeners are removed by DataTables automatically
 			// on table destroy
-			dt.on( namespacedEvents(config), function () {
+			dt.on( 'draw.dt.DT select.dt.DT deselect.dt.DT', function () {
 				var enable = that.rows( { selected: true } ).any() ||
 				             that.columns( { selected: true } ).any() ||
 				             that.cells( { selected: true } ).any();
@@ -1028,19 +1018,15 @@ $.extend( DataTable.ext.buttons, {
 			} );
 
 			this.disable();
-		},
-		destroy: function ( dt, node, config ) {
-			dt.off( config._eventNamespace );
 		}
 	},
 	selectedSingle: {
 		text: i18n( 'selectedSingle', 'Selected single' ),
 		className: 'buttons-selected-single',
-		init: function ( dt, node, config ) {
+		init: function ( dt ) {
 			var that = this;
-			config._eventNamespace = '.select'+(_buttonNamespace++);
 
-			dt.on( namespacedEvents(config), function () {
+			dt.on( 'draw.dt.DT select.dt.DT deselect.dt.DT', function () {
 				var count = dt.rows( { selected: true } ).flatten().length +
 				            dt.columns( { selected: true } ).flatten().length +
 				            dt.cells( { selected: true } ).flatten().length;
@@ -1049,9 +1035,6 @@ $.extend( DataTable.ext.buttons, {
 			} );
 
 			this.disable();
-		},
-		destroy: function ( dt, node, config ) {
-			dt.off( config._eventNamespace );
 		}
 	},
 	selectAll: {
@@ -1068,11 +1051,10 @@ $.extend( DataTable.ext.buttons, {
 		action: function () {
 			clear( this.settings()[0], true );
 		},
-		init: function ( dt, node, config ) {
+		init: function ( dt ) {
 			var that = this;
-			config._eventNamespace = '.select'+(_buttonNamespace++);
 
-			dt.on( namespacedEvents(config), function () {
+			dt.on( 'draw.dt.DT select.dt.DT deselect.dt.DT', function () {
 				var count = dt.rows( { selected: true } ).flatten().length +
 				            dt.columns( { selected: true } ).flatten().length +
 				            dt.cells( { selected: true } ).flatten().length;
@@ -1081,9 +1063,6 @@ $.extend( DataTable.ext.buttons, {
 			} );
 
 			this.disable();
-		},
-		destroy: function ( dt, node, config ) {
-			dt.off( config._eventNamespace );
 		}
 	}
 } );

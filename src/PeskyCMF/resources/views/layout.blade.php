@@ -14,7 +14,7 @@
     <link href="/packages/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/js/lib/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/js/lib/datatables/css/select.dataTables.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/js/lib/datatables/extensions/Select/css/select.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/fonts/source_sans_pro/source_sans_pro.css" rel="stylesheet" type="text/css"/>
@@ -70,7 +70,7 @@
     <script src='/packages/adminlte/plugins/fastclick/fastclick.min.js'></script>
     <script src="/packages/cmf/js/lib/datatables/js/jquery.dataTables.min.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/lib/datatables/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/datatables/js/dataTables.select.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/lib/datatables/extensions/Select/js/Select/js/dataTables.select.min.js" type="text/javascript"></script>
     <script src="/packages/adminlte/plugins/datepicker/bootstrap-datepicker.js" type="text/javascript"></script>
     <script src="/packages/adminlte/plugins/datepicker/locales/bootstrap-datepicker.ru.js" type="text/javascript"></script>
     <script src="/packages/adminlte/js/app.js" type="text/javascript"></script>
