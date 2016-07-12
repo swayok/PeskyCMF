@@ -31,14 +31,50 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
     <div class="content">
         <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">
             <div class="box"><div class="box-body">
-                <table class="table table-bordered table-hover table-striped" id="<?php echo $dataGridId ?>">
+                <table id="<?php echo $dataGridId ?>" class="table table-bordered table-hover table-striped">
                 <thead>
                     <tr>
                         <?php
                             if ($dataGridConfig->isAllowedMultiRowSelection()) {
+                                $dropdownBtn = \Swayok\Html\Tag::button()
+                                    ->setType('button')
+                                    ->setClass('rows-selection-options-dropdown-btn')
+                                    ->setDataAttr('toggle' , 'dropdown')
+                                    ->setAttribute('aria-haspopup', 'true')
+                                    ->setAttribute('aria-expanded', 'false')
+                                    ->setContent('<span class="glyphicon glyphicon-menu-hamburger"></span>')
+                                    ->build();
+
+                                $selectionActions = [
+                                    \Swayok\Html\Tag::a()
+                                        ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.select_all'))
+                                        ->setClass('select-all')
+                                        ->setHref('javascript: void(0)')
+                                        ->build(),
+                                    \Swayok\Html\Tag::a()
+                                        ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.select_none'))
+                                        ->setClass('select-none')
+                                        ->setHref('javascript: void(0)')
+                                        ->build(),
+                                    \Swayok\Html\Tag::a()
+                                        ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.invert_selection'))
+                                        ->setClass('invert-selection')
+                                        ->setHref('javascript: void(0)')
+                                        ->build()
+                                ];
+                                $dropdownMenu = \Swayok\Html\Tag::ul()
+                                    ->setClass('dropdown-menu')
+                                    ->setContent('<li>' . implode('</li><li>', $selectionActions) . '</li>')
+                                    ->build();
+
                                 echo \Swayok\Html\Tag::th()
-                                    ->setContent('&nbsp;')
-                                    ->setClass('text-nowrap select-checkbox text-center')
+                                    ->setContent(
+                                        \Swayok\Html\Tag::div()
+                                            ->setClass('btn-group rows-selection-options float-none')
+                                            ->setContent($dropdownBtn . $dropdownMenu)
+                                            ->build()
+                                    )
+                                    ->setClass('text-nowrap text-center')
                                     ->build();
                             }
                             $invisibleColumns = [];
@@ -95,17 +131,19 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                     ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_selected_confirm'))
                     ->setDataAttr('action', 'bulk-selected')
                     ->setDataAttr('url', route('cmf_api_delete_bulk', [$tableNameForRoutes], false))
+                    ->setDataAttr('id-field', $pkName)
                     ->setDataAttr('method', 'delete')
-                    ->setHref('#')
+                    ->setHref('javascript: void(0)')
                     ->build();
             }
             if ($dataGridConfig->isEditAllowed() && $dataGridConfig->isBulkItemsEditingAllowed()) {
                 $bulkActions[] = \Swayok\Html\Tag::a()
                     ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.edit_selected'))
-                    ->setDataAttr('action', 'bulk-selected')
+                    ->setDataAttr('action', 'bulk-edit-selected')
                     ->setDataAttr('url', route('cmf_api_edit_bulk', [$tableNameForRoutes], false))
                     ->setDataAttr('method', 'put')
-                    ->setHref('#')
+                    ->setDataAttr('id-field', $pkName)
+                    ->setHref('javascript: void(0)')
                     ->build();
             }
         }
@@ -116,16 +154,16 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_filtered_confirm'))
                 ->setDataAttr('url', route('cmf_api_delete_filtered', [$tableNameForRoutes], false))
                 ->setDataAttr('method', 'delete')
-                ->setHref('#')
+                ->setHref('javascript: void(0)')
                 ->build();
         }
         if ($dataGridConfig->isEditAllowed() && $dataGridConfig->isFilteredItemsEditingAllowed()) {
             $bulkActions[] = \Swayok\Html\Tag::a()
                 ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.edit_filtered'))
-                ->setDataAttr('action', 'bulk-filtered')
+                ->setDataAttr('action', 'bulk-edit-filtered')
                 ->setDataAttr('url', route('cmf_api_edit_filtered', [$tableNameForRoutes], false))
                 ->setDataAttr('method', 'put')
-                ->setHref('#')
+                ->setHref('javascript: void(0)')
                 ->build();
         }
         foreach ($dataGridConfig->getBulkActionsToolbarItems() as $toolbarItem) {
@@ -147,14 +185,14 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->append('&nbsp;<span class="caret"></span>')
                 ->build();
 
-            $dropDownMenu = \Swayok\Html\Tag::ul()
+            $dropdownMenu = \Swayok\Html\Tag::ul()
                 ->setClass('dropdown-menu')
                 ->setContent('<li>' . implode('</li><li>', $bulkActions) . '</li>')
                 ->build();
 
             $toolbar['bulk_actions'] = \Swayok\Html\Tag::div()
                 ->setClass('btn-group bulk-actions float-none')
-                ->setContent($dropdownBtn . $dropDownMenu)
+                ->setContent($dropdownBtn . $dropdownMenu)
                 ->build();
         }
         if ($dataGridConfig->isCreateAllowed()) {
@@ -199,7 +237,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setDataAttr('method', 'delete')
                 ->setDataAttr('url', route('cmf_api_delete_item', [$tableNameForRoutes, ":{$pkName}:"], false))
                 ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'))
-                ->setHref('#')
+                ->setHref('javascript: void(0)')
                 ->build();
             $actionsTpl .= '{{? !!it.___delete_allowed }}' . $btn . '{{?}}';
         }
@@ -265,7 +303,8 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 <?php if ($dataGridConfig->isAllowedMultiRowSelection()) :?>
                 dataTablesConfig.select = {
                     style: 'multi+shift',
-                    selector: 'td.select-checkbox'
+                    selector: 'td.select-checkbox',
+                    info: false
                 };
                 <?php endif; ?>
             <?php endif; ?>

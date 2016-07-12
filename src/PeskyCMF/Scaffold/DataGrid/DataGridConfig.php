@@ -347,19 +347,31 @@ class DataGridConfig extends ScaffoldActionConfig {
      * - call some url via ajax passing all selected ids and then run "callback(json)"
         Tag::a()
             ->setContent(trans('path.to.translation'))
+            //^ you can use ':count' in label to inser selected items count
             ->setDataAttr('action', 'bulk-selected')
             ->setDataAttr('url', route('route', [], false))
-            ->setDataAttr('method', 'delete')    //< can be 'post', 'put', 'delete' depending on action type
-            ->setDataAttr('on-success', 'callback(json);')
-            ->setHref('#');
+            ->setDataAttr('method', 'delete')
+            //^ can be 'post', 'put', 'delete' depending on action type
+            ->setDataAttr('id-field', 'id')
+            //^ id field name to use for getting rows ids, default: 'id'
+            ->setDataAttr('on-success', 'callback(data);')
+            ->setDataAttr('response-type', 'json')
+            //^ one of: json, html, xml. Default: 'json'
+            ->setHref('javascript: void(0)');
+     * Values will be received in the 'ids' key of the request as array
      * - call some url via ajax passing filter conditions and then run "callback(json)"
         Tag::a()
             ->setContent(trans('path.to.translation'))
+            //^ you can use ':count' in label to inser filtered items count
             ->setDataAttr('action', 'bulk-filtered')
             ->setDataAttr('url', route('route', [], false))
-            ->setDataAttr('method', 'put')    //< can be 'post', 'put', 'delete' depending on action type
-            ->setDataAttr('on-success', 'callback(json);')
-            ->setHref('#');
+            ->setDataAttr('method', 'put')
+            //^ can be 'post', 'put', 'delete' depending on action type
+            ->setDataAttr('on-success', 'callback(data);')
+            ->setDataAttr('response-type', 'json')
+            //^ one of: json, html, xml. Default: 'json'
+            ->setHref('javascript: void(0)');
+     * Conditions will be received in the 'conditions' key of the request as JSON string
      * @return $this
      * @throws ScaffoldActionException
      */
@@ -377,8 +389,8 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @throws \PeskyORM\Exception\DbTableConfigException
      */
     public function prepareRecords(array $records) {
-        foreach ($records as $idx => $record) {
-            $records[$idx] = $this->prepareRecord($record);
+        foreach ($records as $idx => &$record) {
+            $record = $this->prepareRecord($record);
         }
         return $records;
     }
@@ -401,26 +413,26 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param Tag[]|callable $arrayOrCallable - callable: function (ScaffolActionConfig $scaffoldAction) { return []; }
      * Examples:
      * - call some url via ajax blocking data grid while waiting for response and then run "callback(json)"
-     * Tag::a()
-     * ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
-     * ->setClass('row-action text-success')
-     * ->setTitle(trans('path.to.translation'))
-     * ->setDataAttr('toggle', 'tooltip')
-     * ->setDataAttr('block-datagrid', '1')
-     * ->setDataAttr('action', 'request')
-     * ->setDataAttr('method', 'put')
-     * ->setDataAttr('url', route('route', [], false))
-     * ->setDataAttr('data', 'id=:id:')
-     * ->setDataAttr('on-success', 'callback(json);')
-     * ->setHref('#')
+        Tag::a()
+            ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
+            ->setClass('row-action text-success')
+            ->setTitle(trans('path.to.translation'))
+            ->setDataAttr('toggle', 'tooltip')
+            ->setDataAttr('block-datagrid', '1')
+            ->setDataAttr('action', 'request')
+            ->setDataAttr('method', 'put')
+            ->setDataAttr('url', route('route', [], false))
+            ->setDataAttr('data', 'id=:id:')
+            ->setDataAttr('on-success', 'callback(json);')
+            ->setHref('javascript: void(0)')
      * - redirect
-     * Tag::a()
-     * ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
-     * ->setClass('row-action text-primary')
-     * ->setTitle(trans('path.to.translation'))
-     * ->setDataAttr('toggle', 'tooltip')
-     * ->setHref(route('route', [], false))
-     * ->setTarget('_blank')
+        Tag::a()
+           ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
+           ->setClass('row-action text-primary')
+           ->setTitle(trans('path.to.translation'))
+           ->setDataAttr('toggle', 'tooltip')
+           ->setHref(route('route', [], false))
+           ->setTarget('_blank')
      *
      * @return $this
      * @throws \Swayok\Html\HtmlTagException

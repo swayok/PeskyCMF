@@ -14,7 +14,6 @@
     <link href="/packages/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/js/lib/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/js/lib/datatables/extensions/Select/css/select.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/fonts/source_sans_pro/source_sans_pro.css" rel="stylesheet" type="text/css"/>

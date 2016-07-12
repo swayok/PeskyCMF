@@ -49,12 +49,12 @@ return [
         ],
         'bulk_actions' => [
             'dropdown_label' => 'Bulk actions',
-            'delete_selected' => 'Delete selected (:count)',
+            'delete_selected' => 'Delete selected <span class="label label-primary pull-right">:count</span>',
             'delete_selected_confirm' => 'Confirm selected Items delete action',
-            'edit_selected' => 'Edit selected (:count)',
-            'delete_filtered' => 'Delete filtered (:count)',
+            'edit_selected' => 'Edit selected <span class="label label-primary pull-right">:count</span>',
+            'delete_filtered' => 'Delete filtered <span class="label label-primary pull-right">:count</span>',
             'delete_filtered_confirm' => 'Confirm filtered Items delete action',
-            'edit_filtered' => 'Edit filtered (:count)',
+            'edit_filtered' => 'Edit filtered <span class="label label-primary pull-right">:count</span>',
         ],
         'field' => [
             'bool' => [
@@ -66,7 +66,10 @@ return [
             'column_label' => 'Actions',
             'edit_item' => 'Edit',
             'view_item' => 'View',
-            'delete_item' => 'Delete'
+            'delete_item' => 'Delete',
+            'select_all' => 'Select all',
+            'select_none' => 'Select none',
+            'invert_selection' => 'Invert selection'
         ],
         'filter' => [
             'bool' => [

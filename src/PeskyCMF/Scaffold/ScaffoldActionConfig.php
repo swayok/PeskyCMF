@@ -457,7 +457,7 @@ abstract class ScaffoldActionConfig {
             ->setDataAttr('method', 'put')
             ->setDataAttr('data', 'id=:id:')
             ->setDataAttr('on-success', 'callback(json);')
-            ->setHref('#');
+            ->setHref('javascript: void(0)');
      * - redirect to other url
         Tag::a()
             ->setContent(trans('path.to.translation'))

@@ -64,7 +64,10 @@ return [
             'column_label' => 'Действия',
             'edit_item' => 'Редактировать',
             'view_item' => 'Просмотр',
-            'delete_item' => 'Удалить'
+            'delete_item' => 'Удалить',
+            'select_all' => 'Выбрать все',
+            'select_none' => 'Отменить выбор',
+            'invert_selection' => 'Обратить выделение'
         ],
         'filter' => [
             'bool' => [

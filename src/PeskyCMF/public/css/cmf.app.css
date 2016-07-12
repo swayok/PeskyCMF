@@ -304,6 +304,26 @@ form .error-text {
 #user-panel .actions a:hover {
   text-decoration: underline;
 }
+div.dataTables_wrapper.multiselect .dataTables_scrollHead .dropdown-menu {
+  position: fixed;
+  top: auto;
+  left: auto;
+}
+div.dataTables_wrapper.multiselect .dataTables_scrollHead .rows-selection-options-dropdown-btn {
+  border: 0 none;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+  background-color: transparent;
+  opacity: 0.3;
+  color: #000000;
+  outline: 0 none;
+}
+div.dataTables_wrapper.multiselect .dataTables_scrollHead .rows-selection-options-dropdown-btn:hover {
+  opacity: 0.5;
+}
 div.dataTables_wrapper table.dataTable.table-bordered {
   -moz-box-sizing: content-box;
   -webkit-box-sizing: content-box;
@@ -327,7 +347,7 @@ div.dataTables_wrapper table.dataTable thead .sorting_asc:after {
   content: "\e093";
 }
 div.dataTables_wrapper table.dataTable tbody tr.selected {
-  background-color: rgba(54, 127, 169, 0.4);
+  background-color: rgba(78, 167, 205, 0.4);
   color: #000000;
 }
 div.dataTables_wrapper table.dataTable tbody tr.selected a {
@@ -335,6 +355,21 @@ div.dataTables_wrapper table.dataTable tbody tr.selected a {
 }
 div.dataTables_wrapper table.dataTable tbody tr.selected a:hover {
   color: #00a1ee;
+}
+div.dataTables_wrapper table.dataTable tbody tr.selected td.select-checkbox:before {
+  content: "\f046";
+}
+div.dataTables_wrapper table.dataTable tbody tr td.select-checkbox {
+  cursor: pointer;
+  font-family: FontAwesome;
+  text-align: center;
+}
+div.dataTables_wrapper table.dataTable tbody tr td.select-checkbox:before {
+  content: "\f096";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  text-align: left;
 }
 div.dataTables_wrapper table.dataTable tbody a:hover {
   text-decoration: underline;
@@ -453,6 +488,15 @@ div.dataTables_wrapper .toolbar .btn,
 div.dataTables_wrapper .filter-toolbar .btn {
   float: none;
   display: inline-block;
+}
+div.dataTables_wrapper .toolbar ul.dropdown-menu a,
+div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a {
+  white-space: nowrap;
+}
+div.dataTables_wrapper .toolbar ul.dropdown-menu a .label,
+div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a .label {
+  margin-top: 3px;
+  margin-left: 8px;
 }
 .skin-blue .sidebar-menu > li.header {
   color: #678b97;

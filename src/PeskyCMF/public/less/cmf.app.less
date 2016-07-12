@@ -335,6 +335,33 @@ form {
 
 div.dataTables_wrapper {
 
+    &.multiselect {
+        .dataTables_scrollHead {
+            .dropdown-menu {
+                position: fixed;
+                top: auto;
+                left: auto;
+            }
+
+            .rows-selection-options-dropdown-btn {
+                border: 0 none;
+                width: auto;
+                height: auto;
+                padding: 0;
+                margin: 0;
+                line-height: normal;
+                background-color: transparent;
+                opacity: 0.3;
+                color: #000000;
+                outline: 0 none;
+
+                &:hover {
+                    opacity: 0.5;
+                }
+            }
+        }
+    }
+
     table.dataTable {
 
         &.table-bordered {
@@ -368,7 +395,7 @@ div.dataTables_wrapper {
         tbody {
             tr {
                 &.selected {
-                    background-color: rgba(54, 127, 169, 0.4);
+                    background-color: rgba(78, 167, 205, 0.4);
                     color: #000000;
 
                     a {
@@ -378,6 +405,26 @@ div.dataTables_wrapper {
                             color: #00a1ee;
                         }
                     }
+
+                    td.select-checkbox {
+                        &:before {
+                            content: "\f046";
+                        }
+                    }
+                }
+
+                td.select-checkbox {
+                    cursor: pointer;
+                    font-family: FontAwesome;
+                    text-align: center;
+
+                    &:before {
+                        content: "\f096";
+                        display: inline-block;
+                        width: 14px;
+                        height: 14px;
+                        text-align: left;
+                    }
                 }
 
             }
@@ -386,6 +433,7 @@ div.dataTables_wrapper {
                 text-decoration: underline;
             }
         }
+
     } //< .dataTables_wrapper table.dataTable
 
     .row-actions-container {
@@ -512,6 +560,16 @@ div.dataTables_wrapper {
         .btn {
             float: none;
             display: inline-block;
+        }
+
+        ul.dropdown-menu {
+            a {
+                white-space: nowrap;
+                .label {
+                    margin-top: 3px;
+                    margin-left: 8px;
+                }
+            }
         }
     }
 
