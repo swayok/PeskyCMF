@@ -12,12 +12,12 @@ abstract class ScaffoldActionConfig {
     /** @var CmfDbModel */
     protected $model;
     /** @var array */
-    protected $fieldsConfigs = array();
+    protected $fieldsConfigs = [];
     /**
-     * Fields list to select from db
+     * Fields list
      * @var array|ScaffoldFieldConfig[]
      */
-    protected $fields = array();
+    protected $fields = [];
     /** @var string */
     protected $title;
     /** @var array */
@@ -79,6 +79,8 @@ abstract class ScaffoldActionConfig {
     /**
      * @param array $fields
      * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \PeskyORM\Exception\DbModelException
      * @throws ScaffoldActionException
      */
     public function setFields(array $fields) {
@@ -140,10 +142,18 @@ abstract class ScaffoldActionConfig {
      * @throws ScaffoldActionException
      */
     public function getField($name) {
-        if (empty($name) || empty($this->fields[$name])) {
+        if (!$this->hasField($name)) {
             throw new ScaffoldActionException($this, "Unknown field [$name]");
         }
         return $this->fields[$name];
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasField($name) {
+        return !empty($name) && !empty($this->fields[$name]);
     }
 
     /**

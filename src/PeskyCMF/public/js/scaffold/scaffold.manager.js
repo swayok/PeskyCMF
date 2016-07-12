@@ -71,6 +71,7 @@ ScaffoldsManager.setResourceTemplates = function (resourceName, html) {
     Cache.rawTemplates[resourceName] = {
         datagrid: false,
         itemForm: false,
+        bulkEditForm: false,
         itemdetails: false
     };
     var dataGridTpl = templates.find('#data-grid-tpl');
@@ -80,6 +81,10 @@ ScaffoldsManager.setResourceTemplates = function (resourceName, html) {
     var itemFormTpl = templates.find('#item-form-tpl');
     if (itemFormTpl.length) {
         Cache.rawTemplates[resourceName].itemForm = itemFormTpl.html();
+    }
+    var bulkEditFormTpl = templates.find('#bulk-edit-form-tpl');
+    if (bulkEditFormTpl.length) {
+        Cache.rawTemplates[resourceName].bulkEditForm = bulkEditFormTpl.html();
     }
     var itemDetailsTpl = templates.find('#item-details-tpl');
     if (itemDetailsTpl.length) {
@@ -99,6 +104,11 @@ ScaffoldsManager.hasDataGridTemplate = function (resourceName) {
 ScaffoldsManager.hasItemFormTemplate = function (resourceName) {
     ScaffoldsManager.validateResourceName(resourceName);
     return ScaffoldsManager.isTemplatesLoaded(resourceName) && Cache.rawTemplates[resourceName].itemForm;
+};
+
+ScaffoldsManager.hasBulkEditFormTemplate = function (resourceName) {
+    ScaffoldsManager.validateResourceName(resourceName);
+    return ScaffoldsManager.isTemplatesLoaded(resourceName) && Cache.rawTemplates[resourceName].bulkEditForm;
 };
 
 ScaffoldsManager.hasItemDetailsTemplate = function (resourceName) {
@@ -133,6 +143,25 @@ ScaffoldsManager.getItemFormTpl = function (resourceName) {
             );
         }
         deferred.resolve(Cache.compiledTemplates.itemForm[resourceName]);
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getBulkEditFormTpl = function (resourceName) {
+    ScaffoldsManager.validateResourceName(resourceName);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName);
+        if (!ScaffoldsManager.hasBulkEditFormTemplate(resourceName)) {
+            throw 'There is no bulk edit form template for resource [' + resourceName + ']';
+        }
+        if (!Cache.compiledTemplates.bulkEditForm[resourceName]) {
+            Cache.compiledTemplates.bulkEditForm[resourceName] = Utils.makeTemplateFromText(
+                Cache.rawTemplates[resourceName].bulkEditForm,
+                'Bulk edit form template for ' + resourceName
+            );
+        }
+        deferred.resolve(Cache.compiledTemplates.bulkEditForm[resourceName]);
     });
     return deferred;
 };

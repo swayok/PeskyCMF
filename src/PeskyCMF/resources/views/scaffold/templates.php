@@ -34,6 +34,13 @@ $data = [
 
 
 <?php echo view(
+    $formConfig->getBulkEditingView(),
+    $data + $formConfig->getAdditionalDataForView(),
+    ['formConfig' => $formConfig]
+)->render(); ?>
+
+
+<?php echo view(
     $itemDetailsConfig->getView(),
     $data + $itemDetailsConfig->getAdditionalDataForView(),
     ['itemDetailsConfig' => $itemDetailsConfig]

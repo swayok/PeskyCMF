@@ -15,6 +15,13 @@ use Swayok\Utils\StringUtils;
 class FormConfig extends ScaffoldActionConfig {
 
     protected $view = 'cmf::scaffold/form';
+    protected $bulkEditingView = 'cmf::scaffold/bulk_edit_form';
+
+    /**
+     * Fields list that can be edited in bulk (for many records at once)
+     * @var FormFieldConfig[]
+     */
+    protected $bulkEditableFields = [];
     /**
      * @var null|mixed
      */
@@ -34,7 +41,7 @@ class FormConfig extends ScaffoldActionConfig {
     protected $alterDefaultValues = [];
     /** @var string */
     protected $jsInitiator = null;
-    /** @var string|Closure */
+    /** @var string|\Closure */
     protected $additionalHtmlForForm = '';
 
     const VALIDATOR_FOR_ID = 'required|integer|min:1';
@@ -49,6 +56,18 @@ class FormConfig extends ScaffoldActionConfig {
     /** @var callable|null */
     protected $validationSuccessCallback;
 
+    public function setBulkEditingView($view) {
+        $this->bulkEditingView = $view;
+        return $this;
+    }
+
+    public function getBulkEditingView() {
+        if (empty($this->bulkEditingView)) {
+            throw new ScaffoldActionException($this, 'The view file for bulk editing is not set');
+        }
+        return $this->bulkEditingView;
+    }
+
     protected function createFieldRendererConfig() {
         return InputRendererConfig::create();
     }
@@ -57,6 +76,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @param InputRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
      * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \PeskyORM\Exception\DbColumnConfigException
      */
     protected function configureDefaultRenderer(
         ScaffoldFieldRendererConfig $rendererConfig,
@@ -154,6 +174,66 @@ class FormConfig extends ScaffoldActionConfig {
         $rendererConfig
             ->setIsRequiredForCreate($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE))
             ->setIsRequiredForEdit($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE));
+    }
+
+    /**
+     * @param array $fields
+     * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \BadMethodCallException
+     */
+    public function setBulkEditableFields(array $fields) {
+        if (empty($this->fields)) {
+            throw new \BadMethodCallException('setFields() method must be called before');
+        }
+        foreach ($fields as $name => $config) {
+            if (is_int($name)) {
+                $name = $config;
+                $config = null;
+            }
+            $this->addBulkEditableField($name, $config);
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param null|FormFieldConfig $config - null: FormFieldConfig will be imported from $this->fields or created default one
+     * @return $this
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws ScaffoldActionException
+     */
+    public function addBulkEditableField($name, $config = null) {
+        if ((!$config || $config->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
+            throw new ScaffoldActionException($this, "Unknown table column [$name]");
+        }
+        if (empty($config)) {
+            $config = $this->hasField($name) ? $this->getField($name) : $this->createFieldConfig();
+        }
+        /** @var FormFieldConfig $config */
+        $config->setName($name);
+        $config->setPosition($this->getNextBulkEditableFieldPosition($config));
+        $config->setScaffoldActionConfig($this);
+        $this->bulkEditableFields[$name] = $config;
+        return $this;
+    }
+
+    /**
+     * @return FormFieldConfig[]
+     */
+    public function getBulkEditableFields() {
+        return $this->fields;
+    }
+
+    /**
+     * @param FormFieldConfig $fieldConfig
+     * @return int
+     */
+    protected function getNextBulkEditableFieldPosition(FormFieldConfig $fieldConfig) {
+        return count($this->bulkEditableFields);
     }
 
     /**
@@ -343,6 +423,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $messages
      * @param bool $isRevalidation
      * @return array|string|bool
+     * @throws \LogicException
      *
      * @throws ScaffoldActionException
      */
@@ -382,8 +463,10 @@ class FormConfig extends ScaffoldActionConfig {
                         $arrayFields[] = $key;
                     }
                 }
+                unset($validator);
             }
-        };
+        }
+        unset($value);
         $validator = \Validator::make($data, $validators, $messages);
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();

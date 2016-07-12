@@ -140,9 +140,6 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 $bulkActions[] = \Swayok\Html\Tag::a()
                     ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.edit_selected'))
                     ->setDataAttr('action', 'bulk-edit-selected')
-                    ->setDataAttr('url', route('cmf_api_edit_bulk', [$tableNameForRoutes], false))
-                    ->setDataAttr('method', 'put')
-                    ->setDataAttr('id-field', $pkName)
                     ->setHref('javascript: void(0)')
                     ->build();
             }

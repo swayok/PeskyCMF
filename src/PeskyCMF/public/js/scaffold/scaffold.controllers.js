@@ -510,6 +510,7 @@ var ScaffoldDataGridHelper = {
             if ($link.hasClass('disabled')) {
                 return false;
             }
+            var tpl = ScaffoldsManager.getBulkEditFormTpl(request.params.resource);
             // todo: get and render bulk-edit template and then show it in modal
             return false;
         })

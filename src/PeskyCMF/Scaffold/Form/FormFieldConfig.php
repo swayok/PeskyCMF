@@ -2,6 +2,8 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
+use PeskyCMF\Scaffold\ScaffoldActionException;
+use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldException;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
 use PeskyORM\DbColumnConfig;
