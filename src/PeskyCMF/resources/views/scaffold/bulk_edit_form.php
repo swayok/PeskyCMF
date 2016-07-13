@@ -48,9 +48,15 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                 <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
                 data-uuid="{{= it.formUUID }}">
                     <input type="hidden" name="_method" value="PUT">
-                    {{~ it.ids :item_id }}
-                        <input type="hidden" name="<?php echo $pkColName; ?>[]" value="{{= item_id }}">
-                    {{~}}
+                    {{? it._ids && it._ids.length }}
+                        {{~ it._ids :item_id }}
+                            <input type="hidden" name="<?php echo $pkColName; ?>[]" value="{{= item_id }}">
+                        {{~}}
+                    {{??}}
+                        {{? typeof it._conditions === 'string' }}
+                            <input type="hidden" name="_conditions" value="{{= it._conditions }}">
+                        {{?}}
+                    {{?}}
                     <!-- disable chrome email & password autofill -->
                     <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>
                     <!-- end of autofill disabler -->

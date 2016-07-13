@@ -466,15 +466,9 @@ var ScaffoldDataGridHelper = {
         };
         // selected items
         if (configs && configs.multiselect && $selectionLinks.length) {
-            var updateSelectedCountInLabel = function () {
+            var updateSelectedCountInLabelAndCollectIds = function () {
                 var count = api.rows({selected: true}).count() || 0;
                 updateCounter($selectionLinks, count);
-            };
-            updateSelectedCountInLabel();
-            $table.on('select.dt deselect.dt', function (event, api, type) {
-                if (type === 'row') {
-                    updateSelectedCountInLabel();
-                }
                 var rowsData = api.rows({selected: true}).data();
                 $selectionLinks.each(function () {
                     var idKey = $(this).attr('data-id-field') || 'id';
@@ -484,6 +478,15 @@ var ScaffoldDataGridHelper = {
                     });
                     $(this).data('data', {'ids': ids});
                 });
+            };
+            updateSelectedCountInLabelAndCollectIds();
+            $table.on('select.dt deselect.dt', function (event, api, type) {
+                if (type === 'row') {
+                    updateSelectedCountInLabelAndCollectIds();
+                }
+            });
+            $table.on('draw.dt', function () {
+                updateSelectedCountInLabelAndCollectIds();
             });
         } else {
             $selectionLinks
@@ -500,17 +503,33 @@ var ScaffoldDataGridHelper = {
             updateFilteredCountInLabel();
             $table.on('draw.dt', function () {
                 updateFilteredCountInLabel();
-            })
+            });
         }
     },
     initBulkEditing: function ($table, $tableWrapper, configs) {
         var $links = $tableWrapper.find('[data-action="bulk-edit-selected"], [data-action="bulk-edit-filtered"]');
+        var api = $table.dataTable().api();
         $links.on('click', function () {
             var $link = $(this);
             if ($link.hasClass('disabled')) {
                 return false;
             }
-            var tpl = ScaffoldsManager.getBulkEditFormTpl(request.params.resource);
+            var modalTpl = ScaffoldsManager.getBulkEditFormTpl(request.params.resource);
+            var tplData = {};
+            if ($link.attr('data-action') === 'bulk-edit-selected') {
+                tplData._ids = [];
+                var idKey = $link.attr('data-id-field');
+                api.rows({selected: true}).data().each(function (rowData) {
+                    tplData._ids.push(rowData[idKey]);
+                });
+                if (!tplData._ids) {
+                    toastr.error('No rows selected'); //< this should not happen, message is for developer to fix situation
+                    return false;
+                }
+            } else {
+                tplData._conditions = api.search();
+            }
+            var $modalContent = $(modalTpl(tplData));
             // todo: get and render bulk-edit template and then show it in modal
             return false;
         })
