@@ -367,8 +367,8 @@ div.dataTables_wrapper table.dataTable tbody tr td.select-checkbox {
 div.dataTables_wrapper table.dataTable tbody tr td.select-checkbox:before {
   content: "\f096";
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  line-height: 23px;
   text-align: left;
 }
 div.dataTables_wrapper table.dataTable tbody a:hover {
