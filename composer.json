@@ -43,6 +43,7 @@
         "driftyco/ionicons": "*",
         "nostalgiaz/bootstrap-switch": "*",
         "Eonasdan/bootstrap-datetimepicker": "*",
-        "datatables/datatables": "*"
+        "datatables/datatables": "*",
+        "ckeditor/ckeditor": "dev-full/4.*"
     }
 }
