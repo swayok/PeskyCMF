@@ -146,15 +146,20 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             base_path('vendor/components/jquery/jquery.js') => public_path('packages/cmf-vendors/jquery/jquery.js'),
             base_path('vendor/components/jquery/jquery.min.js') => public_path('packages/cmf-vendors/jquery/jquery.min.js'),
             base_path('vendor/components/jquery/jquery.min.map') => public_path('packages/cmf-vendors/jquery/jquery.min.map'),
+            base_path('vendor/malsup/form/jquery.form.js') => public_path('packages/cmf-vendors/jquery.form.js'),
+            base_path('vendor/mistic100/jquery-querybuilder/dist') => public_path('packages/cmf-vendors/db-query-builder'),
+            // ckeditor
+            base_path('vendor/ckeditor/ckeditor/ckeditor.js') => public_path('packages/cmf-vendors/ckeditor/ckeditor.js'),
+            base_path('vendor/ckeditor/ckeditor/config.js') => public_path('packages/cmf-vendors/ckeditor/config.js'),
+            base_path('vendor/ckeditor/ckeditor/adapters') => public_path('packages/cmf-vendors/ckeditor/adapters'),
+            base_path('vendor/ckeditor/ckeditor/lang') => public_path('packages/cmf-vendors/ckeditor/lang'),
+            base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
             // libs
             base_path('vendor/datatables/datatables/media') => public_path('packages/cmf-vendors/datatables'),
-            base_path('vendor/ckeditor/ckeditor') => public_path('packages/cmf-vendors/ckeditor'),
-            base_path('vendor/mistic100/jquery-querybuilder/dist') => public_path('packages/cmf-vendors/db-query-builder'),
             base_path('vendor/grimmlink/toastr/build') => public_path('packages/cmf-vendors/toastr'),
             base_path('vendor/moment/moment/moment.js') => public_path('packages/cmf-vendors/moment/moment.js'),
             base_path('vendor/moment/moment/min/moment.min.js') => public_path('packages/cmf-vendors/moment/moment.min.js'),
             base_path('vendor/moment/moment/locale') => public_path('packages/cmf-vendors/moment/locale'),
-            base_path('vendor/malsup/form/jquery.form.js') => public_path('packages/cmf-vendors/jquery.form.js'),
             base_path('vendor/afarkas/html5shiv/dist/html5shiv.min.js') => public_path('packages/cmf-vendors/html5shiv.min.js'),
             base_path('vendor/select2/select2/dist') => public_path('packages/cmf-vendors/select2'),
 

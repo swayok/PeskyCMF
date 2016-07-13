@@ -208,7 +208,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('container', 'body')
+                ->setDataAttr('container', '#section-content')
                 ->setHref($url)
                 ->build();
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
@@ -220,7 +220,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('container', 'body')
+                ->setDataAttr('container', '#section-content')
                 ->setHref($url)
                 ->build();
             $actionsTpl .= '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
@@ -231,7 +231,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setClass('row-action text-red')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.delete_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('container', 'body')
+                ->setDataAttr('container', '#section-content')
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
