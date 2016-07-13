@@ -19,7 +19,7 @@
     <link href="/packages/cmf-vendors/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
 
-    <link href="/packages/cmf/css/bootstrap-datepicker3.css" rel="stylesheet" type="text/css"/>
+    {{--<link href="/packages/cmf/css/bootstrap-datepicker3.css" rel="stylesheet" type="text/css"/>--}}
     <link href="/packages/cmf/css/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/cmf-vendors/toastr/toastr.css" rel="stylesheet" type="text/css"/>
@@ -71,8 +71,6 @@
     <script src="/packages/cmf-vendors/datatables/js/jquery.dataTables.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/datatables/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/datatables/extensions/Select/js/dataTables.select.min.js" type="text/javascript"></script>
-    <script src="/packages/adminlte/plugins/datepicker/bootstrap-datepicker.js" type="text/javascript"></script>
-    <script src="/packages/adminlte/plugins/datepicker/locales/bootstrap-datepicker.ru.js" type="text/javascript"></script>
     <script src="/packages/adminlte/js/app.js" type="text/javascript"></script>
 
     <script src="/packages/cmf-vendors/modernizr.custom.js" type="text/javascript"></script>

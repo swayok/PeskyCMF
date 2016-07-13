@@ -151,15 +151,20 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             // ckeditor
             base_path('vendor/ckeditor/ckeditor/ckeditor.js') => public_path('packages/cmf-vendors/ckeditor/ckeditor.js'),
             base_path('vendor/ckeditor/ckeditor/config.js') => public_path('packages/cmf-vendors/ckeditor/config.js'),
+            base_path('vendor/ckeditor/ckeditor/styles.js') => public_path('packages/cmf-vendors/ckeditor/styles.js'),
+            base_path('vendor/ckeditor/ckeditor/contents.css') => public_path('packages/cmf-vendors/ckeditor/contents.css'),
             base_path('vendor/ckeditor/ckeditor/adapters') => public_path('packages/cmf-vendors/ckeditor/adapters'),
             base_path('vendor/ckeditor/ckeditor/lang') => public_path('packages/cmf-vendors/ckeditor/lang'),
             base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
+            base_path('vendor/ckeditor/ckeditor/skins') => public_path('packages/cmf-vendors/ckeditor/skins'),
+            __DIR__ . '/public/cmf-vendors/ckeditor/config.js' => public_path('packages/cmf-vendors/ckeditor/config.js'),
             // libs
             base_path('vendor/datatables/datatables/media') => public_path('packages/cmf-vendors/datatables'),
             base_path('vendor/grimmlink/toastr/build') => public_path('packages/cmf-vendors/toastr'),
             base_path('vendor/moment/moment/moment.js') => public_path('packages/cmf-vendors/moment/moment.js'),
             base_path('vendor/moment/moment/min/moment.min.js') => public_path('packages/cmf-vendors/moment/moment.min.js'),
             base_path('vendor/moment/moment/locale') => public_path('packages/cmf-vendors/moment/locale'),
+            base_path('vendor/moment/moment/locale/en-gb.js') => public_path('packages/cmf-vendors/moment/locale/en.js'),
             base_path('vendor/afarkas/html5shiv/dist/html5shiv.min.js') => public_path('packages/cmf-vendors/html5shiv.min.js'),
             base_path('vendor/select2/select2/dist') => public_path('packages/cmf-vendors/select2'),
 
