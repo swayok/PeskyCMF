@@ -156,6 +156,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             base_path('vendor/moment/moment/locale') => public_path('packages/cmf-vendors/moment/locale'),
             base_path('vendor/malsup/form/jquery.form.js') => public_path('packages/cmf-vendors/jquery.form.js'),
             base_path('vendor/afarkas/html5shiv/dist/html5shiv.min.js') => public_path('packages/cmf-vendors/html5shiv.min.js'),
+            base_path('vendor/select2/select2/dist') => public_path('packages/cmf-vendors/select2'),
 
         ], 'public');
     }

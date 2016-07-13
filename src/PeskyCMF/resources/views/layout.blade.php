@@ -16,7 +16,7 @@
     <link href="/packages/cmf-vendors/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/fontions/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/fontions/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/adminlte/plugins/select2/select2.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/cmf/css/bootstrap-datepicker3.css" rel="stylesheet" type="text/css"/>
