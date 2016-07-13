@@ -44,6 +44,13 @@
         "nostalgiaz/bootstrap-switch": "*",
         "Eonasdan/bootstrap-datetimepicker": "*",
         "datatables/datatables": "*",
-        "ckeditor/ckeditor": "dev-full/stable"
+        "ckeditor/ckeditor": "dev-full/stable",
+        "twbs/bootstrap": "3.*",
+        "components/jquery": "2.*",
+        "bootstrap-select/bootstrap-select": "*",
+        "mistic100/jquery-querybuilder": "*",
+        "grimmlink/toastr": "2.*",
+        "moment/moment": "2.*",
+        "malsup/form": "3.*"
     }
 }
