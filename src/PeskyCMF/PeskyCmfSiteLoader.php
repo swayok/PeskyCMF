@@ -124,16 +124,16 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     protected function configurePublishes() {
         $this->provider->publishes([
             // cmf
-            __DIR__ . '/public/css' => public_path('packages/cmf'),
-            __DIR__ . '/public/js' => public_path('packages/cmf'),
-            __DIR__ . '/public/less' => public_path('packages/cmf'),
-            __DIR__ . '/public/img' => public_path('packages/cmf'),
+            __DIR__ . '/public/css' => public_path('packages/cmf/css'),
+            __DIR__ . '/public/js' => public_path('packages/cmf/js'),
+            __DIR__ . '/public/less' => public_path('packages/cmf/less'),
+            __DIR__ . '/public/img' => public_path('packages/cmf/img'),
             __DIR__ . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
             // AdminLTE
             base_path('vendor/almasaeed2010/adminlte/dist') => public_path('packages/adminlte'),
-            base_path('vendor/almasaeed2010/adminlte/plugins') => public_path('packages/adminlte/plugins'),
+//            base_path('vendor/almasaeed2010/adminlte/plugins') => public_path('packages/adminlte/plugins'),
             // bootstrap
-            base_path('twbs/bootstrap/dist') => public_path('packages/cmf-vendors/bootstrap'),
+            base_path('vendor/twbs/bootstrap/dist') => public_path('packages/cmf-vendors/bootstrap'),
             base_path('vendor/eonasdan/bootstrap-datetimepicker/build') => public_path('packages/cmf-vendors/bootstrap/datetimepicker'),
             base_path('vendor/nostalgiaz/bootstrap-switch/dist') => public_path('packages/cmf-vendors/bootstrap/switches'),
             base_path('vendor/bootstrap-select/bootstrap-select/dist') => public_path('packages/cmf-vendors/bootstrap/select'),
@@ -155,6 +155,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             base_path('vendor/moment/moment/min/moment.min.js') => public_path('packages/cmf-vendors/moment/moment.min.js'),
             base_path('vendor/moment/moment/locale') => public_path('packages/cmf-vendors/moment/locale'),
             base_path('vendor/malsup/form/jquery.form.js') => public_path('packages/cmf-vendors/jquery.form.js'),
+            base_path('vendor/afarkas/html5shiv/dist/html5shiv.min.js') => public_path('packages/cmf-vendors/html5shiv.min.js'),
 
         ], 'public');
     }

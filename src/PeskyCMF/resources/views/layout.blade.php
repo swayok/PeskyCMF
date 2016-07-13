@@ -10,23 +10,25 @@
 
     @yield('html-head')
 
-    <link href="/packages/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/js/lib/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/fontions/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/fontions/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/adminlte/plugins/select2/select2.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
+
     <link href="/packages/cmf/css/bootstrap-datepicker3.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/js/lib/bootstrap-select/bootstrap-select.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/js/lib/toastr/toastr.css" rel="stylesheet" type="text/css"/>
+
+    <link href="/packages/cmf-vendors/toastr/toastr.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/adminlte/css/skins/skin-blue.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/font-replace.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css" id="place-dynamic-css-files-before"/>
-    <link href="/packages/cmf/js/lib/query_builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/db-query-builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/cmf.app.css" rel="stylesheet" type="text/css"/>
 
     @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->layout_css_includes() as $cssPath)
@@ -39,8 +41,8 @@
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <script src="/packages/cmf-vendors/html5shiv.min.js"></script>
+    <script src="/packages/cmf-vendors/respond.min.js"></script>
     <![endif]-->
 </head>
 
@@ -60,38 +62,38 @@
         };
     </script>
 
-    <script src="/packages/cmf/js/lib/jquery/jquery-2.1.3.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/jquery/jquery.min.js" type="text/javascript"></script>
 
-    <script src="/packages/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
-    <script src="/packages/bootstrap/switches/js/bootstrap-switch.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/bootstrap/switches/js/bootstrap-switch.min.js" type="text/javascript"></script>
     <script src="/packages/adminlte/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
     <script src='/packages/adminlte/plugins/fastclick/fastclick.min.js'></script>
-    <script src="/packages/cmf/js/lib/datatables/js/jquery.dataTables.min.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/datatables/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/datatables/extensions/Select/js/dataTables.select.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/datatables/js/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/datatables/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/datatables/extensions/Select/js/dataTables.select.min.js" type="text/javascript"></script>
     <script src="/packages/adminlte/plugins/datepicker/bootstrap-datepicker.js" type="text/javascript"></script>
     <script src="/packages/adminlte/plugins/datepicker/locales/bootstrap-datepicker.ru.js" type="text/javascript"></script>
     <script src="/packages/adminlte/js/app.js" type="text/javascript"></script>
 
-    <script src="/packages/cmf/js/lib/modernizr.custom.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/pilot.router.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/jquery.observable.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/rison.object.coder.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/dotjs/doT.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/moment/moment.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/moment/locale/{{ app()->getLocale() }}.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/jQuery.extendext.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/query_builder/query-builder.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/query_builder/i18n/query-builder.{{ app()->getLocale() }}.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/jquery.plugins.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/jquery.form.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/toastr/toastr.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/base64.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/ckeditor/ckeditor.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/ckeditor/adapters/jquery.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/ckeditor/config.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/lib/bootstrap-select/bootstrap-select.min.js" type="text/javascript"></script>
-    <script src="/packages/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/modernizr.custom.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/pilot.router.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/jquery.observable.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/rison.object.coder.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/dotjs/doT.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/moment/moment.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/moment/locale/{{ app()->getLocale() }}.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/jQuery-extendext/jQuery.extendext.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/db-query-builder/js/query-builder.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/db-query-builder/i18n/query-builder.{{ app()->getLocale() }}.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/jquery.plugins.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/jquery.form.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/toastr/toastr.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/base64.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/ckeditor/ckeditor.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/ckeditor/adapters/jquery.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/ckeditor/config.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.global.vars.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.helpers.js" type="text/javascript"></script>

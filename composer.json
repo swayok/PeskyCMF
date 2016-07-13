@@ -51,6 +51,7 @@
         "mistic100/jquery-querybuilder": "*",
         "grimmlink/toastr": "2.*",
         "moment/moment": "2.*",
-        "malsup/form": "3.*"
+        "malsup/form": "3.*",
+        "afarkas/html5shiv": "*"
     }
 }
