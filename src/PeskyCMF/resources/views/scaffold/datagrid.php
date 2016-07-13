@@ -31,7 +31,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
     <div class="content">
         <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">
             <div class="box"><div class="box-body">
-                <table id="<?php echo $dataGridId ?>" class="table table-bordered table-hover table-striped">
+                <table id="<?php echo $dataGridId ?>" class="table table-bordered table-hover table-striped fluid-width">
                 <thead>
                     <tr>
                         <?php
@@ -208,6 +208,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
+                ->setDataAttr('container', 'body')
                 ->setHref($url)
                 ->build();
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
@@ -219,6 +220,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
+                ->setDataAttr('container', 'body')
                 ->setHref($url)
                 ->build();
             $actionsTpl .= '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
@@ -229,6 +231,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setClass('row-action text-red')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.delete_item'))
                 ->setDataAttr('toggle', 'tooltip')
+                ->setDataAttr('container', 'body')
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
@@ -244,7 +247,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 $actionsTpl .= $rowAction;
             }
         }
-        $actionsTpl = '<div class="row-actions">' . preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $actionsTpl) . '</div>'
+        $actionsTpl = '<div class="row-actions text-nowrap">' . preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $actionsTpl) . '</div>'
     ?>
 
     <script type="application/javascript">
