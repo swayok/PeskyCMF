@@ -76,7 +76,6 @@ body {
     100%{ -moz-transform: rotate(360deg); transform: rotate(360deg); }
 }
 
-div.dataTables_wrapper div.dataTables_processing,
 .has-preloader {
     position: relative;
     min-height: 50px;
@@ -167,30 +166,6 @@ div.dataTables_wrapper div.dataTables_processing,
 .content-wrapper.has-preloader,
 .wrapper.has-preloader {
     min-height: 100%;
-}
-
-div.dataTables_wrapper div.dataTables_processing {
-    position: absolute;
-    top: 0;
-    left: 5px;
-    right: 5px;
-    bottom: -45px;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    height: auto;
-    color: transparent;
-    box-shadow: none;
-    border: 0 none;
-
-    &:before {
-        height: 100%;
-        ._fade-in;
-    }
-
-    &:after {
-        ._fade-in;
-    }
 }
 
 .mfp-s-loading .mfp-preloader {
@@ -335,6 +310,32 @@ form {
 
 div.dataTables_wrapper {
 
+    div.dataTables_processing {
+        .has-preloader;
+
+        position: absolute;
+        top: 0;
+        left: 5px;
+        right: 5px;
+        bottom: -45px;
+        margin: 0;
+        padding: 0;
+        width: auto;
+        height: auto;
+        color: transparent;
+        box-shadow: none;
+        border: 0 none;
+
+        &:before {
+            height: 100%;
+            ._fade-in;
+        }
+
+        &:after {
+            ._fade-in;
+        }
+    }
+
     &.multiselect {
         .dataTables_scrollHead {
             .dropdown-menu {
@@ -407,6 +408,12 @@ div.dataTables_wrapper {
                     }
 
                     td.select-checkbox {
+                        color: #08C;
+
+                        &:hover {
+                            color: #000000;
+                        }
+
                         &:before {
                             content: "\f046";
                         }
@@ -417,6 +424,10 @@ div.dataTables_wrapper {
                     cursor: pointer;
                     font-family: FontAwesome;
                     text-align: center;
+
+                    &:hover {
+                        color: #08C;
+                    }
 
                     &:before {
                         content: "\f096";
@@ -564,12 +575,22 @@ div.dataTables_wrapper {
 
         ul.dropdown-menu {
             a {
-                white-space: nowrap;
                 .label {
-                    margin-top: 3px;
-                    margin-left: 8px;
+                    line-height: 16px;
+                    padding: 1px 6px 1px 6px;
+                    vertical-align: middle;
+                    margin: 0 3px 0 -3px;
+                }
+
+                &.disabled {
+                    color: #BBBBBB;
+
+                    .label {
+                        background-color: #999999 !important;
+                    }
                 }
             }
+
         }
     }
 

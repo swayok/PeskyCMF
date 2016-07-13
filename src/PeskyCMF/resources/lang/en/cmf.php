@@ -49,12 +49,12 @@ return [
         ],
         'bulk_actions' => [
             'dropdown_label' => 'Bulk actions',
-            'delete_selected' => 'Delete selected <span class="label label-primary pull-right">:count</span>',
+            'delete_selected' => '<span class="label label-danger">:count</span> Delete selected',
             'delete_selected_confirm' => 'Confirm selected Items delete action',
-            'edit_selected' => 'Edit selected <span class="label label-primary pull-right">:count</span>',
-            'delete_filtered' => 'Delete filtered <span class="label label-primary pull-right">:count</span>',
+            'edit_selected' => '<span class="label label-primary">:count</span> Edit selected',
+            'delete_filtered' => '<span class="label label-danger">:count</span> Delete filtered',
             'delete_filtered_confirm' => 'Confirm filtered Items delete action',
-            'edit_filtered' => 'Edit filtered <span class="label label-primary pull-right">:count</span>',
+            'edit_filtered' => '<span class="label label-primary">:count</span> Edit filtered ',
         ],
         'field' => [
             'bool' => [

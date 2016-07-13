@@ -49,10 +49,12 @@ return [
         ],
         'bulk_actions' => [
             'dropdown_label' => 'Массовые действия',
-            'delete_selected' => 'Удалить выбранные (:count)',
-            'edit_selected' => 'Редактировать выбранные (:count)',
-            'delete_filtered' => 'Удалить отфильтрованные (:count)',
-            'edit_filtered' => 'Редактировать отфильтрованные (:count)',
+            'delete_selected' => '<span class="label label-danger">:count</span> Удалить выбранные',
+            'delete_selected_confirm' => 'Подтвердите удаление выбранных объектов',
+            'edit_selected' => '<span class="label label-primary"> Редактировать выбранные',
+            'delete_filtered' => '<span class="label label-danger">:count</span> Удалить отфильтрованные',
+            'delete_filtered_confirm' => 'Подтвердите удаление отфильтрованных объектов',
+            'edit_filtered' => '<span class="label label-primary"> Редактировать отфильтрованные',
         ],
         'field' => [
             'bool' => [
