@@ -501,23 +501,47 @@ div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a .label {
 .skin-blue .sidebar-menu > li.header {
   color: #678b97;
 }
-aside.main-sidebar .sidebar-menu li a {
+aside.main-sidebar .sidebar-menu li > a {
   border-right: 3px solid transparent;
 }
-aside.main-sidebar .sidebar-menu li.active a {
+aside.main-sidebar .sidebar-menu li > a > .fa.pull-right,
+aside.main-sidebar .sidebar-menu li > a > .glyphicon.pull-right {
+  line-height: 20px;
+}
+aside.main-sidebar .sidebar-menu li > a > .fa-angle-left {
+  -webkit-transition: -webkit-transform 0.1s linear;
+  -moz-transition: -moz-transform 0.1s linear;
+  -o-transition: -o-transform 0.1s linear;
+  transition: transform 0.1s linear;
+  width: 8px;
+  height: 14px;
+  text-align: left;
+  margin: 3px 8px 0 0;
+}
+aside.main-sidebar .sidebar-menu li > a > .fa-angle-left.pull-right {
+  line-height: normal;
+}
+aside.main-sidebar .sidebar-menu li.active > a {
   border-left-color: transparent;
   border-right-color: #3c8dbc;
 }
-aside.main-sidebar .sidebar-menu li.active:hover a {
+aside.main-sidebar .sidebar-menu li.active > a > .fa-angle-left {
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+}
+aside.main-sidebar .sidebar-menu li.active:hover > a {
   border-left-color: #3c8dbc;
 }
-aside.main-sidebar .sidebar-menu li.treeview.active a {
+aside.main-sidebar .sidebar-menu li.treeview.active > a {
   border-right-color: transparent !important;
 }
 aside.main-sidebar .sidebar-menu li.treeview.active .treeview-menu.menu-open {
   margin-right: 0;
 }
-aside.main-sidebar .sidebar-menu li.treeview.active .treeview-menu.menu-open a.active {
+aside.main-sidebar .sidebar-menu li.treeview.active .treeview-menu.menu-open > a.active {
   border-right-color: #3c8dbc !important;
 }
 aside.main-sidebar .sidebar-menu li.header {

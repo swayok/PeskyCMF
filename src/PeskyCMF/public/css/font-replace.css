@@ -1,7 +1,7 @@
-@import "fonts/opensans.css";
+@import "fonts/Roboto/roboto.css";
 
 body {
-    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 h1,
@@ -16,5 +16,5 @@ h6,
 .h4,
 .h5,
 .h6 {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Roboto', sans-serif;
 }

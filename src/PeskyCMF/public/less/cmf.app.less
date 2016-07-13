@@ -581,30 +581,51 @@ div.dataTables_wrapper {
 
 aside.main-sidebar {
     .sidebar-menu li {
-        a {
+        > a {
             border-right: 3px solid transparent;
+
+            > .fa.pull-right,
+            > .glyphicon.pull-right {
+                line-height: 20px;
+            }
+
+            > .fa-angle-left {
+                .transition-transform(0.1s linear);
+                width: 8px;
+                height: 14px;
+                text-align: left;
+                margin: 3px 8px 0 0;
+
+                &.pull-right {
+                    line-height: normal;
+                }
+            }
         }
 
         &.active {
-            a {
+            > a {
                 border-left-color: transparent;
                 border-right-color: #3c8dbc;
+
+                > .fa-angle-left {
+                    .transform(rotate(-90deg));
+                }
             }
 
-            &:hover a {
+            &:hover > a {
                 border-left-color: #3c8dbc;
             }
         }
 
         &.treeview.active {
-            a {
+            > a {
                 border-right-color: transparent !important;
             }
 
             .treeview-menu.menu-open {
                 margin-right: 0;
 
-                a.active {
+                > a.active {
                     border-right-color: #3c8dbc !important;
                 }
             }

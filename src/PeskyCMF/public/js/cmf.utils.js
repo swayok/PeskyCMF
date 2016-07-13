@@ -332,13 +332,17 @@ Utils.setUser = function (userData) {
     return Cache.user;
 };
 
-Utils.highlightLinks = function (url) {
+Utils.highlightLinks = function (url, isRecursion) {
     $('li.current-page, a.current-page, li.treeview').removeClass('current-page active');
-    var links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
-    links.parent().filter('li').addClass('current-page active')
+    var $links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
+    if (!$links.length && !isRecursion) {
+        Utils.highlightLinks(url.replace(/\/[^\/]+$/, ''), true);
+        return;
+    }
+    $links.parent().filter('li').addClass('current-page active')
         .parent().filter('ul.treeview-menu').addClass('menu-open')
         .parent().filter('li.treeview').addClass('active');
-    links.not('li').find('> a').addClass('current-page active');
+    $links.not('li').find('> a').addClass('current-page active');
 };
 
 Utils.cleanCache = function () {
