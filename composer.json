@@ -44,6 +44,6 @@
         "nostalgiaz/bootstrap-switch": "*",
         "Eonasdan/bootstrap-datetimepicker": "*",
         "datatables/datatables": "*",
-        "ckeditor/ckeditor": "dev-full/4.*"
+        "ckeditor/ckeditor": "dev-full/stable"
     }
 }
