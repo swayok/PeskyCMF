@@ -412,19 +412,20 @@ Utils.initDebuggingTools = function () {
         var $disableTplCacheBtn = $('<button type="button" class="btn btn-xs btn-default">Tpl cache: on</button>');
         $buttons.append($disableTplCacheBtn);
         if (Modernizr.localstorage) {
-            ScaffoldsManager.cacheTemplates = !localStorage.getItem('debug-tools-templates-cache-disabled');
+            ScaffoldsManager.cacheTemplates = localStorage.getItem('debug-tools-templates-cache') !== 'off';
         }
         if (!ScaffoldsManager.cacheTemplates) {
             $disableTplCacheBtn.addClass('btn-danger').removeClass('btn-default').text('Tpl cache: off');
         }
         $disableTplCacheBtn.on('click', function () {
             ScaffoldsManager.cacheTemplates = !ScaffoldsManager.cacheTemplates;
+            var labelSuffix = ScaffoldsManager.cacheTemplates ? 'on' : 'off';
             $disableTplCacheBtn
                 .addClass(ScaffoldsManager.cacheTemplates ? 'btn-default' : 'btn-danger')
                 .removeClass(ScaffoldsManager.cacheTemplates ? 'btn-danger' : 'btn-default')
-                .text('Tpl cache: ' + (ScaffoldsManager.cacheTemplates ? 'on' : 'off'));
+                .text('Tpl cache: ' + labelSuffix);
             if (Modernizr.localstorage) {
-                localStorage.setItem('debug-tools-templates-cache-disabled', !ScaffoldsManager.cacheTemplates);
+                localStorage.setItem('debug-tools-templates-cache', labelSuffix);
             }
         });
     }
