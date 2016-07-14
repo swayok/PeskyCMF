@@ -62,6 +62,7 @@ $(document).ready(function () {
         }
         Utils.highlightLinks(request.path);
         app.disableUrlChangeOnce = false;
+        $('.modal.in').not('[data-close-on-nav="false"]').modal('hide');
     })/*.on('useraction:navigate', function () {
     })*/;
 

@@ -77,6 +77,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyORM\Exception\DbColumnConfigException
+     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     protected function configureDefaultRenderer(
         ScaffoldFieldRendererConfig $rendererConfig,
@@ -179,6 +180,7 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param array $fields
      * @return $this
+     * @throws \PeskyORM\Exception\DbTableConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyORM\Exception\DbModelException
@@ -200,24 +202,30 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * @param string $name
-     * @param null|FormFieldConfig $config - null: FormFieldConfig will be imported from $this->fields or created default one
+     * @param null|FormFieldConfig $fieldConfig - null: FormFieldConfig will be imported from $this->fields or created default one
      * @return $this
+     * @throws \PeskyORM\Exception\DbTableConfigException
      * @throws \PeskyORM\Exception\DbModelException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
-    public function addBulkEditableField($name, $config = null) {
-        if ((!$config || $config->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
+    public function addBulkEditableField($name, $fieldConfig = null) {
+        if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
+        } else if ($this->getModel()->getTableColumn($name)->isFile()) {
+            throw new ScaffoldActionException(
+                $this,
+                "Attaching files in bulk editing form is not suppoted. Table column: [$name]"
+            );
         }
-        if (empty($config)) {
-            $config = $this->hasField($name) ? $this->getField($name) : $this->createFieldConfig();
+        if (empty($fieldConfig)) {
+            $fieldConfig = $this->hasField($name) ? $this->getField($name) : $this->createFieldConfig();
         }
-        /** @var FormFieldConfig $config */
-        $config->setName($name);
-        $config->setPosition($this->getNextBulkEditableFieldPosition($config));
-        $config->setScaffoldActionConfig($this);
-        $this->bulkEditableFields[$name] = $config;
+        /** @var FormFieldConfig $fieldConfig */
+        $fieldConfig->setName($name);
+        $fieldConfig->setPosition($this->getNextBulkEditableFieldPosition($fieldConfig));
+        $fieldConfig->setScaffoldActionConfig($this);
+        $this->bulkEditableFields[$name] = $fieldConfig;
         return $this;
     }
 
@@ -225,7 +233,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @return FormFieldConfig[]
      */
     public function getBulkEditableFields() {
-        return $this->fields;
+        return $this->bulkEditableFields;
     }
 
     /**
@@ -372,6 +380,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $messages
      * @param bool $isRevalidation
      * @return array
+     * @throws \LogicException
      * @throws ScaffoldActionException
      */
     public function validateDataForCreate(array $data, array $messages = [], $isRevalidation = false) {
@@ -383,6 +392,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $messages
      * @param bool $isRevalidation
      * @return array
+     * @throws \LogicException
      * @throws ScaffoldActionException
      */
     public function validateDataForEdit(array $data, array $messages = [], $isRevalidation = false) {

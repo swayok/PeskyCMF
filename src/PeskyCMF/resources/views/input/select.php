@@ -7,8 +7,9 @@
  */
 
 $allAttributes = $rendererConfig->getAttributes();
+$isMultiple = $rendererConfig->getAttribute('multiple', false);
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName() . ($rendererConfig->getAttribute('multiple', false) ? '[]' : ''), false)
+    ->addAttribute('name', $fieldConfig->getName() . ($isMultiple ? '[]' : ''), false)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('class', 'form-control selectpicker', false);
 
@@ -17,7 +18,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 ?>
 <div class="form-group">
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel(); ?></label>
-    <select data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || ''}}"
+    <select data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || '<?php echo $isMultiple ? '[]' : ''; ?>'}}"
         {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
     >
     <?php if (!$fieldConfig->hasOptionsLoader()) : ?>

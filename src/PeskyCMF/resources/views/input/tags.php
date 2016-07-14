@@ -17,7 +17,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <div class="form-group">
     <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
     <div>
-        <select multiple data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || ''}}"
+        <select multiple data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || '[]'}}"
             {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
         >
         </select>

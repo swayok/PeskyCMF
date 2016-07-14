@@ -43,11 +43,7 @@ var ScaffoldControllers = {
         },
         afterRender : function (event, request) {
             ScaffoldActionsHelper.initActions(this.$el);
-            this.$el.find('select[data-value!=""]').each(function () {
-                $(this).val(this.getAttribute('data-value'));
-            });
-            var form = this.$el.find('form');
-            FormHelper.initForm(form, form, function (json, form, container) {
+            ScaffoldFormHelper.initForm(this.$el.find('form'), function (json, form, container) {
                 if (json._message) {
                     toastr.success(json._message);
                 }
@@ -514,23 +510,7 @@ var ScaffoldDataGridHelper = {
             if ($link.hasClass('disabled')) {
                 return false;
             }
-            var modalTpl = ScaffoldsManager.getBulkEditFormTpl(request.params.resource);
-            var tplData = {};
-            if ($link.attr('data-action') === 'bulk-edit-selected') {
-                tplData._ids = [];
-                var idKey = $link.attr('data-id-field');
-                api.rows({selected: true}).data().each(function (rowData) {
-                    tplData._ids.push(rowData[idKey]);
-                });
-                if (!tplData._ids) {
-                    toastr.error('No rows selected'); //< this should not happen, message is for developer to fix situation
-                    return false;
-                }
-            } else {
-                tplData._conditions = api.search();
-            }
-            var $modalContent = $(modalTpl(tplData));
-            // todo: get and render bulk-edit template and then show it in modal
+            ScaffoldFormHelper.handleBulkEditForm($link, configs.resource_name, api);
             return false;
         })
     }
@@ -824,5 +804,57 @@ var ScaffoldFormHelper = {
             deferred.resolve(ScaffoldFormHelper.options[cacheKey]);
         }
         return deferred;
+    },
+    initForm: function ($form, successCallback) {
+        $form.find('select[data-value!=""]').each(function () {
+            $(this).val(this.getAttribute('data-value'));
+        });
+        FormHelper.initForm($form, $form, successCallback);
+    },
+    handleBulkEditForm: function ($link, resourceName, api) {
+        try {
+            var deferred = ScaffoldsManager.getBulkEditFormTpl(resourceName);
+        } catch (exc) {
+            toastr.error(exc);
+        }
+        $('.modal.in').modal('hide'); //< hide any opened modals
+        Utils.showPreloader(CmfControllerHelpers.currentContentContainer);
+        $.when(deferred, ScaffoldFormHelper.loadOptions(resourceName, 'bulk-edit'))
+            .done(function (modalTpl, optionsResponse) {
+                var tplData = {_options: optionsResponse};
+                if ($link.attr('data-action') === 'bulk-edit-selected') {
+                    tplData._ids = [];
+                    var idKey = $link.attr('data-id-field');
+                    api.rows({selected: true}).data().each(function (rowData) {
+                        tplData._ids.push(rowData[idKey]);
+                    });
+                    if (!tplData._ids) {
+                        toastr.error('No rows selected'); //< this should not happen, message is for developer to fix situation
+                        return false;
+                    }
+                } else {
+                    tplData._conditions = api.search();
+                }
+                var $bulkEditModal = $(modalTpl(tplData));
+                $(document.body).append($bulkEditModal);
+                $bulkEditModal.modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $bulkEditModal
+                    .on('hidden.bs.modal', function () {
+                        $bulkEditModal.remove();
+                    })
+                    .on('show.bs.modal', function () {
+                        ScaffoldFormHelper.initForm($bulkEditModal.find('form'), function () {
+                            // todo: success callback
+                        });
+                    });
+                $bulkEditModal.modal('show');
+                // todo: finish bulk-edit form (submit)
+            })
+            .always(function () {
+                Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+            });
     }
 };

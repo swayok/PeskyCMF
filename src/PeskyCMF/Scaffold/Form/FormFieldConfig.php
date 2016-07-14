@@ -2,8 +2,6 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyCMF\Scaffold\ScaffoldActionException;
-use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldException;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
 use PeskyORM\DbColumnConfig;
@@ -151,6 +149,15 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     public function setType($type) {
         parent::setType($type);
         return $this;
+    }
+
+    /**
+     * @param string $default
+     * @return string
+     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     */
+    public function getLabel($default = '') {
+        return parent::getLabel($default) . ($this->getTableColumnConfig()->isRequiredOnAnyAction() ? '*' : '');
     }
 
 }

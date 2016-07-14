@@ -63,9 +63,6 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                                 if (!$inputConfig->hasLabel()) {
                                     $inputConfig->setLabel(trans("$translationPrefix.form.field.{$inputConfig->getName()}"));
                                 }
-                                if ($model->getTableColumn($inputConfig->getName())->isRequiredOnAnyAction()) {
-                                    $inputConfig->setLabel($inputConfig->getLabel() . '*');
-                                }
                                 try {
                                     $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
                                     // replace <script> tags to be able to render that template
@@ -122,8 +119,10 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                                     <?php endif; ?>
                                 <?php echo $endIf; ?>
                                 </div>
-                                <div class="col-xs-3">
-                                    <button type="submit" class="btn btn-success pull-right"><?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?></button>
+                                <div class="col-xs-3 text-right">
+                                    <button type="submit" class="btn btn-success">
+                                        <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?>
+                                    </button>
                                 </div>
                             </div>
                             <?php $toolbarItems = $formConfig->getToolbarItems(); ?>

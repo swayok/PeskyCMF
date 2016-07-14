@@ -158,8 +158,6 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             $bulkActions[] = \Swayok\Html\Tag::a()
                 ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.edit_filtered'))
                 ->setDataAttr('action', 'bulk-edit-filtered')
-                ->setDataAttr('url', route('cmf_api_edit_filtered', [$tableNameForRoutes], false))
-                ->setDataAttr('method', 'put')
                 ->setHref('javascript: void(0)')
                 ->build();
         }
@@ -271,10 +269,10 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                     ]
                 );
             ?>
-            var dataTablesConfig = <?php echo json_encode($dataTablesConfig, JSON_UNESCAPED_UNICODE); ?>;
+            var dataTablesConfig = <?php echo json_encode($dataTablesConfig + ['resource_name' => $tableNameForRoutes], JSON_UNESCAPED_UNICODE); ?>;
             var rowActionsTpl = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
             <?php if ($dataGridConfig->isRowActionsFloating()): ?>
-            dataTablesConfig.rowActions = rowActionsTpl;
+                dataTablesConfig.rowActions = rowActionsTpl;
             <?php else: ?>
                 <?php
                     /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $actionsFieldConfig */

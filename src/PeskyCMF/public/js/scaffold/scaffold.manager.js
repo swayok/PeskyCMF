@@ -1,6 +1,5 @@
 var ScaffoldsManager = {
     app: null,
-    currentResource: null,
     cacheTemplates: true
 };
 
@@ -35,12 +34,18 @@ ScaffoldsManager.validateResourceName = function (resourceName) {
     }
 };
 
+ScaffoldsManager.findResourceNameInUrl = function (url) {
+    var matches = url.match(/\/resource\/([^\/]+)/i);
+    return !matches ? false : matches[0];
+};
+
 /* ============ Templates ============ */
 
 $.extend(Cache, {
     rawTemplates: {},
     compiledTemplates: {
         itemForm: {},
+        bulkEditForm: {},
         itemDetails: {}
     }
 });
@@ -49,7 +54,6 @@ ScaffoldsManager.loadTemplates = function (resourceName) {
     ScaffoldsManager.validateResourceName(resourceName);
     var deferred = $.Deferred();
     if (!ScaffoldsManager.cacheTemplates || !ScaffoldsManager.isTemplatesLoaded(resourceName)) {
-    //if (true) {
         var resourceUrl = ScaffoldsManager.getResourceBaseUrl(resourceName);
         $.ajax({
             url: resourceUrl + '/service/templates',
@@ -137,7 +141,7 @@ ScaffoldsManager.getItemFormTpl = function (resourceName) {
         if (!ScaffoldsManager.hasItemFormTemplate(resourceName)) {
             throw 'There is no item form template for resource [' + resourceName + ']';
         }
-        if (!Cache.compiledTemplates.itemForm[resourceName]) {
+        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.itemForm[resourceName]) {
             Cache.compiledTemplates.itemForm[resourceName] = Utils.makeTemplateFromText(
                 Cache.rawTemplates[resourceName].itemForm,
                 'Item form template for ' + resourceName
