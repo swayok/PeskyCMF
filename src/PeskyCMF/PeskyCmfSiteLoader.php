@@ -130,7 +130,13 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             __DIR__ . '/public/img' => public_path('packages/cmf/img'),
             __DIR__ . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
             // AdminLTE
-            base_path('vendor/almasaeed2010/adminlte/dist') => public_path('packages/adminlte'),
+            base_path('vendor/almasaeed2010/adminlte/dist/js/app.js') => public_path('packages/adminlte/js/app.js'),
+            base_path('vendor/almasaeed2010/adminlte/dist/js/app.min.js') => public_path('packages/adminlte/js/app.min.js'),
+            base_path('vendor/almasaeed2010/adminlte/dist/img/boxed-bg.jpg') => public_path('packages/adminlte/img/boxed-bg.jpg'),
+            base_path('vendor/almasaeed2010/adminlte/dist/css/AdminLTE.css') => public_path('packages/adminlte/css/AdminLTE.css'),
+            base_path('vendor/almasaeed2010/adminlte/dist/css/AdminLTE.min.css') => public_path('packages/adminlte/css/AdminLTE.min.css'),
+            base_path('vendor/almasaeed2010/adminlte/dist/css/skins/skin-blue.css') => public_path('packages/adminlte/css/skins/skin-blue.css'),
+            base_path('vendor/almasaeed2010/adminlte/dist/css/skins/skin-blue.min.css') => public_path('packages/adminlte/css/skins/skin-blue.min.css'),
             base_path('vendor/almasaeed2010/adminlte/plugins/fastclick/fastclick.min.js') => public_path('packages/adminlte/plugins/fastclick/fastclick.min.js'),
 //            base_path('vendor/almasaeed2010/adminlte/plugins') => public_path('packages/adminlte/plugins'),
             // bootstrap
