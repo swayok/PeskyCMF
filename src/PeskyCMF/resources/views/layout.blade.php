@@ -25,6 +25,8 @@
     <link href="/packages/adminlte/css/skins/skin-blue.min.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/cmf-vendors/db-query-builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
+
     <link href="/packages/cmf/css/font-replace.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css" id="place-dynamic-css-files-before"/>
     <link href="/packages/cmf/css/cmf.app.css" rel="stylesheet" type="text/css"/>

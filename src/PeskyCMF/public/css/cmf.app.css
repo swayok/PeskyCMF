@@ -648,6 +648,8 @@ aside.main-sidebar #secondary-menu #sidebar-company-badge a:hover {
 }
 #query-builder {
   position: relative;
+  z-index: 4;
+  /* needed to fix strange z-index:3 in .pagination>.active>a in bootstrap.css */
 }
 #query-builder h4 {
   position: absolute;
@@ -665,6 +667,15 @@ aside.main-sidebar #secondary-menu #sidebar-company-badge a:hover {
 #query-builder.query-builder .rule-container input[type=text],
 #query-builder.query-builder .rule-container input[type=number] {
   padding: 1px 1px 1px 6px;
+  font-size: 13px;
+  height: 26px;
+}
+#query-builder.query-builder .rule-container .bootstrap-select button {
+  font-size: 13px;
+  height: 26px;
+}
+#query-builder.query-builder .rule-container .radio label {
+  line-height: 17px;
 }
 #query-builder .rules-group-footer {
   position: absolute;

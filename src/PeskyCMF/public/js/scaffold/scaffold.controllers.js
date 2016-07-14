@@ -539,7 +539,7 @@ var ScaffoldDataGridHelper = {
 var DataGridSearchHelper = {
     container: '#query-builder',
     defaultConfig: {
-        plugins: ['bt-tooltip-errors', 'bt-checkbox'],
+        plugins: ['bt-tooltip-errors', 'bt-checkbox', 'bt-selectpicker'],
         allow_empty: true
     },
     resetButton: '#query-builder-reset',

@@ -14,14 +14,15 @@ class DataGridFilterConfig {
     protected $filters = [];
     protected $defaultConditions = ['condition' => 'AND', 'rules' => []];
     
-    static $dbTypeToFilterType = [
+    static public $dbTypeToFilterType = [
         DbColumnConfig::DB_TYPE_VARCHAR => DataGridColumnFilterConfig::TYPE_STRING,
         DbColumnConfig::DB_TYPE_TEXT => DataGridColumnFilterConfig::TYPE_STRING,
         DbColumnConfig::DB_TYPE_INT => DataGridColumnFilterConfig::TYPE_INTEGER,
         DbColumnConfig::DB_TYPE_FLOAT => DataGridColumnFilterConfig::TYPE_FLOAT,
         DbColumnConfig::DB_TYPE_BOOL => DataGridColumnFilterConfig::TYPE_BOOL,
         DbColumnConfig::DB_TYPE_JSONB => DataGridColumnFilterConfig::TYPE_STRING,
-        DbColumnConfig::DB_TYPE_TIMESTAMP => DataGridColumnFilterConfig::TYPE_TIMESTAMP,
+        // it is rarely needed to use date-time filter, so it is better to use date filter instead
+        DbColumnConfig::DB_TYPE_TIMESTAMP => DataGridColumnFilterConfig::TYPE_DATE,
         DbColumnConfig::DB_TYPE_DATE => DataGridColumnFilterConfig::TYPE_DATE,
         DbColumnConfig::DB_TYPE_TIME => DataGridColumnFilterConfig::TYPE_TIME,
         DbColumnConfig::DB_TYPE_IP_ADDRESS => DataGridColumnFilterConfig::TYPE_STRING,
@@ -48,13 +49,16 @@ class DataGridFilterConfig {
     /**
      * @param DataGridColumnFilterConfig[] $filters
      * @return $this
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyORM\Exception\DbColumnConfigException
      * @throws ScaffoldException
      */
     public function setFilters(array $filters) {
         $this->filters = [];
         /** @var DataGridColumnFilterConfig $config */
         foreach ($filters as $columnName => $config) {
-            if (is_integer($columnName)) {
+            if (is_int($columnName)) {
                 $columnName = $config;
                 $config = null;
             }
@@ -67,6 +71,10 @@ class DataGridFilterConfig {
      * @param string $columnName - 'col_name' or 'RelationAlias.col_name'
      * @param null|DataGridColumnFilterConfig $config
      * @return $this
+     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyORM\Exception\DbColumnConfigException
      * @throws ScaffoldException
      */
     public function addFilter($columnName, $config = null) {
@@ -106,6 +114,11 @@ class DataGridFilterConfig {
     /**
      * @param string $columnName
      * @return DataGridColumnFilterConfig
+     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyORM\Exception\DbColumnConfigException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function createColumnFilterConfig($columnName) {
         $model = $this->getModel();
@@ -113,9 +126,9 @@ class DataGridFilterConfig {
         /** @var DataGridColumnFilterConfig $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         if (
-            $columnConfig->getDbTableConfig()->getName() === $model->getTableName()
+            $columnConfig->getDbType() === DbColumnConfig::DB_TYPE_INT
+            && $columnConfig->getDbTableConfig()->getName() === $model->getTableName()
             && $model->getPkColumnName() === $columnConfig->getName()
-            && $columnConfig->getDbType() === DbColumnConfig::DB_TYPE_INT
         ) {
             // Primary key integer column
             return $configClass::forPositiveInteger()
@@ -132,6 +145,9 @@ class DataGridFilterConfig {
     /**
      * @param $columnName
      * @return DbColumnConfig
+     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbTableConfigException
      * @throws ScaffoldException
      */
     public function findColumnConfig($columnName) {
@@ -153,10 +169,12 @@ class DataGridFilterConfig {
      * @param array $scannedModels
      * @param int $depth
      * @return bool|\PeskyCMF\Db\CmfDbModel
+     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \PeskyORM\Exception\DbTableConfigException
      * @throws ScaffoldException
      * @throws \PeskyORM\Exception\DbModelException
      */
-    protected function findRelatedModel(CmfDbModel $model, $relationAlias, &$scannedModels = [], $depth = 0) {
+    protected function findRelatedModel(CmfDbModel $model, $relationAlias, array &$scannedModels = [], $depth = 0) {
         if ($model->hasTableRelation($relationAlias)) {
             return $model->getRelatedModel($relationAlias);
         }
@@ -184,7 +202,7 @@ class DataGridFilterConfig {
      * @return string
      */
     public function getColumnNameWithAlias($columnName) {
-        if (strstr($columnName, '.') === false) {
+        if (strpos($columnName, '.') === false) {
             return $this->getModel()->getAlias() . '.' . $columnName;
         }
         return $columnName;
@@ -265,6 +283,7 @@ class DataGridFilterConfig {
     /**
      * @param array $rulesGroup
      * @return array
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function buildConditionsFromSearchRules(array $rulesGroup) {
         $conditions = [];
@@ -284,7 +303,7 @@ class DataGridFilterConfig {
      * @throws ScaffoldException
      */
     protected function buildConditionFromSearchRule(array $searchRule) {
-        if (empty($searchRule['f']) || empty($searchRule['o']) || !array_key_exists('v', $searchRule)) {
+        if (!array_key_exists('v', $searchRule) || empty($searchRule['f']) || empty($searchRule['o'])) {
             throw new ScaffoldException('Invalid search rule passed: ' . json_encode($searchRule));
         }
         $filterColumnConfig = $this->getFilter($searchRule['f']);

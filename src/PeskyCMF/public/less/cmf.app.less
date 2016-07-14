@@ -682,6 +682,7 @@ aside.main-sidebar {
 
 #query-builder {
     position: relative;
+    z-index: 4; /* needed to fix strange z-index:3 in .pagination>.active>a in bootstrap.css */
 
     h4 {
         position: absolute;
@@ -702,6 +703,21 @@ aside.main-sidebar {
         input[type=text],
         input[type=number] {
             padding: 1px 1px 1px 6px;
+            font-size: 13px;
+            height: 26px;
+        }
+
+        .bootstrap-select {
+            button {
+                font-size: 13px;
+                height: 26px;
+            }
+        }
+
+        .radio {
+            label {
+                line-height: 17px;
+            }
         }
     }
 
