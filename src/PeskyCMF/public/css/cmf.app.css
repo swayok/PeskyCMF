@@ -31,6 +31,10 @@ body.skin-blue .wrapper .main-sidebar {
 body.login-page .wrapper {
   background-color: transparent;
 }
+body #page-wrapper {
+  position: relative;
+  z-index: 1;
+}
 .content-wrapper {
   min-height: calc(100vh - 51px);
 }

@@ -1,6 +1,7 @@
 var ScaffoldsManager = {
     app: null,
-    currentResource: null
+    currentResource: null,
+    cacheTemplates: true
 };
 
 ScaffoldsManager.init = function (app) {
@@ -47,7 +48,7 @@ $.extend(Cache, {
 ScaffoldsManager.loadTemplates = function (resourceName) {
     ScaffoldsManager.validateResourceName(resourceName);
     var deferred = $.Deferred();
-    if (!ScaffoldsManager.isTemplatesLoaded(resourceName)) {
+    if (!ScaffoldsManager.cacheTemplates || !ScaffoldsManager.isTemplatesLoaded(resourceName)) {
     //if (true) {
         var resourceUrl = ScaffoldsManager.getResourceBaseUrl(resourceName);
         $.ajax({

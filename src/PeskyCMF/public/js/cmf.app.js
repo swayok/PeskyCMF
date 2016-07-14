@@ -6,6 +6,10 @@ $(document).ready(function () {
         $.extend(GlobalVars, CmfSettings);
     }
 
+    if (GlobalVars.isDebug) {
+        Utils.initDebuggingTools();
+    }
+
     Utils.configureAppLibs();
 
     Pilot.pushState = true;
