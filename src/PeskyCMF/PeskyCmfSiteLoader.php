@@ -131,6 +131,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             __DIR__ . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
             // AdminLTE
             base_path('vendor/almasaeed2010/adminlte/dist') => public_path('packages/adminlte'),
+            base_path('vendor/almasaeed2010/adminlte/plugins/fastclick/fastclick.min.js') => public_path('packages/adminlte/plugins/fastclick/fastclick.min.js'),
 //            base_path('vendor/almasaeed2010/adminlte/plugins') => public_path('packages/adminlte/plugins'),
             // bootstrap
             base_path('vendor/twbs/bootstrap/dist') => public_path('packages/cmf-vendors/bootstrap'),

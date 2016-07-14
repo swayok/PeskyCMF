@@ -13,22 +13,20 @@
     <link href="/packages/cmf-vendors/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
+
     <link href="/packages/cmf-vendors/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/fontions/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/fontions/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
-
-    {{--<link href="/packages/cmf/css/bootstrap-datepicker3.css" rel="stylesheet" type="text/css"/>--}}
-    <link href="/packages/cmf/css/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
-
     <link href="/packages/cmf-vendors/toastr/toastr.css" rel="stylesheet" type="text/css"/>
+
     <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/adminlte/css/skins/skin-blue.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/font-replace.css" rel="stylesheet" type="text/css"/>
 
-    <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css" id="place-dynamic-css-files-before"/>
     <link href="/packages/cmf-vendors/db-query-builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/font-replace.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css" id="place-dynamic-css-files-before"/>
     <link href="/packages/cmf/css/cmf.app.css" rel="stylesheet" type="text/css"/>
 
     @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->layout_css_includes() as $cssPath)
@@ -66,7 +64,6 @@
 
     <script src="/packages/cmf-vendors/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/switches/js/bootstrap-switch.min.js" type="text/javascript"></script>
-    <script src="/packages/adminlte/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
     <script src='/packages/adminlte/plugins/fastclick/fastclick.min.js'></script>
     <script src="/packages/cmf-vendors/datatables/js/jquery.dataTables.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/datatables/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
