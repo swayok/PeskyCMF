@@ -386,7 +386,13 @@ Utils.initDebuggingTools = function () {
                 right: '14px'
             })
             .hide();
-        if (Modernizr.localstorage && localStorage.getItem('debug-tools-opened')) {
+        if (
+            Modernizr.localstorage
+            && (
+                localStorage.getItem('debug-tools-opened')
+                || localStorage.getItem('debug-tools-templates-cache-disabled')
+            )
+        ) {
             $buttons.show();
         }
         var $container = $('<div id="debug-tools"></div>')
@@ -403,19 +409,20 @@ Utils.initDebuggingTools = function () {
         $(document.body).append($container);
 
         // templates cache
-        var $disableTplCacheBtn = $('<button type="button" class="btn btn-xs btn-default">Templates</button>');
+        var $disableTplCacheBtn = $('<button type="button" class="btn btn-xs btn-default">Tpl cache: on</button>');
         $buttons.append($disableTplCacheBtn);
         if (Modernizr.localstorage) {
             ScaffoldsManager.cacheTemplates = !localStorage.getItem('debug-tools-templates-cache-disabled');
         }
         if (!ScaffoldsManager.cacheTemplates) {
-            $disableTplCacheBtn.addClass('btn-danger').removeClass('btn-default');
+            $disableTplCacheBtn.addClass('btn-danger').removeClass('btn-default').text('Tpl cache: off');
         }
         $disableTplCacheBtn.on('click', function () {
             ScaffoldsManager.cacheTemplates = !ScaffoldsManager.cacheTemplates;
             $disableTplCacheBtn
                 .addClass(ScaffoldsManager.cacheTemplates ? 'btn-default' : 'btn-danger')
-                .removeClass(ScaffoldsManager.cacheTemplates ? 'btn-danger' : 'btn-default');
+                .removeClass(ScaffoldsManager.cacheTemplates ? 'btn-danger' : 'btn-default')
+                .text('Tpl cache: ' + (ScaffoldsManager.cacheTemplates ? 'on' : 'off'));
             if (Modernizr.localstorage) {
                 localStorage.setItem('debug-tools-templates-cache-disabled', !ScaffoldsManager.cacheTemplates);
             }
