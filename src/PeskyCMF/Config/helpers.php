@@ -68,7 +68,7 @@ if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
                 $encoded = base64_encode($matches[2]);
                 return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
             } else {
-                $script = preg_replace('%//.*$%m', '', $matches[2]);
+                $script = preg_replace('%(^|\s)//.*$%m', '$1', $matches[2]); //< strip "//" comments from a script
                 return "{{= '<' + 'script{$matches[1]}>' }}$script{{= '</' + 'script>'}}";
             }
         }, $dotJsTemplate);
