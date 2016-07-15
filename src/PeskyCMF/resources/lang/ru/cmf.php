@@ -95,6 +95,12 @@ return [
                 'no' => 'Нет'
             ],
         ],
+        'bulk_edit' => [
+            'enabler' => [
+                'edit_field' => 'Изменить',
+                'skip_field' => 'Пропустить'
+            ]
+        ]
     ],
     'item_details' => [
         'toolbar' => [

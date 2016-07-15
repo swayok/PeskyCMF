@@ -270,6 +270,15 @@ form {
         padding: 1px 5px 1px 5px;
         text-align: center;
     }
+
+    .bulk-edit-form-input-container {
+
+        &.checkbox-switch {
+            .bulk-edit-form-input-enabler {
+                padding-top: 6px;
+            }
+        }
+    }
 }
 
 .scaffold-datagrid .no-items {
@@ -778,6 +787,12 @@ aside.main-sidebar {
         &:active {
             outline: 0 none !important;
             border-color: #3c8dbc !important;
+        }
+
+        &.disabled {
+            background-color: #eee !important;
+            border-color: #d2d6de !important;
+            opacity: 1;
         }
     }
 

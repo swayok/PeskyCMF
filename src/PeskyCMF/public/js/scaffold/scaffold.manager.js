@@ -160,7 +160,7 @@ ScaffoldsManager.getBulkEditFormTpl = function (resourceName) {
         if (!ScaffoldsManager.hasBulkEditFormTemplate(resourceName)) {
             throw 'There is no bulk edit form template for resource [' + resourceName + ']';
         }
-        if (!Cache.compiledTemplates.bulkEditForm[resourceName]) {
+        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.bulkEditForm[resourceName]) {
             Cache.compiledTemplates.bulkEditForm[resourceName] = Utils.makeTemplateFromText(
                 Cache.rawTemplates[resourceName].bulkEditForm,
                 'Bulk edit form template for ' + resourceName
@@ -179,7 +179,7 @@ ScaffoldsManager.getItemDetailsTpl = function (resourceName) {
         if (!ScaffoldsManager.hasItemDetailsTemplate(resourceName)) {
             throw 'There is no item details template for resource [' + resourceName + ']';
         }
-        if (!Cache.compiledTemplates.itemDetails[resourceName]) {
+        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.itemDetails[resourceName]) {
             Cache.compiledTemplates.itemDetails[resourceName] = Utils.makeTemplateFromText(
                 Cache.rawTemplates[resourceName].itemDetails,
                 'Item details template for ' + resourceName

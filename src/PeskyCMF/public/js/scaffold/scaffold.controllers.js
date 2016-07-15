@@ -484,6 +484,11 @@ var ScaffoldDataGridHelper = {
             $table.on('draw.dt', function () {
                 updateSelectedCountInLabelAndCollectIds();
             });
+            $selectionLinks.on('click', function () {
+                if ($(this).parent('li').parent('ul.dropdown-menu').length) {
+                    $(this).parent().parent().parent().find('[data-toggle="dropdown"]').dropdown("toggle");
+                }
+            });
         } else {
             $selectionLinks
                 .addClass('disabled')
@@ -499,6 +504,11 @@ var ScaffoldDataGridHelper = {
             updateFilteredCountInLabel();
             $table.on('draw.dt', function () {
                 updateFilteredCountInLabel();
+            });
+            $fitleringLinks.on('click', function () {
+                if ($(this).parent('li').parent('ul.dropdown-menu').length) {
+                    $(this).parent().parent().parent().find('[data-toggle="dropdown"]').dropdown("toggle");
+                }
             });
         }
     },
@@ -819,6 +829,10 @@ var ScaffoldFormHelper = {
         }
         $('.modal.in').modal('hide'); //< hide any opened modals
         Utils.showPreloader(CmfControllerHelpers.currentContentContainer);
+        var timeout = setTimeout(function () {
+            Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+            toastr.info('Server response timed out');
+        }, 20000);
         $.when(deferred, ScaffoldFormHelper.loadOptions(resourceName, 'bulk-edit'))
             .done(function (modalTpl, optionsResponse) {
                 var tplData = {_options: optionsResponse};
@@ -836,24 +850,82 @@ var ScaffoldFormHelper = {
                     tplData._conditions = api.search();
                 }
                 var $bulkEditModal = $(modalTpl(tplData));
+                // init inputs activation checkboxes (enablers)
+                $bulkEditModal
+                    .find('input, select, textarea')
+                    .not('[type="hidden"]')
+                    .not('.bulk-edit-form-input-enabler-switch')
+                        .prop('disabled', true)
+                        .filter('[type="checkbox"]')
+                            .not('.switch')
+                                .closest('.bulk-edit-form-input-container')
+                                    .addClass('checkbox')
+                                .end()
+                            .end()
+                            .filter('.switch')
+                                .closest('.bulk-edit-form-input-container')
+                                    .addClass('checkbox-switch')
+                                .end()
+                            .end()
+                        .end()
+                        .filter('[type="radio"]')
+                            .not('.switch')
+                                .closest('.bulk-edit-form-input-container')
+                                    .addClass('radio')
+                                .end()
+                            .end()
+                            .filter('.switch')
+                                .closest('.bulk-edit-form-input-container')
+                                    .addClass('radio-switch')
+                                .end()
+                            .end()
+                        ;
+                $bulkEditModal
+                    .find('.bulk-edit-form-input label')
+                    .on('click', function () {
+                        var $inputOrLabel = $(this);
+                        $inputOrLabel
+                            .closest('.bulk-edit-form-input-container')
+                                .find('.bulk-edit-form-input-enabler-switch')
+                                    .prop('checked', true)
+                                    .change();
+                    });
+                $bulkEditModal
+                    .find('.bulk-edit-form-input-enabler-switch')
+                    .on('change switchChange.bootstrapSwitch', function () {
+                        var $inputs = $(this)
+                            .closest('.bulk-edit-form-input-container')
+                            .find('.bulk-edit-form-input')
+                            .find('input, textarea, select');
+                        $inputs.prop('disabled', !this.checked);
+                        setTimeout(function () {
+                            $inputs.not('[type="hidden"], .switch').focus();
+                        }, 50);
+                        $inputs.filter('.switch').bootstrapSwitch('disabled', !this.checked);
+                    });
+
+                // add resulting html to page and open modal
                 $(document.body).append($bulkEditModal);
-                $bulkEditModal.modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
                 $bulkEditModal
                     .on('hidden.bs.modal', function () {
                         $bulkEditModal.remove();
                     })
                     .on('show.bs.modal', function () {
-                        ScaffoldFormHelper.initForm($bulkEditModal.find('form'), function () {
-                            // todo: success callback
+                        ScaffoldFormHelper.initForm($bulkEditModal.find('form'), function (json, $form, $container) {
+                            if (json._message) {
+                                toastr.success(json._message);
+                            }
+                            $bulkEditModal.modal('hide');
                         });
+                    })
+                    .modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
                     });
-                $bulkEditModal.modal('show');
-                // todo: finish bulk-edit form (submit)
             })
             .always(function () {
+                clearTimeout(timeout);
                 Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
             });
     }

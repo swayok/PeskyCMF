@@ -245,6 +245,9 @@ form .error-text {
   padding: 1px 5px 1px 5px;
   text-align: center;
 }
+form .bulk-edit-form-input-container.checkbox-switch .bulk-edit-form-input-enabler {
+  padding-top: 6px;
+}
 .scaffold-datagrid .no-items {
   text-align: center;
   font-weight: bold;
@@ -724,6 +727,11 @@ aside.main-sidebar #secondary-menu #sidebar-company-badge a:hover {
 .bootstrap-select > button.dropdown-toggle:active {
   outline: 0 none !important;
   border-color: #3c8dbc !important;
+}
+.bootstrap-select > button.dropdown-toggle.disabled {
+  background-color: #eee !important;
+  border-color: #d2d6de !important;
+  opacity: 1;
 }
 .bootstrap-select.open > button.dropdown-toggle {
   border-color: #3c8dbc !important;

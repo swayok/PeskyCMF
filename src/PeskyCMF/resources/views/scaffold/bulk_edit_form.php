@@ -55,14 +55,26 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                     <!-- end of autofill disabler -->
                     <div class="modal-body">
                     <?php
-                        foreach ($formConfig->getBulkEditableFields() as $config) {
-                            if (!$config->hasLabel()) {
-                                $config->setLabel(trans("$translationPrefix.form.field.{$config->getName()}"));
+                        $enablerTextOn = \PeskyCMF\Config\CmfConfig::transBase('.form.bulk_edit.enabler.edit_field');
+                        $enablerTextOff = \PeskyCMF\Config\CmfConfig::transBase('.form.bulk_edit.enabler.skip_field');
+                        $baseEnablerId = str_random() . '-enabler-for-';
+                        foreach ($formConfig->getBulkEditableFields() as $inputConfig) {
+                            if (!$inputConfig->hasLabel()) {
+                                $inputConfig->setLabel(trans("$translationPrefix.form.field.{$inputConfig->getName()}"));
                             }
                             try {
-                                $renderedInput = $config->render(['translationPrefix' => $translationPrefix]);
+                                $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
                                 // replace <script> tags to be able to render that template
-                                echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
+                                $renderedInput = modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
+                                $enablerSwitchId = $baseEnablerId . str_slug($inputConfig->getName());
+                                $enablerSwitch = "
+                                    <div class=\"bulk-edit-form-input-enabler pull-left va-t mr15\">
+                                        <input class=\"bulk-edit-form-input-enabler-switch switch\" type=\"checkbox\" 
+                                            id=\"{$enablerSwitchId}\" data-size=\"mini\"
+                                            data-on-text=\"{$enablerTextOn}\" data-off-text=\"{$enablerTextOff}\">
+                                    </div>";
+                                $renderedInput = '<div class="bulk-edit-form-input va-t">' . $renderedInput . '</div>';
+                                echo '<div class="bulk-edit-form-input-container">' . $enablerSwitch . $renderedInput . '</div>';
                             } catch (Exception $exc) {
                                 echo '<div>' . $exc->getMessage() . '</div>';
                                 echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
