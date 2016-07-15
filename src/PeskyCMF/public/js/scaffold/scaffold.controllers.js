@@ -838,7 +838,7 @@ var ScaffoldFormHelper = {
                 var tplData = {_options: optionsResponse};
                 if ($link.attr('data-action') === 'bulk-edit-selected') {
                     tplData._ids = [];
-                    var idKey = $link.attr('data-id-field');
+                    var idKey = $link.attr('data-id-field') || 'id';
                     api.rows({selected: true}).data().each(function (rowData) {
                         tplData._ids.push(rowData[idKey]);
                     });

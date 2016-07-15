@@ -41,9 +41,9 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                 <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
                 data-uuid="{{= it.formUUID }}">
                     <input type="hidden" name="_method" value="PUT">
-                    {{? it._ids && it._ids.length }}
-                        {{~ it._ids :item_id }}
-                            <input type="hidden" name="<?php echo $pkColName; ?>[]" value="{{= item_id }}">
+                    {{? it._ids && $.isArray(it._ids) }}
+                        {{~ it._ids :value:index }}
+                            <input type="hidden" name="<?php echo $pkColName; ?>[]" value="{{= value }}">
                         {{~}}
                     {{??}}
                         {{? typeof it._conditions === 'string' }}
