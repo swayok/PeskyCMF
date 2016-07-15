@@ -124,6 +124,10 @@ return [
             'please_confirm' => 'Confirm Item delete action',
             'forbidden_for_record' => 'It is forbidden to delete this Item',
         ],
+        'delete_bulk' => [
+            'success' => 'Items deleted: :count',
+            'nothing_deleted' => 'No items deleted',
+        ],
         'create' => [
             'forbidden' => 'It is forbidden to create Items in this section',
         ],

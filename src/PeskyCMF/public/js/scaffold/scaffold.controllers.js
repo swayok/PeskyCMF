@@ -275,10 +275,14 @@ var ScaffoldDataGridHelper = {
                     break;
                 case 'bulk-filtered':
                     $el.data('data', {conditions: api.search()});
+                    $el.attr('data-block-datagrid', '1');
+                    // no break here!!!
+                case 'bulk-selected':
+                    $el.attr('data-block-datagrid', '1');
                     // no break here!!!
                 case 'request':
-                case 'bulk-selected':
-                    if ($el.attr('data-block-datagrid')) {
+                    var blockDataGrid = !!$el.attr('data-block-datagrid');
+                    if (blockDataGrid) {
                         Utils.showPreloader($tableWrapper);
                     }
                     ScaffoldActionsHelper.handleRequestAction($el)
@@ -298,7 +302,7 @@ var ScaffoldDataGridHelper = {
                             ScaffoldActionsHelper.onSuccess(json);
                         })
                         .always(function () {
-                            if ($el.attr('data-block-datagrid')) {
+                            if (blockDataGrid) {
                                 Utils.hidePreloader($tableWrapper);
                             }
                         });
@@ -902,6 +906,8 @@ var ScaffoldFormHelper = {
                             $inputs.not('[type="hidden"], .switch').focus();
                         }, 50);
                         $inputs.filter('.switch').bootstrapSwitch('disabled', !this.checked);
+                        $inputs.filter('select.selectpicker').selectpicker('refresh');
+                        $inputs.trigger('toggle.bulkEditEnabler', !this.checked);
                     });
 
                 // add resulting html to page and open modal

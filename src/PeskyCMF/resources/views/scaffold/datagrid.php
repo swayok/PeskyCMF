@@ -150,7 +150,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_filtered'))
                 ->setDataAttr('action', 'bulk-filtered')
                 ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_filtered_confirm'))
-                ->setDataAttr('url', route('cmf_api_delete_filtered', [$tableNameForRoutes], false))
+                ->setDataAttr('url', route('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                 ->setDataAttr('method', 'delete')
                 ->setHref('javascript: void(0)')
                 ->build();

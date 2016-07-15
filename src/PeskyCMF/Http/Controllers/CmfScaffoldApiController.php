@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Http\Controllers;
 
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbModel;
@@ -12,6 +13,8 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Traits\DataValidationHelper;
+use PeskyORM\Db;
+use PeskyORM\DbExpr;
 use PeskyORM\Exception\DbObjectValidationException;
 use Swayok\Html\Tag;
 
@@ -141,7 +144,6 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function getItemDefaults() {
-        $model = static::getModel();
         /** @var FormConfig $config */
         if (!static::getScaffoldConfig()->isCreateAllowed() && !static::getScaffoldConfig()->isEditAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
@@ -149,7 +151,7 @@ class CmfScaffoldApiController extends Controller {
                 ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
         }
         $formConfig = static::getScaffoldConfig()->getFormConfig();
-        $data = $formConfig->alterDefaultValues($model::getOwnDbObject()->getDefaultsArray());
+        $data = $formConfig->alterDefaultValues(static::getModel()->getOwnDbObject()->getDefaultsArray());
         return response()->json($formConfig->prepareRecord($data));
     }
 
@@ -171,12 +173,12 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function addItem(Request $request) {
-        $model = static::getModel();
         if (!static::getScaffoldConfig()->isCreateAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(CmfConfig::transBase('.action.create.forbidden'))
                 ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
         }
+        $model = static::getModel();
         $formConfig = static::getScaffoldConfig()->getFormConfig();
         $data = array_intersect_key($request->data(), $formConfig->getFields());
         $errors = $formConfig->validateDataForCreate($data);
@@ -214,12 +216,12 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function updateItem(Request $request) {
-        $model = static::getModel();
         if (!static::getScaffoldConfig()->isEditAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
                 ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
         }
+        $model = static::getModel();
         $formConfig = static::getScaffoldConfig()->getFormConfig();
         $expectedFields = array_keys($formConfig->getFields());
         $expectedFields[] = $model->getPkColumnName();
@@ -275,13 +277,77 @@ class CmfScaffoldApiController extends Controller {
             ->setMessage(CmfConfig::transBase('.form.resource_updated_successfully'));
     }
 
-    public function deleteItem($tableName, $id) {
+    public function updateBulk(Request $request) {
+        /*if (!static::getScaffoldConfig()->isEditAllowed()) {
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
+                ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
+        }
         $model = static::getModel();
+        $formConfig = static::getScaffoldConfig()->getFormConfig();
+        $expectedFields = array_keys($formConfig->getBulkEditableFields());
+        $expectedFields[] = $model->getPkColumnName();
+        $data = array_intersect_key($request->data(), array_flip($expectedFields));
+        $errors = $formConfig->validateDataForEdit($data);
+        if (!empty($errors)) {
+            return $this->sendValidationErrorsResponse($errors);
+        }
+        if (!$request->data($model->getPkColumnName())) {
+            return static::sendItemNotFoundResponse($model);
+        }
+        $conditions = $this->getConditionsForBulkActions($request, $model);
+
+        $id = $request->data($model->getPkColumnName());
+        $object = $model::getOwnDbObject();
+        if (!$object->_getPkField()->isValidValueFormat($id)) {
+            return static::sendItemNotFoundResponse($model);
+        }
+        $conditions = $formConfig->getSpecialConditions();
+        $conditions[$model->getPkColumnName()] = $id;
+        if (!$object->find($conditions)->exists()) {
+            return static::sendItemNotFoundResponse($model);
+        }
+        if (!static::getScaffoldConfig()->isRecordEditAllowed($object->toPublicArrayWithoutFiles())) {
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.edit.forbidden_for_record'))
+                ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
+        }
+        if ($formConfig->hasBeforeSaveCallback()) {
+            $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
+            if (empty($data)) {
+                throw new ScaffoldException('Empty $data received from beforeSave callback');
+            }
+        }
+        if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
+            // revalidate
+            $errors = $formConfig->validateDataForCreate($data);
+            if (!empty($errors)) {
+                return $this->sendValidationErrorsResponse($errors);
+            }
+        }
+        unset($data[$model->getPkColumnName()]);
+        if (!empty($data)) {
+            try {
+                $success = $object->begin()->updateValues($data)->commit();
+                if (!$success) {
+                    return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
+                        ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
+                }
+            } catch (DbObjectValidationException $exc) {
+                return $this->sendValidationErrorsResponse($exc->getValidationErrors());
+            }
+        }
+        return cmfServiceJsonResponse()
+            ->setMessage(CmfConfig::transBase('.form.resource_updated_successfully'));*/
+    }
+
+    public function deleteItem($tableName, $id) {
         if (!static::getScaffoldConfig()->isDeleteAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(CmfConfig::transBase('.action.delete.forbidden'))
                 ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
         }
+        $model = static::getModel();
         $object = $model::getOwnDbObject();
         if (!$object->_getPkField()->isValidValueFormat($id)) {
             return static::sendItemNotFoundResponse($model);
@@ -301,6 +367,86 @@ class CmfScaffoldApiController extends Controller {
         return cmfServiceJsonResponse()
             ->setMessage(CmfConfig::transBase('.action.delete.success'))
             ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
+    }
+
+    public function deleteBulk(Request $request) {
+        if (!static::getScaffoldConfig()->isDeleteAllowed()) {
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.delete.forbidden'))
+                ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
+        }
+        $model = static::getModel();
+        $conditions = $this->getConditionsForBulkActions($request, $model);
+        if (!is_array($conditions)) {
+            return $conditions; //< response
+        }
+        $deletedCount = $model->delete($conditions);
+        $message = $deletedCount
+            ? CmfConfig::transBase('.action.delete_bulk.success', ['count' => $deletedCount])
+            : CmfConfig::transBase('.action.delete_bulk.nothing_deleted');
+        return cmfServiceJsonResponse()
+            ->setMessage($message)
+            ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
+    }
+
+    /**
+     * @param Request $request
+     * @param CmfDbModel $model
+     * @return array|Response
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \PeskyCMF\PeskyCmfException
+     * @throws \PeskyORM\Exception\DbQueryException
+     * @throws \PeskyORM\Exception\DbException
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \PeskyORM\Exception\DbModelException
+     */
+    private function getConditionsForBulkActions(Request $request, CmfDbModel $model) {
+        $specialConditions = static::getScaffoldConfig()->getFormConfig()->getSpecialConditions();
+        $conditions = $specialConditions;
+        if ($request->has('ids')) {
+            $this->validate($request->data(), [
+                'ids' => 'required|array',
+                'ids.*' => 'integer|min:1'
+            ]);
+            $conditions[$model->getPkColumnName()] = $request->data('ids');
+        } else if ($request->has('conditions')) {
+            $this->validate($request->data(), [
+                'conditions' => 'string|regex:%^[\{\[].*[\}\]]$%s',
+            ]);
+            $encodedConditions = $request->data('conditions') !== ''
+                ? json_decode($request->data('conditions'), true)
+                : [];
+            if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
+                return cmfJsonResponseForValidationErrors(['conditions' => 'JSON expected']);
+            }
+            if (!empty($encodedConditions)) {
+                $dataGridConfig = static::getScaffoldConfig()->getDataGridConfig();
+                $filterConditions = static::getScaffoldConfig()
+                    ->getDataGridFilterConfig()
+                    ->buildConditionsFromSearchRules($encodedConditions);
+                if ($dataGridConfig->hasContains()) {
+                    $subQueryConditions = array_merge(
+                        ['CONTAIN' => $dataGridConfig->getContains()],
+                        $filterConditions,
+                        $specialConditions
+                    );
+                    $subQuery = $model->builder()
+                        ->fromOptions($model->resolveContains($subQueryConditions))
+                        ->fields(['id'])
+                        ->buildQuery(DbExpr::create("`{$model->getAlias()}`.`id`"), false, false);
+                    $conditions = [DbExpr::create("`{$model->getPkColumnName()}` IN ({$subQuery})")];
+                } else {
+                    $conditions = array_merge($filterConditions, $specialConditions);
+                }
+            }
+        } else {
+            return cmfJsonResponseForValidationErrors([
+                'ids' => 'List of items IDs of filtering conditions expected',
+                'conditions' => 'List of items IDs of filtering conditions expected',
+            ]);
+        }
+        return $conditions;
     }
 
     private function getDataGridItems(Request $request) {

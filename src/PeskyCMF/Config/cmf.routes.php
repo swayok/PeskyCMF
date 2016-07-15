@@ -237,6 +237,24 @@ Route::group(
                     ]
                 ]);
 
+                Route::delete('{table_name}/bulk', [
+                    'as' => 'cmf_api_delete_bulk',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@deleteBulk',
+                    'fallback' => [
+                        'route' => 'cmf_items_table',
+                        'params' => true
+                    ]
+                ]);
+
+                Route::put('{table_name}/bulk', [
+                    'as' => 'cmf_api_edit_bulk',
+                    'uses' => __cmf_scaffold_api_controller_class() . '@updateBulk',
+                    'fallback' => [
+                        'route' => 'cmf_items_table',
+                        'params' => true
+                    ]
+                ]);
+
                 Route::get('{table_name}/{id}', [
                     'as' => 'cmf_api_get_item',
                     'uses' => __cmf_scaffold_api_controller_class() . '@getItem',
@@ -258,42 +276,6 @@ Route::group(
                 Route::delete('{table_name}/{id}', [
                     'as' => 'cmf_api_delete_item',
                     'uses' => __cmf_scaffold_api_controller_class() . '@deleteItem',
-                    'fallback' => [
-                        'route' => 'cmf_items_table',
-                        'params' => true
-                    ]
-                ]);
-
-                Route::delete('{table_name}/bulk', [
-                    'as' => 'cmf_api_delete_bulk',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@deleteBulk',
-                    'fallback' => [
-                        'route' => 'cmf_items_table',
-                        'params' => true
-                    ]
-                ]);
-
-                Route::delete('{table_name}/filtered', [
-                    'as' => 'cmf_api_delete_filtered',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@deleteFiltered',
-                    'fallback' => [
-                        'route' => 'cmf_items_table',
-                        'params' => true
-                    ]
-                ]);
-
-                Route::put('{table_name}/bulk', [
-                    'as' => 'cmf_api_edit_bulk',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@editBulk',
-                    'fallback' => [
-                        'route' => 'cmf_items_table',
-                        'params' => true
-                    ]
-                ]);
-
-                Route::put('{table_name}/filtered', [
-                    'as' => 'cmf_api_edit_filtered',
-                    'uses' => __cmf_scaffold_api_controller_class() . '@editFiltered',
                     'fallback' => [
                         'route' => 'cmf_items_table',
                         'params' => true
