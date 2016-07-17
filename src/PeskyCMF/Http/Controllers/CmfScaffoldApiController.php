@@ -308,7 +308,7 @@ class CmfScaffoldApiController extends Controller {
                 }
             }
         }
-        $conditions = $this->getConditionsForBulkActions($request, $model);
+        $conditions = $this->getConditionsForBulkActions($request, $model, '_');
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
@@ -372,6 +372,8 @@ class CmfScaffoldApiController extends Controller {
     /**
      * @param Request $request
      * @param CmfDbModel $model
+     * @param string $inputNamePrefix - input name prefix
+     *      For example if you use '_ids' instead of 'ids' - use prefix '_'
      * @return array|Response
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\PeskyCmfException
@@ -381,24 +383,26 @@ class CmfScaffoldApiController extends Controller {
      * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \PeskyORM\Exception\DbModelException
      */
-    private function getConditionsForBulkActions(Request $request, CmfDbModel $model) {
+    private function getConditionsForBulkActions(Request $request, CmfDbModel $model, $inputNamePrefix = '') {
         $specialConditions = static::getScaffoldConfig()->getFormConfig()->getSpecialConditions();
         $conditions = $specialConditions;
-        if ($request->has('ids')) {
+        $idsField = $inputNamePrefix . 'ids';
+        $conditionsField = $inputNamePrefix . 'conditions';
+        if ($request->has($idsField)) {
             $this->validate($request->data(), [
-                'ids' => 'required|array',
-                'ids.*' => 'integer|min:1'
+                $idsField => 'required|array',
+                $idsField .'.*' => 'integer|min:1'
             ]);
-            $conditions[$model->getPkColumnName()] = $request->data('ids');
-        } else if ($request->has('conditions')) {
+            $conditions[$model->getPkColumnName()] = $request->data($idsField);
+        } else if ($request->has($conditionsField)) {
             $this->validate($request->data(), [
-                'conditions' => 'string|regex:%^[\{\[].*[\}\]]$%s',
+                $conditionsField => 'string|regex:%^[\{\[].*[\}\]]$%s',
             ]);
-            $encodedConditions = $request->data('conditions') !== ''
-                ? json_decode($request->data('conditions'), true)
+            $encodedConditions = $request->data($conditionsField) !== ''
+                ? json_decode($request->data($conditionsField), true)
                 : [];
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
-                return cmfJsonResponseForValidationErrors(['conditions' => 'JSON expected']);
+                return cmfJsonResponseForValidationErrors([$conditionsField => 'JSON expected']);
             }
             if (!empty($encodedConditions)) {
                 $dataGridConfig = static::getScaffoldConfig()->getDataGridConfig();
@@ -422,8 +426,8 @@ class CmfScaffoldApiController extends Controller {
             }
         } else {
             return cmfJsonResponseForValidationErrors([
-                'ids' => 'List of items IDs of filtering conditions expected',
-                'conditions' => 'List of items IDs of filtering conditions expected',
+                $idsField => 'List of items IDs of filtering conditions expected',
+                $conditionsField => 'List of items IDs of filtering conditions expected',
             ]);
         }
         return $conditions;

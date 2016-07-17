@@ -43,11 +43,11 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                     <input type="hidden" name="_method" value="PUT">
                     {{? it._ids && $.isArray(it._ids) }}
                         {{~ it._ids :value:index }}
-                            <input type="hidden" name="ids[]" value="{{= value }}">
+                            <input type="hidden" name="_ids[]" value="{{= value }}">
                         {{~}}
                     {{??}}
                         {{? typeof it._conditions === 'string' }}
-                            <input type="hidden" name="_conditions" value="{{= it._conditions }}">
+                            <input type="hidden" name="_conditions" value="{{! it._conditions }}">
                         {{?}}
                     {{?}}
                     <!-- disable chrome email & password autofill -->
