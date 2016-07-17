@@ -212,7 +212,7 @@ body #page-wrapper {
 }
 #debug-dialog {
   position: fixed;
-  z-index: 1000;
+  z-index: 9999;
 }
 #debug-dialog .dialog {
   left: 240px;

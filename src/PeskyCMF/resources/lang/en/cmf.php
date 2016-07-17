@@ -135,6 +135,11 @@ return [
             'forbidden' => 'It is forbidden to edit Items in this section',
             'forbidden_for_record' => 'It is forbidden to edit this Item',
         ],
+        'bulk_edit' => [
+            'no_data_to_save' => 'No data received',
+            'success' => 'Items updated: :count',
+            'nothing_updated' => 'No items updated',
+        ],
         'item_details' => [
             'forbidden' => 'It is forbidden to view Items details in this section',
             'forbidden_for_record' => 'It is forbidden to view details of this Item',

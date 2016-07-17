@@ -37,7 +37,7 @@ class FormConfig extends ScaffoldActionConfig {
     protected $validatorsForCreate = [];
     /** @var array  */
     protected $validatorsForEdit = [];
-    /** @var array|callable|null */
+    /** @var array|\Closure|null */
     protected $alterDefaultValues = [];
     /** @var string */
     protected $jsInitiator = null;
@@ -45,15 +45,17 @@ class FormConfig extends ScaffoldActionConfig {
     protected $additionalHtmlForForm = '';
 
     const VALIDATOR_FOR_ID = 'required|integer|min:1';
-    /** @var callable */
+    /** @var \Closure */
     protected $beforeSaveCallback;
+    /** @var \Closure */
+    protected $beforeBulkEditDataSaveCallback;
     /** @var bool */
     protected $revalidateDataAfterBeforeSaveCallbackForCreation = false;
     /** @var bool */
     protected $revalidateDataAfterBeforeSaveCallbackForUpdate = false;
-    /** @var callable */
+    /** @var \Closure */
     protected $beforeValidateCallback;
-    /** @var callable|null */
+    /** @var \Closure|null */
     protected $validationSuccessCallback;
 
     public function setBulkEditingView($view) {
@@ -400,11 +402,27 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param callable $callback - function (array $data, $isRevalidation) { return true; }
+     * @param array $data
+     * @param array $messages
+     * @param bool $isRevalidation
+     * @return array
+     * @throws \LogicException
+     * @throws ScaffoldActionException
+     */
+    public function validateDataForBulkEdit(array $data, array $messages = [], $isRevalidation = false) {
+        $rules = array_intersect_key($this->getValidatorsForEdit(), $data);
+        if (empty($rules)) {
+            return [];
+        }
+        return $this->validateData($data, $rules, $messages, $isRevalidation, true);
+    }
+
+    /**
+     * @param \Closure $callback - function (array $data, $isRevalidation) { return true; }
      * Note: callback MUST return true if everything is ok, otherwise - returned values treated as error
      * @return $this
      */
-    public function setBeforeValidateCallback(callable $callback) {
+    public function setBeforeValidateCallback(\Closure $callback) {
         $this->beforeValidateCallback = $callback;
         return $this;
     }
@@ -432,12 +450,19 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $validators - supports inserts in format "{{id}}" where "id" can be any key from $data
      * @param array $messages
      * @param bool $isRevalidation
+     * @param bool $isBulkEdit
      * @return array|string|bool
      * @throws \LogicException
      *
      * @throws ScaffoldActionException
      */
-    public function validateData(array $data, array $validators, array $messages = [], $isRevalidation = false) {
+    public function validateData(
+        array $data,
+        array $validators,
+        array $messages = [],
+        $isRevalidation = false,
+        $isBulkEdit = false
+    ) {
         $success = $this->beforeValidate($data, $isRevalidation);
         if ($success !== true) {
             return $success;
@@ -489,7 +514,7 @@ class FormConfig extends ScaffoldActionConfig {
             return $errors;
         }
 
-        $success = $this->onValidationSuccess($data, $isRevalidation);
+        $success = $this->onValidationSuccess($data, $isRevalidation, $isBulkEdit);
         if ($success !== true) {
             return $success;
         }
@@ -500,10 +525,11 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * Called after request data validation and before specific callbacks and data saving.
      * Note: if you need to revalidate data after callback - use setRevalidateDataAfterBeforeSaveCallback() method
-     * @param callable $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
+     * Note: is not applied to bulk edit!
+     * @param \Closure $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
      * @return $this
      */
-    public function setBeforeSaveCallback(callable $callback) {
+    public function setBeforeSaveCallback(\Closure $callback) {
         $this->beforeSaveCallback = $callback;
         return $this;
     }
@@ -516,10 +542,36 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @return callable - function ($isCreation, array $validatedData, FormConfig $formConfig) {}
+     * @return \Closure - function ($isCreation, array $validatedData, FormConfig $formConfig) {}
      */
     public function getBeforeSaveCallback() {
         return $this->beforeSaveCallback;
+    }
+
+    /**
+     * Called after request data validation and before specific callbacks and data saving.
+     * Note: if you need to revalidate data after callback - use setRevalidateDataAfterBeforeSaveCallback() method
+     * Note: is not applied to bulk edit!
+     * @param \Closure $callback = function (array $validatedData, FormConfig $formConfig) { return $validatedData; }
+     * @return $this
+     */
+    public function setBeforeBulkEditDataSaveCallback(\Closure $callback) {
+        $this->beforeBulkEditDataSaveCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasBeforeBulkEditDataSaveCallback() {
+        return !empty($this->beforeBulkEditDataSaveCallback);
+    }
+
+    /**
+     * @return \Closure - function ($isCreation, array $validatedData, FormConfig $formConfig) {}
+     */
+    public function getBeforeBulkEditDataSaveCallback() {
+        return $this->beforeBulkEditDataSaveCallback;
     }
 
     /**
@@ -544,7 +596,7 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param callable $calback = function (array $data, $isRevalidation) { return true }
+     * @param \Closure $calback = function (array $data, $isRevalidation, $isBulkEdit) { return true }
      * Note: callback MUST return true if everything is ok, otherwise - returned values treated as error
      * Values allowed to be returned:
      *      - true: no errors
@@ -553,20 +605,21 @@ class FormConfig extends ScaffoldActionConfig {
      *               default "validation failed" message
      * @return $this
      */
-    public function setValidationSuccessCallback(callable $calback) {
+    public function setValidationSuccessCallback(\Closure $calback) {
         $this->validationSuccessCallback = $calback;
         return $this;
     }
 
     /**
      * @param array $data
-     * @param $isRevalidation
+     * @param bool $isRevalidation
+     * @param bool $isBulkEdit
      * @return array|bool - true: no errors | other - validation errors
      * @throws \LogicException
      */
-    protected function onValidationSuccess(array $data, $isRevalidation) {
+    protected function onValidationSuccess(array $data, $isRevalidation, $isBulkEdit) {
         if (!empty($this->validationSuccessCallback)) {
-            $success = call_user_func($this->validationSuccessCallback, $data, $isRevalidation);
+            $success = call_user_func($this->validationSuccessCallback, $data, $isRevalidation, $isBulkEdit);
             if ($success !== true) {
                 if (is_string($success)) {
                     return ['_message' => $success];
@@ -583,14 +636,14 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param array|callable $arrayOrCallable
-     *      - callable: funciton (array $defaults, FormConfig $formConfig) { return $defaults; }
+     * @param array|\Closure $arrayOrCallable
+     *      - \Closure: funciton (array $defaults, FormConfig $formConfig) { return $defaults; }
      * @return $this
      * @throws ScaffoldActionException
      */
     public function setAlterDefaultValues($arrayOrCallable) {
-        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
-            throw new ScaffoldActionException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
+        if (!is_array($arrayOrCallable) && !($arrayOrCallable instanceof \Closure)) {
+            throw new ScaffoldActionException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or \Closure');
         }
         $this->alterDefaultValues = $arrayOrCallable;
         return $this;
@@ -603,7 +656,7 @@ class FormConfig extends ScaffoldActionConfig {
      */
     public function alterDefaultValues(array $defaults) {
         if (!empty($this->alterDefaultValues)) {
-            if (is_callable($this->alterDefaultValues)) {
+            if ($this->alterDefaultValues instanceof \Closure) {
                 $defaults = call_user_func($this->alterDefaultValues, $defaults, $this);
                 if (!is_array($defaults)) {
                     throw new ScaffoldActionException(

@@ -43,7 +43,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                     <input type="hidden" name="_method" value="PUT">
                     {{? it._ids && $.isArray(it._ids) }}
                         {{~ it._ids :value:index }}
-                            <input type="hidden" name="<?php echo $pkColName; ?>[]" value="{{= value }}">
+                            <input type="hidden" name="ids[]" value="{{= value }}">
                         {{~}}
                     {{??}}
                         {{? typeof it._conditions === 'string' }}
@@ -90,7 +90,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                                 </button>
                             </div>
                             <div class="col-xs-6 text-right">
-                                <button type="submit" class="btn btn-success">
+                                <button type="submit" class="btn btn-success" disabled>
                                     <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?>
                                 </button>
                             </div>

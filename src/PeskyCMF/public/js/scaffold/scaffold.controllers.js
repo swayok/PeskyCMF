@@ -840,6 +840,7 @@ var ScaffoldFormHelper = {
         $.when(deferred, ScaffoldFormHelper.loadOptions(resourceName, 'bulk-edit'))
             .done(function (modalTpl, optionsResponse) {
                 var tplData = {_options: optionsResponse};
+                // collect ids or conditions
                 if ($link.attr('data-action') === 'bulk-edit-selected') {
                     tplData._ids = [];
                     var idKey = $link.attr('data-id-field') || 'id';
@@ -854,8 +855,9 @@ var ScaffoldFormHelper = {
                     tplData._conditions = api.search();
                 }
                 var $bulkEditModal = $(modalTpl(tplData));
-                // init inputs activation checkboxes (enablers)
-                $bulkEditModal
+                var $bulkEditForm = $bulkEditModal.find('form');
+                // add special classes for containers of checkboxes radios inputs
+                $bulkEditForm
                     .find('input, select, textarea')
                     .not('[type="hidden"]')
                     .not('.bulk-edit-form-input-enabler-switch')
@@ -884,7 +886,8 @@ var ScaffoldFormHelper = {
                                 .end()
                             .end()
                         ;
-                $bulkEditModal
+                // switch editing on/off by clicking on input's label
+                $bulkEditForm
                     .find('.bulk-edit-form-input label')
                     .on('click', function () {
                         var $inputOrLabel = $(this);
@@ -894,7 +897,8 @@ var ScaffoldFormHelper = {
                                     .prop('checked', true)
                                     .change();
                     });
-                $bulkEditModal
+                // switch editing on/off by changing enabler input
+                $bulkEditForm
                     .find('.bulk-edit-form-input-enabler-switch')
                     .on('change switchChange.bootstrapSwitch', function () {
                         var $inputs = $(this)
@@ -908,7 +912,12 @@ var ScaffoldFormHelper = {
                         $inputs.filter('.switch').bootstrapSwitch('disabled', !this.checked);
                         $inputs.filter('select.selectpicker').selectpicker('refresh');
                         $inputs.trigger('toggle.bulkEditEnabler', !this.checked);
-                    });
+                        $bulkEditForm.find('[type="submit"]').prop(
+                            'disabled',
+                            $bulkEditForm.find('.bulk-edit-form-input-enabler-switch:checked').length === 0
+                        );
+                    })
+                    .change();
 
                 // add resulting html to page and open modal
                 $(document.body).append($bulkEditModal);
@@ -917,11 +926,15 @@ var ScaffoldFormHelper = {
                         $bulkEditModal.remove();
                     })
                     .on('show.bs.modal', function () {
-                        ScaffoldFormHelper.initForm($bulkEditModal.find('form'), function (json, $form, $container) {
+                        $bulkEditForm.on('submit', function () {
+                            return $bulkEditForm.find('.bulk-edit-form-input-enabler-switch:checked').length > 0;
+                        });
+                        ScaffoldFormHelper.initForm($bulkEditForm, function (json, $form, $container) {
                             if (json._message) {
                                 toastr.success(json._message);
                             }
                             $bulkEditModal.modal('hide');
+                            api.draw();
                         });
                     })
                     .modal({
