@@ -157,7 +157,8 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     public function getLabel($default = '') {
-        return parent::getLabel($default) . ($this->getTableColumnConfig()->isRequiredOnAnyAction() ? '*' : '');
+        $suffix = $this->isDbField() && $this->getTableColumnConfig()->isRequiredOnAnyAction() ? '*' : '';
+        return parent::getLabel($default) . $suffix;
     }
 
 }

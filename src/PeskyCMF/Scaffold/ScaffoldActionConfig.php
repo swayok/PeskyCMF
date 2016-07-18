@@ -270,15 +270,15 @@ abstract class ScaffoldActionConfig {
         }
         foreach ($this->getNonDbFields() as $key => $fieldConfig) {
             $valueConverter = $fieldConfig->getValueConverter();
-            if (is_callable($valueConverter)) {
+            if ($valueConverter instanceof \Closure) {
                 $recordWithBackup[$key] = call_user_func($valueConverter, $recordWithBackup, $fieldConfig, $this);
             } else {
                 $recordWithBackup[$key] = '';
             }
         }
-        $recordWithBackup += $permissions;
+        $recordWithBackup = array_merge($recordWithBackup, $permissions);
         if (!empty($customData) && is_array($customData)) {
-            $recordWithBackup += $customData;
+            $recordWithBackup = array_merge($recordWithBackup, $customData);
         }
         return $recordWithBackup;
     }

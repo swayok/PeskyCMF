@@ -18,8 +18,12 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 ?>
 <div class="form-group">
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel(); ?></label>
-    <select data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || '<?php echo $isMultiple ? '[]' : ''; ?>'}}"
-        {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
+    <select {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
+        <?php if ($isMultiple): ?>
+            data-value="{{! it.<?php echo $fieldConfig->getName(); ?> && $.isArray(it.<?php echo $fieldConfig->getName(); ?>) ? JSON.stringify(it.<?php echo $fieldConfig->getName(); ?>) : (it.<?php echo $fieldConfig->getName(); ?> || '[]') }}"
+        <?php else: ?>
+            data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || '<?php echo $isMultiple ? '[]' : ''; ?>' }}"
+        <?php endif; ?>
     >
     <?php if (!$fieldConfig->hasOptionsLoader()) : ?>
         <?php if ($rendererConfig->areOptionsDifferent()) : ?>
