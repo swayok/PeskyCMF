@@ -57,6 +57,10 @@ class FormConfig extends ScaffoldActionConfig {
     protected $beforeValidateCallback;
     /** @var \Closure|null */
     protected $validationSuccessCallback;
+    /** @var \Closure|null */
+    protected $afterSaveCallback;
+    /** @var \Closure|null */
+    protected $afterBulkEditDataSaveCallback;
 
     public function setBulkEditingView($view) {
         $this->bulkEditingView = $view;
@@ -544,7 +548,7 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @return \Closure - function ($isCreation, array $validatedData, FormConfig $formConfig) {}
+     * @return \Closure
      */
     public function getBeforeSaveCallback() {
         return $this->beforeSaveCallback;
@@ -570,7 +574,7 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @return \Closure - function ($isCreation, array $validatedData, FormConfig $formConfig) {}
+     * @return \Closure
      */
     public function getBeforeBulkEditDataSaveCallback() {
         return $this->beforeBulkEditDataSaveCallback;
@@ -635,6 +639,58 @@ class FormConfig extends ScaffoldActionConfig {
             }
         }
         return true;
+    }
+
+    /**
+     * Callback is called after successfully saving data but before model's commit()
+     * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
+     * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
+     * @param \Closure $callback - function ($isCreation, array $validatedData, CmfDbObject $object, FormConfig $formConfig) { return true; }
+     * @return $this
+     */
+    public function setAfterSaveCallback(\Closure $callback) {
+        $this->afterSaveCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAfterSaveCallback() {
+        return !empty($this->afterSaveCallback);
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function getAfterSaveCallback() {
+        return $this->afterSaveCallback;
+    }
+
+    /**
+     * Callback is called after successfully saving data but before model's commit()
+     * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
+     * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
+     * @param \Closure $callback - function (array $validatedData, FormConfig $formConfig) { return []; }
+     * @return $this
+     */
+    public function setAfterBulkEditDataSaveCallback(\Closure $callback) {
+        $this->afterBulkEditDataSaveCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAfterBulkEditDataAfterSaveCallback() {
+        return !empty($this->afterBulkEditDataSaveCallback);
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function getAfterBulkEditDataAfterSaveCallback() {
+        return $this->afterBulkEditDataSaveCallback;
     }
 
     /**

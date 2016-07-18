@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
@@ -13,7 +14,6 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Traits\DataValidationHelper;
-use PeskyORM\Db;
 use PeskyORM\DbExpr;
 use PeskyORM\Exception\DbObjectValidationException;
 use Swayok\Html\Tag;
@@ -87,12 +87,15 @@ class CmfScaffoldApiController extends Controller {
     public function getTemplates() {
         return view(
             CmfConfig::getInstance()->scaffold_templates_view(),
-            static::getScaffoldConfig()->getConfigs() + ['tableNameForRoutes' => static::getTableNameForRoutes()]
+            array_merge(
+                static::getScaffoldConfig()->getConfigs(),
+                ['tableNameForRoutes' => static::getTableNameForRoutes()]
+            )
         )->render();
     }
 
     public function getItemsList(Request $request) {
-        return response()->json($this->getDataGridItems($request));
+        return new JsonResponse($this->getDataGridItems($request));
     }
 
     public function getItem(Request $request, $tableName, $id = null) {
@@ -140,7 +143,7 @@ class CmfScaffoldApiController extends Controller {
                 ))
                 ->goBack(route('cmf_items_table', [static::getTableNameForRoutes()]));
         }
-        return response()->json($actionConfig->prepareRecord($data));
+        return new JsonResponse($actionConfig->prepareRecord($data));
     }
 
     public function getItemDefaults() {
@@ -152,7 +155,7 @@ class CmfScaffoldApiController extends Controller {
         }
         $formConfig = static::getScaffoldConfig()->getFormConfig();
         $data = $formConfig->alterDefaultValues(static::getModel()->getOwnDbObject()->getDefaultsArray());
-        return response()->json($formConfig->prepareRecord($data));
+        return new JsonResponse($formConfig->prepareRecord($data));
     }
 
     public function getOptions(Request $request) {
@@ -169,7 +172,7 @@ class CmfScaffoldApiController extends Controller {
                 unset($optionsByFields[$fieldName]);
             }
         }
-        return response()->json($optionsByFields);
+        return new JsonResponse($optionsByFields);
     }
 
     public function addItem(Request $request) {
@@ -201,14 +204,42 @@ class CmfScaffoldApiController extends Controller {
         }
         unset($data[$model->getPkColumnName()]); //< to be 100% sure =)
         if (!empty($data)) {
+            $model->begin();
             try {
-                $success = $model::getOwnDbObject($data)->save();
+                $dbData = array_diff_key($data, $formConfig->getNonDbFields());
+                $object = $model::getOwnDbObject($dbData);
+                $success = $object->save();
                 if (!$success) {
+                    $model->rollback();
                     return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
                         ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
+                } else if ($formConfig->hasAfterSaveCallback()) {
+                    $success = call_user_func($formConfig->getAfterSaveCallback(), true, $data, $object, $formConfig);
+                    if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
+                        if ($success->getStatusCode() < 400) {
+                            $model->commit();
+                        } else {
+                            $model->rollback();
+                        }
+                        return $success;
+                    } else if ($success !== true) {
+                        $model->rollback();
+                        throw new ScaffoldException(
+                            'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
+                        );
+                    }
                 }
+                $model->commit();
             } catch (DbObjectValidationException $exc) {
+                if ($model->inTransaction()) {
+                    $model->rollback();
+                }
                 return $this->sendValidationErrorsResponse($exc->getValidationErrors());
+            } catch (\Exception $exc) {
+                if ($model->inTransaction()) {
+                    $model->rollback();
+                }
+                throw $exc;
             }
         }
         return cmfServiceJsonResponse()
@@ -263,14 +294,41 @@ class CmfScaffoldApiController extends Controller {
         }
         unset($data[$model->getPkColumnName()]);
         if (!empty($data)) {
+            $model->begin();
             try {
-                $success = $object->begin()->updateValues($data)->commit();
+                $dbData = array_diff_key($data, $formConfig->getNonDbFields());
+                $success = $object->begin()->updateValues($dbData)->commit();
                 if (!$success) {
+                    $model->rollback();
                     return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
                         ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
+                } else if ($formConfig->hasAfterSaveCallback()) {
+                    $success = call_user_func($formConfig->getAfterSaveCallback(), false, $data, $object, $formConfig);
+                    if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
+                        if ($success->getStatusCode() < 400) {
+                            $model->commit();
+                        } else {
+                            $model->rollback();
+                        }
+                        return $success;
+                    } else if ($success !== true) {
+                        $model->rollback();
+                        throw new ScaffoldException(
+                            'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
+                        );
+                    }
                 }
+                $model->commit();
             } catch (DbObjectValidationException $exc) {
+                if ($model->inTransaction()) {
+                    $model->rollback();
+                }
                 return $this->sendValidationErrorsResponse($exc->getValidationErrors());
+            } catch (\Exception $exc) {
+                if ($model->inTransaction()) {
+                    $model->rollback();
+                }
+                throw $exc;
             }
         }
         return cmfServiceJsonResponse()
@@ -296,7 +354,7 @@ class CmfScaffoldApiController extends Controller {
             return $this->sendValidationErrorsResponse($errors);
         }
         if ($formConfig->hasBeforeBulkEditDataSaveCallback()) {
-            $data = call_user_func($formConfig->getBeforeBulkEditDataSaveCallback(), false, $data, $formConfig);
+            $data = call_user_func($formConfig->getBeforeBulkEditDataSaveCallback(), $data, $formConfig);
             if (empty($data)) {
                 throw new ScaffoldException('Empty $data received from beforeBulkEditDataSave callback');
             }
@@ -312,7 +370,25 @@ class CmfScaffoldApiController extends Controller {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
+        $model->begin();
         $updatedCount = $model->update($data, $conditions);
+        if ($formConfig->hasAfterBulkEditDataAfterSaveCallback()) {
+            $success = call_user_func($formConfig->getAfterBulkEditDataAfterSaveCallback(), $data);
+            if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
+                if ($success->getStatusCode() < 400) {
+                    $model->commit();
+                } else {
+                    $model->rollback();
+                }
+                return $success;
+            } else if ($success !== true) {
+                $model->rollback();
+                throw new ScaffoldException(
+                    'afterBulkEditDataAfterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
+                );
+            }
+        }
+        $model->commit();
         $message = $updatedCount
             ? CmfConfig::transBase('.action.bulk_edit.success', ['count' => $updatedCount])
             : CmfConfig::transBase('.action.bulk_edit.nothing_updated');
