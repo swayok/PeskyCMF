@@ -343,7 +343,7 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param array $validatorsForEdit
+     * @param array $validatorsForEdit - you can insert fields from received data via '{{field_name}}'
      * @return $this
      */
     public function addValidatorsForEdit(array $validatorsForEdit) {

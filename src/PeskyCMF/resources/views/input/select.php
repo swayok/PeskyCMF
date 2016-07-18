@@ -22,7 +22,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
         <?php if ($isMultiple): ?>
             data-value="{{! it.<?php echo $fieldConfig->getName(); ?> && $.isArray(it.<?php echo $fieldConfig->getName(); ?>) ? JSON.stringify(it.<?php echo $fieldConfig->getName(); ?>) : (it.<?php echo $fieldConfig->getName(); ?> || '[]') }}"
         <?php else: ?>
-            data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || '<?php echo $isMultiple ? '[]' : ''; ?>' }}"
+            data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}"
         <?php endif; ?>
     >
     <?php if (!$fieldConfig->hasOptionsLoader()) : ?>

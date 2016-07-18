@@ -22,7 +22,11 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             return;
         }
     }
-    $form.find('.selectpicker').selectpicker();
+    $form.find('.selectpicker').each(function () {
+        // somehow it is loosing value that was set by $('select').val('val');
+        var val = $(this).val();
+        $(this).selectpicker().selectpicker('val', val);
+    });
     $form.find('input.switch[type="checkbox"]').bootstrapSwitch();
 
     $form.ajaxForm({
