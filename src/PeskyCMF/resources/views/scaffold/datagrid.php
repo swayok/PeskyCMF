@@ -259,18 +259,18 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                         'processing' => true,
                         'serverSide' => true,
                         'ajax' => route('cmf_api_get_items', ['model' => $tableNameForRoutes], false),
-                        'order' => ($dataGridConfig->getOrderBy() instanceof \PeskyORM\DbExpr)
-                            ? []
-                            : [
-                                [
-                                    $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(),
-                                    $dataGridConfig->getOrderDirection()
-                                ]
-                            ],
                         'pageLength' => $dataGridConfig->getLimit(),
                         'toolbarItems' => array_values($toolbar),
                     ]
                 );
+                if (!$dataGridConfig->getOrderBy() instanceof \PeskyORM\DbExpr) {
+                    $dataTablesConfig['order'] = [
+                        [
+                            $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(),
+                            $dataGridConfig->getOrderDirection()
+                        ]
+                    ];
+                }
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig + ['resource_name' => $tableNameForRoutes], JSON_UNESCAPED_UNICODE); ?>;
             var rowActionsTpl = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
