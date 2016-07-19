@@ -259,12 +259,14 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                         'processing' => true,
                         'serverSide' => true,
                         'ajax' => route('cmf_api_get_items', ['model' => $tableNameForRoutes], false),
-                        'order' => [
-                            [
-                                $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(),
-                                $dataGridConfig->getOrderDirection()
-                            ]
-                        ],
+                        'order' => ($dataGridConfig->getOrderBy() instanceof \PeskyORM\DbExpr)
+                            ? []
+                            : [
+                                [
+                                    $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(),
+                                    $dataGridConfig->getOrderDirection()
+                                ]
+                            ],
                         'pageLength' => $dataGridConfig->getLimit(),
                         'toolbarItems' => array_values($toolbar),
                     ]

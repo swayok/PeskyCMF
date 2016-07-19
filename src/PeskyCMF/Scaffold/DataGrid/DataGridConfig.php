@@ -9,6 +9,7 @@ use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyORM\DbExpr;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
 
@@ -194,7 +195,7 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @throws ScaffoldActionException
      */
     public function setOrderBy($orderBy, $direction = null) {
-        if (!$this->model->hasTableColumn($orderBy)) {
+        if (!($orderBy instanceof DbExpr) && !$this->model->hasTableColumn($orderBy)) {
             throw new ScaffoldActionException($this, "Unknown column [$orderBy]");
         }
         if (!empty($direction)) {
