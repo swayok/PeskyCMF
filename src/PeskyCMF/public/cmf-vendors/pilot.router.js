@@ -159,8 +159,8 @@
                             fire: 'triggerHandler'
                         }, function (exportName, originalMethod) {
                             this[originalMethod] = function () {
-                                $emitter[exportName].apply($emitter, arguments);
-                                return this;
+                                var ret = $emitter[exportName].apply($emitter, arguments);
+                                return ret === false ? false : this;
                             };
                         }, this);
                     }
@@ -216,6 +216,7 @@
                 , reloadable: false
                 , basePath: '/'
                 , production: window.Pilot && window.Pilot.production
+                , useOnlyFirstMatchedRoute: false
                 , hashBang: '#!'
                 , useHistory: false
             }, options);
@@ -416,7 +417,7 @@
                 }
             }, this);
 
-            return units;
+            return (units.length && this.options.useOnlyFirstMatchedRoute) ? [units[0]] : units;
         },
 
 
@@ -468,7 +469,7 @@
                                 redirectTo: task.accessDeniedRedirectTo
                                 , redirectParams: task.requestParams
                             };
-
+                    req.access = access;
                     if (!access) {
                         task.trigger('accessDenied', req);
                         return Deferred().reject(accessDenied);
@@ -524,7 +525,6 @@
                     delete req.params;
                 }
             }
-
             if (accessQueue.length) {
                 promise = Deferred();
 
@@ -535,8 +535,7 @@
                             promise.reject(access.denied);
                         })
                 ;
-            }
-            else {
+            } else {
                 promise = _when(queue);
             }
 

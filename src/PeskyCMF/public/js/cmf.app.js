@@ -22,17 +22,22 @@ $(document).ready(function () {
             '[data-nav]',
         production: !GlobalVars.isDebug,
         basePath: GlobalVars.rootUrl,
+        useOnlyFirstMatchedRoute: true,
         reloadable: true
         //profile: true
         //useHistory: true
     });
 
+    if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
+        CustomRoutes.init(app);
+    }
+
     app
-        .route('/login', CmfControllers.loginController)
-        .route('/forgot_password', CmfControllers.forgotPasswordController)
-        .route('/replace_password/:access_key', CmfControllers.replacePasswordController)
-        .route('/page/:uri*', CmfControllers.pageController)
-        .route('/logout', function (event, request) {
+        .route('login', '/login', CmfControllers.loginController)
+        .route('forgot_password', '/forgot_password', CmfControllers.forgotPasswordController)
+        .route('replace_password', '/replace_password/:access_key', CmfControllers.replacePasswordController)
+        .route('page', '/page/:uri*', CmfControllers.pageController)
+        .route('logout', '/logout', function (event, request) {
             app.disableUrlChangeOnce = true;
             Utils.showPreloader(document.body);
             Utils.getPageWrapper().fadeOut(500);
@@ -40,10 +45,6 @@ $(document).ready(function () {
         });
 
     ScaffoldsManager.init(app);
-
-    if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
-        CustomRoutes.init(app);
-    }
 
     app.on('404', function (event, request) {
         if (request.path === GlobalVars.rootUrl) {
@@ -56,15 +57,14 @@ $(document).ready(function () {
             toastr.error('Page not found')
         }
         app.back(GlobalVars.rootUrl + '/login');
-    }).on('route:found', function (event, request) {
+    }).on('routestart', function (event, request) {
         if (request.routeDetected && !app.disableUrlChangeOnce && request.url !== document.location.href) {
             Pilot.setLocation(request);
         }
         Utils.highlightLinks(request.path);
         app.disableUrlChangeOnce = false;
         $('.modal.in').not('[data-close-on-nav="false"]').modal('hide');
-    })/*.on('useraction:navigate', function () {
-    })*/;
+    });
 
     window.addEventListener('popstate', function(event) {
         if (document.location.pathname.match(new RegExp('^' + GlobalVars.rootUrl + '(/|$)'))) {
@@ -74,7 +74,7 @@ $(document).ready(function () {
         }
     });
 
-    app.nav(Pilot.getLocation());
+    app.start();
 
 });
 

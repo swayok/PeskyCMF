@@ -7,16 +7,16 @@ ScaffoldsManager.init = function (app) {
     ScaffoldsManager.app = app;
 
     ScaffoldsManager.app
-        .route('/resource/:resource', ScaffoldControllers.dataGrid)
-        .route('/resource/:resource/details/:id', ScaffoldControllers.itemDetails)
+        .route('resource_datagrid', '/resource/:resource', ScaffoldControllers.dataGrid)
+        .route('resource_details', '/resource/:resource/details/:id', ScaffoldControllers.itemDetails)
         .route('/resource/:resource/list', function (event, request) {
             setTimeout(function () {
                 // timeout required to make previous route change end before this one started
                 ScaffoldsManager.app.nav(GlobalVars.rootUrl + '/resource/' + request.params.resource);
             }, 50);
         })
-        .route('/resource/:resource/create', ScaffoldControllers.itemForm)
-        .route('/resource/:resource/edit/:id', ScaffoldControllers.itemForm)
+        .route('resource_create', '/resource/:resource/create', ScaffoldControllers.itemForm)
+        .route('resource_edit', '/resource/:resource/edit/:id', ScaffoldControllers.itemForm)
 };
 
 ScaffoldsManager.getResourceBaseUrl = function (resourceName, additionalParameter) {

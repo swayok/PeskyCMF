@@ -203,7 +203,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
         if ($dataGridConfig->isDetailsViewerAllowed()) {
             $url = $dblClickUrl = route('cmf_item_details', [$tableNameForRoutes, ":{$pkName}:"], false);
             $btn = \Swayok\Html\Tag::a()
-                ->setClass('row-action text-light-blue')
+                ->setClass('row-action text-light-blue item-details')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
@@ -215,7 +215,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
         if ($dataGridConfig->isEditAllowed()) {
             $url = $dblClickUrl = route('cmf_item_edit_form', [$tableNameForRoutes, ":{$pkName}:"], false);
             $btn = \Swayok\Html\Tag::a()
-                ->setClass('row-action text-green')
+                ->setClass('row-action text-green item-edit')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
@@ -227,7 +227,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
         if ($dataGridConfig->isDeleteAllowed()) {
             $btn = \Swayok\Html\Tag::a()
                 ->setContent('<i class="glyphicon glyphicon-trash"></i>')
-                ->setClass('row-action text-red')
+                ->setClass('row-action text-red item-delete')
                 ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.delete_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setDataAttr('container', '#section-content .content')
