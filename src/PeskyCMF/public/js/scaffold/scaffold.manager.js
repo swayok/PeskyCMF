@@ -19,18 +19,26 @@ ScaffoldsManager.init = function (app) {
         .route('/resource/:resource/edit/:id', ScaffoldControllers.itemForm)
 };
 
-ScaffoldsManager.getResourceBaseUrl = function (resourceName) {
-    return GlobalVars.rootUrl + '/' + GlobalVars.scaffoldApiUrlSection + '/' + resourceName
+ScaffoldsManager.getResourceBaseUrl = function (resourceName, additionalParameter) {
+    return GlobalVars.rootUrl + '/' + GlobalVars.scaffoldApiUrlSection + '/' + ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)
+};
+
+ScaffoldsManager.buildResourceUrlSuffix = function (resourceName, additionalParameter) {
+    return resourceName + (additionalParameter ? '/' + additionalParameter : '');
 };
 
 ScaffoldsManager.isValidResourceName = function (resourceName) {
     return typeof resourceName == 'string' && String(resourceName).match(/^[a-zA-Z_][a-zA-Z_0-9]+$/);
 };
 
-ScaffoldsManager.validateResourceName = function (resourceName) {
+ScaffoldsManager.validateResourceName = function (resourceName, additionalParameter) {
     if (!ScaffoldsManager.isValidResourceName(resourceName)) {
         console.trace();
         throw 'Invalid REST resource name: ' + resourceName;
+    }
+    if (typeof additionalParameter !== 'undefined' && typeof additionalParameter !== 'string') {
+        console.trace();
+        throw 'Additional parameter must be a string: ' + (typeof additionalParameter) + ' received';
     }
 };
 
@@ -50,30 +58,31 @@ $.extend(Cache, {
     }
 });
 
-ScaffoldsManager.loadTemplates = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
+ScaffoldsManager.loadTemplates = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var deferred = $.Deferred();
-    if (!ScaffoldsManager.cacheTemplates || !ScaffoldsManager.isTemplatesLoaded(resourceName)) {
-        var resourceUrl = ScaffoldsManager.getResourceBaseUrl(resourceName);
+    if (!ScaffoldsManager.cacheTemplates || !ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)) {
+        var resourceUrl = ScaffoldsManager.getResourceBaseUrl(resourceName, additionalParameter);
         $.ajax({
             url: resourceUrl + '/service/templates',
             method: 'GET',
             cache: false,
             type: 'html'
         }).done(function (html) {
-            ScaffoldsManager.setResourceTemplates(resourceName, html);
-            deferred.resolve(resourceName);
+            ScaffoldsManager.setResourceTemplates(resourceName, additionalParameter, html);
+            deferred.resolve(resourceName, additionalParameter);
         }).fail(Utils.handleAjaxError);
     } else {
-        deferred.resolve(resourceName);
+        deferred.resolve(resourceName, additionalParameter);
     }
     return deferred;
 };
 
-ScaffoldsManager.setResourceTemplates = function (resourceName, html) {
-    ScaffoldsManager.validateResourceName(resourceName);
+ScaffoldsManager.setResourceTemplates = function (resourceName, additionalParameter, html) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var templates = $('<div id="templates">' + html + '</div>');
-    Cache.rawTemplates[resourceName] = {
+    var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+    Cache.rawTemplates[resourceId] = {
         datagrid: false,
         itemForm: false,
         bulkEditForm: false,
@@ -81,111 +90,132 @@ ScaffoldsManager.setResourceTemplates = function (resourceName, html) {
     };
     var dataGridTpl = templates.find('#data-grid-tpl');
     if (dataGridTpl.length) {
-        Cache.rawTemplates[resourceName].datagrid = dataGridTpl.html();
+        Cache.rawTemplates[resourceId].datagrid = dataGridTpl.html();
     }
     var itemFormTpl = templates.find('#item-form-tpl');
     if (itemFormTpl.length) {
-        Cache.rawTemplates[resourceName].itemForm = itemFormTpl.html();
+        Cache.rawTemplates[resourceId].itemForm = itemFormTpl.html();
     }
     var bulkEditFormTpl = templates.find('#bulk-edit-form-tpl');
     if (bulkEditFormTpl.length) {
-        Cache.rawTemplates[resourceName].bulkEditForm = bulkEditFormTpl.html();
+        Cache.rawTemplates[resourceId].bulkEditForm = bulkEditFormTpl.html();
     }
     var itemDetailsTpl = templates.find('#item-details-tpl');
     if (itemDetailsTpl.length) {
-        Cache.rawTemplates[resourceName].itemDetails = itemDetailsTpl.html();
+        Cache.rawTemplates[resourceId].itemDetails = itemDetailsTpl.html();
     }
 };
 
-ScaffoldsManager.isTemplatesLoaded = function (resourceName) {
-    return !!Cache.rawTemplates[resourceName];
+ScaffoldsManager.isTemplatesLoaded = function (resourceName, additionalParameter) {
+    return !!Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)];
 };
 
-ScaffoldsManager.hasDataGridTemplate = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
-    return ScaffoldsManager.isTemplatesLoaded(resourceName) && Cache.rawTemplates[resourceName].datagrid;
+ScaffoldsManager.hasDataGridTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+    )
 };
 
-ScaffoldsManager.hasItemFormTemplate = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
-    return ScaffoldsManager.isTemplatesLoaded(resourceName) && Cache.rawTemplates[resourceName].itemForm;
+ScaffoldsManager.hasItemFormTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemForm
+    );
 };
 
-ScaffoldsManager.hasBulkEditFormTemplate = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
-    return ScaffoldsManager.isTemplatesLoaded(resourceName) && Cache.rawTemplates[resourceName].bulkEditForm;
+ScaffoldsManager.hasBulkEditFormTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].bulkEditForm
+    );
 };
 
-ScaffoldsManager.hasItemDetailsTemplate = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
-    return ScaffoldsManager.isTemplatesLoaded(resourceName) && Cache.rawTemplates[resourceName].itemDetails;
+ScaffoldsManager.hasItemDetailsTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemDetails
+    );
 };
 
-ScaffoldsManager.getDataGridTpl = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
+ScaffoldsManager.getDataGridTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var deferred = $.Deferred();
-    ScaffoldsManager.loadTemplates(resourceName).done(function () {
-        if (!ScaffoldsManager.hasDataGridTemplate(resourceName)) {
-            throw 'There is no data grid template for resource [' + resourceName + ']';
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        if (!ScaffoldsManager.hasDataGridTemplate(resourceName, additionalParameter)) {
+            throw 'There is no data grid template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
-        deferred.resolve(Cache.rawTemplates[resourceName].datagrid);
+        deferred.resolve(
+            Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+        );
     });
     return deferred;
 };
 
-ScaffoldsManager.getItemFormTpl = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
+ScaffoldsManager.getItemFormTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var deferred = $.Deferred();
-    ScaffoldsManager.loadTemplates(resourceName).done(function () {
-        ScaffoldsManager.validateResourceName(resourceName);
-        if (!ScaffoldsManager.hasItemFormTemplate(resourceName)) {
-            throw 'There is no item form template for resource [' + resourceName + ']';
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasItemFormTemplate(resourceName, additionalParameter)) {
+            throw 'There is no item form template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
-        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.itemForm[resourceName]) {
-            Cache.compiledTemplates.itemForm[resourceName] = Utils.makeTemplateFromText(
-                Cache.rawTemplates[resourceName].itemForm,
-                'Item form template for ' + resourceName
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.itemForm[resourceId]) {
+            Cache.compiledTemplates.itemForm[resourceId] = Utils.makeTemplateFromText(
+                Cache.rawTemplates[resourceId].itemForm,
+                'Item form template for ' + resourceId
             );
         }
-        deferred.resolve(Cache.compiledTemplates.itemForm[resourceName]);
+        deferred.resolve(Cache.compiledTemplates.itemForm[resourceId]);
     });
     return deferred;
 };
 
-ScaffoldsManager.getBulkEditFormTpl = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
+ScaffoldsManager.getBulkEditFormTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName ,additionalParameter);
     var deferred = $.Deferred();
-    ScaffoldsManager.loadTemplates(resourceName).done(function () {
-        ScaffoldsManager.validateResourceName(resourceName);
-        if (!ScaffoldsManager.hasBulkEditFormTemplate(resourceName)) {
-            throw 'There is no bulk edit form template for resource [' + resourceName + ']';
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasBulkEditFormTemplate(resourceName, additionalParameter)) {
+            throw 'There is no bulk edit form template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
-        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.bulkEditForm[resourceName]) {
-            Cache.compiledTemplates.bulkEditForm[resourceName] = Utils.makeTemplateFromText(
-                Cache.rawTemplates[resourceName].bulkEditForm,
-                'Bulk edit form template for ' + resourceName
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.bulkEditForm[resourceId]) {
+            Cache.compiledTemplates.bulkEditForm[resourceId] = Utils.makeTemplateFromText(
+                Cache.rawTemplates[resourceId].bulkEditForm,
+                'Bulk edit form template for ' + resourceId
             );
         }
-        deferred.resolve(Cache.compiledTemplates.bulkEditForm[resourceName]);
+        deferred.resolve(Cache.compiledTemplates.bulkEditForm[resourceId]);
     });
     return deferred;
 };
 
-ScaffoldsManager.getItemDetailsTpl = function (resourceName) {
-    ScaffoldsManager.validateResourceName(resourceName);
+ScaffoldsManager.getItemDetailsTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var deferred = $.Deferred();
-    ScaffoldsManager.loadTemplates(resourceName).done(function () {
-        ScaffoldsManager.validateResourceName(resourceName);
-        if (!ScaffoldsManager.hasItemDetailsTemplate(resourceName)) {
-            throw 'There is no item details template for resource [' + resourceName + ']';
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasItemDetailsTemplate(resourceName, additionalParameter)) {
+            throw 'There is no item details template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
-        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.itemDetails[resourceName]) {
-            Cache.compiledTemplates.itemDetails[resourceName] = Utils.makeTemplateFromText(
-                Cache.rawTemplates[resourceName].itemDetails,
-                'Item details template for ' + resourceName
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.itemDetails[resourceId]) {
+            Cache.compiledTemplates.itemDetails[resourceId] = Utils.makeTemplateFromText(
+                Cache.rawTemplates[resourceId].itemDetails,
+                'Item details template for ' + resourceId
             );
         }
-        deferred.resolve(Cache.compiledTemplates.itemDetails[resourceName]);
+        deferred.resolve(Cache.compiledTemplates.itemDetails[resourceId]);
     });
     return deferred;
 };

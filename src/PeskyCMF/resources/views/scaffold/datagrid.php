@@ -261,6 +261,7 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                         'ajax' => route('cmf_api_get_items', ['model' => $tableNameForRoutes], false),
                         'pageLength' => $dataGridConfig->getLimit(),
                         'toolbarItems' => array_values($toolbar),
+                        'order' => []
                     ]
                 );
                 if (!$dataGridConfig->getOrderBy() instanceof \PeskyORM\DbExpr) {

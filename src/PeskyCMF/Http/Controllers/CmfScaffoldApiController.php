@@ -538,7 +538,11 @@ class CmfScaffoldApiController extends Controller {
                 $config['column'] = $columns[$config['column']]['name'];
             }
             if (!empty($config['column']) && !is_numeric($config['column'])) {
-                $conditions['ORDER'][$config['column']] = $config['dir'];
+                if ($config['column'] instanceof DbExpr) {
+                    $conditions['ORDER'] = DbExpr::create($config['column']->get() . ' ' . $config['dir']);
+                } else {
+                    $conditions['ORDER'][$config['column']] = $config['dir'];
+                }
             }
         }
         $result = static::getModel()->selectWithCount(array_keys($dataGridConfig->getDbFields()), $conditions);
