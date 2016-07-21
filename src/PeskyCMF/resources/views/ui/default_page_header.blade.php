@@ -1,8 +1,8 @@
 <?php
 /**
  * @var string $header
- * @var string|null $addBackUrl
- * @var bool|null $defaultBackUrl
+ * @var bool|null $addBackUrl
+ * @var string|null $defaultBackUrl
  */
 ?>
 <div class="content-header">

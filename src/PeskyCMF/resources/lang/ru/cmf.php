@@ -105,6 +105,7 @@ return [
     'item_details' => [
         'toolbar' => [
             'cancel' => 'Назад',
+            'close' => 'Закрыть',
             'edit' => 'Редактировать',
             'create' => 'Добавить',
             'delete' => 'Удалить'

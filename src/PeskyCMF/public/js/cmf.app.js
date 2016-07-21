@@ -67,6 +67,11 @@ $(document).ready(function () {
     });
 
     window.addEventListener('popstate', function(event) {
+        if (app.ignoreDocumentHistoryPopStateOnce) {
+            app.ignoreDocumentHistoryPopStateOnce = false;
+            return;
+        }
+        console.log(event);
         if (document.location.pathname.match(new RegExp('^' + GlobalVars.rootUrl + '(/|$)'))) {
             app.nav(Pilot.getLocation());
         } else {

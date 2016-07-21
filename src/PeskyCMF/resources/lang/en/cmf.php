@@ -81,6 +81,7 @@ return [
     'form' => [
         'toolbar' => [
             'cancel' => 'Cancel',
+            'close' => 'Close',
             'submit' => 'Save',
             'create' => 'Add new',
             'delete' => 'Delete'
