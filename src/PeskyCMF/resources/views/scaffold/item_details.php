@@ -13,7 +13,7 @@ try {
 ?>
 
 <?php View::startSection('item-detials-table') ;?>
-    <table class="table table-striped table-bordered mn">
+    <table class="table table-striped table-bordered mn item-details-table">
         <?php foreach ($fieldConfigs as $config) : ?>
         <tr id="item-details-<?php echo $config->getName(); ?>">
             <th class="text-nowrap">
