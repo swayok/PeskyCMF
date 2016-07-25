@@ -332,17 +332,28 @@ Utils.setUser = function (userData) {
     return Cache.user;
 };
 
-Utils.highlightLinks = function (url, isRecursion) {
+Utils.highlightLinks = function (url) {
     $('li.current-page, a.current-page, li.treeview').removeClass('current-page active');
     var $links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
-    if (!$links.length && !isRecursion) {
-        Utils.highlightLinks(url.replace(/\/[^\/]+$/, ''), true);
-        return;
+    if ($links.length) {
+        $links.parent().filter('li').addClass('current-page active')
+            .parent().filter('ul.treeview-menu').addClass('menu-open')
+            .parent().filter('li.treeview').addClass('active');
+        $links.not('li').find('> a').addClass('current-page active');
     }
-    $links.parent().filter('li').addClass('current-page active')
-        .parent().filter('ul.treeview-menu').addClass('menu-open')
-        .parent().filter('li.treeview').addClass('active');
-    $links.not('li').find('> a').addClass('current-page active');
+    // in case when there is no active link in sidemenus - try to shorten url by 1 section and search for matches again
+    if (!$('.sidebar-menu li.current-page.active').length) {
+        var parentUrl = url.replace(/\/[^\/]+$/, '');
+        if (parentUrl.match(/(page|resource)$/) === null) {
+            $links = $('.sidebar-menu a[href="' + parentUrl + '"], a[href="' + document.location.origin + parentUrl + '"]');
+            if ($links.length) {
+                $links.parent().filter('li').addClass('current-page active')
+                    .parent().filter('ul.treeview-menu').addClass('menu-open')
+                    .parent().filter('li.treeview').addClass('active');
+                $links.not('li').find('> a').addClass('current-page active');
+            }
+        }
+    }
 };
 
 Utils.cleanCache = function () {

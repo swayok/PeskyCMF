@@ -1412,6 +1412,7 @@
                 });
                 this.trigger('render');
             }
+            this.router.trigger('routerender', this.request);
         }
     });
     // View;

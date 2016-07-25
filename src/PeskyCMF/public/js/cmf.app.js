@@ -61,9 +61,14 @@ $(document).ready(function () {
         if (request.routeDetected && !app.disableUrlChangeOnce && request.url !== document.location.href) {
             Pilot.setLocation(request);
         }
-        Utils.highlightLinks(request.path);
         app.disableUrlChangeOnce = false;
         $('.modal.in').not('[data-close-on-nav="false"]').modal('hide');
+    }).on('routerender', function (event, request) {
+        Utils.highlightLinks(request.path);
+        // call custom handler if exists
+        if (typeof CustomUtils !== 'undefined' && typeof CustomUtils.highlightLinks === 'function') {
+            CustomUtils.highlightLinks.call(app, request);
+        }
     });
 
     window.addEventListener('popstate', function(event) {
