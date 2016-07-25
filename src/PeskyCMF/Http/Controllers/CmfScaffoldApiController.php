@@ -568,12 +568,14 @@ class CmfScaffoldApiController extends Controller {
             if (!is_array($label)) {
                 $ret .= Tag::option()
                     ->setContent($label)
-                    ->setValue($value);
+                    ->setValue($value)
+                    ->build();
             } else {
                 $ret .= Tag::create()
                     ->setName('optgroup')
                     ->setAttribute('label', $value)
-                    ->setContent($this->buildFieldOptions($label));
+                    ->setContent($this->buildFieldOptions($label))
+                    ->build();
             }
         }
         return $ret;

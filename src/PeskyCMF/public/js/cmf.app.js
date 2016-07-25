@@ -76,7 +76,6 @@ $(document).ready(function () {
             app.ignoreDocumentHistoryPopStateOnce = false;
             return;
         }
-        console.log(event);
         if (document.location.pathname.match(new RegExp('^' + GlobalVars.rootUrl + '(/|$)'))) {
             app.nav(Pilot.getLocation());
         } else {
