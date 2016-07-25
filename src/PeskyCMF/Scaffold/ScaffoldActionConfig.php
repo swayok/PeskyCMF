@@ -241,7 +241,6 @@ abstract class ScaffoldActionConfig {
         foreach ($record as $key => $value) {
             $recordWithBackup[$key] = $recordWithBackup['__' . $key] = $value;
         }
-        reset($record);
         foreach ($record as $key => $notUsed) {
             if ($this->getModel()->hasTableRelation($key)) {
                 continue;
@@ -268,17 +267,17 @@ abstract class ScaffoldActionConfig {
                 );
             }
         }
+        if (!empty($customData) && is_array($customData)) {
+            $recordWithBackup = array_merge($recordWithBackup, $customData);
+        }
+        $recordWithBackup = array_merge($recordWithBackup, $permissions);
         foreach ($this->getNonDbFields() as $key => $fieldConfig) {
             $valueConverter = $fieldConfig->getValueConverter();
             if ($valueConverter instanceof \Closure) {
                 $recordWithBackup[$key] = call_user_func($valueConverter, $recordWithBackup, $fieldConfig, $this);
-            } else {
+            } else if (!array_has($recordWithBackup, $key)) {
                 $recordWithBackup[$key] = '';
             }
-        }
-        $recordWithBackup = array_merge($recordWithBackup, $permissions);
-        if (!empty($customData) && is_array($customData)) {
-            $recordWithBackup = array_merge($recordWithBackup, $customData);
         }
         return $recordWithBackup;
     }

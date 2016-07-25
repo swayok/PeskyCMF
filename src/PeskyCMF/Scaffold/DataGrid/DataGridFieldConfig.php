@@ -81,6 +81,13 @@ class DataGridFieldConfig extends ScaffoldFieldConfig {
             switch ($this->getType()) {
                 case self::TYPE_BOOL:
                     return function ($value) {
+                        if (!$this->isDbField()) {
+                            if (!array_has($value, $this->getName())) {
+                                return '-';
+                            } else {
+                                $value = (bool)$value[$this->getName()];
+                            }
+                        }
                         return CmfConfig::transBase('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
                     };
             }
