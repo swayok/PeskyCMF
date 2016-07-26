@@ -67,6 +67,9 @@
     <script src="/packages/cmf-vendors/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/switches/js/bootstrap-switch.min.js" type="text/javascript"></script>
     <script src='/packages/adminlte/plugins/fastclick/fastclick.min.js'></script>
+    <script src='/packages/adminlte/plugins/input-mask/jquery.inputmask.js'></script>
+    <script src='/packages/adminlte/plugins/input-mask/jquery.inputmask.numeric.extensions.js'></script>
+    <script src='/packages/adminlte/plugins/input-mask/jquery.inputmask.regex.extensions.js'></script>
     <script src="/packages/cmf-vendors/datatables/js/jquery.dataTables.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/datatables/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/datatables/extensions/Select/js/dataTables.select.min.js" type="text/javascript"></script>

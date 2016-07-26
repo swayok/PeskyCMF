@@ -138,6 +138,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             base_path('vendor/almasaeed2010/adminlte/dist/css/skins/skin-blue.css') => public_path('packages/adminlte/css/skins/skin-blue.css'),
             base_path('vendor/almasaeed2010/adminlte/dist/css/skins/skin-blue.min.css') => public_path('packages/adminlte/css/skins/skin-blue.min.css'),
             base_path('vendor/almasaeed2010/adminlte/plugins/fastclick/fastclick.min.js') => public_path('packages/adminlte/plugins/fastclick/fastclick.min.js'),
+            base_path('vendor/almasaeed2010/adminlte/plugins/input-mask') => public_path('packages/adminlte/plugins/input-mask'),
 //            base_path('vendor/almasaeed2010/adminlte/plugins') => public_path('packages/adminlte/plugins'),
             // bootstrap
             base_path('vendor/twbs/bootstrap/dist') => public_path('packages/cmf-vendors/bootstrap'),

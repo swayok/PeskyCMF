@@ -6,6 +6,10 @@ var Utils = {
 Utils.configureAppLibs = function () {
     Utils.configureAjax();
     Utils.configureToastr();
+    if ($.inputmask !== 'undefined') {
+        $.inputmask.defaults.rightAlign = false;
+        $.inputmask.defaults.rightAlignNumerics = false;
+    }
 };
 
 Utils.configureToastr = function () {

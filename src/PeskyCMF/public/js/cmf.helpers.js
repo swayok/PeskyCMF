@@ -22,13 +22,37 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             return;
         }
     }
-    $form.find('.selectpicker').each(function () {
-        // somehow it is loosing value that was set by $('select').val('val');
-        var val = $(this).val();
-        $(this).selectpicker().selectpicker('val', val);
-    });
-    $form.find('input.switch[type="checkbox"]').bootstrapSwitch();
-
+    // init plugins
+    $form
+        .find('.selectpicker')
+        .each(function () {
+            // somehow it is loosing value that was set by $('select').val('val');
+            var val = $(this).val();
+            $(this).selectpicker().selectpicker('val', val);
+        });
+    $form
+        .find('input.switch[type="checkbox"]')
+        .bootstrapSwitch();
+    // input masks
+    $form
+        .find('input[data-type], textarea[data-type]')
+        .each(function () {
+            $(this).inputmask({alias: $(this).attr('data-type')});
+        });
+    $form
+        .find('input[data-mask], textarea[data-mask]')
+        .each(function () {
+            $(this).inputmask($(this).attr('data-mask'));
+        });
+    $form
+        .find('input[data-regexp], textarea[data-regexp]')
+        .each(function () {
+            $(this).inputmask("Regex", {regex: $(this).attr('data-regexp')});
+        });
+    $form
+        .find('input[data-inputmask], textarea[data-inputmask]')
+        .inputmask();
+    // init submit
     $form.ajaxForm({
         clearForm: !!options.clearForm,
         dataType: !options.isJson ? 'html' : 'json',
