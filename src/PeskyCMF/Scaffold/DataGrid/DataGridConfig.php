@@ -419,6 +419,7 @@ class DataGridConfig extends ScaffoldActionConfig {
             ->setClass('row-action text-success')
             ->setTitle(trans('path.to.translation'))
             ->setDataAttr('toggle', 'tooltip')
+            ->setDataAttr('container', '#section-content .content') //< tooltip container
             ->setDataAttr('block-datagrid', '1')
             ->setDataAttr('action', 'request')
             ->setDataAttr('method', 'put')
@@ -428,12 +429,13 @@ class DataGridConfig extends ScaffoldActionConfig {
             ->setHref('javascript: void(0)')
      * - redirect
         Tag::a()
-           ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
-           ->setClass('row-action text-primary')
-           ->setTitle(trans('path.to.translation'))
-           ->setDataAttr('toggle', 'tooltip')
-           ->setHref(route('route', [], false))
-           ->setTarget('_blank')
+            ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
+            ->setClass('row-action text-primary')
+            ->setTitle(trans('path.to.translation'))
+            ->setDataAttr('toggle', 'tooltip')
+            ->setDataAttr('container', '#section-content .content') //< tooltip container
+            ->setHref(route('route', [], false))
+            ->setTarget('_blank')
      *
      * @return $this
      * @throws \Swayok\Html\HtmlTagException
