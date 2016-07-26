@@ -44,6 +44,8 @@ class AjaxOnly {
                 $params = array_get($fallback, 'params', true);
                 if ($params === true) {
                     $params = $request->route()->parameters();
+                } else if ($params instanceof \Closure) {
+                    $params = call_user_func($params, $request->route()->parameters());
                 } else if ($params === false || !is_array($params)) {
                     $params = [];
                 }
