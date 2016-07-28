@@ -60,14 +60,19 @@ $config = array_merge([
         var $input = $('#<?php echo $attributes['id']; ?>');
         $input.datetimepicker(<?php echo json_encode($config); ?>);
         <?php if (!empty($enabler)) : ?>
-            $('#<?php echo $enabler; ?>-input').on('change', function () {
-                var val = this.type === 'checkbox' ? this.checked : $(this).val().length > 0;
+            var toggleVisibility = function ($enablerInput) {
+                var val = $enablerInput[0].type === 'checkbox' ? $enablerInput[0].checked : $enablerInput.val().length > 0;
                 if (val) {
-                    $input.closest('.form-group').show();
+                    $input.closest('.form-group').slideDown(100);
                 } else {
-                    $input.closest('.form-group').hide();
+                    $input.closest('.form-group').slideUp(100);
                 }
-            }).change();
+            };
+            var $enablerInput = $('#<?php echo \PeskyCMF\Scaffold\Form\FormFieldConfig::makeDefaultId($enabler); ?>');
+            toggleVisibility($enablerInput);
+            $enablerInput.on('change switchChange.bootstrapSwitch', function () {
+                toggleVisibility($(this));
+            });
         <?php endif; ?>
         $input.parent().find('.input-group-addon.cursor').on('click', function () {
             $input.data("DateTimePicker").show();
