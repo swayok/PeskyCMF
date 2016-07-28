@@ -128,13 +128,13 @@ var ScaffoldActionsHelper = {
             }
         }
         var data = $el.attr('data-data') || $el.data('data') || '';
-        var method = $el.attr('data-method') || 'get';
+        var method = String($el.attr('data-method') || 'get').toLowerCase();
         var baseMethod;
-        if (!$.inArray(method.toLowerCase(), ['post', 'put', 'delete'])) {
+        if ($.inArray(method, ['post', 'put', 'delete']) === false) {
             baseMethod = 'GET';
         } else {
             baseMethod = 'POST';
-            if (method.toLowerCase() !== 'post') {
+            if (method !== 'post') {
                 if ($.isPlainObject(data)) {
                     data._method = method.toUpperCase();
                 } else {
