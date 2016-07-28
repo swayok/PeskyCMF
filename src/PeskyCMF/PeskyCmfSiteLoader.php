@@ -172,9 +172,12 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         return static::getCmfConfig()->default_locale();
     }
 
-    static public function setLocale() {
-        $locale = session()->get(static::$cmfConfig->locale_session_key());
-        app()->setLocale($locale ?: static::getDefaultLocale());
+    static public function getAllowedLocales() {
+        return static::$cmfConfig->locales();
+    }
+
+    static public function getLocaleSessionKey() {
+        return static::$cmfConfig->locale_session_key();
     }
 
 }
