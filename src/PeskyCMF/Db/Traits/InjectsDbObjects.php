@@ -20,31 +20,29 @@ trait InjectsDbObjects {
     protected function readDbObjectForInjection($parameters) {
         /** @var Route $route */
         $route = \Request::route();
-        $id = $route->parameter('id', false);
-        if ($id === false && \Request::method() !== 'GET') {
-             $id = \Request::get('id', false);
+        $object = null;
+        foreach ($parameters as $key => $value) {
+            if ($value instanceof CmfDbObject) {
+                // get only last object in params
+                $object = $value;
+            }
         }
-        if ($id !== false) {
+        if (!empty($object)) {
+            $id = $route->parameter('id', false);
+            if ($id === false && \Request::method() !== 'GET') {
+                 $id = \Request::get('id', false);
+            }
             if (empty($id)) {
                 $this->sendRecordNotFoundResponse();
             }
-            $object = null;
-            foreach ($parameters as $key => $value) {
-                if ($value instanceof CmfDbObject) {
-                    // get only last object in params
-                    $object = $value;
-                }
-            }
-            if (!empty($object)) {
-                $conditions = [
-                    'id' => $id,
-                ];
-                $this->addConditionsForDbObjectInjection($route, $object, $conditions);
-                $this->addParentIdsConditionsForDbObjectInjection($route, $object, $conditions);
-                $object->find($conditions);
-                if (!$object->exists()) {
-                    $this->sendRecordNotFoundResponse();
-                }
+            $conditions = [
+                'id' => $id,
+            ];
+            $this->addConditionsForDbObjectInjection($route, $object, $conditions);
+            $this->addParentIdsConditionsForDbObjectInjection($route, $object, $conditions);
+            $object->find($conditions);
+            if (!$object->exists()) {
+                $this->sendRecordNotFoundResponse();
             }
         }
     }
