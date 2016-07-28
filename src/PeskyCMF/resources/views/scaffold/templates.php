@@ -1,42 +1,50 @@
 <?php
 /**
+ * @var \PeskyCMF\Scaffold\ScaffoldSectionConfig $scaffoldSection
  * @var \PeskyCMF\Db\CmfDbModel $model
  * @var string $tableNameForRoutes
+ * @var string $localizationKey
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  */
-$data = [
-    'model' => $model,
-    'tableNameForRoutes' => $tableNameForRoutes,
-    'translationPrefix' => \PeskyCMF\Config\CmfConfig::getInstance()->custom_dictionary_name() . ".{$tableNameForRoutes}",
-    'idSuffix' => preg_replace('%[^a-z0-9]%i', '-', strtolower($tableNameForRoutes))
-];
-?>
+if (empty($localizationKey)) {
+    $localizationKey = $tableNameForRoutes;
+}
 
+$data = compact([
+    'model', 'tableNameForRoutes', 'dataGridConfig', 'dataGridFilterConfig', 'formConfig', 'itemDetailsConfig'
+]);
+$data['translationPrefix'] = $scaffoldSection->getLocalizationBasePath($tableNameForRoutes);
+$data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
+?>
 
 <?php echo view(
     $dataGridConfig->getView(),
-    $data + $dataGridConfig->getAdditionalDataForView(),
-    [
-        'dataGridConfig' => $dataGridConfig,
-        'dataGridFilterConfig' => $dataGridFilterConfig
-    ]
+    $data,
+    $dataGridConfig->getAdditionalDataForView()
 )->render(); ?>
 
 
 <?php echo view(
     $formConfig->getView(),
-    $data + $formConfig->getAdditionalDataForView(),
-    ['formConfig' => $formConfig]
+    $data,
+    $formConfig->getAdditionalDataForView()
+)->render(); ?>
+
+
+<?php echo view(
+    $formConfig->getBulkEditingView(),
+    $data,
+    $formConfig->getAdditionalDataForView()
 )->render(); ?>
 
 
 <?php echo view(
     $itemDetailsConfig->getView(),
-    $data + $itemDetailsConfig->getAdditionalDataForView(),
-    ['itemDetailsConfig' => $itemDetailsConfig]
+    $data,
+    $itemDetailsConfig->getAdditionalDataForView()
 )->render(); ?>
 
 

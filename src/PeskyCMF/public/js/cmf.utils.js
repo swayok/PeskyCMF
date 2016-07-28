@@ -6,6 +6,10 @@ var Utils = {
 Utils.configureAppLibs = function () {
     Utils.configureAjax();
     Utils.configureToastr();
+    if ($.inputmask !== 'undefined') {
+        $.inputmask.defaults.rightAlign = false;
+        $.inputmask.defaults.rightAlignNumerics = false;
+    }
 };
 
 Utils.configureToastr = function () {
@@ -37,19 +41,21 @@ Utils.configureAjax = function () {
                 console.groupEnd();
             }
             console.groupCollapsed('Response');
-            if (xhr.responseText[0] === '{') {
-                try {
-                    var json = JSON.parse(xhr.responseText);
-                    console.log(json);
-                } catch (exc) {}
-            }
-            if (!json) {
-                console.log(xhr.responseText);
-            }
+            var json = Utils.convertXhrResponseToJsonIfPossible(xhr);
+            console.log(json || xhr.responseText);
             console.groupEnd();
             console.groupEnd();
         });
     }
+};
+
+Utils.convertXhrResponseToJsonIfPossible = function (xhr) {
+    if (xhr.responseText && xhr.responseText.length >= 2 && (xhr.responseText[0] === '{' || xhr.responseText[0] === '[')) {
+        try {
+            return JSON.parse(xhr.responseText);
+        } catch (exc) {}
+    }
+    return false;
 };
 
 /**
@@ -131,27 +137,25 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
 };
 
 Utils.handleAjaxError = function (xhr) {
-    if (xhr.responseText[0] === '{') {
-        try {
-            var json = JSON.parse(xhr.responseText);
-            if (json.redirect_with_reload) {
-                document.location = json.redirect_with_reload;
-            } else if (json.redirect) {
-                if (json.redirect === 'back') {
-                    window.adminApp.back(json.redirect_fallback);
-                } else if (json.redirect[0] === '/') {
-                    window.adminApp.nav(json.redirect);
-                } else {
-                    document.location = json.redirect;
-                }
+    var json = Utils.convertXhrResponseToJsonIfPossible(xhr);
+    if (json) {
+        if (json.redirect_with_reload) {
+            document.location = json.redirect_with_reload;
+        } else if (json.redirect) {
+            if (json.redirect === 'back') {
+                window.adminApp.back(json.redirect_fallback);
+            } else if (json.redirect[0] === '/') {
+                window.adminApp.nav(json.redirect);
+            } else {
+                document.location = json.redirect;
             }
-            if (json._message) {
-                toastr.error(json._message);
-            }
-            if (json.redirect || json.redirect_with_reload || json._message) {
-                return;
-            }
-        } catch (e) {}
+        }
+        if (json._message) {
+            toastr.error(json._message);
+        }
+        if (json.redirect || json.redirect_with_reload || json._message) {
+            return;
+        }
     }
     GlobalVars.getDebugDialog().showDebug(
         'HTTP Error ' + xhr.status + ' ' + xhr.statusText,
@@ -334,11 +338,26 @@ Utils.setUser = function (userData) {
 
 Utils.highlightLinks = function (url) {
     $('li.current-page, a.current-page, li.treeview').removeClass('current-page active');
-    var links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
-    links.parent().filter('li').addClass('current-page active')
-        .parent().filter('ul.treeview-menu').addClass('menu-open')
-        .parent().filter('li.treeview').addClass('active');
-    links.not('li').find('> a').addClass('current-page active');
+    var $links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
+    if ($links.length) {
+        $links.parent().filter('li').addClass('current-page active')
+            .parent().filter('ul.treeview-menu').addClass('menu-open')
+            .parent().filter('li.treeview').addClass('active');
+        $links.not('li').find('> a').addClass('current-page active');
+    }
+    // in case when there is no active link in sidemenus - try to shorten url by 1 section and search for matches again
+    if (!$('.sidebar-menu li.current-page.active').length) {
+        var parentUrl = url.replace(/\/[^\/]+$/, '');
+        if (parentUrl.match(/(page|resource)$/) === null) {
+            $links = $('.sidebar-menu a[href="' + parentUrl + '"], a[href="' + document.location.origin + parentUrl + '"]');
+            if ($links.length) {
+                $links.parent().filter('li').addClass('current-page active')
+                    .parent().filter('ul.treeview-menu').addClass('menu-open')
+                    .parent().filter('li.treeview').addClass('active');
+                $links.not('li').find('> a').addClass('current-page active');
+            }
+        }
+    }
 };
 
 Utils.cleanCache = function () {
@@ -349,8 +368,81 @@ Utils.updatePageTitleFromH1 = function ($content) {
     var $h1 = $content && $content.length ? $content.find('h1').first() : $('#section-content h1, h1').first();
     var defaultPageTitle = $.trim(String(GlobalVars.defaultPageTitle));
     if ($h1.length) {
-        document.title = $h1.text() + (defaultPageTitle.length ? ' - ' + defaultPageTitle : '');
+        var $pageTitle = $h1.find('.page-title');
+        document.title = ($pageTitle.length ? $pageTitle.text() : $h1.text()) + (defaultPageTitle.length ? ' - ' + defaultPageTitle : '');
     } else {
         document.title = defaultPageTitle;
+    }
+};
+
+Utils.initDebuggingTools = function () {
+    if (GlobalVars.isDebug) {
+        var $opener = $('<button type="button" class="btn btn-xs btn-default">&nbsp;</button>')
+            .fadeOut()
+            .css({
+                width: '14px',
+                cursor: 'default',
+                'background-color': 'transparent',
+                border: '0 none',
+                margin: '0',
+                position: 'absolute',
+                top: '0',
+                right: '0'
+            })
+            .on('click', function () {
+                $buttons.toggle();
+                if (Modernizr.localstorage) {
+                    localStorage.setItem('debug-tools-opened', $buttons.height() > 0);
+                }
+            });
+        var $buttons = $('<div class="btn-group" role="group"></div>')
+            .css({
+                position: 'absolute',
+                top: '0',
+                right: '14px'
+            })
+            .hide();
+        if (
+            Modernizr.localstorage
+            && (
+                localStorage.getItem('debug-tools-opened')
+                || localStorage.getItem('debug-tools-templates-cache-disabled')
+            )
+        ) {
+            $buttons.show();
+        }
+        var $container = $('<div id="debug-tools"></div>')
+            .css({
+                position: 'absolute',
+                top: '-4px',
+                right: '0',
+                overflow: 'visible',
+                'z-index': 10
+            })
+            .append($opener)
+            .append($buttons);
+
+        $(document.body).append($container);
+
+        // templates cache
+        var $disableTplCacheBtn = $('<button type="button" class="btn btn-xs btn-default">Tpl cache: on</button>');
+        $buttons.append($disableTplCacheBtn);
+        if (Modernizr.localstorage) {
+            ScaffoldsManager.cacheTemplates = localStorage.getItem('debug-tools-templates-cache') !== 'off';
+        }
+        if (!ScaffoldsManager.cacheTemplates) {
+            $disableTplCacheBtn.addClass('btn-danger').removeClass('btn-default').text('Tpl cache: off');
+        }
+        $disableTplCacheBtn.on('click', function () {
+            ScaffoldsManager.cacheTemplates = !ScaffoldsManager.cacheTemplates;
+            var labelSuffix = ScaffoldsManager.cacheTemplates ? 'on' : 'off';
+            $disableTplCacheBtn
+                .addClass(ScaffoldsManager.cacheTemplates ? 'btn-default' : 'btn-danger')
+                .removeClass(ScaffoldsManager.cacheTemplates ? 'btn-danger' : 'btn-default')
+                .text('Tpl cache: ' + labelSuffix);
+            if (Modernizr.localstorage) {
+                localStorage.setItem('debug-tools-templates-cache', labelSuffix);
+            }
+        });
     }
 };

@@ -18,6 +18,9 @@ var DebugDialog = function () {
     this.toggleVisibility = toggle;
 
     function showDebug (title, content) {
+        if (!content) {
+            content = '';
+        }
         if (!content.match(/^\s*<(html|!doctype)/i)) {
             content = content.replace(/^([\s\S]*?)((?:<!doctype[^>]*>)?\s*<html[\s\S]*?<body[^>]*>)/i, '$2$1', content);
         }

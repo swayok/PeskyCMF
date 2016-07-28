@@ -81,6 +81,13 @@ class DataGridFieldConfig extends ScaffoldFieldConfig {
             switch ($this->getType()) {
                 case self::TYPE_BOOL:
                     return function ($value) {
+                        if (!$this->isDbField()) {
+                            if (!array_has($value, $this->getName())) {
+                                return '-';
+                            } else {
+                                $value = (bool)$value[$this->getName()];
+                            }
+                        }
                         return CmfConfig::transBase('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
                     };
             }
@@ -93,6 +100,13 @@ class DataGridFieldConfig extends ScaffoldFieldConfig {
             $this->setIsSortable(false);
         }
         return parent::setIsDbField($isDbField);
+    }
+
+    /**
+     * @return int
+     */
+    public function getPosition() {
+        return (int)$this->position + ($this->getScaffoldActionConfig()->isAllowedMultiRowSelection() ? 1 : 0);
     }
 
 }

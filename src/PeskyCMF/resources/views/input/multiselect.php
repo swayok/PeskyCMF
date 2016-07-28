@@ -17,9 +17,9 @@ include __DIR__ . '/select.php';
 ?>
 
 <script type="application/javascript">
-    Utils.requireFiles('/packages/adminlte/plugins/select2/select2.full.min.js')
+    Utils.requireFiles('/packages/cmf-vendors/select2/js/select2.full.min.js')
         .done(function () {
-            Utils.requireFiles('/packages/adminlte/plugins/select2/i18n/<?php echo app()->getLocale(); ?>.js')
+            Utils.requireFiles('/packages/cmf-vendors/select2/js/i18n/<?php echo app()->getLocale(); ?>.js')
                 .done(function () {
                     var $select = $('#<?php echo $rendererConfig->getAttribute('id'); ?>');
                     var values = $select.attr('data-value');
@@ -37,5 +37,5 @@ include __DIR__ . '/select.php';
                         closeOnSelect: false
                     });
                 });
-        })
+        });
 </script>

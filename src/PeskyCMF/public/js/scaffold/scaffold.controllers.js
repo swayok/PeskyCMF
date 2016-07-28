@@ -43,11 +43,7 @@ var ScaffoldControllers = {
         },
         afterRender : function (event, request) {
             ScaffoldActionsHelper.initActions(this.$el);
-            this.$el.find('select[data-value!=""]').each(function () {
-                $(this).val(this.getAttribute('data-value'));
-            });
-            var form = this.$el.find('form');
-            FormHelper.initForm(form, form, function (json, form, container) {
+            ScaffoldFormHelper.initForm(this.$el.find('form'), function (json, form, container) {
                 if (json._message) {
                     toastr.success(json._message);
                 }
@@ -131,7 +127,7 @@ var ScaffoldActionsHelper = {
                 return $.Deferred().reject();
             }
         }
-        var data = $el.attr('data-data') || '';
+        var data = $el.attr('data-data') || $el.data('data') || '';
         var method = $el.attr('data-method') || 'get';
         var baseMethod;
         if (!$.inArray(method.toLowerCase(), ['post', 'put', 'delete'])) {
@@ -139,7 +135,11 @@ var ScaffoldActionsHelper = {
         } else {
             baseMethod = 'POST';
             if (method.toLowerCase() !== 'post') {
-                data += (data.length ? '&' : '') + '_method=' + method.toUpperCase();
+                if ($.isPlainObject(data)) {
+                    data._method = method.toUpperCase();
+                } else {
+                    data += (data.length ? '&' : '') + '_method=' + method.toUpperCase();
+                }
             }
         }
         return $.ajax({
@@ -147,7 +147,7 @@ var ScaffoldActionsHelper = {
                 data: data,
                 method: baseMethod,
                 cache: false,
-                dataType: 'json'
+                dataType: $el.attr('data-response-type') || 'json'
             })
             .done(function (json) {
                 if ($el.attr('data-on-success')) {
@@ -224,8 +224,11 @@ var ScaffoldDataGridHelper = {
                     var $tableWrapper = $(settings.nTableWrapper);
                     $table.data('configs', mergedConfigs);
                     ScaffoldDataGridHelper.initToolbar($tableWrapper, configs.toolbarItems, configs.filterToolbarItems);
-                    ScaffoldDataGridHelper.initClickEvents($tableWrapper, $table);
-                    ScaffoldDataGridHelper.initRowActions($table);
+                    ScaffoldDataGridHelper.initClickEvents($tableWrapper, $table, configs);
+                    ScaffoldDataGridHelper.initRowActions($table, configs);
+                    ScaffoldDataGridHelper.initMultiselect($table, $tableWrapper, configs);
+                    ScaffoldDataGridHelper.initBulkLinks($table, $tableWrapper, configs);
+                    ScaffoldDataGridHelper.initBulkEditing($table, $tableWrapper, configs);
                 }).on('preXhr', function (event, settings) {
                     ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                 });
@@ -234,7 +237,7 @@ var ScaffoldDataGridHelper = {
             throw 'Invalid data grid id: ' + dataGrid
         }
     },
-    initToolbar: function ($tableWrapper, customToolbarItems) {
+    initToolbar: function ($tableWrapper, customToolbarItems, customFilterToolbarItems) {
         var $toolbarEl = $tableWrapper.find('.toolbar');
         var $filterToolbar = $tableWrapper.find('.filter-toolbar');
         var $reloadBtn = $('<button class="btn btn-default" data-action="reload"></button>')
@@ -242,27 +245,44 @@ var ScaffoldDataGridHelper = {
         if ($filterToolbar.length) {
             $filterToolbar.prepend($reloadBtn);
         }
+        if ($.isArray(customFilterToolbarItems)) {
+            for (var i = 0; i < customFilterToolbarItems.length; i++) {
+                $filterToolbar.append(customFilterToolbarItems[i]);
+            }
+        }
         if ($toolbarEl.length) {
             if (!$filterToolbar.length) {
                 $toolbarEl.prepend($reloadBtn);
             }
             if ($.isArray(customToolbarItems)) {
-                for (var i = 0; i < customToolbarItems.length; i++) {
+                for (i = 0; i < customToolbarItems.length; i++) {
                     $toolbarEl.append(customToolbarItems[i]);
                 }
             }
         }
     },
-    initClickEvents: function ($tableWrapper, $table) {
+    initClickEvents: function ($tableWrapper, $table, configs) {
+        var api = $table.dataTable().api();
         $tableWrapper.on('click tap', '[data-action]', function (event) {
             var $el = $(this);
+            if ($el.hasClass('disabled')) {
+                return;
+            }
             var action = String($el.attr('data-action')).toLowerCase();
             switch (action) {
                 case 'reload':
-                    $table.dataTable().api().ajax.reload();
+                    api.ajax.reload();
                     break;
+                case 'bulk-filtered':
+                    $el.data('data', {conditions: api.search()});
+                    $el.attr('data-block-datagrid', '1');
+                    // no break here!!!
+                case 'bulk-selected':
+                    $el.attr('data-block-datagrid', '1');
+                    // no break here!!!
                 case 'request':
-                    if ($el.attr('data-block-datagrid')) {
+                    var blockDataGrid = !!$el.attr('data-block-datagrid');
+                    if (blockDataGrid) {
                         Utils.showPreloader($tableWrapper);
                     }
                     ScaffoldActionsHelper.handleRequestAction($el)
@@ -276,13 +296,13 @@ var ScaffoldDataGridHelper = {
                                     || json.redirect === ScaffoldsManager.app.activeRequest.path
                                 )
                             ) {
-                                $table.dataTable().api().ajax.reload();
+                                api.ajax.reload();
                                 delete json.redirect;
                             }
                             ScaffoldActionsHelper.onSuccess(json);
                         })
                         .always(function () {
-                            if ($el.attr('data-block-datagrid')) {
+                            if (blockDataGrid) {
                                 Utils.hidePreloader($tableWrapper);
                             }
                         });
@@ -290,9 +310,16 @@ var ScaffoldDataGridHelper = {
             }
             return false;
         });
+        if (configs && configs.doubleClickUrl) {
+            $table.on('dblclick dbltap', 'tbody tr', function (event) {
+                if (!$(event.target).hasClass('select-checkbox')) {
+                    ScaffoldsManager.app.nav(configs.doubleClickUrl(api.row($(this)).data()));
+                }
+                return false;
+            });
+        }
     },
-    initRowActions: function ($table) {
-        var configs = $table.data('configs');
+    initRowActions: function ($table, configs) {
         if (!configs || !configs.rowActions) {
             return;
         }
@@ -358,12 +385,6 @@ var ScaffoldDataGridHelper = {
                 }
             }
         });
-        if (configs && configs.doubleClickUrl) {
-            $table.on('dblclick dbltap', 'tbody tr', function (event) {
-                ScaffoldsManager.app.nav(configs.doubleClickUrl($table.dataTable().api().row($(this)).data()));
-                return false;
-            });
-        }
     },
     showRowActions: function ($row, $table, mouseX) {
         var configs = $table.data('configs');
@@ -392,13 +413,127 @@ var ScaffoldDataGridHelper = {
         if (configs && configs.rowActions && $table.data('rowActionsContainer')) {
             $table.data('rowActionsContainer').addClass('hidden');
         }
+    },
+    initMultiselect: function ($table, $tableWrapper, configs) {
+        if (!configs || !configs.multiselect) {
+            return;
+        }
+        var api = $table.dataTable().api();
+        $tableWrapper.addClass('multiselect');
+        $tableWrapper.find('th .rows-selection-options ul a').on('click', function () {
+            var $el = $(this);
+            if ($el.hasClass('select-all')) {
+                api.rows().select();
+            } else if ($el.hasClass('select-none')) {
+                api.rows().deselect();
+            } else if ($el.hasClass('invert-selection')) {
+                var selected = api.rows({selected: true});
+                api.rows({selected: false}).select();
+                selected.deselect();
+            }
+        });
+    },
+    initBulkLinks: function ($table, $tableWrapper, configs) {
+        var $selectionLinks = $tableWrapper.find('[data-action="bulk-selected"], [data-action="bulk-edit-selected"]');
+        var $fitleringLinks = $tableWrapper.find('[data-action="bulk-filtered"], [data-action="bulk-edit-filtered"]');
+        if (!$selectionLinks.length && !$fitleringLinks.length) {
+            return;
+        }
+        var api = $table.dataTable().api();
+        $selectionLinks.each(function () {
+            $(this).data('label-tpl', $(this).html());
+        });
+        $fitleringLinks.each(function () {
+            $(this).data('label-tpl', $(this).html());
+        });
+        var updateCounter = function ($links, count) {
+            $links.each(function () {
+                var $link = $(this);
+                $link.html($link.data('label-tpl').replace(/:count/g, String(count)));
+                var $parent = $link.parent('li');
+                if (count === 0) {
+                    $link.addClass('disabled');
+                    if ($parent.length) {
+                        $parent.addClass('disabled');
+                    }
+                } else {
+                    $link.removeClass('disabled');
+                    if ($parent.length) {
+                        $parent.removeClass('disabled');
+                    }
+                }
+            });
+        };
+        // selected items
+        if (configs && configs.multiselect && $selectionLinks.length) {
+            var updateSelectedCountInLabelAndCollectIds = function () {
+                var count = api.rows({selected: true}).count() || 0;
+                updateCounter($selectionLinks, count);
+                var rowsData = api.rows({selected: true}).data();
+                $selectionLinks.each(function () {
+                    var idKey = $(this).attr('data-id-field') || 'id';
+                    var ids = [];
+                    rowsData.each(function (rowData) {
+                        ids.push(rowData[idKey]);
+                    });
+                    $(this).data('data', {'ids': ids});
+                });
+            };
+            updateSelectedCountInLabelAndCollectIds();
+            $table.on('select.dt deselect.dt', function (event, api, type) {
+                if (type === 'row') {
+                    updateSelectedCountInLabelAndCollectIds();
+                }
+            });
+            $table.on('draw.dt', function () {
+                updateSelectedCountInLabelAndCollectIds();
+            });
+            $selectionLinks.on('click', function () {
+                if ($(this).parent('li').parent('ul.dropdown-menu').length) {
+                    $(this).parent().parent().parent().find('[data-toggle="dropdown"]').dropdown("toggle");
+                }
+            });
+        } else {
+            $selectionLinks
+                .addClass('disabled')
+                .parent('li')
+                    .addClass('disabled')
+        }
+        // fitlered items
+        if ($fitleringLinks.length) {
+            var updateFilteredCountInLabel = function () {
+                var count = api.page.info().recordsTotal || 0;
+                updateCounter($fitleringLinks, count);
+            };
+            updateFilteredCountInLabel();
+            $table.on('draw.dt', function () {
+                updateFilteredCountInLabel();
+            });
+            $fitleringLinks.on('click', function () {
+                if ($(this).parent('li').parent('ul.dropdown-menu').length) {
+                    $(this).parent().parent().parent().find('[data-toggle="dropdown"]').dropdown("toggle");
+                }
+            });
+        }
+    },
+    initBulkEditing: function ($table, $tableWrapper, configs) {
+        var $links = $tableWrapper.find('[data-action="bulk-edit-selected"], [data-action="bulk-edit-filtered"]');
+        var api = $table.dataTable().api();
+        $links.on('click', function () {
+            var $link = $(this);
+            if ($link.hasClass('disabled')) {
+                return false;
+            }
+            ScaffoldFormHelper.handleBulkEditForm($link, configs.resource_name, api);
+            return false;
+        })
     }
 };
 
 var DataGridSearchHelper = {
     container: '#query-builder',
     defaultConfig: {
-        plugins: ['bt-tooltip-errors', 'bt-checkbox'],
+        plugins: ['bt-tooltip-errors', 'bt-checkbox', 'bt-selectpicker'],
         allow_empty: true
     },
     resetButton: '#query-builder-reset',
@@ -683,5 +818,143 @@ var ScaffoldFormHelper = {
             deferred.resolve(ScaffoldFormHelper.options[cacheKey]);
         }
         return deferred;
+    },
+    initForm: function ($form, successCallback) {
+        $form.find('select[data-value!=""]').each(function () {
+            if (this.multiple) {
+                try {
+                    var json = JSON.parse(this.getAttribute('data-value'));
+                    $(this).val(json);
+                } catch (exc) {
+                    $(this).val(this.getAttribute('data-value'));
+                }
+            } else {
+                $(this).val(this.getAttribute('data-value'));
+            }
+        });
+        FormHelper.initForm($form, $form, successCallback);
+    },
+    handleBulkEditForm: function ($link, resourceName, api) {
+        try {
+            var deferred = ScaffoldsManager.getBulkEditFormTpl(resourceName);
+        } catch (exc) {
+            toastr.error(exc);
+        }
+        $('.modal.in').modal('hide'); //< hide any opened modals
+        Utils.showPreloader(CmfControllerHelpers.currentContentContainer);
+        var timeout = setTimeout(function () {
+            Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+            toastr.info('Server response timed out');
+        }, 20000);
+        $.when(deferred, ScaffoldFormHelper.loadOptions(resourceName, 'bulk-edit'))
+            .done(function (modalTpl, optionsResponse) {
+                var tplData = {_options: optionsResponse};
+                // collect ids or conditions
+                if ($link.attr('data-action') === 'bulk-edit-selected') {
+                    tplData._ids = [];
+                    var idKey = $link.attr('data-id-field') || 'id';
+                    api.rows({selected: true}).data().each(function (rowData) {
+                        tplData._ids.push(rowData[idKey]);
+                    });
+                    if (!tplData._ids) {
+                        toastr.error('No rows selected'); //< this should not happen, message is for developer to fix situation
+                        return false;
+                    }
+                } else {
+                    tplData._conditions = api.search();
+                }
+                var $bulkEditModal = $(modalTpl(tplData));
+                var $bulkEditForm = $bulkEditModal.find('form');
+                // add special classes for containers of checkboxes radios inputs
+                $bulkEditForm
+                    .find('input, select, textarea')
+                    .not('[type="hidden"]')
+                    .not('.bulk-edit-form-input-enabler-switch')
+                        .prop('disabled', true)
+                        .filter('[type="checkbox"]')
+                            .not('.switch')
+                                .closest('.bulk-edit-form-input-container')
+                                    .addClass('checkbox')
+                                .end()
+                            .end()
+                            .filter('.switch')
+                                .closest('.bulk-edit-form-input-container')
+                                    .addClass('checkbox-switch')
+                                .end()
+                            .end()
+                        .end()
+                        .filter('[type="radio"]')
+                            .not('.switch')
+                                .closest('.bulk-edit-form-input-container')
+                                    .addClass('radio')
+                                .end()
+                            .end()
+                            .filter('.switch')
+                                .closest('.bulk-edit-form-input-container')
+                                    .addClass('radio-switch')
+                                .end()
+                            .end()
+                        ;
+                // switch editing on/off by clicking on input's label
+                $bulkEditForm
+                    .find('.bulk-edit-form-input label')
+                    .on('click', function () {
+                        var $inputOrLabel = $(this);
+                        $inputOrLabel
+                            .closest('.bulk-edit-form-input-container')
+                                .find('.bulk-edit-form-input-enabler-switch')
+                                    .prop('checked', true)
+                                    .change();
+                    });
+                // switch editing on/off by changing enabler input
+                $bulkEditForm
+                    .find('.bulk-edit-form-input-enabler-switch')
+                    .on('change switchChange.bootstrapSwitch', function () {
+                        var $inputs = $(this)
+                            .closest('.bulk-edit-form-input-container')
+                            .find('.bulk-edit-form-input')
+                            .find('input, textarea, select');
+                        $inputs.prop('disabled', !this.checked);
+                        setTimeout(function () {
+                            $inputs.not('[type="hidden"], .switch').focus();
+                        }, 50);
+                        $inputs.filter('.switch').bootstrapSwitch('disabled', !this.checked);
+                        $inputs.filter('select.selectpicker').selectpicker('refresh');
+                        $inputs.trigger('toggle.bulkEditEnabler', !this.checked);
+                        $bulkEditForm.find('[type="submit"]').prop(
+                            'disabled',
+                            $bulkEditForm.find('.bulk-edit-form-input-enabler-switch:checked').length === 0
+                        );
+                    })
+                    .change();
+
+                // add resulting html to page and open modal
+                $(document.body).append($bulkEditModal);
+                $bulkEditModal
+                    .on('hidden.bs.modal', function () {
+                        $bulkEditModal.remove();
+                    })
+                    .on('show.bs.modal', function () {
+                        $bulkEditForm.on('submit', function () {
+                            return $bulkEditForm.find('.bulk-edit-form-input-enabler-switch:checked').length > 0;
+                        });
+                        ScaffoldFormHelper.initForm($bulkEditForm, function (json, $form, $container) {
+                            if (json._message) {
+                                toastr.success(json._message);
+                            }
+                            $bulkEditModal.modal('hide');
+                            api.draw();
+                        });
+                    })
+                    .modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+            })
+            .always(function () {
+                clearTimeout(timeout);
+                Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+            });
     }
 };

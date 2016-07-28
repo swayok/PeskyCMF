@@ -17,17 +17,17 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <div class="form-group">
     <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
     <div>
-        <select multiple data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || ''}}"
-            {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
+        <select multiple {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
+            data-value="{{! it.<?php echo $fieldConfig->getName(); ?> && $.isArray(it.<?php echo $fieldConfig->getName(); ?>) ? JSON.stringify(it.<?php echo $fieldConfig->getName(); ?>) : (it.<?php echo $fieldConfig->getName(); ?> || '[]') }}"
         >
         </select>
     </div>
 </div>
 
 <script type="application/javascript">
-    Utils.requireFiles('/packages/adminlte/plugins/select2/select2.full.min.js')
+    Utils.requireFiles('/packages/cmf-vendors/select2/js/select2.full.min.js')
         .done(function () {
-            Utils.requireFiles('/packages/adminlte/plugins/select2/i18n/<?php echo app()->getLocale(); ?>.js')
+            Utils.requireFiles('/packages/cmf-vendors/select2/js/i18n/<?php echo app()->getLocale(); ?>.js')
                 .done(function () {
                     var $select = $('#<?php echo $attributes['id']; ?>');
                     var tags = $select.attr('data-value');
@@ -49,5 +49,5 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
                         selectOnClose: true
                     });
                 });
-        })
+        });
 </script>

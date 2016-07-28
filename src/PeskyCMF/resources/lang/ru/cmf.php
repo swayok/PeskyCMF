@@ -47,6 +47,15 @@ return [
                 'toggle' => 'Фильтры'
             ],
         ],
+        'bulk_actions' => [
+            'dropdown_label' => 'Массовые действия',
+            'delete_selected' => '<span class="label label-danger">:count</span> Удалить выбранные',
+            'delete_selected_confirm' => 'Подтвердите удаление выбранных объектов',
+            'edit_selected' => '<span class="label label-primary"> Редактировать выбранные',
+            'delete_filtered' => '<span class="label label-danger">:count</span> Удалить отфильтрованные',
+            'delete_filtered_confirm' => 'Подтвердите удаление отфильтрованных объектов',
+            'edit_filtered' => '<span class="label label-primary"> Редактировать отфильтрованные',
+        ],
         'field' => [
             'bool' => [
                 'yes' => 'Да',
@@ -57,7 +66,10 @@ return [
             'column_label' => 'Действия',
             'edit_item' => 'Редактировать',
             'view_item' => 'Просмотр',
-            'delete_item' => 'Удалить'
+            'delete_item' => 'Удалить',
+            'select_all' => 'Выбрать все',
+            'select_none' => 'Отменить выбор',
+            'invert_selection' => 'Обратить выделение'
         ],
         'filter' => [
             'bool' => [
@@ -83,10 +95,17 @@ return [
                 'no' => 'Нет'
             ],
         ],
+        'bulk_edit' => [
+            'enabler' => [
+                'edit_field' => 'Изменить',
+                'skip_field' => 'Пропустить'
+            ]
+        ]
     ],
     'item_details' => [
         'toolbar' => [
             'cancel' => 'Назад',
+            'close' => 'Закрыть',
             'edit' => 'Редактировать',
             'create' => 'Добавить',
             'delete' => 'Удалить'
@@ -106,12 +125,21 @@ return [
             'success' => 'Объект успешно удален',
             'please_confirm' => 'Подтвердите удаление объекта'
         ],
+        'delete_bulk' => [
+            'success' => 'Объектов удалено: :count',
+            'nothing_deleted' => 'Не удалено ни одного объекта',
+        ],
         'create' => [
             'forbidden' => 'Создание объектов запрещено для этого раздела',
         ],
         'edit' => [
             'forbidden' => 'Редактирование объектов запрещено для этого раздела',
             'forbidden_for_record' => 'Редактирование этого объекта запрещено',
+        ],
+        'bulk_edit' => [
+            'no_data_to_save' => 'Нет данных для сохранения',
+            'success' => 'Объектов изменено: :count',
+            'nothing_updated' => 'Не изменено ни одного объекта',
         ],
         'item_details' => [
             'forbidden' => 'Просмотр информации об объектах этого раздела запрещен',

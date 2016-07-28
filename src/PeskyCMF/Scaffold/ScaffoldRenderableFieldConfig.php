@@ -2,8 +2,6 @@
 
 namespace PeskyCMF\Scaffold;
 
-use PeskyORM\DbColumnConfig;
-
 abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
 
     /**

@@ -10,6 +10,7 @@ $formId = "scaffold-form-{$idSuffix}";
 $pkColName = $model->getPkColumnName();
 
 $ifEdit = "{{? it.{$pkColName} > 0 }}";
+$ifCreate = "{{? !it.{$pkColName} }}";
 $else = '{{??}}';
 $endIf = '{{?}}';
 $printPk = "{{= it.{$pkColName} }}";
@@ -58,23 +59,29 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                         <!-- end of autofill disabler -->
                         <div class="box-body">
                         <?php
-                            foreach ($formConfig->getFields() as $config) {
-                                if (!$config->hasLabel()) {
-                                    $config->setLabel(trans("$translationPrefix.form.field.{$config->getName()}"));
-                                }
-                                if ($model->getTableColumn($config->getName())->isRequiredOnAnyAction()) {
-                                    $config->setLabel($config->getLabel() . '*');
+                            foreach ($formConfig->getFields() as $inputConfig) {
+                                if (!$inputConfig->hasLabel()) {
+                                    $inputConfig->setLabel(trans("$translationPrefix.form.field.{$inputConfig->getName()}"));
                                 }
                                 try {
-                                    $renderedInput = $config->render(['translationPrefix' => $translationPrefix]);
+                                    $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
                                     // replace <script> tags to be able to render that template
-                                    echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
+                                    $renderedInput = modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
+                                    if ($inputConfig->isShownOnCreate() && $inputConfig->isShownOnEdit()) {
+                                        echo $renderedInput;
+                                    } else if ($inputConfig->isShownOnCreate()) {
+                                        // display only when creating
+                                        echo $ifCreate . $renderedInput . $endIf;
+                                    } else {
+                                        // display only when editing
+                                        echo $ifEdit . $renderedInput . $endIf;
+                                    }
                                 } catch (Exception $exc) {
                                     echo '<div>' . $exc->getMessage() . '</div>';
                                     echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
                                 }
                             }
-                            echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());
+                            echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());;
                         ?>
                         </div>
                         <div class="box-footer">
@@ -112,14 +119,17 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                                     <?php endif; ?>
                                 <?php echo $endIf; ?>
                                 </div>
-                                <div class="col-xs-3">
-                                    <button type="submit" class="btn btn-success pull-right"><?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?></button>
+                                <div class="col-xs-3 text-right">
+                                    <button type="submit" class="btn btn-success">
+                                        <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?>
+                                    </button>
                                 </div>
                             </div>
-                            <?php if (count($formConfig->getToolbarItems()) > 0) : ?>
+                            <?php $toolbarItems = $formConfig->getToolbarItems(); ?>
+                            <?php if (count($toolbarItems) > 0) : ?>
                                 <div class="mt10 text-center">
                                     <?php
-                                        foreach ($formConfig->getToolbarItems() as $toolbarItem) {
+                                        foreach ($toolbarItems as $toolbarItem) {
                                             echo ' ' . preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $toolbarItem) . ' ';
                                         }
                                     ?>

@@ -3,7 +3,9 @@
 namespace PeskyCMF\Scaffold;
 
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
+use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\DbColumnConfig;
 use PeskyORM\DbRelationConfig;
 use Swayok\Html\Tag;
@@ -60,7 +62,7 @@ abstract class ScaffoldFieldConfig {
     }
 
     /**
-     * @return ScaffoldActionConfig|FormConfig|null
+     * @return ScaffoldActionConfig|DataGridConfig|ItemDetailsConfig|FormConfig|null
      */
     public function getScaffoldActionConfig() {
         return $this->scaffoldActionConfig;

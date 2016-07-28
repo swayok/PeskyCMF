@@ -1,7 +1,14 @@
 <?php
 
 if (!function_exists('routeTpl')) {
-    function routeTpl($routeName, $parameters = [], $tplParams = [], $absolute = false, $route = null) {
+    /**
+     * @param string $routeName
+     * @param array $parameters
+     * @param array $tplParams
+     * @param bool $absolute
+     * @return mixed
+     */
+    function routeTpl($routeName, array $parameters = [], array $tplParams = [], $absolute = false) {
         $replacements = [];
         foreach ($tplParams as $name => $tplName) {
             if (is_numeric($name)) {
@@ -10,18 +17,29 @@ if (!function_exists('routeTpl')) {
             $parameters[$name] = '__' . $name . '__';
             $replacements['%' . preg_quote($parameters[$name], '%') . '%'] = '{{= it.' . $tplName . ' }}';
         }
-        $url = route($routeName, $parameters, $absolute, $route);
+        $url = route($routeName, $parameters, $absolute);
         return preg_replace(array_keys($replacements), array_values($replacements), $url);
     }
 }
 
 if (!function_exists('cmfServiceJsonResponse')) {
-    function cmfServiceJsonResponse($httpCode = \PeskyCMF\HttpCode::OK, $headers = [], $options = 0) {
+    /**
+     * @param int $httpCode
+     * @param array $headers
+     * @param int $options
+     * @return \PeskyCMF\Http\CmfJsonResponse
+     */
+    function cmfServiceJsonResponse($httpCode = \PeskyCMF\HttpCode::OK, array $headers = [], $options = 0) {
         return new \PeskyCMF\Http\CmfJsonResponse([], $httpCode, $headers, $options);
     }
 }
 
 if (!function_exists('cmfJsonResponseForValidationErrors')) {
+    /**
+     * @param array $errors
+     * @param null|string $message
+     * @return \PeskyCMF\Http\CmfJsonResponse
+     */
     function cmfJsonResponseForValidationErrors(array $errors = [], $message = null) {
         if (empty($message)) {
             $message = \PeskyCMF\Config\CmfConfig::transBase('.form.validation_errors');
@@ -32,6 +50,11 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
 }
 
 if (!function_exists('cmfJsonResponseForHttp404')) {
+    /**
+     * @param null|string $fallbackUrl
+     * @param null|string $message
+     * @return \PeskyCMF\Http\CmfJsonResponse
+     */
     function cmfJsonResponseForHttp404($fallbackUrl = null, $message = null) {
         if (empty($message)) {
             $message = \PeskyCMF\Config\CmfConfig::transBase('.error.http404');
@@ -46,15 +69,31 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
 }
 
 if (!function_exists('cmfRedirectResponseWithMessage')) {
+    /**
+     * @param string $url
+     * @param string $message
+     * @param string $type
+     * @return \Illuminate\Http\RedirectResponse|\PeskyCMF\Http\CmfJsonResponse
+     */
     function cmfRedirectResponseWithMessage($url, $message, $type = 'info') {
-        return Redirect::to($url)->with(\PeskyCMF\Config\CmfConfig::getInstance()->session_message_key(), [
-            'message' => $message,
-            'type' => $type
-        ]);
+        if (request()->ajax()) {
+            return cmfServiceJsonResponse()
+                ->setMessage($message)
+                ->setRedirect($url);
+        } else {
+            return Redirect::to($url)->with(\PeskyCMF\Config\CmfConfig::getInstance()->session_message_key(), [
+                'message' => $message,
+                'type' => $type
+            ]);
+        }
     }
 }
 
 if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
+    /**
+     * @param string $dotJsTemplate
+     * @return string
+     */
     function modifyDotJsTemplateToAllowInnerScriptsAndTemplates($dotJsTemplate) {
         return preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
             if (preg_match('%type="text/html"%i', $matches[1])) {
@@ -62,7 +101,7 @@ if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
                 $encoded = base64_encode($matches[2]);
                 return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
             } else {
-                $script = preg_replace('%//.*$%m', '', $matches[2]);
+                $script = preg_replace('%(^|\s)//.*$%m', '$1', $matches[2]); //< remove "//" comments from a script
                 return "{{= '<' + 'script{$matches[1]}>' }}$script{{= '</' + 'script>'}}";
             }
         }, $dotJsTemplate);

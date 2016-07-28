@@ -31,6 +31,14 @@ abstract class ScaffoldSectionConfig {
     protected $isEditAllowed = true;
     /** @var bool */
     protected $isDeleteAllowed = true;
+    /**
+     * Path to localization of views.
+     * Usage: see $this->getLocalizationBasePath() method.
+     * By default if $localizationKey is empty - cmf::scaffold.templates view
+     * will call $this->getLocalizationBasePath($tableNameForRoutes)
+     * @return null|string
+     */
+    protected $viewsLocalizationKey = null;
 
     /**
      * ScaffoldSectionConfig constructor.
@@ -53,7 +61,10 @@ abstract class ScaffoldSectionConfig {
      * @throws ScaffoldActionException
      */
     public function getConfigs() {
-        $configs = ['model' => $this->getModel()];
+        $configs = [
+            'model' => $this->getModel(),
+            'scaffoldSection' => $this
+        ];
         $configs['dataGridConfig'] = $this->getDataGridConfig();
         if (!($configs['dataGridConfig'] instanceof DataGridConfig)) {
             throw new ScaffoldActionException(null, 'createDataGridConfig() should return instance of DataGridConfig class');
@@ -203,5 +214,14 @@ abstract class ScaffoldSectionConfig {
         return $this->isDetailsViewerAllowed();
     }
 
+    /**
+     * Base path to localization of scaffold views for this resource
+     * @param $defaultLocalizationKey
+     * @return string
+     */
+    public function getLocalizationBasePath($defaultLocalizationKey) {
+        $key = $this->viewsLocalizationKey ?: $defaultLocalizationKey;
+        return CmfConfig::getInstance()->custom_dictionary_name() . '.' . $key;
+    }
 
 }

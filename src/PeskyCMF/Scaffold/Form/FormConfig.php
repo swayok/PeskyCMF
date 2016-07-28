@@ -15,6 +15,13 @@ use Swayok\Utils\StringUtils;
 class FormConfig extends ScaffoldActionConfig {
 
     protected $view = 'cmf::scaffold/form';
+    protected $bulkEditingView = 'cmf::scaffold/bulk_edit_form';
+
+    /**
+     * Fields list that can be edited in bulk (for many records at once)
+     * @var FormFieldConfig[]
+     */
+    protected $bulkEditableFields = [];
     /**
      * @var null|mixed
      */
@@ -30,24 +37,42 @@ class FormConfig extends ScaffoldActionConfig {
     protected $validatorsForCreate = [];
     /** @var array  */
     protected $validatorsForEdit = [];
-    /** @var array|callable|null */
+    /** @var array|\Closure|null */
     protected $alterDefaultValues = [];
     /** @var string */
     protected $jsInitiator = null;
-    /** @var string|Closure */
+    /** @var string|\Closure */
     protected $additionalHtmlForForm = '';
 
     const VALIDATOR_FOR_ID = 'required|integer|min:1';
-    /** @var callable */
+    /** @var \Closure */
     protected $beforeSaveCallback;
+    /** @var \Closure */
+    protected $beforeBulkEditDataSaveCallback;
     /** @var bool */
     protected $revalidateDataAfterBeforeSaveCallbackForCreation = false;
     /** @var bool */
     protected $revalidateDataAfterBeforeSaveCallbackForUpdate = false;
-    /** @var callable */
+    /** @var \Closure */
     protected $beforeValidateCallback;
-    /** @var callable|null */
+    /** @var \Closure|null */
     protected $validationSuccessCallback;
+    /** @var \Closure|null */
+    protected $afterSaveCallback;
+    /** @var \Closure|null */
+    protected $afterBulkEditDataSaveCallback;
+
+    public function setBulkEditingView($view) {
+        $this->bulkEditingView = $view;
+        return $this;
+    }
+
+    public function getBulkEditingView() {
+        if (empty($this->bulkEditingView)) {
+            throw new ScaffoldActionException($this, 'The view file for bulk editing is not set');
+        }
+        return $this->bulkEditingView;
+    }
 
     protected function createFieldRendererConfig() {
         return InputRendererConfig::create();
@@ -57,6 +82,8 @@ class FormConfig extends ScaffoldActionConfig {
      * @param InputRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
      * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \PeskyORM\Exception\DbColumnConfigException
+     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     protected function configureDefaultRenderer(
         ScaffoldFieldRendererConfig $rendererConfig,
@@ -136,7 +163,9 @@ class FormConfig extends ScaffoldActionConfig {
             default:
                 $rendererConfig->setView('cmf::input/text');
         }
-        $this->configureRendererByColumnConfig($rendererConfig, $fieldConfig->getTableColumnConfig());
+        if ($fieldConfig->isDbField()) {
+            $this->configureRendererByColumnConfig($rendererConfig, $fieldConfig->getTableColumnConfig());
+        }
         if ($fieldConfig->hasDefaultRendererConfigurator()) {
             call_user_func($fieldConfig->getDefaultRendererConfigurator(), $rendererConfig, $fieldConfig);
         }
@@ -154,6 +183,73 @@ class FormConfig extends ScaffoldActionConfig {
         $rendererConfig
             ->setIsRequiredForCreate($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE))
             ->setIsRequiredForEdit($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE));
+    }
+
+    /**
+     * @param array $fields
+     * @return $this
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \BadMethodCallException
+     */
+    public function setBulkEditableFields(array $fields) {
+        if (empty($this->fields)) {
+            throw new \BadMethodCallException('setFields() method must be called before');
+        }
+        foreach ($fields as $name => $config) {
+            if (is_int($name)) {
+                $name = $config;
+                $config = null;
+            }
+            $this->addBulkEditableField($name, $config);
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param null|FormFieldConfig $fieldConfig - null: FormFieldConfig will be imported from $this->fields or created default one
+     * @return $this
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws ScaffoldActionException
+     */
+    public function addBulkEditableField($name, $fieldConfig = null) {
+        if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
+            throw new ScaffoldActionException($this, "Unknown table column [$name]");
+        } else if ($this->getModel()->getTableColumn($name)->isFile()) {
+            throw new ScaffoldActionException(
+                $this,
+                "Attaching files in bulk editing form is not suppoted. Table column: [$name]"
+            );
+        }
+        if (empty($fieldConfig)) {
+            $fieldConfig = $this->hasField($name) ? $this->getField($name) : $this->createFieldConfig();
+        }
+        /** @var FormFieldConfig $fieldConfig */
+        $fieldConfig->setName($name);
+        $fieldConfig->setPosition($this->getNextBulkEditableFieldPosition($fieldConfig));
+        $fieldConfig->setScaffoldActionConfig($this);
+        $this->bulkEditableFields[$name] = $fieldConfig;
+        return $this;
+    }
+
+    /**
+     * @return FormFieldConfig[]
+     */
+    public function getBulkEditableFields() {
+        return $this->bulkEditableFields;
+    }
+
+    /**
+     * @param FormFieldConfig $fieldConfig
+     * @return int
+     */
+    protected function getNextBulkEditableFieldPosition(FormFieldConfig $fieldConfig) {
+        return count($this->bulkEditableFields);
     }
 
     /**
@@ -247,7 +343,7 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param array $validatorsForEdit
+     * @param array $validatorsForEdit - you can insert fields from received data via '{{field_name}}'
      * @return $this
      */
     public function addValidatorsForEdit(array $validatorsForEdit) {
@@ -292,6 +388,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $messages
      * @param bool $isRevalidation
      * @return array
+     * @throws \LogicException
      * @throws ScaffoldActionException
      */
     public function validateDataForCreate(array $data, array $messages = [], $isRevalidation = false) {
@@ -303,6 +400,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $messages
      * @param bool $isRevalidation
      * @return array
+     * @throws \LogicException
      * @throws ScaffoldActionException
      */
     public function validateDataForEdit(array $data, array $messages = [], $isRevalidation = false) {
@@ -310,11 +408,27 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param callable $callback - function (array $data, $isRevalidation) { return true; }
+     * @param array $data
+     * @param array $messages
+     * @param bool $isRevalidation
+     * @return array
+     * @throws \LogicException
+     * @throws ScaffoldActionException
+     */
+    public function validateDataForBulkEdit(array $data, array $messages = [], $isRevalidation = false) {
+        $rules = array_intersect_key($this->getValidatorsForEdit(), $data);
+        if (empty($rules)) {
+            return [];
+        }
+        return $this->validateData($data, $rules, $messages, $isRevalidation, true);
+    }
+
+    /**
+     * @param \Closure $callback - function (array $data, $isRevalidation) { return true; }
      * Note: callback MUST return true if everything is ok, otherwise - returned values treated as error
      * @return $this
      */
-    public function setBeforeValidateCallback(callable $callback) {
+    public function setBeforeValidateCallback(\Closure $callback) {
         $this->beforeValidateCallback = $callback;
         return $this;
     }
@@ -342,11 +456,19 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $validators - supports inserts in format "{{id}}" where "id" can be any key from $data
      * @param array $messages
      * @param bool $isRevalidation
+     * @param bool $isBulkEdit
      * @return array|string|bool
+     * @throws \LogicException
      *
      * @throws ScaffoldActionException
      */
-    public function validateData(array $data, array $validators, array $messages = [], $isRevalidation = false) {
+    public function validateData(
+        array $data,
+        array $validators,
+        array $messages = [],
+        $isRevalidation = false,
+        $isBulkEdit = false
+    ) {
         $success = $this->beforeValidate($data, $isRevalidation);
         if ($success !== true) {
             return $success;
@@ -382,8 +504,10 @@ class FormConfig extends ScaffoldActionConfig {
                         $arrayFields[] = $key;
                     }
                 }
+                unset($validator);
             }
-        };
+        }
+        unset($value);
         $validator = \Validator::make($data, $validators, $messages);
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
@@ -396,7 +520,7 @@ class FormConfig extends ScaffoldActionConfig {
             return $errors;
         }
 
-        $success = $this->onValidationSuccess($data, $isRevalidation);
+        $success = $this->onValidationSuccess($data, $isRevalidation, $isBulkEdit);
         if ($success !== true) {
             return $success;
         }
@@ -407,10 +531,11 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * Called after request data validation and before specific callbacks and data saving.
      * Note: if you need to revalidate data after callback - use setRevalidateDataAfterBeforeSaveCallback() method
-     * @param callable $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
+     * Note: is not applied to bulk edit!
+     * @param \Closure $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
      * @return $this
      */
-    public function setBeforeSaveCallback(callable $callback) {
+    public function setBeforeSaveCallback(\Closure $callback) {
         $this->beforeSaveCallback = $callback;
         return $this;
     }
@@ -423,10 +548,36 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @return callable - function ($isCreation, array $validatedData, FormConfig $formConfig) {}
+     * @return \Closure
      */
     public function getBeforeSaveCallback() {
         return $this->beforeSaveCallback;
+    }
+
+    /**
+     * Called after request data validation and before specific callbacks and data saving.
+     * Note: if you need to revalidate data after callback - use setRevalidateDataAfterBeforeSaveCallback() method
+     * Note: is not applied to bulk edit!
+     * @param \Closure $callback = function (array $validatedData, FormConfig $formConfig) { return $validatedData; }
+     * @return $this
+     */
+    public function setBeforeBulkEditDataSaveCallback(\Closure $callback) {
+        $this->beforeBulkEditDataSaveCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasBeforeBulkEditDataSaveCallback() {
+        return !empty($this->beforeBulkEditDataSaveCallback);
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function getBeforeBulkEditDataSaveCallback() {
+        return $this->beforeBulkEditDataSaveCallback;
     }
 
     /**
@@ -451,7 +602,7 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param callable $calback = function (array $data, $isRevalidation) { return true }
+     * @param \Closure $calback = function (array $data, $isRevalidation, $isBulkEdit) { return true }
      * Note: callback MUST return true if everything is ok, otherwise - returned values treated as error
      * Values allowed to be returned:
      *      - true: no errors
@@ -460,20 +611,21 @@ class FormConfig extends ScaffoldActionConfig {
      *               default "validation failed" message
      * @return $this
      */
-    public function setValidationSuccessCallback(callable $calback) {
+    public function setValidationSuccessCallback(\Closure $calback) {
         $this->validationSuccessCallback = $calback;
         return $this;
     }
 
     /**
      * @param array $data
-     * @param $isRevalidation
+     * @param bool $isRevalidation
+     * @param bool $isBulkEdit
      * @return array|bool - true: no errors | other - validation errors
      * @throws \LogicException
      */
-    protected function onValidationSuccess(array $data, $isRevalidation) {
+    protected function onValidationSuccess(array $data, $isRevalidation, $isBulkEdit) {
         if (!empty($this->validationSuccessCallback)) {
-            $success = call_user_func($this->validationSuccessCallback, $data, $isRevalidation);
+            $success = call_user_func($this->validationSuccessCallback, $data, $isRevalidation, $isBulkEdit);
             if ($success !== true) {
                 if (is_string($success)) {
                     return ['_message' => $success];
@@ -490,14 +642,66 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param array|callable $arrayOrCallable
-     *      - callable: funciton (array $defaults, FormConfig $formConfig) { return $defaults; }
+     * Callback is called after successfully saving data but before model's commit()
+     * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
+     * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
+     * @param \Closure $callback - function ($isCreation, array $validatedData, CmfDbObject $object, FormConfig $formConfig) { return true; }
+     * @return $this
+     */
+    public function setAfterSaveCallback(\Closure $callback) {
+        $this->afterSaveCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAfterSaveCallback() {
+        return !empty($this->afterSaveCallback);
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function getAfterSaveCallback() {
+        return $this->afterSaveCallback;
+    }
+
+    /**
+     * Callback is called after successfully saving data but before model's commit()
+     * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
+     * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
+     * @param \Closure $callback - function (array $validatedData, FormConfig $formConfig) { return []; }
+     * @return $this
+     */
+    public function setAfterBulkEditDataSaveCallback(\Closure $callback) {
+        $this->afterBulkEditDataSaveCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAfterBulkEditDataAfterSaveCallback() {
+        return !empty($this->afterBulkEditDataSaveCallback);
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function getAfterBulkEditDataAfterSaveCallback() {
+        return $this->afterBulkEditDataSaveCallback;
+    }
+
+    /**
+     * @param array|\Closure $arrayOrCallable
+     *      - \Closure: funciton (array $defaults, FormConfig $formConfig) { return $defaults; }
      * @return $this
      * @throws ScaffoldActionException
      */
     public function setAlterDefaultValues($arrayOrCallable) {
-        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
-            throw new ScaffoldActionException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
+        if (!is_array($arrayOrCallable) && !($arrayOrCallable instanceof \Closure)) {
+            throw new ScaffoldActionException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or \Closure');
         }
         $this->alterDefaultValues = $arrayOrCallable;
         return $this;
@@ -510,7 +714,7 @@ class FormConfig extends ScaffoldActionConfig {
      */
     public function alterDefaultValues(array $defaults) {
         if (!empty($this->alterDefaultValues)) {
-            if (is_callable($this->alterDefaultValues)) {
+            if ($this->alterDefaultValues instanceof \Closure) {
                 $defaults = call_user_func($this->alterDefaultValues, $defaults, $this);
                 if (!is_array($defaults)) {
                     throw new ScaffoldActionException(

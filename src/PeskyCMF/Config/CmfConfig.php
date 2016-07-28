@@ -549,9 +549,9 @@ class CmfConfig extends ConfigsContainer {
     static public function data_tables_config() {
         return [
             'scrollX' => true,
-            'scrollY' => '55vh',
+            'scrollY' => '65vh',
             'scrollCollapse' => true,
-            'multiselect' => false,
+            'width' => '100%'
         ];
     }
 

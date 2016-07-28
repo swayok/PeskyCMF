@@ -37,11 +37,22 @@
         "swayok/peskyorm": "master@dev",
         "swayok/laravel-extended-errors": "master@dev",
         "swayok/html-tag-helper": "master@dev",
-		"swayok/laravel-site-loader": "master@dev",
+        "swayok/laravel-site-loader": "master@dev",
         "almasaeed2010/adminlte": "~2.0",
         "FortAwesome/Font-Awesome": "*",
         "driftyco/ionicons": "*",
         "nostalgiaz/bootstrap-switch": "*",
-        "Eonasdan/bootstrap-datetimepicker": "*"
+        "Eonasdan/bootstrap-datetimepicker": "*",
+        "datatables/datatables": "*",
+        "ckeditor/ckeditor": "4.*",
+        "twbs/bootstrap": "3.*",
+        "components/jquery": "2.*",
+        "bootstrap-select/bootstrap-select": "*",
+        "mistic100/jquery-querybuilder": "*",
+        "grimmlink/toastr": "2.*",
+        "moment/moment": "2.*",
+        "malsup/form": "3.*",
+        "afarkas/html5shiv": "*",
+        "select2/select2": "*"
     }
 }

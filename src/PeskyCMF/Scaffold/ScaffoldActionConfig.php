@@ -6,18 +6,18 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig;
 use PeskyCMF\Scaffold\Form\FormFieldConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
-use phpDocumentor\Reflection\DocBlock\Tag;
+use Swayok\Html\Tag;
 
 abstract class ScaffoldActionConfig {
     /** @var CmfDbModel */
     protected $model;
     /** @var array */
-    protected $fieldsConfigs = array();
+    protected $fieldsConfigs = [];
     /**
-     * Fields list to select from db
+     * Fields list
      * @var array|ScaffoldFieldConfig[]
      */
-    protected $fields = array();
+    protected $fields = [];
     /** @var string */
     protected $title;
     /** @var array */
@@ -30,9 +30,9 @@ abstract class ScaffoldActionConfig {
      */
     protected $width = 100;
     /**
-     * @var Tag[]|callable
+     * @var callable|null
      */
-    protected $toolbarItems = array();
+    protected $toolbarItems = null;
     /** @var array|callable */
     protected $specialConditions = [];
     /** @var ScaffoldSectionConfig */
@@ -79,6 +79,8 @@ abstract class ScaffoldActionConfig {
     /**
      * @param array $fields
      * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \PeskyORM\Exception\DbModelException
      * @throws ScaffoldActionException
      */
     public function setFields(array $fields) {
@@ -140,10 +142,18 @@ abstract class ScaffoldActionConfig {
      * @throws ScaffoldActionException
      */
     public function getField($name) {
-        if (empty($name) || empty($this->fields[$name])) {
+        if (!$this->hasField($name)) {
             throw new ScaffoldActionException($this, "Unknown field [$name]");
         }
         return $this->fields[$name];
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasField($name) {
+        return !empty($name) && !empty($this->fields[$name]);
     }
 
     /**
@@ -231,7 +241,6 @@ abstract class ScaffoldActionConfig {
         foreach ($record as $key => $value) {
             $recordWithBackup[$key] = $recordWithBackup['__' . $key] = $value;
         }
-        reset($record);
         foreach ($record as $key => $notUsed) {
             if ($this->getModel()->hasTableRelation($key)) {
                 continue;
@@ -258,17 +267,17 @@ abstract class ScaffoldActionConfig {
                 );
             }
         }
+        if (!empty($customData) && is_array($customData)) {
+            $recordWithBackup = array_merge($recordWithBackup, $customData);
+        }
+        $recordWithBackup = array_merge($recordWithBackup, $permissions);
         foreach ($this->getNonDbFields() as $key => $fieldConfig) {
             $valueConverter = $fieldConfig->getValueConverter();
-            if (is_callable($valueConverter)) {
+            if ($valueConverter instanceof \Closure) {
                 $recordWithBackup[$key] = call_user_func($valueConverter, $recordWithBackup, $fieldConfig, $this);
-            } else {
+            } else if (!array_has($recordWithBackup, $key)) {
                 $recordWithBackup[$key] = '';
             }
-        }
-        $recordWithBackup += $permissions;
-        if (!empty($customData) && is_array($customData)) {
-            $recordWithBackup += $customData;
         }
         return $recordWithBackup;
     }
@@ -411,14 +420,42 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return Tag[]
+     * @return string[]
+     * @throws \LogicException
      */
     public function getToolbarItems() {
-        return is_callable($this->toolbarItems) ? call_user_func($this->toolbarItems, $this) : $this->toolbarItems;
+        if (empty($this->toolbarItems)) {
+            return [];
+        }
+        $toolbarItems = call_user_func($this->toolbarItems, $this);
+        if (!is_array($toolbarItems)) {
+            throw new \LogicException(get_class($this) . '->toolbarItems closure must return an array');
+        }
+        /** @var Tag|string $item */
+        foreach ($toolbarItems as &$item) {
+            if (is_object($item)) {
+                if (method_exists($item, 'build')) {
+                    $item = $item->build();
+                } else if (method_exists($item, '__toString')) {
+                    $item = (string) $item;
+                } else {
+                    throw new \LogicException(
+                        get_class($this) . '->toolbarItems: array may contain only strings and objects with build() or __toString() methods'
+                    );
+                }
+            } else if (!is_string($item)) {
+                throw new \LogicException(
+                    get_class($this) . '->toolbarItems: array may contain only strings and objects with build() or __toString() methods'
+                );
+            }
+        }
+        return $toolbarItems;
     }
 
     /**
-     * @param Tag[]|callable $arrayOrCallable
+     * @param \Closure $callback - function (ScaffoldActionConfig $scaffoldAction) { return []; }
+     * Callback must return an array.
+     * Array may contain only strings, Tag class instances, or any object with build() or __toString() method
      * Examples:
      * - call some url via ajax and then run "callback(json)"
         Tag::a()
@@ -429,7 +466,7 @@ abstract class ScaffoldActionConfig {
             ->setDataAttr('method', 'put')
             ->setDataAttr('data', 'id=:id:')
             ->setDataAttr('on-success', 'callback(json);')
-            ->setHref('#');
+            ->setHref('javascript: void(0)');
      * - redirect to other url
         Tag::a()
             ->setContent(trans('path.to.translation'))
@@ -439,25 +476,8 @@ abstract class ScaffoldActionConfig {
      * @return $this
      * @throws ScaffoldActionException
      */
-    public function setToolbarItems($arrayOrCallable) {
-        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
-            throw new ScaffoldActionException($this, 'setRowActions($arrayOrCallable) accepts only array or callable');
-        }
-        if (!is_callable($arrayOrCallable)) {
-            foreach ($arrayOrCallable as &$toolbarItem) {
-                if (is_object($toolbarItem)) {
-                    if (method_exists($toolbarItem, 'build')) {
-                        $toolbarItem = $toolbarItem->build();
-                    } else if (method_exists($toolbarItem, '__toString')) {
-                        $toolbarItem = (string) $toolbarItem;
-                    } else {
-                        throw new ScaffoldActionException($this, 'Toolbar item is an object without possibility to convert it to string');
-                    }
-                }
-            }
-            unset($toolbarItem);
-        }
-        $this->toolbarItems = $arrayOrCallable;
+    public function setToolbarItems(\Closure $callback) {
+        $this->toolbarItems = $callback;
         return $this;
     }
 
