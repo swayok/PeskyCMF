@@ -17,7 +17,13 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
     }, options);
     var customInitiator = $form.attr('data-initiator');
     if (customInitiator) {
-        var ret = eval(customInitiator + '(form, container, onSubmitSuccess);');
+        var ret = null;
+        if (customInitiator.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
+            eval('customInitiator = ' + customInitiator);
+            if (typeof customInitiator === 'function') {
+                ret = customInitiator.call(form, form, container, onSubmitSuccess);
+            }
+        }
         if (ret === false) {
             return;
         }

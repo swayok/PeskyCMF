@@ -6,14 +6,20 @@
  * @var string $translationPrefix
  * @var string $idSuffix
  */
+try {
+
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 $fieldConfigs = $itemDetailsConfig->getFields();
 $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false);
-try {
+
+$jsInitiator = '';
+if ($itemDetailsConfig->hasJsInitiator()) {
+    $jsInitiator = 'data-initiator="' . addslashes($itemDetailsConfig->getJsInitiator()) . '"';
+}
 ?>
 
 <?php View::startSection('item-detials-table') ;?>
-    <table class="table table-striped table-bordered mn item-details-table">
+    <table class="table table-striped table-bordered mn item-details-table" <?php echo $jsInitiator; ?>>
         <?php foreach ($fieldConfigs as $config) : ?>
         <tr id="item-details-<?php echo $config->getName(); ?>">
             <th class="text-nowrap">

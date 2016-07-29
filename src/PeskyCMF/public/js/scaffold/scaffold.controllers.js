@@ -74,6 +74,13 @@ var ScaffoldControllers = {
         },
         afterRender : function (event, request) {
             ScaffoldActionsHelper.initActions(this.$el);
+            var customInitiator = this.$el.find('table.item-details-table').attr('data-initiator');
+            if (customInitiator && customInitiator.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
+                eval('customInitiator = ' + customInitiator);
+                if (typeof customInitiator === 'function') {
+                    customInitiator.call(this.$el);
+                }
+            }
         }
     })
 };
@@ -98,8 +105,7 @@ var ScaffoldActionsHelper = {
         switch (action) {
             case 'request':
                 Utils.showPreloader(container);
-                ScaffoldActionsHelper.handleRequestAction($el)
-                    .done(ScaffoldActionsHelper.onSuccess)
+                ScaffoldActionsHelper.handleRequestAction($el, ScaffoldActionsHelper.onSuccess)
                     .always(function () {
                         Utils.hidePreloader(container);
                     });
@@ -116,7 +122,7 @@ var ScaffoldActionsHelper = {
                 break;
         }
     },
-    handleRequestAction: function ($el) {
+    handleRequestAction: function ($el, onSuccess) {
         var url = $el.attr('data-url') || $el.attr('href');
         if (!url || url.length < 2) {
             return $.Deferred().reject();
@@ -150,8 +156,20 @@ var ScaffoldActionsHelper = {
                 dataType: $el.attr('data-response-type') || 'json'
             })
             .done(function (json) {
-                if ($el.attr('data-on-success')) {
-                    eval($el.attr('data-on-success'));
+                var ret = null;
+                var callback = $el.attr('data-on-success');
+                if (callback) {
+                    if (callback.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
+                        eval('callback = ' + callback);
+                        if (typeof callback === 'function') {
+                            ret = callback(json, $el, function () {
+                                return onSuccess(json);
+                            });
+                        }
+                    }
+                }
+                if (ret !== false) {
+                    onSuccess(json);
                 }
             })
             .fail(Utils.handleAjaxError);
@@ -285,8 +303,7 @@ var ScaffoldDataGridHelper = {
                     if (blockDataGrid) {
                         Utils.showPreloader($tableWrapper);
                     }
-                    ScaffoldActionsHelper.handleRequestAction($el)
-                        .done(function (json) {
+                    ScaffoldActionsHelper.handleRequestAction($el, function (json) {
                             if (
                                 json.redirect
                                 && (

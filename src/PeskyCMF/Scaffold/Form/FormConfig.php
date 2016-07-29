@@ -39,8 +39,7 @@ class FormConfig extends ScaffoldActionConfig {
     protected $validatorsForEdit = [];
     /** @var array|\Closure|null */
     protected $alterDefaultValues = [];
-    /** @var string */
-    protected $jsInitiator = null;
+
     /** @var string|\Closure */
     protected $additionalHtmlForForm = '';
 
@@ -727,33 +726,6 @@ class FormConfig extends ScaffoldActionConfig {
             }
         }
         return $defaults;
-    }
-
-    /**
-     * @return string
-     */
-    public function getJsInitiator() {
-        return $this->jsInitiator;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasJsInitiator() {
-        return !empty($this->jsInitiator);
-    }
-
-    /**
-     * @param $jsFunctionName
-     * @return $this
-     * @throws ScaffoldActionException
-     */
-    public function setJsInitiator($jsFunctionName) {
-        if (!is_string($jsFunctionName) && !preg_match('%^[_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%s', $jsFunctionName)) {
-            throw new ScaffoldActionException($this, "Invalid JavaScript funciton name: [$jsFunctionName]");
-        }
-        $this->jsInitiator = $jsFunctionName;
-        return $this;
     }
 
     /**

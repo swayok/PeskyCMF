@@ -18,9 +18,12 @@
             return originalInitializer(tableSelector, dataTablesConfig);
         }
  */
+try {
+
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig[] $gridColumnsConfigs */
 $gridColumnsConfigs = $dataGridConfig->getFields();
+
 ?>
 
 <div id="data-grid-tpl">
@@ -344,6 +347,10 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 is_opened: <?php echo $dataGridConfig->isFilterShownByDefault() ? 'true' : 'false'; ?>
             };
             DataGridSearchHelper.locale = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
+
+            <?php if ($dataGridConfig->hasJsInitiator()): ?>
+                <?php echo $dataGridConfig->getJsInitiator(); ?>.call($('#<?php echo $dataGridId; ?>'));
+            <?php endif ?>
             <?php if (empty($dataTablesInitializer)): ?>
                 var dataGrid = ScaffoldDataGridHelper.init('#<?php echo $dataGridId; ?>', dataTablesConfig);
             <?php else: ?>
@@ -354,3 +361,8 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
     </script>
 
 </div>
+
+<?php } catch (Exception $exc) {
+    echo $exc->getMessage();
+    echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
+}?>
