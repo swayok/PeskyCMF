@@ -7,7 +7,7 @@
                 @if (!empty($info['id'])) id="{{ $info['id'] }}" @endif
                 @if (!empty($info['class'])) class="{{ $info['class'] }}" @endif>
                     @if (!empty($info['icon']))<i class="{{ $info['icon'] }}"></i>@endif
-                    <span>{{ trans($info['label']) }}</span>
+                    <span>{!! trans($info['label']) !!}</span>
                     <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
@@ -17,7 +17,7 @@
                         @if (!empty($subItem['id'])) id="{{ $subItem['id'] }}" @endif
                         @if (!empty($subItem['class'])) class="{{ $subItem['class'] }}" @endif>
                             @if (!empty($subItem['icon']))<i class="{{ $subItem['icon'] }}"></i>@endif
-                            <span>{{ trans($subItem['label']) }}</span>{{ array_get($subItem, 'addition', '') }}
+                            <span>{!! trans($subItem['label']) !!}</span>{!! array_get($subItem, 'addition', '') !!}
                         </a>
                     </li>
                     @endforeach
@@ -29,7 +29,7 @@
                 @if (!empty($info['id'])) id="{{ $info['id'] }}" @endif
                 @if (!empty($info['class'])) class="{{ $info['class'] }}" @endif>
                     @if (!empty($info['icon']))<i class="{{ $info['icon'] }}"></i>@endif
-                    <span>{{ trans($info['label']) }}</span>{{ array_get($info, 'addition', '') }}
+                    <span>{!! trans($info['label']) !!}</span>{!! array_get($info, 'addition', '') !!}
                 </a>
             </li>
         @endif
