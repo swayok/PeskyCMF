@@ -6,6 +6,9 @@
  * @var string $translationPrefix
  * @var string $idSuffix
  */
+
+try {
+
 $formId = "scaffold-form-{$idSuffix}";
 $pkColName = $model->getPkColumnName();
 
@@ -142,3 +145,8 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
         </div>
     </div>
 </script>
+
+<?php } catch (Exception $exc) {
+    echo $exc->getMessage();
+    echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
+}?>

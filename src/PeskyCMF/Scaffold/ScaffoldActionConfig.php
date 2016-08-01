@@ -43,6 +43,8 @@ abstract class ScaffoldActionConfig {
     protected $dataToSendToView;
     /** @var string */
     protected $view = null;
+    /** @var string */
+    protected $jsInitiator = null;
 
     /**
      * @param CmfDbModel $model
@@ -465,7 +467,9 @@ abstract class ScaffoldActionConfig {
             ->setDataAttr('url', route('route', [], false))
             ->setDataAttr('method', 'put')
             ->setDataAttr('data', 'id=:id:')
-            ->setDataAttr('on-success', 'callback(json);')
+            ->setDataAttr('on-success', 'callbackFuncitonName')
+            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
             ->setHref('javascript: void(0)');
      * - redirect to other url
         Tag::a()
@@ -565,6 +569,33 @@ abstract class ScaffoldActionConfig {
         $colsLg = $colsXl >= 10 ? 12 : $colsXl + 2;
         $colsLgLeft = floor((12 - $colsLg) / 2);
         return "col-xs-12 col-xl-{$colsXl} col-lg-{$colsLg} col-xl-offset-{$colsXlLeft} col-lg-offset-{$colsLgLeft}";
+    }
+
+    /**
+     * @return string
+     */
+    public function getJsInitiator() {
+        return $this->jsInitiator;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasJsInitiator() {
+        return !empty($this->jsInitiator);
+    }
+
+    /**
+     * @param string $jsFunctionName
+     * @return $this
+     * @throws ScaffoldActionException
+     */
+    public function setJsInitiator($jsFunctionName) {
+        if (!is_string($jsFunctionName) && !preg_match('%^[$_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%s', $jsFunctionName)) {
+            throw new ScaffoldActionException($this, "Invalid JavaScript funciton name: [$jsFunctionName]");
+        }
+        $this->jsInitiator = $jsFunctionName;
+        return $this;
     }
 
     /**

@@ -355,7 +355,9 @@ class DataGridConfig extends ScaffoldActionConfig {
             //^ can be 'post', 'put', 'delete' depending on action type
             ->setDataAttr('id-field', 'id')
             //^ id field name to use for getting rows ids, default: 'id'
-            ->setDataAttr('on-success', 'callback(data);')
+            ->setDataAttr('on-success', 'callbackFuncitonName')
+            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
             ->setDataAttr('response-type', 'json')
             //^ one of: json, html, xml. Default: 'json'
             ->setHref('javascript: void(0)');
@@ -368,7 +370,9 @@ class DataGridConfig extends ScaffoldActionConfig {
             ->setDataAttr('url', route('route', [], false))
             ->setDataAttr('method', 'put')
             //^ can be 'post', 'put', 'delete' depending on action type
-            ->setDataAttr('on-success', 'callback(data);')
+            ->setDataAttr('on-success', 'callbackFuncitonName')
+            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
             ->setDataAttr('response-type', 'json')
             //^ one of: json, html, xml. Default: 'json'
             ->setHref('javascript: void(0)');
@@ -425,7 +429,9 @@ class DataGridConfig extends ScaffoldActionConfig {
             ->setDataAttr('method', 'put')
             ->setDataAttr('url', route('route', [], false))
             ->setDataAttr('data', 'id=:id:')
-            ->setDataAttr('on-success', 'callback(json);')
+            ->setDataAttr('on-success', 'callbackFuncitonName')
+            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
             ->setHref('javascript: void(0)')
      * - redirect
         Tag::a()
