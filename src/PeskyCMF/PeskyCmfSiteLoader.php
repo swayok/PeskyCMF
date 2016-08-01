@@ -44,7 +44,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         // custom configurations
         $this->configure();
         $this->configurePublishes();
-        static::setLocale();
+        $this->configureLocale();
         $this->loadRoutes();
         $this->includeFiles();
         $this->storeConfigsInLaravelContainer();
