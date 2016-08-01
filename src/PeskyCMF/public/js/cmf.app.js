@@ -83,7 +83,15 @@ $(document).ready(function () {
         }
     });
 
+    if (typeof CustomApp !== 'undefined' && typeof CustomApp.beforeStart === 'function') {
+        CustomApp.beforeStart(app);
+    }
+
     app.start();
+
+    if (typeof CustomApp !== 'undefined' && typeof CustomApp.afterStart === 'function') {
+        CustomApp.afterStart(app);
+    }
 
 });
 

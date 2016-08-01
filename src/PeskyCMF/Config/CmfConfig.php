@@ -551,7 +551,20 @@ class CmfConfig extends ConfigsContainer {
             'scrollX' => true,
             'scrollY' => '65vh',
             'scrollCollapse' => true,
-            'width' => '100%'
+            'width' => '100%',
+            'filter' => true,
+            'stateSave' => true,
+            'dom' => "<'row'<'col-sm-12'<'#query-builder'>>>
+                <'row'
+                    <'col-xs-12 col-md-5'<'filter-toolbar btn-toolbar text-left'>>
+                    <'col-xs-12 col-md-7'<'toolbar btn-toolbar text-right'>>
+                >
+                <'row'<'col-sm-12'tr>>
+                <'row'
+                    <'col-md-3 hidden-xs hidden-sm'i>
+                    <'col-xs-12 col-md-6'p>
+                    <'col-md-3 hidden-xs hidden-sm'l>
+                >",
         ];
     }
 
