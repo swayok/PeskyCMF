@@ -635,6 +635,14 @@ aside.main-sidebar .sidebar-menu li.treeview.active .treeview-menu.menu-open > a
 aside.main-sidebar .sidebar-menu li.header {
   padding: 10px 15px 10px 15px;
 }
+aside.main-sidebar .sidebar-menu li .label,
+aside.main-sidebar .sidebar-menu li .badge {
+  font-size: 11px;
+  line-height: normal;
+  padding: 2px 8px 2px 8px;
+  font-weight: normal;
+  display: inline-block;
+}
 aside.main-sidebar #secondary-menu #sidebar-company-title {
   display: inline-block;
   width: calc(100% - 40px);
