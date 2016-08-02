@@ -54,12 +54,16 @@ class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function session_configs() {
-        return [
+        $config = [
             'table' => static::sessions_table_name(),
             'cookie' => static::sessions_table_name(),
             'lifetime' => 1440,
-            'connection' => static::session_connection(),
         ];
+        $sessionDriver = strtolower(config('session.driver', 'file'));
+        if (in_array($sessionDriver, ['database', 'redis'], true)) {
+            $config['connection'] = static::session_connection();
+        }
+        return $config;
     }
 
     /**
@@ -73,9 +77,10 @@ class CmfConfig extends ConfigsContainer {
     /**
      * Session connection for redis and db drivers
      * @return string
+     * @throws \BadMethodCallException
      */
     static public function session_connection() {
-        return 'cmf';
+        throw new \BadMethodCallException('You must overwrite session_connection() in subclass');
     }
 
     /**
