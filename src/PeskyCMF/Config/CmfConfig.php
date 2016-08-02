@@ -569,6 +569,15 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Variables that will be sent to js and stored into AppData
+     * To access data from js code use AppData.key_name
+     * @return array
+     */
+    static public function js_app_data() {
+        return [];
+    }
+
+    /**
      * Get ScaffoldSectionConfig instance
      * @param CmfDbModel $model - a model to be used in ScaffoldSectionConfig
      * @param string $tableName - table name passed via route parameter, may differ from $model->getTableName()

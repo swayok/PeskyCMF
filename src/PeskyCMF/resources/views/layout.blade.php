@@ -60,6 +60,8 @@
             userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}',
             defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getInstance()->default_page_title() }}'
         };
+
+        var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getInstance()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
     <script src="/packages/cmf-vendors/jquery/jquery.min.js" type="text/javascript"></script>
