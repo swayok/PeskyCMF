@@ -136,7 +136,7 @@ var ScaffoldActionsHelper = {
         var data = $el.attr('data-data') || $el.data('data') || '';
         var method = String($el.attr('data-method') || 'get').toLowerCase();
         var baseMethod;
-        if ($.inArray(method, ['post', 'put', 'delete']) === false) {
+        if ($.inArray(method, ['post', 'put', 'delete']) < 0) {
             baseMethod = 'GET';
         } else {
             baseMethod = 'POST';

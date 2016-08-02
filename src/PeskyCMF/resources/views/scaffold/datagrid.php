@@ -18,110 +18,98 @@
             return originalInitializer(tableSelector, dataTablesConfig);
         }
  */
-try {
-
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig[] $gridColumnsConfigs */
 $gridColumnsConfigs = $dataGridConfig->getFields();
 
 ?>
 
-<div id="data-grid-tpl">
-    <?php echo view('cmf::ui.default_page_header', [
-        'header' => trans("$translationPrefix.datagrid.header"),
-        'defaultBackUrl' => route('cmf_start_page'),
-    ])->render(); ?>
-    <div class="content">
-        <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">
-            <div class="box"><div class="box-body">
-                <table id="<?php echo $dataGridId ?>" class="table table-bordered table-hover table-striped fluid-width">
-                <thead>
-                    <tr>
-                        <?php
-                            if ($dataGridConfig->isAllowedMultiRowSelection()) {
-                                $dropdownBtn = \Swayok\Html\Tag::button()
-                                    ->setType('button')
-                                    ->setClass('rows-selection-options-dropdown-btn')
-                                    ->setDataAttr('toggle' , 'dropdown')
-                                    ->setAttribute('aria-haspopup', 'true')
-                                    ->setAttribute('aria-expanded', 'false')
-                                    ->setContent('<span class="glyphicon glyphicon-menu-hamburger"></span>')
-                                    ->build();
-
-                                $selectionActions = [
-                                    \Swayok\Html\Tag::a()
-                                        ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.select_all'))
-                                        ->setClass('select-all')
-                                        ->setHref('javascript: void(0)')
-                                        ->build(),
-                                    \Swayok\Html\Tag::a()
-                                        ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.select_none'))
-                                        ->setClass('select-none')
-                                        ->setHref('javascript: void(0)')
-                                        ->build(),
-                                    \Swayok\Html\Tag::a()
-                                        ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.invert_selection'))
-                                        ->setClass('invert-selection')
-                                        ->setHref('javascript: void(0)')
-                                        ->build()
-                                ];
-                                $dropdownMenu = \Swayok\Html\Tag::ul()
-                                    ->setClass('dropdown-menu')
-                                    ->setContent('<li>' . implode('</li><li>', $selectionActions) . '</li>')
-                                    ->build();
-
-                                echo \Swayok\Html\Tag::th()
-                                    ->setContent(
-                                        \Swayok\Html\Tag::div()
-                                            ->setClass('btn-group rows-selection-options float-none')
-                                            ->setContent($dropdownBtn . $dropdownMenu)
-                                            ->build()
-                                    )
-                                    ->setClass('text-nowrap text-center')
-                                    ->build();
-                            }
-                            $invisibleColumns = [];
-                            /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $config */
-                            foreach ($gridColumnsConfigs as $config) {
-                                $th = \Swayok\Html\Tag::th()
-                                    ->setContent($config->isVisible()
-                                        ? $config->getLabel(trans("$translationPrefix.datagrid.column.{$config->getName()}"))
-                                        : '&nbsp'
-                                    )
-                                    ->setClass('text-nowrap')
-                                    ->setDataAttr('visible', $config->isVisible() ? null : 'false')
-                                    ->setDataAttr('orderable', $config->isVisible() && $config->isSortable() ? 'true' : 'false')
-                                    ->setDataAttr('name', $config->getName())
-                                    ->setDataAttr('data', $config->getName());
-                                if ($config->isVisible()) {
-                                    echo $th->build();
-                                } else {
-                                    $invisibleColumns[] = $th->build();
-                                }
-                            }
-                            echo implode("\n", $invisibleColumns);
-                        ?>
-                    </tr>
-                </thead>
-                </table>
-
+<?php View::startSection('scaffold-datagrid-table'); ?>
+    <table id="<?php echo $dataGridId ?>" class="table table-bordered table-hover table-striped fluid-width">
+        <thead>
+            <tr>
                 <?php
-                    if (!empty($includes)) {
-                        if (!is_array($includes)) {
-                            $includes = [$includes];
-                        }
-                        $dataForViews = compact('translationPrefix', 'idSuffix', 'model', 'dataGridConfig');
-                        foreach ($includes as $include) {
-                            echo view($include, $dataForViews)->render();
-                            echo "\n\n";
+                    if ($dataGridConfig->isAllowedMultiRowSelection()) {
+                        $dropdownBtn = \Swayok\Html\Tag::button()
+                            ->setType('button')
+                            ->setClass('rows-selection-options-dropdown-btn')
+                            ->setDataAttr('toggle' , 'dropdown')
+                            ->setAttribute('aria-haspopup', 'true')
+                            ->setAttribute('aria-expanded', 'false')
+                            ->setContent('<span class="glyphicon glyphicon-menu-hamburger"></span>')
+                            ->build();
+
+                        $selectionActions = [
+                            \Swayok\Html\Tag::a()
+                                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.select_all'))
+                                ->setClass('select-all')
+                                ->setHref('javascript: void(0)')
+                                ->build(),
+                            \Swayok\Html\Tag::a()
+                                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.select_none'))
+                                ->setClass('select-none')
+                                ->setHref('javascript: void(0)')
+                                ->build(),
+                            \Swayok\Html\Tag::a()
+                                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.invert_selection'))
+                                ->setClass('invert-selection')
+                                ->setHref('javascript: void(0)')
+                                ->build()
+                        ];
+                        $dropdownMenu = \Swayok\Html\Tag::ul()
+                            ->setClass('dropdown-menu')
+                            ->setContent('<li>' . implode('</li><li>', $selectionActions) . '</li>')
+                            ->build();
+
+                        echo \Swayok\Html\Tag::th()
+                            ->setContent(
+                                \Swayok\Html\Tag::div()
+                                    ->setClass('btn-group rows-selection-options float-none')
+                                    ->setContent($dropdownBtn . $dropdownMenu)
+                                    ->build()
+                            )
+                            ->setClass('text-nowrap text-center')
+                            ->build();
+                    }
+                    $invisibleColumns = [];
+                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $config */
+                    foreach ($gridColumnsConfigs as $config) {
+                        $th = \Swayok\Html\Tag::th()
+                            ->setContent($config->isVisible()
+                                ? $config->getLabel(trans("$translationPrefix.datagrid.column.{$config->getName()}"))
+                                : '&nbsp'
+                            )
+                            ->setClass('text-nowrap')
+                            ->setDataAttr('visible', $config->isVisible() ? null : 'false')
+                            ->setDataAttr('orderable', $config->isVisible() && $config->isSortable() ? 'true' : 'false')
+                            ->setDataAttr('name', $config->getName())
+                            ->setDataAttr('data', $config->getName());
+                        if ($config->isVisible()) {
+                            echo $th->build();
+                        } else {
+                            $invisibleColumns[] = $th->build();
                         }
                     }
+                    echo implode("\n", $invisibleColumns);
                 ?>
-            </div></div>
-        </div></div>
+            </tr>
+        </thead>
+    </table>
+    <?php
+        if (!empty($includes)) {
+            if (!is_array($includes)) {
+                $includes = [$includes];
+            }
+            $dataForViews = compact('translationPrefix', 'idSuffix', 'model', 'dataGridConfig');
+            foreach ($includes as $include) {
+                echo view($include, $dataForViews)->render();
+                echo "\n\n";
+            }
+        }
+    ?>
+<?php View::stopSection(); ?>
 
-    </div>
-
+<?php View::startSection('scaffold-datagrid-js'); ?>
     <?php
         $pkName = $model->getPkColumnName();
         $dblClickUrl = null;
@@ -359,10 +347,23 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             DataGridSearchHelper.init(queryBuilderConfig, defaultSearchRules, dataGrid);
         })();
     </script>
+<?php View::stopSection(); ?>
+
+<div id="data-grid-tpl">
+    <?php echo view('cmf::ui.default_page_header', [
+        'header' => trans("$translationPrefix.datagrid.header"),
+        'defaultBackUrl' => route('cmf_start_page'),
+    ])->render(); ?>
+    <div class="content">
+        <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">
+            <div class="box"><div class="box-body">
+                <?php echo View::yieldContent('scaffold-datagrid-table'); ?>
+            </div></div>
+        </div></div>
+
+    </div>
+
+    <?php echo View::yieldContent('scaffold-datagrid-js'); ?>
 
 </div>
 
-<?php } catch (Exception $exc) {
-    echo $exc->getMessage();
-    echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
-}?>
