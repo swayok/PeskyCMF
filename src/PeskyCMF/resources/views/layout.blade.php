@@ -22,7 +22,7 @@
     <link href="/packages/cmf-vendors/toastr/toastr.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/adminlte/css/skins/skin-blue.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/adminlte/css/skins/{{ \PeskyCMF\Config\CmfConfig::getInstance()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/cmf-vendors/db-query-builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
@@ -46,7 +46,7 @@
     <![endif]-->
 </head>
 
-<body class="skin-blue" data-locale="{{ app()->getLocale() }}">
+<body class="{{ \PeskyCMF\Config\CmfConfig::getInstance()->ui_skin() }}" data-locale="{{ app()->getLocale() }}">
     <div class="wrapper has-preloader loading" id="page-wrapper">
 
     </div>

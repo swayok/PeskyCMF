@@ -261,6 +261,10 @@ class CmfConfig extends ConfigsContainer {
         return 'cmf::layout';
     }
 
+    static public function ui_skin() {
+        return 'skin-blue';
+    }
+
     /**
      * View for CMF login form
      * @return string
