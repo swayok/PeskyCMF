@@ -22,9 +22,19 @@ pre.json-text {
   -o-transition: opacity 0.2s linear;
   transition: opacity 0.2s linear;
 }
+body.skin-red .wrapper,
+body.skin-purple .wrapper,
+body.skin-black .wrapper,
+body.skin-yellow .wrapper,
+body.skin-green .wrapper,
 body.skin-blue .wrapper {
   background-color: #FFFFFF;
 }
+body.skin-red .wrapper .main-sidebar,
+body.skin-purple .wrapper .main-sidebar,
+body.skin-black .wrapper .main-sidebar,
+body.skin-yellow .wrapper .main-sidebar,
+body.skin-green .wrapper .main-sidebar,
 body.skin-blue .wrapper .main-sidebar {
   background-color: #222d32;
 }
@@ -261,6 +271,13 @@ form .bulk-edit-form-input-container.checkbox-switch .bulk-edit-form-input-enabl
 }
 #user-panel {
   padding: 10px 10px 8px 20px;
+}
+body.skin-red #user-panel,
+body.skin-purple #user-panel,
+body.skin-black #user-panel,
+body.skin-yellow #user-panel,
+body.skin-green #user-panel,
+body.skin-blue #user-panel {
   color: #FFFFFF;
 }
 #user-panel .info {
@@ -609,19 +626,111 @@ aside.main-sidebar .sidebar-menu li > a > .fa-angle-left {
 aside.main-sidebar .sidebar-menu li > a > .fa-angle-left.pull-right {
   line-height: normal;
 }
+aside.main-sidebar .sidebar-menu li > a:hover,
+aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+aside.main-sidebar .sidebar-menu li.active:hover > a {
+  border-left-color: #3c8dbc;
+}
+body.skin-red aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-red aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-red aside.main-sidebar .sidebar-menu li.active:hover > a,
+body.skin-red-light aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-red-light aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-red-light aside.main-sidebar .sidebar-menu li.active:hover > a {
+  border-left-color: #d73925;
+}
+body.skin-purple aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-purple aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-purple aside.main-sidebar .sidebar-menu li.active:hover > a,
+body.skin-purple-light aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-purple-light aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-purple-light aside.main-sidebar .sidebar-menu li.active:hover > a {
+  border-left-color: #555299;
+}
+body.skin-black aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-black aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-black aside.main-sidebar .sidebar-menu li.active:hover > a {
+  border-left-color: #FFFFFF;
+}
+body.skin-black-light aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-black-light aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-black-light aside.main-sidebar .sidebar-menu li.active:hover > a {
+  border-left-color: #222d32;
+}
+body.skin-yellow aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-yellow aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-yellow aside.main-sidebar .sidebar-menu li.active:hover > a,
+body.skin-yellow-light aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-yellow-light aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-yellow-light aside.main-sidebar .sidebar-menu li.active:hover > a {
+  border-left-color: #e08e0b;
+}
+body.skin-green aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-green aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-green aside.main-sidebar .sidebar-menu li.active:hover > a,
+body.skin-green-light aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-green-light aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-green-light aside.main-sidebar .sidebar-menu li.active:hover > a {
+  border-left-color: #008d4c;
+}
+body.skin-blue aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-blue aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-blue aside.main-sidebar .sidebar-menu li.active:hover > a,
+body.skin-blue-light aside.main-sidebar .sidebar-menu li > a:hover,
+body.skin-blue-light aside.main-sidebar .sidebar-menu li.current-page:hover > a,
+body.skin-blue-light aside.main-sidebar .sidebar-menu li.active:hover > a {
+  border-left-color: #3c8dbc;
+}
+aside.main-sidebar .sidebar-menu li.current-page > a,
 aside.main-sidebar .sidebar-menu li.active > a {
   border-left-color: transparent;
   border-right-color: #3c8dbc;
 }
+body.skin-red aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-red aside.main-sidebar .sidebar-menu li.active > a,
+body.skin-red-light aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-red-light aside.main-sidebar .sidebar-menu li.active > a {
+  border-right-color: #d73925;
+}
+body.skin-purple aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-purple aside.main-sidebar .sidebar-menu li.active > a,
+body.skin-purple-light aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-purple-light aside.main-sidebar .sidebar-menu li.active > a {
+  border-right-color: #555299;
+}
+body.skin-black aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-black aside.main-sidebar .sidebar-menu li.active > a {
+  border-right-color: #FFFFFF;
+}
+body.skin-black-light aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-black-light aside.main-sidebar .sidebar-menu li.active > a {
+  border-right-color: #222d32;
+}
+body.skin-yellow aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-yellow aside.main-sidebar .sidebar-menu li.active > a,
+body.skin-yellow-light aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-yellow-light aside.main-sidebar .sidebar-menu li.active > a {
+  border-right-color: #e08e0b;
+}
+body.skin-green aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-green aside.main-sidebar .sidebar-menu li.active > a,
+body.skin-green-light aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-green-light aside.main-sidebar .sidebar-menu li.active > a {
+  border-right-color: #008d4c;
+}
+body.skin-blue aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-blue aside.main-sidebar .sidebar-menu li.active > a,
+body.skin-blue-light aside.main-sidebar .sidebar-menu li.current-page > a,
+body.skin-blue-light aside.main-sidebar .sidebar-menu li.active > a {
+  border-right-color: #3c8dbc;
+}
+aside.main-sidebar .sidebar-menu li.current-page > a > .fa-angle-left,
 aside.main-sidebar .sidebar-menu li.active > a > .fa-angle-left {
   -webkit-transform: rotate(-90deg);
   -moz-transform: rotate(-90deg);
   -o-transform: rotate(-90deg);
   -ms-transform: rotate(-90deg);
   transform: rotate(-90deg);
-}
-aside.main-sidebar .sidebar-menu li.active:hover > a {
-  border-left-color: #3c8dbc;
 }
 aside.main-sidebar .sidebar-menu li.treeview.active > a {
   border-right-color: transparent !important;
@@ -642,24 +751,6 @@ aside.main-sidebar .sidebar-menu li .badge {
   padding: 2px 8px 2px 8px;
   font-weight: normal;
   display: inline-block;
-}
-aside.main-sidebar #secondary-menu #sidebar-company-title {
-  display: inline-block;
-  width: calc(100% - 40px);
-  line-height: 17px;
-}
-aside.main-sidebar #secondary-menu #sidebar-company-badge {
-  background-color: transparent;
-  padding: 0;
-}
-aside.main-sidebar #secondary-menu #sidebar-company-badge a {
-  -webkit-transition: color 0.2s linear;
-  -moz-transition: color 0.2s linear;
-  -o-transition: color 0.2s linear;
-  transition: color 0.2s linear;
-}
-aside.main-sidebar #secondary-menu #sidebar-company-badge a:hover {
-  color: #FFFFFF;
 }
 #query-builder {
   position: relative;
