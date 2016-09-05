@@ -32,7 +32,7 @@
     ],
     "require": {
         "php": ">=5.6",
-        "laravel/framework": "5.2.*",
+        "laravel/framework": ">=5.2",
         "swayok/utils": "master@dev",
         "swayok/peskyorm": "master@dev",
         "swayok/laravel-extended-errors": "master@dev",
