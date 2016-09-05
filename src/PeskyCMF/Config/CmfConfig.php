@@ -54,12 +54,16 @@ class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function session_configs() {
-        return [
+        $config = [
             'table' => static::sessions_table_name(),
             'cookie' => static::sessions_table_name(),
             'lifetime' => 1440,
-            'connection' => static::session_connection(),
         ];
+        $sessionDriver = strtolower(config('session.driver', 'file'));
+        if (in_array($sessionDriver, ['database', 'redis'], true)) {
+            $config['connection'] = static::session_connection();
+        }
+        return $config;
     }
 
     /**
@@ -73,9 +77,10 @@ class CmfConfig extends ConfigsContainer {
     /**
      * Session connection for redis and db drivers
      * @return string
+     * @throws \BadMethodCallException
      */
     static public function session_connection() {
-        return 'cmf';
+        throw new \BadMethodCallException('You must overwrite session_connection() in subclass');
     }
 
     /**
@@ -254,6 +259,10 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function layout_view() {
         return 'cmf::layout';
+    }
+
+    static public function ui_skin() {
+        return 'skin-blue';
     }
 
     /**
@@ -551,8 +560,30 @@ class CmfConfig extends ConfigsContainer {
             'scrollX' => true,
             'scrollY' => '65vh',
             'scrollCollapse' => true,
-            'width' => '100%'
+            'width' => '100%',
+            'filter' => true,
+            'stateSave' => true,
+            'dom' => "<'row'<'col-sm-12'<'#query-builder'>>>
+                <'row'
+                    <'col-xs-12 col-md-5'<'filter-toolbar btn-toolbar text-left'>>
+                    <'col-xs-12 col-md-7'<'toolbar btn-toolbar text-right'>>
+                >
+                <'row'<'col-sm-12'tr>>
+                <'row'
+                    <'col-md-3 hidden-xs hidden-sm'i>
+                    <'col-xs-12 col-md-6'p>
+                    <'col-md-3 hidden-xs hidden-sm'l>
+                >",
         ];
+    }
+
+    /**
+     * Variables that will be sent to js and stored into AppData
+     * To access data from js code use AppData.key_name
+     * @return array
+     */
+    static public function js_app_data() {
+        return [];
     }
 
     /**

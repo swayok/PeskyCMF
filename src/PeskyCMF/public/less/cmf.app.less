@@ -21,6 +21,11 @@ pre.json-text {
 }
 
 body {
+    &.skin-red,
+    &.skin-purple,
+    &.skin-black,
+    &.skin-yellow,
+    &.skin-green,
     &.skin-blue {
         .wrapper {
             background-color: #FFFFFF;
@@ -301,7 +306,15 @@ form {
 
 #user-panel {
     padding: 10px 10px 8px 20px;
-    color: #FFFFFF;
+
+    body.skin-red &,
+    body.skin-purple &,
+    body.skin-black &,
+    body.skin-yellow &,
+    body.skin-green &,
+    body.skin-blue & {
+        color: #FFFFFF;
+    }
 
     .info {
         height: 40px;
@@ -637,18 +650,75 @@ aside.main-sidebar {
             }
         }
 
+        > a:hover,
+        &.current-page:hover > a,
+        &.active:hover > a {
+            border-left-color: #3c8dbc;
+
+            body.skin-red &,
+            body.skin-red-light & {
+                border-left-color: #d73925;
+            }
+            body.skin-purple &,
+            body.skin-purple-light & {
+                border-left-color: #555299;
+            }
+            body.skin-black & {
+                border-left-color: #FFFFFF;
+            }
+            body.skin-black-light & {
+                border-left-color: #222d32;
+            }
+            body.skin-yellow &,
+            body.skin-yellow-light & {
+                border-left-color: #e08e0b;
+            }
+            body.skin-green &,
+            body.skin-green-light & {
+                border-left-color: #008d4c;
+            }
+            body.skin-blue &,
+            body.skin-blue-light & {
+                border-left-color: #3c8dbc;
+            }
+        }
+
+        &.current-page,
         &.active {
             > a {
                 border-left-color: transparent;
                 border-right-color: #3c8dbc;
 
+                body.skin-red &,
+                body.skin-red-light & {
+                    border-right-color: #d73925;
+                }
+                body.skin-purple &,
+                body.skin-purple-light & {
+                    border-right-color: #555299;
+                }
+                body.skin-black & {
+                    border-right-color: #FFFFFF;
+                }
+                body.skin-black-light & {
+                    border-right-color: #222d32;
+                }
+                body.skin-yellow &,
+                body.skin-yellow-light & {
+                    border-right-color: #e08e0b;
+                }
+                body.skin-green &,
+                body.skin-green-light & {
+                    border-right-color: #008d4c;
+                }
+                body.skin-blue &,
+                body.skin-blue-light & {
+                    border-right-color: #3c8dbc;
+                }
+
                 > .fa-angle-left {
                     .transform(rotate(-90deg));
                 }
-            }
-
-            &:hover > a {
-                border-left-color: #3c8dbc;
             }
         }
 
@@ -669,29 +739,16 @@ aside.main-sidebar {
         &.header {
             padding: 10px 15px 10px 15px;
         }
-    }
 
-    #secondary-menu {
-
-        #sidebar-company-title {
+        .label,
+        .badge {
+            font-size: 11px;
+            line-height: normal;
+            padding: 2px 8px 2px 8px;
+            font-weight: normal;
             display: inline-block;
-            width: ~"calc(100% - 40px)";
-            line-height: 17px;
-        }
-
-        #sidebar-company-badge {
-            background-color: transparent;
-            padding: 0;
-
-            a {
-                .transition(color 0.2s linear);
-                &:hover {
-                    color: #FFFFFF;
-                }
-            }
         }
     }
-
 }
 
 #query-builder {

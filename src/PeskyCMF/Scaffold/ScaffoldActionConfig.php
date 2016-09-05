@@ -477,6 +477,55 @@ abstract class ScaffoldActionConfig {
             ->setClass('btn btn-warning')
             ->setHref('url', route('route', [], false))
             ->setTarget('_blank')
+     * ONLY FOR DATA GRIDS:
+     * - call some url via ajax passing all selected ids and then run "callback(json)"
+        Tag::a()
+            ->setContent(trans('path.to.translation'))
+            //^ you can use ':count' in label to insert selected items count
+            ->setDataAttr('action', 'bulk-selected')
+            ->setDataAttr('confirm', trans('path.to.translation'))
+            //^ confirm action before sending request to server
+            ->setDataAttr('url', route('route', [], false))
+            ->setDataAttr('method', 'delete')
+            //^ can be 'post', 'put', 'delete' depending on action type
+            ->setDataAttr('id-field', 'id')
+            //^ id field name to use to get rows ids, default: 'id'
+            ->setDataAttr('on-success', 'callbackFuncitonName')
+            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+            ->setDataAttr('response-type', 'json')
+            //^ one of: json, html, xml. Default: 'json'
+            ->setHref('javascript: void(0)');
+     * Values will be received in the 'ids' key of the request as array
+     * - call some url via ajax passing filter conditions and then run "callback(json)"
+        Tag::a()
+            ->setContent(trans('path.to.translation'))
+            //^ you can use ':count' in label to insert filtered items count
+            ->setDataAttr('action', 'bulk-filtered')
+            ->setDataAttr('confirm', trans('path.to.translation'))
+            //^ confirm action before sending request to server
+            ->setDataAttr('url', route('route', [], false))
+            ->setDataAttr('method', 'put')
+            //^ can be 'post', 'put', 'delete' depending on action type
+            ->setDataAttr('on-success', 'callbackFuncitonName')
+            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+            ->setDataAttr('response-type', 'json')
+            //^ one of: json, html, xml. Default: 'json'
+            ->setHref('javascript: void(0)');
+     * - bulk actions with custom on-click handler
+        Tag::button()
+            ->setContent(trans('path.to.translation'))
+            //^ you can use ':count' in label to insert selected items count or filtered items count
+            //^ depending on 'data-type' attribute
+            ->setClass('btn btn-success')
+            ->setDataAttr('type', 'bulk-selected')
+            //^ 'bulk-selected' or 'bulk-filtered'
+            ->setDataAttr('url', route('route', [], false))
+            ->setDataAttr('id-field', 'id')
+            //^ id field name to use to get rows ids, default: 'id'
+            ->setOnClick('someFunction(this)')
+            //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
      * @return $this
      * @throws ScaffoldActionException
      */

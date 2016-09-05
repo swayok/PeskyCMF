@@ -136,7 +136,7 @@ var ScaffoldActionsHelper = {
         var data = $el.attr('data-data') || $el.data('data') || '';
         var method = String($el.attr('data-method') || 'get').toLowerCase();
         var baseMethod;
-        if ($.inArray(method, ['post', 'put', 'delete']) === false) {
+        if ($.inArray(method, ['post', 'put', 'delete']) < 0) {
             baseMethod = 'GET';
         } else {
             baseMethod = 'POST';
@@ -451,8 +451,12 @@ var ScaffoldDataGridHelper = {
         });
     },
     initBulkLinks: function ($table, $tableWrapper, configs) {
-        var $selectionLinks = $tableWrapper.find('[data-action="bulk-selected"], [data-action="bulk-edit-selected"]');
-        var $fitleringLinks = $tableWrapper.find('[data-action="bulk-filtered"], [data-action="bulk-edit-filtered"]');
+        var $selectionLinks = $tableWrapper.find(
+            '[data-action="bulk-selected"], [data-action="bulk-edit-selected"], [data-type="bulk-selected"], [data-type="bulk-edit-selected"]'
+        );
+        var $fitleringLinks = $tableWrapper.find(
+            '[data-action="bulk-filtered"], [data-action="bulk-edit-filtered"], [data-type="bulk-filtered"], [data-type="bulk-edit-filtered"]'
+        );
         if (!$selectionLinks.length && !$fitleringLinks.length) {
             return;
         }
@@ -484,9 +488,10 @@ var ScaffoldDataGridHelper = {
         // selected items
         if (configs && configs.multiselect && $selectionLinks.length) {
             var updateSelectedCountInLabelAndCollectIds = function () {
-                var count = api.rows({selected: true}).count() || 0;
+                var selectedRows = api.rows({selected: true});
+                var count = selectedRows.count() || 0;
                 updateCounter($selectionLinks, count);
-                var rowsData = api.rows({selected: true}).data();
+                var rowsData = selectedRows.data();
                 $selectionLinks.each(function () {
                     var idKey = $(this).attr('data-id-field') || 'id';
                     var ids = [];
@@ -494,6 +499,7 @@ var ScaffoldDataGridHelper = {
                         ids.push(rowData[idKey]);
                     });
                     $(this).data('data', {'ids': ids});
+                    $selectionLinks.trigger('selectionchange.dt', api);
                 });
             };
             updateSelectedCountInLabelAndCollectIds();

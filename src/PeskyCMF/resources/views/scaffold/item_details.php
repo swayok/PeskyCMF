@@ -6,8 +6,6 @@
  * @var string $translationPrefix
  * @var string $idSuffix
  */
-try {
-
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 $fieldConfigs = $itemDetailsConfig->getFields();
 $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false);
@@ -147,7 +145,3 @@ if ($itemDetailsConfig->hasJsInitiator()) {
         </div>
     {{?}}
 </script>
-<?php } catch (Exception $exc) {
-    echo $exc->getMessage();
-    echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
-}?>
