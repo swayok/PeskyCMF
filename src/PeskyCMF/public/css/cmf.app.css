@@ -776,7 +776,8 @@ aside.main-sidebar .sidebar-menu li .badge {
   font-size: 13px;
   height: 26px;
 }
-#query-builder.query-builder .rule-container .bootstrap-select button {
+#query-builder.query-builder .rule-container .bootstrap-select button,
+#query-builder.query-builder .rule-container select.form-control {
   font-size: 13px;
   height: 26px;
 }

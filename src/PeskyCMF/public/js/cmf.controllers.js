@@ -153,7 +153,7 @@ var CmfControllers = {
         cacheTemplate: false,
         bodyClass: null,
         switchBodyClass: function (request) {
-            Utils.switchBodyClass(this.bodyClass || 'page-' + request.params.uri);
+            Utils.switchBodyClass(this.bodyClass || 'page-' + request.params.uri.replace(/[^a-zA-Z0-9]+/, '-'));
         },
         afterRender : function (event, request) {
 

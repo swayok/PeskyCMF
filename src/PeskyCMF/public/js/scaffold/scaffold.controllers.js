@@ -82,6 +82,11 @@ var ScaffoldControllers = {
                 }
             }
         }
+    }),
+    itemCustomPage: CmfControllers.pageController.extend({
+        switchBodyClass: function (request) {
+            Utils.switchBodyClass(this.bodyClass || 'resource-' + request.params.resource + '-' + request.params.page + '-' + request.params.id);
+        }
     })
 };
 

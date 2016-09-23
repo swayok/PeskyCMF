@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
 use PeskyORM\Exception\DbObjectValidationException;
+use Swayok\Utils\StringUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -16,10 +17,12 @@ class AjaxOnly {
      * Request must be done via ajax
      * You can specify a fallback url OR 'route' with optional 'params' via 'fallback' key in route config:
      * Example:
-     * Route::get('forgot_password', [
+     * Route::get('forgot_password/{param}', [
      *  'middleware' => AjaxOnly::class,
      *  'fallback' => '/some/url'
-     *  //< or
+     *  // or
+     *  'fallback' => '/some/url/{param}'
+     *  // or
      *  'fallback' => [
      *      'route' => 'cmf_login',
      *      'params' => [] //< optional, can be array or boolean (by default === true: pass params from original url)
@@ -39,7 +42,11 @@ class AjaxOnly {
             // maybe there is a fallback?
             $fallback = array_get($request->route()->getAction(), 'fallback', []);
             if (!empty($fallback) && is_string($fallback)) {
-                return new RedirectResponse($fallback);
+                return new RedirectResponse(StringUtils::insert(
+                    $fallback,
+                    $request->route()->parameters(),
+                    ['before' => '{', 'after' => '}']
+                ));
             } else if (!empty($fallback['route'])) {
                 $params = array_get($fallback, 'params', true);
                 if ($params === true) {

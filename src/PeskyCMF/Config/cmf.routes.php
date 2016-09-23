@@ -177,6 +177,24 @@ Route::group(
                     'as' => 'cmf_item_edit_form',
                     'uses' => __cmf_general_controller_class() . '@loadJsApp',
                 ]);
+
+                Route::get('{table_name}/page/{page}/{id}.html', [
+                    'middleware' => AjaxOnly::class,
+                    'fallback' => [
+                        'route' => 'cmf_item_custom_page',
+                        'params' => true
+                    ],
+                    'uses' => function () {
+                        return view('cmf::ui.default_page_header', [
+                            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined',
+                        ]);
+                    }
+                ]);
+
+                Route::get('{table_name}/page/{page}/{id}', [
+                    'as' => 'cmf_item_custom_page',
+                    'uses' => __cmf_general_controller_class() . '@loadJsApp',
+                ]);
             }
         );
 
