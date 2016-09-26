@@ -29,7 +29,16 @@ class ItemDetailsConfig extends ScaffoldActionConfig {
         ScaffoldFieldRendererConfig $rendererConfig,
         ScaffoldFieldConfig $fieldConfig
     ) {
-        $rendererConfig->setView('cmf::details/text');
+        switch ($fieldConfig->getType()) {
+            case $fieldConfig::TYPE_IMAGE:
+                $rendererConfig->setView('cmf::details.image');
+                break;
+            case $fieldConfig::TYPE_BOOL:
+                $rendererConfig->setView('cmf::details.bool');
+                break;
+            default:
+                $rendererConfig->setView('cmf::details.text');
+        }
     }
 
 }
