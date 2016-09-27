@@ -178,7 +178,7 @@ Route::group(
                     'uses' => __cmf_general_controller_class() . '@loadJsApp',
                 ]);
 
-                Route::get('{table_name}/page/{page}/{id}.html', [
+                Route::get('{table_name}/{id}/page/{page}.html', [
                     'middleware' => AjaxOnly::class,
                     'fallback' => [
                         'route' => 'cmf_item_custom_page',
@@ -191,7 +191,7 @@ Route::group(
                     }
                 ]);
 
-                Route::get('{table_name}/page/{page}/{id}', [
+                Route::get('{table_name}/{id}/page/{page}', [
                     'as' => 'cmf_item_custom_page',
                     'uses' => __cmf_general_controller_class() . '@loadJsApp',
                 ]);

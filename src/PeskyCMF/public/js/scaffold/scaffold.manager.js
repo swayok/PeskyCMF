@@ -17,7 +17,7 @@ ScaffoldsManager.init = function (app) {
         })
         .route('resource_create', '/resource/:resource/create', ScaffoldControllers.itemForm)
         .route('resource_edit', '/resource/:resource/edit/:id', ScaffoldControllers.itemForm)
-        .route('resource_page', '/resource/:resource/page/:page/:id', ScaffoldControllers.itemCustomPage)
+        .route('resource_page', '/resource/:resource/:id/page/:page', ScaffoldControllers.itemCustomPage)
 };
 
 ScaffoldsManager.getResourceBaseUrl = function (resourceName, additionalParameter) {
