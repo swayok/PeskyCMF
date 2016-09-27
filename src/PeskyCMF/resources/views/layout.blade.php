@@ -51,6 +51,46 @@
 
     </div>
 
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-normal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                    aria-label="{{ \PeskyCMF\Config\CmfConfig::transBase('.close') }}">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer hidden">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-large">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                    aria-label="{{ \PeskyCMF\Config\CmfConfig::transBase('.close') }}">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer hidden">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="application/javascript">
         <?php $urlPrefix = \PeskyCMF\Config\CmfConfig::getInstance()->url_prefix(); ?>
         var CmfSettings = {

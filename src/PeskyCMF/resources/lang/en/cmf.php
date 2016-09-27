@@ -2,6 +2,7 @@
 
 return [
     'ui' => [
+        'close' => 'Close',
         'js_component' => [
             'data_tables' => [
 

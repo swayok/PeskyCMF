@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'close' => 'Закрыть',
     'ui' => [
         'js_component' => [
             'data_tables' => [
