@@ -202,11 +202,10 @@ Route::group(
         Route::group(
             [
                 'prefix' => 'api',
-                'middleware' => [
-                    AjaxOnly::class,
-                    LoadModelAndScaffoldConfig::class,
-                    ValidateAdmin::class,
-                ]
+                'middleware' => array_merge(
+                    [AjaxOnly::class],
+                    \PeskyCMF\Config\CmfConfig::getInstance()->middleware_for_cmf_scaffold_api_controller()
+                )
             ],
             function () {
 

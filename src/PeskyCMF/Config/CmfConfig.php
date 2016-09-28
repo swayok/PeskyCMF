@@ -5,6 +5,8 @@ namespace PeskyCMF\Config;
 use Illuminate\Http\Request;
 use PeskyCMF\ConfigsContainer;
 use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Http\Middleware\LoadModelAndScaffoldConfig;
+use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 
@@ -243,6 +245,17 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function cmf_scaffold_api_controller_class() {
         return \PeskyCMF\Http\Controllers\CmfScaffoldApiController::class;
+    }
+
+    /**
+     * Basic set of middlewares for scaffold api controller
+     * @return array
+     */
+    static public function middleware_for_cmf_scaffold_api_controller() {
+        return [
+            LoadModelAndScaffoldConfig::class,
+            ValidateAdmin::class,
+        ];
     }
 
     /**

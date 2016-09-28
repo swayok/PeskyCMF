@@ -17,6 +17,7 @@ class LoadModelAndScaffoldConfig {
      * @param  Request $request
      * @param  \Closure $next
      * @return \Closure
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
     public function handle(Request $request, Closure $next) {
@@ -24,17 +25,18 @@ class LoadModelAndScaffoldConfig {
         if (!empty($tableName)) {
             try {
                 $model = CmfConfig::getInstance()->getModelByTableName($tableName);
+                $cmfConfig = CmfConfig::getInstance();
                 /** @var CmfScaffoldApiController $scaffoldApiControllerClass */
-                $scaffoldApiControllerClass = CmfConfig::getInstance()->cmf_scaffold_api_controller_class();
+                $scaffoldApiControllerClass = $cmfConfig::cmf_scaffold_api_controller_class();
                 $scaffoldApiControllerClass::setModel($model);
                 $scaffoldApiControllerClass::setTableNameForRoutes($tableName);
-                $customScaffoldConfig = CmfConfig::getInstance()->getScaffoldConfig($model, $tableName);
+                $customScaffoldConfig = $cmfConfig::getScaffoldConfig($model, $tableName);
                 if ($customScaffoldConfig instanceof ScaffoldSectionConfig) {
                     $scaffoldApiControllerClass::setScaffoldConfig($customScaffoldConfig);
                 } else if (!empty($customScaffoldConfig)) {
-                    $configClass = get_class(CmfConfig::getInstance());
                     throw new \LogicException(
-                        $configClass . '::getCustomScaffoldSectionConfigForTable() must return null or instance of ScaffoldSectionConfig class'
+                        get_class($cmfConfig) . '::getCustomScaffoldSectionConfigForTable() must return '
+                            . 'null or instance of ScaffoldSectionConfig class'
                     );
                 }
             } catch (DbUtilsException $exc) {

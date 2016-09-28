@@ -50,7 +50,7 @@ class CmfScaffoldApiController extends Controller {
         }
         return static::$model;
     }
-    
+
     /**
      * @param ScaffoldSectionConfig $scaffoldConfig
      */
@@ -467,7 +467,7 @@ class CmfScaffoldApiController extends Controller {
         if ($request->has($idsField)) {
             $this->validate($request->data(), [
                 $idsField => 'required|array',
-                $idsField .'.*' => 'integer|min:1'
+                $idsField . '.*' => 'integer|min:1'
             ]);
             $conditions[$model->getPkColumnName()] = $request->data($idsField);
         } else if ($request->has($conditionsField)) {

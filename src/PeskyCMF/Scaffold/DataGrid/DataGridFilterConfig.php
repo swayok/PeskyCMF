@@ -343,7 +343,7 @@ class DataGridFilterConfig {
      * @param string $className
      * @return $this
      */
-    public function setdefaultDataGridColumnFilterConfigClass($className) {
+    public function setDefaultDataGridColumnFilterConfigClass($className) {
         $this->defaultDataGridColumnFilterConfigClass = $className;
         return $this;
     }
