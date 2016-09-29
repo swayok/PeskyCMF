@@ -364,7 +364,8 @@ div.dataTables_wrapper {
     }
 
     &.multiselect {
-        .dataTables_scrollHead {
+        .dataTables_scrollHead,
+        .DTFC_LeftWrapper .DTFC_LeftHeadWrapper {
             .dropdown-menu {
                 position: fixed;
                 top: auto;
@@ -379,14 +380,26 @@ div.dataTables_wrapper {
                 margin: 0;
                 line-height: normal;
                 background-color: transparent;
-                opacity: 0.3;
+                opacity: 0.5;
                 color: #000000;
                 outline: 0 none;
 
                 &:hover {
-                    opacity: 0.5;
+                    opacity: 1;
+                }
+
+                > span {
+                    font-size: 16px;
+                    vertical-align: middle;
+                    line-height: 24px;
                 }
             }
+        }
+    }
+
+    .DTFC_LeftWrapper {
+        .DTFC_LeftHeadWrapper {
+            overflow: visible !important;
         }
     }
 

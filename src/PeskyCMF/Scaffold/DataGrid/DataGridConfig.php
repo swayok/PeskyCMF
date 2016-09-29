@@ -60,6 +60,8 @@ class DataGridConfig extends ScaffoldActionConfig {
     /** @var bool */
     protected $isRowActionsFloating = true;
     /** @var bool */
+    protected $isRowActionsColumnFixed = true;
+    /** @var bool */
     protected $isFilterShown = true;
 
     const ROW_ACTIONS_COLUMN_NAME = '__actions';
@@ -509,6 +511,23 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
+     * @return bool
+     */
+    public function isRowActionsColumnFixed() {
+        return $this->isRowActionsColumnFixed;
+    }
+
+    /**
+     * Pass 'true' to fix actions column in data grid so it will not move during horisontal scrolling of data grid
+     * @param bool $isFixed
+     * @return $this
+     */
+    public function setIsRowActionsColumnFixed($isFixed) {
+        $this->isRowActionsColumnFixed = (bool)$isFixed;
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getAdditionalDataTablesConfig() {
@@ -558,11 +577,8 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function finish() {
-        if (!$this->isRowActionsFloating()) {
-            $fields = $this->getFields();
-            if (!isset($fields[static::ROW_ACTIONS_COLUMN_NAME])) {
-                $this->addField(static::ROW_ACTIONS_COLUMN_NAME, null);
-            }
+        if (!$this->isRowActionsFloating() && !$this->hasField(static::ROW_ACTIONS_COLUMN_NAME)) {
+            $this->addField(static::ROW_ACTIONS_COLUMN_NAME, null);
         }
     }
 

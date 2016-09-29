@@ -21,6 +21,11 @@
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig[] $gridColumnsConfigs */
 $gridColumnsConfigs = $dataGridConfig->getFields();
+uasort($gridColumnsConfigs, function ($a, $b) {
+    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $a */
+    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $b */
+    return ($a->getPosition() > $b->getPosition());
+});
 
 ?>
 
@@ -266,6 +271,8 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig + ['resource_name' => $tableNameForRoutes], JSON_UNESCAPED_UNICODE); ?>;
             var rowActionsTpl = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
+            dataTablesConfig.columnDefs = [];
+            var fixedColumns = 0;
             <?php if ($dataGridConfig->isRowActionsFloating()): ?>
                 dataTablesConfig.rowActions = rowActionsTpl;
             <?php else: ?>
@@ -273,18 +280,10 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                     /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $actionsFieldConfig */
                     $actionsFieldConfig = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
                 ?>
+                <?php if ($actionsFieldConfig->getPosition() === (int)$dataGridConfig->isAllowedMultiRowSelection()): ?>
+                    fixedColumns++;
+                <?php endif; ?>
                 dataTablesConfig.columnDefs = [
-                    <?php if ($dataGridConfig->isAllowedMultiRowSelection()) :?>
-                    {
-                        targets: 0,
-                        orderable: false,
-                        className: 'select-checkbox text-center',
-                        width: '1%',
-                        render: function () {
-                            return '';
-                        }
-                    },
-                    <?php endif; ?>
                     {
                         targets: <?php echo $actionsFieldConfig->getPosition(); ?>,
                         render: function (data, type, row) {
@@ -301,13 +300,29 @@ $gridColumnsConfigs = $dataGridConfig->getFields();
                 };
                 <?php endif; ?>
             <?php endif; ?>
+            <?php if ($dataGridConfig->isAllowedMultiRowSelection()) :?>
+                fixedColumns++;
+                dataTablesConfig.columnDefs.push({
+                    targets: 0,
+                    orderable: false,
+                    className: 'select-checkbox text-center',
+                    width: '1%',
+                    render: function () {
+                        return '';
+                    }
+                });
+            <?php endif; ?>
+            if (fixedColumns > 0) {
+                dataTablesConfig.fixedColumns = {
+                    leftColumns: fixedColumns
+                };
+            }
             <?php if (!empty($dblClickUrl)): ?>
                 dataTablesConfig.doubleClickUrl = Utils.makeTemplateFromText(
                     '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%i', '{{= it.$2 }}', $dblClickUrl)); ?>',
                     'Double click URL template'
                 );
             <?php endif; ?>
-
             <?php
                 $defaultConditions = $dataGridFilterConfig->getDefaultConditions();
                 if (empty($defaultConditions['rules'])) {
