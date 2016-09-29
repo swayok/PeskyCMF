@@ -5,7 +5,6 @@ namespace PeskyCMF\Config;
 use Illuminate\Http\Request;
 use PeskyCMF\ConfigsContainer;
 use PeskyCMF\Db\CmfDbModel;
-use PeskyCMF\Http\Middleware\LoadModelAndScaffoldConfig;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
@@ -252,8 +251,15 @@ class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function middleware_for_cmf_scaffold_api_controller() {
+        return [];
+    }
+
+    /**
+     * Middleware to be added to routes that require user authorisation
+     * @return array
+     */
+    static public function middleware_for_routes_that_require_authorisation() {
         return [
-            LoadModelAndScaffoldConfig::class,
             ValidateAdmin::class,
         ];
     }

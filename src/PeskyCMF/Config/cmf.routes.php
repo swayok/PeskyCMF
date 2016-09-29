@@ -1,8 +1,6 @@
 <?php
 
 use PeskyCMF\Http\Middleware\AjaxOnly;
-use PeskyCMF\Http\Middleware\ValidateAdmin;
-use PeskyCMF\Http\Middleware\LoadModelAndScaffoldConfig;
 
 function __cmf_general_controller_class() {
     return \PeskyCMF\Config\CmfConfig::getInstance()->cmf_general_controller_class();
@@ -81,7 +79,7 @@ Route::group(
 
         Route::group(
             [
-                'middleware' => ValidateAdmin::class
+                'middleware' => \PeskyCMF\Config\CmfConfig::getInstance()->middleware_for_routes_that_require_authorisation()
             ],
             function () {
 
@@ -152,10 +150,7 @@ Route::group(
         Route::group(
             [
                 'prefix' => 'resource',
-                'middleware' => [
-                    LoadModelAndScaffoldConfig::class,
-                    ValidateAdmin::class
-                ]
+                'middleware' => \PeskyCMF\Config\CmfConfig::getInstance()->middleware_for_routes_that_require_authorisation()
             ],
             function () {
                 Route::get('{table_name}', [
@@ -202,10 +197,11 @@ Route::group(
         Route::group(
             [
                 'prefix' => 'api',
-                'middleware' => array_merge(
+                'middleware' => array_unique(array_merge(
                     [AjaxOnly::class],
+                    \PeskyCMF\Config\CmfConfig::getInstance()->middleware_for_routes_that_require_authorisation(),
                     \PeskyCMF\Config\CmfConfig::getInstance()->middleware_for_cmf_scaffold_api_controller()
-                )
+                ))
             ],
             function () {
 
