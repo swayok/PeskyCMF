@@ -145,7 +145,7 @@ abstract class ScaffoldActionConfig {
      */
     public function getField($name) {
         if (!$this->hasField($name)) {
-            throw new ScaffoldActionException($this, "Unknown field [$name]");
+            throw new ScaffoldActionException($this, "Scaffold action has not field with name [$name]");
         }
         return $this->fields[$name];
     }
