@@ -442,7 +442,7 @@ var ScaffoldDataGridHelper = {
         }
         var api = $table.dataTable().api();
         $tableWrapper.addClass('multiselect');
-        $tableWrapper.find('th .rows-selection-options ul a').on('click', function () {
+        $tableWrapper.on('click', 'th .rows-selection-options ul a', function () {
             var $el = $(this);
             if ($el.hasClass('select-all')) {
                 api.rows().select();
