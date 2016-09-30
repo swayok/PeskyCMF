@@ -204,17 +204,20 @@ abstract class ScaffoldFieldConfig {
 
     /**
      * @param mixed $value
-     * @param DbColumnConfig $columnConfig
      * @param array $record
      * @param bool $ignoreValueConverter
      * @return mixed
      * @throws ScaffoldFieldException
      * @throws \PeskyORM\Exception\DbColumnConfigException
      */
-    public function convertValue($value, DbColumnConfig $columnConfig, array $record, $ignoreValueConverter = false) {
+    public function convertValue($value, array $record, $ignoreValueConverter = false) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
         if (!empty($valueConverter)) {
-            $value = call_user_func($valueConverter, $value, $columnConfig, $record, $this);
+            if ($this->isDbField()) {
+                $value = call_user_func($valueConverter, $value, $this->getTableColumnConfig(), $record, $this);
+            } else {
+                $value = call_user_func($valueConverter, $record, $this, $this->getScaffoldActionConfig());
+            }
         } else if (!empty($value) || is_bool($value)) {
             switch ($this->getType()) {
                 case static::TYPE_DATETIME:
@@ -235,7 +238,7 @@ abstract class ScaffoldFieldConfig {
                     }
                     return '<pre class="json-text">' . htmlentities(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</pre>';
                 case static::TYPE_LINK:
-                    return $this->buildLinkToExternalRecord($columnConfig, $record);
+                    return $this->buildLinkToExternalRecord($this->getTableColumnConfig(), $record);
                     break;
             }
         }

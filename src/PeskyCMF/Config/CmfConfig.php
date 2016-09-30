@@ -645,4 +645,13 @@ class CmfConfig extends ConfigsContainer {
         );
     }
 
+    /**
+     * Shortcut to static::getScaffoldConfig()
+     * @param string $tableName
+     * @return ScaffoldSectionConfig
+     */
+    static public function getScaffoldConfigByTableName($tableName) {
+        return static::getScaffoldConfig(static::getModelByTableName($tableName), $tableName);
+    }
+
 }

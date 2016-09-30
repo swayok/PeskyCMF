@@ -222,7 +222,7 @@ abstract class ScaffoldActionConfig {
      */
     public function prepareRecord(array $record) {
         $permissions = [
-            '___delete_allowed' =>(
+            '___delete_allowed' => (
                 $this->isDeleteAllowed()
                 && $this->scaffoldSection->isRecordDeleteAllowed($record)
             ),
@@ -264,7 +264,6 @@ abstract class ScaffoldActionConfig {
             ) {
                 $recordWithBackup[$key] = $fieldConfig->convertValue(
                     $recordWithBackup[$key],
-                    $this->getModel()->getTableColumn($key),
                     $recordWithBackup
                 );
             }
