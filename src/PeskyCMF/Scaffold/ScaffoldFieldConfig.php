@@ -219,28 +219,41 @@ abstract class ScaffoldFieldConfig {
                 $value = call_user_func($valueConverter, $record, $this, $this->getScaffoldActionConfig());
             }
         } else if (!empty($value) || is_bool($value)) {
-            switch ($this->getType()) {
-                case static::TYPE_DATETIME:
-                    return date(static::FORMAT_DATETIME, is_numeric($value) ? $value : strtotime($value));
-                case static::TYPE_DATE:
-                    return date(static::FORMAT_DATE, is_numeric($value) ? $value : strtotime($value));
-                case static::TYPE_TIME:
-                    return date(static::FORMAT_TIME, is_numeric($value) ? $value : strtotime($value));
-                case static::TYPE_MULTILINE:
-                    return '<pre class="multiline-text">' . $value . '</pre>';
-                case static::TYPE_JSON:
-                case static::TYPE_JSONB:
-                    if (!is_array($value)) {
-                        $value = json_decode($value, true);
-                        if ($value === false) {
-                            $value = 'Failed to decode JSON';
-                        }
-                    }
-                    return '<pre class="json-text">' . htmlentities(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</pre>';
-                case static::TYPE_LINK:
-                    return $this->buildLinkToExternalRecord($this->getTableColumnConfig(), $record);
-                    break;
+            if ($this->getType() === static::TYPE_LINK) {
+                return $this->buildLinkToExternalRecord($this->getTableColumnConfig(), $record);
+            } else {
+                return static::doDefaultValueConversionByType($value, $this->type);
             }
+        }
+        return $value;
+    }
+
+    /**
+     * Default value converter by value type
+     * @param mixed $value
+     * @param string $type - one of static::TYPE_*
+     * @return mixed
+     */
+    static public function doDefaultValueConversionByType($value, $type) {
+        switch ($type) {
+            case static::TYPE_DATETIME:
+                return date(static::FORMAT_DATETIME, is_numeric($value) ? $value : strtotime($value));
+            case static::TYPE_DATE:
+                return date(static::FORMAT_DATE, is_numeric($value) ? $value : strtotime($value));
+            case static::TYPE_TIME:
+                return date(static::FORMAT_TIME, is_numeric($value) ? $value : strtotime($value));
+            case static::TYPE_MULTILINE:
+                return '<pre class="multiline-text">' . $value . '</pre>';
+            case static::TYPE_JSON:
+            case static::TYPE_JSONB:
+                if (!is_array($value)) {
+                    $value = json_decode($value, true);
+                    if ($value === false) {
+                        $value = 'Failed to decode JSON';
+                    }
+                }
+                return '<pre class="json-text">' . htmlentities(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</pre>';
+                break;
         }
         return $value;
     }
@@ -252,7 +265,7 @@ abstract class ScaffoldFieldConfig {
         $relationConfig = null;
         $relationAlias = null;
         foreach ($columnConfig->getRelations() as $alias => $relation) {
-            if (in_array($relation->getType(), [DbRelationConfig::BELONGS_TO, DbRelationConfig::HAS_ONE])) {
+            if (in_array($relation->getType(), [DbRelationConfig::BELONGS_TO, DbRelationConfig::HAS_ONE], true)) {
                 $relationConfig = $relation;
                 $relationAlias = $alias;
                 break;
