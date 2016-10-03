@@ -634,6 +634,9 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
+     * NOTES for data grids:
+     * - JS function will be called before any other common js executed (even before DataTables plugin initiated)
+     * - JS function will be called within the context of the data grid (use this to access it)
      * @param string $jsFunctionName
      * @return $this
      * @throws ScaffoldActionException
