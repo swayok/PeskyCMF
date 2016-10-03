@@ -291,14 +291,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         }
                     }
                 ];
-                dataTablesConfig.multiselect = <?php echo $dataGridConfig->isAllowedMultiRowSelection() ? 'true' : 'false'; ?>;
-                <?php if ($dataGridConfig->isAllowedMultiRowSelection()) :?>
-                dataTablesConfig.select = {
-                    style: 'multi+shift',
-                    selector: 'td.select-checkbox',
-                    info: false
-                };
-                <?php endif; ?>
             <?php endif; ?>
             <?php if ($dataGridConfig->isAllowedMultiRowSelection()) :?>
                 fixedColumns++;
@@ -311,6 +303,12 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         return '';
                     }
                 });
+                dataTablesConfig.multiselect = true;
+                dataTablesConfig.select = {
+                    style: 'multi+shift',
+                    selector: 'td.select-checkbox',
+                    info: false
+                };
             <?php endif; ?>
             if (fixedColumns > 0) {
                 dataTablesConfig.fixedColumns = {
