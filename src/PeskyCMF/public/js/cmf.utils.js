@@ -6,7 +6,7 @@ var Utils = {
 Utils.configureAppLibs = function () {
     Utils.configureAjax();
     Utils.configureToastr();
-    if ($.inputmask !== 'undefined') {
+    if (typeof $.inputmask !== 'undefined') {
         $.inputmask.defaults.rightAlign = false;
         $.inputmask.defaults.rightAlignNumerics = false;
     }
