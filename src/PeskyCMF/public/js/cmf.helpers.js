@@ -43,7 +43,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
     $form
         .find('input[data-type], textarea[data-type]')
         .each(function () {
-            $(this).inputmask({alias: $(this).attr('data-type')});
+            $(this).inputmask({alias: $(this).attr('data-type'), rightAlign: false});
             $(this).val($(this).val());
         });
     $form
