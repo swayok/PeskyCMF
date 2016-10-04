@@ -44,20 +44,26 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
         .find('input[data-type], textarea[data-type]')
         .each(function () {
             $(this).inputmask({alias: $(this).attr('data-type')});
+            $(this).val($(this).val());
         });
     $form
         .find('input[data-mask], textarea[data-mask]')
         .each(function () {
             $(this).inputmask($(this).attr('data-mask'));
+            $(this).val($(this).val());
         });
     $form
         .find('input[data-regexp], textarea[data-regexp]')
         .each(function () {
             $(this).inputmask("Regex", {regex: $(this).attr('data-regexp')});
+            $(this).val($(this).val());
         });
     $form
         .find('input[data-inputmask], textarea[data-inputmask]')
-        .inputmask();
+        .each(function () {
+            $(this).inputmask();
+            $(this).val($(this).val());
+        });
     // init submit
     $form.ajaxForm({
         clearForm: !!options.clearForm,
