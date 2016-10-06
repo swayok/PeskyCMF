@@ -6,6 +6,7 @@ namespace PeskyCMF\Db\Traits;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyORM\DbRelationConfig;
 use PeskyORM\Exception\DbModelException;
+use Swayok\Utils\NormalizeValue;
 
 trait KeyValueModelHelpers {
 
@@ -55,7 +56,7 @@ trait KeyValueModelHelpers {
      * @return string
      */
     static public function encodeValue($value) {
-        return is_numeric($value) ? $value : json_encode($value, JSON_UNESCAPED_UNICODE);
+        return NormalizeValue::normalizeJson($value);
     }
 
     /**
