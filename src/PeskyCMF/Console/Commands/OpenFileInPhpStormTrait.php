@@ -10,7 +10,7 @@ trait OpenFileInPhpStormTrait {
         // make sure path to phpstorm binary is present in Windows' PATH environment variable
         (new Process('', base_path()))
             ->setTimeout(null)
-            ->setCommandLine('PhpStorm.exe ' . base_path() . ' ' . $filePath)
+            ->setCommandLine('PhpStorm64.exe ' . base_path() . ' ' . $filePath)
             ->run();
     }
 }
