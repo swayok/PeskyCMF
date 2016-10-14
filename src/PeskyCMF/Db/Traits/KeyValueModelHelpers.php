@@ -138,10 +138,14 @@ trait KeyValueModelHelpers {
                 ->_setFieldValue('value', $record['value'])
                 ->commit();
         } else {
-            return $object
+            $object
                 ->reset()
-                ->fromData($record)
-                ->save();
+                ->_setFieldValue('key', $record['key'])
+                ->_setFieldValue('value', $record['value']);
+            if (!empty($fkName)) {
+                $object->_setFieldValue($fkName, $record[$fkName]);
+            }
+            return $object->save();
         }
     }
 
