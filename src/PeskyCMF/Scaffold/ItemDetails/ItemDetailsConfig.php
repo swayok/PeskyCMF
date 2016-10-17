@@ -36,6 +36,9 @@ class ItemDetailsConfig extends ScaffoldActionConfig {
             case $fieldConfig::TYPE_BOOL:
                 $rendererConfig->setView('cmf::details.bool');
                 break;
+            case $fieldConfig::TYPE_JSON_TREE:
+                $rendererConfig->setView('cmf::details.json_tree');
+                break;
             default:
                 $rendererConfig->setView('cmf::details.text');
         }

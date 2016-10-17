@@ -246,10 +246,14 @@ abstract class ScaffoldFieldConfig {
                 return '<pre class="multiline-text">' . $value . '</pre>';
             case static::TYPE_JSON:
             case static::TYPE_JSONB:
-                if (!is_array($value)) {
-                    $value = json_decode($value, true);
-                    if ($value === false) {
-                        $value = 'Failed to decode JSON';
+                if (!is_array($value) && $value !== null) {
+                    if (is_string($value) || is_numeric($value) || is_bool($value)) {
+                        $value = json_decode($value, true);
+                        if ($value === null && strtolower($value) !== 'null') {
+                            $value = 'Failed to decode JSON: ' . print_r($value, true);
+                        }
+                    } else {
+                        $value = 'Invalid value for JSON: ' . print_r($value, true);
                     }
                 }
                 return '<pre class="json-text">' . htmlentities(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</pre>';

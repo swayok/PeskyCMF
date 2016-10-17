@@ -8,6 +8,8 @@ use PeskyORM\DbColumnConfig;
 
 class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
 
+    const TYPE_JSON_TREE = 'json_collapsed';
+
     /**
      * @return callable|null
      */
@@ -43,6 +45,25 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
             }
         }
         return parent::getValueConverter();
+    }
+
+    static public function doDefaultValueConversionByType($value, $type) {
+        switch ($type) {
+            case ItemDetailsFieldConfig::TYPE_JSON_TREE:
+                if (!is_array($value) && $value !== null) {
+                    if (is_string($value) || is_numeric($value) || is_bool($value)) {
+                        $value = json_decode($value, true);
+                        if ($value === null) {
+                            $value = 'Failed to decode JSON: ' . print_r($value, true);
+                        }
+                    } else {
+                        $value = 'Invalid value for JSON: ' . print_r($value, true);
+                    }
+                }
+                return json_encode($value, JSON_UNESCAPED_UNICODE);
+            default:
+                return parent::doDefaultValueConversionByType($value, $type);
+        }
     }
 
 }
