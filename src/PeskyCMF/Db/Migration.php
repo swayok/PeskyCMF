@@ -10,8 +10,14 @@ use Swayok\Utils\StringUtils;
 
 class Migration extends Base {
 
+    protected $connection = 'pgsql';
+
     public function getConnection() {
-        $driver = config('database.default');
+        return config('database.default');
+    }
+
+    public function getPeskyOrmConnection() {
+        $driver = $this->getConnection();
         return new Db(
             $driver,
             config("database.connections.$driver.database"),
@@ -30,7 +36,7 @@ class Migration extends Base {
 //        $test = "SELECT EXISTS (SELECT 1 FROM `information_schema`.`tables` WHERE `table_schema` = ``$schema`` AND `table_name` = ``$tableName``);";
         $query = StringUtils::insert($query, ['table' => $tableName, 'schema' => $schema]);
         $this->out('Create table: ' . $tableName . ' in DB Schema ' . $schema);
-        $ds = $this->getConnection();
+        $ds = $this->getPeskyOrmConnection();
         $stmnt = $ds->query(DbExpr::create($test));
         if ($stmnt) {
             $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
@@ -48,7 +54,7 @@ class Migration extends Base {
 
     protected function dropTableFromSchema($schema, $tableName) {
         $this->out('Drop table: ' . $tableName . ' from DB Schema ' . $schema);
-        $ds = $this->getConnection();
+        $ds = $this->getPeskyOrmConnection();
         $test = "SELECT to_regclass('{$schema}.{$tableName}')::int;";
         $stmnt = $ds->query(DbExpr::create($test));
         if ($stmnt) {
@@ -74,7 +80,7 @@ class Migration extends Base {
      */
     public function executeQueryOnSchema($schema, $queryTpl, array $tables = [], $testQueryTpl = null) {
         $this->out('DB Schema: ' . $schema);
-        $ds = $this->getConnection();
+        $ds = $this->getPeskyOrmConnection();
         if (!empty($tables)) {
             foreach ($tables as $tableName) {
                 $this->out('Update table: ' . $tableName);

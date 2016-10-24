@@ -12,7 +12,7 @@ use Swayok\Utils\Folder;
 
 class MakeMigration extends BaseCommand {
 
-    use OpenFileInPhpStormTrait;
+//    use OpenFileInPhpStormTrait;
 
     protected $composer;
     protected $description = 'Create a new migration file';
@@ -52,16 +52,16 @@ class MakeMigration extends BaseCommand {
 
         $sqlFilePath = $this->getFilePath($name, true);
         File::save($sqlFilePath, "-- sql\n", 0664);
-        $this->openFileInPhpStorm($sqlFilePath);
+//        $this->openFileInPhpStorm($sqlFilePath);
         $this->line("Migration SQL File: $sqlFilePath");
 
         if (!$isCreateTable) {
             $rollbackSqlFilePath = $this->getFilePath($name, true, true);
             File::save($rollbackSqlFilePath, "-- rollback\n", 0664);
-            $this->openFileInPhpStorm($rollbackSqlFilePath);
+//            $this->openFileInPhpStorm($rollbackSqlFilePath);
             $this->line("Migration Rollback SQL File: $rollbackSqlFilePath");
         }
-        $this->openFileInPhpStorm($sqlFilePath);
+//        $this->openFileInPhpStorm($sqlFilePath);
     }
 
     protected function getDataForClassView($name, $isCreateTable) {
