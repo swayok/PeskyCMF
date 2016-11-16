@@ -29,10 +29,12 @@ abstract class ScaffoldFieldRendererConfig {
     }
 
     /**
-     * @return array
+     * @param null|string $key - string: get value for a key or default one | null: get all data
+     * @param mixed $default
+     * @return array|mixed
      */
-    public function getData() {
-        return $this->data;
+    public function getData($key = null, $default = null) {
+        return $key === null ? $this->data : array_get($this->data, $key, $default);
     }
 
     /**

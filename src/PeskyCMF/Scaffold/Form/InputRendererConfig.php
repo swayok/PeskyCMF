@@ -90,7 +90,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
     /**
      * @param string $name
      * @param string|null|bool $default
-     * @return $this
+     * @return mixed
      */
     public function getAttribute($name, $default = null) {
         return array_key_exists($name, $this->attributes) ? $this->attributes[$name] : $default;
