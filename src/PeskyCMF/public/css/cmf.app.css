@@ -621,22 +621,11 @@ div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
 aside.main-sidebar .sidebar-menu li > a {
   border-right: 3px solid transparent;
 }
-aside.main-sidebar .sidebar-menu li > a > .fa.pull-right,
-aside.main-sidebar .sidebar-menu li > a > .glyphicon.pull-right {
-  line-height: 20px;
-}
 aside.main-sidebar .sidebar-menu li > a > .fa-angle-left {
   -webkit-transition: -webkit-transform 0.1s linear;
   -moz-transition: -moz-transform 0.1s linear;
   -o-transition: -o-transform 0.1s linear;
   transition: transform 0.1s linear;
-  width: 8px;
-  height: 14px;
-  text-align: left;
-  margin: 3px 8px 0 0;
-}
-aside.main-sidebar .sidebar-menu li > a > .fa-angle-left.pull-right {
-  line-height: normal;
 }
 aside.main-sidebar .sidebar-menu li > a:hover,
 aside.main-sidebar .sidebar-menu li.current-page:hover > a,
