@@ -3,35 +3,42 @@
 namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Contracts\Encryption\DecryptException;
-use PeskyCMF\Db\CmfDbObject;
-use PeskyORM\DbColumnConfig;
-use PeskyORM\DbExpr;
+use PeskyCMF\Db\CmfDbRecord;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\ORM\Column;
 
 trait ResetsPasswordsViaAccessKey {
 
     /**
      * @return string
-     * @throws \PeskyORM\Exception\DbObjectException
+     * @throws \PeskyORM\Exception\RecordNotFoundException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     * @throws \Illuminate\Contracts\Encryption\EncryptException
      */
     public function getPasswordRecoveryAccessKey() {
-        /** @var CmfDbObject|ResetsPasswordsViaAccessKey $this */
+        /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
         $data = [
-            'account_id' => $this->_getPkValue(),
+            'account_id' => $this->getPrimaryKeyValue(),
             'expires_at' => time() + config('auth.passwords.' . \Auth::getDefaultDriver() . 'expire', 60) * 60,
         ];
         $this->reload(); //< needed to exclude situation with outdated data
         foreach ($this->getAdditionalFieldsForPasswordRecoveryAccessKey() as $fieldName) {
-            $data[$fieldName] = $this->_getFieldValue($fieldName);
+            $data[$fieldName] = $this->getValue($fieldName);
         }
         return \Crypt::encrypt(json_encode($data));
     }
 
     public function getAdditionalFieldsForPasswordRecoveryAccessKey() {
-        /** @var CmfDbObject|ResetsPasswordsViaAccessKey $this */
+        /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
         $fields = [];
-        if ($this->_hasField('updated_at')) {
+        if ($this::hasColumn('updated_at')) {
             $fields[] = 'updated_at';
-        } else if ($this->_hasField('password')) {
+        } else if ($this::hasColumn('password')) {
             $fields[] = 'password';
         }
         return $fields;
@@ -40,7 +47,13 @@ trait ResetsPasswordsViaAccessKey {
     /**
      * Vlidate access key and find user
      * @param string $accessKey
-     * @return CmfDbObject|bool - false = failed to parse access key, validate data or load user
+     * @return CmfDbRecord|bool - false = failed to parse access key, validate data or load user
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     static public function loadFromPasswordRecoveryAccessKey($accessKey) {
         try {
@@ -61,31 +74,31 @@ trait ResetsPasswordsViaAccessKey {
         ) {
             return false;
         }
-        /** @var CmfDbObject|ResetsPasswordsViaAccessKey $user */
-        $user = static::create();
+        /** @var ResetsPasswordsViaAccessKey|CmfDbRecord $user */
+        $user = static::newEmptyRecord();
         $conditions = [
-            $user->_getPkFieldName() => $data['account_id'],
+            $user->getPrimaryKeyColumnName() => $data['account_id'],
         ];
         foreach ($user->getAdditionalFieldsForPasswordRecoveryAccessKey() as $fieldName) {
             if (empty($data[$fieldName])) {
                 return false;
             }
-            $fieldType = $user->_getField($fieldName)->getType();
+            $fieldType = $user::getColumn($fieldName)->getType();
             switch ($fieldType) {
-                case DbColumnConfig::TYPE_DATE:
+                case Column::TYPE_DATE:
                     $conditions[$fieldName . '::date'] = DbExpr::create("``$data[$fieldName]``::date");
                     break;
-                case DbColumnConfig::TYPE_TIME:
+                case Column::TYPE_TIME:
                     $conditions[$fieldName . '::time'] = DbExpr::create("``$data[$fieldName]``::time");
                     break;
-                case DbColumnConfig::TYPE_TIMESTAMP:
+                case Column::TYPE_TIMESTAMP:
                     $conditions[] = DbExpr::create("`{$fieldName}`::timestamp(0) = ``{$data[$fieldName]}``::timestamp(0)");
                     break;
                 default:
                     $conditions[$fieldName] = $data[$fieldName];
             }
         }
-        if (!$user->find($conditions)->exists()) {
+        if (!$user->fromDb($conditions)->existsInDb()) {
             return false;
         }
         return $user;

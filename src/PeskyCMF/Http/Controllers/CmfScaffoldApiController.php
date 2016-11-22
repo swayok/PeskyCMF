@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
@@ -26,7 +26,7 @@ class CmfScaffoldApiController extends Controller {
     protected $scaffoldConfig = null;
 
     /**
-     * @return CmfDbModel
+     * @return CmfDbTable
      * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function getModel() {
@@ -441,7 +441,7 @@ class CmfScaffoldApiController extends Controller {
 
     /**
      * @param Request $request
-     * @param CmfDbModel $model
+     * @param CmfDbTable $model
      * @param string $inputNamePrefix - input name prefix
      *      For example if you use '_ids' instead of 'ids' - use prefix '_'
      * @return array|Response
@@ -453,7 +453,7 @@ class CmfScaffoldApiController extends Controller {
      * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \PeskyORM\Exception\DbModelException
      */
-    private function getConditionsForBulkActions(Request $request, CmfDbModel $model, $inputNamePrefix = '') {
+    private function getConditionsForBulkActions(Request $request, CmfDbTable $model, $inputNamePrefix = '') {
         $specialConditions = $this->getScaffoldConfig()->getFormConfig()->getSpecialConditions();
         $conditions = $specialConditions;
         $idsField = $inputNamePrefix . 'ids';
@@ -577,11 +577,11 @@ class CmfScaffoldApiController extends Controller {
     }
 
     /**
-     * @param CmfDbModel $model
+     * @param CmfDbTable $model
      * @param null|string $message
      * @return $this
      */
-    protected function sendItemNotFoundResponse(CmfDbModel $model, $message = null) {
+    protected function sendItemNotFoundResponse(CmfDbTable $model, $message = null) {
         if (empty($message)) {
             $message = CmfConfig::transBase('.error.resource_item_not_found');
         }

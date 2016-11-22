@@ -1,11 +1,15 @@
 <?php
 
 namespace PeskyCMF\Db\Traits;
-use PeskyORM\DbColumnConfig\PkColumnConfig;
+
+use PeskyORM\ORM\Column;
 
 trait IdColumn {
 
     private function id() {
-        return PkColumnConfig::create();
+        return Column::create(Column::TYPE_INT)
+            ->itIsPrimaryKey()
+            ->valueIsNotNullable()
+            ->convertsEmptyStringToNull();
     }
 }

@@ -2,26 +2,9 @@
 
 namespace PeskyCMF\Db;
 
-use PeskyCMF\Db\Traits\CacheForDbSelects;
-use PeskyORM\DbObject;
+use PeskyORM\ORM\Record;
 
-abstract class CmfDbObject extends DbObject {
-
-    protected $_autoAddPkValueToPublicArray = false;
-    protected $_baseModelClass = CmfDbModel::class;
-
-    protected function _loadModel() {
-        $modelClass = get_called_class() . call_user_func([$this->_baseModelClass, 'getModelClassSuffix']);
-        return call_user_func([$modelClass, 'getInstance']);
-    }
-
-    /**
-     * Needed for IDE autocompletion
-     * @return CmfDbModel|CacheForDbSelects
-     */
-    public function _getModel() {
-        return parent::_getModel();
-    }
+abstract class CmfDbRecord extends Record {
 
     /**
      * @param array $values

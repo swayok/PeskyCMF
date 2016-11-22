@@ -3,12 +3,12 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyORM\DbColumnConfig;
 
 class DataGridFilterConfig {
-    /** @var CmfDbModel */
+    /** @var CmfDbTable */
     protected $model;
     /** @var array|DataGridColumnFilterConfig[] */
     protected $filters = [];
@@ -30,19 +30,19 @@ class DataGridFilterConfig {
     protected $defaultDataGridColumnFilterConfigClass = DataGridColumnFilterConfig::class;
 
     /**
-     * @param CmfDbModel $model
+     * @param CmfDbTable $model
      * @return $this
      */
-    static public function create(CmfDbModel $model) {
+    static public function create(CmfDbTable $model) {
         $class = get_called_class();
         return new $class($model);
     }
 
     /**
      * ScaffoldActionConfig constructor.
-     * @param CmfDbModel $model
+     * @param CmfDbTable $model
      */
-    public function __construct(CmfDbModel $model) {
+    public function __construct(CmfDbTable $model) {
         $this->model = $model;
     }
 
@@ -164,23 +164,23 @@ class DataGridFilterConfig {
     }
 
     /**
-     * @param CmfDbModel $model
+     * @param CmfDbTable $model
      * @param string $relationAlias
      * @param array $scannedModels
      * @param int $depth
-     * @return bool|\PeskyCMF\Db\CmfDbModel
+     * @return bool|\PeskyCMF\Db\CmfDbTable
      * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \PeskyORM\Exception\DbTableConfigException
      * @throws ScaffoldException
      * @throws \PeskyORM\Exception\DbModelException
      */
-    protected function findRelatedModel(CmfDbModel $model, $relationAlias, array &$scannedModels = [], $depth = 0) {
+    protected function findRelatedModel(CmfDbTable $model, $relationAlias, array &$scannedModels = [], $depth = 0) {
         if ($model->hasTableRelation($relationAlias)) {
             return $model->getRelatedModel($relationAlias);
         }
         $scannedModels[] = $model->getTableName();
         foreach ($model->getTableRealtaions() as $alias => $relationConfig) {
-            /** @var CmfDbModel $relModel */
+            /** @var CmfDbTable $relModel */
             $relModel = $model->getRelatedModel($alias);
             if (!empty($scannedModels[$relModel->getTableName()])) {
                 continue;
@@ -221,7 +221,7 @@ class DataGridFilterConfig {
     }
 
     /**
-     * @return CmfDbModel
+     * @return CmfDbTable
      */
     public function getModel() {
         return $this->model;

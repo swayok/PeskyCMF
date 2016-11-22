@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var \PeskyCMF\Db\CmfDbTable $model
  * @var string $tableNameForRoutes
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
@@ -11,7 +11,7 @@
  *      All views receive:
             * var string $translationPrefix
             * var string $idSuffix
-            * var \PeskyCMF\Db\CmfDbModel $model
+            * var \PeskyCMF\Db\CmfDbTable $model
             * var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var string|null $dataTablesInitializer - js function like
         funciton (tableSelector, dataTablesConfig, originalInitializer) {

@@ -4,7 +4,7 @@
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig $fieldConfig
  * @var array|null $options
- * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var \PeskyCMF\Db\CmfDbTable $model
  * @var string $translationPrefix
  */
 if (empty($options)) {

@@ -1,14 +1,13 @@
 <?php
 
 namespace PeskyCMF\Db\Traits;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 
 trait IsActiveColumn {
 
     private function is_active() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_BOOL)
+        return Column::create(Column::TYPE_BOOL)
             ->setIsNullable(false)
-            ->setIsRequired(false)
             ->setDefaultValue(true);
     }
 }

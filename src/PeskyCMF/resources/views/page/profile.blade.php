@@ -73,7 +73,7 @@
                         <div class="form-group">
                             <label for="timezone-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.timezone') }}</label>
                             <select class="form-control" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input" required="required">
-                                @foreach(\PeskyCMF\Db\CmfDbModel::getTimezonesList(true) as $value => $label)
+                                @foreach(\PeskyCMF\Db\CmfDbTable::getTimezonesList(true) as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>

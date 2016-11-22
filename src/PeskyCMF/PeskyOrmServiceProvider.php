@@ -3,43 +3,66 @@
 namespace PeskyCMF;
 
 use Auth;
-use DebugBar\DataCollector\PDO\PDOCollector;
 use Illuminate\Support\ServiceProvider;
-use PeskyCMF\Db\CmfDbModel;
-use PeskyCMF\Db\Field\PasswordField;
-use PeskyORM\Db;
-use PeskyORM\DbColumnConfig;
-use PeskyORM\DbConnectionConfig;
+use PeskyORM\Config\Connection\MysqlConfig;
+use PeskyORM\Config\Connection\PostgresConfig;
+use PeskyORM\Core\DbAdapter;
+use PeskyORM\Core\DbAdapterInterface;
+use PeskyORM\Core\DbConnectionsManager;
 
 class PeskyOrmServiceProvider extends ServiceProvider {
     /**
      * Bootstrap any application services.
      *
      * @return void
-     * @throws \DebugBar\DebugBarException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
+     * @throws \InvalidArgumentException
      */
     public function boot() {
         $driver = config('database.default');
-        CmfDbModel::setDbConnectionConfig(
-            DbConnectionConfig::create()
-                ->setDriver($driver)
-                ->setHost(config("database.connections.$driver.host"))
-                ->setDbName(config("database.connections.$driver.database"))
-                ->setUserName(config("database.connections.$driver.username"))
-                ->setPassword(config("database.connections.$driver.password"))
-        );
-        DbColumnConfig::registerType('password', DbColumnConfig::DB_TYPE_VARCHAR, PasswordField::class);
+        switch ($driver) {
+            case 'pgsql':
+                $config = new PostgresConfig(
+                    config("database.connections.$driver.database"),
+                    config("database.connections.$driver.username"),
+                    config("database.connections.$driver.password")
+                );
+                break;
+            case 'mysql':
+                $config = new MysqlConfig(
+                    config("database.connections.$driver.database"),
+                    config("database.connections.$driver.username"),
+                    config("database.connections.$driver.password")
+                );
+                break;
+            default:
+                return;
+        }
+        $host = config("database.connections.$driver.host");
+        if ($host) {
+            $config->setDbHost($host);
+        }
+        $port = config("database.connections.$driver.port");
+        if ($port) {
+            $config->setDbPort($port);
+        }
+        DbConnectionsManager::createConnection('default', $driver, $config);
 
+        $this->addPdoCollectorForDebugbar();
+    }
+
+    protected function addPdoCollectorForDebugbar() {
         if (config('app.debug', false) && app()->offsetExists('debugbar') && debugbar()->isEnabled()) {
             $timeCollector = debugbar()->hasCollector('time') ? debugbar()->getCollector('time') : null;
-            $pdoCollector = new PDOCollector(null, $timeCollector);
+            $pdoCollector = new DebugBar\DataCollector\PDO\PDOCollector(null, $timeCollector);
             $pdoCollector->setRenderSqlWithParams(true);
             debugbar()->addCollector($pdoCollector);
-            Db::setConnectionWrapper(function (Db $db, \PDO $pdo) {
+            DbAdapter::setConnectionWrapper(function (DbAdapterInterface $adapter, \PDO $pdo) {
                 $pdoTracer = new PeskyOrmPdoTracer($pdo);
                 if (debugbar()->hasCollector('pdo')) {
-                    debugbar()->getCollector('pdo')->addConnection($pdoTracer, $db->getDbName());
+                    debugbar()->getCollector('pdo')->addConnection(
+                        $pdoTracer,
+                        $adapter->getConnectionConfig()->getDbName()
+                    );
                 }
                 return $pdoTracer;
             });
@@ -50,7 +73,6 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      * Register any application services.
      *
      * @return void
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function register() {
         Auth::provider('peskyorm', function($app, array $config) {

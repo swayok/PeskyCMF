@@ -4,7 +4,7 @@ namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Routing\Route;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\HttpCode;
 
 trait InjectsDbObjects {
@@ -16,13 +16,19 @@ trait InjectsDbObjects {
 
     /**
      * @param $parameters
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     * @throws \PDOException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\InvalidDataException
      */
     protected function readDbObjectForInjection($parameters) {
         /** @var Route $route */
         $route = \Request::route();
         $object = null;
         foreach ($parameters as $key => $value) {
-            if ($value instanceof CmfDbObject) {
+            if ($value instanceof CmfDbRecord) {
                 // get only last object in params
                 $object = $value;
             }
@@ -41,7 +47,7 @@ trait InjectsDbObjects {
             $this->addConditionsForDbObjectInjection($route, $object, $conditions);
             $this->addParentIdsConditionsForDbObjectInjection($route, $object, $conditions);
             $object->find($conditions);
-            if (!$object->exists()) {
+            if (!$object->existsInDb()) {
                 $this->sendRecordNotFoundResponse();
             }
         }
@@ -56,21 +62,25 @@ trait InjectsDbObjects {
 
     /**
      * @param Route $route
-     * @param CmfDbObject $object
+     * @param CmfDbRecord $object
      * @param array $conditions
      */
-    protected function addConditionsForDbObjectInjection(Route $route, CmfDbObject $object, array &$conditions) {
+    protected function addConditionsForDbObjectInjection(Route $route, CmfDbRecord $object, array &$conditions) {
 
     }
 
     /**
      * @param Route $route
-     * @param CmfDbObject $object
+     * @param CmfDbRecord $object
      * @param array $conditions
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \UnexpectedValueException
      */
-    protected function addParentIdsConditionsForDbObjectInjection(Route $route, CmfDbObject $object, array &$conditions) {
+    protected function addParentIdsConditionsForDbObjectInjection(Route $route, CmfDbRecord $object, array &$conditions) {
         foreach ($route->parameterNames() as $name) {
-            if ($object->_hasField($name)) {
+            if ($object::hasColumn($name)) {
                 $conditions[$name] = $route->parameter($name);
             }
         }

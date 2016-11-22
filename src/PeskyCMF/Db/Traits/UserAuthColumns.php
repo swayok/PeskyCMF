@@ -1,28 +1,35 @@
 <?php
 
 namespace PeskyCMF\Db\Traits;
-use PeskyORM\DbColumnConfig;
-use PeskyORM\DbColumnConfig\PasswordColumnConfig;
+
+use PeskyORM\ORM\Column;
+use PeskyORM\ORM\DefaultColumnClosures;
 
 trait UserAuthColumns {
 
     private function password() {
-        return PasswordColumnConfig::create()
+        return Column::create(Column::TYPE_PASSWORD)
             ->setIsNullable(false)
-            ->setIsRequired(true)
-            ->setIsPrivate(true)
-            ->setHashFunction(function ($password) {
-                return \Hash::make($password);
-            });
+            ->setValuePreprocessor(function ($value, $isDbValue, Column $column) {
+                $value = DefaultColumnClosures::valuePreprocessor($value, $isDbValue, $column);
+                if ($isDbValue) {
+                    return $value;
+                } else {
+                    if (!empty($value)) {
+                        return \Hash::make($value);
+                    }
+                    return $value;
+                }
+            })
+            ->itIsHiddenFromToArray();
     }
 
     private function remember_token() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_STRING)
-            ->setIsRequired(false)
+        return Column::create(Column::TYPE_STRING)
             ->setIsNullable(true)
-            ->setConvertEmptyValueToNull(true)
+            ->convertsEmptyStringToNull()
             ->setDefaultValue(null)
-            ->setIsPrivate(true);
+            ->itIsHiddenFromToArray();
     }
 
 }

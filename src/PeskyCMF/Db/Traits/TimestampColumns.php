@@ -1,21 +1,19 @@
 <?php
 
 namespace PeskyCMF\Db\Traits;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 
 trait TimestampColumns {
 
     private function created_at() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_TIMESTAMP)
-            ->setIsRequired(false)
+        return Column::create(Column::TYPE_TIMESTAMP)
             ->setIsNullable(false)
-            ->setIsExcluded(true);
+            ->valueCannotBeSetOrChanged();
     }
 
     private function updated_at() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_TIMESTAMP)
-            ->setIsRequired(false)
+        return Column::create(Column::TYPE_TIMESTAMP)
             ->setIsNullable(false)
-            ->setIsExcluded(true);
+            ->valueCannotBeSetOrChanged();
     }
 }

@@ -3,7 +3,7 @@
  * @var \PeskyCMF\Scaffold\Form\InputRendererConfig $rendererConfig
  * @var \PeskyCMF\Scaffold\Form\FormFieldConfig $fieldConfig
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var \PeskyCMF\Db\CmfDbTable $model
  */
 
 $attributes = array(

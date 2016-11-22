@@ -11,4 +11,7 @@ class HttpCode {
     const NOT_FOUND = 404;
     const CONFLICT = 409;
     const CANNOT_PROCESS = 422;
+
+    const MOVED_PERMANENTLY = 301;
+    const MOVED_TEMPORARILY = 302;
 }

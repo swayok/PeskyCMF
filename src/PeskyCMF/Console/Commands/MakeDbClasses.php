@@ -4,8 +4,8 @@ namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbModel;
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfDbTable;
+use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;
@@ -42,8 +42,8 @@ class MakeDbClasses extends Command {
     protected $dbTableConfigView = 'cmf::console.db_table_config';
     protected $scaffoldConfigView = 'cmf::console.db_scaffold_config';
 
-    protected $modelParentClass = CmfDbModel::class;
-    protected $objectParentClass = CmfDbObject::class;
+    protected $modelParentClass = CmfDbTable::class;
+    protected $objectParentClass = CmfDbRecord::class;
     protected $tableConfigParentClass = DbTableConfig::class;
     protected $scaffoldConfigParentClass = ScaffoldSectionConfig::class;
 

@@ -644,7 +644,7 @@ class FormConfig extends ScaffoldActionConfig {
      * Callback is called after successfully saving data but before model's commit()
      * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
      * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
-     * @param \Closure $callback - function ($isCreation, array $validatedData, CmfDbObject $object, FormConfig $formConfig) { return true; }
+     * @param \Closure $callback - function ($isCreation, array $validatedData, CmfDbRecord $object, FormConfig $formConfig) { return true; }
      * @return $this
      */
     public function setAfterSaveCallback(\Closure $callback) {

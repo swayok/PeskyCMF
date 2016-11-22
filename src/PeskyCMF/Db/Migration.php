@@ -4,8 +4,10 @@
 namespace PeskyCMF\Db;
 
 use Illuminate\Database\Migrations\Migration as Base;
-use PeskyORM\Db;
-use PeskyORM\DbExpr;
+use League\Flysystem\FileNotFoundException;
+use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\Core\Utils;
 use Swayok\Utils\StringUtils;
 
 class Migration extends Base {
@@ -16,15 +18,13 @@ class Migration extends Base {
         return config('database.default');
     }
 
+    /**
+     * @return \PeskyORM\Core\DbAdapter|\PeskyORM\Core\DbAdapterInterface
+     * @throws \InvalidArgumentException
+     */
     public function getPeskyOrmConnection() {
         $driver = $this->getConnection();
-        return new Db(
-            $driver,
-            config("database.connections.$driver.database"),
-            config("database.connections.$driver.username"),
-            config("database.connections.$driver.password"),
-            config("database.connections.$driver.host") ?: 'localhost'
-        );
+        return DbConnectionsManager::getConnection('default');
     }
 
     protected function out($string) {
@@ -39,7 +39,7 @@ class Migration extends Base {
         $ds = $this->getPeskyOrmConnection();
         $stmnt = $ds->query(DbExpr::create($test));
         if ($stmnt) {
-            $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
+            $exists = Utils::getDataFromStatement($stmnt, Utils::FETCH_VALUE);
             if (!empty($exists)) {
                 $this->out('- Table already exists');
             } else {
@@ -58,7 +58,7 @@ class Migration extends Base {
         $test = "SELECT to_regclass('{$schema}.{$tableName}')::int;";
         $stmnt = $ds->query(DbExpr::create($test));
         if ($stmnt) {
-            $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
+            $exists = Utils::getDataFromStatement($stmnt, Utils::FETCH_VALUE);
             if (empty($exists)) {
                 $this->out('- Table not exists');
             } else {
@@ -77,6 +77,7 @@ class Migration extends Base {
      * @param array $tables - empty value: just execute $queryTpl
      * @param null|string $testQueryTpl
      * @throws \PeskyORM\Exception\DbException
+     * @throws \InvalidArgumentException
      */
     public function executeQueryOnSchema($schema, $queryTpl, array $tables = [], $testQueryTpl = null) {
         $this->out('DB Schema: ' . $schema);
@@ -89,7 +90,7 @@ class Migration extends Base {
                     $test = StringUtils::insert($testQueryTpl, ['table' => $tableName, 'schema' => $schema]);
                     $stmnt = $ds->query(DbExpr::create($test));
                     if ($stmnt) {
-                        $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
+                        $exists = Utils::getDataFromStatement($stmnt, Utils::FETCH_VALUE);
                         if (!empty($exists)) {
                             $this->out('- Object already exists');
                         } else {
@@ -110,7 +111,7 @@ class Migration extends Base {
                 $test = StringUtils::insert($testQueryTpl, ['schema' => $schema]);
                 $stmnt = $ds->query(DbExpr::create($test));
                 if ($stmnt) {
-                    $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
+                    $exists = Utils::getDataFromStatement($stmnt, Utils::FETCH_VALUE);
                     if (!empty($exists)) {
                         $this->out('- Object already exists');
                     } else {
@@ -141,7 +142,7 @@ class Migration extends Base {
             $file
         );
         if (!file_exists($file)) {
-            throw new \Exception('SQL file ' . $file . ' not exists');
+            throw new FileNotFoundException('SQL file ' . $file . ' not exists');
         }
         return file_get_contents($file);
     }

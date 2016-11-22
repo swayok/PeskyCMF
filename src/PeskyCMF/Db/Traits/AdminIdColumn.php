@@ -2,22 +2,26 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use App\Db\Admin\AdminTableConfig;
-use PeskyORM\DbColumnConfig;
-use PeskyORM\DbRelationConfig;
+use PeskyCMF\Config\CmfConfig;
+use PeskyORM\ORM\Column;
+use PeskyORM\ORM\Relation;
 
 trait AdminIdColumn {
 
     private function admin_id() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_INT)
-            ->setIsRequired(false)
+        return Column::create(Column::TYPE_INT)
             ->setIsNullable(true)
-            ->setConvertEmptyValueToNull(true);
+            ->convertsEmptyStringToNull();
     }
 
     private function Admin() {
-        return DbRelationConfig::create($this, 'admin_id', DbRelationConfig::BELONGS_TO, AdminTableConfig::TABLE_NAME, 'id')
-            ->setDisplayField('email');
+        return Relation::create(
+                'admin_id',
+                Relation::BELONGS_TO,
+                get_class(CmfConfig::getInstance()->getModelByTableName('admins')),
+                'id'
+            )
+            ->setDisplayColumnName('email');
     }
 
 }

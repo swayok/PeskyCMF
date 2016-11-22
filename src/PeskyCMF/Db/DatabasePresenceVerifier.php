@@ -3,7 +3,7 @@
 namespace PeskyCMF\Db;
 
 use Illuminate\Validation\PresenceVerifierInterface;
-use PeskyORM\DbModel;
+use PeskyCMF\Config\CmfConfig;
 
 class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
@@ -17,7 +17,11 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      * @param  string $idColumn
      * @param  array $extra
      * @return int
-     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function getCount($tableName, $column, $value, $excludeId = null, $idColumn = null, array $extra = []) {
         $conditions = [$column => $value];
@@ -38,7 +42,11 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      * @param  array $values
      * @param  array $extra
      * @return int
-     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function getMultiCount($tableName, $column, array $values, array $extra = []) {
         $conditions = [$column => $values];
@@ -52,13 +60,10 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
     /**
      * @param $tableName
-     * @return CmfDbModel
-     * @throws \PeskyORM\Exception\DbUtilsException
+     * @return CmfDbTable
      */
     private function getModel($tableName) {
-        /** @var CmfDbModel $baseClass */
-        $baseClass = app()->make(DbModel::class);
-        return $baseClass::getModelByClassName($baseClass::getFullModelClassByTableName($tableName));
+        return CmfConfig::getInstance()->getModelByTableName($tableName);
     }
 
     /**

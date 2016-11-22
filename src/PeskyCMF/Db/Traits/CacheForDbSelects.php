@@ -2,9 +2,11 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbModel;
-use PeskyORM\DbExpr;
-use PeskyORM\Exception\DbModelException;
+use PeskyCMF\Db\CmfDbTable;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\Core\Utils;
+use PeskyORM\ORM\RecordsArray;
+use PeskyORM\ORM\RecordsSet;
 use Swayok\Utils\Set;
 
 trait CacheForDbSelects {
@@ -91,22 +93,18 @@ trait CacheForDbSelects {
      * @return string
      * @throws \InvalidArgumentException
      */
-    static public function buildCacheKey($columns = '*', $conditionsAndOptions = null) {
-        if (is_array($conditionsAndOptions)) {
-            foreach ($conditionsAndOptions as &$value) {
-                if ($value instanceof DbExpr) {
-                    $value = $value->get();
-                } else if (is_object($value)) {
-                    throw new \InvalidArgumentException(
-                        '$conditionsAndOptions argument may contain only strings and objects of class \PeskyORM\DbExpr.'
-                        . ' Object of class ' . get_class($value) . ' detected'
-                    );
-                }
+    static public function buildCacheKey($columns = '*', array $conditionsAndOptions = []) {
+        foreach ($conditionsAndOptions as &$value) {
+            if ($value instanceof DbExpr) {
+                $value = $value->get();
+            } else if (is_object($value)) {
+                throw new \InvalidArgumentException(
+                    '$conditionsAndOptions argument may contain only strings and objects of class \PeskyORM\DbExpr.'
+                    . ' Object of class ' . get_class($value) . ' detected'
+                );
             }
-            unset($value);
-        } else if ($conditionsAndOptions instanceof DbExpr) {
-            $conditionsAndOptions = $conditionsAndOptions->get();
         }
+        unset($value);
         if (is_array($columns)) {
             foreach ($columns as &$value) {
                 if ($value instanceof DbExpr) {
@@ -133,7 +131,7 @@ trait CacheForDbSelects {
      * @return $this
      */
     public function withCacheTimeout($minutes) {
-        /** @var CmfDbModel|CacheForDbSelects $this */
+        /** @var CmfDbTable|CacheForDbSelects $this */
         $this->_cacheTimeoutForNextSelect = $minutes;
         return $this;
     }
@@ -151,7 +149,7 @@ trait CacheForDbSelects {
      * @return int
      */
     private function _getCacheDurationForSelectOneInMinutes() {
-        /** @var CmfDbModel|CacheForDbSelects $this */
+        /** @var CmfDbTable|CacheForDbSelects $this */
         return $this->_cacheTimeoutForNextSelect === null
             ? $this->getDefaultCacheDurationForSelectOneInMinutes()
             : $this->_cacheTimeoutForNextSelect;
@@ -162,7 +160,7 @@ trait CacheForDbSelects {
      * @return int
      */
     private function _getCacheDurationForSelectManyInMinutes() {
-        /** @var CmfDbModel|CacheForDbSelects $this */
+        /** @var CmfDbTable|CacheForDbSelects $this */
         return $this->_cacheTimeoutForNextSelect === null
             ? $this->getDefaultCacheDurationForSelectManyInMinutes()
             : $this->_cacheTimeoutForNextSelect;
@@ -197,17 +195,19 @@ trait CacheForDbSelects {
 
     /**
      * @return string
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws DbModelException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function getModelCachePrefix() {
-        /** @var CmfDbModel|CacheForDbSelects $this */
+        /** @var CmfDbTable|CacheForDbSelects $this */
+        $structure = $this::getStructure();
         $parts = [
-            $this->getConnectionAlias(),
-            $this->getTableConfig()->getSchema(),
-            $this->getDataSource()->getDbName(),
-            $this->getAlias()
+            $structure::getConnectionName(),
+            $structure::getSchema(),
+            $this::getConnection()->getConnectionConfig()->getDbName(),
+            $this::getAlias()
         ];
         return implode('.', $parts) . '.';
     }
@@ -258,10 +258,10 @@ trait CacheForDbSelects {
      * @param null|string|array $columns
      * @param null|array $conditionsAndOptions
      * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
         $mid = $affectsSingleRecord ? 'one.' : 'many.';
@@ -272,7 +272,6 @@ trait CacheForDbSelects {
      * @param mixed $cacheSettings
      * @param int|bool|\DateTime $defaultTimeout
      * @param callable $defaultCacheKey
-     * @param bool $isAutoCache
      * @return array|bool - bool: false - when caching is not possible
      */
     protected function resolveCacheSettings($cacheSettings, $defaultTimeout, callable $defaultCacheKey) {
@@ -321,18 +320,13 @@ trait CacheForDbSelects {
      *  - true: cache with default settings
      *  - numeric or \DateTime: cache timeout, key and tags are set to default values
      *  - string: cache tag, timeout and tags are set to default
-     * @param bool $asObjects - true: return DbObject | false: return array
-     * @param bool $withRootAlias
-     * @return array|Object[]
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbObjectException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
+     * @param \Closure $configurator
+     * @return RecordsSet|RecordsArray
+     * @throws \InvalidArgumentException
      */
-    public function select($columns = '*', $conditionsAndOptions = null, $asObjects = false, $withRootAlias = false) {
+    public function select($columns = '*', array $conditionsAndOptions = [], \Closure $configurator = null) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
+            /** @var CmfDbTable|CacheForDbSelects $this */
             $hasCacheOption = is_array($conditionsAndOptions) && array_key_exists('CACHE', $conditionsAndOptions);
             if (
                 $hasCacheOption
@@ -353,100 +347,88 @@ trait CacheForDbSelects {
                             return $this->buildDefaultCacheKey(false, $columns, $conditionsAndOptions);
                         }
                     );
-                    $records = $this->_getCachedData(false, $cacheSettings, function () use ($columns, $conditionsAndOptions) {
-                        return parent::select($columns, $conditionsAndOptions, false, false);
+                    $records = $this->_getCachedData(false, $cacheSettings, function () use ($columns, $conditionsAndOptions, $configurator) {
+                        return parent::select($columns, $conditionsAndOptions, $configurator);
                     });
-                    if ($asObjects) {
-                        $records = $this->recordsToObjects($records, true);
-                    } else if ($withRootAlias) {
-                        $records = array($this->getAlias() => $records);
-                    }
-                    return $records;
+                    return RecordsSet::createFromArray($this, $records, null);
                 }
             }
         }
         unset($conditionsAndOptions['CACHE']);
-        return parent::select($columns, $conditionsAndOptions, $asObjects, $withRootAlias);
+        return parent::select($columns, $conditionsAndOptions, $configurator);
     }
 
     /**
      * @param string|array $columns
-     * @param null|array|string $conditionsAndOptions
-     * @param bool $asObjects - true: return DbObject | false: return array
-     * @param bool $withRootAlias
-     * @return array|Object[]
+     * @param array $conditions
+     * @param \Closure|null $configurator
+     * @return RecordsSet|RecordsArray
      */
-    public function selectFromCache($columns = '*', $conditionsAndOptions = null, $asObjects = false, $withRootAlias = false) {
+    public function selectFromCache($columns = '*', array $conditions = [], \Closure $configurator = null) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            static::addCacheOptionToConditionsAndOptions($conditions);
         }
-        return $this->select($columns, $conditionsAndOptions, $asObjects, $withRootAlias);
+        return $this->select($columns, $conditions, $configurator);
     }
 
     /**
-     * Selects only 1 column
      * @param string $column
-     * @param null|array|string $conditionsAndOptions
+     * @param array $conditions
+     * @param \Closure|null $configurator
      * @return array
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbQueryException
-     * @throws \PeskyORM\Exception\DbException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    public function selectColumnFromCache($column, $conditionsAndOptions = null) {
+    public function selectColumnFromCache($column, array $conditions = [], \Closure $configurator = null) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            static::addCacheOptionToConditionsAndOptions($conditions);
         }
-        return $this->selectColumn($column, $conditionsAndOptions);
+        return $this->selectColumn($column, $conditions, $configurator);
     }
 
     /**
-     * Select associative array
-     * Note: does not support columns from foreign models
      * @param string $keysColumn
      * @param string $valuesColumn
-     * @param null|array|string $conditionsAndOptions
+     * @param array $conditions
+     * @param \Closure $configurator
      * @return array
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbQueryException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbUtilsException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    public function selectAssocFromCache($keysColumn, $valuesColumn, $conditionsAndOptions = null) {
+    public function selectAssocFromCache($keysColumn, $valuesColumn, array $conditions = [], \Closure $configurator = null) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            static::addCacheOptionToConditionsAndOptions($conditions);
         }
-        return $this->selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions);
+        return $this->selectAssoc($keysColumn, $valuesColumn, $conditions, $configurator);
     }
 
     /**
      * @param null|array|string $conditionsAndOptions
      * @param bool $cacheSettings
      */
-    static private function addCacheOptionToConditionsAndOptions(&$conditionsAndOptions, $cacheSettings = true) {
-        if (empty($conditionsAndOptions)) {
-            $conditionsAndOptions = array();
-        } else if (is_string($conditionsAndOptions)) {
-            $conditionsAndOptions = array($conditionsAndOptions);
-        }
+    static private function addCacheOptionToConditionsAndOptions(array &$conditionsAndOptions, $cacheSettings = true) {
         $conditionsAndOptions['CACHE'] = $cacheSettings;
     }
 
     /**
-     * @param null|array $conditionsAndOptions
+     * @param array $conditions
+     * @param \Closure $configurator
      * @param bool $removeNotInnerJoins
      * @return int
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
-    public function count($conditionsAndOptions = null, $removeNotInnerJoins = false) {
+    public function count(array $conditions = [], \Closure $configurator = null, $removeNotInnerJoins = false) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
-            $hasCacheOption = is_array($conditionsAndOptions) && array_key_exists('CACHE', $conditionsAndOptions);
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
             if (
                 $hasCacheOption
                 || (
@@ -455,59 +437,58 @@ trait CacheForDbSelects {
                 )
             ) {
                 $cacheSettings = $hasCacheOption
-                    ? $conditionsAndOptions['CACHE']
+                    ? $conditions['CACHE']
                     : ['timeout' => $this->getAutoCacheTimeoutForSelectManyInMinutes()];
-                unset($conditionsAndOptions['CACHE']);
+                unset($conditions['CACHE']);
                 if ($cacheSettings !== false) {
-                    $conditionsAndOptions = $this->cleanOptionsForCount($conditionsAndOptions, $removeNotInnerJoins);
                     /** @var array $cacheSettings */
                     $cacheSettings = $this->resolveCacheSettings(
                         $cacheSettings,
                         $this->_getCacheDurationForSelectManyInMinutes(),
-                        function () use ($conditionsAndOptions) {
-                            return $this->buildDefaultCacheKey(false, '__COUNT__', $conditionsAndOptions);
+                        function () use ($conditions) {
+                            return $this->buildDefaultCacheKey(false, '__COUNT__', $conditions);
                         }
                     );
                     $cacheSettings['key'] .= '_count'; //< for DbModel->selectWithCount() method when cache key provided by user
                     $count = $this->_getCachedData(
                         false,
                         $cacheSettings,
-                        function () use ($conditionsAndOptions, $removeNotInnerJoins) {
-                            return parent::count($conditionsAndOptions, $removeNotInnerJoins);
+                        function () use ($conditions, $configurator, $removeNotInnerJoins) {
+                            return parent::count($conditions, $configurator, $removeNotInnerJoins);
                         }
                     );
                     return $count;
                 }
             }
         }
-        unset($conditionsAndOptions['CACHE']);
-        return parent::count($conditionsAndOptions, $removeNotInnerJoins);
+        unset($conditions['CACHE']);
+        return parent::count($conditions, $configurator, $removeNotInnerJoins);
     }
 
     /**
-     * @param null|array $conditionsAndOptions
+     * @param array $conditions
+     * @param \Closure $configurator
      * @param bool $removeNotInnerJoins
      * @return int
      */
-    public function countFromCache($conditionsAndOptions = null, $removeNotInnerJoins = false) {
+    public function countFromCache(array $conditions = [], \Closure $configurator = null, $removeNotInnerJoins = false) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            static::addCacheOptionToConditionsAndOptions($conditions);
         }
-        return $this->count($conditionsAndOptions, $removeNotInnerJoins);
+        return $this->count($conditions, $configurator, $removeNotInnerJoins);
     }
 
     /**
-     * @param string $expression - example: 'COUNT(*)', 'SUM(`field`)'
-     * @param array|string|null $conditionsAndOptions
-     * @return string|int|float|bool
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
+     * @param DbExpr $expression
+     * @param array $conditions
+     * @param \Closure|null $configurator
+     * @return array
      */
-    public function expression($expression, $conditionsAndOptions = null) {
+    public function selectValue(DbExpr $expression, array $conditions = [], \Closure $configurator = null) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
-            $hasCacheOption = is_array($conditionsAndOptions) && array_key_exists('CACHE', $conditionsAndOptions);
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
             if (
                 $hasCacheOption
                 || (
@@ -516,65 +497,93 @@ trait CacheForDbSelects {
                 )
             ) {
                 $cacheSettings = $hasCacheOption
-                    ? $conditionsAndOptions['CACHE']
+                    ? $conditions['CACHE']
                     : ['timeout' => $this->getAutoCacheTimeoutForSelectOneInMinutes()];
-                unset($conditionsAndOptions['CACHE']);
+                unset($conditions['CACHE']);
                 if ($cacheSettings !== false) {
                     /** @var array $cacheSettings */
                     $cacheSettings = $this->resolveCacheSettings(
                         $cacheSettings,
                         $this->getAutoCacheTimeoutForSelectOneInMinutes(),
-                        function () use ($expression, $conditionsAndOptions) {
-                            return $this->buildDefaultCacheKey(false, $expression, $conditionsAndOptions);
+                        function () use ($expression, $conditions) {
+                            return $this->buildDefaultCacheKey(false, $expression, $conditions);
                         }
                     );
                     $result = $this->_getCachedData(
                         false,
                         $cacheSettings,
-                        function () use ($expression, $conditionsAndOptions) {
-                            return parent::expression($expression, $conditionsAndOptions);
+                        function () use ($expression, $conditions, $configurator) {
+                            return parent::expression($expression, $conditions, $configurator);
                         }
                     );
                     return $result;
                 }
             }
         }
-        unset($conditionsAndOptions['CACHE']);
-        return parent::expression($expression, $conditionsAndOptions);
+        unset($conditions['CACHE']);
+        return parent::expression($expression, $conditions, $configurator);
     }
 
     /**
-     * @param string $expression - example: 'COUNT(*)', 'SUM(`field`)'
-     * @param array|string|null $conditionsAndOptions
-     * @return string|int|float|bool
+     * @param DbExpr $expression
+     * @param array $conditions
+     * @param \Closure|null $configurator
+     * @return mixed
      */
-    public function expressionFromCache($expression, $conditionsAndOptions = null) {
+    public function selectValueFromCache(DbExpr $expression, array $conditions = [], \Closure $configurator = null) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            static::addCacheOptionToConditionsAndOptions($conditions);
         }
-        return $this->expression($expression, $conditionsAndOptions);
+        return $this->selectValue($expression, $conditions, $configurator);
     }
 
     /**
      * Get 1 record from DB
      * @param string|array $columns
-     * @param null|array|string|int $conditionsAndOptions -
+     * @param null|array|string|int $conditions -
      *      array|string: conditions,
      *      numeric|int: record's pk value, automatically converted to array($this->primaryKey => $where)
-     * @param bool $asObject - true: return DbObject | false: return array
-     * @param bool $withRootAlias
-     * @return array|bool|Object
+     * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    public function selectOneFromCache($columns, $conditionsAndOptions = null, $asObject = false, $withRootAlias = false) {
+    public function selectOneFromCache($columns, array $conditions, \Closure $configurator = null) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
-            if (is_numeric($conditionsAndOptions) || is_int($conditionsAndOptions)) {
-                $conditionsAndOptions = array($this->getPkColumnName() => $conditionsAndOptions);
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            if (is_numeric($conditions) || is_int($conditions)) {
+                $conditions = array(static::getPkColumnName() => $conditions);
             }
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions, true);
+            static::addCacheOptionToConditionsAndOptions($conditions, true);
         }
-        return $this->selectOne($columns, $conditionsAndOptions, $asObject, $withRootAlias);
+        return $this->selectOne($columns, $conditions, $configurator);
+    }
+
+    /**
+     * Get 1 record from DB
+     * @param string|array $columns
+     * @param null|array|string|int $conditions -
+     *      array|string: conditions,
+     *      numeric|int: record's pk value, automatically converted to array($this->primaryKey => $where)
+     * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function selectOneAsDbRecordFromCache($columns, array $conditions, \Closure $configurator = null) {
+        if ($this->cachingIsPossible()) {
+            /** @var CmfDbTable|CacheForDbSelects $this */
+            if (is_numeric($conditions) || is_int($conditions)) {
+                $conditions = array(static::getPkColumnName() => $conditions);
+            }
+            static::addCacheOptionToConditionsAndOptions($conditions, true);
+        }
+        return $this->selectOneAsDbRecord($columns, $conditions, $configurator);
     }
 
     /**
@@ -584,10 +593,13 @@ trait CacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \PeskyORM\Exception\DbObjectException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \UnexpectedValueException
      */
-    public function selectOne($columns, $conditionsAndOptions, $asObject = false, $withRootAlias = false) {
+    public function selectOne($columns, array $conditions, \Closure $configurator = null) {
         if ($this->cachingIsPossible()) {
-            /** @var CmfDbModel|CacheForDbSelects $this */
+            /** @var CmfDbTable|CacheForDbSelects $this */
             if (empty($conditionsAndOptions)) {
                 throw new DbModelException($this, 'Selecting one record without conditions is not allowed');
             }
@@ -661,9 +673,12 @@ trait CacheForDbSelects {
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \PeskyORM\Exception\DbModelException
      * @throws \PeskyORM\Exception\DbObjectException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \UnexpectedValueException
      */
     public function update($data, $conditionsAndOptions = null, $returning = false) {
-        /** @var CmfDbModel|CacheForDbSelects $this */
+        /** @var CmfDbTable|CacheForDbSelects $this */
         $ret = parent::update($data, $conditionsAndOptions, $returning);
         if ($this->cachingIsPossible()) {
             if (!empty($ret[$this->getPkColumnName()])) {
@@ -696,9 +711,12 @@ trait CacheForDbSelects {
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \PeskyORM\Exception\DbModelException
      * @throws \PeskyORM\Exception\DbObjectException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \UnexpectedValueException
      */
     public function delete($conditionsAndOptions = null, $returning = false) {
-        /** @var CmfDbModel|CacheForDbSelects $this */
+        /** @var CmfDbTable|CacheForDbSelects $this */
         $ret = parent::delete($conditionsAndOptions, $returning);
         if ($this->cachingIsPossible()) {
             if (!empty($ret[$this->getPkColumnName()])) {

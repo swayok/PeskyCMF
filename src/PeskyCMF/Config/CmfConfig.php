@@ -4,7 +4,7 @@ namespace PeskyCMF\Config;
 
 use Illuminate\Http\Request;
 use PeskyCMF\ConfigsContainer;
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
@@ -37,7 +37,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function base_db_model_class() {
-        return CmfDbModel::class;
+        return CmfDbTable::class;
     }
 
     /**
@@ -607,13 +607,13 @@ class CmfConfig extends ConfigsContainer {
 
     /**
      * Get ScaffoldSectionConfig instance
-     * @param CmfDbModel $model - a model to be used in ScaffoldSectionConfig
+     * @param CmfDbTable $model - a model to be used in ScaffoldSectionConfig
      * @param string $tableName - table name passed via route parameter, may differ from $model->getTableName()
      *      and added here to be used in child configs when you need to use scaffolds with fake table names.
      *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
      * @return ScaffoldSectionConfig
      */
-    static public function getScaffoldConfig(CmfDbModel $model, $tableName) {
+    static public function getScaffoldConfig(CmfDbTable $model, $tableName) {
         // $tableName is no tused by default and added here to be used in child configs
         $className = $model->getNamespace() . $model->getAlias() . static::scaffold_config_class_suffix();
         return new $className($model);
@@ -631,11 +631,11 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Get CmfDbModel instance for $tableName
+     * Get CmfDbTable instance for $tableName
      * Note: can be ovewritted to allow usage of fake tables in resources routes
      * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
      * @param string $tableName
-     * @return CmfDbModel
+     * @return CmfDbTable
      * @throws \PeskyORM\Exception\DbUtilsException
      */
     static public function getModelByTableName($tableName) {

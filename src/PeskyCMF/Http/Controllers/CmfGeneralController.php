@@ -8,8 +8,8 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbModel;
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfDbTable;
+use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
@@ -195,7 +195,7 @@ class CmfGeneralController extends Controller {
 
     /**
      * @param $accessKey
-     * @return bool|CmfDbObject
+     * @return bool|CmfDbRecord
      */
     protected function getUserFromPasswordRecoveryAccessKey($accessKey) {
         /** @var ResetsPasswordsViaAccessKey $userClass */
@@ -274,7 +274,7 @@ class CmfGeneralController extends Controller {
         ]);
         $email = strtolower(trim($request->data('email')));
         if (Auth::guard()->attempt(['email' => $email], false, false)) {
-            /** @var CmfDbObject|ResetsPasswordsViaAccessKey $user */
+            /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $user */
             $user = Auth::guard()->getLastAttempted();
             $data = [
                 'url' => route('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
@@ -303,7 +303,7 @@ class CmfGeneralController extends Controller {
         ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (!empty($user) && $user->_getPkValue() !== $request->data('id')) {
-            /** @var CmfDbObject $user */
+            /** @var CmfDbRecord $user */
             $user->begin()->_setFieldValue('password', $request->data('password'));
             if ($user->commit()) {
                 return cmfServiceJsonResponse()

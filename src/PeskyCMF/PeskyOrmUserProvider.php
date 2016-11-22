@@ -6,8 +6,7 @@ use Hash;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Contracts\Auth\UserProvider;
-use PeskyORM\DbObject;
-use PeskyORM\Exception\DbUtilsException;
+use PeskyORM\ORM\RecordInterface;
 
 class PeskyOrmUserProvider implements UserProvider {
 
@@ -22,11 +21,11 @@ class PeskyOrmUserProvider implements UserProvider {
      * Create a new database user provider.
      *
      * @param  string $dbObjectName
-     * @throws DbUtilsException
+     * @throws \InvalidArgumentException
      */
     public function __construct($dbObjectName) {
         if (empty($dbObjectName)) {
-            throw new DbUtilsException('PeskyOrmUserProvider received empty class name of DbObject');
+            throw new \InvalidArgumentException('PeskyOrmUserProvider received empty class name of DbObject');
         }
         $this->model = $dbObjectName;
     }
@@ -38,11 +37,11 @@ class PeskyOrmUserProvider implements UserProvider {
      * @return \Illuminate\Contracts\Auth\Authenticatable|null
      */
     public function retrieveById($identifier) {
-        if (empty($identifier) || intval($identifier) <= 0) {
+        if (empty($identifier) || (int)$identifier <= 0) {
             return null;
         }
-        /** @var DbObject $user */
-        $user = $this->createDbObject()->read($identifier);
+        /** @var RecordInterface $user */
+        $user = $this->createDbObject()->fromPrimaryKey($identifier);
         return $this->validateUser($user, null);
     }
 
@@ -54,26 +53,26 @@ class PeskyOrmUserProvider implements UserProvider {
      * @return \Illuminate\Contracts\Auth\Authenticatable|null
      */
     public function retrieveByToken($identifier, $token) {
-        /** @var DbObject|Authenticatable $dbObject */
+        /** @var RecordInterface|Authenticatable $dbObject */
         $dbObject = $this->createDbObject();
-        /** @var DbObject $user */
-        $user = $dbObject->find([
-            $dbObject->_getPkFieldName() => $identifier,
+        /** @var RecordInterface $user */
+        $user = $dbObject->fromDb([
+            $dbObject->getAuthIdentifierName() => $identifier,
             $dbObject->getRememberTokenName() => $token
         ]);
         return $this->validateUser($user, null);
     }
 
     /**
-     * @param DbObject $user
+     * @param RecordInterface $user
      * @param mixed $onFailReturn
-     * @return mixed|DbObject
+     * @return mixed|RecordInterface
      */
-    protected function validateUser(DbObject $user, $onFailReturn = null) {
+    protected function validateUser(RecordInterface $user, $onFailReturn = null) {
         if (
-            $user->exists()
-            && (!$user->_hasField('is_active') || $user->is_active)
-            && (!$user->_hasField('is_banned') || !$user->is_banned)
+            $user->existsInDb()
+            && (!$user->hasValue('is_active') || $user->getValue('is_active'))
+            && (!$user->hasValue('is_banned') || !$user->getValue('is_banned'))
         ) {
             return $user;
         }
@@ -86,10 +85,11 @@ class PeskyOrmUserProvider implements UserProvider {
      * @param  \Illuminate\Contracts\Auth\Authenticatable $user
      * @param  string $token
      * @return void
+     * @throws \BadMethodCallException
      */
     public function updateRememberToken(UserContract $user, $token) {
         $user->setRememberToken($token);
-        /** @var DbObject $user */
+        /** @var RecordInterface $user */
         $user->save();
     }
 
@@ -108,7 +108,7 @@ class PeskyOrmUserProvider implements UserProvider {
                 $conditions[$key] = $value;
             }
         }
-        $user = $this->createDbObject()->find($conditions);
+        $user = $this->createDbObject()->fromDb($conditions);
 
         return $this->validateUser($user, null);
     }
@@ -127,7 +127,7 @@ class PeskyOrmUserProvider implements UserProvider {
                     if (!Hash::check($value, $user->getAuthPassword())) {
                         return false;
                     }
-                } else if ($user->$fieldName != $value) {
+                } else if ($user->$fieldName !== $value) {
                     return false;
                 }
             }
@@ -136,13 +136,13 @@ class PeskyOrmUserProvider implements UserProvider {
     }
 
     /**
-     * Create a new instance of the model.
+     * Create a new instance of the db record.
      *
-     * @return DbObject
+     * @return RecordInterface
      */
     public function createDbObject() {
+        /** @var RecordInterface $class */
         $class = '\\' . ltrim($this->model, '\\');
-
-        return $class::create();
+        return new $class();
     }
 }

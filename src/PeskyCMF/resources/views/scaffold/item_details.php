@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var \PeskyCMF\Db\CmfDbTable $model
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
  * @var string $tableNameForRoutes
  * @var string $translationPrefix

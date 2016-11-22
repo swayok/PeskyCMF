@@ -3,8 +3,8 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbModel;
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfDbTable;
+use PeskyCMF\Db\CmfDbRecord;
 
 trait CacheHelpersTrait {
 
@@ -13,6 +13,11 @@ trait CacheHelpersTrait {
      * @param string|array $baseKey - use method name; array - will be jsoned and hashed
      * @param string|array|null $suffix
      * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     * @throws \RuntimeException
      */
     public function generateCacheKey($baseKey, $suffix = null) {
         if (is_array($baseKey)) {
@@ -20,11 +25,11 @@ trait CacheHelpersTrait {
             $baseKey = \Hash::make(json_encode($baseKey, JSON_UNESCAPED_UNICODE));
         }
         $key = get_class($this) . '->' . $baseKey;
-        if ($this instanceof CmfDbObject) {
-            $key .= '-' . $this->_getTableConfig()->getSchema();
-            $key .= '-id-' . $this->_getPkValue();
-        } else if ($this instanceof CmfDbModel) {
-            $key .= '-' . $this->getTableConfig()->getSchema();
+        if ($this instanceof CmfDbRecord) {
+            $key .= '-' . $this::getTableStructure()->getSchema();
+            $key .= '-id-' . $this->getPrimaryKeyValue();
+        } else if ($this instanceof CmfDbTable) {
+            $key .= '-' . $this::getTableStructure()->getSchema();
         }
         if (!empty($suffix)) {
             if (is_array($suffix)) {
@@ -44,6 +49,11 @@ trait CacheHelpersTrait {
      * @param string|array|null $cacheKeySuffix
      * @param bool $recache - true: update cache forcefully
      * @return mixed
+     * @throws \UnexpectedValueException
+     * @throws \RuntimeException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function cachedData($baseKey, $minutes, \Closure $dataCallback, $cacheKeySuffix = '', $recache = false) {
         $cacheKay = $this->generateCacheKey($baseKey, $cacheKeySuffix);
@@ -57,6 +67,11 @@ trait CacheHelpersTrait {
      * @param string|array $baseKey
      * @param string|array|null $cacheKeySuffix
      * @return bool
+     * @throws \UnexpectedValueException
+     * @throws \RuntimeException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function removeCachedData($baseKey, $cacheKeySuffix = '') {
         return \Cache::forget($this->generateCacheKey($baseKey, $cacheKeySuffix));
@@ -67,6 +82,11 @@ trait CacheHelpersTrait {
      * @param string|array|null $cacheKeySuffix
      * @param mixed $default
      * @return mixed
+     * @throws \UnexpectedValueException
+     * @throws \RuntimeException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function getDataFromCache($baseKey, $cacheKeySuffix = '', $default = null) {
         $cacheKay = $this->generateCacheKey($baseKey, $cacheKeySuffix);

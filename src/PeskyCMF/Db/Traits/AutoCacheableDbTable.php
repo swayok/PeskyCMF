@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Db\Traits;
 
-trait AutoCacheableDbModel {
+trait AutoCacheableDbTable {
 
     use CacheForDbSelects;
 

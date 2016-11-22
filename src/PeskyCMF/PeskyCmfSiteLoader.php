@@ -2,11 +2,13 @@
 
 namespace PeskyCMF;
 
+use Illuminate\Support\ServiceProvider;
 use LaravelSiteLoader\AppSiteLoader;
+use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Event\AdminAuthorised;
 use PeskyCMF\Listeners\AdminAuthorisedEventListener;
-use PeskyORM\DbModel;
+use PeskyORM\ORM\Table;
 use Swayok\Utils\File;
 
 abstract class PeskyCmfSiteLoader extends AppSiteLoader {
@@ -22,7 +24,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
      * @return CmfConfig
      */
     static public function getCmfConfig() {
-        if (empty(static::$cmfConfig)) {
+        if (static::$cmfConfig === null) {
             static::$cmfConfig = new static::$cmfConfigsClass;
         }
         return static::$cmfConfig;
@@ -43,7 +45,6 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         $this->configureSession();
         // custom configurations
         $this->configure();
-        $this->configurePublishes();
         $this->configureLocale();
         $this->loadRoutes();
         $this->includeFiles();
@@ -76,7 +77,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         $this->app->singleton(\PeskyCMF\Http\Request::class, function () {
             return new \PeskyCMF\Http\Request(request());
         });
-        $this->app->singleton(DbModel::class, function () {
+        $this->app->singleton(Table::class, function () {
             return CmfConfig::getInstance()->base_db_model_class();
         });
     }
@@ -84,8 +85,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     public function provides() {
         return [
             CmfConfig::class,
-            \PeskyCMF\Http\Request::class,
-            DbModel::class
+            Table::class
         ];
     }
 
@@ -121,8 +121,8 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         $this->provider->loadTranslationsFrom(static::getCmfConfig()->cmf_dictionaries_path(), 'cmf');
     }
 
-    protected function configurePublishes() {
-        $this->provider->publishes([
+    static public function configurePublishes(AppSitesServiceProvider $provider) {
+        $provider->publishes([
             // cmf
             __DIR__ . '/public/css' => public_path('packages/cmf/css'),
             __DIR__ . '/public/js' => public_path('packages/cmf/js'),
@@ -216,11 +216,11 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     }
 
     static public function getAllowedLocales() {
-        return static::$cmfConfig->locales();
+        return static::getCmfConfig()->locales();
     }
 
     static public function getLocaleSessionKey() {
-        return static::$cmfConfig->locale_session_key();
+        return static::getCmfConfig()->locale_session_key();
     }
 
 }
