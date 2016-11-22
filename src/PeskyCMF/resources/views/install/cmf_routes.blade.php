@@ -8,7 +8,7 @@ echo "<?php\n";
 
 Route::group(
     [
-        'prefix' => \App\{{ $sectionName }}\Config\{{ $sectionName }}Config::url_prefix(),
+        'prefix' => \App\{{ $sectionName }}\{{ $sectionName }}Config::url_prefix(),
         'namespace' => 'App\{{ $sectionName }}\Http\Controllers',
         'middleware' => [
             'web',

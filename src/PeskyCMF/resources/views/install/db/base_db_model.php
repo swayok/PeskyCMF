@@ -1,26 +1,38 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\Db;
+namespace App\<?php echo $dbClassesAppSubfolder ?>;
 
-use PeskyCMF\Db\CmfDbModel;
-use PeskyCMF\Db\Traits\CacheableDbModel;
-use PeskyORM\Db;
-use PeskyORM\DbExpr;
-use PeskyORM\Exception\DbUtilsException;
+use PeskyCMF\Db\CmfDbTable;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\Core\Utils;
+use PeskyORM\ORM\TableStructure;
+use Swayok\Utils\StringUtils;
 
-abstract class BaseDbModel extends CmfDbModel {
+abstract class AbstractTable extends CmfDbTable {
 
-    use CacheableDbModel;
+    /** @var null|string */
+    protected $recordClass = null;
+    /** @var int */
+    static private $currentTime;
 
-    static public function getRootNamespace() {
-        return __NAMESPACE__;
+    public function newRecord() {
+        if (!$this->recordClass) {
+            $class = new \ReflectionClass(get_called_class());
+            $this->recordClass = $class->getNamespaceName() . '\\'
+                . StringUtils::singularize(str_replace('Table', '', $class->getShortName()));
+        }
+        return new $this->recordClass;
     }
 
-    static private $currentTime = null;
+    public function getTableStructure() {
+        /** @var TableStructure $class */
+        $class = get_called_class() . 'Structure';
+        return $class::getInstance();
+    }
 
     public function getCurrentTime() {
-        if (empty(self::$currentTime)) {
-            self::$currentTime = strtotime($this->expression(self::getCurrentTimeDbExpr()));
+        if (self::$currentTime === null) {
+            self::$currentTime = strtotime(static::selectValue(static::getCurrentTimeDbExpr()));
         }
         return self::$currentTime;
     }
@@ -31,13 +43,9 @@ abstract class BaseDbModel extends CmfDbModel {
 
     static public function _getCurrentTime() {
         if (empty(self::$currentTime)) {
-            if (!empty(self::$dataSources['default'])) {
-                $ds = self::$dataSources['default'];
-                $query = $ds->replaceQuotes('SELECT ' . self::getCurrentTimeDbExpr()->get());
-                self::$currentTime = strtotime(Db::processRecords($ds->query($query), Db::FETCH_VALUE));
-            } else {
-                throw new DbUtilsException('There is no DataSource callde [default]');
-            }
+            $ds = self::getConnection();
+            $query = 'SELECT ' . $ds->quoteDbExpr(static::getCurrentTimeDbExpr());
+            self::$currentTime = strtotime($ds->query($query, Utils::FETCH_VALUE));
         }
         return self::$currentTime;
     }

@@ -78,7 +78,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             return new \PeskyCMF\Http\Request(request());
         });
         $this->app->singleton(Table::class, function () {
-            return CmfConfig::getInstance()->base_db_model_class();
+            return CmfConfig::getInstance()->base_db_table_class();
         });
     }
 
@@ -191,7 +191,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     }
 
     protected function loadCmfRoutes() {
-        foreach (static::getCmfConfig()->cmf_routes_cofig_files() as $filePath) {
+        foreach (static::getCmfConfig()->cmf_routes_config_files() as $filePath) {
             require_once $filePath;
         }
     }

@@ -8,8 +8,8 @@ trait IdColumn {
 
     private function id() {
         return Column::create(Column::TYPE_INT)
-            ->itIsPrimaryKey()
-            ->valueIsNotNullable()
+            ->primaryKey()
+            ->disallowsNullValues()
             ->convertsEmptyStringToNull();
     }
 }

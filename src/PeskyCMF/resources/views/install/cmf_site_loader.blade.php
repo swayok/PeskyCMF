@@ -5,9 +5,9 @@
 echo "<?php\n";
 ?>
 
-namespace App\{{ $sectionName }};
+namespace App\SiteLoaders;
 
-use App\{{ $sectionName }}\Config\{{ $sectionName }}Config;
+use App\{{ $sectionName }}\{{ $sectionName }}Config;
 use PeskyCMF\PeskyCmfSiteLoader;
 
 class {{ $sectionName }}SiteLoader extends PeskyCmfSiteLoader {

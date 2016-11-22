@@ -1,27 +1,24 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\Db\Admin;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
 
-use App\Db\BaseDbObject;
+use PeskyCMF\Db\CmfDbRecord;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use PeskyCMF\Db\Traits\Authenticatable;
-use PeskyCMF\Db\Traits\UserDataSavingHelper;
 
 /**
- * @package App\DbObject
- *
  * @property-read int       $id
  * @property-read string    $email
  * @property-read string    $password
  * @property-read string    $name
  * @property-read string    $created_at
- * @property-read string    $created_at_date
- * @property-read string    $created_at_time
- * @property-read string    $created_at_ts
+ * @property-read string    $created_at_as_date
+ * @property-read string    $created_at_as_time
+ * @property-read string    $created_at_as_unix_ts
  * @property-read string    $updated_at
- * @property-read string    $updated_at_date
- * @property-read string    $updated_at_time
- * @property-read string    $updated_at_ts
+ * @property-read string    $updated_at_as_date
+ * @property-read string    $updated_at_as_time
+ * @property-read string    $updated_at_as_unix_ts
  * @property-read string    $remember_token
  * @property-read bool      $is_superadmin
  * @property-read bool      $is_active
@@ -43,9 +40,12 @@ use PeskyCMF\Db\Traits\UserDataSavingHelper;
  * @method $this    setRole($value)
  *
  */
-class Admin extends BaseDbObject implements AuthenticatableContract {
+class Admin extends CmfDbRecord implements AuthenticatableContract {
 
-    use Authenticatable,
-        UserDataSavingHelper;
+    use Authenticatable;
+
+    static public function getTable() {
+        return AdminsTable::getInstance();
+    }
 
 }

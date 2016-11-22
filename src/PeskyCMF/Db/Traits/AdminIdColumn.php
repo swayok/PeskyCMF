@@ -10,7 +10,6 @@ trait AdminIdColumn {
 
     private function admin_id() {
         return Column::create(Column::TYPE_INT)
-            ->setIsNullable(true)
             ->convertsEmptyStringToNull();
     }
 

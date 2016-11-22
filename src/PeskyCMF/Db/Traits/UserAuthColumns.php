@@ -9,7 +9,7 @@ trait UserAuthColumns {
 
     private function password() {
         return Column::create(Column::TYPE_PASSWORD)
-            ->setIsNullable(false)
+            ->disallowsNullValues()
             ->setValuePreprocessor(function ($value, $isDbValue, Column $column) {
                 $value = DefaultColumnClosures::valuePreprocessor($value, $isDbValue, $column);
                 if ($isDbValue) {
@@ -21,15 +21,14 @@ trait UserAuthColumns {
                     return $value;
                 }
             })
-            ->itIsHiddenFromToArray();
+            ->privateValue();
     }
 
     private function remember_token() {
         return Column::create(Column::TYPE_STRING)
-            ->setIsNullable(true)
+            ->allowsNullValues()
             ->convertsEmptyStringToNull()
-            ->setDefaultValue(null)
-            ->itIsHiddenFromToArray();
+            ->privateValue();
     }
 
 }

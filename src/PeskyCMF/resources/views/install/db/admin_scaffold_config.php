@@ -1,6 +1,6 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\Db\Admin;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
@@ -9,9 +9,9 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormFieldConfig;
 use PeskyCMF\Scaffold\Form\InputRendererConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 
-class AdminScaffoldConfig extends ScaffoldSectionConfig {
+class AdminsScaffoldConfig extends ScaffoldSectionConfig {
 
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
@@ -30,7 +30,7 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
                 'is_superadmin',
                 'role' => DataGridFieldConfig::create()
                     ->setIsSortable(true)
-                    ->setValueConverter(function ($value, DbColumnConfig $columnConfig, $record) {
+                    ->setValueConverter(function ($value, Column $columnConfig, $record) {
                         return CmfConfig::transCustom(".admins.role.$value");
                     }),
                 'parent_id' => DataGridFieldConfig::create()
@@ -47,12 +47,12 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
                 'email',
                 'name',
                 'language' => ItemDetailsFieldConfig::create()
-                    ->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
+                    ->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         return CmfConfig::transCustom(".language.$value");
                     }),
                 'is_active',
                 'role' => ItemDetailsFieldConfig::create()
-                    ->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
+                    ->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         return CmfConfig::transCustom(".admins.role.$value");
                     }),
                 'is_superadmin' => ItemDetailsFieldConfig::create(),
@@ -107,7 +107,7 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
                 'parent_id' => FormFieldConfig::create()
                     ->setRenderer(function () {
                         return InputRendererConfig::create('cmf::input/hidden');
-                    })->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
+                    })->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         if (empty($record['id']) && empty($value)) {
                             return \Auth::guard()->user()->id;
                         } else {
@@ -122,14 +122,14 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
                 'is_superadmin' => 'boolean',
             ])
             ->addValidatorsForCreate([
-                'email' => 'required|email|min:4|max:100|unique:' . AdminTableConfig::TABLE_NAME . ',email',
-                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . AdminTableConfig::TABLE_NAME . ',login',
+                'email' => 'required|email|min:4|max:100|unique:' . AdminsTableStructure::getTableName() . ',email',
+                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . AdminsTableStructure::getTableName() . ',login',
                 'password' => 'required|min:6',
             ])
             ->addValidatorsForEdit([
                 'id' => FormConfig::VALIDATOR_FOR_ID,
-                'email' => 'required|email|min:4|max:100|unique:' . AdminTableConfig::TABLE_NAME . ',email,{{id}},id',
-                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . AdminTableConfig::TABLE_NAME . ',login,{{id}},id',
+                'email' => 'required|email|min:4|max:100|unique:' . AdminsTableStructure::getTableName() . ',email,{{id}},id',
+                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . AdminsTableStructure::getTableName() . ',login,{{id}},id',
                 'password' => 'min:6',
             ])
             ;

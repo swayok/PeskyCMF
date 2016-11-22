@@ -11,7 +11,7 @@ $lowercasedSectionName = snake_case($sectionName);
 echo "<?php\n";
 ?>
 
-namespace App\{{ $sectionName }}\Config;
+namespace App\{{ $sectionName }};
 
 use PeskyCMF\Config\CmfConfig;
 
@@ -36,12 +36,6 @@ class {{ $sectionName }}Config extends CmfConfig {
         return '{{ $lowercasedSectionName }}.';
     }
 
-    static public function routes_config_files() {
-        return [
-            __DIR__ . '/{{ $lowercasedSectionName }}.routes.php'
-        ];
-    }
-
     static public function layout_css_includes() {
         return [
             '/packages/{{ $lowercasedSectionName }}/css/{{ $lowercasedSectionName }}.custom.css'
@@ -55,7 +49,7 @@ class {{ $sectionName }}Config extends CmfConfig {
     }
 
     static public function base_db_model_class() {
-        return \App\{{ str_replace('/', '\\', $dbClassesAppSubfolder) }}\BaseDbModel::class;
+        return \App\{{ str_replace('/', '\\', $dbClassesAppSubfolder) }}\AbstractTable::class;
     }
 
     /**

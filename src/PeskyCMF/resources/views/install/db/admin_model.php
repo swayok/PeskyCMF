@@ -1,12 +1,29 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\Db\Admin;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
 
-use App\Db\BaseDbModel;
+use App\<?php echo $dbClassesAppSubfolder ?>\AbstractTable;
 
-class AdminModel extends BaseDbModel {
+class AdminsTable extends AbstractTable {
 
-    protected $orderField = 'id';
-    protected $orderDirection = self::ORDER_ASCENDING;
-    protected $alias = 'Admin';
+    /**
+     * @return AdminsTableStructure
+     */
+    public function getTableStructure() {
+        return AdminsTableStructure::getInstance();
+    }
+
+    /**
+     * @return Admin
+     */
+    public function newRecord() {
+        return Admin::newEmptyRecord();
+    }
+
+    /**
+     * @return string
+     */
+    public function getTableAlias() {
+        return 'Admins';
+    }
 }

@@ -8,6 +8,10 @@ use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyORM\ORM\ClassBuilder;
+use PeskyORM\ORM\Table;
+use PeskyORM\ORM\TableInterface;
+use Swayok\Utils\StringUtils;
 
 class CmfConfig extends ConfigsContainer {
 
@@ -19,7 +23,7 @@ class CmfConfig extends ConfigsContainer {
         }
     }
 
-    static public function cmf_routes_cofig_files() {
+    static public function cmf_routes_config_files() {
         return [
             __DIR__ . '/cmf.routes.php'
         ];
@@ -36,7 +40,7 @@ class CmfConfig extends ConfigsContainer {
      * Note: you must overwrite this to avoid problems
      * @return string
      */
-    static public function base_db_model_class() {
+    static public function base_db_table_class() {
         return CmfDbTable::class;
     }
 
@@ -53,6 +57,7 @@ class CmfConfig extends ConfigsContainer {
     /**
      * Session configs
      * @return array
+     * @throws \BadMethodCallException
      */
     static public function session_configs() {
         $config = [
@@ -129,7 +134,7 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function user_object_class() {
         return call_user_func(
-            [static::base_db_model_class(), 'getFullDbObjectClass'],
+            [static::base_db_table_class(), 'getFullDbObjectClass'],
             static::users_table_name()
         );
     }
@@ -175,6 +180,7 @@ class CmfConfig extends ConfigsContainer {
     /**
      * Email address used in "From" header for emails sent to users
      * @return string
+     * @throws \UnexpectedValueException
      */
     static public function system_email_address() {
         return 'noreply@' . static::domain();
@@ -183,6 +189,7 @@ class CmfConfig extends ConfigsContainer {
     /**
      * Domain name
      * @return string
+     * @throws \UnexpectedValueException
      */
     static public function domain() {
         return request()->getHost();
@@ -607,27 +614,25 @@ class CmfConfig extends ConfigsContainer {
 
     /**
      * Get ScaffoldSectionConfig instance
-     * @param CmfDbTable $model - a model to be used in ScaffoldSectionConfig
-     * @param string $tableName - table name passed via route parameter, may differ from $model->getTableName()
+     * @param CmfDbTable $table - a model to be used in ScaffoldSectionConfig
+     * @param string $tableNameInRoute - table name passed via route parameter, may differ from $model->getTableName()
      *      and added here to be used in child configs when you need to use scaffolds with fake table names.
      *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
      * @return ScaffoldSectionConfig
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    static public function getScaffoldConfig(CmfDbTable $model, $tableName) {
-        // $tableName is no tused by default and added here to be used in child configs
-        $className = $model->getNamespace() . $model->getAlias() . static::scaffold_config_class_suffix();
-        return new $className($model);
-    }
-
-    /**
-     * Get scaffold config class name only by table name avoiding model class usage
-     * Used by MakeDbClasses console command
-     * @param $tableName
-     * @return string
-     */
-    static public function getScaffoldConfigNameByTableName($tableName) {
-        $objectName = call_user_func([static::base_db_model_class(), 'getObjectNameByTableName'], $tableName);
-        return $objectName . CmfConfig::getInstance()->scaffold_config_class_suffix();
+    static public function getScaffoldConfig(CmfDbTable $table, $tableNameInRoute) {
+        /** @var ClassBuilder $builderClass */
+        $builderClass = static::getDbClassesBuilderClass();
+        $className = preg_replace(
+            '%\\' . $builderClass::makeTableClassName('([A-Za-z0-9]+?)') . '$%',
+            '$1' . static::scaffold_config_class_suffix(),
+            get_class($table)
+        );
+        return new $className($table);
     }
 
     /**
@@ -635,23 +640,47 @@ class CmfConfig extends ConfigsContainer {
      * Note: can be ovewritted to allow usage of fake tables in resources routes
      * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
      * @param string $tableName
-     * @return CmfDbTable
-     * @throws \PeskyORM\Exception\DbUtilsException
+     * @return CmfDbTable|TableInterface
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     static public function getModelByTableName($tableName) {
-        return call_user_func(
-            [static::getInstance()->base_db_model_class(), 'getModelByTableName'],
-            $tableName
-        );
+        /** @var ClassBuilder $builderClass */
+        $builderClass = static::getDbClassesBuilderClass();
+        /** @var Table $class */
+        $class = static::getDbClassesNamespaceForTable($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
+        return $class::getInstance();
+    }
+
+    /**
+     * @param string $tableName
+     * @return string
+     */
+    static public function getDbClassesNamespaceForTable($tableName) {
+        return static::base_db_table_class() . '\\' . StringUtils::classify($tableName);
     }
 
     /**
      * Shortcut to static::getScaffoldConfig()
      * @param string $tableName
      * @return ScaffoldSectionConfig
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     static public function getScaffoldConfigByTableName($tableName) {
         return static::getScaffoldConfig(static::getModelByTableName($tableName), $tableName);
+    }
+
+    /**
+     * Class that knows how to build db classes (table, structure and record)
+     * @return string
+     */
+    static public function getDbClassesBuilderClass() {
+        return ClassBuilder::class;
     }
 
 }

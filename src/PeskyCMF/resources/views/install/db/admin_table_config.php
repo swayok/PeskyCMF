@@ -1,21 +1,17 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\Db\Admin;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyCMF\Db\Traits\UserAuthColumns;
-use PeskyORM\DbColumnConfig;
-use PeskyORM\DbColumnConfig\EnumColumnConfig;
-use PeskyORM\DbRelationConfig;
-use PeskyORM\DbTableConfig;
+use PeskyORM\ORM\Column;
+use PeskyORM\ORM\Relation;
+use PeskyORM\ORM\TableStructure;
 
-class AdminTableConfig extends DbTableConfig {
-
-    const TABLE_NAME = 'admins';
-    protected $name = self::TABLE_NAME;
+class AdminsTableStructure extends TableStructure {
 
     use IdColumn,
         TimestampColumns,
@@ -23,61 +19,58 @@ class AdminTableConfig extends DbTableConfig {
         UserAuthColumns
         ;
 
+    /**
+     * @return string
+     */
+    static public function getTableName() {
+        return 'admins';
+    }
+
     private function parent_id() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_INT)
-            ->setIsRequired(false)
-            ->setIsNullable(true);
+        return Column::create(Column::TYPE_INT)
+            ->convertsEmptyStringToNull();
     }
 
     private function email() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_EMAIL)
-            ->setIsNullable(false)
-            ->setIsRequired(true)
-            ->setTrimValue(true)
-            ->setIsUnique(true);
+        return Column::create(Column::TYPE_EMAIL)
+            ->disallowsNullValues()
+            ->trimsValue()
+            ->uniqueValues();
     }
 
     private function name() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_STRING)
-            ->setIsNullable(false)
-            ->setIsRequired(false)
-            ->setMaxLength(200);
+        return Column::create(Column::TYPE_STRING)
+            ->disallowsNullValues();
     }
 
     private function ip() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_IPV4_ADDRESS)
-            ->setIsRequired(false)
-            ->setIsNullable(false);
+        return Column::create(Column::TYPE_IPV4_ADDRESS)
+            ->disallowsNullValues();
     }
 
     private function is_superadmin() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_BOOL)
-            ->setIsNullable(false)
-            ->setIsRequired(false)
+        return Column::create(Column::TYPE_BOOL)
+            ->disallowsNullValues()
             ->setDefaultValue(false);
     }
 
     private function role() {
-        return EnumColumnConfig::create()
+        return Column::create(Column::TYPE_ENUM)
             ->setAllowedValues(CmfConfig::getInstance()->roles_list())
-            ->setIsNullable(false)
-            ->setIsRequired(true)
+            ->disallowsNullValues()
             ->setDefaultValue(CmfConfig::getInstance()->default_role());
     }
 
     private function language() {
-        return EnumColumnConfig::create()
+        return Column::create(Column::TYPE_ENUM)
             ->setAllowedValues(CmfConfig::getInstance()->locales())
-            ->setIsRequired(true)
-            ->setIsNullable(false)
-            ->setMaxLength(2)
-            ->setMinLength(2)
+            ->disallowsNullValues()
             ->setDefaultValue(CmfConfig::getInstance()->default_locale());
     }
 
     private function ParentAdmin() {
-        return DbRelationConfig::create($this, 'parent_id', DbRelationConfig::BELONGS_TO, self::TABLE_NAME, 'id')
-            ->setDisplayField(CmfConfig::getInstance()->user_login_column());
+        return Relation::create('parent_id', Relation::BELONGS_TO, __CLASS__, 'id')
+            ->setDisplayColumnName(CmfConfig::getInstance()->user_login_column());
     }
 
 }
