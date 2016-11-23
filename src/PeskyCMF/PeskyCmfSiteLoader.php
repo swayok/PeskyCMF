@@ -3,6 +3,7 @@
 namespace PeskyCMF;
 
 use LaravelSiteLoader\AppSiteLoader;
+use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Event\AdminAuthorised;
 use PeskyCMF\Listeners\AdminAuthorisedEventListener;
@@ -43,9 +44,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         $this->configureSession();
         // custom configurations
         $this->configure();
-        $this->configurePublishes();
         $this->configureLocale();
-        $this->loadRoutes();
         $this->includeFiles();
         $this->storeConfigsInLaravelContainer();
 
@@ -121,8 +120,8 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         $this->provider->loadTranslationsFrom(static::getCmfConfig()->cmf_dictionaries_path(), 'cmf');
     }
 
-    protected function configurePublishes() {
-        $this->provider->publishes([
+    static public function configurePublishes(AppSitesServiceProvider $provider) {
+        $provider->publishes([
             // cmf
             __DIR__ . '/public/css' => public_path('packages/cmf/css'),
             __DIR__ . '/public/js' => public_path('packages/cmf/js'),
@@ -179,9 +178,33 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         ], 'public');
     }
 
-    protected function loadRoutes() {
-        $this->loadCustomRoutes();
-        $this->loadCmfRoutes();
+    static public function loadRoutes() {
+        $groupConfig = static::getRoutesGroupConfig();
+        $files = static::getCmfConfig()->routes_config_files();
+        if (count($files) > 0) {
+            \Route::group($groupConfig, function () use ($files) {
+                foreach ($files as $filePath) {
+                    include $filePath;
+                }
+            });
+        }
+        $files = static::getCmfConfig()->cmf_routes_cofig_files();
+        if (count($files) > 0) {
+            unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
+            \Route::group($groupConfig, function () use ($files) {
+                foreach ($files as $filePath) {
+                    include $filePath;
+                }
+            });
+        }
+    }
+
+    static protected function getRoutesGroupConfig() {
+        return [
+            'prefix' => static::getCmfConfig()->url_prefix(),
+            //'namespace' => '\App\Section\Http\Controllers',
+            'middleware' => ['web'],
+        ];
     }
 
     protected function loadCustomRoutes() {
