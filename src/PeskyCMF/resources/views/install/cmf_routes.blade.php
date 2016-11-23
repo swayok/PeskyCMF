@@ -8,10 +8,7 @@ echo "<?php\n";
 
 Route::group(
     [
-        'prefix' => \App\{{ $sectionName }}\{{ $sectionName }}Config::url_prefix(),
-        'namespace' => 'App\{{ $sectionName }}\Http\Controllers',
         'middleware' => [
-            'web',
             PeskyCMF\Http\Middleware\ValidateAdmin::class
         ]
     ],
@@ -20,7 +17,7 @@ Route::group(
         Route::get('/', [
             'as' => 'cmf_start_page',
             function () {
-                return Redirect::route('cmf_page', ['dashboard']);
+                return routeToCmfPage('dashboard');
             }
         ]);
 

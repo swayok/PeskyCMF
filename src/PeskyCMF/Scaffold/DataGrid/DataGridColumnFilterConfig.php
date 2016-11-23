@@ -302,8 +302,8 @@ class DataGridColumnFilterConfig {
         switch ($type) {
             case static::TYPE_BOOL:
                 $this->setAllowedValues([
-                    't' => CmfConfig::transBase('.datagrid.filter.bool.yes'),
-                    'f' => CmfConfig::transBase('.datagrid.filter.bool.no'),
+                    't' => cmfTransGeneral('.datagrid.filter.bool.yes'),
+                    'f' => cmfTransGeneral('.datagrid.filter.bool.no'),
                 ]);
                 break;
             case static::TYPE_TIME:

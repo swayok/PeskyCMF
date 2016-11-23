@@ -279,7 +279,7 @@ abstract class ScaffoldFieldConfig {
             throw new ScaffoldFieldException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
         if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getForeignColumn()])) {
-            return CmfConfig::transBase('.item_details.field.no_relation');
+            return cmfTransGeneral('.item_details.field.no_relation');
         } else {
             if (empty($linkLabel)) {
                 $displayField = $relationConfig->getDisplayField();
@@ -289,7 +289,7 @@ abstract class ScaffoldFieldConfig {
                 $linkLabel = $record[$relationAlias][$displayField];
             }
             return Tag::a($linkLabel)
-                ->setHref(route('cmf_item_details', [$relationConfig->getForeignTable(), $record[$columnConfig->getName()]]))
+                ->setHref(routeToCmfItemDetails($relationConfig->getForeignTable(), $record[$columnConfig->getName()]))
                 ->build();
         }
     }

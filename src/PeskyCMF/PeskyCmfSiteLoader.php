@@ -2,7 +2,6 @@
 
 namespace PeskyCMF;
 
-use Illuminate\Support\ServiceProvider;
 use LaravelSiteLoader\AppSiteLoader;
 use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\Config\CmfConfig;
@@ -46,7 +45,6 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         // custom configurations
         $this->configure();
         $this->configureLocale();
-        $this->loadRoutes();
         $this->includeFiles();
         $this->storeConfigsInLaravelContainer();
 
@@ -179,21 +177,33 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         ], 'public');
     }
 
-    protected function loadRoutes() {
-        $this->loadCustomRoutes();
-        $this->loadCmfRoutes();
-    }
-
-    protected function loadCustomRoutes() {
-        foreach (static::getCmfConfig()->routes_config_files() as $filePath) {
-            require_once $filePath;
+    static public function loadRoutes() {
+        $groupConfig = static::getRoutesGroupConfig();
+        $files = static::getCmfConfig()->routes_config_files();
+        if (count($files) > 0) {
+            \Route::group($groupConfig, function () use ($files) {
+                foreach ($files as $filePath) {
+                    include $filePath;
+                }
+            });
+        }
+        $files = static::getCmfConfig()->cmf_routes_config_files();
+        if (count($files) > 0) {
+            unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
+            \Route::group($groupConfig, function () use ($files) {
+                foreach ($files as $filePath) {
+                    include $filePath;
+                }
+            });
         }
     }
 
-    protected function loadCmfRoutes() {
-        foreach (static::getCmfConfig()->cmf_routes_config_files() as $filePath) {
-            require_once $filePath;
-        }
+    static protected function getRoutesGroupConfig() {
+        return [
+            'prefix' => static::getCmfConfig()->url_prefix(),
+            //'namespace' => '\App\Section\Http\Controllers',
+            'middleware' => ['web'],
+        ];
     }
 
     protected function configureEventListeners() {

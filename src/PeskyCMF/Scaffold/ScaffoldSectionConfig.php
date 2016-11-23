@@ -221,7 +221,7 @@ abstract class ScaffoldSectionConfig {
      */
     public function getLocalizationBasePath($defaultLocalizationKey) {
         $key = $this->viewsLocalizationKey ?: $defaultLocalizationKey;
-        return CmfConfig::getInstance()->custom_dictionary_name() . '.' . $key;
+        return '.' . $key;
     }
 
 }

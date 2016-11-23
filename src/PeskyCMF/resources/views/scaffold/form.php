@@ -16,7 +16,7 @@ $else = '{{??}}';
 $endIf = '{{?}}';
 $printPk = "{{= it.{$pkColName} }}";
 
-$backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false);
+$backUrl = routeToCmfItemsTable('cmf_items_table', $tableNameForRoutes);
 ?>
 
 <?php View::startSection('scaffold-form'); ?>
@@ -52,7 +52,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
         <?php
             foreach ($formConfig->getFields() as $inputConfig) {
                 if (!$inputConfig->hasLabel()) {
-                    $inputConfig->setLabel(trans("$translationPrefix.form.field.{$inputConfig->getName()}"));
+                    $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.field.{$inputConfig->getName()}"));
                 }
                 try {
                     $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
@@ -79,17 +79,14 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
             <div class="row">
                 <div class="col-xs-3">
                     <a class="btn btn-default" href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
-                        <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.cancel'); ?>
+                        <?php echo cmfTransGeneral('.form.toolbar.cancel'); ?>
                     </a>
                 </div>
                 <div class="col-xs-6 text-center">
                 <?php echo $ifEdit; ?>
                     <?php if ($formConfig->isCreateAllowed()) : ?>
-                        <?php
-                            $createUrl = route('cmf_item_add_form', [$tableNameForRoutes]);
-                        ?>
-                        <a class="btn btn-primary" href="<?php echo $createUrl; ?>">
-                            <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.create'); ?>
+                        <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
+                            <?php echo cmfTransGeneral('.form.toolbar.create'); ?>
                         </a>
                     <?php endif; ?>
                     <?php if ($formConfig->isDeleteAllowed()) : ?>
@@ -103,8 +100,8 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                         {{? !!it.___delete_allowed }}
                         <a class="btn btn-danger" href="#"
                         data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
-                        data-confirm="<?php echo \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'); ?>">
-                            <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.delete'); ?>
+                        data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>">
+                            <?php echo cmfTransGeneral('.form.toolbar.delete'); ?>
                         </a>
                         {{?}}
                     <?php endif; ?>
@@ -112,7 +109,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                 </div>
                 <div class="col-xs-3 text-right">
                     <button type="submit" class="btn btn-success">
-                        <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?>
+                        <?php echo cmfTransGeneral('.form.toolbar.submit'); ?>
                     </button>
                 </div>
             </div>
@@ -132,8 +129,8 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
 
 <script type="text/html" id="item-form-tpl">
     <?php echo view('cmf::ui.default_page_header', [
-        'header' => $ifEdit . trans("$translationPrefix.form.header_edit")
-                    . $else . trans("$translationPrefix.form.header_create")
+        'header' => $ifEdit . cmfTransCustom("$translationPrefix.form.header_edit")
+                    . $else . cmfTransCustom("$translationPrefix.form.header_create")
                     . $endIf,
         'defaultBackUrl' => $backUrl,
     ])->render(); ?>

@@ -88,7 +88,7 @@ class DataGridFieldConfig extends ScaffoldFieldConfig {
                                 $value = (bool)$value[$this->getName()];
                             }
                         }
-                        return CmfConfig::transBase('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
+                        return cmfTransGeneral('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
                     };
             }
         }

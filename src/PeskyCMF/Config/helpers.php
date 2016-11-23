@@ -22,6 +22,125 @@ if (!function_exists('routeTpl')) {
     }
 }
 
+if (!function_exists('routeToCmfPage')) {
+    /**
+     * @param string $pageId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @return mixed
+     */
+    function routeToCmfPage($pageId, array $queryArgs = [], $absolute = false) {
+        return route('cmf_page', array_merge(['page' => $pageId], $queryArgs), $absolute);
+    }
+}
+
+if (!function_exists('routeToCmfItemsTable')) {
+    /**
+     * @param string $tableName
+     * @param array $filters
+     * @param bool $absolute
+     * @return mixed
+     */
+    function routeToCmfItemsTable($tableName, array $filters = [], $absolute = false) {
+        // todo: implement filters processing for route
+        return route('cmf_items_table', array_merge(['table_name' => $tableName], $filters), $absolute);
+    }
+}
+
+if (!function_exists('routeToCmfItemAddForm')) {
+    /**
+     * @param string $tableName
+     * @param bool $absolute
+     * @return mixed
+     */
+    function routeToCmfItemAddForm($tableName, $absolute = false) {
+        return route('cmf_item_add_form', ['table_name' => $tableName], $absolute);
+    }
+}
+
+if (!function_exists('routeToCmfItemEditForm')) {
+    /**
+     * @param string $tableName
+     * @param int|string $itemId
+     * @param bool $absolute
+     * @return mixed
+     */
+    function routeToCmfItemEditForm($tableName, $itemId, $absolute = false) {
+        return route('cmf_item_edit_form', ['table_name' => $tableName, 'id' => $itemId], $absolute);
+    }
+}
+
+if (!function_exists('routeToCmfItemDetails')) {
+    /**
+     * @param string $tableName
+     * @param int|string $itemId
+     * @param bool $absolute
+     * @return mixed
+     */
+    function routeToCmfItemDetails($tableName, $itemId, $absolute = false) {
+        return route('cmf_item_details', ['table_name' => $tableName, 'id' => $itemId], $absolute);
+    }
+}
+
+if (!function_exists('routeToCmfItemCustomPage')) {
+    /**
+     * @param string $tableName
+     * @param int|string $itemId
+     * @param string $pageId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @return mixed
+     */
+    function routeToCmfItemCustomPage($tableName, $itemId, $pageId, array $queryArgs = [], $absolute = false) {
+        return route(
+            'cmf_item_custom_page',
+            array_merge(
+                ['table_name' => $tableName, 'id' => $itemId, 'page' => $pageId],
+                $queryArgs
+            ),
+            $absolute
+        );
+    }
+}
+
+if (!function_exists('transChoiceRu')) {
+    function transChoiceRu($id, $number, array $parameters = [], $domain = 'messages', $locale = null) {
+        $trans = \Swayok\Utils\StringUtils::pluralizeRu($number, trans($id, [], $domain, $locale));
+        if (!empty($parameters)) {
+            $trans = \Swayok\Utils\StringUtils::insert($trans, $parameters, ['before' => ':']);
+        }
+        return $trans;
+    }
+}
+
+if (!function_exists('cmfTransGeneral')) {
+
+    /**
+     * @param $path - must strat with '.'
+     * @param array $parameters
+     * @param string $domain
+     * @param null|string $locale
+     * @return string
+     */
+    function cmfTransGeneral($path, array $parameters = [], $domain = 'messages', $locale = null) {
+        return \PeskyCMF\Config\CmfConfig::transGeneral($path, $parameters, $domain, $locale);
+    }
+}
+
+if (!function_exists('cmfTransCustom')) {
+
+    /**
+     * @param $path - must strat with '.'
+     * @param array $parameters
+     * @param string $domain
+     * @param null|string $locale
+     * @return string
+     */
+    function cmfTransCustom($path, array $parameters = [], $domain = 'messages', $locale = null) {
+        return \PeskyCMF\Config\CmfConfig::transCustom($path, $parameters, $domain, $locale);
+    }
+}
+
 if (!function_exists('cmfServiceJsonResponse')) {
     /**
      * @param int $httpCode
@@ -42,7 +161,7 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
      */
     function cmfJsonResponseForValidationErrors(array $errors = [], $message = null) {
         if (empty($message)) {
-            $message = \PeskyCMF\Config\CmfConfig::transBase('.form.validation_errors');
+            $message = cmfTransGeneral('.form.validation_errors');
         }
         return cmfServiceJsonResponse(\PeskyCMF\HttpCode::INVALID)
             ->setErrors($errors, $message);
@@ -57,7 +176,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
      */
     function cmfJsonResponseForHttp404($fallbackUrl = null, $message = null) {
         if (empty($message)) {
-            $message = \PeskyCMF\Config\CmfConfig::transBase('.error.http404');
+            $message = cmfTransGeneral('.error.http404');
         }
         if (empty($fallbackUrl)) {
             $fallbackUrl = route('cmf_start_page');

@@ -57,7 +57,7 @@ trait InjectsDbObjects {
      * Abort with HTTP code 404
      */
     protected function sendRecordNotFoundResponse() {
-        abort(HttpCode::NOT_FOUND, CmfConfig::transBase('.error.db_record_not_exists'));
+        abort(HttpCode::NOT_FOUND, cmfTransGeneral('.error.db_record_not_exists'));
     }
 
     /**

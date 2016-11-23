@@ -31,7 +31,7 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
                 'role' => DataGridFieldConfig::create()
                     ->setIsSortable(true)
                     ->setValueConverter(function ($value, Column $columnConfig, $record) {
-                        return CmfConfig::transCustom(".admins.role.$value");
+                        return cmfTransCustom(".admins.role.$value");
                     }),
                 'parent_id' => DataGridFieldConfig::create()
                     ->setType(ItemDetailsFieldConfig::TYPE_LINK),
@@ -48,12 +48,12 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
                 'name',
                 'language' => ItemDetailsFieldConfig::create()
                     ->setValueConverter(function ($value, Column $columnConfig, array $record) {
-                        return CmfConfig::transCustom(".language.$value");
+                        return cmfTransCustom(".language.$value");
                     }),
                 'is_active',
                 'role' => ItemDetailsFieldConfig::create()
                     ->setValueConverter(function ($value, Column $columnConfig, array $record) {
-                        return CmfConfig::transCustom(".admins.role.$value");
+                        return cmfTransCustom(".admins.role.$value");
                     }),
                 'is_superadmin' => ItemDetailsFieldConfig::create(),
                 'parent_id' => ItemDetailsFieldConfig::create()
@@ -80,7 +80,7 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
                     ->setOptions(function () {
                         $options = array();
                         foreach (CmfConfig::getInstance()->locales() as $lang) {
-                            $options[$lang] = CmfConfig::transCustom(".language.$lang");
+                            $options[$lang] = cmfTransCustom(".language.$lang");
                         }
                         return $options;
                     })
@@ -95,7 +95,7 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
                     ->setOptions(function () {
                         $options = array();
                         foreach (CmfConfig::getInstance()->roles_list() as $roleId) {
-                            $options[$roleId] = CmfConfig::transCustom(".admins.role.$roleId");
+                            $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
                         }
                         return $options;
                     })

@@ -20,7 +20,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
     <div class="ib">
         <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
             {{? !!it.<?php echo $fieldConfig->getName(); ?> }}checked{{?}}
-            data-on-text="<?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.field.bool.yes') ?>"
-            data-off-text="<?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.field.bool.no') ?>">
+            data-on-text="<?php echo cmfTransGeneral('.form.field.bool.yes') ?>"
+            data-off-text="<?php echo cmfTransGeneral('.form.field.bool.no') ?>">
     </div>
 </div>

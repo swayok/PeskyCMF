@@ -58,7 +58,7 @@ class CmfExceptionHandler extends ExceptionHandler {
     }
 
     protected function errorCodeToMessage($code, $parameters = []) {
-        return CmfConfig::transBase('.error.' . $code, $parameters);
+        return cmfTransGeneral('.error.' . $code, $parameters);
     }
 
     protected function getStartPageUrl() {

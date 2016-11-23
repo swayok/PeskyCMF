@@ -480,7 +480,7 @@ class FormConfig extends ScaffoldActionConfig {
             return [];
         }
         if (empty($messages)) {
-            $messages = CmfConfig::transCustom('.' . $this->getModel()->getTableName() . '.form.validation');
+            $messages = cmfTransCustom('.' . $this->getModel()->getTableName() . '.form.validation');
         }
         if (!is_array($messages)) {
             $messages = [];

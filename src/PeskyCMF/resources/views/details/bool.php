@@ -10,7 +10,7 @@
 if (empty($options)) {
     $options = [];
 }
-$yes = empty($options['yes']) ? \PeskyCMF\Config\CmfConfig::transBase('.item_details.field.bool.yes') : $options['yes'];
-$no = empty($options['no']) ? \PeskyCMF\Config\CmfConfig::transBase('.item_details.field.bool.no') : $options['no'];
+$yes = empty($options['yes']) ? cmfTransGeneral('.item_details.field.bool.yes') : $options['yes'];
+$no = empty($options['no']) ? cmfTransGeneral('.item_details.field.bool.no') : $options['no'];
 echo '{{? !!it.' . $fieldConfig->getName() . ' }}' . $yes . '{{??}}' . $no . '{{?}}';
 

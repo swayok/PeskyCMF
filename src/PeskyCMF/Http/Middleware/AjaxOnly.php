@@ -65,7 +65,7 @@ class AjaxOnly {
             return $next($request);
         } catch (DbObjectValidationException $exc) {
             return new JsonResponse([
-                '_message' => trans(CmfConfig::transBase('.error.invalid_data_received')),
+                '_message' => trans(cmfTransGeneral('.error.invalid_data_received')),
                 'errors' => $exc->getValidationErrors()
             ], HttpCode::INVALID);
         } catch (HttpException $exc) {

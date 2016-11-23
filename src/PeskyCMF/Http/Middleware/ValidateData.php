@@ -17,7 +17,7 @@ class ValidateData {
     protected function getValidationErrorsResponseMessage() {
         return isset($this->errorMessage)
             ? trans($this->errorMessage)
-            : CmfConfig::transBase('.error.invalid_data_received');
+            : cmfTransGeneral('.error.invalid_data_received');
     }
 
     /**

@@ -1,5 +1,5 @@
 <ul class="sidebar-menu" id="common-menu">
-    <li class="header">{{ \PeskyCMF\Config\CmfConfig::transCustom('.main_menu.header') }}</li>
+    <li class="header">{{ cmfTransCustom('.main_menu.header') }}</li>
     @foreach (\PeskyCMF\Config\CmfConfig::getInstance()->menu() as $info)
         @if (!empty($info['submenu']))
             <li class="treeview">

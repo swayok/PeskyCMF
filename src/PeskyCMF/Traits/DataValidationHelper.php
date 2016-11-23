@@ -39,7 +39,7 @@ trait DataValidationHelper {
     }
 
     protected function getValidationErrorsResponseMessage() {
-        return CmfConfig::transBase('.error.invalid_data_received');
+        return cmfTransGeneral('.error.invalid_data_received');
     }
 
     protected function sendValidationErrorsResponse(array $errors) {

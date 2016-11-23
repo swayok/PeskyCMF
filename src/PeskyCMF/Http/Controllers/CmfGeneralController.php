@@ -70,11 +70,11 @@ class CmfGeneralController extends Controller {
             }
             if ($admin->commit()) {
                 return cmfServiceJsonResponse()
-                    ->setMessage(CmfConfig::transCustom('.page.profile.saved'))
+                    ->setMessage(cmfTransCustom('.page.profile.saved'))
                     ->reloadPage();
             } else {
                 return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
-                    ->setMessage(CmfConfig::transBase('.form.failed_to_save_resource_data'))
+                    ->setMessage(cmfTransGeneral('.form.failed_to_save_resource_data'))
                     ->reloadPage();
             }
         }
@@ -128,13 +128,13 @@ class CmfGeneralController extends Controller {
         $validator = \Validator::make(
             $request->data(),
             $validationRules,
-            Set::flatten(CmfConfig::transCustom('.page.profile.errors'))
+            Set::flatten(cmfTransCustom('.page.profile.errors'))
         );
         $errors = [];
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
         } else if (!\Hash::check($request->data('old_password'), $admin->getAuthPassword())) {
-            $errors['old_password'] = CmfConfig::transCustom('.page.profile.errors.old_password.match');
+            $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
         }
         if (!empty($errors)) {
             return cmfJsonResponseForValidationErrors($errors);
@@ -186,7 +186,7 @@ class CmfGeneralController extends Controller {
         if (empty($user)) {
             return cmfRedirectResponseWithMessage(
                 route(CmfConfig::getInstance()->login_route()),
-                CmfConfig::transCustom('.replace_password.invalid_access_key'),
+                cmfTransCustom('.replace_password.invalid_access_key'),
                 'error'
             );
         }
@@ -220,7 +220,7 @@ class CmfGeneralController extends Controller {
             ])->render();
         } else {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transCustom('.replace_password.invalid_access_key'))
+                ->setMessage(cmfTransCustom('.replace_password.invalid_access_key'))
                 ->setRedirect(route(CmfConfig::getInstance()->login_route()));
         }
     }
@@ -231,19 +231,19 @@ class CmfGeneralController extends Controller {
             return CmfConfig::getInstance()->home_page_url();
         } else {
             if (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
-                return route('cmf_items_table', [$matches[1]]);
+                return routeToCmfItemsTable($matches[1]);
             } else if (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
-                return route('cmf_items_table', [$matches[1]]);
+                return routeToCmfItemsTable($matches[1]);
             } else if (preg_match('%/api/([^/]+?)/([^/]+?)/?(?:details=(\d)|$)%i', $intendedUrl, $matches)) {
                 if ($matches[3] === '1') {
-                    return route('cmf_item_details', [$matches[1], $matches[2]]);
+                    return routeToCmfItemDetails($matches[1], $matches[2]);
                 } else {
-                    return route('cmf_item_edit_form', [$matches[1], $matches[2]]);
+                    return routeToCmfItemEditForm($matches[1], $matches[2]);
                 }
             } else if (preg_match('%/api/([^/]+?)%i', $intendedUrl, $matches)) {
-                return route('cmf_items_table', [$matches[1]]);
+                return routeToCmfItemsTable($matches[1]);
             } else if (preg_match('%/page/([^/]+)\.html$%i', $intendedUrl, $matches)) {
-                return route('cmf_page', [$matches[1]]);
+                return routeToCmfPage($matches[1]);
             } else {
                return $intendedUrl;
             }
@@ -262,7 +262,7 @@ class CmfGeneralController extends Controller {
         ];
         if (!Auth::guard()->attempt($credentials)) {
             return cmfServiceJsonResponse(HttpCode::INVALID)
-                ->setMessage(CmfConfig::transCustom('.login_form.login_failed'));
+                ->setMessage(cmfTransCustom('.login_form.login_failed'));
         } else {
             return cmfServiceJsonResponse()->setRedirect($this->getIntendedUrl());
         }
@@ -280,7 +280,7 @@ class CmfGeneralController extends Controller {
                 'url' => route('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
                 'user' => $user->toPublicArrayWithoutFiles()
             ];
-            $subject = CmfConfig::transCustom('.forgot_password.email_subject');
+            $subject = cmfTransCustom('.forgot_password.email_subject');
             $from = CmfConfig::getInstance()->system_email_address();
             $view = CmfConfig::getInstance()->password_recovery_email_view();
             \Mail::send($view, $data, function (Message $message) use ($from, $email, $subject) {
@@ -291,7 +291,7 @@ class CmfGeneralController extends Controller {
             });
         }
         return cmfServiceJsonResponse()
-            ->setMessage(CmfConfig::transCustom('.forgot_password.instructions_sent'))
+            ->setMessage(cmfTransCustom('.forgot_password.instructions_sent'))
             ->setRedirect(route(CmfConfig::getInstance()->login_route()));
     }
 
@@ -307,15 +307,15 @@ class CmfGeneralController extends Controller {
             $user->begin()->_setFieldValue('password', $request->data('password'));
             if ($user->commit()) {
                 return cmfServiceJsonResponse()
-                    ->setMessage(CmfConfig::transCustom('.replace_password.password_replaced'))
+                    ->setMessage(cmfTransCustom('.replace_password.password_replaced'))
                     ->setRedirect(route(CmfConfig::getInstance()->login_route()));
             } else {
                 return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
-                    ->setMessage(CmfConfig::transCustom('.replace_password.failed_to_save'));
+                    ->setMessage(cmfTransCustom('.replace_password.failed_to_save'));
             }
         } else {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transCustom('.replace_password.invalid_access_key'))
+                ->setMessage(cmfTransCustom('.replace_password.invalid_access_key'))
                 ->setRedirect(route(CmfConfig::getInstance()->login_route()));
         }
     }
@@ -333,7 +333,7 @@ class CmfGeneralController extends Controller {
         if (!empty($adminData['role'])) {
             $adminData['_role'] = $admin->role;
             $role = ($admin->is_superadmin ? 'superadmin' : $admin->role);
-            $adminData['role'] = CmfConfig::transCustom('.admins.role.' . $role);
+            $adminData['role'] = cmfTransCustom('.admins.role.' . $role);
         }
         return response()->json($adminData);
     }

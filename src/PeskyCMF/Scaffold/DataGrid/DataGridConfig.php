@@ -565,7 +565,7 @@ class DataGridConfig extends ScaffoldActionConfig {
         return DataGridFieldConfig::create()
             ->setIsDbField(false)
             ->setName(static::ROW_ACTIONS_COLUMN_NAME)
-            ->setLabel(CmfConfig::transBase('.datagrid.actions.column_label'))
+            ->setLabel(cmfTransGeneral('.datagrid.actions.column_label'))
             ->setType(DataGridFieldConfig::TYPE_STRING);
     }
 

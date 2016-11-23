@@ -31,7 +31,7 @@ class CmfConfig extends ConfigsContainer {
 
     static public function routes_config_files() {
         return [
-//            __DIR__ . '/admin.routes.php'
+//            base_path('routes/admin.php')
         ];
     }
 
@@ -131,12 +131,13 @@ class CmfConfig extends ConfigsContainer {
     /**
      * Class name of user db object
      * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     static public function user_object_class() {
-        return call_user_func(
-            [static::base_db_table_class(), 'getFullDbObjectClass'],
-            static::users_table_name()
-        );
+        return get_class(static::getModelByTableName(static::users_table_name())->newRecord());
     }
 
     /**
@@ -383,12 +384,12 @@ class CmfConfig extends ConfigsContainer {
         return [
             [
                 'label' => self::transCustom('.page.dashboard.menu_title'),
-                'url' => route('cmf_page', ['dashboard']),
+                'url' => routeToCmfPage('dashboard'),
                 'icon' => 'glyphicon glyphicon-dashboard',
             ],
             [
                 'label' => self::transCustom('.admins.menu_title'),
-                'url' => route('cmf_items_table', ['admins']),
+                'url' => routeToCmfItemsTable('admins'),
                 'icon' => 'fa fa-group'
             ]
             /*[
@@ -434,15 +435,20 @@ class CmfConfig extends ConfigsContainer {
      * @param null|string $locale
      * @return string
      */
-    static public function transCustom($path, $parameters = [], $domain = 'messages', $locale = null) {
-        return trans(CmfConfig::getInstance()->custom_dictionary_name() . $path, $parameters, $domain, $locale);
+    static public function transCustom($path, array $parameters = [], $domain = 'messages', $locale = null) {
+        $dict = CmfConfig::getInstance()->custom_dictionary_name();
+        $trans = trans($dict . $path, $parameters, $domain, $locale);
+        if ($trans === $dict . $path && $dict !== 'cmf::custom') {
+            $trans = trans('cmf::custom' . $path, $parameters, $domain, $locale);
+        }
+        return $trans;
     }
 
     /**
      * Dictionary that contains general ui translations for CMF
      * @return string
      */
-    static public function cmf_base_dictionary_name() {
+    static public function cmf_general_dictionary_name() {
         return 'cmf::cmf';
     }
 
@@ -453,8 +459,13 @@ class CmfConfig extends ConfigsContainer {
      * @param null|string $locale
      * @return string
      */
-    static public function transBase($path, $parameters = [], $domain = 'messages', $locale = null) {
-        return trans(CmfConfig::getInstance()->cmf_base_dictionary_name() . $path, $parameters, $domain, $locale);
+    static public function transGeneral($path, array $parameters = [], $domain = 'messages', $locale = null) {
+        $dict = CmfConfig::getInstance()->cmf_general_dictionary_name();
+        $trans = trans($dict . $path, $parameters, $domain, $locale);
+        if ($trans === $dict . $path && $dict !== 'cmf::cmf') {
+            $trans = trans('cmf::cmf' . $path, $parameters, $domain, $locale);
+        }
+        return $trans;
     }
 
     /**

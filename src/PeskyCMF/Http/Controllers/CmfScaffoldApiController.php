@@ -97,10 +97,10 @@ class CmfScaffoldApiController extends Controller {
         $model = $this->getModel();
         if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase(
+                ->setMessage(cmfTransGeneral(
                     '.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden'
                 ))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $object = $model::getOwnDbObject();
         if (!$object->_getPkField()->isValidValueFormat($id)) {
@@ -132,10 +132,10 @@ class CmfScaffoldApiController extends Controller {
             )
         ) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase(
+                ->setMessage(cmfTransGeneral(
                     '.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden_for_record'
                 ))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         return new JsonResponse($actionConfig->prepareRecord($data));
     }
@@ -144,8 +144,8 @@ class CmfScaffoldApiController extends Controller {
         /** @var FormConfig $config */
         if (!$this->getScaffoldConfig()->isCreateAllowed() && !$this->getScaffoldConfig()->isEditAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.create.forbidden'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.create.forbidden'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
         $data = $formConfig->alterDefaultValues($this->getModel()->getOwnDbObject()->getDefaultsArray());
@@ -155,8 +155,8 @@ class CmfScaffoldApiController extends Controller {
     public function getOptions(Request $request) {
         if (!$this->getScaffoldConfig()->isEditAllowed() && !$this->getScaffoldConfig()->isCreateAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.edit.forbidden'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $optionsByFields = $this->getScaffoldConfig()->getFormConfig()->loadOptions($request->query('id'));
         foreach ($optionsByFields as $fieldName => $fieldOptions) {
@@ -172,8 +172,8 @@ class CmfScaffoldApiController extends Controller {
     public function addItem(Request $request) {
         if (!$this->getScaffoldConfig()->isCreateAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.create.forbidden'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.create.forbidden'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $model = $this->getModel();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
@@ -206,7 +206,7 @@ class CmfScaffoldApiController extends Controller {
                 if (!$success) {
                     $model->rollback();
                     return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
-                        ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
+                        ->setMessage(cmfTransGeneral('.form.failed_to_save_data'));
                 } else if ($formConfig->hasAfterSaveCallback()) {
                     $success = call_user_func($formConfig->getAfterSaveCallback(), true, $data, $object, $formConfig);
                     if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
@@ -237,14 +237,14 @@ class CmfScaffoldApiController extends Controller {
             }
         }
         return cmfServiceJsonResponse()
-            ->setMessage(CmfConfig::transBase('.form.resource_created_successfully'));
+            ->setMessage(cmfTransGeneral('.form.resource_created_successfully'));
     }
 
     public function updateItem(Request $request) {
         if (!$this->getScaffoldConfig()->isEditAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.edit.forbidden'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $model = $this->getModel();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
@@ -270,8 +270,8 @@ class CmfScaffoldApiController extends Controller {
         }
         if (!$this->getScaffoldConfig()->isRecordEditAllowed($object->toPublicArrayWithoutFiles())) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.edit.forbidden_for_record'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.edit.forbidden_for_record'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         if ($formConfig->hasBeforeSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
@@ -295,7 +295,7 @@ class CmfScaffoldApiController extends Controller {
                 if (!$success) {
                     $model->rollback();
                     return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
-                        ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
+                        ->setMessage(cmfTransGeneral('.form.failed_to_save_data'));
                 } else if ($formConfig->hasAfterSaveCallback()) {
                     $success = call_user_func($formConfig->getAfterSaveCallback(), false, $data, $object, $formConfig);
                     if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
@@ -326,14 +326,14 @@ class CmfScaffoldApiController extends Controller {
             }
         }
         return cmfServiceJsonResponse()
-            ->setMessage(CmfConfig::transBase('.form.resource_updated_successfully'));
+            ->setMessage(cmfTransGeneral('.form.resource_updated_successfully'));
     }
 
     public function updateBulk(Request $request) {
         if (!$this->getScaffoldConfig()->isEditAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.edit.forbidden'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $model = $this->getModel();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
@@ -341,7 +341,7 @@ class CmfScaffoldApiController extends Controller {
         $data = array_intersect_key($request->data(), array_flip($expectedFields));
         if (empty($data)) {
             return cmfServiceJsonResponse(HttpCode::INVALID)
-                ->setMessage(CmfConfig::transBase('.action.bulk_edit.no_data_to_save'));
+                ->setMessage(cmfTransGeneral('.action.bulk_edit.no_data_to_save'));
         }
         $errors = $formConfig->validateDataForBulkEdit($data);
         if (count($errors) !== 0) {
@@ -384,18 +384,18 @@ class CmfScaffoldApiController extends Controller {
         }
         $model->commit();
         $message = $updatedCount
-            ? CmfConfig::transBase('.action.bulk_edit.success', ['count' => $updatedCount])
-            : CmfConfig::transBase('.action.bulk_edit.nothing_updated');
+            ? cmfTransGeneral('.action.bulk_edit.success', ['count' => $updatedCount])
+            : cmfTransGeneral('.action.bulk_edit.nothing_updated');
         return cmfServiceJsonResponse()
             ->setMessage($message)
-            ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+            ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
     }
 
     public function deleteItem($tableName, $id) {
         if (!$this->getScaffoldConfig()->isDeleteAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.delete.forbidden'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.delete.forbidden'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $model = $this->getModel();
         $object = $model::getOwnDbObject();
@@ -410,20 +410,20 @@ class CmfScaffoldApiController extends Controller {
         }
         if (!$this->getScaffoldConfig()->isRecordDeleteAllowed($object->toPublicArrayWithoutFiles())) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.delete.forbidden_for_record'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.delete.forbidden_for_record'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $object->delete();
         return cmfServiceJsonResponse()
-            ->setMessage(CmfConfig::transBase('.action.delete.success'))
-            ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+            ->setMessage(cmfTransGeneral('.action.delete.success'))
+            ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
     }
 
     public function deleteBulk(Request $request) {
         if (!$this->getScaffoldConfig()->isDeleteAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase('.action.delete.forbidden'))
-                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+                ->setMessage(cmfTransGeneral('.action.delete.forbidden'))
+                ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
         $model = $this->getModel();
         $conditions = $this->getConditionsForBulkActions($request, $model);
@@ -432,11 +432,11 @@ class CmfScaffoldApiController extends Controller {
         }
         $deletedCount = $model->delete($conditions);
         $message = $deletedCount
-            ? CmfConfig::transBase('.action.delete_bulk.success', ['count' => $deletedCount])
-            : CmfConfig::transBase('.action.delete_bulk.nothing_deleted');
+            ? cmfTransGeneral('.action.delete_bulk.success', ['count' => $deletedCount])
+            : cmfTransGeneral('.action.delete_bulk.nothing_deleted');
         return cmfServiceJsonResponse()
             ->setMessage($message)
-            ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+            ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
     }
 
     /**
@@ -583,10 +583,10 @@ class CmfScaffoldApiController extends Controller {
      */
     protected function sendItemNotFoundResponse(CmfDbTable $model, $message = null) {
         if (empty($message)) {
-            $message = CmfConfig::transBase('.error.resource_item_not_found');
+            $message = cmfTransGeneral('.error.resource_item_not_found');
         }
         return cmfJsonResponseForHttp404(
-            route('cmf_items_table', [$this->getTableNameForRoutes()]),
+            routeToCmfItemsTable($this->getTableNameForRoutes()),
             $message
         );
     }

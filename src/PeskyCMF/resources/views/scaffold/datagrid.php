@@ -46,17 +46,17 @@ uasort($gridColumnsConfigs, function ($a, $b) {
 
                         $selectionActions = [
                             \Swayok\Html\Tag::a()
-                                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.select_all'))
+                                ->setContent(cmfTransGeneral('.datagrid.actions.select_all'))
                                 ->setClass('select-all')
                                 ->setHref('javascript: void(0)')
                                 ->build(),
                             \Swayok\Html\Tag::a()
-                                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.select_none'))
+                                ->setContent(cmfTransGeneral('.datagrid.actions.select_none'))
                                 ->setClass('select-none')
                                 ->setHref('javascript: void(0)')
                                 ->build(),
                             \Swayok\Html\Tag::a()
-                                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.invert_selection'))
+                                ->setContent(cmfTransGeneral('.datagrid.actions.invert_selection'))
                                 ->setClass('invert-selection')
                                 ->setHref('javascript: void(0)')
                                 ->build()
@@ -81,7 +81,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     foreach ($gridColumnsConfigs as $config) {
                         $th = \Swayok\Html\Tag::th()
                             ->setContent($config->isVisible()
-                                ? $config->getLabel(trans("$translationPrefix.datagrid.column.{$config->getName()}"))
+                                ? $config->getLabel(cmfTransCustom("$translationPrefix.datagrid.column.{$config->getName()}"))
                                 : '&nbsp'
                             )
                             ->setClass('text-nowrap')
@@ -123,8 +123,8 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         if ($dataGridConfig->isAllowedMultiRowSelection()) {
             if ($dataGridConfig->isDeleteAllowed() && $dataGridConfig->isBulkItemsDeleteAllowed()) {
                 $bulkActions[] = \Swayok\Html\Tag::a()
-                    ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_selected'))
-                    ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_selected_confirm'))
+                    ->setContent(cmfTransGeneral('.datagrid.bulk_actions.delete_selected'))
+                    ->setDataAttr('confirm', cmfTransGeneral('.datagrid.bulk_actions.delete_selected_confirm'))
                     ->setDataAttr('action', 'bulk-selected')
                     ->setDataAttr('url', route('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                     ->setDataAttr('id-field', $pkName)
@@ -134,7 +134,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             }
             if ($dataGridConfig->isEditAllowed() && $dataGridConfig->isBulkItemsEditingAllowed()) {
                 $bulkActions[] = \Swayok\Html\Tag::a()
-                    ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.edit_selected'))
+                    ->setContent(cmfTransGeneral('.datagrid.bulk_actions.edit_selected'))
                     ->setDataAttr('action', 'bulk-edit-selected')
                     ->setDataAttr('id-field', $pkName)
                     ->setHref('javascript: void(0)')
@@ -143,9 +143,9 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         if ($dataGridConfig->isDeleteAllowed() && $dataGridConfig->isFilteredItemsDeleteAllowed()) {
             $bulkActions[] = \Swayok\Html\Tag::a()
-                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_filtered'))
+                ->setContent(cmfTransGeneral('.datagrid.bulk_actions.delete_filtered'))
                 ->setDataAttr('action', 'bulk-filtered')
-                ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_filtered_confirm'))
+                ->setDataAttr('confirm', cmfTransGeneral('.datagrid.bulk_actions.delete_filtered_confirm'))
                 ->setDataAttr('url', route('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                 ->setDataAttr('method', 'delete')
                 ->setHref('javascript: void(0)')
@@ -153,7 +153,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         if ($dataGridConfig->isEditAllowed() && $dataGridConfig->isFilteredItemsEditingAllowed()) {
             $bulkActions[] = \Swayok\Html\Tag::a()
-                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.edit_filtered'))
+                ->setContent(cmfTransGeneral('.datagrid.bulk_actions.edit_filtered'))
                 ->setDataAttr('action', 'bulk-edit-filtered')
                 ->setHref('javascript: void(0)')
                 ->build();
@@ -173,7 +173,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setDataAttr('toggle' , 'dropdown')
                 ->setAttribute('aria-haspopup', 'true')
                 ->setAttribute('aria-expanded', 'false')
-                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.dropdown_label'))
+                ->setContent(cmfTransGeneral('.datagrid.bulk_actions.dropdown_label'))
                 ->append('&nbsp;<span class="caret"></span>')
                 ->build();
 
@@ -189,19 +189,19 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         if ($dataGridConfig->isCreateAllowed()) {
             $toolbar['create'] = \Swayok\Html\Tag::a()
-                ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.create'))
+                ->setContent(cmfTransGeneral('.datagrid.toolbar.create'))
                 ->setClass('btn btn-primary')
-                ->setHref(route('cmf_item_add_form', [$tableNameForRoutes], false))
+                ->setHref(routeToCmfItemAddForm($tableNameForRoutes))
                 ->build();
         }
         // row actions
         $actionsTpl = '';
         if ($dataGridConfig->isDetailsViewerAllowed()) {
-            $url = $dblClickUrl = route('cmf_item_details', [$tableNameForRoutes, ":{$pkName}:"], false);
+            $url = $dblClickUrl = routeToCmfItemDetails($tableNameForRoutes, ":{$pkName}:");
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue item-details')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
-                ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.view_item'))
+                ->setTitle(cmfTransGeneral('.datagrid.actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setDataAttr('container', '#section-content .content')
                 ->setHref($url)
@@ -209,11 +209,11 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
         }
         if ($dataGridConfig->isEditAllowed()) {
-            $url = $dblClickUrl = route('cmf_item_edit_form', [$tableNameForRoutes, ":{$pkName}:"], false);
+            $url = $dblClickUrl = routeToCmfItemEditForm($tableNameForRoutes, ":{$pkName}:");
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green item-edit')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
-                ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.edit_item'))
+                ->setTitle(cmfTransGeneral('.datagrid.actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setDataAttr('container', '#section-content .content')
                 ->setHref($url)
@@ -224,14 +224,14 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $btn = \Swayok\Html\Tag::a()
                 ->setContent('<i class="glyphicon glyphicon-trash"></i>')
                 ->setClass('row-action text-red item-delete')
-                ->setTitle(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.actions.delete_item'))
+                ->setTitle(cmfTransGeneral('.datagrid.actions.delete_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setDataAttr('container', '#section-content .content')
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
                 ->setDataAttr('url', route('cmf_api_delete_item', [$tableNameForRoutes, ":{$pkName}:"], false))
-                ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'))
+                ->setDataAttr('confirm', cmfTransGeneral('.action.delete.please_confirm'))
                 ->setHref('javascript: void(0)')
                 ->build();
             $actionsTpl .= '{{? !!it.___delete_allowed }}' . $btn . '{{?}}';
@@ -338,7 +338,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 foreach($dataGridFilterConfig->getFilters() as $filterConfig) {
                     if (!$filterConfig->hasFilterLabel()) {
                         $path = "$translationPrefix.datagrid.filter." . \Swayok\Utils\StringUtils::underscore($filterConfig->getColumnName());
-                        $filterConfig->setFilterLabel(trans($path));
+                        $filterConfig->setFilterLabel(cmfTransCustom($path));
                     }
                     $fitlers[] = $filterConfig->buildConfig();
                 }
@@ -347,7 +347,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 filters: <?php echo json_encode($fitlers, JSON_UNESCAPED_UNICODE); ?>,
                 is_opened: <?php echo $dataGridConfig->isFilterShownByDefault() ? 'true' : 'false'; ?>
             };
-            DataGridSearchHelper.locale = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
+            DataGridSearchHelper.locale = <?php echo json_encode(cmfTransGeneral('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
 
             <?php if ($dataGridConfig->hasJsInitiator()): ?>
                 <?php echo $dataGridConfig->getJsInitiator(); ?>.call($('#<?php echo $dataGridId; ?>'));
@@ -364,7 +364,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
 
 <div id="data-grid-tpl">
     <?php echo view('cmf::ui.default_page_header', [
-        'header' => trans("$translationPrefix.datagrid.header"),
+        'header' => cmfTransCustom("$translationPrefix.datagrid.header"),
         'defaultBackUrl' => route('cmf_start_page'),
     ])->render(); ?>
     <div class="content">

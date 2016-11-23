@@ -8,7 +8,7 @@
  */
 $formId = "scaffold-bulk-edit-form-{$idSuffix}";
 $pkColName = $model->getPkColumnName();
-$backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false);
+$backUrl = routeToCmfItemsTable('cmf_items_table', $tableNameForRoutes);
 ?>
 
 <script type="text/html" id="bulk-edit-form-tpl">
@@ -17,14 +17,14 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"
-                    aria-label="<?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.cancel'); ?>">
+                    aria-label="<?php echo cmfTransGeneral('.form.toolbar.cancel'); ?>">
                         <span aria-hidden="true">&times;</span>
                     </button>
                     <h4 class="modal-title" id="scaffold-bulk-edit-<?php echo $idSuffix; ?>-header">
                         {{? it._ids && it._ids.length }}
-                            <?php echo trans("$translationPrefix.form.header_bulk_edit_selected"); ?>
+                            <?php echo cmfTransCustom("$translationPrefix.form.header_bulk_edit_selected"); ?>
                         {{??}}
-                            <?php echo trans("$translationPrefix.form.header_bulk_edit_filtered"); ?>
+                            <?php echo cmfTransCustom("$translationPrefix.form.header_bulk_edit_filtered"); ?>
                         {{?}}
                     </h4>
                 </div>
@@ -55,12 +55,12 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                     <!-- end of autofill disabler -->
                     <div class="modal-body">
                     <?php
-                        $enablerTextOn = \PeskyCMF\Config\CmfConfig::transBase('.form.bulk_edit.enabler.edit_field');
-                        $enablerTextOff = \PeskyCMF\Config\CmfConfig::transBase('.form.bulk_edit.enabler.skip_field');
+                        $enablerTextOn = cmfTransGeneral('.form.bulk_edit.enabler.edit_field');
+                        $enablerTextOff = cmfTransGeneral('.form.bulk_edit.enabler.skip_field');
                         $baseEnablerId = str_random() . '-enabler-for-';
                         foreach ($formConfig->getBulkEditableFields() as $inputConfig) {
                             if (!$inputConfig->hasLabel()) {
-                                $inputConfig->setLabel(trans("$translationPrefix.form.field.{$inputConfig->getName()}"));
+                                $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.field.{$inputConfig->getName()}"));
                             }
                             try {
                                 $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
@@ -86,12 +86,12 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                         <div class="row">
                             <div class="col-xs-6 text-left">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">
-                                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.cancel'); ?>
+                                    <?php echo cmfTransGeneral('.form.toolbar.cancel'); ?>
                                 </button>
                             </div>
                             <div class="col-xs-6 text-right">
                                 <button type="submit" class="btn btn-success" disabled>
-                                    <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.submit'); ?>
+                                    <?php echo cmfTransGeneral('.form.toolbar.submit'); ?>
                                 </button>
                             </div>
                         </div>

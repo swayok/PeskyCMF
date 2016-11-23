@@ -4,7 +4,7 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 
 class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
 
@@ -12,23 +12,24 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
 
     /**
      * @return callable|null
+     * @throws \UnexpectedValueException
      */
     public function getValueConverter() {
         if (empty(parent::getValueConverter())) {
             switch ($this->getType()) {
                 case self::TYPE_BOOL:
                     $this->setValueConverter(function ($value) {
-                        return CmfConfig::transBase('.item_details.field.bool.' . ($value ? 'yes' : 'no'));
+                        return cmfTransGeneral('.item_details.field.bool.' . ($value ? 'yes' : 'no'));
                     });
                     break;
                 case self::TYPE_IMAGE:
-                    $this->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
+                    $this->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         if (!empty($value) && is_array($value) && !empty($value['url']) && is_array($value['url'])) {
                             if (count($value['url']) > 0) {
                                 unset($value['url']['source']);
                             }
                             $images = [];
-                            $translationPath = CmfConfig::getInstance()->custom_dictionary_name() . '.' . $columnConfig->getDbTableConfig()->getName()
+                            $translationPath = cmfTransCustom('.' . $columnConfig->getTableStructure()->getTableName())
                                 . '.item_details.field.' . $columnConfig->getName() . '_version.';
                             foreach ($value['url'] as $key => $url) {
                                 $images[] = [

@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'close' => 'Закрыть',
     'ui' => [
+        'close' => 'Закрыть',
         'js_component' => [
             'data_tables' => [
                 'processing' => 'Подождите...',
