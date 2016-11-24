@@ -71,8 +71,8 @@ class PeskyOrmUserProvider implements UserProvider {
     protected function validateUser(RecordInterface $user, $onFailReturn = null) {
         if (
             $user->existsInDb()
-            && (!$user->hasValue('is_active') || $user->getValue('is_active'))
-            && (!$user->hasValue('is_banned') || !$user->getValue('is_banned'))
+            && (!$user::hasColumn('is_active') || $user->getValue('is_active'))
+            && (!$user::hasColumn('is_banned') || !$user->getValue('is_banned'))
         ) {
             return $user;
         }

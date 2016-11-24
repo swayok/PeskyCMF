@@ -77,17 +77,17 @@ class {{ $sectionName }}Config extends CmfConfig {
         return [
             [
                 'label' => self::transCustom('.page.dashboard.menu_title'),
-                'url' => '/page/dashboard',
+                'url' => routeToCmfPage('dashboard'),
                 'icon' => 'glyphicon glyphicon-dashboard',
             ],
             [
                 'label' => self::transCustom('.admins.menu_title'),
-                'url' => '/resource/admins',
+                'url' => routeToCmfItemsTable('admins'),
                 'icon' => 'fa fa-group'
             ]
             /*[
                 'label' => self::transCustom('.users.menu_title'),
-                'url' => '/resource/users',
+                'url' => routeToCmfItemsTable('users'),
                 'icon' => 'fa fa-group'
             ],*/
             /*[
@@ -96,7 +96,7 @@ class {{ $sectionName }}Config extends CmfConfig {
                 'submenu' => [
                     [
                         'label' => self::transCustom('.admins.menu_title'),
-                        'url' => '/resource/admins',
+                        'url' => routeToCmfItemsTable('admins'),
                         'icon' => 'glyphicon glyphicon-user'
                     ],
                 ]

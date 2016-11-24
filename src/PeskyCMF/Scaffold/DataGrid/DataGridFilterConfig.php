@@ -5,7 +5,8 @@ namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Scaffold\ScaffoldException;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
+use PeskyORM\ORM\TableInterface;
 
 class DataGridFilterConfig {
     /** @var CmfDbTable */
@@ -14,18 +15,14 @@ class DataGridFilterConfig {
     protected $filters = [];
     protected $defaultConditions = ['condition' => 'AND', 'rules' => []];
     
-    static public $dbTypeToFilterType = [
-        DbColumnConfig::DB_TYPE_VARCHAR => DataGridColumnFilterConfig::TYPE_STRING,
-        DbColumnConfig::DB_TYPE_TEXT => DataGridColumnFilterConfig::TYPE_STRING,
-        DbColumnConfig::DB_TYPE_INT => DataGridColumnFilterConfig::TYPE_INTEGER,
-        DbColumnConfig::DB_TYPE_FLOAT => DataGridColumnFilterConfig::TYPE_FLOAT,
-        DbColumnConfig::DB_TYPE_BOOL => DataGridColumnFilterConfig::TYPE_BOOL,
-        DbColumnConfig::DB_TYPE_JSONB => DataGridColumnFilterConfig::TYPE_STRING,
+    static public $columnTypeToFilterType = [
+        Column::TYPE_INT => DataGridColumnFilterConfig::TYPE_INTEGER,
+        Column::TYPE_FLOAT => DataGridColumnFilterConfig::TYPE_FLOAT,
+        Column::TYPE_BOOL => DataGridColumnFilterConfig::TYPE_BOOL,
         // it is rarely needed to use date-time filter, so it is better to use date filter instead
-        DbColumnConfig::DB_TYPE_TIMESTAMP => DataGridColumnFilterConfig::TYPE_DATE,
-        DbColumnConfig::DB_TYPE_DATE => DataGridColumnFilterConfig::TYPE_DATE,
-        DbColumnConfig::DB_TYPE_TIME => DataGridColumnFilterConfig::TYPE_TIME,
-        DbColumnConfig::DB_TYPE_IP_ADDRESS => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_TIMESTAMP => DataGridColumnFilterConfig::TYPE_DATE,
+        Column::TYPE_DATE => DataGridColumnFilterConfig::TYPE_DATE,
+        Column::TYPE_TIME => DataGridColumnFilterConfig::TYPE_TIME,
     ];
     protected $defaultDataGridColumnFilterConfigClass = DataGridColumnFilterConfig::class;
 
@@ -49,9 +46,10 @@ class DataGridFilterConfig {
     /**
      * @param DataGridColumnFilterConfig[] $filters
      * @return $this
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
     public function setFilters(array $filters) {
@@ -71,10 +69,10 @@ class DataGridFilterConfig {
      * @param string $columnName - 'col_name' or 'RelationAlias.col_name'
      * @param null|DataGridColumnFilterConfig $config
      * @return $this
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
     public function addFilter($columnName, $config = null) {
@@ -101,6 +99,10 @@ class DataGridFilterConfig {
     /**
      * @param string $columnName
      * @return DataGridColumnFilterConfig
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
     public function getFilter($columnName) {
@@ -114,29 +116,29 @@ class DataGridFilterConfig {
     /**
      * @param string $columnName
      * @return DataGridColumnFilterConfig
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     * @throws \UnexpectedValueException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function createColumnFilterConfig($columnName) {
-        $model = $this->getModel();
+        $table = $this->getTable();
         $columnConfig = $this->findColumnConfig($columnName);
         /** @var DataGridColumnFilterConfig $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         if (
-            $columnConfig->getDbType() === DbColumnConfig::DB_TYPE_INT
-            && $columnConfig->getDbTableConfig()->getName() === $model->getTableName()
-            && $model->getPkColumnName() === $columnConfig->getName()
+            $columnConfig->getType() === Column::TYPE_INT
+            && $table::getPkColumnName() === $columnConfig->getName()
+            && $columnConfig->getTableStructure()->getTableName() === $table::getName()
         ) {
             // Primary key integer column
             return $configClass::forPositiveInteger()
                 ->setColumnName($this->getColumnNameWithAlias($columnName));
         } else {
             return $configClass::create(
-                self::$dbTypeToFilterType[$columnConfig->getDbType()],
-                $columnConfig->isNullable(),
+                self::$columnTypeToFilterType[$columnConfig->getType()] ?: DataGridColumnFilterConfig::TYPE_STRING,
+                $columnConfig->isValueCanBeNull(),
                 $this->getColumnNameWithAlias($columnName)
             );
         }
@@ -144,55 +146,58 @@ class DataGridFilterConfig {
 
     /**
      * @param $columnName
-     * @return DbColumnConfig
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @return Column
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
     public function findColumnConfig($columnName) {
-        $model = $this->getModel();
+        $table = $this->getTable();
         $colNameParts = explode('.', $columnName, 2);
         if (count($colNameParts) === 2) {
             $columnName = $colNameParts[1];
-            if ($colNameParts[0] !== $model->getAlias()) {
-                // recursively find related model
-                $model = $this->findRelatedModel($model, $colNameParts[0]);
+            if ($colNameParts[0] !== $table::getAlias()) {
+                // recursively find related table
+                $table = $this->findRelatedModel($table, $colNameParts[0]);
             }
         }
-        return $model->getTableColumn($columnName);
+        return $table::getStructure()->getColumn($columnName);
     }
 
     /**
-     * @param CmfDbTable $model
+     * @param TableInterface $table
      * @param string $relationAlias
-     * @param array $scannedModels
+     * @param array $scannedTables
      * @param int $depth
-     * @return bool|\PeskyCMF\Db\CmfDbTable
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @return bool|TableInterface
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldException
-     * @throws \PeskyORM\Exception\DbModelException
      */
-    protected function findRelatedModel(CmfDbTable $model, $relationAlias, array &$scannedModels = [], $depth = 0) {
-        if ($model->hasTableRelation($relationAlias)) {
-            return $model->getRelatedModel($relationAlias);
+    protected function findRelatedModel(TableInterface $table, $relationAlias, array &$scannedTables = [], $depth = 0) {
+        $structure = $table->getTableStructure();
+        if ($structure::hasRelation($relationAlias)) {
+            return $structure::getRelation($relationAlias)->getForeignTable();
         }
-        $scannedModels[] = $model->getTableName();
-        foreach ($model->getTableRealtaions() as $alias => $relationConfig) {
-            /** @var CmfDbTable $relModel */
-            $relModel = $model->getRelatedModel($alias);
-            if (!empty($scannedModels[$relModel->getTableName()])) {
+        $scannedTables[] = $structure::getTableName();
+        foreach ($structure::getRelations() as $alias => $relationConfig) {
+            /** @var CmfDbTable $relTable */
+            $relTable = $relationConfig->getForeignTable();
+            if (!empty($scannedTables[$relTable::getName()])) {
                 continue;
             }
-            $modelFound = $this->findRelatedModel($relModel, $relationAlias, $scannedModels, $depth + 1);
+            $modelFound = $this->findRelatedModel($relTable, $relationAlias, $scannedTables, $depth + 1);
             if ($modelFound) {
                 return $modelFound;
             }
-            $scannedModels[] = $relModel->getTableName();
+            $scannedTables[] = $relTable::getName();
         }
         if (!$depth === 0 && empty($modelFound)) {
-            throw new ScaffoldException("Cannot find relation [$relationAlias] in model [{$model->getAlias()}] or among its relations");
+            throw new ScaffoldException("Cannot find relation [$relationAlias] in model [{$table->getAlias()}] or among its relations");
         }
         return false;
     }
@@ -200,10 +205,14 @@ class DataGridFilterConfig {
     /**
      * @param string $columnName
      * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function getColumnNameWithAlias($columnName) {
         if (strpos($columnName, '.') === false) {
-            return $this->getModel()->getAlias() . '.' . $columnName;
+            return $this->getTable()->getAlias() . '.' . $columnName;
         }
         return $columnName;
     }
@@ -223,7 +232,7 @@ class DataGridFilterConfig {
     /**
      * @return CmfDbTable
      */
-    public function getModel() {
+    public function getTable() {
         return $this->model;
     }
 
@@ -248,6 +257,10 @@ class DataGridFilterConfig {
      * @param string $operator
      * @param string|int|bool|float $value
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
     public function addDefaultCondition($columnName, $operator, $value) {
@@ -268,13 +281,17 @@ class DataGridFilterConfig {
 
     /**
      * @return DataGridFilterConfig
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
     public function addDefaultConditionForPk() {
         /** @var DataGridColumnFilterConfig $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         return $this->addDefaultCondition(
-            $this->getModel()->getPkColumnName(),
+            $this->getTable()->getPkColumnName(),
             $configClass::OPERATOR_GREATER,
             0
         );
@@ -283,6 +300,10 @@ class DataGridFilterConfig {
     /**
      * @param array $rulesGroup
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function buildConditionsFromSearchRules(array $rulesGroup) {
@@ -300,6 +321,10 @@ class DataGridFilterConfig {
     /**
      * @param array $searchRule
      * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
     protected function buildConditionFromSearchRule(array $searchRule) {
@@ -319,6 +344,10 @@ class DataGridFilterConfig {
      * @param array $keyValueArray
      * @param array $otherArgs
      * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function makeFilterFromData(array $keyValueArray, array $otherArgs = []) {
         $filters = [];

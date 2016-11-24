@@ -16,7 +16,7 @@ $else = '{{??}}';
 $endIf = '{{?}}';
 $printPk = "{{= it.{$pkColName} }}";
 
-$backUrl = routeToCmfItemsTable('cmf_items_table', $tableNameForRoutes);
+$backUrl = routeToCmfItemsTable($tableNameForRoutes);
 ?>
 
 <?php View::startSection('scaffold-form'); ?>

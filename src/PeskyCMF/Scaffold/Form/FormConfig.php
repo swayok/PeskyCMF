@@ -3,12 +3,11 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
 
@@ -38,7 +37,7 @@ class FormConfig extends ScaffoldActionConfig {
     /** @var array  */
     protected $validatorsForEdit = [];
     /** @var array|\Closure|null */
-    protected $alterDefaultValues = [];
+    protected $defaultValuesModifier = [];
 
     /** @var string|\Closure */
     protected $additionalHtmlForForm = '';
@@ -81,7 +80,6 @@ class FormConfig extends ScaffoldActionConfig {
      * @param InputRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
      * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     protected function configureDefaultRenderer(
@@ -113,7 +111,7 @@ class FormConfig extends ScaffoldActionConfig {
                 if (
                     !$fieldConfig->hasValueConverter()
                     && in_array(
-                        $fieldConfig->getTableColumnConfig()->getType(),
+                        $fieldConfig->getTableColumn()->getType(),
                         [FormFieldConfig::TYPE_JSON, FormFieldConfig::TYPE_JSONB],
                         true
                     )
@@ -132,7 +130,7 @@ class FormConfig extends ScaffoldActionConfig {
                 if (
                     !$fieldConfig->hasValueConverter()
                     && in_array(
-                        $fieldConfig->getTableColumnConfig()->getType(),
+                        $fieldConfig->getTableColumn()->getType(),
                         [FormFieldConfig::TYPE_JSON, FormFieldConfig::TYPE_JSONB],
                         true
                     )
@@ -163,7 +161,7 @@ class FormConfig extends ScaffoldActionConfig {
                 $rendererConfig->setView('cmf::input/text');
         }
         if ($fieldConfig->isDbField()) {
-            $this->configureRendererByColumnConfig($rendererConfig, $fieldConfig->getTableColumnConfig());
+            $this->configureRendererByColumnConfig($rendererConfig, $fieldConfig->getTableColumn());
         }
         if ($fieldConfig->hasDefaultRendererConfigurator()) {
             call_user_func($fieldConfig->getDefaultRendererConfigurator(), $rendererConfig, $fieldConfig);
@@ -172,25 +170,24 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * @param InputRendererConfig $rendererConfig
-     * @param DbColumnConfig $columnConfig
-     * @throws \PeskyORM\Exception\DbColumnConfigException
+     * @param Column $columnConfig
      */
     protected function configureRendererByColumnConfig(
         InputRendererConfig $rendererConfig,
-        DbColumnConfig $columnConfig
+        Column $columnConfig
     ) {
         $rendererConfig
-            ->setIsRequiredForCreate($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE))
-            ->setIsRequiredForEdit($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE));
+            ->setIsRequiredForCreate(!$columnConfig->isValueCanBeNull())
+            ->setIsRequiredForEdit(!$columnConfig->isValueCanBeNull());
     }
 
     /**
      * @param array $fields
      * @return $this
-     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws \BadMethodCallException
      */
     public function setBulkEditableFields(array $fields) {
@@ -211,15 +208,16 @@ class FormConfig extends ScaffoldActionConfig {
      * @param string $name
      * @param null|FormFieldConfig $fieldConfig - null: FormFieldConfig will be imported from $this->fields or created default one
      * @return $this
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
     public function addBulkEditableField($name, $fieldConfig = null) {
-        if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
+        if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
-        } else if ($this->getModel()->getTableColumn($name)->isFile()) {
+        } else if ($this->getTable()->getTableStructure()->getColumn($name)->isItAFile()) {
             throw new ScaffoldActionException(
                 $this,
                 "Attaching files in bulk editing form is not suppoted. Table column: [$name]"
@@ -280,7 +278,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @return $this
      */
     public function setHasFiles($value) {
-        $this->hasFiles = !!$value;
+        $this->hasFiles = (bool)$value;
         return $this;
     }
 
@@ -387,6 +385,10 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $messages
      * @param bool $isRevalidation
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \LogicException
      * @throws ScaffoldActionException
      */
@@ -399,6 +401,10 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $messages
      * @param bool $isRevalidation
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \LogicException
      * @throws ScaffoldActionException
      */
@@ -411,6 +417,10 @@ class FormConfig extends ScaffoldActionConfig {
      * @param array $messages
      * @param bool $isRevalidation
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \LogicException
      * @throws ScaffoldActionException
      */
@@ -441,10 +451,7 @@ class FormConfig extends ScaffoldActionConfig {
         if (!empty($this->beforeValidateCallback)) {
             $success = call_user_func($this->beforeValidateCallback, $data, $isRevalidation);
             if ($success !== true) {
-                if (!is_array($success)) {
-                    $success = [$success];
-                }
-                return $success;
+                return (array)$success;
             }
         }
         return true;
@@ -457,6 +464,10 @@ class FormConfig extends ScaffoldActionConfig {
      * @param bool $isRevalidation
      * @param bool $isBulkEdit
      * @return array|string|bool
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \LogicException
      *
      * @throws ScaffoldActionException
@@ -480,7 +491,7 @@ class FormConfig extends ScaffoldActionConfig {
             return [];
         }
         if (empty($messages)) {
-            $messages = cmfTransCustom('.' . $this->getModel()->getTableName() . '.form.validation');
+            $messages = cmfTransCustom('.' . $this->getTable()->getName() . '.form.validation');
         }
         if (!is_array($messages)) {
             $messages = [];
@@ -495,6 +506,7 @@ class FormConfig extends ScaffoldActionConfig {
                     $arrayFields[] = $key;
                 }
             } else if (is_array($value)) {
+                /** @var array $value */
                 foreach ($value as &$validator) {
                     if (is_string($validator)) {
                         $validator = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
@@ -585,8 +597,8 @@ class FormConfig extends ScaffoldActionConfig {
      * @return $this
      */
     public function setRevalidateDataAfterBeforeSaveCallback($forCreation, $forUpdate) {
-        $this->revalidateDataAfterBeforeSaveCallbackForCreation = !!$forCreation;
-        $this->revalidateDataAfterBeforeSaveCallbackForUpdate = !!$forUpdate;
+        $this->revalidateDataAfterBeforeSaveCallbackForCreation = (bool)$forCreation;
+        $this->revalidateDataAfterBeforeSaveCallbackForUpdate = (bool)$forUpdate;
         return $this;
     }
 
@@ -698,11 +710,11 @@ class FormConfig extends ScaffoldActionConfig {
      * @return $this
      * @throws ScaffoldActionException
      */
-    public function setAlterDefaultValues($arrayOrCallable) {
+    public function setDefaultValuesModifier($arrayOrCallable) {
         if (!is_array($arrayOrCallable) && !($arrayOrCallable instanceof \Closure)) {
             throw new ScaffoldActionException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or \Closure');
         }
-        $this->alterDefaultValues = $arrayOrCallable;
+        $this->defaultValuesModifier = $arrayOrCallable;
         return $this;
     }
 
@@ -712,9 +724,9 @@ class FormConfig extends ScaffoldActionConfig {
      * @throws ScaffoldActionException
      */
     public function alterDefaultValues(array $defaults) {
-        if (!empty($this->alterDefaultValues)) {
-            if ($this->alterDefaultValues instanceof \Closure) {
-                $defaults = call_user_func($this->alterDefaultValues, $defaults, $this);
+        if (!empty($this->defaultValuesModifier)) {
+            if ($this->defaultValuesModifier instanceof \Closure) {
+                $defaults = call_user_func($this->defaultValuesModifier, $defaults, $this);
                 if (!is_array($defaults)) {
                     throw new ScaffoldActionException(
                         $this,
@@ -722,7 +734,7 @@ class FormConfig extends ScaffoldActionConfig {
                     );
                 }
             } else {
-                return array_merge($defaults, $this->alterDefaultValues);
+                return array_merge($defaults, $this->defaultValuesModifier);
             }
         }
         return $defaults;

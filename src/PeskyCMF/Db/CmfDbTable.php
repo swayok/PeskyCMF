@@ -6,6 +6,7 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
+use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableStructure;
 use Swayok\Utils\StringUtils;
@@ -80,6 +81,9 @@ abstract class CmfDbTable extends Table {
         return $this->scaffoldConfig;
     }
 
+    /**
+     * @return Record|CmfDbRecord
+     */
     public function newRecord() {
         if (!$this->recordClass) {
             $class = new \ReflectionClass(get_called_class());
@@ -89,6 +93,9 @@ abstract class CmfDbTable extends Table {
         return new $this->recordClass;
     }
 
+    /**
+     * @return TableStructure
+     */
     public function getTableStructure() {
         /** @var TableStructure $class */
         $class = get_called_class() . 'Structure';

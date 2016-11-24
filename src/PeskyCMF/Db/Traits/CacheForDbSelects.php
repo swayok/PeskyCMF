@@ -99,7 +99,7 @@ trait CacheForDbSelects {
                 $value = $value->get();
             } else if (is_object($value)) {
                 throw new \InvalidArgumentException(
-                    '$conditionsAndOptions argument may contain only strings and objects of class \PeskyORM\DbExpr.'
+                    '$conditionsAndOptions argument may contain only strings and objects of class \PeskyORM\Core\DbExpr.'
                     . ' Object of class ' . get_class($value) . ' detected'
                 );
             }
@@ -111,7 +111,7 @@ trait CacheForDbSelects {
                     $value = $value->get();
                 } else if (is_object($value)) {
                     throw new \InvalidArgumentException(
-                        '$columns argument may contain only strings and objects of class \PeskyORM\DbExpr.'
+                        '$columns argument may contain only strings and objects of class \PeskyORM\Core\DbExpr.'
                         . ' Object of class ' . get_class($value) . ' detected'
                     );
                 }

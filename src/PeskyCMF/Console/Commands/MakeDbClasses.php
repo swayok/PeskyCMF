@@ -12,8 +12,8 @@ use PeskyCMF\Db\Traits\IsActiveColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyCMF\Db\Traits\UserAuthColumns;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyORM\DbExpr;
-use PeskyORM\DbTableConfig;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\ORM\TableStructure;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 use Swayok\Utils\Set;
@@ -39,12 +39,12 @@ class MakeDbClasses extends Command {
 
     protected $dbModelView = 'cmf::console.db_model';
     protected $dbObjectView = 'cmf::console.db_object';
-    protected $dbTableConfigView = 'cmf::console.db_table_config';
+    protected $dbTableStructureView = 'cmf::console.db_table_config';
     protected $scaffoldConfigView = 'cmf::console.db_scaffold_config';
 
     protected $modelParentClass = CmfDbTable::class;
     protected $objectParentClass = CmfDbRecord::class;
-    protected $tableConfigParentClass = DbTableConfig::class;
+    protected $tableStructureParentClass = TableStructure::class;
     protected $scaffoldConfigParentClass = ScaffoldSectionConfig::class;
 
     /**
@@ -67,7 +67,7 @@ class MakeDbClasses extends Command {
             $this->createDbObject($dataForViews);
         }
         if (!$only || $only === 'table_config') {
-            $this->createDbTableConfig($dataForViews);
+            $this->createDbTableStructure($dataForViews);
         }
         if ((!$only && $this->option('with-scaffold')) || $only === 'scaffold') {
             $this->createScaffoldConfig($dataForViews);
@@ -97,7 +97,7 @@ class MakeDbClasses extends Command {
             'columns' => $columns,
             'modelParentClass' => $this->modelParentClass,
             'objectParentClass' => $this->objectParentClass,
-            'tableConfigParentClass' => $this->tableConfigParentClass,
+            'tableConfigParentClass' => $this->tableStructureParentClass,
             'scaffoldConfigParentClass' => $this->scaffoldConfigParentClass,
             'modelClassName' => call_user_func([$this->modelParentClass, 'getModelNameByTableName'], $tableName),
             'objectClassName' => call_user_func([$this->modelParentClass, 'getObjectNameByTableName'], $tableName),
@@ -192,12 +192,12 @@ class MakeDbClasses extends Command {
         $this->line("Object class created ($objectFile)");
     }
 
-    protected function createDbTableConfig($dataForViews) {
+    protected function createDbTableStructure($dataForViews) {
         $tableConfigFile = $dataForViews['files']['table_config'];
         if (File::exist($tableConfigFile)) {
             File::remove();
         }
-        File::save($tableConfigFile, view($this->dbTableConfigView, $dataForViews)->render(), 0664);
+        File::save($tableConfigFile, view($this->dbTableStructureView, $dataForViews)->render(), 0664);
         $this->openFileInPhpStorm($tableConfigFile);
         $this->line("TableConfig class created ($tableConfigFile)");
     }
