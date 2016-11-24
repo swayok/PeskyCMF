@@ -1,6 +1,9 @@
 <?php
 
 namespace PeskyCMF\Db\Traits;
+use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\CmfDbTable;
+use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 
 trait TimestampColumns {
@@ -14,6 +17,9 @@ trait TimestampColumns {
     private function updated_at() {
         return Column::create(Column::TYPE_TIMESTAMP)
             ->disallowsNullValues()
-            ->valueCannotBeSetOrChanged();
+            ->valueCannotBeSetOrChanged()
+            ->autoUpdateValueOnEachSaveWith(function () {
+                return DbExpr::create('NOW()');
+            });
     }
 }

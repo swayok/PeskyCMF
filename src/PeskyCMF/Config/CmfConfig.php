@@ -670,7 +670,11 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function getDbClassesNamespaceForTable($tableName) {
-        return static::base_db_table_class() . '\\' . StringUtils::classify($tableName);
+        static $namespace = null;
+        if ($namespace === null) {
+            $namespace = '\\' . (new \ReflectionClass(static::base_db_table_class()) )->getNamespaceName() . '\\';
+        }
+        return $namespace . StringUtils::classify($tableName);
     }
 
     /**

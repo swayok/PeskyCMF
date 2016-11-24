@@ -2,14 +2,14 @@
 
 namespace PeskyCMF\Event;
 
-use App\Events\Event;
-use PeskyORM\DbObject;
+use PeskyORM\ORM\RecordInterface;
 
-class AdminAuthorised extends Event {
+class AdminAuthorised {
 
+    /** @var RecordInterface */
     public $user;
 
-    public function __construct(DbObject $user) {
+    public function __construct(RecordInterface $user) {
         $this->user = $user;
     }
 

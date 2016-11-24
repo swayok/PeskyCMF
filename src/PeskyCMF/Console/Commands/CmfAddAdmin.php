@@ -3,42 +3,45 @@
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Database\Console\Migrations\BaseCommand;
-use PeskyORM\Db;
-use PeskyORM\DbExpr;
+use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\Core\Utils;
 
 class CmfAddAdmin extends BaseCommand {
 
     protected $description = 'Create administrator in DB';
-    protected $signature = 'cmf:add_admin {email_or_login} {password} {role=admin} {table=admins} {schema=public} {--login : use [login] field instead of [email]}';
+    protected $signature = 'cmf:add-admin {email_or_login} {role=admin} {table=admins} {schema?} {--login : use [login] field instead of [email]}';
 
     public function fire() {
-        $driver = config('database.default');
-        $db = new Db(
-            $driver,
-            config("database.connections.$driver.database"),
-            config("database.connections.$driver.username"),
-            config("database.connections.$driver.password"),
-            config("database.connections.$driver.host") ?: 'localhost'
-        );
+        $db = DbConnectionsManager::getConnection('default');
         $args = $this->input->getArguments();
         $emailOrLogin = strtolower(trim($args['email_or_login']));
         $authField = $this->input->getOption('login') ? 'login' : 'email';
-        $password = \Hash::make($args['password']);
-        $table = "`{$args['schema']}`.`{$args['table']}`";
-        $exists = $db::processRecords(
-            $db->query(DbExpr::create("SELECT 1 FROM {$table} WHERE `{$authField}`=``{$emailOrLogin}``")),
-            $db::FETCH_VALUE
+        $table = empty($args['schema']) ? $args['table'] : "{$args['schema']}.{$args['table']}";
+        $exists = $db->query(
+            DbExpr::create("SELECT 1 FROM {$table} WHERE `{$authField}`=``{$emailOrLogin}``"),
+            Utils::FETCH_VALUE
         );
-        if ($exists > 0) {
-            $query = "UPDATE {$table} SET `password`=``{$password}``, `role`=``{$args['role']}`` WHERE `{$authField}`=``{$emailOrLogin}``";
-        } else {
-            $query = "INSERT INTO {$table} (`{$authField}`, `password`, `role`) VALUES (``{$emailOrLogin}``,``{$password}``, ``{$args['role']}``)";
+        $password = $this->secret('Enter password for admin');
+        if (empty($password)) {
+            $this->line('Cannot continue: password is empty');
+            exit;
         }
-
         try {
-            $result = $db->exec(DbExpr::create($query));
+            $data = [
+                'password' => \Hash::make($password),
+                'role' => $args['role'],
+                'is_superadmin' => true,
+                $authField => $emailOrLogin
+            ];
+            if ($exists > 0) {
+                $result = $db->update($table, $data, DbExpr::create("`{$authField}`=``{$emailOrLogin}``"));
+            } else {
+                $result = $db->insert($table, $data);
+            }
+
             if ($result > 0) {
-                $this->line($exists ? 'Admin updated' : 'Admin created');
+                $this->line($exists > 0 ? 'Admin updated' : 'Admin created');
             } else {
                 $this->line('Fail. DB returned "0 rows updated"');
             }
@@ -46,6 +49,7 @@ class CmfAddAdmin extends BaseCommand {
             $this->line('Fail. DB Exception:');
             $this->line($exc->getMessage());
             $this->line($exc->getTraceAsString());
+            exit;
         }
     }
 }
