@@ -10,7 +10,11 @@ $rendererConfig
     ->addAttribute('type', 'checkbox', true)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('value', 1, false)
-    ->addAttribute('class', 'switch', true);
+    ->addAttribute('class', 'switch', true)
+    ->addAttribute('required', false, true)
+    ->setIsRequired(false)
+    ->setIsRequiredForCreate(false)
+    ->setIsRequiredForEdit(false);
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
