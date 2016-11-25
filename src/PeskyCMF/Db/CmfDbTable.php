@@ -26,19 +26,13 @@ abstract class CmfDbTable extends Table {
 
     static public function getTimezonesList($asOptions = false) {
         if (self::$timeZonesList === null) {
-            $ds = self::getConnection();
-            $query = $ds->quoteDbExpr(
-                DbExpr::create('SELECT * from `pg_timezone_names` ORDER BY `utc_offset` ASC')->get()
-            );
-            self::$timeZonesList = $ds->query($query, Utils::FETCH_ALL);
+            self::$timeZonesList = \DateTimeZone::listIdentifiers();
         }
         if ($asOptions) {
             if (self::$timeZonesOptions === null) {
                 self::$timeZonesOptions = [];
-                foreach (self::$timeZonesList as $tzInfo) {
-                    $offset = preg_replace('%:\d\d$%', '', $tzInfo['utc_offset']);
-                    $offsetPrefix = $offset[0] === '-' ? '' : '+';
-                    self::$timeZonesOptions[$tzInfo['name']] = "({$offsetPrefix}{$offset}) {$tzInfo['name']}";
+                foreach (self::$timeZonesList as $tzName) {
+                    self::$timeZonesOptions[$tzName] = $tzName;
                 }
             }
             return self::$timeZonesOptions;
