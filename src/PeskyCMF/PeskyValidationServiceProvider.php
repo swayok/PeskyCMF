@@ -81,11 +81,13 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
             }
             $min = isset($parameters[0]) && is_numeric($parameters[0]) ? (int)$parameters[0] : 1;
             $max = isset($parameters[1]) && is_numeric($parameters[1]) ? (int)$parameters[1] : '';
-            return (
-                is_array($value)
-                && !empty($value['name'])
-                && preg_match('%\.[a-zA-Z0-9]{' . $min . ',' . $max . '}$%i', $value['name'])
-            );
+            if ($value instanceof UploadedFile) {
+                $extLen = strlen($value->getClientOriginalExtension());
+                return ($extLen >= $min && $extLen <= $max);
+            } else if (is_array($value) && !empty($value['name'])) {
+                return preg_match('%\.[a-zA-Z0-9]{' . $min . ',' . $max . '}$%i', $value['name']);
+            }
+            return false;
         });
         Validator::replacer('ext', function ($message, $attribute, $rule, $parameters) {
             return str_replace(
@@ -116,10 +118,10 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
             if ($max > 0 && $min > $max) {
                 throw new \InvalidArgumentException('Validation rule filesize requires that 2nd parameter (max) must be greater then 1st parameter (min) or 0.');
             }
-            if (!is_array($value)) {
-                return false;
-            }
             if (!($value instanceof UploadedFile)) {
+                if (!is_array($value)) {
+                    return false;
+                }
                 $value = new UploadedFile($value['tmp_name'], $value['name'], $value['type'], $value['size'], $value['error']);
             }
             if (!$value->getSize()) {
