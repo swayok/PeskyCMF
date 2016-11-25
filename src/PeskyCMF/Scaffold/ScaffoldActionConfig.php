@@ -380,6 +380,13 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
+     * Set relations to join.
+     * Notes:
+     * - For data grid you need to provide key-value pairs in same format as for columns selection:
+     *   ['Relation' => ['col1', 'col2', ...]]. More info: @see AbstractSelect::columns()
+     *   HAS MANY relations are forbidden.
+     * - For item edit form and item details view you need to provide only names of the relations you need to read
+     *   with the item. All types of relations allowed but there is no automatic possibility to get deeper relations
      * @param array $contains
      * @return $this
      */

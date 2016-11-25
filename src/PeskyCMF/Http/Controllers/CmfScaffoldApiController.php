@@ -504,10 +504,6 @@ class CmfScaffoldApiController extends Controller {
             'OFFSET' => (int)$request->query('start', 0),
             'ORDER' => []
         ];
-        /*if ($dataGridConfig->hasContains()) {
-            $conditions['CONTAIN'] = $dataGridConfig->getContains();
-        }*/
-        // todo: resolve contains
         $conditions = array_merge($dataGridConfig->getSpecialConditions(), $conditions);
         $searchInfo = $request->query('search');
         if (!empty($searchInfo) && !empty($searchInfo['value'])) {
@@ -534,7 +530,11 @@ class CmfScaffoldApiController extends Controller {
                 }
             }
         }
-        $result = $this->getTable()->select(array_keys($dataGridConfig->getDbFields()), $conditions);
+        $columnsToSelect = array_merge(
+            array_keys($dataGridConfig->getDbFields()),
+            $dataGridConfig->getContains()
+        );
+        $result = $this->getTable()->select($columnsToSelect, $conditions);
         $records = [];
         if ($result->count()) {
             $records = $dataGridConfig->prepareRecords($result->toArrays());

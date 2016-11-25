@@ -291,7 +291,10 @@ abstract class ScaffoldFieldConfig {
                 $linkLabel = $record[$relationAlias][$displayField];
             }
             return Tag::a($linkLabel)
-                ->setHref(routeToCmfItemDetails($relationConfig->getForeignTable(), $record[$columnConfig->getName()]))
+                ->setHref(routeToCmfItemDetails(
+                    $relationConfig->getForeignTable()->getName(),
+                    $record[$columnConfig->getName()]
+                ))
                 ->build();
         }
     }
