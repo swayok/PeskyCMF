@@ -2,12 +2,11 @@
 
 namespace PeskyCMF\Scaffold;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
-use PeskyORM\DbColumnConfig;
-use PeskyORM\DbRelationConfig;
+use PeskyORM\ORM\Column;
+use PeskyORM\ORM\Relation;
 use Swayok\Html\Tag;
 
 abstract class ScaffoldFieldConfig {
@@ -20,16 +19,16 @@ abstract class ScaffoldFieldConfig {
 
     /** @var string */
     protected $type = null;
-    const TYPE_STRING = DbColumnConfig::TYPE_STRING;
-    const TYPE_DATE = DbColumnConfig::TYPE_DATE;
-    const TYPE_TIME = DbColumnConfig::TYPE_TIME;
-    const TYPE_DATETIME = DbColumnConfig::TYPE_TIMESTAMP;
-    const TYPE_BOOL = DbColumnConfig::TYPE_BOOL;
-    const TYPE_TEXT = DbColumnConfig::TYPE_TEXT;
+    const TYPE_STRING = Column::TYPE_STRING;
+    const TYPE_DATE = Column::TYPE_DATE;
+    const TYPE_TIME = Column::TYPE_TIME;
+    const TYPE_DATETIME = Column::TYPE_TIMESTAMP;
+    const TYPE_BOOL = Column::TYPE_BOOL;
+    const TYPE_TEXT = Column::TYPE_TEXT;
     const TYPE_MULTILINE = 'multiline'; //< for non-html multiline text
     const TYPE_IMAGE = 'image';
-    const TYPE_JSON = DbColumnConfig::TYPE_JSON;
-    const TYPE_JSONB = DbColumnConfig::TYPE_JSONB;
+    const TYPE_JSON = Column::TYPE_JSON;
+    const TYPE_JSONB = Column::TYPE_JSONB;
     const TYPE_LINK = 'link';
     /**
      * @var null|string
@@ -78,11 +77,14 @@ abstract class ScaffoldFieldConfig {
     }
 
     /**
-     * @return DbColumnConfig
+     * @return Column
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldFieldException
      */
-    public function getTableColumnConfig() {
-        return $this->getScaffoldActionConfig()->getModel()->getTableColumn($this->getName());
+    public function getTableColumn() {
+        return $this->getScaffoldActionConfig()->getTable()->getTableStructure()->getColumn($this->getName());
     }
 
     /**
@@ -123,10 +125,11 @@ abstract class ScaffoldFieldConfig {
 
     /**
      * @return string
+     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     public function getType() {
         if (empty($this->type)) {
-            $this->setType($this->getTableColumnConfig()->getType());
+            $this->setType($this->getTableColumn()->getType());
         }
         return $this->type;
     }
@@ -193,7 +196,7 @@ abstract class ScaffoldFieldConfig {
 
     /**
      * @param callable $valueConverter 
-     *      - when $this->isDbField() === true: function ($value, DbColumnConfig $columnConfig, array $record, ScaffoldFieldConfig $fieldConfig) {}
+     *      - when $this->isDbField() === true: function ($value, Column $columnConfig, array $record, ScaffoldFieldConfig $fieldConfig) {}
      *      - when $this->isDbField() === false: function (array $record, ScaffoldFieldConfig $fieldConfig, ScaffolActionConfig $scaffoldActionConfig) {}
      * @return $this
      */
@@ -208,19 +211,18 @@ abstract class ScaffoldFieldConfig {
      * @param bool $ignoreValueConverter
      * @return mixed
      * @throws ScaffoldFieldException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
      */
     public function convertValue($value, array $record, $ignoreValueConverter = false) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
         if (!empty($valueConverter)) {
             if ($this->isDbField()) {
-                $value = call_user_func($valueConverter, $value, $this->getTableColumnConfig(), $record, $this);
+                $value = call_user_func($valueConverter, $value, $this->getTableColumn(), $record, $this);
             } else {
                 $value = call_user_func($valueConverter, $record, $this, $this->getScaffoldActionConfig());
             }
         } else if (!empty($value) || is_bool($value)) {
             if ($this->getType() === static::TYPE_LINK) {
-                return $this->buildLinkToExternalRecord($this->getTableColumnConfig(), $record);
+                return $this->buildLinkToExternalRecord($this->getTableColumn(), $record);
             } else {
                 return static::doDefaultValueConversionByType($value, $this->type);
             }
@@ -262,14 +264,14 @@ abstract class ScaffoldFieldConfig {
         return $value;
     }
 
-    public function buildLinkToExternalRecord(DbColumnConfig $columnConfig, array $record, $linkLabel = null) {
+    public function buildLinkToExternalRecord(Column $columnConfig, array $record, $linkLabel = null) {
         if (empty($record[$columnConfig->getName()])) {
             return '-';
         }
         $relationConfig = null;
         $relationAlias = null;
         foreach ($columnConfig->getRelations() as $alias => $relation) {
-            if (in_array($relation->getType(), [DbRelationConfig::BELONGS_TO, DbRelationConfig::HAS_ONE], true)) {
+            if (in_array($relation->getType(), [Relation::BELONGS_TO, Relation::HAS_ONE], true)) {
                 $relationConfig = $relation;
                 $relationAlias = $alias;
                 break;
@@ -278,13 +280,13 @@ abstract class ScaffoldFieldConfig {
         if (empty($relationConfig)) {
             throw new ScaffoldFieldException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
-        if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getForeignColumn()])) {
+        if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getDisplayColumnName()])) {
             return cmfTransGeneral('.item_details.field.no_relation');
         } else {
             if (empty($linkLabel)) {
-                $displayField = $relationConfig->getDisplayField();
+                $displayField = $relationConfig->getDisplayColumnName();
                 if (empty($record[$relationAlias][$displayField])) {
-                    $displayField = $relationConfig->getForeignColumn();
+                    $displayField = $relationConfig->getDisplayColumnName();
                 }
                 $linkLabel = $record[$relationAlias][$displayField];
             }

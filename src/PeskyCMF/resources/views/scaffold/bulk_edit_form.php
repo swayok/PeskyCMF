@@ -8,7 +8,7 @@
  */
 $formId = "scaffold-bulk-edit-form-{$idSuffix}";
 $pkColName = $model->getPkColumnName();
-$backUrl = routeToCmfItemsTable('cmf_items_table', $tableNameForRoutes);
+$backUrl = routeToCmfItemsTable($tableNameForRoutes);
 ?>
 
 <script type="text/html" id="bulk-edit-form-tpl">

@@ -3,13 +3,13 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyORM\DbExpr;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
 
@@ -51,14 +51,14 @@ class DataGridConfig extends ScaffoldActionConfig {
     protected $allowFilteredItemsEditing = false;
     /** @var bool */
     protected $allowFilteredItemsDelete = false;
-    /** @var callable|null */
+    /** @var \Closure|null */
     protected $bulkActionsToolbarItems = null;
-    /** @var Tag[]|callable */
+    /** @var \Closure */
     protected $rowActions = [];
     /** @var array */
     protected $additionalDataTablesConfig = [];
     /** @var bool */
-    protected $isRowActionsFloating = true;
+    protected $isRowActionsFloating = false;
     /** @var bool */
     protected $isRowActionsColumnFixed = true;
     /** @var bool */
@@ -66,12 +66,10 @@ class DataGridConfig extends ScaffoldActionConfig {
 
     const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
-    public function __construct(CmfDbTable $model, ScaffoldSectionConfig $scaffoldSectionConfig) {
-        parent::__construct($model, $scaffoldSectionConfig);
+    public function __construct(TableInterface $table, ScaffoldSectionConfig $scaffoldSectionConfig) {
+        parent::__construct($table, $scaffoldSectionConfig);
         $this->limit = CmfConfig::getInstance()->rows_per_page();
-        if ($model->getOrderField()) {
-            $this->setOrderBy($model->getOrderField(), $model->getOrderDirection());
-        }
+        $this->setOrderBy($table->getPkColumnName());
     }
 
     protected function createFieldRendererConfig() {
@@ -98,7 +96,6 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     public function setInvisibleFields(array $fieldNames) {
         foreach ($fieldNames as $fieldName) {
@@ -193,11 +190,10 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param string $orderBy
      * @param null $direction
      * @return $this
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws ScaffoldActionException
      */
     public function setOrderBy($orderBy, $direction = null) {
-        if (!($orderBy instanceof DbExpr) && !$this->model->hasTableColumn($orderBy)) {
+        if (!($orderBy instanceof DbExpr) && !$this->table->getTableStructure()->hasColumn($orderBy)) {
             throw new ScaffoldActionException($this, "Unknown column [$orderBy]");
         }
         if (!empty($direction)) {
@@ -322,6 +318,7 @@ class DataGridConfig extends ScaffoldActionConfig {
             throw new \LogicException(get_class($this) . '->bulkActionsToolbarItems closure must return an array');
         }
         /** @var Tag|string $item */
+        /** @var array $bulkActionsToolbarItems */
         foreach ($bulkActionsToolbarItems as &$item) {
             if (is_object($item)) {
                 if (method_exists($item, 'build')) {
@@ -408,9 +405,6 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param array $records
      * @return array
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
-     * @throws \PeskyORM\Exception\DbTableConfigException
      */
     public function prepareRecords(array $records) {
         foreach ($records as $idx => &$record) {
@@ -434,56 +428,40 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param Tag[]|callable $arrayOrCallable - callable: function (ScaffolActionConfig $scaffoldAction) { return []; }
+     * @param \Closure $rowActionsBuilder - function (ScaffolActionConfig $scaffoldAction) { return []; }
      * Examples:
      * - call some url via ajax blocking data grid while waiting for response and then run "callback(json)"
-        Tag::a()
-            ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
-            ->setClass('row-action text-success')
-            ->setTitle(trans('path.to.translation'))
-            ->setDataAttr('toggle', 'tooltip')
-            ->setDataAttr('container', '#section-content .content') //< tooltip container
-            ->setDataAttr('block-datagrid', '1')
-            ->setDataAttr('action', 'request')
-            ->setDataAttr('method', 'put')
-            ->setDataAttr('url', route('route', [], false))
-            ->setDataAttr('data', 'id=:id:')
-            ->setDataAttr('on-success', 'callbackFuncitonName')
-            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-            ->setHref('javascript: void(0)')
+        * Tag::a()
+            * ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
+            * ->setClass('row-action text-success')
+            * ->setTitle(trans('path.to.translation'))
+            * ->setDataAttr('toggle', 'tooltip')
+            * ->setDataAttr('container', '#section-content .content') //< tooltip container
+            * ->setDataAttr('block-datagrid', '1')
+            * ->setDataAttr('action', 'request')
+            * ->setDataAttr('method', 'put')
+            * ->setDataAttr('url', route('route', [], false))
+            * ->setDataAttr('data', 'id=:id:')
+            * ->setDataAttr('on-success', 'callbackFuncitonName')
+            * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+            * ->setHref('javascript: void(0)')
      * - redirect
-        Tag::a()
-            ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
-            ->setClass('row-action text-primary')
-            ->setTitle(trans('path.to.translation'))
-            ->setDataAttr('toggle', 'tooltip')
-            ->setDataAttr('container', '#section-content .content') //< tooltip container
-            ->setHref(route('route', [], false))
-            ->setTarget('_blank')
+        * Tag::a()
+            * ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
+            * ->setClass('row-action text-primary')
+            * ->setTitle(trans('path.to.translation'))
+            * ->setDataAttr('toggle', 'tooltip')
+            * ->setDataAttr('container', '#section-content .content') //< tooltip container
+            * ->setHref(route('route', [], false))
+            * ->setTarget('_blank')
      *
      * @return $this
      * @throws \Swayok\Html\HtmlTagException
      * @throws ScaffoldActionException
      */
-    public function setRowActions($arrayOrCallable) {
-        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
-            throw new ScaffoldActionException($this, 'setRowActions($arrayOrCallable) accepts only array or callable');
-        }
-        if (!is_callable($arrayOrCallable)) {
-            foreach ($arrayOrCallable as &$rowAction) {
-                if (is_object($rowAction)) {
-                    if (method_exists($rowAction, 'build')) {
-                        $rowAction = $rowAction->build();
-                    } else if (method_exists($rowAction, '__toString')) {
-                        $rowAction = $rowAction->__toString();
-                    } else {
-                        throw new ScaffoldActionException($this, 'Row action is an object without possibility to convert it to string');
-                    }
-                }
-            }
-        }
-        $this->rowActions = $arrayOrCallable;
+    public function setRowActions(\Closure $rowActionsBuilder) {
+        $this->rowActions = $rowActionsBuilder;
         return $this;
     }
 
@@ -549,7 +527,6 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @return ScaffoldActionConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     public function addField($name, $config = null) {
         $config = !$config && $name === static::ROW_ACTIONS_COLUMN_NAME
@@ -572,7 +549,6 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */

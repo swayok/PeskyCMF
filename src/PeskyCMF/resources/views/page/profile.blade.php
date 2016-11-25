@@ -42,7 +42,7 @@
                             <input class="form-control" value="{{ $admin->$loginColumn }}" name="{{ $loginColumn }}" id="{{ $loginColumn }}-input" type="text" required="required">
                         </div>
                     @endif
-                    @if ($admin->_hasField('email'))
+                    @if ($admin::hasColumn('email'))
                         <?php $emailRequired = !$admin::getColumn('email')->isValueCanBeNull(); ?>
                         <div class="form-group">
                             <label for="email-input">{{ cmfTransCustom('.page.profile.input.email') . ($emailRequired ? '*' : '') }}</label>
@@ -53,13 +53,13 @@
                         <label for="new-password-input">{{ cmfTransCustom('.page.profile.input.new_password') }}</label>
                         <input class="form-control" value="" name="new_password" id="new-password-input" type="password" autocomplete="off">
                     </div>
-                    @if ($admin->_hasField('name'))
+                    @if ($admin::hasColumn('name'))
                         <div class="form-group">
                             <label for="name-input">{{ cmfTransCustom('.page.profile.input.name') }}</label>
                             <input class="form-control" value="{{ $admin->name }}" name="name" id="name-input" type="text">
                         </div>
                     @endif
-                    @if ($admin->_hasField('language'))
+                    @if ($admin::hasColumn('language'))
                         <div class="form-group">
                             <label for="language-input">{{ cmfTransCustom('.page.profile.input.language') }}</label>
                             <select class="form-control" data-value=" {{ $admin->language }}" name="language" id="language-input" required="required">
@@ -69,11 +69,20 @@
                             </select>
                         </div>
                     @endif
-                    @if ($admin->_hasField('timezone'))
+                    @if ($admin::hasColumn('timezone'))
                         <div class="form-group">
                             <label for="timezone-input">{{ cmfTransCustom('.page.profile.input.timezone') }}</label>
-                            <select class="form-control" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input" required="required">
-                                @foreach(\PeskyCMF\Db\CmfDbTable::getTimezonesList(true) as $value => $label)
+                            <?php $isRequired = !$admin::getColumn('timezone')->allowsNullValues(); ?>
+                            <select class="form-control" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input"
+                            @if ($isRequired) required="required" @endif>
+                                <?php
+                                    $usersTable = \PeskyCMF\Config\CmfConfig::getInstance()->getModelByTableName(
+                                        \PeskyCMF\Config\CmfConfig::getInstance()->users_table_name()
+                                    );
+                                ?>
+                                <?php if (!$isRequired) ?>
+                                <option value="">{{ cmfTransCustom('.page.profile.input.no_timezone') }}</option>
+                                @foreach($usersTable::getTimezonesList(true) as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>

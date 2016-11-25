@@ -8,7 +8,7 @@
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 $fieldConfigs = $itemDetailsConfig->getFields();
-$backUrl = routeToCmfItemsTable('cmf_items_table', $tableNameForRoutes);
+$backUrl = routeToCmfItemsTable($tableNameForRoutes);
 
 $jsInitiator = '';
 if ($itemDetailsConfig->hasJsInitiator()) {

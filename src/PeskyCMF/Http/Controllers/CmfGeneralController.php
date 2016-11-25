@@ -2,21 +2,19 @@
 
 namespace PeskyCMF\Http\Controllers;
 
-use App\Db\Admin\Admin;
+use App\Db\Admins\Admin;
 use Auth;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Traits\DataValidationHelper;
-use PeskyORM\DbExpr;
-use PeskyORM\DbModel;
-use PeskyORM\DbObject;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\ORM\Record;
 use Redirect;
 use Swayok\Utils\Set;
 
@@ -82,30 +80,30 @@ class CmfGeneralController extends Controller {
 
     /**
      * @param Request $request
-     * @param DbObject|Authenticatable $admin
+     * @param Record|Authenticatable $admin
      * @return array|\Illuminate\Http\JsonResponse
      */
-    protected function validateAndGetAdminProfileUpdates(Request $request, DbObject $admin) {
+    protected function validateAndGetAdminProfileUpdates(Request $request, Record $admin) {
         $validationRules = [
             'old_password' => 'required',
             'new_password' => 'min:6',
         ];
         $fieldsToUpdate = [];
-        if ($admin->_hasField('language')) {
+        if ($admin::hasColumn('language')) {
             $validationRules['language'] = 'required|in:' . implode(CmfConfig::getInstance()->locales());
             $fieldsToUpdate[] = 'language';
         }
-        if ($admin->_hasField('name')) {
+        if ($admin::hasColumn('name')) {
             $validationRules['name'] = 'max:200';
             $fieldsToUpdate[] = 'name';
         }
-        if ($admin->_hasField('timezone')) {
+        if ($admin::hasColumn('timezone')) {
             $validationRules['timezone'] = 'required|exists2:pg_timezone_names,name';
             $fieldsToUpdate[] = 'timezone';
         }
         $usersTable = CmfConfig::getInstance()->users_table_name();
         $userLoginCol = CmfConfig::getInstance()->user_login_column();
-        if ($admin->_hasField('email')) {
+        if ($admin::hasColumn('email')) {
             if ($userLoginCol === 'email') {
                 $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->getAuthIdentifier()},id";
             } else {
@@ -216,7 +214,7 @@ class CmfGeneralController extends Controller {
         if (!empty($user)) {
             return view(CmfConfig::getInstance()->replace_password_view(), [
                 'accessKey' => $accessKey,
-                'userId' => $user->_getPkValue()
+                'userId' => $user->getPrimaryKeyValue()
             ])->render();
         } else {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
@@ -278,7 +276,7 @@ class CmfGeneralController extends Controller {
             $user = Auth::guard()->getLastAttempted();
             $data = [
                 'url' => route('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
-                'user' => $user->toPublicArrayWithoutFiles()
+                'user' => $user->toArrayWithoutFiles()
             ];
             $subject = cmfTransCustom('.forgot_password.email_subject');
             $from = CmfConfig::getInstance()->system_email_address();
@@ -302,9 +300,9 @@ class CmfGeneralController extends Controller {
             'password_confirm' => 'required|min:6|same:password'
         ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
-        if (!empty($user) && $user->_getPkValue() !== $request->data('id')) {
+        if (!empty($user) && $user->getPrimaryKeyValue() !== $request->data('id')) {
             /** @var CmfDbRecord $user */
-            $user->begin()->_setFieldValue('password', $request->data('password'));
+            $user->begin()->updateValue('password', $request->data('password'), false);
             if ($user->commit()) {
                 return cmfServiceJsonResponse()
                     ->setMessage(cmfTransCustom('.replace_password.password_replaced'))
@@ -329,7 +327,7 @@ class CmfGeneralController extends Controller {
 
     public function getAdminInfo() {
         $admin = $this->getAdmin();
-        $adminData = $admin->toPublicArray();
+        $adminData = $admin->toArray();
         if (!empty($adminData['role'])) {
             $adminData['_role'] = $admin->role;
             $role = ($admin->is_superadmin ? 'superadmin' : $admin->role);

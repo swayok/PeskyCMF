@@ -2,7 +2,7 @@
 
 namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
 
-use PeskyCMF\Config\CmfConfig;
+use App\<?php echo $sectionName; ?>\AdminConfig;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
@@ -45,7 +45,7 @@ class AdminsTableStructure extends TableStructure {
 
     private function ip() {
         return Column::create(Column::TYPE_IPV4_ADDRESS)
-            ->disallowsNullValues();
+            ->allowsNullValues();
     }
 
     private function is_superadmin() {
@@ -56,21 +56,31 @@ class AdminsTableStructure extends TableStructure {
 
     private function role() {
         return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues(CmfConfig::getInstance()->roles_list())
+            ->setAllowedValues(AdminConfig::roles_list())
             ->disallowsNullValues()
-            ->setDefaultValue(CmfConfig::getInstance()->default_role());
+            ->setDefaultValue(AdminConfig::default_role());
     }
 
     private function language() {
         return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues(CmfConfig::getInstance()->locales())
+            ->setAllowedValues(AdminConfig::locales())
             ->disallowsNullValues()
-            ->setDefaultValue(CmfConfig::getInstance()->default_locale());
+            ->setDefaultValue(AdminConfig::default_locale());
+    }
+
+    private function timezone() {
+        return Column::create(Column::TYPE_STRING)
+            ->allowsNullValues();
     }
 
     private function ParentAdmin() {
-        return Relation::create('parent_id', Relation::BELONGS_TO, __CLASS__, 'id')
-            ->setDisplayColumnName(CmfConfig::getInstance()->user_login_column());
+        return Relation::create(
+                'parent_id',
+                Relation::BELONGS_TO,
+                AdminConfig::getModelByTableName(static::getTableName()),
+                'id'
+            )
+            ->setDisplayColumnName(AdminConfig::user_login_column());
     }
 
 }

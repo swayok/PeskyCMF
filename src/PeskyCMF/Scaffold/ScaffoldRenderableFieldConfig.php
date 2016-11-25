@@ -53,7 +53,7 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
                 'fieldConfig' => $this,
                 'rendererConfig' => $configOrString,
                 'actionConfig' => $this->getScaffoldActionConfig(),
-                'model' => $this->getScaffoldActionConfig()->getModel(),
+                'model' => $this->getScaffoldActionConfig()->getTable(),
             ]))->render() . $configOrString->getJavaScriptBlocks();
         } else {
             throw new ScaffoldFieldException($this, 'Renderer function returned unsopported result. String or ScaffoldFieldRendererConfig object expected');

@@ -110,6 +110,7 @@ return [
                 'language' => 'Language',
                 'name' => 'Name',
                 'timezone' => 'Time zone',
+                'no_timezone' => '[Not selected]',
                 'timezone_search' => 'Search time zone by name or offset',
             ],
             'saved' => 'Administrator profile updated',

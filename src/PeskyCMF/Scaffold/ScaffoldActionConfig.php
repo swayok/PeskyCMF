@@ -2,27 +2,37 @@
 
 namespace PeskyCMF\Scaffold;
 
-use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig;
 use PeskyCMF\Scaffold\Form\FormFieldConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
+use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 
 abstract class ScaffoldActionConfig {
-    /** @var CmfDbTable */
-    protected $model;
-    /** @var array */
+    /**
+     * @var TableInterface
+     */
+    protected $table;
+    /**
+     * @var array
+     */
     protected $fieldsConfigs = [];
     /**
      * Fields list
      * @var array|ScaffoldFieldConfig[]
      */
     protected $fields = [];
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $title;
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $contains = [];
-    /** @var null|callable */
+    /**
+     * @var null|\Closure
+     */
     protected $defaultFieldRenderer = null;
     /**
      * Container width (percents)
@@ -30,39 +40,51 @@ abstract class ScaffoldActionConfig {
      */
     protected $width = 100;
     /**
-     * @var callable|null
+     * @var \Closure|null
      */
     protected $toolbarItems = null;
-    /** @var array|callable */
+    /**
+     * @var array|\Closure
+     */
     protected $specialConditions = [];
-    /** @var ScaffoldSectionConfig */
+    /**
+     * @var ScaffoldSectionConfig
+     */
     protected $scaffoldSection;
-    /** @var array|callable */
+    /**
+     * @var array|\Closure
+     */
     protected $dataToAddToRecord;
-    /** @var array|callable */
+    /**
+     * @var array|\Closure
+     */
     protected $dataToSendToView;
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $view = null;
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $jsInitiator = null;
 
     /**
-     * @param CmfDbTable $model
+     * @param TableInterface $table
      * @param ScaffoldSectionConfig $scaffoldSection
      * @return $this
      */
-    static public function create(CmfDbTable $model, ScaffoldSectionConfig $scaffoldSection) {
+    static public function create(TableInterface $table, ScaffoldSectionConfig $scaffoldSection) {
         $class = get_called_class();
-        return new $class($model, $scaffoldSection);
+        return new $class($table, $scaffoldSection);
     }
 
     /**
      * ScaffoldActionConfig constructor.
-     * @param CmfDbTable $model
+     * @param TableInterface $table
      * @param ScaffoldSectionConfig $scaffoldSection
      */
-    public function __construct(CmfDbTable $model, ScaffoldSectionConfig $scaffoldSection) {
-        $this->model = $model;
+    public function __construct(TableInterface $table, ScaffoldSectionConfig $scaffoldSection) {
+        $this->table = $table;
         $this->scaffoldSection = $scaffoldSection;
     }
 
@@ -82,7 +104,6 @@ abstract class ScaffoldActionConfig {
      * @param array $fields
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws ScaffoldActionException
      */
     public function setFields(array $fields) {
@@ -162,12 +183,11 @@ abstract class ScaffoldActionConfig {
      * @param string $name
      * @param null|ScaffoldFieldConfig $config
      * @return $this
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
     public function addField($name, $config = null) {
-        if ((!$config || $config->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
+        if ((!$config || $config->isDbField()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
         }
         if (empty($config)) {
@@ -189,10 +209,10 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return CmfDbTable
+     * @return TableInterface
      */
-    public function getModel() {
-        return $this->model;
+    public function getTable() {
+        return $this->table;
     }
 
     /**
@@ -216,11 +236,9 @@ abstract class ScaffoldActionConfig {
      * @param array $record
      * @return array
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
      */
     public function prepareRecord(array $record) {
+        /** @noinspection UnnecessaryParenthesesInspection */
         $permissions = [
             '___delete_allowed' => (
                 $this->isDeleteAllowed()
@@ -237,14 +255,14 @@ abstract class ScaffoldActionConfig {
         ];
         $customData = $this->getCustomDataForRecord($record);
         $dbFields = $this->getDbFields();
-        $pkKey = $this->getModel()->getPkColumnName();
+        $pkKey = $this->getTable()->getPkColumnName();
         // backup values
         $recordWithBackup = [];
         foreach ($record as $key => $value) {
             $recordWithBackup[$key] = $recordWithBackup['__' . $key] = $value;
         }
         foreach ($record as $key => $notUsed) {
-            if ($this->getModel()->hasTableRelation($key)) {
+            if ($this->getTable()->getTableStructure()->hasRelation($key)) {
                 continue;
             }
             if (empty($dbFields[$key])) {
@@ -432,7 +450,10 @@ abstract class ScaffoldActionConfig {
         if (!is_array($toolbarItems)) {
             throw new \LogicException(get_class($this) . '->toolbarItems closure must return an array');
         }
-        /** @var Tag|string $item */
+        /**
+         * @var array $toolbarItems
+         * @var Tag|string $item
+         */
         foreach ($toolbarItems as &$item) {
             if (is_object($item)) {
                 if (method_exists($item, 'build')) {

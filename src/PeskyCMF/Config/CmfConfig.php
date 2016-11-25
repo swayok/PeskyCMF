@@ -625,7 +625,7 @@ class CmfConfig extends ConfigsContainer {
 
     /**
      * Get ScaffoldSectionConfig instance
-     * @param CmfDbTable $table - a model to be used in ScaffoldSectionConfig
+     * @param TableInterface $table - a model to be used in ScaffoldSectionConfig
      * @param string $tableNameInRoute - table name passed via route parameter, may differ from $model->getTableName()
      *      and added here to be used in child configs when you need to use scaffolds with fake table names.
      *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
@@ -635,23 +635,23 @@ class CmfConfig extends ConfigsContainer {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static public function getScaffoldConfig(CmfDbTable $table, $tableNameInRoute) {
+    static public function getScaffoldConfig(TableInterface $table, $tableNameInRoute) {
         /** @var ClassBuilder $builderClass */
         $builderClass = static::getDbClassesBuilderClass();
         $className = preg_replace(
-            '%\\' . $builderClass::makeTableClassName('([A-Za-z0-9]+?)') . '$%',
-            '$1' . static::scaffold_config_class_suffix(),
+            '%\\\([A-Za-z0-9]+?)' . $builderClass::makeTableClassName('') . '$%',
+            '\\\$1' . static::scaffold_config_class_suffix(),
             get_class($table)
         );
         return new $className($table);
     }
 
     /**
-     * Get CmfDbTable instance for $tableName
+     * Get TableInterface instance for $tableName
      * Note: can be ovewritted to allow usage of fake tables in resources routes
      * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
      * @param string $tableName
-     * @return CmfDbTable|TableInterface
+     * @return TableInterface
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
@@ -670,7 +670,11 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function getDbClassesNamespaceForTable($tableName) {
-        return static::base_db_table_class() . '\\' . StringUtils::classify($tableName);
+        static $namespace = null;
+        if ($namespace === null) {
+            $namespace = '\\' . (new \ReflectionClass(static::base_db_table_class()) )->getNamespaceName() . '\\';
+        }
+        return $namespace . StringUtils::classify($tableName);
     }
 
     /**
