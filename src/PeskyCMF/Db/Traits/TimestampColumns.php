@@ -1,8 +1,6 @@
 <?php
 
 namespace PeskyCMF\Db\Traits;
-use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbTable;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 

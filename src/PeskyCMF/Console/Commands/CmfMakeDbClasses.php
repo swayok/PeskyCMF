@@ -8,6 +8,8 @@ use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;
+use PeskyCMF\Db\Traits\IsPublishedColumn;
+use PeskyCMF\Db\Traits\PasswordColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyCMF\Db\Traits\UserAuthColumns;
 use PeskyORM\Core\DbConnectionsManager;
@@ -16,14 +18,14 @@ use PeskyORM\ORM\TableStructure;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 
-class MakeDbClasses extends Command {
+class CmfMakeDbClasses extends Command {
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:db-classes {table_name} {schema?} {database_classes_app_subfolder=Db}'
+    protected $signature = 'cmf:make-db-classes {table_name} {schema?} {database_classes_app_subfolder=Db}'
                             . ' {--overwrite= : 1|0|y|n|yes|no; what to do if classes already exist}'
                             . ' {--only= : table|record|structure; create only specified class}'
                             . ' {--connection= : name of connection to use}';
@@ -73,11 +75,14 @@ class MakeDbClasses extends Command {
      * @throws \InvalidArgumentException
      */
     public function handle() {
-        $info = $this->preapareAndGetDataForViews();
-
-        if ($this->hasOption('connection')) {
-            $connectionInfo = config('database.connections.' . $this->option('connection'));
-            $connection = DbConnectionsManager::createConnectionFromArray($this->option('connection'), $connectionInfo);
+        $connectionName = $this->option('connection');
+        if (!empty($connectionName)) {
+            $connectionInfo = config('database.connections.' . $connectionName);
+            if (!is_array($connectionInfo)) {
+                $this->line("- There is no configuration info for connection '{$connectionName}'");
+                return;
+            }
+            $connection = DbConnectionsManager::createConnectionFromArray($connectionName, $connectionInfo);
         } else {
             $connection = DbConnectionsManager::getConnection('default');
         }
@@ -85,9 +90,9 @@ class MakeDbClasses extends Command {
         $builderClass = $this->getClassBuilderClass();
         $builder = new $builderClass(
             $this->argument('table_name'),
-            $this->argument('schema'),
             $connection
         );
+        $builder->setDbSchemaName($this->argument('schema'));
 
         $only = $this->option('only');
         $overwrite = null;
@@ -96,6 +101,8 @@ class MakeDbClasses extends Command {
         } else if (in_array($this->option('overwrite'), ['0', 'no', 'n'], true)) {
             $overwrite = false;
         }
+
+        $info = $this->preapareAndGetDataForViews();
 
         if (!$only || $only === 'table') {
             $this->createTableClassFile($builder, $info, $overwrite);
@@ -123,9 +130,9 @@ class MakeDbClasses extends Command {
             'record_class_name' => $builderClass::makeRecordClassName($tableName),
             'structure_class_name' => $builderClass::makeTableStructureClassName($tableName),
         ];
-        $dataForViews['table_file_path'] = $dataForViews['folder'] . $dataForViews['tableClassName'] . '.php';
-        $dataForViews['record_file_path'] = $dataForViews['folder'] . $dataForViews['recordClassName'] . '.php';
-        $dataForViews['structure_file_path'] = $dataForViews['folder'] . $dataForViews['structureClassName'] . '.php';
+        $dataForViews['table_file_path'] = $dataForViews['folder'] . $dataForViews['table_class_name'] . '.php';
+        $dataForViews['record_file_path'] = $dataForViews['folder'] . $dataForViews['record_class_name'] . '.php';
+        $dataForViews['structure_file_path'] = $dataForViews['folder'] . $dataForViews['structure_class_name'] . '.php';
         Folder::load($dataForViews['folder'], true, 0775);
         return $dataForViews;
     }
@@ -159,15 +166,17 @@ class MakeDbClasses extends Command {
     /**
      * @return array (
      *      NameOfTrait1::class,
-     *      NameOfTrait2::class => ['col1_name', 'col2_name']
+     *      NameOfTrait2::class,
      * )
      */
     protected function getTraitsForTableConfig() {
         return [
-            UserAuthColumns::class,
             IdColumn::class,
+            UserAuthColumns::class,
+            PasswordColumn::class,
             AdminIdColumn::class,
             IsActiveColumn::class,
+            IsPublishedColumn::class,
             TimestampColumns::class
         ];
     }
