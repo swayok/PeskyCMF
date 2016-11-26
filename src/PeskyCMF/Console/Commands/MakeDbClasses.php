@@ -3,7 +3,6 @@
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\AdminIdColumn;
@@ -11,24 +10,23 @@ use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyCMF\Db\Traits\UserAuthColumns;
-use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyORM\Core\DbExpr;
+use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\TableStructure;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
-use Swayok\Utils\Set;
 
 class MakeDbClasses extends Command {
 
-    use OpenFileInPhpStormTrait;
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:db_classes {table_name} {schema?} {--with-scaffold}'
-                            . ' {--overwrite= : 1|0|yes|no; what to do if classes already exist}'
-                            . ' {--only= : model|object|table_config|scaffold; create only specified class}';
+    protected $signature = 'make:db-classes {table_name} {schema?} {database_classes_app_subfolder=Db}'
+                            . ' {--overwrite= : 1|0|y|n|yes|no; what to do if classes already exist}'
+                            . ' {--only= : table|record|structure; create only specified class}'
+                            . ' {--connection= : name of connection to use}';
 
     /**
      * The console command description.
@@ -37,123 +35,125 @@ class MakeDbClasses extends Command {
      */
     protected $description = 'Create classes for DB table.';
 
-    protected $dbModelView = 'cmf::console.db_model';
-    protected $dbObjectView = 'cmf::console.db_object';
-    protected $dbTableStructureView = 'cmf::console.db_table_config';
-    protected $scaffoldConfigView = 'cmf::console.db_scaffold_config';
+    protected function getTableParentClass() {
+        $abstractTableClass = $this->buildBaseNamespace() . '\\AbstractTable';
+        if (class_exists($abstractTableClass)) {
+            return $abstractTableClass;
+        }
+        return CmfDbTable::class;
+    }
 
-    protected $modelParentClass = CmfDbTable::class;
-    protected $objectParentClass = CmfDbRecord::class;
-    protected $tableStructureParentClass = TableStructure::class;
-    protected $scaffoldConfigParentClass = ScaffoldSectionConfig::class;
+    protected function getRecordParentClass() {
+        $abstractRecordClass = $this->buildBaseNamespace() . '\\AbstractRecord';
+        if (class_exists($abstractRecordClass)) {
+            return $abstractRecordClass;
+        }
+        return CmfDbRecord::class;
+    }
+
+    protected function getTableStructureParentClass() {
+        $abstractStructureClass = $this->buildBaseNamespace() . '\\AbstractTableStructure';
+        if (class_exists($abstractStructureClass)) {
+            return $abstractStructureClass;
+        }
+        return TableStructure::class;
+    }
+
+    protected function getClassBuilderClass() {
+        $customClassBuilderClass = $this->buildBaseNamespace() . '\\ClassBuilder';
+        if (class_exists($customClassBuilderClass)) {
+            return $customClassBuilderClass;
+        }
+        return ClassBuilder::class;
+    }
 
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @throws \InvalidArgumentException
      */
     public function handle() {
-        $dataForViews = $this->preapareAndGetDataForViews();
-        if (empty($dataForViews)) {
-            return;
+        $info = $this->preapareAndGetDataForViews();
+
+        if ($this->hasOption('connection')) {
+            $connectionInfo = config('database.connections.' . $this->option('connection'));
+            $connection = DbConnectionsManager::createConnectionFromArray($this->option('connection'), $connectionInfo);
+        } else {
+            $connection = DbConnectionsManager::getConnection('default');
         }
+        /** @var ClassBuilder $builder */
+        $builderClass = $this->getClassBuilderClass();
+        $builder = new $builderClass(
+            $this->argument('table_name'),
+            $this->argument('schema'),
+            $connection
+        );
 
         $only = $this->option('only');
-
-        if (!$only || $only === 'model') {
-            $this->createDbModel($dataForViews);
-        }
-        if (!$only || $only === 'object') {
-            $this->createDbObject($dataForViews);
-        }
-        if (!$only || $only === 'table_config') {
-            $this->createDbTableStructure($dataForViews);
-        }
-        if ((!$only && $this->option('with-scaffold')) || $only === 'scaffold') {
-            $this->createScaffoldConfig($dataForViews);
+        $overwrite = null;
+        if (in_array($this->option('overwrite'), ['1', 'yes', 'y'], true)) {
+            $overwrite = true;
+        } else if (in_array($this->option('overwrite'), ['0', 'no', 'n'], true)) {
+            $overwrite = false;
         }
 
-        $this->openFileInPhpStorm($dataForViews['files']['table_config']);
+        if (!$only || $only === 'table') {
+            $this->createTableClassFile($builder, $info, $overwrite);
+        }
+        if (!$only || $only === 'record') {
+            $this->createRecordClassFile($builder, $info, $overwrite);
+        }
+        if (!$only || $only === 'structure') {
+            $this->createTableStructureClassFile($builder, $info, $overwrite);
+        }
 
         $this->line('Done');
     }
 
     protected function preapareAndGetDataForViews() {
         $tableName = $this->argument('table_name');
-        $modelClass = call_user_func([$this->modelParentClass, 'getFullModelClassByTableName'], $tableName);
-        $folder = $this->getFolderAndValidate($tableName, $modelClass);
-        if (empty($folder)) {
-            return false;
-        }
-        $tableSchema = $this->getDbSchema();
-        $columns = $this->getColumns($tableName, $tableSchema);
-        if (empty($columns)) {
-            return false;
-        }
+        $namespace = $this->buildNamespaceForClasses($tableName);
+        /** @var ClassBuilder $builderClass */
+        $builderClass = $this->getClassBuilderClass();
         $dataForViews = [
-            'folder' => $folder,
+            'folder' => $this->getFolder($tableName, $namespace),
             'table' => $tableName,
-            'schema' => $tableSchema,
-            'columns' => $columns,
-            'modelParentClass' => $this->modelParentClass,
-            'objectParentClass' => $this->objectParentClass,
-            'tableConfigParentClass' => $this->tableStructureParentClass,
-            'scaffoldConfigParentClass' => $this->scaffoldConfigParentClass,
-            'modelClassName' => call_user_func([$this->modelParentClass, 'getModelNameByTableName'], $tableName),
-            'objectClassName' => call_user_func([$this->modelParentClass, 'getObjectNameByTableName'], $tableName),
-            'tableConfigClassName' => call_user_func([$this->modelParentClass, 'getTableConfigNameByTableName'], $tableName),
-            'scaffoldConfigClassName' => CmfConfig::getInstance()->getScaffoldConfigNameByTableName($tableName),
-            'traitsForTableConfig' => $this->getTraitsForTableConfig()
+            'namespace' => $namespace,
+            'table_class_name' => $builderClass::makeTableClassName($tableName),
+            'record_class_name' => $builderClass::makeRecordClassName($tableName),
+            'structure_class_name' => $builderClass::makeTableStructureClassName($tableName),
         ];
-        $dataForViews['modelAlias'] = $dataForViews['objectClassName'];
-        $dataForViews['namespace'] = call_user_func([$this->modelParentClass, 'getRootNamespace']) . '\\' . $dataForViews['objectClassName'];
-        $dataForViews['files']['model'] = $folder . DIRECTORY_SEPARATOR . $dataForViews['modelClassName'] . '.php';
-        $dataForViews['files']['object'] = $folder . DIRECTORY_SEPARATOR . $dataForViews['objectClassName'] . '.php';
-        $dataForViews['files']['table_config'] = $folder . DIRECTORY_SEPARATOR . $dataForViews['tableConfigClassName'] . '.php';
-        $dataForViews['files']['scaffold_config'] = $folder . DIRECTORY_SEPARATOR . $dataForViews['scaffoldConfigClassName'] . '.php';
-        Folder::load($folder, true, 0775);
+        $dataForViews['table_file_path'] = $dataForViews['folder'] . $dataForViews['tableClassName'] . '.php';
+        $dataForViews['record_file_path'] = $dataForViews['folder'] . $dataForViews['recordClassName'] . '.php';
+        $dataForViews['structure_file_path'] = $dataForViews['folder'] . $dataForViews['structureClassName'] . '.php';
+        Folder::load($dataForViews['folder'], true, 0775);
         return $dataForViews;
     }
 
-    protected function getColumns($tableName, $tableSchema = 'public') {
-        $dataSource = call_user_func([$this->modelParentClass, '_getDataSource'], 'default');
-        $query = "SELECT * FROM `information_schema`.`columns` WHERE `table_name` = ``$tableName`` AND `table_schema` = ``$tableSchema``";
-        $columns = $dataSource->processRecords($dataSource->query(DbExpr::create($query)));
-        if (empty($columns)) {
-            $this->line("Table [$tableName] possibly not exists");
-            return false;
-        }
-        $columns = Set::combine($columns, '/column_name', '/.');
-        return $columns;
+    protected function buildBaseNamespace() {
+        $subfolder = trim(preg_replace('%[\/]+%', '\\', $this->argument('database_classes_app_subfolder')), ' /\\');
+        return rtrim('App\\' . $subfolder, ' /\\');
     }
 
-    protected function getFolderAndValidate($tableName, $modelClass) {
+    protected function buildNamespaceForClasses($tableName) {
+        /** @var ClassBuilder $builderClass */
+        $builderClass = $this->getClassBuilderClass();
+        return $this->buildBaseNamespace() . '\\' . $builderClass::convertTableNameToClassName($tableName);
+    }
+
+    protected function getFolder($tableName, $namespace) {
+        /** @var ClassBuilder $builderClass */
+        $builderClass = $this->getClassBuilderClass();
         $folder = preg_replace(
-            ['%\\\[^\\\]+?' . call_user_func([$this->modelParentClass, 'getModelClassSuffix']) . '$%is', '%\\\%', '%^App%'],
-            ['', DIRECTORY_SEPARATOR, $this->getBasePathToApp()],
-            $modelClass
+            ['%[\\/]%', '%^App%'],
+            [DIRECTORY_SEPARATOR, $this->getBasePathToApp()],
+            $namespace
         );
-        if (file_exists($folder) && is_dir($folder)) {
-            $overwriteOption = $this->option('overwrite');
-            if ($overwriteOption === '1' || $overwriteOption !== 'yes') {
-                // overwrite
-            } else if ($overwriteOption === '0' || $overwriteOption === 'no') {
-                $this->line('Overwriting not allowed. Operation rejected.');
-                return false;
-            } else if ($this->ask("Classes for table [$tableName] already exist. Overwrite?", 'no') === 'no') {
-                $this->line('Operation rejected');
-                return false;
-            }
-        }
-        return $folder;
+        return $folder . DIRECTORY_SEPARATOR;
     }
 
     protected function getBasePathToApp() {
-        return base_path('app');
-    }
-
-    protected function getDbSchema($default = 'public') {
-        return $this->argument('schema') ?: $default;
+        return app_path();
     }
 
     /**
@@ -172,44 +172,68 @@ class MakeDbClasses extends Command {
         ];
     }
 
-    protected function createDbModel($dataForViews) {
-        $modelFile = $dataForViews['files']['model'];
-        if (File::exist($modelFile)) {
-            File::remove();
+    protected function createTableClassFile(ClassBuilder $builder, array $info, $overwrite) {
+        $filePath = $info['table_file_path'];
+        if (File::exist($filePath)) {
+            if ($overwrite === false) {
+                $this->line('Model class creation cancelled');
+                return;
+            } else if ($overwrite === true) {
+                File::remove();
+            } else if ($this->confirm("Table file {$filePath} already exists. Overwrite?")) {
+                File::remove();
+            } else {
+                $this->line('Model class creation cancelled');
+                return;
+            }
         }
-        File::save($modelFile, view($this->dbModelView, $dataForViews)->render(), 0664);
-        $this->openFileInPhpStorm($modelFile);
-        $this->line("Model class created ($modelFile)");
+        $fileContents = $builder->buildTableClass($info['namespace'], $this->getTableParentClass());
+        File::save($filePath, $fileContents, 0664);
+        $this->line("Model class created ({$filePath})");
     }
 
-    protected function createDbObject($dataForViews) {
-        $objectFile = $dataForViews['files']['object'];
-        if (File::exist($objectFile)) {
-            File::remove();
+    protected function createRecordClassFile(ClassBuilder $builder, array $info, $overwrite) {
+        $filePath = $info['record_file_path'];
+        if (File::exist($filePath)) {
+            if ($overwrite === false) {
+                $this->line('Record class creation cancelled');
+                return;
+            } else if ($overwrite === true) {
+                File::remove();
+            } else if ($this->confirm("Record file {$filePath} already exists. Overwrite?")) {
+                File::remove();
+            } else {
+                $this->line('Record class creation cancelled');
+                return;
+            }
         }
-        File::save($objectFile, view($this->dbObjectView, $dataForViews)->render(), 0664);
-        $this->openFileInPhpStorm($objectFile);
-        $this->line("Object class created ($objectFile)");
+        $fileContents = $builder->buildRecordClass($info['namespace'], $this->getRecordParentClass());
+        File::save($filePath, $fileContents, 0664);
+        $this->line("Record class created ($filePath)");
     }
 
-    protected function createDbTableStructure($dataForViews) {
-        $tableConfigFile = $dataForViews['files']['table_config'];
-        if (File::exist($tableConfigFile)) {
-            File::remove();
+    protected function createTableStructureClassFile(ClassBuilder $builder, array $info, $overwrite) {
+        $filePath = $info['structure_file_path'];
+        if (File::exist($filePath)) {
+            if ($overwrite === false) {
+                $this->line('TableStructure class creation cancelled');
+                return;
+            } else if ($overwrite === true) {
+                File::remove();
+            } else if ($this->confirm("TableStructure file {$filePath} already exists. Overwrite?")) {
+                File::remove();
+            } else {
+                $this->line('TableStructure class creation cancelled');
+                return;
+            }
         }
-        File::save($tableConfigFile, view($this->dbTableStructureView, $dataForViews)->render(), 0664);
-        $this->openFileInPhpStorm($tableConfigFile);
-        $this->line("TableConfig class created ($tableConfigFile)");
-    }
-
-    protected function createScaffoldConfig($dataForViews) {
-        $scaffoldConfigFile = $dataForViews['files']['scaffold_config'];
-        if (File::exist($scaffoldConfigFile)) {
-            File::remove();
-        }
-        File::save($scaffoldConfigFile, view($this->scaffoldConfigView, $dataForViews)->render(), 0664);
-        $this->openFileInPhpStorm($scaffoldConfigFile);
-        $this->line("ScaffoldConfig class created ({$scaffoldConfigFile})");
+        $fileContents = $builder->buildStructureClass(
+            $info['namespace'],
+            $this->getTableStructureParentClass(),
+            $this->getTraitsForTableConfig()
+        );
+        File::save($filePath, $fileContents, 0664);
+        $this->line("TableStructure class created ($filePath)");
     }
 
 }

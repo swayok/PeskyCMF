@@ -4,8 +4,6 @@ namespace PeskyCMF;
 
 use Auth;
 use Illuminate\Support\ServiceProvider;
-use PeskyORM\Config\Connection\MysqlConfig;
-use PeskyORM\Config\Connection\PostgresConfig;
 use PeskyORM\Core\DbAdapter;
 use PeskyORM\Core\DbAdapterInterface;
 use PeskyORM\Core\DbConnectionsManager;
@@ -19,33 +17,8 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      */
     public function boot() {
         $driver = config('database.default');
-        switch ($driver) {
-            case 'pgsql':
-                $config = new PostgresConfig(
-                    config("database.connections.$driver.database"),
-                    config("database.connections.$driver.username"),
-                    config("database.connections.$driver.password")
-                );
-                break;
-            case 'mysql':
-                $config = new MysqlConfig(
-                    config("database.connections.$driver.database"),
-                    config("database.connections.$driver.username"),
-                    config("database.connections.$driver.password")
-                );
-                break;
-            default:
-                return;
-        }
-        $host = config("database.connections.$driver.host");
-        if ($host) {
-            $config->setDbHost($host);
-        }
-        $port = config("database.connections.$driver.port");
-        if ($port) {
-            $config->setDbPort($port);
-        }
-        DbConnectionsManager::createConnection('default', $driver, $config);
+        DbConnectionsManager::createConnectionFromArray($driver, config("database.connections.$driver"));
+        DbConnectionsManager::addAlternativeNameForConnection($driver, 'default');
 
         $this->addPdoCollectorForDebugbar();
     }

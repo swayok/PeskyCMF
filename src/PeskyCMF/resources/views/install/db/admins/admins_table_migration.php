@@ -11,27 +11,32 @@ class CreateAdminsTable extends Migration {
         if (!Schema::hasTable('admins')) {
             Schema::create('admins', function (Blueprint $table) {
                 $table->increments('id');
-                $table->string('parent_id')
-                    ->nullable()
-                    ->index()
-                    ->foreign()
-                        ->references('id')
-                        ->on('users')
-                        ->onDelete('set null')
-                        ->onUpdate('cascade');
+                $table->integer('parent_id')->nullable()->unsigned();
                 $table->string('name');
-                $table->string('email')->unique();
-                $table->string('password')->index();
+                $table->string('email');
+                $table->string('password');
                 $table->string('ip', 40);
                 $table->boolean('is_superadmin')->default(false);
                 $table->boolean('is_active')->default(true);
                 $table->string('role', 50)->default(AdminConfig::default_role());
                 $table->char('language', 2)->default(AdminConfig::default_locale());
                 $currentTimestamp = DB::raw(AdminsTable::quoteDbExpr(AdminsTable::getCurrentTimeDbExpr()->setWrapInBrackets(false)));
-                $table->timestampTz('created_at')->default($currentTimestamp)->index();
-                $table->timestampTz('updated_at')->default($currentTimestamp)->index();
+                $table->timestampTz('created_at')->default($currentTimestamp);
+                $table->timestampTz('updated_at')->default($currentTimestamp);
                 $table->string('timezone')->nullable();
                 $table->rememberToken();
+
+                $table->index('parent_id');
+                $table->index('password');
+                $table->index('created_at');
+                $table->index('updated_at');
+                $table->unique('email');
+
+                $table->foreign('parent_id')
+                    ->references('id')
+                    ->on('admins')
+                    ->onDelete('set null')
+                    ->onUpdate('cascade');
             });
         }
     }
