@@ -28,10 +28,6 @@
         {
             "type": "vcs",
             "url": "https://github.com/swayok/peskyorm.git"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/ckeditor/ckeditor-releases.git"
         }
     ],
     "minimum-stability": "dev",
@@ -49,7 +45,7 @@
         "nostalgiaz/bootstrap-switch": "*",
         "Eonasdan/bootstrap-datetimepicker": "*",
         "datatables/datatables": "*",
-        "ckeditor/ckeditor-releases": "full/4.*",
+        "ckeditor/ckeditor": "dev-full/4.6.x",
         "twbs/bootstrap": "3.*",
         "components/jquery": "2.*",
         "bootstrap-select/bootstrap-select": "*",
