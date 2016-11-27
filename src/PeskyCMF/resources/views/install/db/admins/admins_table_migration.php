@@ -1,6 +1,7 @@
 <?php echo "<?php\n"; ?>
 
 use App\<?php echo $dbClassesAppSubfolder ?>\Admins\AdminsTable;
+use App\<?php echo $dbClassesAppSubfolder ?>\Admins\AdminsTableStructure;
 use App\<?php echo $sectionName; ?>\AdminConfig;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -8,14 +9,14 @@ use Illuminate\Database\Migrations\Migration;
 class CreateAdminsTable extends Migration {
 
     public function up() {
-        if (!Schema::hasTable('admins')) {
-            Schema::create('admins', function (Blueprint $table) {
+        if (!Schema::hasTable(AdminsTableStructure::getTableName())) {
+            Schema::create(AdminsTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->string('name');
                 $table->string('email');
                 $table->string('password');
-                $table->string('ip', 40);
+                $table->string('ip', 40)->nullable();
                 $table->boolean('is_superadmin')->default(false);
                 $table->boolean('is_active')->default(true);
                 $table->string('role', 50)->default(AdminConfig::default_role());
@@ -34,7 +35,7 @@ class CreateAdminsTable extends Migration {
 
                 $table->foreign('parent_id')
                     ->references('id')
-                    ->on('admins')
+                    ->on(AdminsTableStructure::getTableName())
                     ->onDelete('set null')
                     ->onUpdate('cascade');
             });
@@ -42,6 +43,6 @@ class CreateAdminsTable extends Migration {
     }
 
     public function down() {
-        Schema::dropIfExists('admins');
+        Schema::dropIfExists(AdminsTableStructure::getTableName());
     }
 }

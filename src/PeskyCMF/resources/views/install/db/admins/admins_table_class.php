@@ -17,7 +17,7 @@ class AdminsTable extends AbstractTable {
      * @return Admin
      */
     public function newRecord() {
-        return Admin::newEmptyRecord();
+        return new Admin();
     }
 
     /**

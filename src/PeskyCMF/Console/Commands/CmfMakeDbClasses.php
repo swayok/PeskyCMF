@@ -185,20 +185,20 @@ class CmfMakeDbClasses extends Command {
         $filePath = $info['table_file_path'];
         if (File::exist($filePath)) {
             if ($overwrite === false) {
-                $this->line('Model class creation cancelled');
+                $this->line('Table class creation cancelled');
                 return;
             } else if ($overwrite === true) {
                 File::remove();
             } else if ($this->confirm("Table file {$filePath} already exists. Overwrite?")) {
                 File::remove();
             } else {
-                $this->line('Model class creation cancelled');
+                $this->line('Table class creation cancelled');
                 return;
             }
         }
         $fileContents = $builder->buildTableClass($info['namespace'], $this->getTableParentClass());
         File::save($filePath, $fileContents, 0664);
-        $this->line("Model class created ({$filePath})");
+        $this->line("Table class created ({$filePath})");
     }
 
     protected function createRecordClassFile(ClassBuilder $builder, array $info, $overwrite) {

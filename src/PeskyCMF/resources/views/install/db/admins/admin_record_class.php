@@ -27,17 +27,19 @@ use PeskyCMF\Db\Traits\Authenticatable;
  * @property-read string    $role
  * @property-read string    $ip
  *
- * @method $this    setId($value)
- * @method $this    setEmail($value)
- * @method $this    setPassword($value)
- * @method $this    setName($value)
- * @method $this    setRememberToken($value)
- * @method $this    setIsSuperadmin($value)
- * @method $this    setIsActive($value)
- * @method $this    setParentId($value)
- * @method $this    setLanguage($value)
- * @method $this    setIp($value)
- * @method $this    setRole($value)
+ * @property-read Admin     $Parent
+ *
+ * @method $this    setId($value, $isFromDb = false)
+ * @method $this    setEmail($value, $isFromDb = false)
+ * @method $this    setPassword($value, $isFromDb = false)
+ * @method $this    setName($value, $isFromDb = false)
+ * @method $this    setRememberToken($value, $isFromDb = false)
+ * @method $this    setIsSuperadmin($value, $isFromDb = false)
+ * @method $this    setIsActive($value, $isFromDb = false)
+ * @method $this    setParentId($value, $isFromDb = false)
+ * @method $this    setLanguage($value, $isFromDb = false)
+ * @method $this    setIp($value, $isFromDb = false)
+ * @method $this    setRole($value, $isFromDb = false)
  *
  */
 class Admin extends CmfDbRecord implements AuthenticatableContract {
