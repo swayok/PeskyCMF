@@ -28,9 +28,13 @@
         {
             "type": "vcs",
             "url": "https://github.com/swayok/peskyorm.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ckeditor/ckeditor-releases.git"
         }
     ],
-	"minimum-stability": "dev",
+    "minimum-stability": "dev",
     "require": {
         "php": ">=5.6",
         "laravel/framework": ">=5.2",
@@ -45,7 +49,7 @@
         "nostalgiaz/bootstrap-switch": "*",
         "Eonasdan/bootstrap-datetimepicker": "*",
         "datatables/datatables": "*",
-        "ckeditor/ckeditor": "4.*",
+        "ckeditor/ckeditor-releases": "full/4.*",
         "twbs/bootstrap": "3.*",
         "components/jquery": "2.*",
         "bootstrap-select/bootstrap-select": "*",
