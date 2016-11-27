@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\Scaffold\ScaffoldSectionConfig $scaffoldSection
+ * @var \PeskyCMF\Scaffold\ScaffoldConfig $scaffoldSection
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var string $tableNameForRoutes
  * @var string $localizationKey

@@ -308,7 +308,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function setIsRequired($bool) {
-        $this->isRequired = !!$bool;
+        $this->isRequired = (bool)$bool;
         if ($this->isRequired) {
             $this->isRequiredForCreate = $this->isRequiredForEdit = true;
         } else if ($this->isRequiredForCreate && $this->isRequiredForEdit) {
@@ -322,7 +322,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function setIsRequiredForCreate($bool) {
-        $this->isRequiredForCreate = !!$bool;
+        $this->isRequiredForCreate = (bool)$bool;
         $this->isRequired = $this->isRequiredForCreate && $this->isRequiredForEdit;
         return $this;
     }
@@ -332,7 +332,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      * @return $this
      */
     public function setIsRequiredForEdit($bool) {
-        $this->isRequiredForEdit = !!$bool;
+        $this->isRequiredForEdit = (bool)$bool;
         $this->isRequired = $this->isRequiredForCreate && $this->isRequiredForEdit;
         return $this;
     }

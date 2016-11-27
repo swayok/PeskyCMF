@@ -137,7 +137,9 @@ class DataGridFilterConfig {
                 ->setColumnName($this->getColumnNameWithAlias($columnName));
         } else {
             return $configClass::create(
-                self::$columnTypeToFilterType[$columnConfig->getType()] ?: DataGridColumnFilterConfig::TYPE_STRING,
+                array_key_exists($columnConfig->getType(), self::$columnTypeToFilterType)
+                    ? self::$columnTypeToFilterType[$columnConfig->getType()]
+                    : DataGridColumnFilterConfig::TYPE_STRING,
                 $columnConfig->isValueCanBeNull(),
                 $this->getColumnNameWithAlias($columnName)
             );

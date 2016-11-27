@@ -32,10 +32,12 @@ class FormConfig extends ScaffoldActionConfig {
 
     /** @var bool */
     protected $hasOptionsLoader = null;
-    /** @var array  */
-    protected $validatorsForCreate = [];
-    /** @var array  */
-    protected $validatorsForEdit = [];
+    /** @var \Closure */
+    protected $validators;
+    /** @var \Closure */
+    protected $validatorsForCreate;
+    /** @var \Closure */
+    protected $validatorsForEdit;
     /** @var array|\Closure|null */
     protected $defaultValuesModifier = [];
 
@@ -176,9 +178,7 @@ class FormConfig extends ScaffoldActionConfig {
         InputRendererConfig $rendererConfig,
         Column $columnConfig
     ) {
-        $rendererConfig
-            ->setIsRequiredForCreate(!$columnConfig->isValueCanBeNull())
-            ->setIsRequiredForEdit(!$columnConfig->isValueCanBeNull());
+        $rendererConfig->setIsRequired(!$columnConfig->isValueCanBeNull() && !$columnConfig->hasDefaultValue());
     }
 
     /**
@@ -329,7 +329,10 @@ class FormConfig extends ScaffoldActionConfig {
      * @return array
      */
     public function getValidatorsForEdit() {
-        return $this->validatorsForEdit;
+        return array_merge(
+            $this->validators ? call_user_func($this->validators) : [],
+            $this->validatorsForCreate ? call_user_func($this->validatorsForEdit) : []
+        );
     }
 
     /**
@@ -340,11 +343,11 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param array $validatorsForEdit - you can insert fields from received data via '{{field_name}}'
+     * @param \Closure $validatorsForEdit - you can insert fields from received data via '{{field_name}}'
      * @return $this
      */
-    public function addValidatorsForEdit(array $validatorsForEdit) {
-        $this->validatorsForEdit = array_replace($this->validatorsForEdit, $validatorsForEdit);
+    public function addValidatorsForEdit(\Closure $validatorsForEdit) {
+        $this->validatorsForEdit = $validatorsForEdit;
         return $this;
     }
 
@@ -352,7 +355,10 @@ class FormConfig extends ScaffoldActionConfig {
      * @return array
      */
     public function getValidatorsForCreate() {
-        return $this->validatorsForCreate;
+        return array_merge(
+            $this->validators ? call_user_func($this->validators) : [],
+            $this->validatorsForCreate ? call_user_func($this->validatorsForCreate) : []
+        );
     }
 
     /**
@@ -363,20 +369,20 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param array $validatorsForCreate
+     * @param \Closure $validatorsForCreate
      * @return $this
      */
-    public function addValidatorsForCreate(array $validatorsForCreate) {
-        $this->validatorsForCreate = array_replace($this->validatorsForCreate, $validatorsForCreate);
+    public function addValidatorsForCreate(\Closure $validatorsForCreate) {
+        $this->validatorsForCreate = $validatorsForCreate;
         return $this;
     }
 
     /**
-     * @param array $validators
+     * @param \Closure $validators
      * @return $this
      */
-    public function setValidators(array $validators) {
-        $this->validatorsForEdit = $this->validatorsForCreate = $validators;
+    public function setValidators(\Closure $validators) {
+        $this->validators = $validators;
         return $this;
     }
 

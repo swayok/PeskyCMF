@@ -76,7 +76,7 @@
                             <select class="form-control" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input"
                             @if ($isRequired) required="required" @endif>
                                 <?php
-                                    $usersTable = \PeskyCMF\Config\CmfConfig::getInstance()->getModelByTableName(
+                                    $usersTable = \PeskyCMF\Config\CmfConfig::getInstance()->getTableByUnderscoredName(
                                         \PeskyCMF\Config\CmfConfig::getInstance()->users_table_name()
                                     );
                                 ?>

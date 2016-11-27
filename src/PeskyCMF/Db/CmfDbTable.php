@@ -3,7 +3,7 @@
 namespace PeskyCMF\Db;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
 use PeskyORM\ORM\Record;
@@ -13,7 +13,7 @@ use Swayok\Utils\StringUtils;
 
 abstract class CmfDbTable extends Table {
 
-    /** @var null|ScaffoldSectionConfig */
+    /** @var null|ScaffoldConfig */
     protected $scaffoldConfig = null;
     /** @var null|string */
     protected $recordClass = null;
@@ -62,7 +62,7 @@ abstract class CmfDbTable extends Table {
     }
 
     /**
-     * @return ScaffoldSectionConfig
+     * @return ScaffoldConfig
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException

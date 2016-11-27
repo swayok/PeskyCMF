@@ -10,7 +10,7 @@ use PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 
-abstract class ScaffoldSectionConfig {
+abstract class ScaffoldConfig {
 
     /** @var CmfDbTable */
     protected $model;
@@ -41,7 +41,7 @@ abstract class ScaffoldSectionConfig {
     protected $viewsLocalizationKey = null;
 
     /**
-     * ScaffoldSectionConfig constructor.
+     * ScaffoldConfig constructor.
      * @param CmfDbTable $model
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      */

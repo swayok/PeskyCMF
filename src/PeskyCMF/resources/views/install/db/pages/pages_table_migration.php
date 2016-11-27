@@ -15,7 +15,6 @@ class CreatePagesTable extends Migration {
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->integer('admin_id')->nullable()->unsigned();
                 $table->string('title');
-                $table->string('page_title')->default('');
                 $table->string('browser_title')->default('');
                 $table->string('menu_title')->default('');
                 $table->string('type', 50)->default('page');

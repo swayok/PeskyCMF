@@ -7,7 +7,7 @@ use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
-use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
@@ -66,7 +66,7 @@ class DataGridConfig extends ScaffoldActionConfig {
 
     const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
-    public function __construct(TableInterface $table, ScaffoldSectionConfig $scaffoldSectionConfig) {
+    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldSectionConfig) {
         parent::__construct($table, $scaffoldSectionConfig);
         $this->limit = CmfConfig::getInstance()->rows_per_page();
         $this->setOrderBy($table->getPkColumnName());

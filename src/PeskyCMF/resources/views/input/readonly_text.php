@@ -8,6 +8,6 @@
 ?>
 
 <div class="form-group">
-    <label><?php echo $fieldConfig->getLabel(); ?></label>
+    <label><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <div>{{= it.<?php echo $fieldConfig->getName(); ?> || '' }}</div>
 </div>

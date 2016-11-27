@@ -10,14 +10,14 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
      *      // -- or --
      *      return 'string'; //< rendered input
      * }
-     * @var null|callable
+     * @var null|\Closure
      */
     protected $renderer = null;
-    /** @var null+callable */
+    /** @var null|\Closure */
     protected $defaultRendererConfigurator = null;
 
     /**
-     * @return callable|null
+     * @return \Closure|null
      * @throws ScaffoldFieldException
      */
     public function getRenderer() {
@@ -31,10 +31,10 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
     }
 
     /**
-     * @param callable $renderer - function (ScaffoldRenderableFieldConfig $field, ScaffoldActionConfig $actionConfig, array $dataForView) {}
+     * @param \Closure $renderer - function (ScaffoldRenderableFieldConfig $field, ScaffoldActionConfig $actionConfig, array $dataForView) {}
      * @return $this
      */
-    public function setRenderer(callable $renderer) {
+    public function setRenderer(\Closure $renderer) {
         $this->renderer = $renderer;
         return $this;
     }
@@ -61,10 +61,10 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
     }
 
     /**
-     * @param callable $configurator = function (ScaffoldFieldRendererConfig $renderer, ScaffoldRenderableFieldConfig $fieldConfig) {}
+     * @param \Closure $configurator = function (ScaffoldFieldRendererConfig $renderer, ScaffoldRenderableFieldConfig $fieldConfig) {}
      * @return $this
      */
-    public function setDefaultRendererConfigurator(callable $configurator) {
+    public function setDefaultRendererConfigurator(\Closure $configurator) {
         $this->defaultRendererConfigurator = $configurator;
         return $this;
     }
@@ -77,7 +77,7 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
     }
 
     /**
-     * @return null|callable
+     * @return null|\Closure
      */
     public function getDefaultRendererConfigurator() {
         return $this->defaultRendererConfigurator;

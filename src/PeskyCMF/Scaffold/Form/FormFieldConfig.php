@@ -162,12 +162,21 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
 
     /**
      * @param string $default
+     * @param null|InputRendererConfig $renderer
      * @return string
+     * @throws \UnexpectedValueException
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    public function getLabel($default = '') {
-        $suffix = $this->isDbField() && !$this->getTableColumn()->isValueCanBeNull() ? '*' : '';
-        return parent::getLabel($default) . $suffix;
+    public function getLabel($default = '', InputRendererConfig $renderer = null) {
+        if ($renderer === null) {
+            $column = $this->getTableColumn();
+            $isRequired = !$column->isValueCanBeNull() && !$column->hasDefaultValue();
+        } else {
+            $isRequired = $renderer->isRequiredForCreate() || $renderer->isRequiredForEdit();
+        }
+        return parent::getLabel($default) . ($isRequired ? '*' : '');
     }
 
 }

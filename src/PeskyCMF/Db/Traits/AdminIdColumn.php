@@ -17,7 +17,7 @@ trait AdminIdColumn {
         return Relation::create(
                 'admin_id',
                 Relation::BELONGS_TO,
-                get_class(CmfConfig::getInstance()->getModelByTableName('admins')),
+                get_class(CmfConfig::getInstance()->getTableByUnderscoredName('admins')),
                 'id'
             )
             ->setDisplayColumnName('email');

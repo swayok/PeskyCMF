@@ -48,7 +48,7 @@ abstract class ScaffoldActionConfig {
      */
     protected $specialConditions = [];
     /**
-     * @var ScaffoldSectionConfig
+     * @var ScaffoldConfig
      */
     protected $scaffoldSection;
     /**
@@ -70,10 +70,10 @@ abstract class ScaffoldActionConfig {
 
     /**
      * @param TableInterface $table
-     * @param ScaffoldSectionConfig $scaffoldSection
+     * @param ScaffoldConfig $scaffoldSection
      * @return $this
      */
-    static public function create(TableInterface $table, ScaffoldSectionConfig $scaffoldSection) {
+    static public function create(TableInterface $table, ScaffoldConfig $scaffoldSection) {
         $class = get_called_class();
         return new $class($table, $scaffoldSection);
     }
@@ -81,9 +81,9 @@ abstract class ScaffoldActionConfig {
     /**
      * ScaffoldActionConfig constructor.
      * @param TableInterface $table
-     * @param ScaffoldSectionConfig $scaffoldSection
+     * @param ScaffoldConfig $scaffoldSection
      */
-    public function __construct(TableInterface $table, ScaffoldSectionConfig $scaffoldSection) {
+    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldSection) {
         $this->table = $table;
         $this->scaffoldSection = $scaffoldSection;
     }
@@ -302,16 +302,16 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @param array|callable $arrayOrCallable
-     *      - callable: funciton (array $record, ScaffoldActionConfig $scaffoldAction) { return []; }
+     * @param array|\Closure $arrayOrClosure
+     *      - \Closure: funciton (array $record, ScaffoldActionConfig $scaffoldAction) { return []; }
      * @return $this
      * @throws ScaffoldException
      */
-    public function setDataToAddToRecord($arrayOrCallable) {
-        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
-            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
+    public function setDataToAddToRecord($arrayOrClosure) {
+        if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
+            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrClosure) accepts only array or \Closure');
         }
-        $this->dataToAddToRecord = $arrayOrCallable;
+        $this->dataToAddToRecord = $arrayOrClosure;
         return $this;
     }
 
@@ -322,7 +322,7 @@ abstract class ScaffoldActionConfig {
     public function getCustomDataForRecord(array $record) {
         if (empty($this->dataToAddToRecord)) {
             return [];
-        } else if (is_callable($this->dataToAddToRecord)) {
+        } else if ($this->dataToAddToRecord instanceof \Closure) {
             return call_user_func($this->dataToAddToRecord, $record, $this);
         } else {
             return $this->dataToAddToRecord;
@@ -330,15 +330,15 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @param array|callable $arrayOrCallable - function (ScaffoldActionConfig $actionConfig) { return [] }
+     * @param array|\Closure $arrayOrClosure - function (ScaffoldActionConfig $actionConfig) { return [] }
      * @return $this
      * @throws ScaffoldException
      */
-    public function sendDataToView($arrayOrCallable) {
-        if (!is_array($arrayOrCallable) && !is_callable($arrayOrCallable)) {
-            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or callable');
+    public function sendDataToView($arrayOrClosure) {
+        if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
+            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrClosure) accepts only array or \Closure');
         }
-        $this->dataToSendToView = $arrayOrCallable;
+        $this->dataToSendToView = $arrayOrClosure;
         return $this;
     }
 
@@ -348,7 +348,7 @@ abstract class ScaffoldActionConfig {
     public function getAdditionalDataForView() {
         if (empty($this->dataToSendToView)) {
             return [];
-        } else if (is_callable($this->dataToSendToView)) {
+        } else if ($this->dataToSendToView instanceof \Closure) {
             return call_user_func($this->dataToSendToView, $this);
         } else {
             return $this->dataToSendToView;
@@ -396,7 +396,7 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return callable|null
+     * @return \Closure|null
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      */
     public function getDefaultFieldRenderer() {
@@ -430,10 +430,10 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @param callable $defaultFieldRenderer
+     * @param \Closure $defaultFieldRenderer
      * @return $this
      */
-    public function setDefaultFieldRenderer(callable $defaultFieldRenderer) {
+    public function setDefaultFieldRenderer(\Closure $defaultFieldRenderer) {
         $this->defaultFieldRenderer = $defaultFieldRenderer;
         return $this;
     }
@@ -600,19 +600,19 @@ abstract class ScaffoldActionConfig {
      * @return array
      */
     public function getSpecialConditions() {
-        return is_callable($this->specialConditions)
+        return $this->specialConditions instanceof \Closure
             ? call_user_func($this->specialConditions, $this)
             : $this->specialConditions;
     }
 
     /**
-     * @param array|callable $specialConditions - array or function (ScaffoldActionConfig $scaffoldAction) {}
+     * @param array|\Closure $specialConditions - array or function (ScaffoldActionConfig $scaffoldAction) {}
      * @return $this
      * @throws ScaffoldActionException
      */
     public function setSpecialConditions($specialConditions) {
-        if (!is_array($specialConditions) && !is_callable($specialConditions)) {
-            throw new ScaffoldActionException($this, 'setSpecialConditions expects array or callable');
+        if (!is_array($specialConditions) && !($specialConditions instanceof \Closure)) {
+            throw new ScaffoldActionException($this, 'setSpecialConditions expects array or \Closure');
         }
         $this->specialConditions = $specialConditions;
         return $this;

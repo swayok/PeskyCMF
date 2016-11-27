@@ -7,7 +7,7 @@ use PeskyCMF\ConfigsContainer;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
-use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
@@ -137,7 +137,7 @@ class CmfConfig extends ConfigsContainer {
      * @throws \BadMethodCallException
      */
     static public function user_object_class() {
-        return get_class(static::getModelByTableName(static::users_table_name())->newRecord());
+        return get_class(static::getTableByUnderscoredName(static::users_table_name())->newRecord());
     }
 
     /**
@@ -624,12 +624,12 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Get ScaffoldSectionConfig instance
-     * @param TableInterface $table - a model to be used in ScaffoldSectionConfig
+     * Get ScaffoldConfig instance
+     * @param TableInterface $table - a model to be used in ScaffoldConfig
      * @param string $tableNameInRoute - table name passed via route parameter, may differ from $model->getTableName()
      *      and added here to be used in child configs when you need to use scaffolds with fake table names.
      *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
-     * @return ScaffoldSectionConfig
+     * @return ScaffoldConfig
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
@@ -657,7 +657,7 @@ class CmfConfig extends ConfigsContainer {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static public function getModelByTableName($tableName) {
+    static public function getTableByUnderscoredName($tableName) {
         /** @var ClassBuilder $builderClass */
         $builderClass = static::getDbClassesBuilderClass();
         /** @var Table $class */
@@ -680,14 +680,14 @@ class CmfConfig extends ConfigsContainer {
     /**
      * Shortcut to static::getScaffoldConfig()
      * @param string $tableName
-     * @return ScaffoldSectionConfig
+     * @return ScaffoldConfig
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
     static public function getScaffoldConfigByTableName($tableName) {
-        return static::getScaffoldConfig(static::getModelByTableName($tableName), $tableName);
+        return static::getScaffoldConfig(static::getTableByUnderscoredName($tableName), $tableName);
     }
 
     /**

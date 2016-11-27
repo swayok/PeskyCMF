@@ -10,7 +10,7 @@ use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ScaffoldException;
-use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Exception\InvalidDataException;
@@ -35,13 +35,13 @@ class CmfScaffoldApiController extends Controller {
      */
     public function getTable() {
         if ($this->table === null) {
-            $this->table = CmfConfig::getInstance()->getModelByTableName($this->getTableNameForRoutes());
+            $this->table = CmfConfig::getInstance()->getTableByUnderscoredName($this->getTableNameForRoutes());
         }
         return $this->table;
     }
 
     /**
-     * @return ScaffoldSectionConfig
+     * @return ScaffoldConfig
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
@@ -52,11 +52,11 @@ class CmfScaffoldApiController extends Controller {
         if ($this->scaffoldConfig === null) {
             $cmfConfig = CmfConfig::getInstance();
             $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getTable(), $this->getTableNameForRoutes());
-            if ($customScaffoldConfig instanceof ScaffoldSectionConfig) {
+            if ($customScaffoldConfig instanceof ScaffoldConfig) {
                 $this->scaffoldConfig = $customScaffoldConfig;
             } else if (!empty($customScaffoldConfig)) {
                 throw new \UnexpectedValueException(
-                    get_class($cmfConfig) . '::getScaffoldConfig() must return null or instance of ScaffoldSectionConfig class. '
+                    get_class($cmfConfig) . '::getScaffoldConfig() must return null or instance of ScaffoldConfig class. '
                         . (is_object($customScaffoldConfig) ? get_class($customScaffoldConfig) : gettype($customScaffoldConfig))
                         . ' Received'
                 );

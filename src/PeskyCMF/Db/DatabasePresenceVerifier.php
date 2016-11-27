@@ -63,7 +63,7 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      * @return CmfDbTable
      */
     private function getModel($tableName) {
-        return CmfConfig::getInstance()->getModelByTableName($tableName);
+        return CmfConfig::getInstance()->getTableByUnderscoredName($tableName);
     }
 
     /**

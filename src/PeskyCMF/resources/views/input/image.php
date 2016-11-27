@@ -14,7 +14,7 @@ $attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
 ?>
 <div class="form-group">
-    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
+    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
     {{? !it.isCreation && !!it.icon }}
     <div class="image-preview" id="<?php echo $attributes['id']; ?>-image-preview">
