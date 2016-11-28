@@ -28,6 +28,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/swayok/peskyorm.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/fengyuanchen/cropperjs.git"
         }
     ],
     "minimum-stability": "dev",
@@ -55,6 +59,7 @@
         "malsup/form": "3.*",
         "afarkas/html5shiv": "*",
         "select2/select2": "*",
-        "robinherbots/jquery.inputmask": "^3.3"
+        "robinherbots/jquery.inputmask": "^3.3",
+        "fengyuanchen/cropperjs": "*"
     }
 }
