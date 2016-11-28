@@ -15,7 +15,7 @@ class WysiwygFieldConfig extends FormFieldConfig {
     /**
      * @var int
      */
-    protected $maxImageHeight = 0;
+    protected $maxImageHeight = 2000;
 
     public function getType() {
         return static::TYPE_WYSIWYG;
