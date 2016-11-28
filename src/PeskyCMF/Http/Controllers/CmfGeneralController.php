@@ -347,4 +347,43 @@ class CmfGeneralController extends Controller {
         \Cache::flush();
     }
 
+    public function getCkeditorConfigJs() {
+        return view(
+            'cmf::ui.ckeditor_config',
+            ['configs' => CmfConfig::getInstance()->ckeditor_config()]
+        );
+    }
+
+    public function ckeditorUploadImage(Request $request) {
+        //todo: eliminate csrf token validation (via constructor?)
+        $file = $request->file();
+        /*if (!empty($request->query('CKEditorFuncNum'))) {
+            !\Validator::make($request->all());
+            $funcNum = $request->query('CKEditorFuncNum');
+            $editorId = $request->query('CKEditor');
+            $url = '';
+            $message = '';
+            $image = $request->data('form')['upload'];
+            $imageSettings = Configure::read('Images.wysiwyg.' . $editorId);
+            if (isImage($image)) {
+                $message = 'Файл не является изображением';
+            } else if (empty($imageSettings)) {
+                $message = 'Не задано правило для обработки этого изображения';
+            } else {
+                // resize image
+                $imagesPath = $imageSettings['path']($editorId, true);
+                $fileName = String::uuid();
+                $fileNames = ImageResizer::resize(
+                    $image,
+                    $imagesPath,
+                    $fileName,
+                    $imageSettings['profiles']
+                );
+                $url = $imageSettings['url']($editorId) . array_shift($fileNames);
+            }
+            return "<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction($funcNum, '$url', '$message');</script>";
+        }
+        return 'Invalid Request';*/
+    }
+
 }

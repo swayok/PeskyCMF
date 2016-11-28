@@ -77,6 +77,16 @@ Route::group(
     ],
     function () {
 
+        Route::get('ckeditor/config.js', [
+            'as' => 'cmf_ckeditor_config_js',
+            'uses' => __cmf_general_controller_class() . '@getCkeditorConfigJs'
+        ]);
+
+        Route::post('ckeditor/upload/image', [
+            'as' => 'cmf_ckeditor_upload_image',
+            'uses' => __cmf_general_controller_class() . '@ckeditorUploadImage'
+        ]);
+
         Route::group(
             [
                 'middleware' => AjaxOnly::class,

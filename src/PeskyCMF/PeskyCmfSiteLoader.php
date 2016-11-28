@@ -160,7 +160,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             base_path('vendor/ckeditor/ckeditor/lang') => public_path('packages/cmf-vendors/ckeditor/lang'),
             base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
             base_path('vendor/ckeditor/ckeditor/skins') => public_path('packages/cmf-vendors/ckeditor/skins'),
-            __DIR__ . '/public/cmf-vendors/ckeditor/config.js' => public_path('packages/cmf-vendors/ckeditor/config.js'),
+            __DIR__ . '/public/cmf-vendors/ckeditor/config.empty.js' => public_path('packages/cmf-vendors/ckeditor/config.js'),
             // libs
             base_path('vendor/datatables/datatables/media') => public_path('packages/cmf-vendors/datatables'),
             base_path('vendor/grimmlink/toastr/build') => public_path('packages/cmf-vendors/toastr'),

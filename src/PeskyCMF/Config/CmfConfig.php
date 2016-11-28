@@ -615,6 +615,40 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Additional configs for CKEditor lib
+     * @return array
+     */
+    static public function ckeditor_config() {
+        return [
+            'language' => app()->getLocale(),
+            'toolbarGroups' => [
+                [ 'name' => 'clipboard', 'groups' => [ 'clipboard', 'undo' ] ],
+                [ 'name' => 'editing', 'groups' => [ 'find', 'selection', 'spellchecker', 'editing' ] ],
+                [ 'name' => 'links', 'groups' => [ 'links' ] ],
+                [ 'name' => 'insert', 'groups' => [ 'insert' ] ],
+                [ 'name' => 'forms', 'groups' => [ 'forms' ] ],
+                [ 'name' => 'tools', 'groups' => [ 'tools' ] ],
+                [ 'name' => 'document', 'groups' => [ 'mode', 'document', 'doctools' ] ],
+                [ 'name' => 'others', 'groups' => [ 'others' ] ],
+                [ 'name' => 'about', 'groups' => [ 'about' ] ],
+                '/',
+                [ 'name' => 'basicstyles', 'groups' => [ 'basicstyles', 'cleanup' ] ],
+                [ 'name' => 'paragraph', 'groups' => [ 'list', 'indent', 'blocks', 'align', 'bidi', 'paragraph' ] ],
+                [ 'name' => 'styles', 'groups' => [ 'styles' ] ],
+                [ 'name' => 'colors', 'groups' => [ 'colors' ] ]
+            ],
+            'removeButtons' => 'Superscript,Find,Replace,SelectAll,Scayt,Flash,Smiley,PageBreak,Iframe,Form,Checkbox,'
+                . 'Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,Maximize,Save,NewPage,Preview,Print,'
+                . 'Templates,Strike,Subscript,BidiLtr,BidiRtl,Language,Styles',
+            'format_tags' => 'p;h1;h2;h3;pre',
+            'removeDialogTabs' => 'image:advanced',
+            'extraPlugins' => 'uploadimage',
+            'filebrowserImageUploadUrl' => route('cmf_ckeditor_upload_image'),
+            'uploadUrl' => route('cmf_ckeditor_upload_image')
+        ];
+    }
+
+    /**
      * Variables that will be sent to js and stored into AppData
      * To access data from js code use AppData.key_name
      * @return array
