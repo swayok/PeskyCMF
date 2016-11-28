@@ -47,19 +47,26 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     /**
      * Default input id
      * @return string
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ScaffoldFieldException
      */
     public function getDefaultId() {
-        return static::makeDefaultId($this->getName());
+        return static::makeDefaultId(
+            $this->getName(),
+            request()->route()->getParameter('table_name', $this->getTableColumn()->getTableStructure()->getTableName())
+        );
     }
 
     /**
      * Make default html id for input using $fieldName
      * @param string $fieldName
+     * @param string $tableName
      * @return string
      */
-    static public function makeDefaultId($fieldName) {
-        return preg_replace('%[^a-zA-Z0-9-]+%', '_', $fieldName) . '-input';
+    static public function makeDefaultId($fieldName, $tableName) {
+        return 't-' . $tableName . '-c-' . preg_replace('%[^a-zA-Z0-9-]+%', '_', $fieldName) . '-input';
     }
 
     /**

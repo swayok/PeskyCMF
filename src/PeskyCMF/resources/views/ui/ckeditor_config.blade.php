@@ -4,3 +4,10 @@ CKEDITOR.editorConfig = function( config ) {
 
     @endforeach
 };
+
+CKEDITOR.on('instanceCreated', function(event) {
+    var element = $(event.editor.element);
+    if (element.attr('data-editor-name')) {
+        event.editor.name = element.attr('data-editor-name');
+    }
+});

@@ -643,8 +643,8 @@ class CmfConfig extends ConfigsContainer {
             'format_tags' => 'p;h1;h2;h3;pre',
             'removeDialogTabs' => 'image:advanced',
             'extraPlugins' => 'uploadimage',
-            'filebrowserImageUploadUrl' => route('cmf_ckeditor_upload_image'),
-            'uploadUrl' => route('cmf_ckeditor_upload_image')
+            'filebrowserImageUploadUrl' => route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
+            'uploadUrl' => route('cmf_ckeditor_upload_image', ['_token' => csrf_token()])
         ];
     }
 

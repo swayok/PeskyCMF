@@ -3,14 +3,18 @@
  * @var \PeskyCMF\Scaffold\Form\InputRendererConfig $rendererConfig
  * @var \PeskyCMF\Scaffold\Form\FormFieldConfig $fieldConfig
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyORM\ORM\TableInterface $model
  * @var string|null $ckeditorInitializer - js function like
         function (textareaSelector) {
             $(textareaSelector).ckeditor();
         }
  * @var string|null $insertJsCode - any js code to be inserted before editor init
  */
-include 'textarea.php';
+$rendererConfig->addAttribute(
+    'data-editor-name',
+    request()->route()->getParameter('table_name', $model->getTableStructure()->getTableName()) . ':' . $fieldConfig->getName()
+);
+include __DIR__ . '/textarea.php';
 /**
  * @var array $attributes
  */

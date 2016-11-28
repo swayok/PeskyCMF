@@ -72,9 +72,6 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         $this->app->singleton(CmfConfig::class, function () {
             return static::getCmfConfig();
         });
-        $this->app->singleton(\PeskyCMF\Http\Request::class, function () {
-            return new \PeskyCMF\Http\Request(request());
-        });
         $this->app->singleton(Table::class, function () {
             return CmfConfig::getInstance()->base_db_table_class();
         });

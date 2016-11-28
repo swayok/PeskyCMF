@@ -149,4 +149,16 @@ return [
         'back' => 'Назад',
         'reload_page' => 'Обновить страницу',
     ],
+    'ckeditor' => [
+        'fileupload' => [
+            'cannot_detect_table_and_field' => 'Не удалось обнаружить имя таблицы и имя поля в имени редактора. Ожидаемое имя редактора: "table_name:field_name". Полученное имя редактора: ":editor_name"',
+            'cannot_find_field_in_scaffold' => 'Поле ":field_name" не найдено среди полей кофигурации формы в :scaffold_class. Имя редактора: ":editor_name"',
+            'is_not_wysiwyg_field_config' => 'Поле ":field_name" из кофигурации формы :scaffold_class не является объектом класса :wysywig_class',
+            'image_uploading_folder_not_set' => 'Не указана папка, в которую нужно сохранять картинки для поля ":field_name" из кофигурации формы :scaffold_class',
+            'failed_to_resize_image' => 'Не удалось изменить размер изображения',
+            'invalid_or_corrupted_image' => 'Файл не является картинкой либо картинка повреждена',
+            'failed_to_save_image_to_fs' => 'Не удалось сохранить файл в хранилище',
+        ]
+    ],
+
 ];

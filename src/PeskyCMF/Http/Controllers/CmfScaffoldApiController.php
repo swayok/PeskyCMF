@@ -3,10 +3,10 @@
 namespace PeskyCMF\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ScaffoldException;
@@ -21,9 +21,9 @@ class CmfScaffoldApiController extends Controller {
 
     use DataValidationHelper;
 
-    protected $tableNameForRoutes = null;
-    protected $table = null;
-    protected $scaffoldConfig = null;
+    protected $tableNameForRoutes;
+    protected $table;
+    protected $scaffoldConfig;
 
     /**
      * @return TableInterface
@@ -183,7 +183,7 @@ class CmfScaffoldApiController extends Controller {
         }
         $table = $this->getTable();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
-        $data = array_intersect_key($request->data(), $formConfig->getFields());
+        $data = array_intersect_key($request->all(), $formConfig->getFields());
         $errors = $formConfig->validateDataForCreate($data);
         if (count($errors) !== 0) {
             return $this->sendValidationErrorsResponse($errors);
@@ -256,15 +256,15 @@ class CmfScaffoldApiController extends Controller {
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
         $expectedFields = array_keys($formConfig->getFields());
         $expectedFields[] = $table->getPkColumnName();
-        $data = array_intersect_key($request->data(), array_flip($expectedFields));
+        $data = array_intersect_key($request->all(), array_flip($expectedFields));
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {
             return $this->sendValidationErrorsResponse($errors);
         }
-        if (!$request->data($table->getPkColumnName())) {
+        if (!$request->input($table->getPkColumnName())) {
             return $this->sendItemNotFoundResponse($table);
         }
-        $id = $request->data($table->getPkColumnName());
+        $id = $request->input($table->getPkColumnName());
         $object = $table->newRecord();
         if (count($object::getPrimaryKeyColumn()->validateValue($id)) > 0) {
             return $this->sendItemNotFoundResponse($table);
@@ -344,7 +344,7 @@ class CmfScaffoldApiController extends Controller {
         $table = $this->getTable();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
         $expectedFields = array_keys($formConfig->getBulkEditableFields());
-        $data = array_intersect_key($request->data(), array_flip($expectedFields));
+        $data = array_intersect_key($request->all(), array_flip($expectedFields));
         if (empty($data)) {
             return cmfServiceJsonResponse(HttpCode::INVALID)
                 ->setMessage(cmfTransGeneral('.action.bulk_edit.no_data_to_save'));
@@ -463,17 +463,17 @@ class CmfScaffoldApiController extends Controller {
         $idsField = $inputNamePrefix . 'ids';
         $conditionsField = $inputNamePrefix . 'conditions';
         if ($request->has($idsField)) {
-            $this->validate($request->data(), [
+            $this->validate($request->input(), [
                 $idsField => 'required|array',
                 $idsField . '.*' => 'integer|min:1'
             ]);
-            $conditions[$table::getPkColumnName()] = $request->data($idsField);
+            $conditions[$table::getPkColumnName()] = $request->input($idsField);
         } else if ($request->has($conditionsField)) {
-            $this->validate($request->data(), [
+            $this->validate($request->input(), [
                 $conditionsField => 'string|regex:%^[\{\[].*[\}\]]$%s',
             ]);
-            $encodedConditions = $request->data($conditionsField) !== ''
-                ? json_decode($request->data($conditionsField), true)
+            $encodedConditions = $request->input($conditionsField) !== ''
+                ? json_decode($request->input($conditionsField), true)
                 : [];
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
                 return cmfJsonResponseForValidationErrors([$conditionsField => 'JSON expected']);

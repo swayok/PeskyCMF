@@ -149,4 +149,15 @@ return [
         'back' => 'Back',
         'reload_page' => 'Reload page',
     ],
+    'ckeditor' => [
+        'fileupload' => [
+            'cannot_detect_table_and_field' => 'Failed to detect table name and field name in editor name. Expected editor name: "table_name:field_name". Received editor name: ":editor_name"',
+            'cannot_find_field_in_scaffold' => 'Field ":field_name" was not found in form configuretion in :scaffold_class. Editor name: ":editor_name"',
+            'is_not_wysiwyg_field_config' => 'Field ":field_name" form configuration of :scaffold_class is not an instance of class :wysywig_class',
+            'image_uploading_folder_not_set' => 'The folder to save images for field ":field_name" form configuration of :scaffold_class is not configured',
+            'failed_to_resize_image' => 'Failed to resize image',
+            'invalid_or_corrupted_image' => 'File is not an image or image is corrupted',
+            'failed_to_save_image_to_fs' => 'Failed to save file to storage',
+        ]
+    ],
 ];

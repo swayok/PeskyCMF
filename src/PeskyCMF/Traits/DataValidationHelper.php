@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Traits;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
 use Swayok\Utils\Set;
 

@@ -5,18 +5,23 @@ namespace PeskyCMF\Http\Controllers;
 use App\Db\Admins\Admin;
 use Auth;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
-use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
+use PeskyCMF\Scaffold\Form\WysiwygFieldConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Record;
+use Ramsey\Uuid\Uuid;
 use Redirect;
+use Swayok\Utils\Folder;
 use Swayok\Utils\Set;
+use Swayok\Utils\ValidateValue;
 
 class CmfGeneralController extends Controller {
 
@@ -63,8 +68,8 @@ class CmfGeneralController extends Controller {
             $admin
                 ->begin()
                 ->updateValues($updates);
-            if (!empty(trim($request->data('new_password')))) {
-                $admin->setPassword($request->data('new_password'));
+            if (!empty(trim($request->input('new_password')))) {
+                $admin->setPassword($request->input('new_password'));
             }
             if ($admin->commit()) {
                 return cmfServiceJsonResponse()
@@ -82,6 +87,10 @@ class CmfGeneralController extends Controller {
      * @param Request $request
      * @param Record|Authenticatable $admin
      * @return array|\Illuminate\Http\JsonResponse
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     protected function validateAndGetAdminProfileUpdates(Request $request, Record $admin) {
         $validationRules = [
@@ -124,17 +133,17 @@ class CmfGeneralController extends Controller {
              $fieldsToUpdate[] = $fieldName;
         }
         $validator = \Validator::make(
-            $request->data(),
+            $request->all(),
             $validationRules,
             Set::flatten(cmfTransCustom('.page.profile.errors'))
         );
         $errors = [];
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
-        } else if (!\Hash::check($request->data('old_password'), $admin->getAuthPassword())) {
+        } else if (!\Hash::check($request->input('old_password'), $admin->getAuthPassword())) {
             $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
         }
-        if (!empty($errors)) {
+        if (count($errors) > 0) {
             return cmfJsonResponseForValidationErrors($errors);
         }
         return $request->only($fieldsToUpdate);
@@ -194,6 +203,12 @@ class CmfGeneralController extends Controller {
     /**
      * @param $accessKey
      * @return bool|CmfDbRecord
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     protected function getUserFromPasswordRecoveryAccessKey($accessKey) {
         /** @var ResetsPasswordsViaAccessKey $userClass */
@@ -250,13 +265,13 @@ class CmfGeneralController extends Controller {
 
     public function doLogin(Request $request) {
         $userLoginColumn = CmfConfig::getInstance()->user_login_column();
-        $this->validate($request->data(), [
+        $this->validate($request->input(), [
             $userLoginColumn => 'required' . ($userLoginColumn === 'email' ? '|email' : ''),
             'password' => 'required'
         ]);
         $credentials = [
             DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($request->data($userLoginColumn)) . '``)'),
-            'password' => $request->data('password')
+            'password' => $request->input('password')
         ];
         if (!Auth::guard()->attempt($credentials)) {
             return cmfServiceJsonResponse(HttpCode::INVALID)
@@ -267,10 +282,10 @@ class CmfGeneralController extends Controller {
     }
 
     public function sendPasswordReplacingInstructions(Request $request) {
-        $this->validate($request->data(), [
+        $this->validate($request->input(), [
             'email' => 'required|email',
         ]);
-        $email = strtolower(trim($request->data('email')));
+        $email = strtolower(trim($request->input('email')));
         if (Auth::guard()->attempt(['email' => $email], false, false)) {
             /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $user */
             $user = Auth::guard()->getLastAttempted();
@@ -294,15 +309,15 @@ class CmfGeneralController extends Controller {
     }
 
     public function replacePassword(Request $request, $accessKey) {
-        $this->validate($request->data(), [
+        $this->validate($request->input(), [
             'id' => 'required|integer|min:1',
             'password' => 'required|min:6',
             'password_confirm' => 'required|min:6|same:password'
         ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
-        if (!empty($user) && $user->getPrimaryKeyValue() !== $request->data('id')) {
+        if (!empty($user) && $user->getPrimaryKeyValue() !== $request->input('id')) {
             /** @var CmfDbRecord $user */
-            $user->begin()->updateValue('password', $request->data('password'), false);
+            $user->begin()->updateValue('password', $request->input('password'), false);
             if ($user->commit()) {
                 return cmfServiceJsonResponse()
                     ->setMessage(cmfTransCustom('.replace_password.password_replaced'))
@@ -351,39 +366,133 @@ class CmfGeneralController extends Controller {
         return view(
             'cmf::ui.ckeditor_config',
             ['configs' => CmfConfig::getInstance()->ckeditor_config()]
-        );
+        )->render();
     }
 
     public function ckeditorUploadImage(Request $request) {
-        //todo: eliminate csrf token validation (via constructor?)
-        $file = $request->file();
-        /*if (!empty($request->query('CKEditorFuncNum'))) {
-            !\Validator::make($request->all());
-            $funcNum = $request->query('CKEditorFuncNum');
-            $editorId = $request->query('CKEditor');
-            $url = '';
-            $message = '';
-            $image = $request->data('form')['upload'];
-            $imageSettings = Configure::read('Images.wysiwyg.' . $editorId);
-            if (isImage($image)) {
-                $message = 'Файл не является изображением';
-            } else if (empty($imageSettings)) {
-                $message = 'Не задано правило для обработки этого изображения';
-            } else {
-                // resize image
-                $imagesPath = $imageSettings['path']($editorId, true);
-                $fileName = String::uuid();
-                $fileNames = ImageResizer::resize(
-                    $image,
-                    $imagesPath,
-                    $fileName,
-                    $imageSettings['profiles']
-                );
-                $url = $imageSettings['url']($editorId) . array_shift($fileNames);
-            }
-            return "<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction($funcNum, '$url', '$message');</script>";
+        $field = $this->validateImageUpload($request);
+        $url = $message = '';
+        if (!is_object($field)) {
+            $message = (string)$field;
+        } else {
+            list($url, $message) = $this->saveUploadedImage($field, $request->file('upload'));
         }
-        return 'Invalid Request';*/
+        $editorNum = (int)$request->input('CKEditorFuncNum');
+        $message = addslashes($message);
+        return "<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction({$editorNum}, '{$url}', '{$message}');</script>";
+    }
+
+    protected function validateImageUpload(Request $request) {
+        $errors = $this->validateWithoutHalt($request->all(), [
+            'CKEditorFuncNum' => 'required|int',
+            'CKEditor' => 'required|string',
+            'upload' => 'required|image|mimes:jpeg,png,gif,svg|between:1,5064',
+        ]);
+        if (is_array($errors)) {
+            $ret = [];
+            /** @var array $errors */
+            foreach ($errors as $param => $errorsForParam) {
+                $ret[] = $param . ': ' . (is_array($errorsForParam) ? implode(', ', $errorsForParam) : (string)$errorsForParam);
+            }
+            return implode('<br>', $ret);
+        }
+
+        $editorId = $request->input('CKEditor');
+
+        if (preg_match('%^([^:]+):(.+)$%', $editorId, $matches)) {
+            list(, $tableName, $fieldName) = $matches;
+        } elseif (preg_match('%^t-(.+?)-c-(.+?)-input$%', $matches)) {
+            list(, $tableName, $fieldName) = $matches;
+        } else {
+            return cmfTransGeneral('.ckeditor.fileupload.cannot_detect_table_and_field', ['editor_name' => $editorId]);
+        }
+        $scaffoldConfig = CmfConfig::getInstance()->getScaffoldConfigByTableName($tableName);
+        $fields = $scaffoldConfig->getFormConfig()->getFields();
+        if (array_key_exists($fieldName, $fields)) {
+            $field = $fields[$fieldName];
+        } else {
+            foreach ($fields as $name => $fieldConfig) {
+                if (preg_replace('%[^a-zA-Z0-9-]+%', '_', $name) === $fieldName) {
+                    $field = $fieldConfig;
+                    break;
+                }
+            }
+        }
+        if (empty($field)) {
+            return cmfTransGeneral(
+                '.ckeditor.fileupload.cannot_find_field_in_scaffold',
+                [
+                    'editor_name' => $editorId,
+                    'field_name' => $fieldName,
+                    'scaffold_class' => get_class($scaffoldConfig)
+                ]
+            );
+        } else if (!($field instanceof WysiwygFieldConfig)) {
+            return cmfTransGeneral(
+                '.ckeditor.fileupload.is_not_wysiwyg_field_config',
+                [
+                    'wysywig_class' => WysiwygFieldConfig::class,
+                    'field_name' => $fieldName,
+                    'scaffold_class' => get_class($scaffoldConfig)
+                ]
+            );
+        }
+        /** @var WysiwygFieldConfig $field */
+        if (!$field->hasImageUploadsFolder()) {
+            return cmfTransGeneral(
+                '.ckeditor.fileupload.image_uploading_folder_not_set',
+                [
+                    'field_name' => $fieldName,
+                    'scaffold_class' => get_class($scaffoldConfig)
+                ]
+            );
+        }
+        return $field;
+    }
+
+    /**
+     * @param WysiwygFieldConfig $field
+     * @param UploadedFile $uploadedFile
+     * @return array - 0: url to file; 1: message
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
+     */
+    protected function saveUploadedImage(WysiwygFieldConfig $field, UploadedFile $uploadedFile) {
+        /** @var UploadedFile $uploadedFile */
+        Folder::load($field->getAbsoluteImageUploadsFolder(), true, 0755);
+        $newFileName = Uuid::uuid4()->toString() . ($uploadedFile->getExtension() ?: $uploadedFile->getClientOriginalExtension());
+        $file = $uploadedFile->move($field->getAbsoluteImageUploadsFolder(), $newFileName);
+        $imageProcessor = new \Imagick($file->getRealPath());
+        // resize image
+        if (
+            !$imageProcessor->valid()
+            || (
+                $imageProcessor->getImageMimeType() === 'image/jpeg'
+                && ValidateValue::isCorruptedJpeg($file->getRealPath())
+            )
+        ) {
+            return ['', cmfTransGeneral('.ckeditor.fileupload.invalid_or_corrupted_image')];
+        }
+        if (
+            ($field->getMaxImageWidth() > 0 && $imageProcessor->getImageWidth() > $field->getMaxImageWidth())
+            || ($field->getMaxImageHeight() > 0 && $imageProcessor->getImageHeight() > $field->getMaxImageHeight())
+        ) {
+            $success = $imageProcessor->resizeImage(
+                $field->getMaxImageWidth(),
+                $field->getMaxImageHeight(),
+                \Imagick::FILTER_LANCZOS,
+                0,
+                true
+            );
+            if (!$success) {
+                return ['', cmfTransGeneral('.ckeditor.fileupload.failed_to_resize_image')];
+            }
+        }
+        $success = $imageProcessor->writeImage($file->getRealPath());
+        if (!$success) {
+            return ['', cmfTransGeneral('.ckeditor.fileupload.failed_to_save_image_to_fs')];
+        }
+        $url = $field->getRelativeImageUploadsUrl() . $newFileName;
+        return [$url, ''];
     }
 
 }
