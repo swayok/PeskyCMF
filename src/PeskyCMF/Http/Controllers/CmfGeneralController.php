@@ -13,7 +13,7 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\HttpCode;
-use PeskyCMF\Scaffold\Form\WysiwygFieldConfig;
+use PeskyCMF\Scaffold\Form\WysiwygFormFieldConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Record;
@@ -427,17 +427,17 @@ class CmfGeneralController extends Controller {
                     'scaffold_class' => get_class($scaffoldConfig)
                 ]
             );
-        } else if (!($field instanceof WysiwygFieldConfig)) {
+        } else if (!($field instanceof WysiwygFormFieldConfig)) {
             return cmfTransGeneral(
                 '.ckeditor.fileupload.is_not_wysiwyg_field_config',
                 [
-                    'wysywig_class' => WysiwygFieldConfig::class,
+                    'wysywig_class' => WysiwygFormFieldConfig::class,
                     'field_name' => $fieldName,
                     'scaffold_class' => get_class($scaffoldConfig)
                 ]
             );
         }
-        /** @var WysiwygFieldConfig $field */
+        /** @var WysiwygFormFieldConfig $field */
         if (!$field->hasImageUploadsFolder()) {
             return cmfTransGeneral(
                 '.ckeditor.fileupload.image_uploading_folder_not_set',
@@ -451,12 +451,12 @@ class CmfGeneralController extends Controller {
     }
 
     /**
-     * @param WysiwygFieldConfig $field
+     * @param WysiwygFormFieldConfig $field
      * @param UploadedFile $uploadedFile
      * @return array - 0: url to file; 1: message
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      */
-    protected function saveUploadedImage(WysiwygFieldConfig $field, UploadedFile $uploadedFile) {
+    protected function saveUploadedImage(WysiwygFormFieldConfig $field, UploadedFile $uploadedFile) {
         /** @var UploadedFile $uploadedFile */
         Folder::load($field->getAbsoluteImageUploadsFolder(), true, 0755);
         $newFileName = Uuid::uuid4()->toString() . ($uploadedFile->getExtension() ?: $uploadedFile->getClientOriginalExtension());

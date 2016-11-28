@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-class WysiwygFieldConfig extends FormFieldConfig {
+class WysiwygFormFieldConfig extends FormFieldConfig {
 
     /**
      * @var string|null

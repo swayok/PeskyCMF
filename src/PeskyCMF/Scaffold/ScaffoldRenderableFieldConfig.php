@@ -17,13 +17,15 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
     protected $defaultRendererConfigurator = null;
 
     /**
-     * @return \Closure|null
+     * @return \Closure
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      * @throws ScaffoldFieldException
      */
     public function getRenderer() {
         if (empty($this->renderer)) {
-            if (!empty($this->getScaffoldActionConfig()->getDefaultFieldRenderer())) {
-                return $this->getScaffoldActionConfig()->getDefaultFieldRenderer();
+            $defaultRenderer = $this->getScaffoldActionConfig()->getDefaultFieldRenderer();
+            if (!empty($defaultRenderer)) {
+                return $defaultRenderer;
             }
             throw new ScaffoldFieldException($this, 'FromFieldConfig->renderer is not provided');
         }
@@ -32,6 +34,7 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
 
     /**
      * @param \Closure $renderer - function (ScaffoldRenderableFieldConfig $field, ScaffoldActionConfig $actionConfig, array $dataForView) {}
+     *      function may return either string or instance of ScaffoldFieldRendererConfig
      * @return $this
      */
     public function setRenderer(\Closure $renderer) {
@@ -42,6 +45,8 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
     /**
      * @param array $dataForView
      * @return string
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \Throwable
      * @throws ScaffoldFieldException
      */
     public function render(array $dataForView = []) {
