@@ -30,8 +30,16 @@
             "url": "https://github.com/swayok/peskyorm.git"
         },
         {
-            "type": "vcs",
-            "url": "https://github.com/fengyuanchen/cropperjs.git"
+            "type": "package",
+            "package": {
+                "name": "fengyuanchen/cropperjs",
+                "version": "dev-master",
+                "source": {
+                    "url": "https://github.com/fengyuanchen/cropperjs",
+                    "type": "git",
+                    "reference": "origin/master"
+                }
+            }
         }
     ],
     "minimum-stability": "dev",
@@ -59,6 +67,7 @@
         "malsup/form": "3.*",
         "afarkas/html5shiv": "*",
         "select2/select2": "*",
-        "robinherbots/jquery.inputmask": "^3.3"
+        "robinherbots/jquery.inputmask": "^3.3",
+        "fengyuanchen/cropperjs": "dev-master"
     }
 }
