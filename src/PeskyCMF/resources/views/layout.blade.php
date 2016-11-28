@@ -133,7 +133,7 @@
     <script src="/packages/cmf-vendors/ckeditor/ckeditor.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/ckeditor/adapters/jquery.js" type="text/javascript"></script>
     {{--<script src="/packages/cmf-vendors/ckeditor/config.js" type="text/javascript"></script>--}}
-    <script src="{{ route('cmf_ckeditor_config_js') }}" type="text/javascript"></script>
+    <script src="{{ route('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js" type="text/javascript"></script>
