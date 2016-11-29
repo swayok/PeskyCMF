@@ -56,6 +56,7 @@
         "afarkas/html5shiv": "*",
         "select2/select2": "*",
         "robinherbots/jquery.inputmask": "^3.3",
+        "fxp/composer-asset-plugin": "*",
         "bower-asset/cropper": "*"
     }
 }
