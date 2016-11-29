@@ -235,8 +235,8 @@ VIEW;
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if ($column->isItAForeignKey()) {
                 $valueViewers[] = <<<VIEW
-'{$column->getName()}' => TableCell::create()
-                    ->setType(TableCell::TYPE_LINK)
+'{$column->getName()}' => DataGridColumn::create()
+                    ->setType(DataGridColumn::TYPE_LINK)
 VIEW;
             } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
                 $valueViewers[] = "'{$column->getName()}'";

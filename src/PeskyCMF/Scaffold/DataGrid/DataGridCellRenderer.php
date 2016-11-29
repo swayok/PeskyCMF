@@ -5,6 +5,6 @@ namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Scaffold\ValueRenderer;
 
-class TableCellRenderer extends ValueRenderer {
+class DataGridCellRenderer extends ValueRenderer {
 
 }

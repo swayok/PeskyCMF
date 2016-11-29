@@ -4,7 +4,7 @@ namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Scaffold\AbstractValueViewer;
 
-class TableCell extends AbstractValueViewer {
+class DataGridColumn extends AbstractValueViewer {
 
     /**
      * @var bool

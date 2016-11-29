@@ -72,13 +72,39 @@ class DataGridConfig extends ScaffoldActionConfig {
         $this->setOrderBy($table->getPkColumnName());
     }
 
-    protected function createValueRenderer() {
-        return TableCellRenderer::create();
+    /**
+     * Alias for setValueViewers
+     * @param array $formInputs
+     * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     */
+    public function setDataGridColumns(array $formInputs) {
+        return $this->setValueViewers($formInputs);
     }
 
     /**
-     * @param TableCellRenderer|ValueRenderer $renderer
-     * @param TableCell|AbstractValueViewer $tableCell
+     * @return DataGridColumn[]|AbstractValueViewer[]
+     */
+    public function getDataGridColumns() {
+        return $this->getValueViewers();
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasDataGridColumn($name) {
+        return $this->hasValueViewer($name);
+    }
+
+    protected function createValueRenderer() {
+        return DataGridCellRenderer::create();
+    }
+
+    /**
+     * @param DataGridCellRenderer|ValueRenderer $renderer
+     * @param DataGridColumn|AbstractValueViewer $tableCell
      */
     protected function configureDefaultValueRenderer(
         ValueRenderer $renderer,
@@ -99,18 +125,18 @@ class DataGridConfig extends ScaffoldActionConfig {
      */
     public function setInvisibleColumns(array $columnNames) {
         foreach ($columnNames as $name) {
-            $this->addValueViewer($name, TableCell::create()->setIsVisible(false));
+            $this->addValueViewer($name, DataGridColumn::create()->setIsVisible(false));
         }
         return $this;
     }
 
     /**
-     * @param AbstractValueViewer|TableCell $viewer
+     * @param AbstractValueViewer|DataGridColumn $viewer
      * @return int
      */
     protected function getNextValueViewerPosition(AbstractValueViewer $viewer) {
         if ($viewer->isVisible()) {
-            /** @var TableCell $otherFieldConfig */
+            /** @var DataGridColumn $otherFieldConfig */
             $count = 0;
             foreach ($this->valueViewers as $otherFieldConfig) {
                 if ($otherFieldConfig->isVisible()) {
@@ -433,7 +459,7 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @inheritdoc
      */
     public function createValueViewer() {
-        return TableCell::create();
+        return DataGridColumn::create();
     }
 
     /**
@@ -539,7 +565,7 @@ class DataGridConfig extends ScaffoldActionConfig {
 
     /**
      * @param string $name
-     * @param null|TableCell|AbstractValueViewer $tableCell
+     * @param null|DataGridColumn|AbstractValueViewer $tableCell
      * @return ScaffoldActionConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
@@ -552,14 +578,14 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @return TableCell
+     * @return DataGridColumn
      */
     protected function getTableCellForForRowActions() {
-        return TableCell::create()
+        return DataGridColumn::create()
             ->setIsDbField(false)
             ->setName(static::ROW_ACTIONS_COLUMN_NAME)
             ->setLabel(cmfTransGeneral('.datagrid.actions.column_label'))
-            ->setType(TableCell::TYPE_STRING);
+            ->setType(DataGridColumn::TYPE_STRING);
     }
 
     /**

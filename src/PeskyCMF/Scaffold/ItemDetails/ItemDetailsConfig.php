@@ -22,6 +22,32 @@ class ItemDetailsConfig extends ScaffoldActionConfig {
     }
 
     /**
+     * Alias for setValueViewers
+     * @param array $formInputs
+     * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     */
+    public function setValueCells(array $formInputs) {
+        return $this->setValueViewers($formInputs);
+    }
+
+    /**
+     * @return ValueCell[]|AbstractValueViewer[]
+     */
+    public function getValueCells() {
+        return $this->getValueViewers();
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasValueCell($name) {
+        return $this->hasValueViewer($name);
+    }
+
+    /**
      * @param ValueRenderer|ValueCellRenderer $renderer
      * @param AbstractValueViewer|ValueCell $valueCell
      */

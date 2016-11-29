@@ -19,11 +19,11 @@
         }
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
-/** @var \PeskyCMF\Scaffold\DataGrid\TableCell[] $gridColumnsConfigs */
+/** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn[] $gridColumnsConfigs */
 $gridColumnsConfigs = $dataGridConfig->getValueViewers();
 uasort($gridColumnsConfigs, function ($a, $b) {
-    /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $a */
-    /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $b */
+    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $a */
+    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $b */
     return ($a->getPosition() > $b->getPosition());
 });
 
@@ -77,7 +77,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                             ->build();
                     }
                     $invisibleColumns = [];
-                    /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $config */
+                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $config */
                     foreach ($gridColumnsConfigs as $config) {
                         $th = \Swayok\Html\Tag::th()
                             ->setContent($config->isVisible()
@@ -277,7 +277,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 dataTablesConfig.rowActions = rowActionsTpl;
             <?php else: ?>
                 <?php
-                    /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $actionsFieldConfig */
+                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $actionsFieldConfig */
                     $actionsFieldConfig = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
                 ?>
                 <?php if ($actionsFieldConfig->getPosition() === (int)$dataGridConfig->isAllowedMultiRowSelection()): ?>

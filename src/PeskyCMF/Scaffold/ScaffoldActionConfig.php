@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Scaffold;
 
-use PeskyCMF\Scaffold\DataGrid\TableCell;
+use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyORM\ORM\TableInterface;
@@ -106,7 +106,7 @@ abstract class ScaffoldActionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
-    public function setValueViewers(array $viewers) {
+    protected function setValueViewers(array $viewers) {
         /** @var AbstractValueViewer|null $config */
         foreach ($viewers as $name => $config) {
             if (is_int($name)) {
@@ -119,7 +119,7 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return array|AbstractValueViewer[]|TableCell[]|ValueCell[]|FormInput[]
+     * @return AbstractValueViewer[]
      */
     public function getValueViewers() {
         return $this->valueViewers;
@@ -127,7 +127,7 @@ abstract class ScaffoldActionConfig {
 
     /**
      * Get field configs only for fields that exist in DB ($valueViewer->isDbColumn() === true)
-     * @return array|AbstractValueViewer[]|TableCell[]|ValueCell[]|FormInput[]
+     * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
      */
     public function getViewersLinkedToDbColumns() {
         $ret = [];
@@ -141,7 +141,7 @@ abstract class ScaffoldActionConfig {
 
     /**
      * Get field configs only for fields that does not exist in DB ($valueViewer->isDbColumn() === false)
-     * @return array|AbstractValueViewer[]|TableCell[]|ValueCell[]|FormInput[]
+     * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
      */
     public function getStandaloneViewers() {
         $ret = [];
@@ -161,7 +161,7 @@ abstract class ScaffoldActionConfig {
 
     /**
      * @param string $name
-     * @return TableCell|ValueCell|FormInput|AbstractValueViewer|array
+     * @return DataGridColumn|ValueCell|FormInput|AbstractValueViewer|array
      * @throws ScaffoldActionException
      */
     public function getValueViewer($name) {

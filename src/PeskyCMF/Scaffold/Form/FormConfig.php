@@ -79,10 +79,39 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
+     * Alias for setValueViewers
+     * @param array $formInputs
+     * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     */
+    public function setFormInputs(array $formInputs) {
+        return $this->setValueViewers($formInputs);
+    }
+
+    /**
+     * @return FormInput[]|AbstractValueViewer[]
+     */
+    public function getFormInputs() {
+        return $this->getValueViewers();
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasFormInput($name) {
+        return $this->hasValueViewer($name);
+    }
+
+    /**
      * @param InputRenderer|ValueRenderer $renderer
      * @param FormInput|AbstractValueViewer $formInput
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     protected function configureDefaultValueRenderer(
         ValueRenderer $renderer,
