@@ -6,7 +6,7 @@ namespace PeskyCMF\Scaffold;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
-use PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig;
+use PeskyCMF\Scaffold\DataGrid\FilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 
@@ -16,7 +16,7 @@ abstract class ScaffoldConfig {
     protected $model;
     /** @var DataGridConfig */
     protected $dataGridConfig = null;
-    /** @var DataGridFilterConfig */
+    /** @var FilterConfig */
     protected $dataGridFilterConfig = null;
     /** @var ItemDetailsConfig */
     protected $itemDetailsConfig = null;
@@ -70,8 +70,8 @@ abstract class ScaffoldConfig {
             throw new ScaffoldActionException(null, 'createDataGridConfig() should return instance of DataGridConfig class');
         }
         $configs['dataGridFilterConfig'] = $this->getDataGridFilterConfig();
-        if (!($configs['dataGridFilterConfig'] instanceof DataGridFilterConfig)) {
-            throw new ScaffoldActionException(null, 'createDataGridFilterConfig() should return instance of DataGridFilterConfig class');
+        if (!($configs['dataGridFilterConfig'] instanceof FilterConfig)) {
+            throw new ScaffoldActionException(null, 'createDataGridFilterConfig() should return instance of FilterConfig class');
         }
         $configs['itemDetailsConfig'] = $this->getItemDetailsConfig();
         if (!($configs['itemDetailsConfig'] instanceof ItemDetailsConfig)) {
@@ -92,10 +92,10 @@ abstract class ScaffoldConfig {
     }
 
     /**
-     * @return DataGridFilterConfig
+     * @return FilterConfig
      */
     protected function createDataGridFilterConfig() {
-        return DataGridFilterConfig::create($this->getModel());
+        return FilterConfig::create($this->getModel());
     }
 
     /**
@@ -124,7 +124,7 @@ abstract class ScaffoldConfig {
     }
 
     /**
-     * @return DataGridFilterConfig
+     * @return FilterConfig
      */
     public function getDataGridFilterConfig() {
         if (empty($this->dataGridFilterConfig)) {

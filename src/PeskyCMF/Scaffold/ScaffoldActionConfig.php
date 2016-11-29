@@ -2,9 +2,9 @@
 
 namespace PeskyCMF\Scaffold;
 
-use PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig;
-use PeskyCMF\Scaffold\Form\FormFieldConfig;
-use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
+use PeskyCMF\Scaffold\DataGrid\TableCell;
+use PeskyCMF\Scaffold\Form\FormInput;
+use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 
@@ -119,7 +119,7 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return array|ScaffoldFieldConfig[]|DataGridFieldConfig[]|ItemDetailsFieldConfig[]|FormFieldConfig[]
+     * @return array|ScaffoldFieldConfig[]|TableCell[]|ValueCell[]|FormInput[]
      */
     public function getFields() {
         return $this->fields;
@@ -127,7 +127,7 @@ abstract class ScaffoldActionConfig {
 
     /**
      * Get field configs only for fields that exist in DB ($fieldConfig->isDbField() === true)
-     * @return array|ScaffoldFieldConfig[]|DataGridFieldConfig[]|ItemDetailsFieldConfig[]|FormFieldConfig[]
+     * @return array|ScaffoldFieldConfig[]|TableCell[]|ValueCell[]|FormInput[]
      */
     public function getDbFields() {
         $ret = [];
@@ -141,7 +141,7 @@ abstract class ScaffoldActionConfig {
 
     /**
      * Get field configs only for fields that does not exist in DB ($fieldConfig->isDbField() === false)
-     * @return array|ScaffoldFieldConfig[]|DataGridFieldConfig[]|ItemDetailsFieldConfig[]|FormFieldConfig[]
+     * @return array|ScaffoldFieldConfig[]|TableCell[]|ValueCell[]|FormInput[]
      */
     public function getNonDbFields() {
         $ret = [];
@@ -161,7 +161,7 @@ abstract class ScaffoldActionConfig {
 
     /**
      * @param string $name
-     * @return DataGridFieldConfig|ItemDetailsFieldConfig|FormFieldConfig|ScaffoldFieldConfig|array
+     * @return TableCell|ValueCell|FormInput|ScaffoldFieldConfig|array
      * @throws ScaffoldActionException
      */
     public function getField($name) {
@@ -413,17 +413,17 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return ScaffoldFieldRendererConfig
+     * @return ScaffoldFieldRenderer
      * @throws ScaffoldActionException
      */
     abstract protected function createFieldRendererConfig();
 
     /**
-     * @param ScaffoldFieldRendererConfig $rendererConfig
+     * @param ScaffoldFieldRenderer $rendererConfig
      * @param ScaffoldFieldConfig $fieldConfig
      */
     protected function configureDefaultRenderer(
-        ScaffoldFieldRendererConfig $rendererConfig,
+        ScaffoldFieldRenderer $rendererConfig,
         ScaffoldFieldConfig $fieldConfig
     ) {
 

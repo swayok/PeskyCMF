@@ -1,8 +1,8 @@
 <?php
 /**
- * @var \PeskyCMF\Scaffold\Form\InputRendererConfig $rendererConfig
+ * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig $fieldConfig
+ * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $fieldConfig
  * @var array|null $options
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var string $translationPrefix

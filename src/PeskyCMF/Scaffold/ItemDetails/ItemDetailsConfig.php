@@ -4,7 +4,7 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
-use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
+use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
 
 class ItemDetailsConfig extends ScaffoldActionConfig {
 
@@ -14,19 +14,19 @@ class ItemDetailsConfig extends ScaffoldActionConfig {
      * @inheritdoc
      */
     public function createFieldConfig() {
-        return ItemDetailsFieldConfig::create();
+        return ValueCell::create();
     }
 
     protected function createFieldRendererConfig() {
-        return DataRendererConfig::create();
+        return ValueCellRenderer::create();
     }
 
     /**
-     * @param ScaffoldFieldRendererConfig|DataRendererConfig $rendererConfig
-     * @param ScaffoldFieldConfig|ItemDetailsFieldConfig $fieldConfig
+     * @param ScaffoldFieldRenderer|ValueCellRenderer $rendererConfig
+     * @param ScaffoldFieldConfig|ValueCell $fieldConfig
      */
     protected function configureDefaultRenderer(
-        ScaffoldFieldRendererConfig $rendererConfig,
+        ScaffoldFieldRenderer $rendererConfig,
         ScaffoldFieldConfig $fieldConfig
     ) {
         switch ($fieldConfig->getType()) {

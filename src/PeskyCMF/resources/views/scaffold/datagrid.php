@@ -3,7 +3,7 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var string $tableNameForRoutes
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
- * @var \PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig $dataGridFilterConfig
+ * @var \PeskyCMF\Scaffold\DataGrid\FilterConfig $dataGridFilterConfig
  * @var string $translationPrefix
  * @var string $idSuffix
  * @var array $includes - views to include into this template.
@@ -19,11 +19,11 @@
         }
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
-/** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig[] $gridColumnsConfigs */
+/** @var \PeskyCMF\Scaffold\DataGrid\TableCell[] $gridColumnsConfigs */
 $gridColumnsConfigs = $dataGridConfig->getFields();
 uasort($gridColumnsConfigs, function ($a, $b) {
-    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $a */
-    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $b */
+    /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $a */
+    /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $b */
     return ($a->getPosition() > $b->getPosition());
 });
 
@@ -77,7 +77,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                             ->build();
                     }
                     $invisibleColumns = [];
-                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $config */
+                    /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $config */
                     foreach ($gridColumnsConfigs as $config) {
                         $th = \Swayok\Html\Tag::th()
                             ->setContent($config->isVisible()
@@ -277,7 +277,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 dataTablesConfig.rowActions = rowActionsTpl;
             <?php else: ?>
                 <?php
-                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig $actionsFieldConfig */
+                    /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $actionsFieldConfig */
                     $actionsFieldConfig = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
                 ?>
                 <?php if ($actionsFieldConfig->getPosition() === (int)$dataGridConfig->isAllowedMultiRowSelection()): ?>

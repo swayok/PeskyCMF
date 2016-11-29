@@ -6,7 +6,7 @@ namespace PeskyCMF\Scaffold\Form;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
-use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
+use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
 use PeskyORM\ORM\Column;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
@@ -18,7 +18,7 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * Fields list that can be edited in bulk (for many records at once)
-     * @var FormFieldConfig[]
+     * @var FormInput[]
      */
     protected $bulkEditableFields = [];
     /**
@@ -75,17 +75,17 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     protected function createFieldRendererConfig() {
-        return InputRendererConfig::create();
+        return InputRenderer::create();
     }
 
     /**
-     * @param InputRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
-     * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
+     * @param InputRenderer|ScaffoldFieldRenderer $rendererConfig
+     * @param FormInput|ScaffoldFieldConfig $fieldConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     protected function configureDefaultRenderer(
-        ScaffoldFieldRendererConfig $rendererConfig,
+        ScaffoldFieldRenderer $rendererConfig,
         ScaffoldFieldConfig $fieldConfig
     ) {
         switch ($fieldConfig->getType()) {
@@ -114,7 +114,7 @@ class FormConfig extends ScaffoldActionConfig {
                     !$fieldConfig->hasValueConverter()
                     && in_array(
                         $fieldConfig->getTableColumn()->getType(),
-                        [FormFieldConfig::TYPE_JSON, FormFieldConfig::TYPE_JSONB],
+                        [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
                         true
                     )
                 ) {
@@ -133,7 +133,7 @@ class FormConfig extends ScaffoldActionConfig {
                     !$fieldConfig->hasValueConverter()
                     && in_array(
                         $fieldConfig->getTableColumn()->getType(),
-                        [FormFieldConfig::TYPE_JSON, FormFieldConfig::TYPE_JSONB],
+                        [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
                         true
                     )
                 ) {
@@ -171,11 +171,11 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param InputRendererConfig $rendererConfig
+     * @param InputRenderer $rendererConfig
      * @param Column $columnConfig
      */
     protected function configureRendererByColumnConfig(
-        InputRendererConfig $rendererConfig,
+        InputRenderer $rendererConfig,
         Column $columnConfig
     ) {
         $rendererConfig->setIsRequired(!$columnConfig->isValueCanBeNull() && !$columnConfig->hasDefaultValue());
@@ -206,7 +206,7 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * @param string $name
-     * @param null|FormFieldConfig $fieldConfig - null: FormFieldConfig will be imported from $this->fields or created default one
+     * @param null|FormInput $fieldConfig - null: FormInput will be imported from $this->fields or created default one
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
@@ -226,7 +226,7 @@ class FormConfig extends ScaffoldActionConfig {
         if (empty($fieldConfig)) {
             $fieldConfig = $this->hasField($name) ? $this->getField($name) : $this->createFieldConfig();
         }
-        /** @var FormFieldConfig $fieldConfig */
+        /** @var FormInput $fieldConfig */
         $fieldConfig->setName($name);
         $fieldConfig->setPosition($this->getNextBulkEditableFieldPosition($fieldConfig));
         $fieldConfig->setScaffoldActionConfig($this);
@@ -235,17 +235,17 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @return FormFieldConfig[]
+     * @return FormInput[]
      */
     public function getBulkEditableFields() {
         return $this->bulkEditableFields;
     }
 
     /**
-     * @param FormFieldConfig $fieldConfig
+     * @param FormInput $fieldConfig
      * @return int
      */
-    protected function getNextBulkEditableFieldPosition(FormFieldConfig $fieldConfig) {
+    protected function getNextBulkEditableFieldPosition(FormInput $fieldConfig) {
         return count($this->bulkEditableFields);
     }
 
@@ -322,7 +322,7 @@ class FormConfig extends ScaffoldActionConfig {
      * @inheritdoc
      */
     public function createFieldConfig() {
-        return FormFieldConfig::create();
+        return FormInput::create();
     }
 
     /**

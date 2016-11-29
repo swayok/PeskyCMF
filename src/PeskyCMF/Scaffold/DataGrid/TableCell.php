@@ -2,10 +2,9 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 
-class DataGridFieldConfig extends ScaffoldFieldConfig {
+class TableCell extends ScaffoldFieldConfig {
 
     /**
      * @var bool

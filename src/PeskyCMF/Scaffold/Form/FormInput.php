@@ -6,7 +6,7 @@ use PeskyCMF\Scaffold\ScaffoldFieldException;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
 use PeskyORM\ORM\Column;
 
-class FormFieldConfig extends ScaffoldRenderableFieldConfig {
+class FormInput extends ScaffoldRenderableFieldConfig {
 
     /** @var bool */
     protected $showOnCreate = true;
@@ -90,7 +90,7 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     }
 
     /**
-     * @param callable $loader = function (FormFieldConfig $fieldConfig, FormConfig $formConfig, $pkValue = null) { return [] }
+     * @param callable $loader = function (FormInput $fieldConfig, FormConfig $formConfig, $pkValue = null) { return [] }
      * @return $this
      */
     public function setOptionsLoader(callable $loader) {
@@ -169,14 +169,14 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
 
     /**
      * @param string $default
-     * @param null|InputRendererConfig $renderer
+     * @param null|InputRenderer $renderer
      * @return string
      * @throws \UnexpectedValueException
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function getLabel($default = '', InputRendererConfig $renderer = null) {
+    public function getLabel($default = '', InputRenderer $renderer = null) {
         if ($renderer === null) {
             $column = $this->getTableColumn();
             $isRequired = !$column->isValueCanBeNull() && !$column->hasDefaultValue();

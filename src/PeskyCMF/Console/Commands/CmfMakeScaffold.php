@@ -235,8 +235,8 @@ VIEW;
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if ($column->isItAForeignKey()) {
                 $fields[] = <<<VIEW
-'{$column->getName()}' => DataGridFieldConfig::create()
-                    ->setType(DataGridFieldConfig::TYPE_LINK)
+'{$column->getName()}' => TableCell::create()
+                    ->setType(TableCell::TYPE_LINK)
 VIEW;
             } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
                 $fields[] = "'{$column->getName()}'";
@@ -260,8 +260,8 @@ VIEW;
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if ($column->isItAForeignKey()) {
                 $fields[] = <<<VIEW
-'{$column->getName()}' => ItemDetailsFieldConfig::create()
-                    ->setType(ItemDetailsFieldConfig::TYPE_LINK)
+'{$column->getName()}' => ValueCell::create()
+                    ->setType(ValueCell::TYPE_LINK)
 VIEW;
             } else {
                 $fields[] = "'{$column->getName()}'";
@@ -276,9 +276,9 @@ VIEW;
             if ($column->isValueCanBeSetOrChanged() && !$column->isAutoUpdatingValue() && !$column->isItPrimaryKey()) {
                 if ($column->getName() === 'admin_id') {
                     $fields[] = <<<VIEW
-'{$column->getName()}' => FormFieldConfig::create()
+'{$column->getName()}' => FormInput::create()
                     ->setRenderer(function () {
-                        return InputRendererConfig::create('cmf::input/hidden');
+                        return InputRenderer::create('cmf::input/hidden');
                     })->setValueConverter(function () {
                         return \Auth::guard()->user()->id;
                     })

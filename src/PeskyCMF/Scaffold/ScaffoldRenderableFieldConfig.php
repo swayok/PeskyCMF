@@ -5,8 +5,8 @@ namespace PeskyCMF\Scaffold;
 abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
 
     /**
-     * function (FormFieldConfig $config, ScaffoldFormConfig $scaffoldAction) {
-     *      return InputRendererConfig::create();
+     * function (FormInput $config, ScaffoldFormConfig $scaffoldAction) {
+     *      return InputRenderer::create();
      *      // -- or --
      *      return 'string'; //< rendered input
      * }
@@ -34,7 +34,7 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
 
     /**
      * @param \Closure $renderer - function (ScaffoldRenderableFieldConfig $field, ScaffoldActionConfig $actionConfig, array $dataForView) {}
-     *      function may return either string or instance of ScaffoldFieldRendererConfig
+     *      function may return either string or instance of ScaffoldFieldRenderer
      * @return $this
      */
     public function setRenderer(\Closure $renderer) {
@@ -53,7 +53,7 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
         $configOrString = call_user_func_array($this->getRenderer(), [$this, $this->getScaffoldActionConfig(), $dataForView]);
         if (is_string($configOrString)) {
             return $configOrString;
-        } else if ($configOrString instanceof ScaffoldFieldRendererConfig) {
+        } else if ($configOrString instanceof ScaffoldFieldRenderer) {
             return view($configOrString->getView(), array_merge($configOrString->getData(), $dataForView, [
                 'fieldConfig' => $this,
                 'rendererConfig' => $configOrString,
@@ -61,12 +61,12 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
                 'model' => $this->getScaffoldActionConfig()->getTable(),
             ]))->render() . $configOrString->getJavaScriptBlocks();
         } else {
-            throw new ScaffoldFieldException($this, 'Renderer function returned unsopported result. String or ScaffoldFieldRendererConfig object expected');
+            throw new ScaffoldFieldException($this, 'Renderer function returned unsopported result. String or ScaffoldFieldRenderer object expected');
         }
     }
 
     /**
-     * @param \Closure $configurator = function (ScaffoldFieldRendererConfig $renderer, ScaffoldRenderableFieldConfig $fieldConfig) {}
+     * @param \Closure $configurator = function (ScaffoldFieldRenderer $renderer, ScaffoldRenderableFieldConfig $fieldConfig) {}
      * @return $this
      */
     public function setDefaultRendererConfigurator(\Closure $configurator) {

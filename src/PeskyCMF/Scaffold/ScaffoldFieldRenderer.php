@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Scaffold;
 
-abstract class ScaffoldFieldRendererConfig {
+abstract class ScaffoldFieldRenderer {
     /** @var string */
     protected $view = null;
     /** @var array */

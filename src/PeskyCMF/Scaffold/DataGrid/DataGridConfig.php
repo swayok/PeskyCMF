@@ -6,7 +6,7 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
-use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
+use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
@@ -73,15 +73,15 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     protected function createFieldRendererConfig() {
-        return CellRendererConfig::create();
+        return TableCellRenderer::create();
     }
 
     /**
-     * @param CellRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
-     * @param DataGridFieldConfig|ScaffoldFieldConfig $fieldConfig
+     * @param TableCellRenderer|ScaffoldFieldRenderer $rendererConfig
+     * @param TableCell|ScaffoldFieldConfig $fieldConfig
      */
     protected function configureDefaultRenderer(
-        ScaffoldFieldRendererConfig $rendererConfig,
+        ScaffoldFieldRenderer $rendererConfig,
         ScaffoldFieldConfig $fieldConfig
     ) {
         switch ($fieldConfig->getType()) {
@@ -99,18 +99,18 @@ class DataGridConfig extends ScaffoldActionConfig {
      */
     public function setInvisibleFields(array $fieldNames) {
         foreach ($fieldNames as $fieldName) {
-            $this->addField($fieldName, DataGridFieldConfig::create()->setIsVisible(false));
+            $this->addField($fieldName, TableCell::create()->setIsVisible(false));
         }
         return $this;
     }
 
     /**
-     * @param ScaffoldFieldConfig|DataGridFieldConfig $fieldConfig
+     * @param ScaffoldFieldConfig|TableCell $fieldConfig
      * @return int
      */
     protected function getNextFieldPosition(ScaffoldFieldConfig $fieldConfig) {
         if ($fieldConfig->isVisible()) {
-            /** @var DataGridFieldConfig $otherFieldConfig */
+            /** @var TableCell $otherFieldConfig */
             $count = 0;
             foreach ($this->fields as $otherFieldConfig) {
                 if ($otherFieldConfig->isVisible()) {
@@ -417,7 +417,7 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @inheritdoc
      */
     public function createFieldConfig() {
-        return DataGridFieldConfig::create();
+        return TableCell::create();
     }
 
     /**
@@ -523,7 +523,7 @@ class DataGridConfig extends ScaffoldActionConfig {
 
     /**
      * @param string $name
-     * @param null|DataGridFieldConfig $config
+     * @param null|TableCell $config
      * @return ScaffoldActionConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
@@ -536,14 +536,14 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @return DataGridFieldConfig
+     * @return TableCell
      */
     protected function getDataGridFieldConfigForRowActions() {
-        return DataGridFieldConfig::create()
+        return TableCell::create()
             ->setIsDbField(false)
             ->setName(static::ROW_ACTIONS_COLUMN_NAME)
             ->setLabel(cmfTransGeneral('.datagrid.actions.column_label'))
-            ->setType(DataGridFieldConfig::TYPE_STRING);
+            ->setType(TableCell::TYPE_STRING);
     }
 
     /**

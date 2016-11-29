@@ -8,23 +8,23 @@ use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
 
-class DataGridFilterConfig {
+class FilterConfig {
     /** @var CmfDbTable */
     protected $model;
-    /** @var array|DataGridColumnFilterConfig[] */
+    /** @var array|ColumnFilter[] */
     protected $filters = [];
     protected $defaultConditions = ['condition' => 'AND', 'rules' => []];
     
     static public $columnTypeToFilterType = [
-        Column::TYPE_INT => DataGridColumnFilterConfig::TYPE_INTEGER,
-        Column::TYPE_FLOAT => DataGridColumnFilterConfig::TYPE_FLOAT,
-        Column::TYPE_BOOL => DataGridColumnFilterConfig::TYPE_BOOL,
+        Column::TYPE_INT => ColumnFilter::TYPE_INTEGER,
+        Column::TYPE_FLOAT => ColumnFilter::TYPE_FLOAT,
+        Column::TYPE_BOOL => ColumnFilter::TYPE_BOOL,
         // it is rarely needed to use date-time filter, so it is better to use date filter instead
-        Column::TYPE_TIMESTAMP => DataGridColumnFilterConfig::TYPE_DATE,
-        Column::TYPE_DATE => DataGridColumnFilterConfig::TYPE_DATE,
-        Column::TYPE_TIME => DataGridColumnFilterConfig::TYPE_TIME,
+        Column::TYPE_TIMESTAMP => ColumnFilter::TYPE_DATE,
+        Column::TYPE_DATE => ColumnFilter::TYPE_DATE,
+        Column::TYPE_TIME => ColumnFilter::TYPE_TIME,
     ];
-    protected $defaultDataGridColumnFilterConfigClass = DataGridColumnFilterConfig::class;
+    protected $defaultDataGridColumnFilterConfigClass = ColumnFilter::class;
 
     /**
      * @param CmfDbTable $model
@@ -44,7 +44,7 @@ class DataGridFilterConfig {
     }
 
     /**
-     * @param DataGridColumnFilterConfig[] $filters
+     * @param ColumnFilter[] $filters
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
@@ -54,7 +54,7 @@ class DataGridFilterConfig {
      */
     public function setFilters(array $filters) {
         $this->filters = [];
-        /** @var DataGridColumnFilterConfig $config */
+        /** @var ColumnFilter $config */
         foreach ($filters as $columnName => $config) {
             if (is_int($columnName)) {
                 $columnName = $config;
@@ -67,7 +67,7 @@ class DataGridFilterConfig {
 
     /**
      * @param string $columnName - 'col_name' or 'RelationAlias.col_name'
-     * @param null|DataGridColumnFilterConfig $config
+     * @param null|ColumnFilter $config
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
@@ -79,8 +79,8 @@ class DataGridFilterConfig {
         $this->findColumnConfig($columnName); //< needed to validate column existense
         if (empty($config)) {
             $config = $this->createColumnFilterConfig($columnName);
-        } else if (!($config instanceof DataGridColumnFilterConfig)) {
-            throw new ScaffoldException("Filter column config for column [$columnName] should an object of class [DataGridColumnFilterConfig]");
+        } else if (!($config instanceof ColumnFilter)) {
+            throw new ScaffoldException("Filter column config for column [$columnName] should an object of class [ColumnFilter]");
         }
         if (!$config->hasColumnName()) {
             $config->setColumnName($this->getColumnNameWithAlias($columnName));
@@ -90,7 +90,7 @@ class DataGridFilterConfig {
     }
 
     /**
-     * @return DataGridColumnFilterConfig[]
+     * @return ColumnFilter[]
      */
     public function getFilters() {
         return $this->filters;
@@ -98,7 +98,7 @@ class DataGridFilterConfig {
 
     /**
      * @param string $columnName
-     * @return DataGridColumnFilterConfig
+     * @return ColumnFilter
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
@@ -115,7 +115,7 @@ class DataGridFilterConfig {
 
     /**
      * @param string $columnName
-     * @return DataGridColumnFilterConfig
+     * @return ColumnFilter
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
@@ -125,7 +125,7 @@ class DataGridFilterConfig {
     public function createColumnFilterConfig($columnName) {
         $table = $this->getTable();
         $columnConfig = $this->findColumnConfig($columnName);
-        /** @var DataGridColumnFilterConfig $configClass */
+        /** @var ColumnFilter $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         if (
             $columnConfig->getType() === Column::TYPE_INT
@@ -139,7 +139,7 @@ class DataGridFilterConfig {
             return $configClass::create(
                 array_key_exists($columnConfig->getType(), self::$columnTypeToFilterType)
                     ? self::$columnTypeToFilterType[$columnConfig->getType()]
-                    : DataGridColumnFilterConfig::TYPE_STRING,
+                    : ColumnFilter::TYPE_STRING,
                 $columnConfig->isValueCanBeNull(),
                 $this->getColumnNameWithAlias($columnName)
             );
@@ -221,7 +221,7 @@ class DataGridFilterConfig {
 
     /**
      * @param string $columnName
-     * @return DataGridColumnFilterConfig
+     * @return ColumnFilter
      * @throws ScaffoldException
      */
     public function getColumnFilter($columnName) {
@@ -266,7 +266,7 @@ class DataGridFilterConfig {
      * @throws ScaffoldException
      */
     public function addDefaultCondition($columnName, $operator, $value) {
-        /** @var DataGridColumnFilterConfig $configClass */
+        /** @var ColumnFilter $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         if (!$configClass::hasOperator($operator)) {
             throw new ScaffoldException("Unknown filter operator: $operator");
@@ -282,7 +282,7 @@ class DataGridFilterConfig {
     }
 
     /**
-     * @return DataGridFilterConfig
+     * @return FilterConfig
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
@@ -290,7 +290,7 @@ class DataGridFilterConfig {
      * @throws ScaffoldException
      */
     public function addDefaultConditionForPk() {
-        /** @var DataGridColumnFilterConfig $configClass */
+        /** @var ColumnFilter $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         return $this->addDefaultCondition(
             $this->getTable()->getPkColumnName(),
@@ -370,7 +370,7 @@ class DataGridFilterConfig {
     }
 
     /**
-     * Replace default DataGridColumnFilterConfig class
+     * Replace default ColumnFilter class
      * @param string $className
      * @return $this
      */

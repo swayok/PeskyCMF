@@ -4,9 +4,9 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Scaffold\ScaffoldException;
-use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
+use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
 
-class InputRendererConfig extends ScaffoldFieldRendererConfig {
+class InputRenderer extends ScaffoldFieldRenderer {
     /** @var array */
     protected $attributes = [];
     /** @var array */
@@ -29,14 +29,14 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
     /**
      * @param null $view
      * @param array $attributes
-     * @return InputRendererConfig
+     * @return InputRenderer
      */
     static public function create($view = null, array $attributes = []) {
-        return new InputRendererConfig($view, $attributes);
+        return new InputRenderer($view, $attributes);
     }
 
     /**
-     * InputRendererConfig constructor.
+     * InputRenderer constructor.
      * @param string $view
      * @param array $attributes
      */
@@ -168,7 +168,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      */
     public function setOptions($options) {
         if (!is_array($options) && !is_callable($options)) {
-            throw new ScaffoldException('Invalid $options passed to InputRendererConfig');
+            throw new ScaffoldException('Invalid $options passed to InputRenderer');
         }
         $this->options = $options;
         return $this;
@@ -203,7 +203,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      */
     public function setOptionsForCreate($options) {
         if (!is_array($options) && !is_callable($options)) {
-            throw new ScaffoldException('Invalid $options passed to InputRendererConfig');
+            throw new ScaffoldException('Invalid $options passed to InputRenderer');
         }
         $this->optionsForCreate = $options;
         return $this;
@@ -228,7 +228,7 @@ class InputRendererConfig extends ScaffoldFieldRendererConfig {
      */
     public function setOptionsForEdit($options) {
         if (!is_array($options) && !is_callable($options)) {
-            throw new ScaffoldException('Invalid $options passed to InputRendererConfig');
+            throw new ScaffoldException('Invalid $options passed to InputRenderer');
         }
         $this->optionsForEdit = $options;
         return $this;

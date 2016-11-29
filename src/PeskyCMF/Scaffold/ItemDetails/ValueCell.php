@@ -2,11 +2,10 @@
 
 namespace PeskyCMF\Scaffold\ItemDetails;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
 use PeskyORM\ORM\Column;
 
-class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
+class ValueCell extends ScaffoldRenderableFieldConfig {
 
     const TYPE_JSON_TREE = 'json_collapsed';
 
@@ -17,12 +16,12 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
     public function getValueConverter() {
         if (empty(parent::getValueConverter())) {
             switch ($this->getType()) {
-                case self::TYPE_BOOL:
+                case static::TYPE_BOOL:
                     $this->setValueConverter(function ($value) {
                         return cmfTransGeneral('.item_details.field.bool.' . ($value ? 'yes' : 'no'));
                     });
                     break;
-                case self::TYPE_IMAGE:
+                case static::TYPE_IMAGE:
                     $this->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         if (!empty($value) && is_array($value) && !empty($value['url']) && is_array($value['url'])) {
                             if (count($value['url']) > 0) {
@@ -50,7 +49,7 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
 
     static public function doDefaultValueConversionByType($value, $type) {
         switch ($type) {
-            case ItemDetailsFieldConfig::TYPE_JSON_TREE:
+            case static::TYPE_JSON_TREE:
                 if (!is_array($value) && $value !== null) {
                     if (is_string($value) || is_numeric($value) || is_bool($value)) {
                         $value = json_decode($value, true);

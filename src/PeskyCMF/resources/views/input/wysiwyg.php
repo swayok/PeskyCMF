@@ -1,7 +1,7 @@
 <?php
 /**
- * @var \PeskyCMF\Scaffold\Form\InputRendererConfig $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormFieldConfig $fieldConfig
+ * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
+ * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyORM\ORM\TableInterface $model
  * @var string|null $ckeditorInitializer - js function like

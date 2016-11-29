@@ -3,13 +3,11 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyORM\Core\DbExpr;
 use Swayok\Utils\NormalizeValue;
 
-class DataGridColumnFilterConfig {
+class ColumnFilter {
 
     const TYPE_STRING = 'string';
     const TYPE_INTEGER = 'integer';
@@ -208,7 +206,7 @@ class DataGridColumnFilterConfig {
      * @param string $dataType
      * @param bool $canBeNull
      * @param null|string $columnName
-     * @return DataGridColumnFilterConfig
+     * @return ColumnFilter
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     static public function create($dataType = self::TYPE_STRING, $canBeNull = false, $columnName = null) {
@@ -220,7 +218,7 @@ class DataGridColumnFilterConfig {
      * @param bool $excludeZero
      * @param bool $canBeNull
      * @param null|string $columnName
-     * @return DataGridColumnFilterConfig
+     * @return ColumnFilter
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     static public function forPositiveInteger($excludeZero = false, $canBeNull = false, $columnName = null) {
@@ -228,7 +226,7 @@ class DataGridColumnFilterConfig {
     }
 
     /**
-     * DataGridColumnFilterConfig constructor.
+     * ColumnFilter constructor.
      * @param string $dataType
      * @param bool $canBeNull
      * @param null $columnName

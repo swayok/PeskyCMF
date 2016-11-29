@@ -4,7 +4,7 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Db\Column\ImagesColumn;
 
-class ImagesFormFieldConfig extends FormFieldConfig {
+class ImagesFormInput extends FormInput {
 
     /**
      * @return string
@@ -32,7 +32,7 @@ class ImagesFormFieldConfig extends FormFieldConfig {
     }
 
     /**
-     * @return InputRendererConfig
+     * @return InputRenderer
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \UnexpectedValueException
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
@@ -52,7 +52,7 @@ class ImagesFormFieldConfig extends FormFieldConfig {
                 "There is no configurations for images in column '{$column->getName()}'"
             );
         }
-        $renderer = new InputRendererConfig();
+        $renderer = new InputRenderer();
         $renderer
             ->setView('cmf::input.image_uploaders')
             ->addData('imagesConfigs', $configs);
