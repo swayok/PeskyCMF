@@ -47,7 +47,7 @@
         "datatables/datatables": "*",
         "ckeditor/ckeditor": "dev-full/4.6.x",
         "twbs/bootstrap": "3.*",
-        "bower-asset/jquery": "dev-master",
+        "bower-asset/jquery": "3.*",
         "components/jquery": "2.*",
         "bootstrap-select/bootstrap-select": "*",
         "mistic100/jquery-querybuilder": "*",
