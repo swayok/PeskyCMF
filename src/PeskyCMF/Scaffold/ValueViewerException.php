@@ -4,14 +4,14 @@
 namespace PeskyCMF\Scaffold;
 
 
-class ValueViewerException extends ScaffoldActionException {
+class ValueViewerException extends ScaffoldSectionException {
 
     /** @var AbstractValueViewer */
     private $valueViewer;
 
     public function __construct(AbstractValueViewer $viewer, $message) {
         $this->valueViewer = $viewer;
-        parent::__construct($viewer->getScaffoldActionConfig(), $message);
+        parent::__construct($viewer->getScaffoldSectionConfig(), $message);
     }
 
     /**

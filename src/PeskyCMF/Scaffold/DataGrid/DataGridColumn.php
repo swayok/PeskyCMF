@@ -105,12 +105,12 @@ class DataGridColumn extends AbstractValueViewer {
      * @return int
      */
     public function getPosition() {
-        if ($this->getName() === DataGridConfig::ROW_ACTIONS_COLUMN_NAME && $this->getScaffoldActionConfig()->isRowActionsColumnFixed()) {
-            return $this->getScaffoldActionConfig()->isAllowedMultiRowSelection() ? 1 : 0;
+        if ($this->getName() === DataGridConfig::ROW_ACTIONS_COLUMN_NAME && $this->getScaffoldSectionConfig()->isRowActionsColumnFixed()) {
+            return $this->getScaffoldSectionConfig()->isAllowedMultiRowSelection() ? 1 : 0;
         } else {
             return (int)$this->position
-                + ($this->getScaffoldActionConfig()->isAllowedMultiRowSelection() ? 1 : 0)
-                + ($this->getScaffoldActionConfig()->isRowActionsColumnFixed() ? 1 : 0);
+                + ($this->getScaffoldSectionConfig()->isAllowedMultiRowSelection() ? 1 : 0)
+                + ($this->getScaffoldSectionConfig()->isRowActionsColumnFixed() ? 1 : 0);
         }
     }
 

@@ -36,7 +36,7 @@ class FilterConfig {
     }
 
     /**
-     * ScaffoldActionConfig constructor.
+     * ScaffoldSectionConfig constructor.
      * @param CmfDbTable $model
      */
     public function __construct(CmfDbTable $model) {

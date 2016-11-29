@@ -3,8 +3,8 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Scaffold\ScaffoldActionConfig;
-use PeskyCMF\Scaffold\ScaffoldActionException;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyCMF\Scaffold\ScaffoldSectionException;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyCMF\Scaffold\ScaffoldConfig;
@@ -13,7 +13,7 @@ use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
 
-class DataGridConfig extends ScaffoldActionConfig {
+class DataGridConfig extends ScaffoldSectionConfig {
 
     protected $template = 'cmf::scaffold/datagrid';
     /**
@@ -76,7 +76,7 @@ class DataGridConfig extends ScaffoldActionConfig {
      * Alias for setValueViewers
      * @param array $formInputs
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function setDataGridColumns(array $formInputs) {
@@ -121,7 +121,7 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param array $columnNames
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      */
     public function setInvisibleColumns(array $columnNames) {
         foreach ($columnNames as $name) {
@@ -191,11 +191,11 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @param int $recordsPerPage
      * @return $this
-     * @throws ScaffoldActionException
+     * @throws ScaffoldSectionException
      */
     public function setRecordsPerPage($recordsPerPage) {
         if (!ValidateValue::isInteger($recordsPerPage, true)) {
-            throw new ScaffoldActionException($this, 'Integer value expected');
+            throw new ScaffoldSectionException($this, 'Integer value expected');
         }
         $this->recordsPerPage = min($this->maxLimit, $recordsPerPage);
         return $this;
@@ -211,11 +211,11 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @param int $offset
      * @return $this
-     * @throws ScaffoldActionException
+     * @throws ScaffoldSectionException
      */
     public function setOffset($offset) {
         if (!ValidateValue::isInteger($offset, true)) {
-            throw new ScaffoldActionException($this, 'Integer value expected');
+            throw new ScaffoldSectionException($this, 'Integer value expected');
         }
         $this->offset = max($offset, 0);
         return $this;
@@ -232,11 +232,11 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param string $orderBy
      * @param null $direction
      * @return $this
-     * @throws ScaffoldActionException
+     * @throws ScaffoldSectionException
      */
     public function setOrderBy($orderBy, $direction = null) {
         if (!($orderBy instanceof DbExpr) && !$this->table->getTableStructure()->hasColumn($orderBy)) {
-            throw new ScaffoldActionException($this, "Unknown column [$orderBy]");
+            throw new ScaffoldSectionException($this, "Unknown column [$orderBy]");
         }
         if (!empty($direction)) {
             $this->setOrderDirection($direction);
@@ -255,11 +255,11 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @param string $orderDirection
      * @return $this
-     * @throws ScaffoldActionException
+     * @throws ScaffoldSectionException
      */
     public function setOrderDirection($orderDirection) {
         if (!in_array(strtolower($orderDirection), array(self::ORDER_ASC, self::ORDER_DESC), true)) {
-            throw new ScaffoldActionException($this, "Invalid order direction [$orderDirection]. Expected 'asc' or 'desc'");
+            throw new ScaffoldSectionException($this, "Invalid order direction [$orderDirection]. Expected 'asc' or 'desc'");
         }
         $this->orderDirection = strtolower($orderDirection);
         return $this;
@@ -382,61 +382,61 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param \Closure $callback - function (ScaffoldActionConfig $scaffoldAction) { return []; }
+     * @param \Closure $callback - function (ScaffoldSectionConfig $scaffoldSectionConfig) { return []; }
      * Callback must return an array.
      * Array may contain only strings, Tag class instances, or any object with build() or __toString() method
      * Examples:
      * - call some url via ajax passing all selected ids and then run "callback(json)"
-        Tag::a()
-            ->setContent(trans('path.to.translation'))
-            //^ you can use ':count' in label to insert selected items count
-            ->setDataAttr('action', 'bulk-selected')
-            ->setDataAttr('confirm', trans('path.to.translation'))
-            //^ confirm action before sending request to server
-            ->setDataAttr('url', route('route', [], false))
-            ->setDataAttr('method', 'delete')
-            //^ can be 'post', 'put', 'delete' depending on action type
-            ->setDataAttr('id-field', 'id')
-            //^ id field name to use to get rows ids, default: 'id'
-            ->setDataAttr('on-success', 'callbackFuncitonName')
-            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-            ->setDataAttr('response-type', 'json')
-            //^ one of: json, html, xml. Default: 'json'
-            ->setHref('javascript: void(0)');
+        * Tag::a()
+            * ->setContent(trans('path.to.translation'))
+            * //^ you can use ':count' in label to insert selected items count
+            * ->setDataAttr('action', 'bulk-selected')
+            * ->setDataAttr('confirm', trans('path.to.translation'))
+            * //^ confirm action before sending request to server
+            * ->setDataAttr('url', route('route', [], false))
+            * ->setDataAttr('method', 'delete')
+            * //^ can be 'post', 'put', 'delete' depending on action type
+            * ->setDataAttr('id-field', 'id')
+            * //^ id field name to use to get rows ids, default: 'id'
+            * ->setDataAttr('on-success', 'callbackFuncitonName')
+            * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+            * ->setDataAttr('response-type', 'json')
+            * //^ one of: json, html, xml. Default: 'json'
+            * ->setHref('javascript: void(0)');
      * Values will be received in the 'ids' key of the request as array
      * - call some url via ajax passing filter conditions and then run "callback(json)"
-        Tag::a()
-            ->setContent(trans('path.to.translation'))
-            //^ you can use ':count' in label to insert filtered items count
-            ->setDataAttr('action', 'bulk-filtered')
-            ->setDataAttr('confirm', trans('path.to.translation'))
-            //^ confirm action before sending request to server
-            ->setDataAttr('url', route('route', [], false))
-            ->setDataAttr('method', 'put')
-            //^ can be 'post', 'put', 'delete' depending on action type
-            ->setDataAttr('on-success', 'callbackFuncitonName')
-            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-            ->setDataAttr('response-type', 'json')
-            //^ one of: json, html, xml. Default: 'json'
-            ->setHref('javascript: void(0)');
+        * Tag::a()
+            * ->setContent(trans('path.to.translation'))
+            * //^ you can use ':count' in label to insert filtered items count
+            * ->setDataAttr('action', 'bulk-filtered')
+            * ->setDataAttr('confirm', trans('path.to.translation'))
+            * //^ confirm action before sending request to server
+            * ->setDataAttr('url', route('route', [], false))
+            * ->setDataAttr('method', 'put')
+            * //^ can be 'post', 'put', 'delete' depending on action type
+            * ->setDataAttr('on-success', 'callbackFuncitonName')
+            * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+            * ->setDataAttr('response-type', 'json')
+            * //^ one of: json, html, xml. Default: 'json'
+            * ->setHref('javascript: void(0)');
      * - bulk actions with custom on-click handler
-        Tag::button()
-            ->setContent(trans('path.to.translation'))
-            //^ you can use ':count' in label to insert selected items count or filtered items count
-            //^ depending on 'data-type' attribute
-            ->setClass('btn btn-success')
-            ->setDataAttr('type', 'bulk-selected')
-            //^ 'bulk-selected' or 'bulk-filtered'
-            ->setDataAttr('url', route('route', [], false))
-            ->setDataAttr('id-field', 'id')
-            //^ id field name to use to get rows ids, default: 'id'
-            ->setOnClick('someFunction(this)')
-            //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
+        * Tag::button()
+            * ->setContent(trans('path.to.translation'))
+            * //^ you can use ':count' in label to insert selected items count or filtered items count
+            * //^ depending on 'data-type' attribute
+            * ->setClass('btn btn-success')
+            * ->setDataAttr('type', 'bulk-selected')
+            * //^ 'bulk-selected' or 'bulk-filtered'
+            * ->setDataAttr('url', route('route', [], false))
+            * ->setDataAttr('id-field', 'id')
+            * //^ id field name to use to get rows ids, default: 'id'
+            * ->setOnClick('someFunction(this)')
+            * //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
      * Conditions will be received in the 'conditions' key of the request as JSON string
      * @return $this
-     * @throws ScaffoldActionException
+     * @throws ScaffoldSectionException
      */
     public function setBulkActionsToolbarItems(\Closure $callback) {
         $this->bulkActionsToolbarItems = $callback;
@@ -470,7 +470,7 @@ class DataGridConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param \Closure $rowActionsBuilder - function (ScaffolActionConfig $scaffoldAction) { return []; }
+     * @param \Closure $rowActionsBuilder - function (ScaffolSectionConfig $scaffoldSectionConfig) { return []; }
      * Examples:
      * - call some url via ajax blocking data grid while waiting for response and then run "callback(json)"
         * Tag::a()
@@ -500,7 +500,7 @@ class DataGridConfig extends ScaffoldActionConfig {
      *
      * @return $this
      * @throws \Swayok\Html\HtmlTagException
-     * @throws ScaffoldActionException
+     * @throws ScaffoldSectionException
      */
     public function setRowActions(\Closure $rowActionsBuilder) {
         $this->rowActions = $rowActionsBuilder;
@@ -566,9 +566,9 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @param string $name
      * @param null|DataGridColumn|AbstractValueViewer $tableCell
-     * @return ScaffoldActionConfig
+     * @return ScaffoldSectionConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      */
     public function addValueViewer($name, AbstractValueViewer $tableCell = null) {
         $tableCell = !$tableCell && $name === static::ROW_ACTIONS_COLUMN_NAME
@@ -591,7 +591,7 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function finish() {

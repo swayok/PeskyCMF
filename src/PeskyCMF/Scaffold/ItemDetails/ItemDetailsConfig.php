@@ -2,11 +2,11 @@
 
 namespace PeskyCMF\Scaffold\ItemDetails;
 
-use PeskyCMF\Scaffold\ScaffoldActionConfig;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ValueRenderer;
 
-class ItemDetailsConfig extends ScaffoldActionConfig {
+class ItemDetailsConfig extends ScaffoldSectionConfig {
 
     protected $template = 'cmf::scaffold/item_details';
 
@@ -25,7 +25,7 @@ class ItemDetailsConfig extends ScaffoldActionConfig {
      * Alias for setValueViewers
      * @param array $formInputs
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function setValueCells(array $formInputs) {

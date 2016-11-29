@@ -11,8 +11,8 @@ use Swayok\Html\Tag;
 
 abstract class AbstractValueViewer {
 
-    /** @var null|ScaffoldActionConfig */
-    protected $scaffoldActionConfig = null;
+    /** @var null|ScaffoldSectionConfig */
+    protected $scaffoldSectionConfig = null;
 
     /** @var string|null */
     protected $name = null;
@@ -61,18 +61,18 @@ abstract class AbstractValueViewer {
     }
 
     /**
-     * @return ScaffoldActionConfig|DataGridConfig|ItemDetailsConfig|FormConfig|null
+     * @return ScaffoldSectionConfig|DataGridConfig|ItemDetailsConfig|FormConfig|null
      */
-    public function getScaffoldActionConfig() {
-        return $this->scaffoldActionConfig;
+    public function getScaffoldSectionConfig() {
+        return $this->scaffoldSectionConfig;
     }
 
     /**
-     * @param ScaffoldActionConfig|null $scaffoldActionConfig
+     * @param ScaffoldSectionConfig|null $scaffoldSectionConfig
      * @return $this
      */
-    public function setScaffoldActionConfig($scaffoldActionConfig) {
-        $this->scaffoldActionConfig = $scaffoldActionConfig;
+    public function setScaffoldSectionConfig($scaffoldSectionConfig) {
+        $this->scaffoldSectionConfig = $scaffoldSectionConfig;
         return $this;
     }
 
@@ -84,7 +84,7 @@ abstract class AbstractValueViewer {
      * @throws ValueViewerException
      */
     public function getTableColumn() {
-        return $this->getScaffoldActionConfig()->getTable()->getTableStructure()->getColumn($this->getName());
+        return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($this->getName());
     }
 
     /**
@@ -197,7 +197,7 @@ abstract class AbstractValueViewer {
     /**
      * @param callable $valueConverter 
      *      - when $this->isDbField() === true: function ($value, Column $columnConfig, array $record, AbstractValueViewer $valueViewer) {}
-     *      - when $this->isDbField() === false: function (array $record, AbstractValueViewer $valueViewer, ScaffolActionConfig $scaffoldActionConfig) {}
+     *      - when $this->isDbField() === false: function (array $record, AbstractValueViewer $valueViewer, ScaffoldSectionConfig $scaffoldSectionConfig) {}
      * @return $this
      */
     public function setValueConverter(callable $valueConverter) {
@@ -218,7 +218,7 @@ abstract class AbstractValueViewer {
             if ($this->isDbColumn()) {
                 $value = call_user_func($valueConverter, $value, $this->getTableColumn(), $record, $this);
             } else {
-                $value = call_user_func($valueConverter, $record, $this, $this->getScaffoldActionConfig());
+                $value = call_user_func($valueConverter, $record, $this, $this->getScaffoldSectionConfig());
             }
         } else if (!empty($value) || is_bool($value)) {
             if ($this->getType() === static::TYPE_LINK) {

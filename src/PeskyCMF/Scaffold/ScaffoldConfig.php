@@ -43,7 +43,7 @@ abstract class ScaffoldConfig {
     /**
      * ScaffoldConfig constructor.
      * @param CmfDbTable $model
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      */
     public function __construct(CmfDbTable $model) {
         $this->model = $model;
@@ -58,7 +58,7 @@ abstract class ScaffoldConfig {
 
     /**
      * @return array
-     * @throws ScaffoldActionException
+     * @throws ScaffoldSectionException
      */
     public function getConfigs() {
         $configs = [
@@ -67,19 +67,19 @@ abstract class ScaffoldConfig {
         ];
         $configs['dataGridConfig'] = $this->getDataGridConfig();
         if (!($configs['dataGridConfig'] instanceof DataGridConfig)) {
-            throw new ScaffoldActionException(null, 'createDataGridConfig() should return instance of DataGridConfig class');
+            throw new ScaffoldSectionException(null, 'createDataGridConfig() should return instance of DataGridConfig class');
         }
         $configs['dataGridFilterConfig'] = $this->getDataGridFilterConfig();
         if (!($configs['dataGridFilterConfig'] instanceof FilterConfig)) {
-            throw new ScaffoldActionException(null, 'createDataGridFilterConfig() should return instance of FilterConfig class');
+            throw new ScaffoldSectionException(null, 'createDataGridFilterConfig() should return instance of FilterConfig class');
         }
         $configs['itemDetailsConfig'] = $this->getItemDetailsConfig();
         if (!($configs['itemDetailsConfig'] instanceof ItemDetailsConfig)) {
-            throw new ScaffoldActionException(null, 'createItemDetailsConfig() should return instance of ItemDetailsConfig class');
+            throw new ScaffoldSectionException(null, 'createItemDetailsConfig() should return instance of ItemDetailsConfig class');
         }
         $configs['formConfig'] = $this->getFormConfig();
         if (!($configs['formConfig'] instanceof FormConfig)) {
-            throw new ScaffoldActionException(null, 'createFormConfig() should return instance of FormConfig class');
+            throw new ScaffoldSectionException(null, 'createFormConfig() should return instance of FormConfig class');
         }
         return $configs;
     }

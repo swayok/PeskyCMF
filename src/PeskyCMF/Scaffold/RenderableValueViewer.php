@@ -5,7 +5,7 @@ namespace PeskyCMF\Scaffold;
 abstract class RenderableValueViewer extends AbstractValueViewer {
 
     /**
-     * function (FormInput $config, ScaffoldFormConfig $scaffoldAction) {
+     * function (FormInput $config, FormConfig $formConfig) {
      *      return InputRenderer::create();
      *      // -- or --
      *      return 'string'; //< rendered input
@@ -18,12 +18,12 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
 
     /**
      * @return \Closure
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws ValueViewerException
      */
     public function getRenderer() {
         if (empty($this->renderer)) {
-            $defaultRenderer = $this->getScaffoldActionConfig()->getDefaultValueRenderer();
+            $defaultRenderer = $this->getScaffoldSectionConfig()->getDefaultValueRenderer();
             if (!empty($defaultRenderer)) {
                 return $defaultRenderer;
             }
@@ -33,7 +33,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     }
 
     /**
-     * @param \Closure $renderer - function (RenderableValueViewer $valueViewer, ScaffoldActionConfig $actionConfig, array $dataForTemplate) {}
+     * @param \Closure $renderer - function (RenderableValueViewer $valueViewer, ScaffoldSectionConfig $actionConfig, array $dataForTemplate) {}
      *      function may return either string or instance of ValueRenderer
      * @return $this
      */
@@ -45,20 +45,20 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     /**
      * @param array $dataForTemplate
      * @return string
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws \Throwable
      * @throws ValueViewerException
      */
     public function render(array $dataForTemplate = []) {
-        $configOrString = call_user_func_array($this->getRenderer(), [$this, $this->getScaffoldActionConfig(), $dataForTemplate]);
+        $configOrString = call_user_func_array($this->getRenderer(), [$this, $this->getScaffoldSectionConfig(), $dataForTemplate]);
         if (is_string($configOrString)) {
             return $configOrString;
         } else if ($configOrString instanceof ValueRenderer) {
             return view($configOrString->getTemplate(), array_merge($configOrString->getData(), $dataForTemplate, [
                 'fieldConfig' => $this,
                 'rendererConfig' => $configOrString,
-                'actionConfig' => $this->getScaffoldActionConfig(),
-                'model' => $this->getScaffoldActionConfig()->getTable(),
+                'actionConfig' => $this->getScaffoldSectionConfig(),
+                'model' => $this->getScaffoldSectionConfig()->getTable(),
             ]))->render() . $configOrString->getJavaScriptBlocks();
         } else {
             throw new ValueViewerException($this, 'Renderer function returned unsopported result. String or ValueRenderer object expected');
