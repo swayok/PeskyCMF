@@ -3,9 +3,9 @@
 
 namespace PeskyCMF\Scaffold\ItemDetails;
 
-use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
+use PeskyCMF\Scaffold\ValueRenderer;
 
-class ValueCellRenderer extends ScaffoldFieldRenderer {
+class ValueCellRenderer extends ValueRenderer {
 
 
 

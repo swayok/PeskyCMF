@@ -27,21 +27,21 @@ trait ResetsPasswordsViaAccessKey {
             'expires_at' => time() + config('auth.passwords.' . \Auth::getDefaultDriver() . 'expire', 60) * 60,
         ];
         $this->reload(); //< needed to exclude situation with outdated data
-        foreach ($this->getAdditionalFieldsForPasswordRecoveryAccessKey() as $fieldName) {
-            $data[$fieldName] = $this->getValue($fieldName);
+        foreach ($this->getAdditionalColumnsForPasswordRecoveryAccessKey() as $columnName) {
+            $data[$columnName] = $this->getValue($columnName);
         }
         return \Crypt::encrypt(json_encode($data));
     }
 
-    public function getAdditionalFieldsForPasswordRecoveryAccessKey() {
+    public function getAdditionalColumnsForPasswordRecoveryAccessKey() {
         /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
-        $fields = [];
+        $columns = [];
         if ($this::hasColumn('updated_at')) {
-            $fields[] = 'updated_at';
+            $columns[] = 'updated_at';
         } else if ($this::hasColumn('password')) {
-            $fields[] = 'password';
+            $columns[] = 'password';
         }
-        return $fields;
+        return $columns;
     }
 
     /**
@@ -79,23 +79,23 @@ trait ResetsPasswordsViaAccessKey {
         $conditions = [
             $user->getPrimaryKeyColumnName() => $data['account_id'],
         ];
-        foreach ($user->getAdditionalFieldsForPasswordRecoveryAccessKey() as $fieldName) {
-            if (empty($data[$fieldName])) {
+        foreach ($user->getAdditionalColumnsForPasswordRecoveryAccessKey() as $columnName) {
+            if (empty($data[$columnName])) {
                 return false;
             }
-            $fieldType = $user::getColumn($fieldName)->getType();
+            $fieldType = $user::getColumn($columnName)->getType();
             switch ($fieldType) {
                 case Column::TYPE_DATE:
-                    $conditions[$fieldName . '::date'] = DbExpr::create("``$data[$fieldName]``::date");
+                    $conditions[$columnName . '::date'] = DbExpr::create("``$data[$columnName]``::date");
                     break;
                 case Column::TYPE_TIME:
-                    $conditions[$fieldName . '::time'] = DbExpr::create("``$data[$fieldName]``::time");
+                    $conditions[$columnName . '::time'] = DbExpr::create("``$data[$columnName]``::time");
                     break;
                 case Column::TYPE_TIMESTAMP:
-                    $conditions[] = DbExpr::create("`{$fieldName}`::timestamp(0) = ``{$data[$fieldName]}``::timestamp(0)");
+                    $conditions[] = DbExpr::create("`{$columnName}`::timestamp(0) = ``{$data[$columnName]}``::timestamp(0)");
                     break;
                 default:
-                    $conditions[$fieldName] = $data[$fieldName];
+                    $conditions[$columnName] = $data[$columnName];
             }
         }
         if (!$user->fromDb($conditions)->existsInDb()) {

@@ -68,7 +68,7 @@ $config = array_merge([
                     $input.closest('.form-group').slideUp(100);
                 }
             };
-            var $enablerInput = $('#<?php echo $actionConfig->getField($enabler)->getDefaultId(); //< todo: use renderer's getId ?>');
+            var $enablerInput = $('#<?php echo $actionConfig->getValueViewer($enabler)->getDefaultId(); //< todo: use renderer's getId ?>');
             toggleVisibility($enablerInput);
             $enablerInput.on('change switchChange.bootstrapSwitch', function () {
                 toggleVisibility($(this));

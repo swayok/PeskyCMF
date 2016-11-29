@@ -58,7 +58,7 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                         $enablerTextOn = cmfTransGeneral('.form.bulk_edit.enabler.edit_field');
                         $enablerTextOff = cmfTransGeneral('.form.bulk_edit.enabler.skip_field');
                         $baseEnablerId = str_random() . '-enabler-for-';
-                        foreach ($formConfig->getBulkEditableFields() as $inputConfig) {
+                        foreach ($formConfig->getBulkEditableColumns() as $inputConfig) {
                             if (!$inputConfig->hasLabel()) {
                                 $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.field.{$inputConfig->getName()}"));
                             }

@@ -20,7 +20,7 @@
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
 /** @var \PeskyCMF\Scaffold\DataGrid\TableCell[] $gridColumnsConfigs */
-$gridColumnsConfigs = $dataGridConfig->getFields();
+$gridColumnsConfigs = $dataGridConfig->getValueViewers();
 uasort($gridColumnsConfigs, function ($a, $b) {
     /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $a */
     /** @var \PeskyCMF\Scaffold\DataGrid\TableCell $b */
@@ -255,7 +255,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         'processing' => true,
                         'serverSide' => true,
                         'ajax' => route('cmf_api_get_items', ['model' => $tableNameForRoutes], false),
-                        'pageLength' => $dataGridConfig->getLimit(),
+                        'pageLength' => $dataGridConfig->getRecordsPerPage(),
                         'toolbarItems' => array_values($toolbar),
                         'order' => []
                     ]
@@ -263,7 +263,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 if (!$dataGridConfig->getOrderBy() instanceof \PeskyORM\Core\DbExpr) {
                     $dataTablesConfig['order'] = [
                         [
-                            $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(),
+                            $dataGridConfig->getValueViewer($dataGridConfig->getOrderBy())->getPosition(),
                             $dataGridConfig->getOrderDirection()
                         ]
                     ];
@@ -345,7 +345,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             ?>
             var queryBuilderConfig = {
                 filters: <?php echo json_encode($fitlers, JSON_UNESCAPED_UNICODE); ?>,
-                is_opened: <?php echo $dataGridConfig->isFilterShownByDefault() ? 'true' : 'false'; ?>
+                is_opened: <?php echo $dataGridConfig->isFilterOpenedByDefault() ? 'true' : 'false'; ?>
             };
             DataGridSearchHelper.locale = <?php echo json_encode(cmfTransGeneral('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
 

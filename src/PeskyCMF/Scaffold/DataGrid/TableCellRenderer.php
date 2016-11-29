@@ -3,8 +3,8 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
+use PeskyCMF\Scaffold\ValueRenderer;
 
-class TableCellRenderer extends ScaffoldFieldRenderer {
+class TableCellRenderer extends ValueRenderer {
 
 }

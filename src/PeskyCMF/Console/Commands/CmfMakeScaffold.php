@@ -231,51 +231,51 @@ VIEW;
     }
 
     protected function makeFieldsListForDataGrid(TableInterface $table) {
-        $fields = [];
+        $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if ($column->isItAForeignKey()) {
-                $fields[] = <<<VIEW
+                $valueViewers[] = <<<VIEW
 '{$column->getName()}' => TableCell::create()
                     ->setType(TableCell::TYPE_LINK)
 VIEW;
             } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
-                $fields[] = "'{$column->getName()}'";
+                $valueViewers[] = "'{$column->getName()}'";
             }
         }
-        return implode(",\n                ", $fields);
+        return implode(",\n                ", $valueViewers);
     }
 
     protected function makeFiltersList(TableInterface $table) {
-        $fields = [];
+        $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)) {
-                $fields[] = "'{$column->getName()}'";
+                $valueViewers[] = "'{$column->getName()}'";
             }
         }
-        return implode(",\n                ", $fields);
+        return implode(",\n                ", $valueViewers);
     }
 
     protected function makeFieldsListForItemDetailsViewer(TableInterface $table) {
-        $fields = [];
+        $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if ($column->isItAForeignKey()) {
-                $fields[] = <<<VIEW
+                $valueViewers[] = <<<VIEW
 '{$column->getName()}' => ValueCell::create()
                     ->setType(ValueCell::TYPE_LINK)
 VIEW;
             } else {
-                $fields[] = "'{$column->getName()}'";
+                $valueViewers[] = "'{$column->getName()}'";
             }
         }
-        return implode(",\n                ", $fields);
+        return implode(",\n                ", $valueViewers);
     }
 
     protected function makeFieldsListForItemForms(TableInterface $table) {
-        $fields = [];
+        $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if ($column->isValueCanBeSetOrChanged() && !$column->isAutoUpdatingValue() && !$column->isItPrimaryKey()) {
                 if ($column->getName() === 'admin_id') {
-                    $fields[] = <<<VIEW
+                    $valueViewers[] = <<<VIEW
 '{$column->getName()}' => FormInput::create()
                     ->setRenderer(function () {
                         return InputRenderer::create('cmf::input/hidden');
@@ -285,11 +285,11 @@ VIEW;
 VIEW;
 
                 } else {
-                    $fields[] = "'{$column->getName()}'";
+                    $valueViewers[] = "'{$column->getName()}'";
                 }
             }
         }
-        return implode(",\n                ", $fields);
+        return implode(",\n                ", $valueViewers);
     }
 
 }

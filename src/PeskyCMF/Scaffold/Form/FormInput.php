@@ -2,11 +2,11 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyCMF\Scaffold\ScaffoldFieldException;
-use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
+use PeskyCMF\Scaffold\ValueViewerException;
+use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyORM\ORM\Column;
 
-class FormInput extends ScaffoldRenderableFieldConfig {
+class FormInput extends RenderableValueViewer {
 
     /** @var bool */
     protected $showOnCreate = true;
@@ -50,7 +50,7 @@ class FormInput extends ScaffoldRenderableFieldConfig {
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws ScaffoldFieldException
+     * @throws ValueViewerException
      */
     public function getDefaultId() {
         return static::makeDefaultId(
@@ -60,13 +60,13 @@ class FormInput extends ScaffoldRenderableFieldConfig {
     }
 
     /**
-     * Make default html id for input using $fieldName
-     * @param string $fieldName
+     * Make default html id for input using $formInputName
+     * @param string $formInputName
      * @param string $tableName
      * @return string
      */
-    static public function makeDefaultId($fieldName, $tableName) {
-        return 't-' . $tableName . '-c-' . preg_replace('%[^a-zA-Z0-9-]+%', '_', $fieldName) . '-input';
+    static public function makeDefaultId($formInputName, $tableName) {
+        return 't-' . $tableName . '-c-' . preg_replace('%[^a-zA-Z0-9-]+%', '_', $formInputName) . '-input';
     }
 
     /**
@@ -79,18 +79,18 @@ class FormInput extends ScaffoldRenderableFieldConfig {
     /**
      * @param null|array|callable $options
      * @return $this
-     * @throws ScaffoldFieldException
+     * @throws ValueViewerException
      */
     public function setOptions($options) {
         if (!is_array($options) && !is_callable($options)) {
-            throw new ScaffoldFieldException($this, '$options should be an array');
+            throw new ValueViewerException($this, '$options should be an array');
         }
         $this->options = $options;
         return $this;
     }
 
     /**
-     * @param callable $loader = function (FormInput $fieldConfig, FormConfig $formConfig, $pkValue = null) { return [] }
+     * @param callable $loader = function (FormInput $formInput, FormConfig $formConfig, $pkValue = null) { return [] }
      * @return $this
      */
     public function setOptionsLoader(callable $loader) {
@@ -172,7 +172,7 @@ class FormInput extends ScaffoldRenderableFieldConfig {
      * @param null|InputRenderer $renderer
      * @return string
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ValueViewerException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */

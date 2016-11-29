@@ -7,7 +7,7 @@
  * @var string $idSuffix
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
-$fieldConfigs = $itemDetailsConfig->getFields();
+$valueViewers = $itemDetailsConfig->getValueViewers();
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 
 $jsInitiator = '';
@@ -18,14 +18,14 @@ if ($itemDetailsConfig->hasJsInitiator()) {
 
 <?php View::startSection('item-detials-table') ;?>
     <table class="table table-striped table-bordered mn item-details-table" <?php echo $jsInitiator; ?>>
-        <?php foreach ($fieldConfigs as $config) : ?>
-        <tr id="item-details-<?php echo $config->getName(); ?>">
+        <?php foreach ($valueViewers as $viewer) : ?>
+        <tr id="item-details-<?php echo $viewer->getName(); ?>">
             <th class="text-nowrap">
                 <?php
-                    if ($config->hasLabel()) {
-                        echo $config->getLabel();
+                    if ($viewer->hasLabel()) {
+                        echo $viewer->getLabel();
                     } else {
-                        echo cmfTransCustom("$translationPrefix.item_details.field.{$config->getName()}");
+                        echo cmfTransCustom("$translationPrefix.item_details.field.{$viewer->getName()}");
                     }
                 ?>
             </th>
@@ -33,7 +33,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
                 <?php
                     try {
                         echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates(
-                            $config->render(['translationPrefix' => $translationPrefix])
+                            $viewer->render(['translationPrefix' => $translationPrefix])
                         );
                     } catch (Exception $exc) {
                         echo '<div>' . $exc->getMessage() . '</div>';

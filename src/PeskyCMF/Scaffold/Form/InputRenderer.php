@@ -4,9 +4,9 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Scaffold\ScaffoldException;
-use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
+use PeskyCMF\Scaffold\ValueRenderer;
 
-class InputRenderer extends ScaffoldFieldRenderer {
+class InputRenderer extends ValueRenderer {
     /** @var array */
     protected $attributes = [];
     /** @var array */

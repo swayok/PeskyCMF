@@ -5,8 +5,8 @@ namespace PeskyCMF\Scaffold\DataGrid;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
-use PeskyCMF\Scaffold\ScaffoldFieldConfig;
-use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
+use PeskyCMF\Scaffold\AbstractValueViewer;
+use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
@@ -15,11 +15,11 @@ use Swayok\Utils\ValidateValue;
 
 class DataGridConfig extends ScaffoldActionConfig {
 
-    protected $view = 'cmf::scaffold/datagrid';
+    protected $template = 'cmf::scaffold/datagrid';
     /**
      * @var int
      */
-    protected $limit = 25;
+    protected $recordsPerPage = 25;
     /**
      * @var int
      */
@@ -62,57 +62,57 @@ class DataGridConfig extends ScaffoldActionConfig {
     /** @var bool */
     protected $isRowActionsColumnFixed = true;
     /** @var bool */
-    protected $isFilterShown = true;
+    protected $isFilterOpened = true;
 
     const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldSectionConfig) {
         parent::__construct($table, $scaffoldSectionConfig);
-        $this->limit = CmfConfig::getInstance()->rows_per_page();
+        $this->recordsPerPage = CmfConfig::getInstance()->rows_per_page();
         $this->setOrderBy($table->getPkColumnName());
     }
 
-    protected function createFieldRendererConfig() {
+    protected function createValueRenderer() {
         return TableCellRenderer::create();
     }
 
     /**
-     * @param TableCellRenderer|ScaffoldFieldRenderer $rendererConfig
-     * @param TableCell|ScaffoldFieldConfig $fieldConfig
+     * @param TableCellRenderer|ValueRenderer $renderer
+     * @param TableCell|AbstractValueViewer $tableCell
      */
-    protected function configureDefaultRenderer(
-        ScaffoldFieldRenderer $rendererConfig,
-        ScaffoldFieldConfig $fieldConfig
+    protected function configureDefaultValueRenderer(
+        ValueRenderer $renderer,
+        AbstractValueViewer $tableCell
     ) {
-        switch ($fieldConfig->getType()) {
-            case $fieldConfig::TYPE_IMAGE:
-                $rendererConfig->setView('cmf::details/image');
+        switch ($tableCell->getType()) {
+            case $tableCell::TYPE_IMAGE:
+                $renderer->setTemplate('cmf::details/image');
                 break;
         }
     }
 
     /**
-     * @param array $fieldNames
+     * @param array $columnNames
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      */
-    public function setInvisibleFields(array $fieldNames) {
-        foreach ($fieldNames as $fieldName) {
-            $this->addField($fieldName, TableCell::create()->setIsVisible(false));
+    public function setInvisibleColumns(array $columnNames) {
+        foreach ($columnNames as $name) {
+            $this->addValueViewer($name, TableCell::create()->setIsVisible(false));
         }
         return $this;
     }
 
     /**
-     * @param ScaffoldFieldConfig|TableCell $fieldConfig
+     * @param AbstractValueViewer|TableCell $viewer
      * @return int
      */
-    protected function getNextFieldPosition(ScaffoldFieldConfig $fieldConfig) {
-        if ($fieldConfig->isVisible()) {
+    protected function getNextValueViewerPosition(AbstractValueViewer $viewer) {
+        if ($viewer->isVisible()) {
             /** @var TableCell $otherFieldConfig */
             $count = 0;
-            foreach ($this->fields as $otherFieldConfig) {
+            foreach ($this->valueViewers as $otherFieldConfig) {
                 if ($otherFieldConfig->isVisible()) {
                     $count++;
                 }
@@ -127,35 +127,51 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param bool $shown - true: filter will be opened on data grid load | false: filter will be hidden
      * @return $this
      */
-    public function setFilterIsShownByDefault($shown = true) {
-        $this->isFilterShown = $shown;
+    public function setFilterIsOpenedByDefault($shown = true) {
+        $this->isFilterOpened = $shown;
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function openFilterByDefault() {
+        $this->isFilterOpened = true;
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function closeFilterByDefault() {
+        $this->isFilterOpened = false;
         return $this;
     }
 
     /**
      * @return bool
      */
-    public function isFilterShownByDefault() {
-        return $this->isFilterShown;
+    public function isFilterOpenedByDefault() {
+        return $this->isFilterOpened;
     }
 
     /**
      * @return int
      */
-    public function getLimit() {
-        return $this->limit;
+    public function getRecordsPerPage() {
+        return $this->recordsPerPage;
     }
 
     /**
-     * @param int $limit
+     * @param int $recordsPerPage
      * @return $this
      * @throws ScaffoldActionException
      */
-    public function setLimit($limit) {
-        if (!ValidateValue::isInteger($limit, true)) {
+    public function setRecordsPerPage($recordsPerPage) {
+        if (!ValidateValue::isInteger($recordsPerPage, true)) {
             throw new ScaffoldActionException($this, 'Integer value expected');
         }
-        $this->limit = min($this->maxLimit, $limit);
+        $this->recordsPerPage = min($this->maxLimit, $recordsPerPage);
         return $this;
     }
 
@@ -404,7 +420,7 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @param array $records
      * @return array
-     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ValueViewerException
      */
     public function prepareRecords(array $records) {
         foreach ($records as $idx => &$record) {
@@ -416,7 +432,7 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @inheritdoc
      */
-    public function createFieldConfig() {
+    public function createValueViewer() {
         return TableCell::create();
     }
 
@@ -523,22 +539,22 @@ class DataGridConfig extends ScaffoldActionConfig {
 
     /**
      * @param string $name
-     * @param null|TableCell $config
+     * @param null|TableCell|AbstractValueViewer $tableCell
      * @return ScaffoldActionConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      */
-    public function addField($name, $config = null) {
-        $config = !$config && $name === static::ROW_ACTIONS_COLUMN_NAME
-            ? $this->getDataGridFieldConfigForRowActions()
-            : $config;
-        return parent::addField($name, $config);
+    public function addValueViewer($name, AbstractValueViewer $tableCell = null) {
+        $tableCell = !$tableCell && $name === static::ROW_ACTIONS_COLUMN_NAME
+            ? $this->getTableCellForForRowActions()
+            : $tableCell;
+        return parent::addValueViewer($name, $tableCell);
     }
 
     /**
      * @return TableCell
      */
-    protected function getDataGridFieldConfigForRowActions() {
+    protected function getTableCellForForRowActions() {
         return TableCell::create()
             ->setIsDbField(false)
             ->setName(static::ROW_ACTIONS_COLUMN_NAME)
@@ -553,8 +569,8 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function finish() {
-        if (!$this->isRowActionsFloating() && !$this->hasField(static::ROW_ACTIONS_COLUMN_NAME)) {
-            $this->addField(static::ROW_ACTIONS_COLUMN_NAME, null);
+        if (!$this->isRowActionsFloating() && !$this->hasValueViewer(static::ROW_ACTIONS_COLUMN_NAME)) {
+            $this->addValueViewer(static::ROW_ACTIONS_COLUMN_NAME, null);
         }
     }
 

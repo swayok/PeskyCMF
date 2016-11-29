@@ -5,22 +5,22 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
-use PeskyCMF\Scaffold\ScaffoldFieldConfig;
-use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
+use PeskyCMF\Scaffold\AbstractValueViewer;
+use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\ORM\Column;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
 
 class FormConfig extends ScaffoldActionConfig {
 
-    protected $view = 'cmf::scaffold/form';
-    protected $bulkEditingView = 'cmf::scaffold/bulk_edit_form';
+    protected $template = 'cmf::scaffold/form';
+    protected $bulkEditingTemplate = 'cmf::scaffold/bulk_edit_form';
 
     /**
      * Fields list that can be edited in bulk (for many records at once)
      * @var FormInput[]
      */
-    protected $bulkEditableFields = [];
+    protected $bulkEditableColumns = [];
     /**
      * @var null|mixed
      */
@@ -62,111 +62,111 @@ class FormConfig extends ScaffoldActionConfig {
     /** @var \Closure|null */
     protected $afterBulkEditDataSaveCallback;
 
-    public function setBulkEditingView($view) {
-        $this->bulkEditingView = $view;
+    public function setBulkEditingTemplate($view) {
+        $this->bulkEditingTemplate = $view;
         return $this;
     }
 
-    public function getBulkEditingView() {
-        if (empty($this->bulkEditingView)) {
+    public function getBulkEditingTemplate() {
+        if (empty($this->bulkEditingTemplate)) {
             throw new ScaffoldActionException($this, 'The view file for bulk editing is not set');
         }
-        return $this->bulkEditingView;
+        return $this->bulkEditingTemplate;
     }
 
-    protected function createFieldRendererConfig() {
+    protected function createValueRenderer() {
         return InputRenderer::create();
     }
 
     /**
-     * @param InputRenderer|ScaffoldFieldRenderer $rendererConfig
-     * @param FormInput|ScaffoldFieldConfig $fieldConfig
+     * @param InputRenderer|ValueRenderer $renderer
+     * @param FormInput|AbstractValueViewer $formInput
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ValueViewerException
      */
-    protected function configureDefaultRenderer(
-        ScaffoldFieldRenderer $rendererConfig,
-        ScaffoldFieldConfig $fieldConfig
+    protected function configureDefaultValueRenderer(
+        ValueRenderer $renderer,
+        AbstractValueViewer $formInput
     ) {
-        switch ($fieldConfig->getType()) {
-            case $fieldConfig::TYPE_BOOL:
-                $rendererConfig->setView('cmf::input/trigger');
+        switch ($formInput->getType()) {
+            case $formInput::TYPE_BOOL:
+                $renderer->setTemplate('cmf::input/trigger');
                 break;
-            case $fieldConfig::TYPE_HIDDEN:
-                $rendererConfig->setView('cmf::input/hidden');
+            case $formInput::TYPE_HIDDEN:
+                $renderer->setTemplate('cmf::input/hidden');
                 break;
-            case $fieldConfig::TYPE_TEXT:
-                $rendererConfig->setView('cmf::input/textarea');
+            case $formInput::TYPE_TEXT:
+                $renderer->setTemplate('cmf::input/textarea');
                 break;
-            case $fieldConfig::TYPE_WYSIWYG:
-                $rendererConfig->setView('cmf::input/wysiwyg');
+            case $formInput::TYPE_WYSIWYG:
+                $renderer->setTemplate('cmf::input/wysiwyg');
                 break;
-            case $fieldConfig::TYPE_SELECT:
-                $rendererConfig
-                    ->setView('cmf::input/select')
-                    ->setOptions($fieldConfig->getOptions());
+            case $formInput::TYPE_SELECT:
+                $renderer
+                    ->setTemplate('cmf::input/select')
+                    ->setOptions($formInput->getOptions());
                 break;
-            case $fieldConfig::TYPE_MULTISELECT:
-                $rendererConfig
-                    ->setView('cmf::input/multiselect')
-                    ->setOptions($fieldConfig->getOptions());
+            case $formInput::TYPE_MULTISELECT:
+                $renderer
+                    ->setTemplate('cmf::input/multiselect')
+                    ->setOptions($formInput->getOptions());
                 if (
-                    !$fieldConfig->hasValueConverter()
+                    !$formInput->hasValueConverter()
                     && in_array(
-                        $fieldConfig->getTableColumn()->getType(),
+                        $formInput->getTableColumn()->getType(),
                         [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
                         true
                     )
                 ) {
-                    $fieldConfig->setValueConverter(function ($value) {
+                    $formInput->setValueConverter(function ($value) {
                         return $value;
                     });
                 }
                 break;
-            case $fieldConfig::TYPE_TAGS:
-                $rendererConfig->setView('cmf::input/tags');
-                $options = $fieldConfig->getOptions();
+            case $formInput::TYPE_TAGS:
+                $renderer->setTemplate('cmf::input/tags');
+                $options = $formInput->getOptions();
                 if (!empty($options)) {
-                    $rendererConfig->setOptions($options);
+                    $renderer->setOptions($options);
                 }
                 if (
-                    !$fieldConfig->hasValueConverter()
+                    !$formInput->hasValueConverter()
                     && in_array(
-                        $fieldConfig->getTableColumn()->getType(),
+                        $formInput->getTableColumn()->getType(),
                         [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
                         true
                     )
                 ) {
-                    $fieldConfig->setValueConverter(function ($value) {
+                    $formInput->setValueConverter(function ($value) {
                         return $value;
                     });
                 }
                 break;
-            case $fieldConfig::TYPE_IMAGE:
-                $rendererConfig->setView('cmf::input/image');
+            case $formInput::TYPE_IMAGE:
+                $renderer->setTemplate('cmf::input/image');
                 break;
-            case $fieldConfig::TYPE_DATETIME:
-                $rendererConfig->setView('cmf::input/datetime');
+            case $formInput::TYPE_DATETIME:
+                $renderer->setTemplate('cmf::input/datetime');
                 break;
-            case $fieldConfig::TYPE_DATE:
-                $rendererConfig->setView('cmf::input/date');
+            case $formInput::TYPE_DATE:
+                $renderer->setTemplate('cmf::input/date');
                 break;
-            case $fieldConfig::TYPE_EMAIL:
-                $rendererConfig
-                    ->setView('cmf::input/text')
+            case $formInput::TYPE_EMAIL:
+                $renderer
+                    ->setTemplate('cmf::input/text')
                     ->setAttributes(['type' => 'email']);
                 break;
-            case $fieldConfig::TYPE_PASSWORD:
-                $rendererConfig->setView('cmf::input/password');
+            case $formInput::TYPE_PASSWORD:
+                $renderer->setTemplate('cmf::input/password');
                 break;
             default:
-                $rendererConfig->setView('cmf::input/text');
+                $renderer->setTemplate('cmf::input/text');
         }
-        if ($fieldConfig->isDbField()) {
-            $this->configureRendererByColumnConfig($rendererConfig, $fieldConfig->getTableColumn());
+        if ($formInput->isDbColumn()) {
+            $this->configureRendererByColumnConfig($renderer, $formInput->getTableColumn());
         }
-        if ($fieldConfig->hasDefaultRendererConfigurator()) {
-            call_user_func($fieldConfig->getDefaultRendererConfigurator(), $rendererConfig, $fieldConfig);
+        if ($formInput->hasDefaultRendererConfigurator()) {
+            call_user_func($formInput->getDefaultRendererConfigurator(), $renderer, $formInput);
         }
     }
 
@@ -182,7 +182,7 @@ class FormConfig extends ScaffoldActionConfig {
     }
 
     /**
-     * @param array $fields
+     * @param array $columns
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
@@ -190,23 +190,23 @@ class FormConfig extends ScaffoldActionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \BadMethodCallException
      */
-    public function setBulkEditableFields(array $fields) {
-        if (empty($this->fields)) {
+    public function setBulkEditableColumns(array $columns) {
+        if (empty($this->valueViewers)) {
             throw new \BadMethodCallException('setFields() method must be called before');
         }
-        foreach ($fields as $name => $config) {
+        foreach ($columns as $name => $config) {
             if (is_int($name)) {
                 $name = $config;
                 $config = null;
             }
-            $this->addBulkEditableField($name, $config);
+            $this->addBulkEditableColumns($name, $config);
         }
         return $this;
     }
 
     /**
      * @param string $name
-     * @param null|FormInput $fieldConfig - null: FormInput will be imported from $this->fields or created default one
+     * @param null|FormInput $formInput - null: FormInput will be imported from $this->fields or created default one
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
@@ -214,8 +214,8 @@ class FormConfig extends ScaffoldActionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
-    public function addBulkEditableField($name, $fieldConfig = null) {
-        if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
+    public function addBulkEditableColumns($name, FormInput $formInput = null) {
+        if ((!$formInput || $formInput->isDbColumn()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
         } else if ($this->getTable()->getTableStructure()->getColumn($name)->isItAFile()) {
             throw new ScaffoldActionException(
@@ -223,30 +223,30 @@ class FormConfig extends ScaffoldActionConfig {
                 "Attaching files in bulk editing form is not suppoted. Table column: [$name]"
             );
         }
-        if (empty($fieldConfig)) {
-            $fieldConfig = $this->hasField($name) ? $this->getField($name) : $this->createFieldConfig();
+        if (empty($formInput)) {
+            $formInput = $this->hasValueViewer($name) ? $this->getValueViewer($name) : $this->createValueViewer();
         }
-        /** @var FormInput $fieldConfig */
-        $fieldConfig->setName($name);
-        $fieldConfig->setPosition($this->getNextBulkEditableFieldPosition($fieldConfig));
-        $fieldConfig->setScaffoldActionConfig($this);
-        $this->bulkEditableFields[$name] = $fieldConfig;
+        /** @var FormInput $formInput */
+        $formInput->setName($name);
+        $formInput->setPosition($this->getNextBulkEditableColumnPosition($formInput));
+        $formInput->setScaffoldActionConfig($this);
+        $this->bulkEditableColumns[$name] = $formInput;
         return $this;
     }
 
     /**
      * @return FormInput[]
      */
-    public function getBulkEditableFields() {
-        return $this->bulkEditableFields;
+    public function getBulkEditableColumns() {
+        return $this->bulkEditableColumns;
     }
 
     /**
-     * @param FormInput $fieldConfig
+     * @param FormInput $formInput
      * @return int
      */
-    protected function getNextBulkEditableFieldPosition(FormInput $fieldConfig) {
-        return count($this->bulkEditableFields);
+    protected function getNextBulkEditableColumnPosition(FormInput $formInput) {
+        return count($this->bulkEditableColumns);
     }
 
     /**
@@ -288,8 +288,8 @@ class FormConfig extends ScaffoldActionConfig {
     public function hasOptionsLoader() {
         if ($this->hasOptionsLoader === null) {
             $this->hasOptionsLoader = false;
-            foreach ($this->getFields() as $field) {
-                if ($field->hasOptionsLoader()) {
+            foreach ($this->getValueViewers() as $viewer) {
+                if ($viewer->hasOptionsLoader()) {
                     $this->hasOptionsLoader = true;
                     break;
                 }
@@ -301,15 +301,15 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param int|string|null $pkValue - primary key value
      * @return array[]
-     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ValueViewerException
      */
     public function loadOptions($pkValue) {
         $options = array();
-        foreach ($this->getFields() as $fieldConfig) {
-            if ($fieldConfig->hasOptionsLoader()) {
-                $options[$fieldConfig->getName()] = call_user_func(
-                    $fieldConfig->getOptionsLoader(),
-                    $fieldConfig,
+        foreach ($this->getValueViewers() as $viewer) {
+            if ($viewer->hasOptionsLoader()) {
+                $options[$viewer->getName()] = call_user_func(
+                    $viewer->getOptionsLoader(),
+                    $viewer,
                     $this,
                     $pkValue
                 );
@@ -321,7 +321,7 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @inheritdoc
      */
-    public function createFieldConfig() {
+    public function createValueViewer() {
         return FormInput::create();
     }
 
@@ -504,12 +504,12 @@ class FormConfig extends ScaffoldActionConfig {
         } else {
             $messages = Set::flatten($messages);
         }
-        $arrayFields = [];
+        $columnsWithArrayType = [];
         foreach ($validators as $key => &$value) {
             if (is_string($value)) {
                 $value = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
                 if (preg_match('%(^|\|)array%i', $value)) {
-                    $arrayFields[] = $key;
+                    $columnsWithArrayType[] = $key;
                 }
             } else if (is_array($value)) {
                 /** @var array $value */
@@ -518,7 +518,7 @@ class FormConfig extends ScaffoldActionConfig {
                         $validator = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
                     }
                     if ($validator === 'array') {
-                        $arrayFields[] = $key;
+                        $columnsWithArrayType[] = $key;
                     }
                 }
                 unset($validator);
@@ -528,10 +528,10 @@ class FormConfig extends ScaffoldActionConfig {
         $validator = \Validator::make($data, $validators, $messages);
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
-            foreach ($errors as $field => $error) {
-                if (in_array($field, $arrayFields, true)) {
-                    $errors[$field . '[]'] = $error;
-                    unset($errors[$field]);
+            foreach ($errors as $viewerName => $error) {
+                if (in_array($viewerName, $columnsWithArrayType, true)) {
+                    $errors[$viewerName . '[]'] = $error;
+                    unset($errors[$viewerName]);
                 }
             }
             return $errors;

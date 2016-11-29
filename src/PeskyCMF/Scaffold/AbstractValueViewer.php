@@ -9,7 +9,7 @@ use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 use Swayok\Html\Tag;
 
-abstract class ScaffoldFieldConfig {
+abstract class AbstractValueViewer {
 
     /** @var null|ScaffoldActionConfig */
     protected $scaffoldActionConfig = null;
@@ -81,7 +81,7 @@ abstract class ScaffoldFieldConfig {
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws ScaffoldFieldException
+     * @throws ValueViewerException
      */
     public function getTableColumn() {
         return $this->getScaffoldActionConfig()->getTable()->getTableStructure()->getColumn($this->getName());
@@ -99,17 +99,17 @@ abstract class ScaffoldFieldConfig {
     /**
      * @return bool
      */
-    public function isDbField() {
+    public function isDbColumn() {
         return $this->isDbField;
     }
 
     /**
      * @return null|string
-     * @throws ScaffoldFieldException
+     * @throws ValueViewerException
      */
     public function getName() {
         if (empty($this->name)) {
-            throw new ScaffoldFieldException($this, 'Field name not provided');
+            throw new ValueViewerException($this, 'Field name not provided');
         }
         return $this->name;
     }
@@ -125,7 +125,7 @@ abstract class ScaffoldFieldConfig {
 
     /**
      * @return string
-     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ValueViewerException
      */
     public function getType() {
         if (empty($this->type)) {
@@ -196,8 +196,8 @@ abstract class ScaffoldFieldConfig {
 
     /**
      * @param callable $valueConverter 
-     *      - when $this->isDbField() === true: function ($value, Column $columnConfig, array $record, ScaffoldFieldConfig $fieldConfig) {}
-     *      - when $this->isDbField() === false: function (array $record, ScaffoldFieldConfig $fieldConfig, ScaffolActionConfig $scaffoldActionConfig) {}
+     *      - when $this->isDbField() === true: function ($value, Column $columnConfig, array $record, AbstractValueViewer $valueViewer) {}
+     *      - when $this->isDbField() === false: function (array $record, AbstractValueViewer $valueViewer, ScaffolActionConfig $scaffoldActionConfig) {}
      * @return $this
      */
     public function setValueConverter(callable $valueConverter) {
@@ -210,12 +210,12 @@ abstract class ScaffoldFieldConfig {
      * @param array $record
      * @param bool $ignoreValueConverter
      * @return mixed
-     * @throws ScaffoldFieldException
+     * @throws ValueViewerException
      */
     public function convertValue($value, array $record, $ignoreValueConverter = false) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
         if (!empty($valueConverter)) {
-            if ($this->isDbField()) {
+            if ($this->isDbColumn()) {
                 $value = call_user_func($valueConverter, $value, $this->getTableColumn(), $record, $this);
             } else {
                 $value = call_user_func($valueConverter, $record, $this, $this->getScaffoldActionConfig());
@@ -278,7 +278,7 @@ abstract class ScaffoldFieldConfig {
             }
         }
         if (empty($relationConfig)) {
-            throw new ScaffoldFieldException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
+            throw new ValueViewerException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
         if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getDisplayColumnName()])) {
             return cmfTransGeneral('.item_details.field.no_relation');

@@ -3,44 +3,44 @@
 namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
-use PeskyCMF\Scaffold\ScaffoldFieldConfig;
-use PeskyCMF\Scaffold\ScaffoldFieldRenderer;
+use PeskyCMF\Scaffold\AbstractValueViewer;
+use PeskyCMF\Scaffold\ValueRenderer;
 
 class ItemDetailsConfig extends ScaffoldActionConfig {
 
-    protected $view = 'cmf::scaffold/item_details';
+    protected $template = 'cmf::scaffold/item_details';
 
     /**
      * @inheritdoc
      */
-    public function createFieldConfig() {
+    public function createValueViewer() {
         return ValueCell::create();
     }
 
-    protected function createFieldRendererConfig() {
+    protected function createValueRenderer() {
         return ValueCellRenderer::create();
     }
 
     /**
-     * @param ScaffoldFieldRenderer|ValueCellRenderer $rendererConfig
-     * @param ScaffoldFieldConfig|ValueCell $fieldConfig
+     * @param ValueRenderer|ValueCellRenderer $renderer
+     * @param AbstractValueViewer|ValueCell $valueCell
      */
-    protected function configureDefaultRenderer(
-        ScaffoldFieldRenderer $rendererConfig,
-        ScaffoldFieldConfig $fieldConfig
+    protected function configureDefaultValueRenderer(
+        ValueRenderer $renderer,
+        AbstractValueViewer $valueCell
     ) {
-        switch ($fieldConfig->getType()) {
-            case $fieldConfig::TYPE_IMAGE:
-                $rendererConfig->setView('cmf::details.image');
+        switch ($valueCell->getType()) {
+            case $valueCell::TYPE_IMAGE:
+                $renderer->setTemplate('cmf::details.image');
                 break;
-            case $fieldConfig::TYPE_BOOL:
-                $rendererConfig->setView('cmf::details.bool');
+            case $valueCell::TYPE_BOOL:
+                $renderer->setTemplate('cmf::details.bool');
                 break;
-            case $fieldConfig::TYPE_JSON_TREE:
-                $rendererConfig->setView('cmf::details.json_tree');
+            case $valueCell::TYPE_JSON_TREE:
+                $renderer->setTemplate('cmf::details.json_tree');
                 break;
             default:
-                $rendererConfig->setView('cmf::details.text');
+                $renderer->setTemplate('cmf::details.text');
         }
     }
 

@@ -2,9 +2,9 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Scaffold\ScaffoldFieldConfig;
+use PeskyCMF\Scaffold\AbstractValueViewer;
 
-class TableCell extends ScaffoldFieldConfig {
+class TableCell extends AbstractValueViewer {
 
     /**
      * @var bool
@@ -80,7 +80,7 @@ class TableCell extends ScaffoldFieldConfig {
             switch ($this->getType()) {
                 case self::TYPE_BOOL:
                     return function ($value) {
-                        if (!$this->isDbField()) {
+                        if (!$this->isDbColumn()) {
                             if (!array_has($value, $this->getName())) {
                                 return '-';
                             } else {

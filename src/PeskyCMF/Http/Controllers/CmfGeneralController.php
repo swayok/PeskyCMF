@@ -97,18 +97,18 @@ class CmfGeneralController extends Controller {
             'old_password' => 'required',
             'new_password' => 'min:6',
         ];
-        $fieldsToUpdate = [];
+        $columnsToUpdate = [];
         if ($admin::hasColumn('language')) {
             $validationRules['language'] = 'required|in:' . implode(CmfConfig::getInstance()->locales());
-            $fieldsToUpdate[] = 'language';
+            $columnsToUpdate[] = 'language';
         }
         if ($admin::hasColumn('name')) {
             $validationRules['name'] = 'max:200';
-            $fieldsToUpdate[] = 'name';
+            $columnsToUpdate[] = 'name';
         }
         if ($admin::hasColumn('timezone')) {
             $validationRules['timezone'] = 'required|exists2:pg_timezone_names,name';
-            $fieldsToUpdate[] = 'timezone';
+            $columnsToUpdate[] = 'timezone';
         }
         $usersTable = CmfConfig::getInstance()->users_table_name();
         $userLoginCol = CmfConfig::getInstance()->user_login_column();
@@ -118,19 +118,19 @@ class CmfGeneralController extends Controller {
             } else {
                 $validationRules['email'] = 'email';
             }
-            $fieldsToUpdate[] = 'email';
+            $columnsToUpdate[] = 'email';
         }
         if ($userLoginCol !== 'email') {
             $validationRules[$userLoginCol] = "required|regex:%^[a-zA-Z0-9_@.-]+$%is|min:4|unique:$usersTable,$userLoginCol,{$admin->getAuthIdentifier()},id";
-            $fieldsToUpdate[] = $userLoginCol;
+            $columnsToUpdate[] = $userLoginCol;
         }
-        foreach (CmfConfig::getInstance()->additional_user_profile_fields() as $fieldName => $rules) {
-             if (is_int($fieldName)) {
-                $fieldName = $rules;
+        foreach (CmfConfig::getInstance()->additional_user_profile_fields() as $columnName => $rules) {
+             if (is_int($columnName)) {
+                $columnName = $rules;
              } else {
-                $validationRules[$fieldName] = $rules;
+                $validationRules[$columnName] = $rules;
              }
-             $fieldsToUpdate[] = $fieldName;
+             $columnsToUpdate[] = $columnName;
         }
         $validator = \Validator::make(
             $request->all(),
@@ -146,7 +146,7 @@ class CmfGeneralController extends Controller {
         if (count($errors) > 0) {
             return cmfJsonResponseForValidationErrors($errors);
         }
-        return $request->only($fieldsToUpdate);
+        return $request->only($columnsToUpdate);
     }
 
     protected function getDataForBasicUiView() {
@@ -370,12 +370,12 @@ class CmfGeneralController extends Controller {
     }
 
     public function ckeditorUploadImage(Request $request) {
-        $field = $this->validateImageUpload($request);
+        $column = $this->validateImageUpload($request);
         $url = $message = '';
-        if (!is_object($field)) {
-            $message = (string)$field;
+        if (!is_object($column)) {
+            $message = (string)$column;
         } else {
-            list($url, $message) = $this->saveUploadedImage($field, $request->file('upload'));
+            list($url, $message) = $this->saveUploadedImage($column, $request->file('upload'));
         }
         $editorNum = (int)$request->input('CKEditorFuncNum');
         $message = addslashes($message);
@@ -400,67 +400,67 @@ class CmfGeneralController extends Controller {
         $editorId = $request->input('CKEditor');
 
         if (preg_match('%^([^:]+):(.+)$%', $editorId, $matches)) {
-            list(, $tableName, $fieldName) = $matches;
+            list(, $tableName, $columnName) = $matches;
         } elseif (preg_match('%^t-(.+?)-c-(.+?)-input$%', $matches)) {
-            list(, $tableName, $fieldName) = $matches;
+            list(, $tableName, $columnName) = $matches;
         } else {
             return cmfTransGeneral('.ckeditor.fileupload.cannot_detect_table_and_field', ['editor_name' => $editorId]);
         }
         $scaffoldConfig = CmfConfig::getInstance()->getScaffoldConfigByTableName($tableName);
-        $fields = $scaffoldConfig->getFormConfig()->getFields();
-        if (array_key_exists($fieldName, $fields)) {
-            $field = $fields[$fieldName];
+        $columns = $scaffoldConfig->getFormConfig()->getValueViewers();
+        if (array_key_exists($columnName, $columns)) {
+            $column = $columns[$columnName];
         } else {
-            foreach ($fields as $name => $fieldConfig) {
-                if (preg_replace('%[^a-zA-Z0-9-]+%', '_', $name) === $fieldName) {
-                    $field = $fieldConfig;
+            foreach ($columns as $name => $columnInfo) {
+                if (preg_replace('%[^a-zA-Z0-9-]+%', '_', $name) === $columnName) {
+                    $column = $columnInfo;
                     break;
                 }
             }
         }
-        if (empty($field)) {
+        if (empty($column)) {
             return cmfTransGeneral(
                 '.ckeditor.fileupload.cannot_find_field_in_scaffold',
                 [
                     'editor_name' => $editorId,
-                    'field_name' => $fieldName,
+                    'field_name' => $columnName,
                     'scaffold_class' => get_class($scaffoldConfig)
                 ]
             );
-        } else if (!($field instanceof WysiwygFormInput)) {
+        } else if (!($column instanceof WysiwygFormInput)) {
             return cmfTransGeneral(
                 '.ckeditor.fileupload.is_not_wysiwyg_field_config',
                 [
                     'wysywig_class' => WysiwygFormInput::class,
-                    'field_name' => $fieldName,
+                    'field_name' => $columnName,
                     'scaffold_class' => get_class($scaffoldConfig)
                 ]
             );
         }
-        /** @var WysiwygFormInput $field */
-        if (!$field->hasImageUploadsFolder()) {
+        /** @var WysiwygFormInput $column */
+        if (!$column->hasImageUploadsFolder()) {
             return cmfTransGeneral(
                 '.ckeditor.fileupload.image_uploading_folder_not_set',
                 [
-                    'field_name' => $fieldName,
+                    'field_name' => $columnName,
                     'scaffold_class' => get_class($scaffoldConfig)
                 ]
             );
         }
-        return $field;
+        return $column;
     }
 
     /**
-     * @param WysiwygFormInput $field
+     * @param WysiwygFormInput $formInput
      * @param UploadedFile $uploadedFile
      * @return array - 0: url to file; 1: message
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      */
-    protected function saveUploadedImage(WysiwygFormInput $field, UploadedFile $uploadedFile) {
+    protected function saveUploadedImage(WysiwygFormInput $formInput, UploadedFile $uploadedFile) {
         /** @var UploadedFile $uploadedFile */
-        Folder::load($field->getAbsoluteImageUploadsFolder(), true, 0755);
+        Folder::load($formInput->getAbsoluteImageUploadsFolder(), true, 0755);
         $newFileName = Uuid::uuid4()->toString() . ($uploadedFile->getExtension() ?: $uploadedFile->getClientOriginalExtension());
-        $file = $uploadedFile->move($field->getAbsoluteImageUploadsFolder(), $newFileName);
+        $file = $uploadedFile->move($formInput->getAbsoluteImageUploadsFolder(), $newFileName);
         $imageProcessor = new \Imagick($file->getRealPath());
         // resize image
         if (
@@ -473,12 +473,12 @@ class CmfGeneralController extends Controller {
             return ['', cmfTransGeneral('.ckeditor.fileupload.invalid_or_corrupted_image')];
         }
         if (
-            ($field->getMaxImageWidth() > 0 && $imageProcessor->getImageWidth() > $field->getMaxImageWidth())
-            || ($field->getMaxImageHeight() > 0 && $imageProcessor->getImageHeight() > $field->getMaxImageHeight())
+            ($formInput->getMaxImageWidth() > 0 && $imageProcessor->getImageWidth() > $formInput->getMaxImageWidth())
+            || ($formInput->getMaxImageHeight() > 0 && $imageProcessor->getImageHeight() > $formInput->getMaxImageHeight())
         ) {
             $success = $imageProcessor->resizeImage(
-                $field->getMaxImageWidth(),
-                $field->getMaxImageHeight(),
+                $formInput->getMaxImageWidth(),
+                $formInput->getMaxImageHeight(),
                 \Imagick::FILTER_LANCZOS,
                 0,
                 true
@@ -491,7 +491,7 @@ class CmfGeneralController extends Controller {
         if (!$success) {
             return ['', cmfTransGeneral('.ckeditor.fileupload.failed_to_save_image_to_fs')];
         }
-        $url = $field->getRelativeImageUploadsUrl() . $newFileName;
+        $url = $formInput->getRelativeImageUploadsUrl() . $newFileName;
         return [$url, ''];
     }
 

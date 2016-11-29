@@ -122,10 +122,10 @@ class CmfScaffoldApiController extends Controller {
         }
         $conditions = $actionConfig->getSpecialConditions();
         $conditions[$table->getPkColumnName()] = $id;
-        if (!$object->fromDb($conditions, [], $actionConfig->getContains())->existsInDb()) {
+        if (!$object->fromDb($conditions, [], $actionConfig->getRelationsToRead())->existsInDb()) {
             return $this->sendItemNotFoundResponse($table);
         }
-        $data = $object->toArray([], $actionConfig->getContains(), false);
+        $data = $object->toArray([], $actionConfig->getRelationsToRead(), false);
         if (
             (
                 $isItemDetails
@@ -164,15 +164,15 @@ class CmfScaffoldApiController extends Controller {
                 ->setMessage(cmfTransGeneral('.action.edit.forbidden'))
                 ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
         }
-        $optionsByFields = $this->getScaffoldConfig()->getFormConfig()->loadOptions($request->query('id'));
-        foreach ($optionsByFields as $fieldName => $fieldOptions) {
-            if (is_array($fieldOptions)) {
-                $optionsByFields[$fieldName] = $this->buildFieldOptions($fieldOptions);
-            } else if (!is_string($fieldOptions)) {
-                unset($optionsByFields[$fieldName]);
+        $columnsOptions = $this->getScaffoldConfig()->getFormConfig()->loadOptions($request->query('id'));
+        foreach ($columnsOptions as $columnName => $options) {
+            if (is_array($options)) {
+                $columnsOptions[$columnName] = $this->buildFieldOptions($options);
+            } else if (!is_string($options)) {
+                unset($columnsOptions[$columnName]);
             }
         }
-        return new JsonResponse($optionsByFields);
+        return new JsonResponse($columnsOptions);
     }
 
     public function addItem(Request $request) {
@@ -183,7 +183,7 @@ class CmfScaffoldApiController extends Controller {
         }
         $table = $this->getTable();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
-        $data = array_intersect_key($request->all(), $formConfig->getFields());
+        $data = array_intersect_key($request->all(), $formConfig->getValueViewers());
         $errors = $formConfig->validateDataForCreate($data);
         if (count($errors) !== 0) {
             return $this->sendValidationErrorsResponse($errors);
@@ -206,7 +206,7 @@ class CmfScaffoldApiController extends Controller {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $dataToSave = array_diff_key($data, $formConfig->getNonDbFields());
+                $dataToSave = array_diff_key($data, $formConfig->getStandaloneViewers());
                 $object = $table->newRecord()->fromData($dataToSave, false);
                 $success = $object->save();
                 if (!$success) {
@@ -254,7 +254,7 @@ class CmfScaffoldApiController extends Controller {
         }
         $table = $this->getTable();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
-        $expectedFields = array_keys($formConfig->getFields());
+        $expectedFields = array_keys($formConfig->getValueViewers());
         $expectedFields[] = $table->getPkColumnName();
         $data = array_intersect_key($request->all(), array_flip($expectedFields));
         $errors = $formConfig->validateDataForEdit($data);
@@ -296,7 +296,7 @@ class CmfScaffoldApiController extends Controller {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $dbData = array_diff_key($data, $formConfig->getNonDbFields());
+                $dbData = array_diff_key($data, $formConfig->getStandaloneViewers());
                 $success = $object->begin()->updateValues($dbData)->commit();
                 if (!$success) {
                     $table::rollBackTransaction();
@@ -343,7 +343,7 @@ class CmfScaffoldApiController extends Controller {
         }
         $table = $this->getTable();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
-        $expectedFields = array_keys($formConfig->getBulkEditableFields());
+        $expectedFields = array_keys($formConfig->getBulkEditableColumns());
         $data = array_intersect_key($request->all(), array_flip($expectedFields));
         if (empty($data)) {
             return cmfServiceJsonResponse(HttpCode::INVALID)
@@ -500,7 +500,7 @@ class CmfScaffoldApiController extends Controller {
         $dataGridConfig = $this->getScaffoldConfig()->getDataGridConfig();
         $dataGridFilterConfig = $this->getScaffoldConfig()->getDataGridFilterConfig();
         $conditions = [
-            'LIMIT' => $request->query('length', $dataGridConfig->getLimit()),
+            'LIMIT' => $request->query('length', $dataGridConfig->getRecordsPerPage()),
             'OFFSET' => (int)$request->query('start', 0),
             'ORDER' => []
         ];
@@ -531,8 +531,8 @@ class CmfScaffoldApiController extends Controller {
             }
         }
         $columnsToSelect = array_merge(
-            array_keys($dataGridConfig->getDbFields()),
-            $dataGridConfig->getContains()
+            array_keys($dataGridConfig->getViewersLinkedToDbColumns()),
+            $dataGridConfig->getRelationsToRead()
         );
         $result = $this->getTable()->select($columnsToSelect, $conditions);
         $records = [];

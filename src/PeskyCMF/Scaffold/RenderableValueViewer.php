@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Scaffold;
 
-abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
+abstract class RenderableValueViewer extends AbstractValueViewer {
 
     /**
      * function (FormInput $config, ScaffoldFormConfig $scaffoldAction) {
@@ -19,22 +19,22 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
     /**
      * @return \Closure
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
-     * @throws ScaffoldFieldException
+     * @throws ValueViewerException
      */
     public function getRenderer() {
         if (empty($this->renderer)) {
-            $defaultRenderer = $this->getScaffoldActionConfig()->getDefaultFieldRenderer();
+            $defaultRenderer = $this->getScaffoldActionConfig()->getDefaultValueRenderer();
             if (!empty($defaultRenderer)) {
                 return $defaultRenderer;
             }
-            throw new ScaffoldFieldException($this, 'FromFieldConfig->renderer is not provided');
+            throw new ValueViewerException($this, 'FromFieldConfig->renderer is not provided');
         }
         return $this->renderer;
     }
 
     /**
-     * @param \Closure $renderer - function (ScaffoldRenderableFieldConfig $field, ScaffoldActionConfig $actionConfig, array $dataForView) {}
-     *      function may return either string or instance of ScaffoldFieldRenderer
+     * @param \Closure $renderer - function (RenderableValueViewer $valueViewer, ScaffoldActionConfig $actionConfig, array $dataForTemplate) {}
+     *      function may return either string or instance of ValueRenderer
      * @return $this
      */
     public function setRenderer(\Closure $renderer) {
@@ -43,30 +43,30 @@ abstract class ScaffoldRenderableFieldConfig extends ScaffoldFieldConfig {
     }
 
     /**
-     * @param array $dataForView
+     * @param array $dataForTemplate
      * @return string
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      * @throws \Throwable
-     * @throws ScaffoldFieldException
+     * @throws ValueViewerException
      */
-    public function render(array $dataForView = []) {
-        $configOrString = call_user_func_array($this->getRenderer(), [$this, $this->getScaffoldActionConfig(), $dataForView]);
+    public function render(array $dataForTemplate = []) {
+        $configOrString = call_user_func_array($this->getRenderer(), [$this, $this->getScaffoldActionConfig(), $dataForTemplate]);
         if (is_string($configOrString)) {
             return $configOrString;
-        } else if ($configOrString instanceof ScaffoldFieldRenderer) {
-            return view($configOrString->getView(), array_merge($configOrString->getData(), $dataForView, [
+        } else if ($configOrString instanceof ValueRenderer) {
+            return view($configOrString->getTemplate(), array_merge($configOrString->getData(), $dataForTemplate, [
                 'fieldConfig' => $this,
                 'rendererConfig' => $configOrString,
                 'actionConfig' => $this->getScaffoldActionConfig(),
                 'model' => $this->getScaffoldActionConfig()->getTable(),
             ]))->render() . $configOrString->getJavaScriptBlocks();
         } else {
-            throw new ScaffoldFieldException($this, 'Renderer function returned unsopported result. String or ScaffoldFieldRenderer object expected');
+            throw new ValueViewerException($this, 'Renderer function returned unsopported result. String or ValueRenderer object expected');
         }
     }
 
     /**
-     * @param \Closure $configurator = function (ScaffoldFieldRenderer $renderer, ScaffoldRenderableFieldConfig $fieldConfig) {}
+     * @param \Closure $configurator = function (ValueRenderer $renderer, RenderableValueViewer $valueViewer) {}
      * @return $this
      */
     public function setDefaultRendererConfigurator(\Closure $configurator) {

@@ -659,8 +659,8 @@ trait CacheForDbSelects {
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \PeskyORM\Exception\DbModelException
      */
-    public function insertMany($fieldNames, $rows, $returning = false) {
-        $ret = parent::insertMany($fieldNames, $rows, $returning);
+    public function insertMany($columnsNames, $rows, $returning = false) {
+        $ret = parent::insertMany($columnsNames, $rows, $returning);
         if ($this->cachingIsPossible()) {
             $this->cleanSelectManyCache();
         }

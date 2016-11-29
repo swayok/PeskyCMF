@@ -50,7 +50,7 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
         <!-- end of autofill disabler -->
         <div class="box-body">
         <?php
-            foreach ($formConfig->getFields() as $inputConfig) {
+            foreach ($formConfig->getValueViewers() as $inputConfig) {
                 if (!$inputConfig->hasLabel()) {
                     $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.field.{$inputConfig->getName()}"));
                 }

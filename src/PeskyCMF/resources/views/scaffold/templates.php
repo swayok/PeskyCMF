@@ -21,30 +21,30 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
 ?>
 
 <?php echo view(
-    $dataGridConfig->getView(),
+    $dataGridConfig->getTemplate(),
     $data,
-    $dataGridConfig->getAdditionalDataForView()
+    $dataGridConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
 
 <?php echo view(
-    $formConfig->getView(),
+    $formConfig->getTemplate(),
     $data,
-    $formConfig->getAdditionalDataForView()
+    $formConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
 
 <?php echo view(
-    $formConfig->getBulkEditingView(),
+    $formConfig->getBulkEditingTemplate(),
     $data,
-    $formConfig->getAdditionalDataForView()
+    $formConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
 
 <?php echo view(
-    $itemDetailsConfig->getView(),
+    $itemDetailsConfig->getTemplate(),
     $data,
-    $itemDetailsConfig->getAdditionalDataForView()
+    $itemDetailsConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
 

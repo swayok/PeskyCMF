@@ -19,9 +19,9 @@ abstract class ScaffoldActionConfig {
     protected $fieldsConfigs = [];
     /**
      * Fields list
-     * @var array|ScaffoldFieldConfig[]
+     * @var array|AbstractValueViewer[]
      */
-    protected $fields = [];
+    protected $valueViewers = [];
     /**
      * @var string
      */
@@ -29,7 +29,7 @@ abstract class ScaffoldActionConfig {
     /**
      * @var array
      */
-    protected $contains = [];
+    protected $relationsToRead = [];
     /**
      * @var null|\Closure
      */
@@ -58,11 +58,11 @@ abstract class ScaffoldActionConfig {
     /**
      * @var array|\Closure
      */
-    protected $dataToSendToView;
+    protected $dataToSendToTemplate;
     /**
      * @var string
      */
-    protected $view = null;
+    protected $template = null;
     /**
      * @var string
      */
@@ -88,124 +88,124 @@ abstract class ScaffoldActionConfig {
         $this->scaffoldSection = $scaffoldSection;
     }
 
-    public function setView($view) {
-        $this->view = $view;
+    public function setTemplate($template) {
+        $this->template = $template;
         return $this;
     }
 
-    public function getView() {
-        if (empty($this->view)) {
+    public function getTemplate() {
+        if (empty($this->template)) {
             throw new ScaffoldActionException($this, 'Scaffold action view file not set');
         }
-        return $this->view;
+        return $this->template;
     }
 
     /**
-     * @param array $fields
+     * @param array $viewers
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
-    public function setFields(array $fields) {
-        /** @var ScaffoldFieldConfig|null $config */
-        foreach ($fields as $name => $config) {
+    public function setValueViewers(array $viewers) {
+        /** @var AbstractValueViewer|null $config */
+        foreach ($viewers as $name => $config) {
             if (is_int($name)) {
                 $name = $config;
                 $config = null;
             }
-            $this->addField($name, $config);
+            $this->addValueViewer($name, $config);
         }
         return $this;
     }
 
     /**
-     * @return array|ScaffoldFieldConfig[]|TableCell[]|ValueCell[]|FormInput[]
+     * @return array|AbstractValueViewer[]|TableCell[]|ValueCell[]|FormInput[]
      */
-    public function getFields() {
-        return $this->fields;
+    public function getValueViewers() {
+        return $this->valueViewers;
     }
 
     /**
-     * Get field configs only for fields that exist in DB ($fieldConfig->isDbField() === true)
-     * @return array|ScaffoldFieldConfig[]|TableCell[]|ValueCell[]|FormInput[]
+     * Get field configs only for fields that exist in DB ($valueViewer->isDbColumn() === true)
+     * @return array|AbstractValueViewer[]|TableCell[]|ValueCell[]|FormInput[]
      */
-    public function getDbFields() {
+    public function getViewersLinkedToDbColumns() {
         $ret = [];
-        foreach ($this->getFields() as $key => $field) {
-            if ($field->isDbField()) {
-                $ret[$key] = $field;
+        foreach ($this->getValueViewers() as $key => $viewer) {
+            if ($viewer->isDbColumn()) {
+                $ret[$key] = $viewer;
             }
         }
         return $ret;
     }
 
     /**
-     * Get field configs only for fields that does not exist in DB ($fieldConfig->isDbField() === false)
-     * @return array|ScaffoldFieldConfig[]|TableCell[]|ValueCell[]|FormInput[]
+     * Get field configs only for fields that does not exist in DB ($valueViewer->isDbColumn() === false)
+     * @return array|AbstractValueViewer[]|TableCell[]|ValueCell[]|FormInput[]
      */
-    public function getNonDbFields() {
+    public function getStandaloneViewers() {
         $ret = [];
-        foreach ($this->getFields() as $key => $field) {
-            if (!$field->isDbField()) {
-                $ret[$key] = $field;
+        foreach ($this->getValueViewers() as $key => $viewer) {
+            if (!$viewer->isDbColumn()) {
+                $ret[$key] = $viewer;
             }
         }
         return $ret;
     }
 
     /**
-     * @return ScaffoldFieldConfig
+     * @return AbstractValueViewer
      * @throws ScaffoldException
      */
-    abstract public function createFieldConfig();
+    abstract public function createValueViewer();
 
     /**
      * @param string $name
-     * @return TableCell|ValueCell|FormInput|ScaffoldFieldConfig|array
+     * @return TableCell|ValueCell|FormInput|AbstractValueViewer|array
      * @throws ScaffoldActionException
      */
-    public function getField($name) {
-        if (!$this->hasField($name)) {
+    public function getValueViewer($name) {
+        if (!$this->hasValueViewer($name)) {
             throw new ScaffoldActionException($this, "Scaffold action has not field with name [$name]");
         }
-        return $this->fields[$name];
+        return $this->valueViewers[$name];
     }
 
     /**
      * @param string $name
      * @return bool
      */
-    public function hasField($name) {
-        return !empty($name) && !empty($this->fields[$name]);
+    public function hasValueViewer($name) {
+        return !empty($name) && !empty($this->valueViewers[$name]);
     }
 
     /**
      * @param string $name
-     * @param null|ScaffoldFieldConfig $config
+     * @param null|AbstractValueViewer $viewer
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
-    public function addField($name, $config = null) {
-        if ((!$config || $config->isDbField()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
+    public function addValueViewer($name, AbstractValueViewer $viewer = null) {
+        if ((!$viewer || $viewer->isDbColumn()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
         }
-        if (empty($config)) {
-            $config = $this->createFieldConfig();
+        if (empty($viewer)) {
+            $viewer = $this->createValueViewer();
         }
-        $config->setName($name);
-        $config->setPosition($this->getNextFieldPosition($config));
-        $config->setScaffoldActionConfig($this);
-        $this->fields[$name] = $config;
+        $viewer->setName($name);
+        $viewer->setPosition($this->getNextValueViewerPosition($viewer));
+        $viewer->setScaffoldActionConfig($this);
+        $this->valueViewers[$name] = $viewer;
         return $this;
     }
 
     /**
-     * @param ScaffoldFieldConfig $fieldConfig
+     * @param AbstractValueViewer $viewer
      * @return int
      */
-    protected function getNextFieldPosition(ScaffoldFieldConfig $fieldConfig) {
-        return count($this->fields);
+    protected function getNextValueViewerPosition(AbstractValueViewer $viewer) {
+        return count($this->valueViewers);
     }
 
     /**
@@ -235,7 +235,7 @@ abstract class ScaffoldActionConfig {
     /**
      * @param array $record
      * @return array
-     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ValueViewerException
      */
     public function prepareRecord(array $record) {
         /** @noinspection UnnecessaryParenthesesInspection */
@@ -254,7 +254,7 @@ abstract class ScaffoldActionConfig {
             )
         ];
         $customData = $this->getCustomDataForRecord($record);
-        $dbFields = $this->getDbFields();
+        $dbFields = $this->getViewersLinkedToDbColumns();
         $pkKey = $this->getTable()->getPkColumnName();
         // backup values
         $recordWithBackup = [];
@@ -290,7 +290,7 @@ abstract class ScaffoldActionConfig {
             $recordWithBackup = array_merge($recordWithBackup, $customData);
         }
         $recordWithBackup = array_merge($recordWithBackup, $permissions);
-        foreach ($this->getNonDbFields() as $key => $fieldConfig) {
+        foreach ($this->getStandaloneViewers() as $key => $fieldConfig) {
             $valueConverter = $fieldConfig->getValueConverter();
             if ($valueConverter instanceof \Closure) {
                 $recordWithBackup[$key] = call_user_func($valueConverter, $recordWithBackup, $fieldConfig, $this);
@@ -334,49 +334,39 @@ abstract class ScaffoldActionConfig {
      * @return $this
      * @throws ScaffoldException
      */
-    public function sendDataToView($arrayOrClosure) {
+    public function sendDataToTemplate($arrayOrClosure) {
         if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
             throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrClosure) accepts only array or \Closure');
         }
-        $this->dataToSendToView = $arrayOrClosure;
+        $this->dataToSendToTemplate = $arrayOrClosure;
         return $this;
     }
 
     /**
      * @return array|mixed
      */
-    public function getAdditionalDataForView() {
-        if (empty($this->dataToSendToView)) {
+    public function getAdditionalDataForTemplate() {
+        if (empty($this->dataToSendToTemplate)) {
             return [];
-        } else if ($this->dataToSendToView instanceof \Closure) {
-            return call_user_func($this->dataToSendToView, $this);
+        } else if ($this->dataToSendToTemplate instanceof \Closure) {
+            return call_user_func($this->dataToSendToTemplate, $this);
         } else {
-            return $this->dataToSendToView;
+            return $this->dataToSendToTemplate;
         }
     }
 
     /**
      * @return array
      */
-    public function getContains() {
-        return $this->contains;
+    public function getRelationsToRead() {
+        return $this->relationsToRead;
     }
 
     /**
      * @return bool
      */
-    public function hasContains() {
-        return !empty($this->contains);
-    }
-
-    /**
-     * @param string $relationAlias
-     * @param array $containOptions
-     * @return $this
-     */
-    public function addContain($relationAlias, $containOptions = []) {
-        $this->contains[$relationAlias] = $containOptions;
-        return $this;
+    public function hasRelationsToRead() {
+        return !empty($this->relationsToRead);
     }
 
     /**
@@ -387,11 +377,11 @@ abstract class ScaffoldActionConfig {
      *   HAS MANY relations are forbidden.
      * - For item edit form and item details view you need to provide only names of the relations you need to read
      *   with the item. All types of relations allowed but there is no automatic possibility to get deeper relations
-     * @param array $contains
+     * @param array $relationNames
      * @return $this
      */
-    public function setContains($contains) {
-        $this->contains = $contains;
+    public function readRelations(array $relationNames) {
+        $this->relationsToRead = $relationNames;
         return $this;
     }
 
@@ -399,13 +389,13 @@ abstract class ScaffoldActionConfig {
      * @return \Closure|null
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      */
-    public function getDefaultFieldRenderer() {
+    public function getDefaultValueRenderer() {
         if (!empty($this->defaultFieldRenderer)) {
             return $this->defaultFieldRenderer;
         } else {
-            $this->setDefaultFieldRenderer(function (ScaffoldFieldConfig $fieldConfig, $actionConfig, array $dataForView) {
-                $rendererConfig = $this->createFieldRendererConfig()->setData($dataForView);
-                $this->configureDefaultRenderer($rendererConfig, $fieldConfig);
+            $this->setDefaultValueRenderer(function (AbstractValueViewer $fieldConfig, $actionConfig, array $dataForView) {
+                $rendererConfig = $this->createValueRenderer()->setData($dataForView);
+                $this->configureDefaultValueRenderer($rendererConfig, $fieldConfig);
                 return $rendererConfig;
             });
             return $this->defaultFieldRenderer;
@@ -413,18 +403,18 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return ScaffoldFieldRenderer
+     * @return ValueRenderer
      * @throws ScaffoldActionException
      */
-    abstract protected function createFieldRendererConfig();
+    abstract protected function createValueRenderer();
 
     /**
-     * @param ScaffoldFieldRenderer $rendererConfig
-     * @param ScaffoldFieldConfig $fieldConfig
+     * @param ValueRenderer $renderer
+     * @param AbstractValueViewer $viewer
      */
-    protected function configureDefaultRenderer(
-        ScaffoldFieldRenderer $rendererConfig,
-        ScaffoldFieldConfig $fieldConfig
+    protected function configureDefaultValueRenderer(
+        ValueRenderer $renderer,
+        AbstractValueViewer $viewer
     ) {
 
     }
@@ -433,7 +423,7 @@ abstract class ScaffoldActionConfig {
      * @param \Closure $defaultFieldRenderer
      * @return $this
      */
-    public function setDefaultFieldRenderer(\Closure $defaultFieldRenderer) {
+    public function setDefaultValueRenderer(\Closure $defaultFieldRenderer) {
         $this->defaultFieldRenderer = $defaultFieldRenderer;
         return $this;
     }
@@ -441,7 +431,7 @@ abstract class ScaffoldActionConfig {
     /**
      * @return bool
      */
-    public function hasDefaultFieldRenderer() {
+    public function hasDefaultValueRenderer() {
         return !empty($this->defaultFieldRenderer);
     }
 

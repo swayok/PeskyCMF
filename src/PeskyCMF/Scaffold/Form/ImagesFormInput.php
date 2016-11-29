@@ -17,7 +17,7 @@ class ImagesFormInput extends FormInput {
      * @return \Closure
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ValueViewerException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
@@ -35,7 +35,7 @@ class ImagesFormInput extends FormInput {
      * @return InputRenderer
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
+     * @throws \PeskyCMF\Scaffold\ValueViewerException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
@@ -54,7 +54,7 @@ class ImagesFormInput extends FormInput {
         }
         $renderer = new InputRenderer();
         $renderer
-            ->setView('cmf::input.image_uploaders')
+            ->setTemplate('cmf::input.image_uploaders')
             ->addData('imagesConfigs', $configs);
         // todo: implement view cmf::input.image_uploaders
         return $renderer;

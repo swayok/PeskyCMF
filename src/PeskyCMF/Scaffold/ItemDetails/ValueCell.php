@@ -2,10 +2,10 @@
 
 namespace PeskyCMF\Scaffold\ItemDetails;
 
-use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
+use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyORM\ORM\Column;
 
-class ValueCell extends ScaffoldRenderableFieldConfig {
+class ValueCell extends RenderableValueViewer {
 
     const TYPE_JSON_TREE = 'json_collapsed';
 

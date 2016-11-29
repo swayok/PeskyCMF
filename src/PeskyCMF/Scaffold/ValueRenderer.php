@@ -2,9 +2,9 @@
 
 namespace PeskyCMF\Scaffold;
 
-abstract class ScaffoldFieldRenderer {
+abstract class ValueRenderer {
     /** @var string */
-    protected $view = null;
+    protected $template = null;
     /** @var array */
     protected $data = [];
     /** @var string */
@@ -24,7 +24,7 @@ abstract class ScaffoldFieldRenderer {
      */
     public function __construct($view = null) {
         if (!empty($view)) {
-            $this->view = $view;
+            $this->template = $view;
         }
     }
 
@@ -63,16 +63,16 @@ abstract class ScaffoldFieldRenderer {
     /**
      * @return string
      */
-    public function getView() {
-        return $this->view;
+    public function getTemplate() {
+        return $this->template;
     }
 
     /**
-     * @param string $view
+     * @param string $template
      * @return $this
      */
-    public function setView($view) {
-        $this->view = $view;
+    public function setTemplate($template) {
+        $this->template = $template;
         return $this;
     }
 
