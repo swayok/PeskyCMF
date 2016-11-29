@@ -79,7 +79,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
-    public function setDataGridColumns(array $formInputs) {
+    public function setColumns(array $formInputs) {
         return $this->setValueViewers($formInputs);
     }
 

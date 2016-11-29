@@ -168,7 +168,7 @@ class {$className} extends {$parentClassShort} {
                 {$this->makeContainsForDataGrid($table)}
             ])
             ->setOrderBy('{$table::getPkColumnName()}', 'asc')
-            ->setDataGridColumns([
+            ->setColumns([
                 {$this->makeFieldsListForDataGrid($table)}
             ])
             ->closeFilterByDefault();

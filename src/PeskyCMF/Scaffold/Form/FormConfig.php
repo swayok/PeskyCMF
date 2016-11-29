@@ -221,7 +221,7 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function setBulkEditableColumns(array $columns) {
         if (empty($this->valueViewers)) {
-            throw new \BadMethodCallException('setFields() method must be called before');
+            throw new \BadMethodCallException('setValueViewers() method must be called before');
         }
         foreach ($columns as $name => $config) {
             if (is_int($name)) {
