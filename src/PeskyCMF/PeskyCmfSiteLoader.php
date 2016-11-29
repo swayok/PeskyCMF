@@ -170,7 +170,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
             base_path('vendor/robinherbots/jquery.inputmask/dist/jquery.inputmask.bundle.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
-            base_path('vendor/fengyuanchen/cropperjs/dist') => public_path('packages/cmf-vendors/cropperjs'),
+            base_path('vendor/bower-asset/cropper/dist') => public_path('packages/cmf-vendors/cropperjs'),
 
         ], 'public');
     }
