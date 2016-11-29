@@ -270,7 +270,7 @@ class CmfGeneralController extends Controller {
             'password' => 'required'
         ]);
         $credentials = [
-            DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($request->data($userLoginColumn)) . '``)'),
+            DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($request->input($userLoginColumn)) . '``)'),
             'password' => $request->input('password')
         ];
         if (!Auth::guard()->attempt($credentials)) {
