@@ -164,14 +164,14 @@ class {$className} extends {$parentClassShort} {
     
     protected function createDataGridConfig() {
         return parent::createDataGridConfig()
-            ->setContains([
+            ->readRelations([
                 {$this->makeContainsForDataGrid($table)}
             ])
             ->setOrderBy('{$table::getPkColumnName()}', 'asc')
-            ->setFields([
+            ->setDataGridColumns([
                 {$this->makeFieldsListForDataGrid($table)}
             ])
-            ->setFilterIsShownByDefault(false);
+            ->closeFilterByDefault();
     }
     
     protected function createDataGridFilterConfig() {
@@ -183,19 +183,18 @@ class {$className} extends {$parentClassShort} {
 
     protected function createItemDetailsConfig() {
         return parent::createItemDetailsConfig()
-            ->setContains([
+            ->readRelations([
                 {$this->makeContainsForItemDetailsViewer($table)}
             ])
-            ->setFields([
+            ->setValueCells([
                 {$this->makeFieldsListForItemDetailsViewer($table)}
             ]);
     }
     
     protected function createFormConfig() {
         return parent::createFormConfig()
-            ->setHasFiles(false)
             ->setWidth(50)
-            ->setFields([
+            ->setFormInputs([
                 {$this->makeFieldsListForItemForms($table)}
             ]);
     }
