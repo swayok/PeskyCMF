@@ -74,9 +74,9 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             base_path('vendor/driftyco/ionicons/css') => public_path('packages/cmf-vendors/fontions/ionicons/css'),
             base_path('vendor/driftyco/ionicons/fonts') => public_path('packages/cmf-vendors/fontions/ionicons/fonts'),
             // jquery
-            base_path('vendor/components/jquery/dist/jquery.js') => public_path('packages/cmf-vendors/jquery/jquery.js'),
-            base_path('vendor/components/jquery/dist/jquery.min.js') => public_path('packages/cmf-vendors/jquery/jquery.min.js'),
-            base_path('vendor/components/jquery/dist/jquery.min.map') => public_path('packages/cmf-vendors/jquery/jquery.min.map'),
+            base_path('vendor/components/jquery/jquery.js') => public_path('packages/cmf-vendors/jquery/jquery.js'),
+            base_path('vendor/components/jquery/jquery.min.js') => public_path('packages/cmf-vendors/jquery/jquery.min.js'),
+            base_path('vendor/components/jquery/jquery.min.map') => public_path('packages/cmf-vendors/jquery/jquery.min.map'),
             base_path('vendor/bower-asset/jquery/dist/jquery.js') => public_path('packages/cmf-vendors/jquery3/jquery.js'),
             base_path('vendor/bower-asset/jquery/dist/jquery.min.js') => public_path('packages/cmf-vendors/jquery3/jquery.min.js'),
             base_path('vendor/bower-asset/jquery/dist/jquery.min.map') => public_path('packages/cmf-vendors/jquery3/jquery.min.map'),
