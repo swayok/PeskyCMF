@@ -61,6 +61,9 @@ class FormConfig extends ScaffoldSectionConfig {
     protected $afterSaveCallback;
     /** @var \Closure|null */
     protected $afterBulkEditDataSaveCallback;
+    /** @var array */
+    protected $inputGroups = [];
+    protected $currentInputsGroup = null;
 
     public function setBulkEditingTemplate($view) {
         $this->bulkEditingTemplate = $view;
@@ -80,13 +83,41 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /**
      * Alias for setValueViewers
-     * @param array $formInputs
+     * @param array $formInputs - formats:
+     * - ['name1', 'name2' => FormInput::create(), ...]
+     * - ['group lablel' => ['name1', 'name2' => FormInput::create(), ...]
+     * Also you may use '/' as value to separate inputs with <hr>
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function setFormInputs(array $formInputs) {
-        return $this->setValueViewers($formInputs);
+        /** @var AbstractValueViewer|null $config */
+        foreach ($formInputs as $name => $config) {
+            if (is_array($config)) {
+                $this->currentInputsGroup = count($this->inputGroups);
+                $this->inputGroups[] = [
+                    'label' => is_int($name) ? '' : $name,
+                    'tab' => null,
+                    'inputs_names' => []
+                ];
+                foreach ($config as $groupInputName => $groupInputConfig) {
+                    if (is_int($groupInputName)) {
+                        $groupInputName = $groupInputConfig;
+                        $groupInputConfig = null;
+                    }
+                    $this->addValueViewer($groupInputName, $groupInputConfig);
+                }
+                $this->currentInputsGroup = null;
+            } else {
+                if (is_int($name)) {
+                    $name = $config;
+                    $config = null;
+                }
+                $this->addValueViewer($name, $config);
+            }
+        }
+        return $this;
     }
 
     /**
@@ -102,6 +133,44 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function hasFormInput($name) {
         return $this->hasValueViewer($name);
+    }
+
+    /**
+     * @param string $name
+     * @return FormInput|AbstractValueViewer
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     */
+    public function getFormInput($name) {
+        return $this->getValueViewer($name);
+    }
+
+    /**
+     * @return array
+     */
+    public function getInputsGroups() {
+        return $this->inputGroups;
+    }
+
+    /**
+     * @param string $name
+     * @param AbstractValueViewer|null $viewer
+     * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     */
+    public function addValueViewer($name, AbstractValueViewer $viewer = null) {
+        parent::addValueViewer($name, $viewer);
+        if ($this->currentInputsGroup === null) {
+            $this->currentInputsGroup = count($this->inputGroups);
+            $this->inputGroups[] = [
+                'label' => '',
+                'tab' => null,
+                'inputs_names' => [$name]
+            ];
+        } else {
+            $this->inputGroups[$this->currentInputsGroup]['inputs_names'][] = $name;
+        }
+        return $this;
     }
 
     /**

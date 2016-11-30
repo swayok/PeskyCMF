@@ -50,26 +50,38 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
         <!-- end of autofill disabler -->
         <div class="box-body">
         <?php
-            foreach ($formConfig->getValueViewers() as $inputConfig) {
-                if (!$inputConfig->hasLabel()) {
-                    $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.field.{$inputConfig->getName()}"));
-                }
-                try {
-                    $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
-                    // replace <script> tags to be able to render that template
-                    $renderedInput = modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
-                    if ($inputConfig->isShownOnCreate() && $inputConfig->isShownOnEdit()) {
-                        echo $renderedInput;
-                    } else if ($inputConfig->isShownOnCreate()) {
-                        // display only when creating
-                        echo $ifCreate . $renderedInput . $endIf;
-                    } else {
-                        // display only when editing
-                        echo $ifEdit . $renderedInput . $endIf;
+            $isFirstGroup = true;
+            foreach ($formConfig->getInputsGroups() as $groupInfo) {
+                if (empty($groupInfo['label'])) {
+                    if (!$isFirstGroup) {
+                        echo '<div class="section-divider"></div>';
                     }
-                } catch (Exception $exc) {
-                    echo '<div>' . $exc->getMessage() . '</div>';
-                    echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
+                } else {
+                    echo '<div class="section-divider"><span>' . $groupInfo['label'] . '</span></div>';
+                }
+                $isFirstGroup = false;
+                foreach ($groupInfo['inputs_names'] as $inputName) {
+                    $inputConfig = $formConfig->getFormInput($inputName);
+                    if (!$inputConfig->hasLabel()) {
+                        $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.field.{$inputConfig->getName()}"));
+                    }
+                    try {
+                        $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
+                        // replace <script> tags to be able to render that template
+                        $renderedInput = modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
+                        if ($inputConfig->isShownOnCreate() && $inputConfig->isShownOnEdit()) {
+                            echo $renderedInput;
+                        } else if ($inputConfig->isShownOnCreate()) {
+                            // display only when creating
+                            echo $ifCreate . $renderedInput . $endIf;
+                        } else {
+                            // display only when editing
+                            echo $ifEdit . $renderedInput . $endIf;
+                        }
+                    } catch (Exception $exc) {
+                        echo '<div>' . $exc->getMessage() . '</div>';
+                        echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
+                    }
                 }
             }
             echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());;
