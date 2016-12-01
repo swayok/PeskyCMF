@@ -61,15 +61,29 @@ class FormConfig extends ScaffoldSectionConfig {
     protected $afterSaveCallback;
     /** @var \Closure|null */
     protected $afterBulkEditDataSaveCallback;
+
+    /** @var array */
+    protected $tabs = [];
+    /** @var null|int */
+    protected $currentTab = null;
     /** @var array */
     protected $inputGroups = [];
+    /** @var null|int */
     protected $currentInputsGroup = null;
 
-    public function setBulkEditingTemplate($view) {
-        $this->bulkEditingTemplate = $view;
+    /**
+     * @param string $laravelViewPath
+     * @return $this
+     */
+    public function setBulkEditingTemplate($laravelViewPath) {
+        $this->bulkEditingTemplate = $laravelViewPath;
         return $this;
     }
 
+    /**
+     * @return string
+     * @throws ScaffoldSectionException
+     */
     public function getBulkEditingTemplate() {
         if (empty($this->bulkEditingTemplate)) {
             throw new ScaffoldSectionException($this, 'The view file for bulk editing is not set');
@@ -77,6 +91,9 @@ class FormConfig extends ScaffoldSectionConfig {
         return $this->bulkEditingTemplate;
     }
 
+    /**
+     * @return InputRenderer
+     */
     protected function createValueRenderer() {
         return InputRenderer::create();
     }
@@ -95,12 +112,7 @@ class FormConfig extends ScaffoldSectionConfig {
         /** @var AbstractValueViewer|null $config */
         foreach ($formInputs as $name => $config) {
             if (is_array($config)) {
-                $this->currentInputsGroup = count($this->inputGroups);
-                $this->inputGroups[] = [
-                    'label' => is_int($name) ? '' : $name,
-                    'tab' => null,
-                    'inputs_names' => []
-                ];
+                $this->newInputsGroup(is_int($name) ? '' : $name);
                 foreach ($config as $groupInputName => $groupInputConfig) {
                     if (is_int($groupInputName)) {
                         $groupInputName = $groupInputConfig;
@@ -118,6 +130,44 @@ class FormConfig extends ScaffoldSectionConfig {
             }
         }
         return $this;
+    }
+
+    /**
+     * @param string $tabLabel
+     * @param array $formInputs
+     * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     */
+    public function addTab($tabLabel, array $formInputs) {
+        $this->newTab($tabLabel);
+        return $this->setFormInputs($formInputs);
+    }
+
+    /**
+     * @param $label
+     */
+    protected function newInputsGroup($label) {
+        if ($this->currentTab === null) {
+            $this->newTab('');
+        }
+        $this->currentInputsGroup = count($this->inputGroups);
+        $this->tabs[$this->currentTab]['groups'][] = $this->currentInputsGroup;
+        $this->inputGroups[] = [
+            'label' => $label,
+            'inputs_names' => []
+        ];
+    }
+
+    /**
+     * @param $label
+     */
+    protected function newTab($label) {
+        $this->currentTab = count($this->tabs);
+        $this->tabs[] = [
+            'label' => $label,
+            'groups' => []
+        ];
+        $this->currentInputsGroup = null;
     }
 
     /**
@@ -147,6 +197,13 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @return array
      */
+    public function getTabs() {
+        return $this->tabs;
+    }
+
+    /**
+     * @return array
+     */
     public function getInputsGroups() {
         return $this->inputGroups;
     }
@@ -161,15 +218,9 @@ class FormConfig extends ScaffoldSectionConfig {
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
         parent::addValueViewer($name, $viewer);
         if ($this->currentInputsGroup === null) {
-            $this->currentInputsGroup = count($this->inputGroups);
-            $this->inputGroups[] = [
-                'label' => '',
-                'tab' => null,
-                'inputs_names' => [$name]
-            ];
-        } else {
-            $this->inputGroups[$this->currentInputsGroup]['inputs_names'][] = $name;
+            $this->newInputsGroup('');
         }
+        $this->inputGroups[$this->currentInputsGroup]['inputs_names'][] = $name;
         return $this;
     }
 
