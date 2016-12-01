@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\Scaffold\ScaffoldConfig $scaffoldSection
+ * @var \PeskyCMF\Scaffold\ScaffoldConfig $scaffoldConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var string $tableNameForRoutes
  * @var string $localizationKey
@@ -16,7 +16,7 @@ if (empty($localizationKey)) {
 $data = compact([
     'model', 'tableNameForRoutes', 'dataGridConfig', 'dataGridFilterConfig', 'formConfig', 'itemDetailsConfig'
 ]);
-$data['translationPrefix'] = $scaffoldSection->getLocalizationBasePath($tableNameForRoutes);
+$data['translationPrefix'] = $scaffoldConfig->getLocalizationBasePath($tableNameForRoutes);
 $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
 ?>
 

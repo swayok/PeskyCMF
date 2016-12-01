@@ -37,5 +37,6 @@ $defaultName = $rendererConfig->getAttribute('name', $fieldConfig->getName());
         </div>
     </div>
     <?php endforeach; ?>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>
 <hr>

@@ -23,4 +23,5 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
     <input {{? !!it.<?php echo $fieldConfig->getName(); ?> }}checked{{?}}
             {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>

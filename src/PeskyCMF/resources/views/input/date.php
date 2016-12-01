@@ -36,6 +36,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
             <i class="fa fa-calendar"></i>
         </div>
     </div>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>
 
 <?php if (!$visibleOnCreate || !$visibleOnEdit) : ?>

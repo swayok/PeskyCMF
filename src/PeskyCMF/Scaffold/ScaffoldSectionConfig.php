@@ -50,7 +50,7 @@ abstract class ScaffoldSectionConfig {
     /**
      * @var ScaffoldConfig
      */
-    protected $scaffoldSection;
+    protected $scaffoldConfig;
     /**
      * @var array|\Closure
      */
@@ -70,22 +70,22 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @param TableInterface $table
-     * @param ScaffoldConfig $scaffoldSection
+     * @param ScaffoldConfig $scaffoldConfig
      * @return $this
      */
-    static public function create(TableInterface $table, ScaffoldConfig $scaffoldSection) {
+    static public function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         $class = get_called_class();
-        return new $class($table, $scaffoldSection);
+        return new $class($table, $scaffoldConfig);
     }
 
     /**
      * ScaffoldSectionConfig constructor.
      * @param TableInterface $table
-     * @param ScaffoldConfig $scaffoldSection
+     * @param ScaffoldConfig $scaffoldConfig
      */
-    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldSection) {
+    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         $this->table = $table;
-        $this->scaffoldSection = $scaffoldSection;
+        $this->scaffoldConfig = $scaffoldConfig;
     }
 
     public function setTemplate($template) {
@@ -242,15 +242,15 @@ abstract class ScaffoldSectionConfig {
         $permissions = [
             '___delete_allowed' => (
                 $this->isDeleteAllowed()
-                && $this->scaffoldSection->isRecordDeleteAllowed($record)
+                && $this->scaffoldConfig->isRecordDeleteAllowed($record)
             ),
             '___edit_allowed' => (
                 $this->isEditAllowed()
-                && $this->scaffoldSection->isRecordEditAllowed($record)
+                && $this->scaffoldConfig->isRecordEditAllowed($record)
             ),
             '___details_allowed' => (
                 $this->isDetailsViewerAllowed()
-                && $this->scaffoldSection->isRecordDetailsAllowed($record)
+                && $this->scaffoldConfig->isRecordDetailsAllowed($record)
             )
         ];
         $customData = $this->getCustomDataForRecord($record);
@@ -555,28 +555,28 @@ abstract class ScaffoldSectionConfig {
      * @return boolean
      */
     public function isCreateAllowed() {
-        return $this->scaffoldSection->isCreateAllowed();
+        return $this->scaffoldConfig->isCreateAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isEditAllowed() {
-        return $this->scaffoldSection->isEditAllowed();
+        return $this->scaffoldConfig->isEditAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isDeleteAllowed() {
-        return $this->scaffoldSection->isDeleteAllowed();
+        return $this->scaffoldConfig->isDeleteAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isDetailsViewerAllowed() {
-        return $this->scaffoldSection->isDetailsViewerAllowed();
+        return $this->scaffoldConfig->isDetailsViewerAllowed();
     }
 
     /**

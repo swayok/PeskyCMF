@@ -35,6 +35,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <div class="form-group">
     <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>
 
 <?php if (!$visibleOnCreate || !$visibleOnEdit) : ?>

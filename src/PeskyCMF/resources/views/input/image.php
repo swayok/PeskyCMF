@@ -21,4 +21,5 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
         <img src="{{= it.icon }}?_=<?php echo time() ?>">
     </div>
     {{?}}
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>

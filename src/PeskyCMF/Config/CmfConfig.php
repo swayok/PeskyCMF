@@ -732,4 +732,19 @@ class CmfConfig extends ConfigsContainer {
         return ClassBuilder::class;
     }
 
+    /**
+     * @return string|null
+     * @throws \UnexpectedValueException
+     */
+    static public function getTableNameFromCurrentRoute() {
+        static $tableNameForRoutes;
+        if ($tableNameForRoutes === null) {
+            if (!request()->route()->hasParameter('table_name')) {
+                return null;
+            }
+            $tableNameForRoutes = request()->route()->parameter('table_name');
+        }
+        return $tableNameForRoutes;
+    }
+
 }

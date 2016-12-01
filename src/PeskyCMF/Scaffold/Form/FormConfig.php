@@ -3,6 +3,7 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionException;
 use PeskyCMF\Scaffold\AbstractValueViewer;
@@ -71,6 +72,9 @@ class FormConfig extends ScaffoldSectionConfig {
     /** @var null|int */
     protected $currentInputsGroup = null;
 
+    /** @var array */
+    protected $tooltips = [];
+
     /**
      * @param string $laravelViewPath
      * @return $this
@@ -112,6 +116,7 @@ class FormConfig extends ScaffoldSectionConfig {
         /** @var AbstractValueViewer|null $config */
         foreach ($formInputs as $name => $config) {
             if (is_array($config)) {
+                /** @var array $config */
                 $this->newInputsGroup(is_int($name) ? '' : $name);
                 foreach ($config as $groupInputName => $groupInputConfig) {
                     if (is_int($groupInputName)) {
@@ -140,7 +145,9 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function addTab($tabLabel, array $formInputs) {
         $this->newTab($tabLabel);
-        return $this->setFormInputs($formInputs);
+        $this->setFormInputs($formInputs);
+        $this->currentTab = null;
+        return $this;
     }
 
     /**
@@ -222,6 +229,42 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         $this->inputGroups[$this->currentInputsGroup]['inputs_names'][] = $name;
         return $this;
+    }
+
+    /**
+     * @param array $tooltips - anything except array will be ignored so it won't crash when there is no
+     *      translations for tooltips in dictionaries (ex: trans('cmf.admins.form.tooltips') may be array or string)
+     * @return $this
+     */
+    public function setTooltipsForInputs($tooltips) {
+        if (is_array($tooltips)) {
+            $this->tooltips = $tooltips;
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $inputName
+     * @return bool
+     */
+    public function hasTooltip($inputName) {
+        return (
+            $this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip()
+            || !empty($this->tooltips[$inputName])
+        );
+    }
+
+    /**
+     * @param string $inputName
+     * @return mixed
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     */
+    public function getTooltip($inputName) {
+        if ($this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip()) {
+            return $this->getFormInput($inputName)->hasTooltip();
+        } else {
+            return array_get($this->tooltips, $inputName, '');
+        }
     }
 
     /**
@@ -920,5 +963,25 @@ class FormConfig extends ScaffoldSectionConfig {
             return call_user_func($this->additionalHtmlForForm, $this);
         }
     }
+
+    public function finish() {
+        if (empty($this->tooltips)) {
+            $resourceName = CmfConfig::getInstance()->getTableNameFromCurrentRoute();
+            if (!empty($resourceName)) {
+                $basePath = $this->scaffoldConfig->getLocalizationBasePath($resourceName);
+                $this->setTooltipsForInputs(cmfTransCustom($basePath . '.form.tooltips'));
+            }
+        }
+        foreach ($this->tooltips as $inputName => $tooltip) {
+            if ($this->hasFormInput($inputName)) {
+                $input = $this->getFormInput($inputName);
+                if (!$input->hasTooltip()) {
+                    $input->setTooltip($tooltip);
+                }
+            }
+        }
+        parent::finish();
+    }
+
 
 }

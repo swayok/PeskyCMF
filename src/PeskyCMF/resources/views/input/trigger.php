@@ -27,4 +27,5 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
             data-on-text="<?php echo cmfTransGeneral('.form.field.bool.yes') ?>"
             data-off-text="<?php echo cmfTransGeneral('.form.field.bool.no') ?>">
     </div>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>

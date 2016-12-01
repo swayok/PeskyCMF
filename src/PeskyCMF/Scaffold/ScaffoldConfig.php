@@ -63,7 +63,7 @@ abstract class ScaffoldConfig {
     public function getConfigs() {
         $configs = [
             'model' => $this->getModel(),
-            'scaffoldSection' => $this
+            'scaffoldConfig' => $this
         ];
         $configs['dataGridConfig'] = $this->getDataGridConfig();
         if (!($configs['dataGridConfig'] instanceof DataGridConfig)) {

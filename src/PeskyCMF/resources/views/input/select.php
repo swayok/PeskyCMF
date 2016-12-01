@@ -47,4 +47,5 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
         {{?}}
     <?php endif; ?>
     </select>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>

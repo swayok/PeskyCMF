@@ -67,14 +67,11 @@ class CmfScaffoldApiController extends Controller {
 
     /**
      * @return string
-     * @throws ScaffoldException
+     * @throws \UnexpectedValueException
      */
     public function getTableNameForRoutes() {
         if ($this->tableNameForRoutes === null) {
-            if (!request()->route()->hasParameter('table_name')) {
-                throw new ScaffoldException('There is no [table_name] parameter in current route');
-            }
-            $tableName = request()->route()->parameter('table_name');
+            $tableName = CmfConfig::getInstance()->getTableNameFromCurrentRoute();
             if (empty($tableName)) {
                 abort(404, 'Table name not found in route');
             }

@@ -174,13 +174,18 @@ FormHelper.handleAjaxErrors = function ($form, xhr) {
 
 FormHelper.showErrorForInput = function ($form, inputName, message) {
     if ($form[0][inputName]) {
-        var container = $($form[0][inputName]).closest('.form-group, .checkbox').addClass('has-error');
-        var errorEl = container.find('.error-text');
-        if (errorEl.length == 0) {
-            errorEl = $('<div class="error-text bg-danger"></div>').hide();
-            container.append(errorEl);
+        var $container = $($form[0][inputName]).closest('.form-group, .checkbox').addClass('has-error');
+        var $errorEl = $container.find('.error-text');
+        if ($errorEl.length == 0) {
+            $errorEl = $('<div class="error-text bg-danger"></div>').hide();
+            var $helpEl = $container.find('.help-block');
+            if ($helpEl.length) {
+                $helpEl.before($errorEl);
+            } else {
+                $container.append($errorEl);
+            }
         }
-        errorEl.html(message).slideDown(FormHelper.messageAnimDurationMs);
+        $errorEl.html(message).slideDown(FormHelper.messageAnimDurationMs);
     }
 };
 

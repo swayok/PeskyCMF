@@ -66,8 +66,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
-    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldSectionConfig) {
-        parent::__construct($table, $scaffoldSectionConfig);
+    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfigConfig) {
+        parent::__construct($table, $scaffoldConfigConfig);
         $this->recordsPerPage = CmfConfig::getInstance()->rows_per_page();
         $this->setOrderBy($table->getPkColumnName());
     }

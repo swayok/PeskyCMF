@@ -44,6 +44,9 @@ class FormInput extends RenderableValueViewer {
     /** @var callable|null */
     protected $optionsLoader = null;
 
+    /** @var null|string */
+    protected $tooltip;
+
     /**
      * Default input id
      * @return string
@@ -184,6 +187,45 @@ class FormInput extends RenderableValueViewer {
             $isRequired = $renderer->isRequiredForCreate() || $renderer->isRequiredForEdit();
         }
         return parent::getLabel($default) . ($isRequired ? '*' : '');
+    }
+
+    /**
+     * @return null|string|array
+     */
+    public function getTooltip() {
+        return $this->tooltip;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormattedTooltip() {
+        if ($this->hasTooltip()) {
+            $tooltip = $this->getTooltip();
+            return '<span class="help-block">'
+                    . '<i class="glyphicon glyphicon-info-sign text-blue fs16 va-m mr5 lh20" style="top: 0;"></i>'
+                    . (is_array($tooltip) ? implode('<br>', $tooltip) : (string)$tooltip)
+                . '</span>';
+        } else {
+            return '';
+        }
+    }
+
+    /**
+     * @param string|array $tooltip - array: array of strings. If processed by getFormattedTooltip()- it will be
+     *      converted to string where each element of array starts with new line (<br>)
+     * @return $this
+     */
+    public function setTooltip($tooltip) {
+        $this->tooltip = $tooltip;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasTooltip() {
+        return !empty($this->tooltip);
     }
 
 }

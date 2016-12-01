@@ -22,6 +22,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
         >
         </select>
     </div>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>
 
 <script type="application/javascript">
