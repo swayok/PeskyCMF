@@ -19,8 +19,7 @@
         }
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
-/** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn[] $gridColumnsConfigs */
-$gridColumnsConfigs = $dataGridConfig->getValueViewers();
+$gridColumnsConfigs = $dataGridConfig->getDataGridColumns();
 uasort($gridColumnsConfigs, function ($a, $b) {
     /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $a */
     /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $b */

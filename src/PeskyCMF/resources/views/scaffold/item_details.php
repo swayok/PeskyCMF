@@ -7,7 +7,7 @@
  * @var string $idSuffix
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
-$valueViewers = $itemDetailsConfig->getValueViewers();
+$valueViewers = $itemDetailsConfig->getValueCells();
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 
 $jsInitiator = '';
@@ -36,8 +36,8 @@ if ($itemDetailsConfig->hasJsInitiator()) {
                             $viewer->render(['translationPrefix' => $translationPrefix])
                         );
                     } catch (Exception $exc) {
-                        echo '<div>' . $exc->getMessage() . '</div>';
-                        echo '<pre>' . nl2br($exc->getTraceAsString()) . '</pre>';
+                        echo '<div>' . htmlspecialchars($exc->getMessage()) . '</div>';
+                        echo '<pre>' . nl2br(htmlspecialchars($exc->getTraceAsString())) . '</pre>';
                     }
                 ?>
             </td>

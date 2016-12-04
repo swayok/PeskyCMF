@@ -53,7 +53,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
                 }
             } catch (Exception $exc) {
                 echo '<div>' . htmlspecialchars($exc->getMessage()) . '</div>';
-                echo '<pre>' . htmlspecialchars(nl2br($exc->getTraceAsString())) . '</pre>';
+                echo '<pre>' . nl2br(htmlspecialchars($exc->getTraceAsString())) . '</pre>';
             }
         }
     }

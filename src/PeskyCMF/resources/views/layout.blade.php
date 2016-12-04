@@ -14,6 +14,8 @@
     <link href="/packages/cmf-vendors/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/bootstrap/fileinput/css/fileinput.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/bootstrap/x-editale/css/bootstrap-editable.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/cmf-vendors/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/datatables/extensions/FixedColumns/css/fixedColumns.bootstrap.min.css" rel="stylesheet" type="text/css"/>
@@ -21,6 +23,7 @@
     <link href="/packages/cmf-vendors/fontions/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/toastr/toastr.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf-vendors/cropperjs/cropper.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/adminlte/css/skins/{{ \PeskyCMF\Config\CmfConfig::getInstance()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
@@ -132,11 +135,15 @@
     <script src="/packages/cmf-vendors/base64.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/ckeditor/ckeditor.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/ckeditor/adapters/jquery.js" type="text/javascript"></script>
-    {{--<script src="/packages/cmf-vendors/ckeditor/config.js" type="text/javascript"></script>--}}
     <script src="{{ route('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
+
     <script src="/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js" type="text/javascript"></script>
+
     <script src="/packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/cropperjs/cropper.min.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.global.vars.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.helpers.js" type="text/javascript"></script>
