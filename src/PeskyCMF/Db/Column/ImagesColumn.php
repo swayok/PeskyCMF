@@ -103,11 +103,12 @@ class ImagesColumn extends Column implements \Iterator, \ArrayAccess {
     /**
      * Return the current element
      * @link http://php.net/manual/en/iterator.current.php
-     * @return mixed Can return any type.
+     * @return ImageConfig
+     * @throws \UnexpectedValueException
      * @since 5.0.0
      */
     public function current() {
-        return $this->getIterator()->current();
+        return $this->getImageConfiguration($this->getIterator()->key());
     }
 
     /**

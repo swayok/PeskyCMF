@@ -56,8 +56,15 @@ class ImagesFormInput extends FormInput {
         $renderer
             ->setTemplate('cmf::input.image_uploaders')
             ->addData('imagesConfigs', $configs);
-        // todo: implement view cmf::input.image_uploaders
         return $renderer;
+    }
+
+    public function hasLabel() {
+        return true;
+    }
+
+    public function getLabel($default = '', InputRenderer $renderer = null) {
+        return '';
     }
 
 
