@@ -2,6 +2,10 @@ html,
 body {
   height: 100%;
 }
+html > .modal-backdrop,
+body > .modal-backdrop {
+  display: none !important;
+}
 pre.json-text {
   white-space: pre-wrap;
 }

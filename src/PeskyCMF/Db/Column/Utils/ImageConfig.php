@@ -31,6 +31,13 @@ class ImageConfig {
     const GIF = 'gif';
     const SVG = 'svg';
 
+    static protected $typeToExt = [
+        self::PNG => 'png',
+        self::JPEG => 'jpg',
+        self::GIF => 'gif',
+        self::SVG => 'svg',
+    ];
+
     /** @var string */
     protected $name;
     /** @var string */
@@ -45,6 +52,8 @@ class ImageConfig {
     protected $fitMode = self::RESIZE_LARGER;
     /** @var string|null */
     protected $backgroundColor;
+    /** @var int */
+    protected $minImagesCount = 0;
     /** @var int */
     protected $maxImagesCount = 1;
     /**
@@ -257,6 +266,13 @@ class ImageConfig {
     }
 
     /**
+     * @return array
+     */
+    public function getAllowedFileExtensions() {
+        return array_values(array_intersect_key(static::$typeToExt, array_flip($this->allowedFileTypes)));
+    }
+
+    /**
      * @param array $allowedFileTypes - combination of ImageConfig::PNG, ImageConfig::JPEG, ImageConfig::GIF, ImageConfig::SVG
      * @return $this
      * @throws \InvalidArgumentException
@@ -273,10 +289,37 @@ class ImageConfig {
     }
 
     /**
+     * @return int
+     */
+    public function getMaxImagesCount() {
+        return $this->maxImagesCount;
+    }
+
+    /**
      * @param int $count - 0 for unlimited
+     * @return $this
      */
     public function setMaxImagesCount($count) {
-        $this->maxImagesCount = (int)$count;
+        $this->maxImagesCount = max(0, (int)$count);
+        return $this;
     }
+
+    /**
+     * @return int
+     */
+    public function getMinImagesCount() {
+        return $this->minImagesCount;
+    }
+
+    /**
+     * @param int $minImagesCount
+     * @return $this
+     */
+    public function setMinImagesCount($minImagesCount) {
+        $this->minImagesCount = max(0, (int)$minImagesCount);
+        return $this;
+    }
+
+
 
 }
