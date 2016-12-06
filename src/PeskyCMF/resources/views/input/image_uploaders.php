@@ -21,8 +21,8 @@ $defaultId = $fieldConfig->getDefaultId()
             <span><?php echo cmfTransCustom($translationPrefix . '.' . $fieldConfig->getName() . '.' . $configName) ?></span>
         </div>
         <div class="image-upload-input-container">
-            <input type="file" id="<?php echo $inputId; ?>" data-name="<?php echo $inputName; ?>" class="file-loading">
-            <input type="hidden" id="<?php echo $inputId; ?>-base64" name="<?php echo $inputName; ?>">
+            <input type="file" id="<?php echo $inputId; ?>" data-name="<?php echo $inputName; ?>[file]" class="file-loading" name="<?php echo $inputName; ?>">
+            <input type="hidden" id="<?php echo $inputId; ?>-info" name="<?php echo $inputName; ?>[info]">
             <script type="application/javascript">
                 $("#<?php echo $inputId; ?>").fileinput({
                     language: '<?php echo app()->getLocale(); ?>',
