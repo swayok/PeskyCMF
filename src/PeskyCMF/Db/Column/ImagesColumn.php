@@ -10,6 +10,7 @@ use PeskyORM\ORM\Column;
  */
 class ImagesColumn extends Column implements \Iterator, \ArrayAccess {
 
+    protected $defaultClosuresClass = ImagesUploadingColumnClosures::class;
     /**
      * @var string
      */

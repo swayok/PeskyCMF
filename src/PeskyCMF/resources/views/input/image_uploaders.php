@@ -22,7 +22,8 @@ $defaultId = $fieldConfig->getDefaultId()
         </div>
         <div class="image-upload-input-container">
             <input type="file" id="<?php echo $inputId; ?>" data-name="<?php echo $inputName; ?>[file]" class="file-loading" name="<?php echo $inputName; ?>">
-            <input type="hidden" id="<?php echo $inputId; ?>-info" name="<?php echo $inputName; ?>[info]">
+            <input type="hidden" id="<?php echo $inputId; ?>-info" name="<?php echo $inputName; ?>[info]" value="{}">
+            <input type="hidden" id="<?php echo $inputId; ?>-deleted" name="<?php echo $inputName; ?>[deleted]" value="0">
             <script type="application/javascript">
                 $("#<?php echo $inputId; ?>").fileinput({
                     language: '<?php echo app()->getLocale(); ?>',
@@ -30,7 +31,9 @@ $defaultId = $fieldConfig->getDefaultId()
                     previewFileType: 'image',
                     allowedFileExtensions: <?php echo json_encode($imageConfig->getAllowedFileExtensions()); ?>,
                     minFileCount: <?php echo $imageConfig->getMinImagesCount(); ?>,
+                    <?php if ($imageConfig->getMaxImagesCount() > 0): ?>
                     maxFileCount: <?php echo $imageConfig->getMaxImagesCount(); ?>,
+                    <?php endif; ?>
                     validateInitialCount: true,
                     maxFileSize: <?php echo $imageConfig->getMaxFileSize(); ?>,
                     browseIcon: '<i class=\"glyphicon glyphicon-picture\"></i>',
