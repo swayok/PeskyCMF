@@ -2,12 +2,17 @@
 
 namespace PeskyCMF\Db\Column\Utils;
 
+use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyORM\ORM\Column;
-use PeskyORM\ORM\ColumnClosuresInterface;
 use PeskyORM\ORM\DefaultColumnClosures;
 use PeskyORM\ORM\RecordValue;
+use PeskyORM\ORM\RecordValueHelpers;
+use Swayok\Utils\ValidateValue;
 
-class ImagesUploadingColumnClosures implements ColumnClosuresInterface {
+/**
+ * todo: added images saving/getting (for both DB and FS)
+ */
+class ImagesUploadingColumnClosures extends DefaultColumnClosures{
 
     /**
      * Set value. Should also normalize and validate value
@@ -15,85 +20,96 @@ class ImagesUploadingColumnClosures implements ColumnClosuresInterface {
      * @param boolean $isFromDb
      * @param RecordValue $valueContainer
      * @return RecordValue
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PDOException
+     * @throws \BadMethodCallException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
     static public function valueSetter($newValue, $isFromDb, RecordValue $valueContainer) {
-
+        if ($isFromDb || empty($newValue)) {
+            return parent::valueSetter($newValue, $isFromDb, $valueContainer);
+        }
+        /** @var ImagesColumn $column */
+        $column = $valueContainer->getColumn();
+        $errors = $column->validateValue($newValue, $isFromDb);
+        if (count($errors) > 0) {
+            return $valueContainer->setValidationErrors($errors);
+        }
+        /** @var array $newValue */
+        $newFiles = static::valueNormalizer($newValue, $isFromDb, $column);
+        if (count($newFiles)) {
+            $valueContainer->setCustomInfo(['new_files' => $newFiles]);
+        }
+        return $valueContainer;
     }
 
-    /**
-     * Slightly modify value before validation. Uses $column->isEmptyStringMustBeConvertedToNull(),
-     * $column->isValueLowercasingRequired() and $column->isValueTrimmingRequired
-     * @param Column $column
-     * @param mixed $value
-     * @param bool $isFromDb
-     * @return mixed
-     */
-    static public function valuePreprocessor($value, $isFromDb, Column $column) {
-        return DefaultColumnClosures::valuePreprocessor($value, $isFromDb, $column);
+    static public function valueNormalizer($value, $isFromDb, Column $column) {
+        if ($isFromDb) {
+            return parent::valueNormalizer($value, $isFromDb, $column);
+        } else if (is_array($value)) {
+            $imagesNames = [];
+            foreach ($column as $imageName => $imageConfig) {
+                $imagesNames[] = $imageName;
+                if (empty($value[$imageName])) {
+                    unset($value[$imageName]);
+                    continue;
+                }
+                if ($value[$imageName] instanceof \SplFileInfo) {
+                    $value[$imageName] = ['file' => $value[$imageName]];
+                }
+                if (
+                    !is_array($value[$imageName])
+                    || (
+                        empty($value[$imageName]['file'])
+                        && !(bool)array_get($value[$imageName], 'deleted', false)
+                    )
+                ) {
+                    unset($value[$imageName]);
+                } else {
+                    $value[$imageName]['deleted'] = (bool)array_get($value[$imageName], 'deleted', false);
+                }
+            }
+            return array_intersect_key($value, array_flip($imagesNames));
+        }
+        return $value;
     }
 
-    /**
-     * Get value
-     * @param RecordValue $value
-     * @param null|string $format
-     * @return mixed
-     */
-    static public function valueGetter(RecordValue $value, $format = null) {
-
-    }
-
-    /**
-     * Tests if value is set
-     * @param RecordValue $value
-     * @param bool $checkDefaultValue
-     * @return bool
-     */
-    static public function valueExistenceChecker(RecordValue $value, $checkDefaultValue = false) {
-
-    }
 
     /**
      * Validates value. Uses valueValidatorExtender
      * @param RecordValue|mixed $value
      * @param bool $isFromDb
-     * @param Column $column
+     * @param Column|ImagesColumn $column
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     static public function valueValidator($value, $isFromDb, Column $column) {
-
-    }
-
-    /**
-     * Extends value validation in addition to valueValidator
-     * @param mixed $value
-     * @param bool $isFromDb
-     * @param Column $column
-     * @return array - list of error messages (empty list = no errors)
-     */
-    static public function valueValidatorExtender($value, $isFromDb, Column $column) {
-
-    }
-
-    /**
-     * Validates if value is allowed
-     * @param RecordValue|mixed $value
-     * @param bool $isFromDb
-     * @param Column $column
-     * @return array
-     */
-    static public function valueIsAllowedValidator($value, $isFromDb, Column $column) {
-
-    }
-
-    /**
-     * Normalize value to fit column's data type
-     * @param mixed $value
-     * @param bool $isFromDb
-     * @param Column $column
-     * @return mixed
-     */
-    static public function valueNormalizer($value, $isFromDb, Column $column) {
-
+        if ($isFromDb || is_string($value)) {
+            return parent::valueValidator($value, $isFromDb, $column);
+        }
+        $localizations = $column::getValidationErrorsLocalization();
+        if (!is_array($value)) {
+            return [RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_ARRAY)];
+        }
+        $value = static::valueNormalizer($value, $isFromDb, $column);
+        foreach ($column as $imageName => $imageConfig) {
+            if (
+                array_key_exists($imageName, $value)
+                && !array_get($value[$imageName], 'deleted', false)
+                && (
+                    !array_get($value[$imageName], 'file', false)
+                    || !ValidateValue::isUploadedFile($value[$imageName]['file'], true)
+                )
+            ) {
+                return [RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_FILE)];
+            }
+        }
+        return [];
     }
 
     /**
@@ -104,7 +120,19 @@ class ImagesUploadingColumnClosures implements ColumnClosuresInterface {
      * @return void
      */
     static public function valueSavingExtender(RecordValue $valueContainer, $isUpdate, array $savedData) {
-
+        $newFiles = $valueContainer->getCustomInfo('new_files', []);
+        if (!empty($newFiles)) {
+            $value = $valueContainer->getRecord()->getValue($valueContainer->getColumn()->getName(), 'array');
+            foreach ($newFiles as $uploadInfo) {
+                $file = array_get($uploadInfo, 'file', false);
+                $delete = array_get($uploadInfo, 'delete', false);
+                if (!$file && $delete) {
+                    // todo: delete file
+                } else if ($file) {
+                    // todo: save file to fs
+                }
+            }
+        }
     }
 
     /**
@@ -114,7 +142,7 @@ class ImagesUploadingColumnClosures implements ColumnClosuresInterface {
      * @return void
      */
     static public function valueDeleteExtender(RecordValue $valueContainer, $deleteFiles) {
-
+        // todo: delete all files
     }
 
     /**
@@ -124,6 +152,6 @@ class ImagesUploadingColumnClosures implements ColumnClosuresInterface {
      * @return mixed
      */
     static public function valueFormatter(RecordValue $valueContainer, $format) {
-
+        // todo: implement formats: "path", "url"
     }
 }
