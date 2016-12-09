@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Db\Column\Utils;
 
+use Illuminate\Http\UploadedFile;
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\DefaultColumnClosures;
@@ -9,9 +10,6 @@ use PeskyORM\ORM\RecordValue;
 use PeskyORM\ORM\RecordValueHelpers;
 use Swayok\Utils\ValidateValue;
 
-/**
- * todo: added images saving/getting (for both DB and FS)
- */
 class ImagesUploadingColumnClosures extends DefaultColumnClosures{
 
     /**
@@ -49,7 +47,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             return parent::valueNormalizer($value, $isFromDb, $column);
         } else if (is_array($value)) {
             $imagesNames = [];
+            /** @var ImagesColumn $column */
             foreach ($column as $imageName => $imageConfig) {
+                // todo: implement multifile
                 $imagesNames[] = $imageName;
                 if (empty($value[$imageName])) {
                     unset($value[$imageName]);
@@ -97,16 +97,37 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             return [RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_ARRAY)];
         }
         $value = static::valueNormalizer($value, $isFromDb, $column);
+        /** @var ImagesColumn $column */
         foreach ($column as $imageName => $imageConfig) {
+            if (!array_key_exists($imageName, $value)) {
+                continue;
+            }
+            // todo: implement multifile
+            /** @var bool|\SplFileInfo $file */
+            $file = array_get($value[$imageName], 'file', false);
             if (
-                array_key_exists($imageName, $value)
+                !ValidateValue::isUploadedImage($file, true)
                 && !array_get($value[$imageName], 'deleted', false)
-                && (
-                    !array_get($value[$imageName], 'file', false)
-                    || !ValidateValue::isUploadedFile($value[$imageName]['file'], true)
-                )
             ) {
-                return [RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_FILE)];
+                return [RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_IMAGE)];
+            }
+            $image = new \Imagick($file->getRealPath());
+            if (!$image->valid() || ValidateValue::isCorruptedJpeg($file->getRealPath())) {
+                return [RecordValueHelpers::getErrorMessage($localizations, $column::FILE_IS_NOT_A_VALID_IMAGE)];
+            } else if (!in_array($image->getImageMimeType(), $imageConfig->getAllowedFileTypes(), true)) {
+                return [
+                    sprintf(
+                        RecordValueHelpers::getErrorMessage($localizations, $column::IMAGE_TYPE_IS_NOT_ALLOWED),
+                        implode(', ', array_keys($imageConfig->getAllowedFileTypes()))
+                    )
+                ];
+            } else if ($file->getSize() / 1024 > $imageConfig->getMaxFileSize()) {
+                return [
+                    sprintf(
+                        RecordValueHelpers::getErrorMessage($localizations, $column::FILE_SIZE_IS_TOO_LARGE),
+                        $imageConfig->getMaxFileSize()
+                    )
+                ];
             }
         }
         return [];
@@ -118,20 +139,59 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
      * @param bool $isUpdate
      * @param array $savedData
      * @return void
+     * @throws \PeskyORM\Exception\RecordNotFoundException
+     * @throws \PeskyORM\Exception\InvalidTableColumnConfigException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PeskyORM\Exception\DbException
+     * @throws \PDOException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     * @throws \UnexpectedValueException
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      */
     static public function valueSavingExtender(RecordValue $valueContainer, $isUpdate, array $savedData) {
+        /** @var array $newFiles */
         $newFiles = $valueContainer->getCustomInfo('new_files', []);
+        /** @var ImagesColumn $column */
+        $column = $valueContainer->getColumn();
+        $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
         if (!empty($newFiles)) {
             $value = $valueContainer->getRecord()->getValue($valueContainer->getColumn()->getName(), 'array');
-            foreach ($newFiles as $uploadInfo) {
+            foreach ($newFiles as $imageName => $uploadInfo) {
+                // todo: implement multifile
+                $imageConfig = $column->getImageConfiguration($imageName);
+                $dir = $imageConfig->getFolderAbsolutePath($pkValue);
+                \File::cleanDirectory($dir);
                 $file = array_get($uploadInfo, 'file', false);
-                $delete = array_get($uploadInfo, 'delete', false);
-                if (!$file && $delete) {
-                    // todo: delete file
-                } else if ($file) {
-                    // todo: save file to fs
+                if ($file) {
+                    $fileInfo = FileInfo::fromSplFileInfo($file, $imageConfig, $pkValue);
+                    // save not modified file to $dir
+                    if ($file instanceof UploadedFile) {
+                        $file->move($dir, $fileInfo->getFileNameWithExtension());
+                    } else {
+                        /** @var \SplFileInfo $file */
+                        \File::copy($file->getRealPath(), $dir . $fileInfo->getFileNameWithExtension());
+                    }
+                    // modify image size if needed
+                    $filePath = $fileInfo->getAbsoluteFilePath();
+                    $imagick = new \Imagick($filePath);
+                    if (
+                        $imagick->getImageWidth() > $imageConfig->getMaxWidth()
+                        && $imagick->resizeImage($imageConfig->getMaxWidth(), 0, $imagick::FILTER_LANCZOS, 0)
+                    ) {
+                        \File::delete($filePath);
+                        $imagick->writeImage($filePath);
+                    }
+                    // update value
+                    $value[$imageName] = $fileInfo->collectImageInfoForDb();
                 }
+
             }
+            $valueContainer->getRecord()
+                ->begin()
+                ->updateValue($valueContainer->getColumn(), $value, false)
+                ->commit();
         }
     }
 
@@ -140,9 +200,20 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
      * @param RecordValue $valueContainer
      * @param bool $deleteFiles
      * @return void
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     static public function valueDeleteExtender(RecordValue $valueContainer, $deleteFiles) {
-        // todo: delete all files
+        if ($deleteFiles) {
+            /** @var ImagesColumn $column */
+            $column = $valueContainer->getColumn();
+            $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
+            foreach ($column as $imageName => $imageConfig) {
+                \File::cleanDirectory($imageConfig->getFolderAbsolutePath($pkValue));
+            }
+        }
     }
 
     /**
@@ -152,6 +223,6 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
      * @return mixed
      */
     static public function valueFormatter(RecordValue $valueContainer, $format) {
-        // todo: implement formats: "path", "url"
+        // todo: implement formats: "array", "{image_name}"
     }
 }

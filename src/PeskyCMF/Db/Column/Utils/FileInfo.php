@@ -3,6 +3,7 @@
 namespace PeskyCMF\Db\Column\Utils;
 
 use Swayok\Utils\File;
+use Symfony\Component\Finder\SplFileInfo;
 
 class FileInfo {
 
@@ -25,11 +26,10 @@ class FileInfo {
      */
     static public function fromArray(array $fileInfo, FileConfig $fileConfig, $primaryKeyValue) {
         /** @var FileInfo $obj */
-        $obj = new static($fileConfig, $primaryKeyValue);
+        $obj = new static($fileConfig, $primaryKeyValue, array_get($fileInfo, 'number', null));
         $obj
             ->setFileName(array_get($fileInfo, 'name', null))
             ->setFileExtension(array_get($fileInfo, 'extension', null));
-
         return $obj;
     }
 
@@ -37,6 +37,7 @@ class FileInfo {
      * @param \SplFileInfo $fileInfo
      * @param FileConfig|ImageConfig $fileConfig
      * @param int|string $primaryKeyValue
+     * @param null|int $fileNumber
      * @return static
      */
     static public function fromSplFileInfo(\SplFileInfo $fileInfo, FileConfig $fileConfig, $primaryKeyValue, $fileNumber = null) {
@@ -48,6 +49,7 @@ class FileInfo {
     /**
      * @param FileConfig $fileConfig
      * @param int|string $primaryKeyValue
+     * @param null|int $fileNumber
      */
     protected function __construct(FileConfig $fileConfig, $primaryKeyValue, $fileNumber = null) {
         $this->fileConfig = $fileConfig;
@@ -56,12 +58,19 @@ class FileInfo {
     }
 
     /**
+     * @return int|null|string
+     */
+    protected function getFileNumber() {
+        return $this->fileNumber;
+    }
+
+    /**
      * @return string
      * @throws \UnexpectedValueException
      */
     public function getFileName() {
         if (!$this->fileName) {
-            $this->fileName = $this->fileConfig->makeNewFileName($this->fileNumber);
+            $this->fileName = $this->fileConfig->makeNewFileName();
         }
         return $this->fileName;
     }
@@ -104,7 +113,7 @@ class FileInfo {
      * @return string
      */
     public function getAbsoluteFilePath() {
-        return $this->fileConfig->getFolderAbsolutePath($this->primaryKeyValue) . $this->getFileNameWithExtension();
+        return $this->fileConfig->getFolderAbsolutePath($this->primaryKeyValue, $this->getFileNumber()) . $this->getFileNameWithExtension();
     }
 
     /**
@@ -118,14 +127,37 @@ class FileInfo {
      * @return string
      */
     public function getRelativeUrl() {
-        return $this->fileConfig->getFolderRelativeUrl($this->primaryKeyValue) . $this->getFileNameWithExtension();
+        return $this->fileConfig->getFolderRelativeUrl($this->primaryKeyValue, $this->getFileNumber()) . $this->getFileNameWithExtension();
     }
 
+    /**
+     * @param ImageModificationConfig $modificationConfig
+     * @return FileInfo;
+     * @throws \BadMethodCallException
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException
+     */
     public function getModifiedImage(ImageModificationConfig $modificationConfig) {
         if (!$this->fileConfig instanceof ImageConfig) {
             throw new \BadMethodCallException('Cannot modify files except images');
         }
-        $modificationConfig->applyModificationTo($this->getAbsoluteFilePath());
+        return FileInfo::fromSplFileInfo(
+            $modificationConfig->applyModificationTo($this->getAbsoluteFilePath()),
+            $this->fileConfig,
+            $this->primaryKeyValue,
+            $this->fileNumber
+        );
+    }
+
+    /**
+     * @return array
+     * @throws \UnexpectedValueException
+     */
+    public function collectImageInfoForDb() {
+        return [
+            'name' => $this->getFileName(),
+            'extension' => $this->getFileExtension(),
+            'number' => $this->getFileNumber()
+        ];
     }
 
 }

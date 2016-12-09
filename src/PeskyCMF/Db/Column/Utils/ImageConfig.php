@@ -9,7 +9,7 @@ class ImageConfig extends FileConfig {
     const GIF = 'image/gif';
     const SVG = 'image/svg';
 
-    static protected $typeToExt = [
+    protected $typeToExt = [
         self::PNG => 'png',
         self::JPEG => 'jpg',
         self::GIF => 'gif',

@@ -57,9 +57,8 @@ class FileConfig {
      */
     protected $fileNameBuilder;
 
-    public function __construct($name, $relativeBaseFolder) {
+    public function __construct($name) {
         $this->name = $name;
-        $this->rootFolderAbsolutePath = $relativeBaseFolder;
         $this->subfolder = preg_replace('%[a-zA-Z-_]+%', '-', $name);
     }
 
@@ -82,10 +81,14 @@ class FileConfig {
 
     /**
      * @param int|string $primaryKeyValue
+     * @param null|int $fileNumber
      * @return string
      */
-    public function getFolderAbsolutePath($primaryKeyValue) {
-        return rtrim($this->getRootFolderAbsolutePath($primaryKeyValue) . $this->getSubfolder(), ' /\\') . DIRECTORY_SEPARATOR;
+    public function getFolderAbsolutePath($primaryKeyValue, $fileNumber = null) {
+        return rtrim(
+            $this->getRootFolderAbsolutePath($primaryKeyValue) . $this->getSubfolder() . DIRECTORY_SEPARATOR . $fileNumber,
+            ' /\\'
+        ) . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -107,10 +110,11 @@ class FileConfig {
 
     /**
      * @param int|string $primaryKeyValue
+     * @param null|int $fileNumber
      * @return string
      */
-    public function getFolderRelativeUrl($primaryKeyValue) {
-        return rtrim($this->getRootRelativeUrl($primaryKeyValue) . $this->getSubfolder(), ' /\\') . '/';
+    public function getFolderRelativeUrl($primaryKeyValue, $fileNumber = null) {
+        return rtrim($this->getRootRelativeUrl($primaryKeyValue) . $this->getSubfolder() . '/' . $fileNumber, ' /\\') . '/';
     }
 
     /**
