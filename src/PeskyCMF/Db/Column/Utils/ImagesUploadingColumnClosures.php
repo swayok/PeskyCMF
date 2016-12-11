@@ -35,9 +35,31 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             return $valueContainer->setValidationErrors($errors);
         }
         /** @var array $newValue */
-        $newFiles = static::valueNormalizer($newValue, $isFromDb, $column);
-        if (count($newFiles)) {
-            $valueContainer->setCustomInfo(['new_files' => $newFiles]);
+        $normaizledValue = static::valueNormalizer($newValue, $isFromDb, $column);
+        if (count($normaizledValue)) {
+            $newFiles = [];
+            $infoArrays = [];
+            foreach ($normaizledValue as $imageName => $imageInfo) {
+                if (empty($imageInfo['file'])) {
+                    $infoArrays[$imageName] = $imageInfo;
+                } else {
+                    $newFiles[$imageName] = $imageInfo;
+                }
+            }
+            $valueContainer->setIsFromDb(false);
+            if (!empty($newFiles)) {
+                $valueContainer->setCustomInfo(['new_files' => $newFiles]);
+            }
+            if (!empty($infoArrays)) {
+                if ($valueContainer->hasValue()) {
+                    $oldValue = json_decode($valueContainer->getValue(), true);
+                    if (is_array($oldValue)) {
+                        $infoArrays = array_merge($oldValue, $infoArrays);
+                    }
+                }
+                $json = json_encode($infoArrays, JSON_UNESCAPED_UNICODE);
+                $valueContainer->setRawValue($infoArrays, $json, false)->setValidValue($json, $infoArrays);
+            }
         }
         return $valueContainer;
     }
@@ -58,12 +80,14 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 if ($value[$imageName] instanceof \SplFileInfo) {
                     $value[$imageName] = ['file' => $value[$imageName]];
                 }
-                if (
-                    !is_array($value[$imageName])
-                    || (
-                        empty($value[$imageName]['file'])
-                        && !(bool)array_get($value[$imageName], 'deleted', false)
-                    )
+                if (!is_array($value[$imageName])) {
+                    unset($value[$imageName]);
+                } else if (static::isFileInfoArray($value[$imageName])) {
+                    // not an upload but file info
+                    continue;
+                } else if (
+                    empty($value[$imageName]['file'])
+                    && !(bool)array_get($value[$imageName], 'deleted', false)
                 ) {
                     unset($value[$imageName]);
                 } else {
@@ -103,6 +127,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 continue;
             }
             // todo: implement multifile
+            if (static::isFileInfoArray($value[$imageName])) {
+                continue;
+            }
             /** @var bool|\SplFileInfo $file */
             $file = array_get($value[$imageName], 'file', false);
             if (
@@ -131,6 +158,14 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             }
         }
         return [];
+    }
+
+    /**
+     * @param array $value
+     * @return bool
+     */
+    static protected function isFileInfoArray(array $value) {
+        return !empty($value['name']) && !empty($value['extension']);
     }
 
     /**
@@ -186,8 +221,8 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     // update value
                     $value[$imageName] = $fileInfo->collectImageInfoForDb();
                 }
-
             }
+            $valueContainer->removeCustomInfo('new_files');
             $valueContainer->getRecord()
                 ->begin()
                 ->updateValue($valueContainer->getColumn(), $value, false)
@@ -221,8 +256,37 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
      * @param RecordValue $valueContainer
      * @param string $format
      * @return mixed
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \BadMethodCallException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
     static public function valueFormatter(RecordValue $valueContainer, $format) {
-        // todo: implement formats: "array", "{image_name}"
+        /** @var ImagesColumn $column */
+        $column = $valueContainer->getColumn();
+        if (isset($column[$format])) {
+            // return FileInfo object or array of FileInfo objects by image config name provided via $format
+            $record = $valueContainer->getRecord();
+            $value = $record->getValue($column->getName(), 'array');
+            $pkValue = $record->getPrimaryKeyValue();
+            $imageConfig = $column->getImageConfiguration($format);
+            if ($imageConfig->getMaxFilesCount() > 1) {
+                $ret = [];
+                if (!empty($value[$format]) && is_array($value[$format])) {
+                    foreach ($value[$format] as $imageInfoArray) {
+                        if (static::isFileInfoArray($imageInfoArray)) {
+                            $imageInfo = FileInfo::fromArray($imageInfoArray, $imageConfig, $pkValue);
+                            $ret[$imageInfo->getFileNumber()] = $imageInfo;
+                        }
+                    }
+                }
+                return $ret;
+            } else {
+                $fileInfoArray = static::isFileInfoArray($value[$format]) ? $value[$format] : [];
+                return FileInfo::fromArray($fileInfoArray, $imageConfig, $pkValue);
+            }
+        } else {
+            return parent::valueFormatter($valueContainer, $format);
+        }
     }
 }

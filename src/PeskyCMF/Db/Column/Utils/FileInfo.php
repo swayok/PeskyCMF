@@ -3,7 +3,7 @@
 namespace PeskyCMF\Db\Column\Utils;
 
 use Swayok\Utils\File;
-use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileInfo {
 
@@ -42,7 +42,9 @@ class FileInfo {
      */
     static public function fromSplFileInfo(\SplFileInfo $fileInfo, FileConfig $fileConfig, $primaryKeyValue, $fileNumber = null) {
         $obj = new static($fileConfig, $primaryKeyValue, $fileNumber);
-        $obj->setFileExtension($fileInfo->getExtension());
+        $obj->setFileExtension(
+            $fileInfo instanceof UploadedFile ? $fileInfo->getClientOriginalExtension() : $fileInfo->getExtension()
+        );
         return $obj;
     }
 
@@ -60,7 +62,7 @@ class FileInfo {
     /**
      * @return int|null|string
      */
-    protected function getFileNumber() {
+    public function getFileNumber() {
         return $this->fileNumber;
     }
 
@@ -104,9 +106,10 @@ class FileInfo {
 
     /**
      * @return string
+     * @throws \UnexpectedValueException
      */
     public function getFileNameWithExtension() {
-        return $this->fileName . ($this->fileExtension ? '.' . $this->fileExtension : '');
+        return $this->getFileName() . ($this->getFileExtension() ? '.' . $this->getFileExtension() : '');
     }
 
     /**
@@ -144,7 +147,7 @@ class FileInfo {
             $modificationConfig->applyModificationTo($this->getAbsoluteFilePath()),
             $this->fileConfig,
             $this->primaryKeyValue,
-            $this->fileNumber
+            $this->getFileNumber()
         );
     }
 

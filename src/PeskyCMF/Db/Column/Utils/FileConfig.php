@@ -59,7 +59,7 @@ class FileConfig {
 
     public function __construct($name) {
         $this->name = $name;
-        $this->subfolder = preg_replace('%[a-zA-Z-_]+%', '-', $name);
+        $this->setSubfolder($name);
     }
 
     /**
@@ -136,7 +136,7 @@ class FileConfig {
      * @return $this
      */
     public function setSubfolder($subfolder) {
-        $this->subfolder = preg_replace('%[a-zA-Z-_]+%', '-', $subfolder);
+        $this->subfolder = preg_replace('%[^a-zA-Z0-9-_]+%', '-', $subfolder);
         return $this;
     }
 
