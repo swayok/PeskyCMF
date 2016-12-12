@@ -47,7 +47,7 @@ class ValueCell extends RenderableValueViewer {
         return parent::getValueConverter();
     }
 
-    static public function doDefaultValueConversionByType($value, $type) {
+    public function doDefaultValueConversionByType($value, $type, array $record) {
         switch ($type) {
             case static::TYPE_JSON_TREE:
                 if (!is_array($value) && $value !== null) {

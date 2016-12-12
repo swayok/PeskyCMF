@@ -235,6 +235,9 @@ abstract class ScaffoldSectionConfig {
     /**
      * @param array $record
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ValueViewerException
      */
     public function prepareRecord(array $record) {
@@ -282,7 +285,7 @@ abstract class ScaffoldSectionConfig {
             ) {
                 $recordWithBackup[$key] = $fieldConfig->convertValue(
                     $recordWithBackup[$key],
-                    $recordWithBackup
+                    $record
                 );
             }
         }

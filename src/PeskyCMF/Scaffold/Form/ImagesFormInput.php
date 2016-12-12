@@ -3,6 +3,7 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Db\Column\ImagesColumn;
+use PeskyORM\ORM\RecordValue;
 
 class ImagesFormInput extends FormInput {
 
@@ -65,6 +66,15 @@ class ImagesFormInput extends FormInput {
 
     public function getLabel($default = '', InputRenderer $renderer = null) {
         return '';
+    }
+
+    public function doDefaultValueConversionByType($value, $type, array $record) {
+        $value = json_decode($value, true);
+        if (!is_array($value)) {
+            return [];
+        }
+        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord()->fromDbData($record);
+        return $record->getValue($this->getTableColumn()->getName(), 'urls');
     }
 
 

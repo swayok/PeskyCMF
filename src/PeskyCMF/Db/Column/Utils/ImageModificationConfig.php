@@ -240,7 +240,7 @@ class ImageModificationConfig {
         $baseFileName = preg_replace('%\.' . $originalFile->getExtension() . '$%i', '', $originalFile->getFilename());
         $newFileExt = $this->getImageType() === null ? $originalFile->getExtension() : static::$typeToExt[$this->getImageType()];
         $newFile = new File(
-            $originalFile->getPath() . DIRECTORY_SEPARATOR . $baseFileName . '_' . $this->getModificationName() . '.' . $newFileExt,
+            $originalFile->getPath() . DIRECTORY_SEPARATOR . $baseFileName . DIRECTORY_SEPARATOR . $this->getModificationName() . '.' . $newFileExt,
             false
         );
         // todo: implement $originalFile modification and store result to $newFile

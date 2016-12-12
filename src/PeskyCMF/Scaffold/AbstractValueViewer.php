@@ -125,6 +125,9 @@ abstract class AbstractValueViewer {
 
     /**
      * @return string
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ValueViewerException
      */
     public function getType() {
@@ -210,6 +213,9 @@ abstract class AbstractValueViewer {
      * @param array $record
      * @param bool $ignoreValueConverter
      * @return mixed
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws ValueViewerException
      */
     public function convertValue($value, array $record, $ignoreValueConverter = false) {
@@ -224,7 +230,7 @@ abstract class AbstractValueViewer {
             if ($this->getType() === static::TYPE_LINK) {
                 return $this->buildLinkToExternalRecord($this->getTableColumn(), $record);
             } else {
-                return static::doDefaultValueConversionByType($value, $this->type);
+                return $this->doDefaultValueConversionByType($value, $this->type, $record);
             }
         }
         return $value;
@@ -234,9 +240,10 @@ abstract class AbstractValueViewer {
      * Default value converter by value type
      * @param mixed $value
      * @param string $type - one of static::TYPE_*
+     * @param array $record
      * @return mixed
      */
-    static public function doDefaultValueConversionByType($value, $type) {
+    public function doDefaultValueConversionByType($value, $type, array $record) {
         switch ($type) {
             case static::TYPE_DATETIME:
                 return date(static::FORMAT_DATETIME, is_numeric($value) ? $value : strtotime($value));

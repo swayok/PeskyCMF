@@ -285,6 +285,34 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 $fileInfoArray = static::isFileInfoArray($value[$format]) ? $value[$format] : [];
                 return FileInfo::fromArray($fileInfoArray, $imageConfig, $pkValue);
             }
+        } else if ($format === 'urls' || $format === 'paths') {
+            $value = parent::valueFormatter($valueContainer, 'array');
+            $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
+            $ret = [];
+            foreach ($value as $imageName => $imageInfo) {
+                if (is_array($imageInfo) && static::isFileInfoArray($imageInfo)) {
+                    $imageConfig = $column->getImageConfiguration($imageName);
+                    if ($imageConfig->getMaxFilesCount() === 1) {
+                        $fileInfo = FileInfo::fromArray($imageInfo, $imageConfig, $pkValue);
+                        if ($format === 'urls') {
+                            $ret[$imageName] = $fileInfo->getRelativeUrl();
+                        } else {
+                            $ret[$imageName] = $fileInfo->getAbsoluteFilePath();
+                        }
+                    } else {
+                        $ret[$imageName] = [];
+                        foreach ($imageInfo as $index => $realImageInfo) {
+                            $fileInfo = FileInfo::fromArray($realImageInfo, $imageConfig, $pkValue);
+                            if ($format === 'urls') {
+                                $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getRelativeUrl();
+                            } else {
+                                $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteFilePath();
+                            }
+                        }
+                    }
+                }
+            }
+            return $ret;
         } else {
             return parent::valueFormatter($valueContainer, $format);
         }

@@ -8,7 +8,8 @@
  */
 /** @var \PeskyCMF\Db\Column\ImagesColumn $column */
 $column = $fieldConfig->getTableColumn();
-$defaultId = $fieldConfig->getDefaultId()
+$defaultId = $fieldConfig->getDefaultId();
+$dotJsInputName = 'it.' . $fieldConfig->getName();
 ?>
 
 <div id="<?php echo $defaultId; ?>-container">
@@ -16,6 +17,7 @@ $defaultId = $fieldConfig->getDefaultId()
         <?php
             $inputId = $defaultId . '-' . preg_replace('%[^a-zA-Z0-9]+%', '-', $configName);
             $inputName = $fieldConfig->getName() . '[' . $configName . ']';
+            $dotJsImageName = 'it.' . $fieldConfig->getName() . '.' . $configName;
         ?>
         <div class="section-divider">
             <span><?php echo cmfTransCustom($translationPrefix . '.' . $fieldConfig->getName() . '.' . $configName) ?></span>
@@ -48,7 +50,19 @@ $defaultId = $fieldConfig->getDefaultId()
                         "   </div>\n" +
                         "   {caption}\n" +
                         "</div>"
-                    }
+                    },
+                    {{? <?php echo $dotJsInputName; ?> && <?php echo $dotJsImageName ?>}}
+                        initialPreview: [
+                            <?php if ($imageConfig->getMaxFilesCount() == 1) : ?>
+                                {{= <?php echo $dotJsImageName ?> }}
+                            <?php else: ?>
+                                {{~ <?php echo $dotJsImageName ?> :url:index}}
+                                    {{= url }},
+                                {{~}}
+                            <?php endif; ?>
+                        ],
+                    {{?}}
+                    overwriteInitial: true
                 });
             </script>
         </div>
