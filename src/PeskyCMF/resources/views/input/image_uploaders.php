@@ -17,7 +17,8 @@ $dotJsInputName = 'it.' . $fieldConfig->getName();
         <?php
             $inputId = $defaultId . '-' . preg_replace('%[^a-zA-Z0-9]+%', '-', $configName);
             $inputName = $fieldConfig->getName() . '[' . $configName . ']';
-            $dotJsImageName = 'it.' . $fieldConfig->getName() . '.' . $configName;
+            $dotJsImageName = 'it.' . $fieldConfig->getName() . '.urls.' . $configName;
+            $dotJsImageInfoName = 'it.' . $fieldConfig->getName() . '.info.' . $configName;
         ?>
         <div class="section-divider">
             <span><?php echo cmfTransCustom($translationPrefix . '.' . $fieldConfig->getName() . '.' . $configName) ?></span>
@@ -54,15 +55,19 @@ $dotJsInputName = 'it.' . $fieldConfig->getName();
                     {{? <?php echo $dotJsInputName; ?> && <?php echo $dotJsImageName ?>}}
                         initialPreview: [
                             <?php if ($imageConfig->getMaxFilesCount() == 1) : ?>
-                                {{= <?php echo $dotJsImageName ?> }}
+                                '{{= <?php echo $dotJsImageName ?> }}'
                             <?php else: ?>
-                                {{~ <?php echo $dotJsImageName ?> :url:index}}
-                                    {{= url }},
-                                {{~}}
+                                '{{= <?php echo $dotJsImageName ?>.join(',') }}',
                             <?php endif; ?>
                         ],
+                        <?php if ($imageConfig->getMaxFilesCount() == 1) : ?>
+                            initialPreviewConfig: [{{= JSON.stringify(<?php echo $dotJsImageInfoName ?>) }}],
+                        <?php else: ?>
+                            initialPreviewConfig: {{= JSON.stringify(<?php echo $dotJsImageInfoName ?>) }},
+                        <?php endif ?>
                     {{?}}
-                    overwriteInitial: true
+                    overwriteInitial: true,
+                    initialPreviewAsData: true
                 });
             </script>
         </div>

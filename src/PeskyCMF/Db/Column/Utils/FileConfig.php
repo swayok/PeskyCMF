@@ -14,9 +14,9 @@ class FileConfig {
     /** @var string */
     protected $name;
     /** @var string */
-    protected $rootFolderAbsolutePath;
+    protected $absolutePathToPublicRootFolder;
     /** @var string */
-    protected $rootRelativeUrl;
+    protected $relativeUrlToPublicRootFolder;
     /** @var string */
     protected $subfolder;
     /** @var int */
@@ -66,8 +66,8 @@ class FileConfig {
      * @param $absolutePath
      * @return $this
      */
-    public function setRootFolderAbsolutePath($absolutePath) {
-        $this->rootFolderAbsolutePath = rtrim($absolutePath, ' /\\') . DIRECTORY_SEPARATOR;
+    public function setAbsolutePathToPublicRootFolder($absolutePath) {
+        $this->absolutePathToPublicRootFolder = rtrim($absolutePath, ' /\\') . DIRECTORY_SEPARATOR;
         return $this;
     }
 
@@ -75,28 +75,24 @@ class FileConfig {
      * @param int|string $primaryKeyValue
      * @return string
      */
-    protected function getRootFolderAbsolutePath($primaryKeyValue) {
-        return $this->rootFolderAbsolutePath . $primaryKeyValue . DIRECTORY_SEPARATOR;
+    public function getAbsolutePathToPublicRootFolder($primaryKeyValue) {
+        return $this->absolutePathToPublicRootFolder . $primaryKeyValue . DIRECTORY_SEPARATOR;
     }
 
     /**
      * @param int|string $primaryKeyValue
-     * @param null|int $fileNumber
      * @return string
      */
-    public function getFolderAbsolutePath($primaryKeyValue, $fileNumber = null) {
-        return rtrim(
-            $this->getRootFolderAbsolutePath($primaryKeyValue) . $this->getSubfolder() . DIRECTORY_SEPARATOR . $fileNumber,
-            ' /\\'
-        ) . DIRECTORY_SEPARATOR;
+    public function getAbsolutePathToFileFolder($primaryKeyValue) {
+        return rtrim($this->getAbsolutePathToPublicRootFolder($primaryKeyValue) . $this->getSubfolder(), ' /\\') . DIRECTORY_SEPARATOR;
     }
 
     /**
      * @param $relativeUrl
      * @return $this
      */
-    public function setRootRelativeUrl($relativeUrl) {
-        $this->rootRelativeUrl = rtrim($relativeUrl, ' /\\') . '/';
+    public function setRelativeUrlToPublicRootFolder($relativeUrl) {
+        $this->relativeUrlToPublicRootFolder = rtrim($relativeUrl, ' /\\') . '/';
         return $this;
     }
 
@@ -104,17 +100,16 @@ class FileConfig {
      * @param int|string $primaryKeyValue
      * @return string
      */
-    protected function getRootRelativeUrl($primaryKeyValue) {
-        return $this->rootRelativeUrl . preg_replace('%[^a-zA-Z0-9_-]+%', '_', $primaryKeyValue) . '/';
+    protected function getRelativeUrlToPublicRootFolder($primaryKeyValue) {
+        return $this->relativeUrlToPublicRootFolder . preg_replace('%[^a-zA-Z0-9_-]+%', '_', $primaryKeyValue) . '/';
     }
 
     /**
      * @param int|string $primaryKeyValue
-     * @param null|int $fileNumber
      * @return string
      */
-    public function getFolderRelativeUrl($primaryKeyValue, $fileNumber = null) {
-        return rtrim($this->getRootRelativeUrl($primaryKeyValue) . $this->getSubfolder() . '/' . $fileNumber, ' /\\') . '/';
+    public function getRelativeUrlToFileFolder($primaryKeyValue) {
+        return rtrim($this->getRelativeUrlToPublicRootFolder($primaryKeyValue) . $this->getSubfolder(), ' /\\') . '/';
     }
 
     /**

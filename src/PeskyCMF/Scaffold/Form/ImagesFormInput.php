@@ -4,6 +4,7 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyORM\ORM\RecordValue;
+use Symfony\Component\HttpFoundation\File\File;
 
 class ImagesFormInput extends FormInput {
 
@@ -74,7 +75,34 @@ class ImagesFormInput extends FormInput {
             return [];
         }
         $record = $this->getScaffoldSectionConfig()->getTable()->newRecord()->fromDbData($record);
-        return $record->getValue($this->getTableColumn()->getName(), 'urls');
+        $paths = $record->getValue($this->getTableColumn()->getName(), 'paths');
+        $info = [];
+        foreach ($paths as $imageName => $path) {
+            if (is_array($path)) {
+                $info[$imageName] = [];
+                $key = 1;
+                foreach ($path as $filePath) {
+                    $file = new File($filePath);
+                    $info[$imageName][] = [
+                        'caption' => $file->getBasename(),
+                        'size' => $file->getSize(),
+                        'key' => $key
+                    ];
+                    $key++;
+                }
+            } else {
+                $file = new File($path);
+                $info[$imageName] = [
+                    'caption' => $file->getBasename(),
+                    'size' => $file->getSize(),
+                    'key' => 1
+                ];
+            }
+        }
+        return [
+            'urls' => $record->getValue($this->getTableColumn()->getName(), 'urls'),
+            'info' => $info
+        ];
     }
 
 

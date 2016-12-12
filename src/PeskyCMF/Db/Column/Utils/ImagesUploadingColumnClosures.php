@@ -196,8 +196,8 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             foreach ($newFiles as $imageName => $uploadInfo) {
                 // todo: implement multifile
                 $imageConfig = $column->getImageConfiguration($imageName);
-                $dir = $imageConfig->getFolderAbsolutePath($pkValue);
-                \File::cleanDirectory($dir);
+                $dir = $imageConfig->getAbsolutePathToFileFolder($pkValue);
+                \File::cleanDirectory($dir); //< todo: for multiple files - delete file and subdirectory with same name as file without extension
                 $file = array_get($uploadInfo, 'file', false);
                 if ($file) {
                     $fileInfo = FileInfo::fromSplFileInfo($file, $imageConfig, $pkValue);
@@ -209,7 +209,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                         \File::copy($file->getRealPath(), $dir . $fileInfo->getFileNameWithExtension());
                     }
                     // modify image size if needed
-                    $filePath = $fileInfo->getAbsoluteFilePath();
+                    /*$filePath = $fileInfo->getAbsoluteFilePath();
                     $imagick = new \Imagick($filePath);
                     if (
                         $imagick->getImageWidth() > $imageConfig->getMaxWidth()
@@ -217,7 +217,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     ) {
                         \File::delete($filePath);
                         $imagick->writeImage($filePath);
-                    }
+                    }*/
                     // update value
                     $value[$imageName] = $fileInfo->collectImageInfoForDb();
                 }
@@ -246,7 +246,10 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             $column = $valueContainer->getColumn();
             $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
             foreach ($column as $imageName => $imageConfig) {
-                \File::cleanDirectory($imageConfig->getFolderAbsolutePath($pkValue));
+                \File::cleanDirectory($imageConfig->getAbsolutePathToFileFolder($pkValue));
+                if ($pkValue) {
+                    \File::cleanDirectory($imageConfig->getAbsolutePathToPublicRootFolder($pkValue));
+                }
             }
         }
     }
@@ -265,54 +268,66 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
         /** @var ImagesColumn $column */
         $column = $valueContainer->getColumn();
         if (isset($column[$format])) {
-            // return FileInfo object or array of FileInfo objects by image config name provided via $format
-            $record = $valueContainer->getRecord();
-            $value = $record->getValue($column->getName(), 'array');
-            $pkValue = $record->getPrimaryKeyValue();
-            $imageConfig = $column->getImageConfiguration($format);
-            if ($imageConfig->getMaxFilesCount() > 1) {
-                $ret = [];
-                if (!empty($value[$format]) && is_array($value[$format])) {
-                    foreach ($value[$format] as $imageInfoArray) {
-                        if (static::isFileInfoArray($imageInfoArray)) {
-                            $imageInfo = FileInfo::fromArray($imageInfoArray, $imageConfig, $pkValue);
-                            $ret[$imageInfo->getFileNumber()] = $imageInfo;
+            return $valueContainer->getCustomInfo(
+                'file_info:' . $format,
+                function () use ($valueContainer, $format, $column) {
+                    // return FileInfo object or array of FileInfo objects by image config name provided via $format
+                    $record = $valueContainer->getRecord();
+                    $value = $record->getValue($column->getName(), 'array');
+                    $pkValue = $record->getPrimaryKeyValue();
+                    $imageConfig = $column->getImageConfiguration($format);
+                    if ($imageConfig->getMaxFilesCount() > 1) {
+                        $ret = [];
+                        if (!empty($value[$format]) && is_array($value[$format])) {
+                            foreach ($value[$format] as $imageInfoArray) {
+                                if (static::isFileInfoArray($imageInfoArray)) {
+                                    $imageInfo = FileInfo::fromArray($imageInfoArray, $imageConfig, $pkValue);
+                                    $ret[$imageInfo->getFileNumber()] = $imageInfo;
+                                }
+                            }
                         }
-                    }
-                }
-                return $ret;
-            } else {
-                $fileInfoArray = static::isFileInfoArray($value[$format]) ? $value[$format] : [];
-                return FileInfo::fromArray($fileInfoArray, $imageConfig, $pkValue);
-            }
-        } else if ($format === 'urls' || $format === 'paths') {
-            $value = parent::valueFormatter($valueContainer, 'array');
-            $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
-            $ret = [];
-            foreach ($value as $imageName => $imageInfo) {
-                if (is_array($imageInfo) && static::isFileInfoArray($imageInfo)) {
-                    $imageConfig = $column->getImageConfiguration($imageName);
-                    if ($imageConfig->getMaxFilesCount() === 1) {
-                        $fileInfo = FileInfo::fromArray($imageInfo, $imageConfig, $pkValue);
-                        if ($format === 'urls') {
-                            $ret[$imageName] = $fileInfo->getRelativeUrl();
-                        } else {
-                            $ret[$imageName] = $fileInfo->getAbsoluteFilePath();
-                        }
+                        return $ret;
                     } else {
-                        $ret[$imageName] = [];
-                        foreach ($imageInfo as $index => $realImageInfo) {
-                            $fileInfo = FileInfo::fromArray($realImageInfo, $imageConfig, $pkValue);
-                            if ($format === 'urls') {
-                                $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getRelativeUrl();
+                        $fileInfoArray = static::isFileInfoArray($value[$format]) ? $value[$format] : [];
+                        return FileInfo::fromArray($fileInfoArray, $imageConfig, $pkValue);
+                    }
+                },
+                true
+            );
+        } else if ($format === 'urls' || $format === 'paths') {
+            return $valueContainer->getCustomInfo(
+                'format:' . $format,
+                function () use ($valueContainer, $format, $column) {
+                    $value = parent::valueFormatter($valueContainer, 'array');
+                    $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
+                    $ret = [];
+                    foreach ($value as $imageName => $imageInfo) {
+                        if (is_array($imageInfo) && static::isFileInfoArray($imageInfo)) {
+                            $imageConfig = $column->getImageConfiguration($imageName);
+                            if ($imageConfig->getMaxFilesCount() === 1) {
+                                $fileInfo = FileInfo::fromArray($imageInfo, $imageConfig, $pkValue);
+                                if ($format === 'urls') {
+                                    $ret[$imageName] = $fileInfo->getAbsoluteUrl();
+                                } else {
+                                    $ret[$imageName] = $fileInfo->getAbsoluteFilePath();
+                                }
                             } else {
-                                $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteFilePath();
+                                $ret[$imageName] = [];
+                                foreach ($imageInfo as $index => $realImageInfo) {
+                                    $fileInfo = FileInfo::fromArray($realImageInfo, $imageConfig, $pkValue);
+                                    if ($format === 'urls') {
+                                        $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteUrl();
+                                    } else {
+                                        $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteFilePath();
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
-            return $ret;
+                    return $ret;
+                },
+                true
+            );
         } else {
             return parent::valueFormatter($valueContainer, $format);
         }

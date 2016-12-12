@@ -123,8 +123,8 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
             /** @var FileConfig $fileConfig */
             $fileConfig = new $class($name);
             $fileConfig
-                ->setRootFolderAbsolutePath($this->getAbsoluteFileUploadsFolder())
-                ->setRootRelativeUrl($this->getRelativeFileUploadsUrl());
+                ->setAbsolutePathToPublicRootFolder($this->getAbsoluteFileUploadsFolder())
+                ->setRelativeUrlToPublicRootFolder($this->getRelativeFileUploadsUrl());
             if ($this->configs[$name] instanceof \Closure) {
                 call_user_func($this->configs[$name], $fileConfig);
             }

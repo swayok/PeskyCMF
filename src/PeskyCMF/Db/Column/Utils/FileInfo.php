@@ -114,9 +114,10 @@ class FileInfo {
 
     /**
      * @return string
+     * @throws \UnexpectedValueException
      */
     public function getAbsoluteFilePath() {
-        return $this->fileConfig->getFolderAbsolutePath($this->primaryKeyValue, $this->getFileNumber()) . $this->getFileNameWithExtension();
+        return $this->fileConfig->getAbsolutePathToFileFolder($this->primaryKeyValue) . $this->getFileNameWithExtension();
     }
 
     /**
@@ -128,9 +129,18 @@ class FileInfo {
 
     /**
      * @return string
+     * @throws \UnexpectedValueException
      */
     public function getRelativeUrl() {
-        return $this->fileConfig->getFolderRelativeUrl($this->primaryKeyValue, $this->getFileNumber()) . $this->getFileNameWithExtension();
+        return $this->fileConfig->getRelativeUrlToFileFolder($this->primaryKeyValue) . $this->getFileNameWithExtension();
+    }
+
+    /**
+     * @return string
+     * @throws \UnexpectedValueException
+     */
+    public function getAbsoluteUrl() {
+        return url($this->getRelativeUrl());
     }
 
     /**
