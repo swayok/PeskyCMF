@@ -122,6 +122,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
         }
         $value = static::valueNormalizer($value, $isFromDb, $column);
         /** @var ImagesColumn $column */
+        $errors = [];
         foreach ($column as $imageName => $imageConfig) {
             if (!array_key_exists($imageName, $value)) {
                 continue;
@@ -136,28 +137,32 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 !ValidateValue::isUploadedImage($file, true)
                 && !array_get($value[$imageName], 'deleted', false)
             ) {
-                return [RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_IMAGE)];
+                $errors[] = sprintf(
+                    RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_IMAGE),
+                    $imageName
+                );
             }
             $image = new \Imagick($file->getRealPath());
             if (!$image->valid() || ValidateValue::isCorruptedJpeg($file->getRealPath())) {
-                return [RecordValueHelpers::getErrorMessage($localizations, $column::FILE_IS_NOT_A_VALID_IMAGE)];
+                $errors[] = sprintf(
+                    RecordValueHelpers::getErrorMessage($localizations, $column::FILE_IS_NOT_A_VALID_IMAGE),
+                    $imageName
+                );
             } else if (!in_array($image->getImageMimeType(), $imageConfig->getAllowedFileTypes(), true)) {
-                return [
-                    sprintf(
-                        RecordValueHelpers::getErrorMessage($localizations, $column::IMAGE_TYPE_IS_NOT_ALLOWED),
-                        implode(', ', array_keys($imageConfig->getAllowedFileTypes()))
-                    )
-                ];
+                $errors[] = sprintf(
+                    RecordValueHelpers::getErrorMessage($localizations, $column::IMAGE_TYPE_IS_NOT_ALLOWED),
+                    $imageName,
+                    implode(', ', array_keys($imageConfig->getAllowedFileTypes()))
+                );
             } else if ($file->getSize() / 1024 > $imageConfig->getMaxFileSize()) {
-                return [
-                    sprintf(
-                        RecordValueHelpers::getErrorMessage($localizations, $column::FILE_SIZE_IS_TOO_LARGE),
-                        $imageConfig->getMaxFileSize()
-                    )
-                ];
+                $errors[] = sprintf(
+                    RecordValueHelpers::getErrorMessage($localizations, $column::FILE_SIZE_IS_TOO_LARGE),
+                    $imageName,
+                    $imageConfig->getMaxFileSize()
+                );
             }
         }
-        return [];
+        return $errors;
     }
 
     /**
