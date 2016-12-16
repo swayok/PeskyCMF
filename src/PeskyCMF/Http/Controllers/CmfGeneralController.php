@@ -480,7 +480,7 @@ class CmfGeneralController extends Controller {
                 $formInput->getMaxImageWidth(),
                 $formInput->getMaxImageHeight(),
                 \Imagick::FILTER_LANCZOS,
-                0,
+                -1,
                 true
             );
             if (!$success) {

@@ -214,17 +214,21 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                         \File::copy($file->getRealPath(), $dir . $fileInfo->getFileNameWithExtension());
                     }
                     // modify image size if needed
-                    /*$filePath = $fileInfo->getAbsoluteFilePath();
+                    $filePath = $fileInfo->getAbsoluteFilePath();
                     $imagick = new \Imagick($filePath);
                     if (
                         $imagick->getImageWidth() > $imageConfig->getMaxWidth()
-                        && $imagick->resizeImage($imageConfig->getMaxWidth(), 0, $imagick::FILTER_LANCZOS, 0)
+                        && $imagick->resizeImage($imageConfig->getMaxWidth(), 0, $imagick::FILTER_LANCZOS, -1)
+                        && $imagick->writeImage($filePath . '.tmp')
                     ) {
                         \File::delete($filePath);
-                        $imagick->writeImage($filePath);
-                    }*/
+                        \File::move($filePath . '.tmp', $filePath);
+                    }
                     // update value
-                    $value[$imageName] = $fileInfo->collectImageInfoForDb();
+                    $value[$imageName] = array_merge(
+                        ['info' => (array)array_get($uploadInfo, 'info', [])],
+                        $fileInfo->collectImageInfoForDb()
+                    );
                 }
             }
             $valueContainer->removeCustomInfo('new_files');
