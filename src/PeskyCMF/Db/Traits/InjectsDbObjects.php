@@ -46,7 +46,7 @@ trait InjectsDbObjects {
             ];
             $this->addConditionsForDbObjectInjection($route, $object, $conditions);
             $this->addParentIdsConditionsForDbObjectInjection($route, $object, $conditions);
-            $object->find($conditions);
+            $object->fromPrimaryKey($conditions);
             if (!$object->existsInDb()) {
                 $this->sendRecordNotFoundResponse();
             }
