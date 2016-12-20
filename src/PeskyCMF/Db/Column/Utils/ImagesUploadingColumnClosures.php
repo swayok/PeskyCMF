@@ -143,7 +143,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 );
             }
             $image = new \Imagick($file->getRealPath());
-            if (!$image->valid() || ValidateValue::isCorruptedJpeg($file->getRealPath())) {
+            if (!$image->valid() || ($image->getImageMimeType() === 'image/jpeg' && ValidateValue::isCorruptedJpeg($file->getRealPath()))) {
                 $errors[] = sprintf(
                     RecordValueHelpers::getErrorMessage($localizations, $column::FILE_IS_NOT_A_VALID_IMAGE),
                     $imageName
@@ -151,8 +151,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             } else if (!in_array($image->getImageMimeType(), $imageConfig->getAllowedFileTypes(), true)) {
                 $errors[] = sprintf(
                     RecordValueHelpers::getErrorMessage($localizations, $column::IMAGE_TYPE_IS_NOT_ALLOWED),
+                    $image->getImageMimeType(),
                     $imageName,
-                    implode(', ', array_keys($imageConfig->getAllowedFileTypes()))
+                    implode(', ', $imageConfig->getAllowedFileTypes())
                 );
             } else if ($file->getSize() / 1024 > $imageConfig->getMaxFileSize()) {
                 $errors[] = sprintf(
@@ -219,10 +220,8 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     if (
                         $imagick->getImageWidth() > $imageConfig->getMaxWidth()
                         && $imagick->resizeImage($imageConfig->getMaxWidth(), 0, $imagick::FILTER_LANCZOS, -1)
-                        && $imagick->writeImage($filePath . '.tmp')
                     ) {
-                        \File::delete($filePath);
-                        \File::move($filePath . '.tmp', $filePath);
+                        $imagick->writeImage($filePath);
                     }
                     // update value
                     $value[$imageName] = array_merge(
@@ -303,7 +302,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 },
                 true
             );
-        } else if ($format === 'urls' || $format === 'paths') {
+        } else if (in_array($format, ['urls', 'urls_with_timestamp', 'paths'], true)) {
             return $valueContainer->getCustomInfo(
                 'format:' . $format,
                 function () use ($valueContainer, $format, $column) {
@@ -315,19 +314,31 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                             $imageConfig = $column->getImageConfiguration($imageName);
                             if ($imageConfig->getMaxFilesCount() === 1) {
                                 $fileInfo = FileInfo::fromArray($imageInfo, $imageConfig, $pkValue);
-                                if ($format === 'urls') {
-                                    $ret[$imageName] = $fileInfo->getAbsoluteUrl();
-                                } else {
+                                if (!$fileInfo->exists()) {
+                                    continue;
+                                }
+                                if ($format === 'paths') {
                                     $ret[$imageName] = $fileInfo->getAbsoluteFilePath();
+                                } else {
+                                    $ret[$imageName] = $fileInfo->getAbsoluteUrl();
+                                    if ($format === 'urls_with_timestamp') {
+                                        $ret[$imageName] .= '?_' . time();
+                                    }
                                 }
                             } else {
                                 $ret[$imageName] = [];
                                 foreach ($imageInfo as $index => $realImageInfo) {
                                     $fileInfo = FileInfo::fromArray($realImageInfo, $imageConfig, $pkValue);
-                                    if ($format === 'urls') {
-                                        $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteUrl();
-                                    } else {
+                                    if (!$fileInfo->exists()) {
+                                        continue;
+                                    }
+                                    if ($format === 'paths') {
                                         $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteFilePath();
+                                    } else {
+                                        $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteUrl();
+                                        if ($format === 'urls_with_timestamp') {
+                                            $ret[$imageName] .= '?_' . time();
+                                        }
                                     }
                                 }
                             }

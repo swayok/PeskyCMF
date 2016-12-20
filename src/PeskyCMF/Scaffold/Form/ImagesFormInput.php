@@ -99,8 +99,9 @@ class ImagesFormInput extends FormInput {
                 ];
             }
         }
+        $urls = $record->getValue($this->getTableColumn()->getName(), 'urls_with_timestamp');
         return [
-            'urls' => $record->getValue($this->getTableColumn()->getName(), 'urls'),
+            'urls' => $urls,
             'info' => $info
         ];
     }
