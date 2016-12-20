@@ -40,10 +40,10 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             $newFiles = [];
             $infoArrays = [];
             foreach ($normaizledValue as $imageName => $imageInfo) {
-                if (empty($imageInfo['file'])) {
-                    $infoArrays[$imageName] = $imageInfo;
-                } else {
+                if (array_key_exists('file', $imageInfo)) {
                     $newFiles[$imageName] = $imageInfo;
+                } else {
+                    $infoArrays[$imageName] = $imageInfo;
                 }
             }
             $valueContainer->setIsFromDb(false);
@@ -133,14 +133,19 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             }
             /** @var bool|\SplFileInfo $file */
             $file = array_get($value[$imageName], 'file', false);
+            $isUploadedImage = ValidateValue::isUploadedImage($file, true);
             if (
-                !ValidateValue::isUploadedImage($file, true)
+                !$isUploadedImage
                 && !array_get($value[$imageName], 'deleted', false)
             ) {
                 $errors[] = sprintf(
                     RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_IMAGE),
                     $imageName
                 );
+            }
+            if (!$isUploadedImage) {
+                // only file deletion requested
+                continue;
             }
             $image = new \Imagick($file->getRealPath());
             if (!$image->valid() || ($image->getImageMimeType() === 'image/jpeg' && ValidateValue::isCorruptedJpeg($file->getRealPath()))) {
@@ -219,17 +224,20 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     $imagick = new \Imagick($filePath);
                     if (
                         $imagick->getImageWidth() > $imageConfig->getMaxWidth()
-                        && $imagick->resizeImage($imageConfig->getMaxWidth(), 0, $imagick::FILTER_LANCZOS, -1)
+                        && $imagick->resizeImage($imageConfig->getMaxWidth(), 0, $imagick::FILTER_LANCZOS, 1)
                     ) {
-                        $imagick->writeImage($filePath);
+                        $imagick->writeImage();
                     }
                     // update value
                     $value[$imageName] = array_merge(
                         ['info' => (array)array_get($uploadInfo, 'info', [])],
                         $fileInfo->collectImageInfoForDb()
                     );
+                } else {
+                    $value[$imageName] = '';
                 }
             }
+            //throw new \Exception('terminate');
             $valueContainer->removeCustomInfo('new_files');
             $valueContainer->getRecord()
                 ->begin()

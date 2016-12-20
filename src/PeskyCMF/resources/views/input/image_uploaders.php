@@ -10,15 +10,15 @@
 $column = $fieldConfig->getTableColumn();
 $defaultId = $fieldConfig->getDefaultId();
 $dotJsInputName = 'it.' . $fieldConfig->getName();
+$configNameToInputId = [];
 ?>
 
 <div id="<?php echo $defaultId; ?>-container">
     <?php foreach ($column as $configName => $imageConfig): ?>
         <?php
             $inputId = $defaultId . '-' . preg_replace('%[^a-zA-Z0-9]+%', '-', $configName);
+            $configNameToInputId[$configName] = array_merge(['id' => $inputId], $imageConfig->getConfigsArrayForJs());
             $inputName = $fieldConfig->getName() . '[' . $configName . ']';
-            $dotJsImageName = 'it.' . $fieldConfig->getName() . '.urls.' . $configName;
-            $dotJsImageInfoName = 'it.' . $fieldConfig->getName() . '.info.' . $configName;
         ?>
         <div class="section-divider">
             <span><?php echo cmfTransCustom($translationPrefix . '.' . $fieldConfig->getName() . '.' . $configName) ?></span>
@@ -27,49 +27,18 @@ $dotJsInputName = 'it.' . $fieldConfig->getName();
             <input type="file" id="<?php echo $inputId; ?>" data-name="<?php echo $inputName; ?>" class="file-loading" name="<?php echo $inputName; ?>[file]">
             <input type="hidden" id="<?php echo $inputId; ?>-info" name="<?php echo $inputName; ?>[info]" value="{}">
             <input type="hidden" id="<?php echo $inputId; ?>-deleted" name="<?php echo $inputName; ?>[deleted]" value="0">
-            <script type="application/javascript">
-                $("#<?php echo $inputId; ?>").fileinput({
-                    language: '<?php echo app()->getLocale(); ?>',
-                    allowedFileTypes: ['image'],
-                    previewFileType: 'image',
-                    allowedFileExtensions: <?php echo json_encode($imageConfig->getAllowedFileExtensions()); ?>,
-                    minFileCount: <?php echo $imageConfig->getMinFilesCount(); ?>,
-                    <?php if ($imageConfig->getMaxFilesCount() > 0): ?>
-                    maxFileCount: <?php echo $imageConfig->getMaxFilesCount(); ?>,
-                    <?php endif; ?>
-                    validateInitialCount: true,
-                    maxFileSize: <?php echo $imageConfig->getMaxFileSize(); ?>,
-                    browseIcon: '<i class=\"glyphicon glyphicon-picture\"></i>',
-                    showUpload: false,
-                    layoutTemplates: {
-                        main1: "{preview}\n" +
-                        "<div class=\'input-group {class}\'>\n" +
-                        "   <div class=\'input-group-btn\'>\n" +
-                        "       {browse}\n" +
-                        "       {upload}\n" +
-                        "       {remove}\n" +
-                        "   </div>\n" +
-                        "   {caption}\n" +
-                        "</div>"
-                    },
-                    {{? <?php echo $dotJsInputName; ?> && <?php echo $dotJsImageName ?>}}
-                        initialPreview: [
-                            <?php if ($imageConfig->getMaxFilesCount() == 1) : ?>
-                                '{{= <?php echo $dotJsImageName ?> }}'
-                            <?php else: ?>
-                                '{{= <?php echo $dotJsImageName ?>.join(',') }}',
-                            <?php endif; ?>
-                        ],
-                        <?php if ($imageConfig->getMaxFilesCount() == 1) : ?>
-                            initialPreviewConfig: [{{= JSON.stringify(<?php echo $dotJsImageInfoName ?>) }}],
-                        <?php else: ?>
-                            initialPreviewConfig: {{= JSON.stringify(<?php echo $dotJsImageInfoName ?>) }},
-                        <?php endif ?>
-                    {{?}}
-                    overwriteInitial: true,
-                    initialPreviewAsData: true
-                });
-            </script>
         </div>
     <?php endforeach; ?>
 </div>
+
+<script type="application/javascript">
+    $(function () {
+        Utils.requireFiles(['/packages/cmf/js/inputs/cmf.fileuploads.js']).done(function () {
+            var data = {
+                files: {{= JSON.stringify(<?php echo $dotJsInputName ?>) }},
+                configs: <?php echo json_encode($configNameToInputId); ?>
+            };
+            CmfFileUploads.initImageUploaders(data);
+        });
+    });
+</script>

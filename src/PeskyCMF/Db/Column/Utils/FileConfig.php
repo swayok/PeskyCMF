@@ -245,4 +245,17 @@ class FileConfig {
         }
         return $fileName;
     }
+
+    /**
+     * @return array
+     */
+    public function getConfigsArrayForJs() {
+        return [
+            'min_files_count' => $this->getMinFilesCount(),
+            'max_files_count' => $this->getMaxFilesCount(),
+            'max_file_size' => $this->getMaxFileSize(),
+            'allowed_extensions' => $this->getAllowedFileExtensions(),
+            'allowed_mime_types' => $this->getAllowedFileTypes(),
+        ];
+    }
 }

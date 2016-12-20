@@ -79,5 +79,15 @@ class ImageConfig extends FileConfig {
         return parent::setAllowedFileTypes($allowedFileTypes);
     }
 
+    public function getConfigsArrayForJs() {
+        return array_merge(
+            parent::getConfigsArrayForJs(),
+            [
+                'aspect_ratio' => $this->getAspectRatio(),
+                'max_width' => $this->getMaxWidth(),
+            ]
+        );
+    }
+
 
 }

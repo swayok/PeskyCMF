@@ -1,6 +1,7 @@
 var Utils = {
     bodyClass: false,
-    loadedJsFiles: []
+    loadedJsFiles: [],
+    cacheLoadedJsFiles: true
 };
 
 Utils.configureAppLibs = function () {
@@ -80,7 +81,13 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
             if (typeof jsFiles[i] !== 'string') {
                 alert('jsFiles argument in Utils.requireFiles() must contain only strings. Not a string detected in index ' + i);
             }
-            if ($.inArray(jsFiles[i], Utils.loadedJsFiles) >= 0 || $('script[src="' + jsFiles[i] + '"]').length) {
+            if (
+                Utils.cacheLoadedJsFiles
+                && (
+                    $.inArray(jsFiles[i], Utils.loadedJsFiles) >= 0
+                    || $('script[src="' + jsFiles[i] + '"]').length
+                )
+            ) {
                 loadedJsFiles++;
                 if (jsFiles.length === loadedJsFiles) {
                     deferred.resolve();
@@ -93,7 +100,7 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
                     if (jsFiles.length === loadedJsFiles) {
                         deferred.resolve();
                     }
-                    if (this.url) {
+                    if (this.url && Utils.cacheLoadedJsFiles) {
                         Utils.loadedJsFiles.push(this.url.replace(/(\?|&)_=[0-9]+/, ''));
                     }
                 })
@@ -399,7 +406,8 @@ Utils.initDebuggingTools = function () {
             .css({
                 position: 'absolute',
                 top: '0',
-                right: '14px'
+                right: '14px',
+                width: '192px'
             })
             .hide();
         if (
@@ -407,6 +415,7 @@ Utils.initDebuggingTools = function () {
             && (
                 localStorage.getItem('debug-tools-opened')
                 || localStorage.getItem('debug-tools-templates-cache-disabled')
+                || localStorage.getItem('debug-tools-js-files-cache-disabled')
             )
         ) {
             $buttons.show();
@@ -442,6 +451,26 @@ Utils.initDebuggingTools = function () {
                 .text('Tpl cache: ' + labelSuffix);
             if (Modernizr.localstorage) {
                 localStorage.setItem('debug-tools-templates-cache', labelSuffix);
+            }
+        });
+        // js files cache
+        var $disableJsFilesCacheBtn = $('<button type="button" class="btn btn-xs btn-default">JS files cache: on</button>');
+        $buttons.append($disableJsFilesCacheBtn);
+        if (Modernizr.localstorage) {
+            Utils.cacheLoadedJsFiles = localStorage.getItem('debug-tools-js-files-cache') !== 'off';
+        }
+        if (!Utils.cacheLoadedJsFiles) {
+            $disableJsFilesCacheBtn.addClass('btn-danger').removeClass('btn-default').text('JS files cache: off');
+        }
+        $disableJsFilesCacheBtn.on('click', function () {
+            Utils.cacheLoadedJsFiles = !Utils.cacheLoadedJsFiles;
+            var labelSuffix = Utils.cacheLoadedJsFiles ? 'on' : 'off';
+            $disableJsFilesCacheBtn
+                .addClass(Utils.cacheLoadedJsFiles ? 'btn-default' : 'btn-danger')
+                .removeClass(Utils.cacheLoadedJsFiles ? 'btn-danger' : 'btn-default')
+                .text('JS files cache: ' + labelSuffix);
+            if (Modernizr.localstorage) {
+                localStorage.setItem('debug-tools-js-files-cache', labelSuffix);
             }
         });
     }
