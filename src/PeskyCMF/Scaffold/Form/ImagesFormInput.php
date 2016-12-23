@@ -69,21 +69,26 @@ class ImagesFormInput extends FormInput {
         return '';
     }
 
-    public function doDefaultValueConversionByType($value, $type, array $record) {
+    public function doDefaultValueConversionByType($value, $type, array $data) {
+        $ret = [
+            'urls' => [],
+            'info' => []
+        ];
         $value = json_decode($value, true);
-        if (!is_array($value)) {
-            return [];
+        if (!is_array($value) || empty($value)) {
+            return $ret;
         }
-        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord()->fromDbData($record);
+        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
+        $record->fromData($data, !empty($data[$record::getPrimaryKeyColumnName()]));
+
         $paths = $record->getValue($this->getTableColumn()->getName(), 'paths');
-        $info = [];
         foreach ($paths as $imageName => $path) {
             if (is_array($path)) {
-                $info[$imageName] = [];
+                $ret['info'][$imageName] = [];
                 $key = 1;
                 foreach ($path as $filePath) {
                     $file = new File($filePath);
-                    $info[$imageName][] = [
+                    $ret['info'][$imageName][] = [
                         'caption' => $file->getBasename(),
                         'size' => $file->getSize(),
                         'key' => $key
@@ -92,18 +97,15 @@ class ImagesFormInput extends FormInput {
                 }
             } else {
                 $file = new File($path);
-                $info[$imageName] = [
+                $ret['info'][$imageName] = [
                     'caption' => $file->getBasename(),
                     'size' => $file->getSize(),
                     'key' => 1
                 ];
             }
         }
-        $urls = $record->getValue($this->getTableColumn()->getName(), 'urls_with_timestamp');
-        return [
-            'urls' => $urls,
-            'info' => $info
-        ];
+        $ret['urls'] = $record->getValue($this->getTableColumn()->getName(), 'urls_with_timestamp');
+        return $ret;
     }
 
 
