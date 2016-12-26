@@ -66,10 +66,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             base_path('vendor/eonasdan/bootstrap-datetimepicker/build') => public_path('packages/cmf-vendors/bootstrap/datetimepicker'),
             base_path('vendor/nostalgiaz/bootstrap-switch/dist') => public_path('packages/cmf-vendors/bootstrap/switches'),
             base_path('vendor/bootstrap-select/bootstrap-select/dist') => public_path('packages/cmf-vendors/bootstrap/select'),
-            base_path('vendor/vitalets/x-editable/dist/bootstrap3-editable') => public_path('packages/cmf-vendors/bootstrap/x-editale'),
-            base_path('vendor/kartik-v/bootstrap-fileinput/js') => public_path('packages/cmf-vendors/bootstrap/fileinput/js'),
-            base_path('vendor/kartik-v/bootstrap-fileinput/css') => public_path('packages/cmf-vendors/bootstrap/fileinput/css'),
-            base_path('vendor/kartik-v/bootstrap-fileinput/img') => public_path('packages/cmf-vendors/bootstrap/fileinput/img'),
             // font icons
             base_path('vendor/fortawesome/font-awesome/css') => public_path('packages/cmf-vendors/fontions/font-awesome/css'),
             base_path('vendor/fortawesome/font-awesome/fonts') => public_path('packages/cmf-vendors/fontions/font-awesome/fonts'),
@@ -79,9 +75,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             base_path('vendor/components/jquery/jquery.js') => public_path('packages/cmf-vendors/jquery/jquery.js'),
             base_path('vendor/components/jquery/jquery.min.js') => public_path('packages/cmf-vendors/jquery/jquery.min.js'),
             base_path('vendor/components/jquery/jquery.min.map') => public_path('packages/cmf-vendors/jquery/jquery.min.map'),
-            base_path('vendor/bower-asset/jquery/dist/jquery.js') => public_path('packages/cmf-vendors/jquery3/jquery.js'),
-            base_path('vendor/bower-asset/jquery/dist/jquery.min.js') => public_path('packages/cmf-vendors/jquery3/jquery.min.js'),
-            base_path('vendor/bower-asset/jquery/dist/jquery.min.map') => public_path('packages/cmf-vendors/jquery3/jquery.min.map'),
             base_path('vendor/malsup/form/jquery.form.js') => public_path('packages/cmf-vendors/jquery.form.js'),
             base_path('vendor/mistic100/jquery-querybuilder/dist') => public_path('packages/cmf-vendors/db-query-builder'),
             // ckeditor
@@ -92,7 +85,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             base_path('vendor/ckeditor/ckeditor/lang') => public_path('packages/cmf-vendors/ckeditor/lang'),
             base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
             base_path('vendor/ckeditor/ckeditor/skins') => public_path('packages/cmf-vendors/ckeditor/skins'),
-            __DIR__ . '/public/cmf-vendors/ckeditor/config.empty.js' => public_path('packages/cmf-vendors/ckeditor/config.js'),
+//            __DIR__ . '/public/cmf-vendors/ckeditor/config.empty.js' => public_path('packages/cmf-vendors/ckeditor/config.js'),
             // libs
             base_path('vendor/datatables/datatables/media') => public_path('packages/cmf-vendors/datatables'),
             base_path('vendor/grimmlink/toastr/build') => public_path('packages/cmf-vendors/toastr'),
@@ -105,7 +98,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             base_path('vendor/robinherbots/jquery.inputmask/dist/jquery.inputmask.bundle.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
-            base_path('vendor/bower-asset/cropper/dist') => public_path('packages/cmf-vendors/cropperjs'),
 
         ], 'public');
 
