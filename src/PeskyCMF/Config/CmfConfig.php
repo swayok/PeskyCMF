@@ -19,7 +19,7 @@ class CmfConfig extends ConfigsContainer {
         }
     }
 
-    static public function cmf_routes_cofig_files() {
+    static public function cmf_routes_config_files() {
         return [
             __DIR__ . '/cmf.routes.php'
         ];
