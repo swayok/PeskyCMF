@@ -96,6 +96,10 @@ return [
                 'yes' => 'Yes',
                 'no' => 'No'
             ],
+            'file_uploads' => [
+                'add_file' => 'Add file',
+                'add_image' => 'Add image'
+            ],
         ],
         'bulk_edit' => [
             'enabler' => [

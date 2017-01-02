@@ -3,6 +3,7 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Db\Column\ImagesColumn;
+use PeskyCMF\Db\Column\Utils\FileInfo;
 use PeskyORM\ORM\RecordValue;
 use Symfony\Component\HttpFoundation\File\File;
 
@@ -72,39 +73,38 @@ class ImagesFormInput extends FormInput {
     public function doDefaultValueConversionByType($value, $type, array $data) {
         $ret = [
             'urls' => [],
-            'info' => []
+            'preview_info' => [],
+            'files' => []
         ];
-        $value = json_decode($value, true);
+        if (!is_array($value)) {
+            $value = json_decode($value, true);
+        }
         if (!is_array($value) || empty($value)) {
             return $ret;
         }
         $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
         $record->fromData($data, !empty($data[$record::getPrimaryKeyColumnName()]));
 
-        $paths = $record->getValue($this->getTableColumn()->getName(), 'paths');
-        foreach ($paths as $imageName => $path) {
-            if (is_array($path)) {
-                $ret['info'][$imageName] = [];
-                $key = 1;
-                foreach ($path as $filePath) {
-                    $file = new File($filePath);
-                    $ret['info'][$imageName][] = [
-                        'caption' => $file->getBasename(),
-                        'size' => $file->getSize(),
-                        'key' => $key
-                    ];
-                    $key++;
-                }
-            } else {
-                $file = new File($path);
-                $ret['info'][$imageName] = [
-                    'caption' => $file->getBasename(),
-                    'size' => $file->getSize(),
+        $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
+        foreach ($fileInfoArrays as $imageName => $fileInfoArray) {
+            $ret['preview_info'][$imageName] = [];
+            $ret['urls'][$imageName] = [];
+            $ret['files'][$imageName] = [];
+            /** @var FileInfo $fileInfo */
+            foreach ($fileInfoArray as $fileInfo) {
+                $ret['urls'][$imageName][] = $fileInfo->getAbsoluteUrl();
+                $ret['files'] = [
+                    'info' => $fileInfo->getCustomInfo(),
+                    'name' => $fileInfo->getFileName(),
+                    'extension' => $fileInfo->getFileExtension(),
+                ];
+                $ret['preview_info'][$imageName][] = [
+                    'caption' => $fileInfo->getFileNameWithExtension(),
+                    'size' => filesize($fileInfo->getAbsoluteFilePath()),
                     'key' => 1
                 ];
             }
         }
-        $ret['urls'] = $record->getValue($this->getTableColumn()->getName(), 'urls_with_timestamp');
         return $ret;
     }
 

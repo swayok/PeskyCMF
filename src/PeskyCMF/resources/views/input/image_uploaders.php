@@ -23,11 +23,28 @@ $configNameToInputId = [];
         <div class="section-divider">
             <span><?php echo cmfTransCustom($translationPrefix . '.' . $fieldConfig->getName() . '.' . $configName) ?></span>
         </div>
-        <div class="image-upload-input-container">
-            <input type="file" id="<?php echo $inputId; ?>" data-name="<?php echo $inputName; ?>" class="file-loading" name="<?php echo $inputName; ?>[file]">
-            <input type="hidden" id="<?php echo $inputId; ?>-info" name="<?php echo $inputName; ?>[info]" value="{}">
-            <input type="hidden" id="<?php echo $inputId; ?>-deleted" name="<?php echo $inputName; ?>[deleted]" value="0">
-        </div>
+        <script type="text/html" id="<?php echo $inputId ?>-tpl">
+            <div class="image-upload-input-container col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
+                <input type="file" class="file-loading"
+                id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
+                <input type="hidden" value="{{= it.info || '{}' }}"
+                id="<?php echo $inputId; ?>-{{= it.index }}-info" name="<?php echo $inputName; ?>[{{= it.index }}][info]">
+                <input type="hidden" value="0"
+                id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
+                {{? it.info }}
+                    <input type="hidden" value="{{= JSON.stringify(it) }}"
+                    id="<?php echo $inputId; ?>-{{= it.index }}-old-file" name="<?php echo $inputName; ?>[{{= it.index }}][old_file]">
+                {{?}}
+            </div>
+        </script>
+        <div id="<?php echo $inputId ?>-container" class="row"></div>
+        <?php if ($imageConfig->getMaxFilesCount() > 1): ?>
+            <div class="mv15 text-center">
+                <button type="button" class="btn btn-default btn-sm" id="<?php echo $inputId; ?>-add">
+                    <?php echo cmfTransGeneral('.form.field.file_uploads.add_image') ?>
+                </button>
+            </div>
+        <?php endif;?>
     <?php endforeach; ?>
 </div>
 

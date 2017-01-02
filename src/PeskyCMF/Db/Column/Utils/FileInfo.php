@@ -14,9 +14,11 @@ class FileInfo {
     /** @var string */
     protected $fileName;
     /** @var null|int|string */
-    protected $fileNumber;
+    protected $fileSuffix;
     /** @var string */
     protected $fileExtension;
+    /** @var array */
+    protected $customInfo = [];
 
     /**
      * @param array $fileInfo
@@ -26,10 +28,11 @@ class FileInfo {
      */
     static public function fromArray(array $fileInfo, FileConfig $fileConfig, $primaryKeyValue) {
         /** @var FileInfo $obj */
-        $obj = new static($fileConfig, $primaryKeyValue, array_get($fileInfo, 'number', null));
+        $obj = new static($fileConfig, $primaryKeyValue, array_get($fileInfo, 'suffix', null));
         $obj
             ->setFileName(array_get($fileInfo, 'name', null))
-            ->setFileExtension(array_get($fileInfo, 'extension', null));
+            ->setFileExtension(array_get($fileInfo, 'extension', null))
+            ->setCustomInfo(array_get($fileInfo, 'info', null));
         return $obj;
     }
 
@@ -37,11 +40,11 @@ class FileInfo {
      * @param \SplFileInfo $fileInfo
      * @param FileConfig|ImageConfig $fileConfig
      * @param int|string $primaryKeyValue
-     * @param null|int $fileNumber
+     * @param null|int $fileSuffix
      * @return static
      */
-    static public function fromSplFileInfo(\SplFileInfo $fileInfo, FileConfig $fileConfig, $primaryKeyValue, $fileNumber = null) {
-        $obj = new static($fileConfig, $primaryKeyValue, $fileNumber);
+    static public function fromSplFileInfo(\SplFileInfo $fileInfo, FileConfig $fileConfig, $primaryKeyValue, $fileSuffix = null) {
+        $obj = new static($fileConfig, $primaryKeyValue, $fileSuffix);
         $obj->setFileExtension(
             $fileInfo instanceof UploadedFile ? $fileInfo->getClientOriginalExtension() : $fileInfo->getExtension()
         );
@@ -51,19 +54,19 @@ class FileInfo {
     /**
      * @param FileConfig $fileConfig
      * @param int|string $primaryKeyValue
-     * @param null|int $fileNumber
+     * @param null|int $fileSuffix
      */
-    protected function __construct(FileConfig $fileConfig, $primaryKeyValue, $fileNumber = null) {
+    protected function __construct(FileConfig $fileConfig, $primaryKeyValue, $fileSuffix = null) {
         $this->fileConfig = $fileConfig;
         $this->primaryKeyValue = $primaryKeyValue;
-        $this->fileNumber = $fileNumber;
+        $this->fileSuffix = $fileSuffix;
     }
 
     /**
      * @return int|null|string
      */
-    public function getFileNumber() {
-        return $this->fileNumber;
+    public function getFileSuffix() {
+        return $this->fileSuffix;
     }
 
     /**
@@ -72,7 +75,7 @@ class FileInfo {
      */
     public function getFileName() {
         if (!$this->fileName) {
-            $this->fileName = $this->fileConfig->makeNewFileName();
+            $this->fileName = $this->fileConfig->makeNewFileName($this->getFileSuffix());
         }
         return $this->fileName;
     }
@@ -121,7 +124,38 @@ class FileInfo {
     }
 
     /**
+     * @return string
+     * @throws \UnexpectedValueException
+     */
+    public function getAbsolutePathToModifiedImagesFolder() {
+        return $this->fileConfig->getAbsolutePathToFileFolder($this->primaryKeyValue) . $this->getFileName();
+    }
+
+    /**
+     * @param string|array $customInfo
+     * @return $this
+     */
+    public function setCustomInfo($customInfo) {
+        if (!is_array($customInfo)) {
+            $customInfo = json_decode($customInfo, true);
+            if (!is_array($customInfo)) {
+                $customInfo = [];
+            }
+        }
+        $this->customInfo = $customInfo;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCustomInfo() {
+        return $this->customInfo;
+    }
+
+    /**
      * @return bool
+     * @throws \UnexpectedValueException
      */
     public function exists() {
         return File::exist($this->getAbsoluteFilePath());
@@ -146,6 +180,7 @@ class FileInfo {
     /**
      * @param ImageModificationConfig $modificationConfig
      * @return FileInfo;
+     * @throws \UnexpectedValueException
      * @throws \BadMethodCallException
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException
      */
@@ -154,11 +189,21 @@ class FileInfo {
             throw new \BadMethodCallException('Cannot modify files except images');
         }
         return FileInfo::fromSplFileInfo(
-            $modificationConfig->applyModificationTo($this->getAbsoluteFilePath()),
+            $modificationConfig->applyModificationTo(
+                $this->getAbsoluteFilePath(),
+                $this->getAbsolutePathToModifiedImagesFolder()
+            ),
             $this->fileConfig,
             $this->primaryKeyValue,
-            $this->getFileNumber()
+            null
         );
+    }
+
+    /**
+     * @return \SplFileInfo
+     */
+    public function getSplFileInfo() {
+        return new \SplFileInfo($this->getAbsoluteFilePath());
     }
 
     /**
@@ -167,9 +212,11 @@ class FileInfo {
      */
     public function collectImageInfoForDb() {
         return [
-            'name' => $this->getFileName(),
+            'config_name' => $this->fileConfig->getName(),
+            'name' => $this->getFileName(), //< file name with suffix but without extension
             'extension' => $this->getFileExtension(),
-            'number' => $this->getFileNumber()
+            'suffix' => $this->getFileSuffix(),
+            'info' => $this->getCustomInfo()
         ];
     }
 

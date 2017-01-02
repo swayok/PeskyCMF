@@ -95,6 +95,10 @@ return [
                 'yes' => 'Да',
                 'no' => 'Нет'
             ],
+            'file_uploads' => [
+                'add_file' => 'Добавить файл',
+                'add_image' => 'Добавить картинку'
+            ],
         ],
         'bulk_edit' => [
             'enabler' => [
@@ -116,7 +120,7 @@ return [
                 'yes' => 'Да',
                 'no' => 'Нет'
             ],
-            'no_relation' => 'Связь отсутствует'
+            'no_relation' => 'Связь отсутствует',
         ],
     ],
     'action' => [

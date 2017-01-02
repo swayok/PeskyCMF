@@ -187,7 +187,7 @@ class FileConfig {
      * @return $this
      */
     public function setMaxFilesCount($count) {
-        $this->maxFilesCount = max(0, (int)$count);
+        $this->maxFilesCount = max(1, (int)$count);
         return $this;
     }
 
@@ -212,8 +212,8 @@ class FileConfig {
      */
     protected function getFileNameBuilder() {
         if (!$this->fileNameBuilder) {
-            $this->fileNameBuilder = function (FileConfig $fileConfig, $fileNumber = null) {
-                return $fileConfig->getName() . (string)$fileNumber;
+            $this->fileNameBuilder = function (FileConfig $fileConfig, $fileSuffix = null) {
+                return $fileConfig->getName() . (string)$fileSuffix;
             };
         }
         return $this->fileNameBuilder;
@@ -232,12 +232,12 @@ class FileConfig {
     }
 
     /**
-     * @param null|int|string $fileNumber
+     * @param null|int|string $fileSuffix
      * @return string
      * @throws \UnexpectedValueException
      */
-    public function makeNewFileName($fileNumber = null) {
-        $fileName = call_user_func($this->getFileNameBuilder(), $this, $fileNumber);
+    public function makeNewFileName($fileSuffix = null) {
+        $fileName = call_user_func($this->getFileNameBuilder(), $this, $fileSuffix);
         if (empty($fileName) || !is_string($fileName)) {
             throw new \UnexpectedValueException(
                 'Value returned from FileConfig->fileNameBuilder must be a not empty string'

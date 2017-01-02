@@ -39,64 +39,94 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
         if (count($normaizledValue)) {
             $newFiles = [];
             $infoArrays = [];
-            foreach ($normaizledValue as $imageName => $imageInfo) {
-                if (array_key_exists('file', $imageInfo)) {
-                    $newFiles[$imageName] = $imageInfo;
-                } else {
-                    $infoArrays[$imageName] = $imageInfo;
+            foreach ($normaizledValue as $imageName => $images) {
+                foreach ($images as $idx => $imageInfo) {
+                    if (array_key_exists('file', $imageInfo)) {
+                        if (!array_key_exists($imageName, $newFiles)) {
+                            $newFiles[$imageName] = [];
+                        }
+                        $newFiles[$imageName][$idx] = $imageInfo;
+                    } else {
+                        if (!array_key_exists($imageName, $infoArrays)) {
+                            $infoArrays[$imageName] = [];
+                        }
+                        $infoArrays[$imageName][$idx] = $imageInfo;
+                    }
                 }
             }
             $valueContainer->setIsFromDb(false);
-            if (!empty($newFiles)) {
-                $valueContainer->setCustomInfo(['new_files' => $newFiles]);
-            }
             if (!empty($infoArrays)) {
                 if ($valueContainer->hasValue()) {
                     $oldValue = json_decode($valueContainer->getValue(), true);
                     if (is_array($oldValue)) {
-                        $infoArrays = array_merge($oldValue, $infoArrays);
+                        $infoArrays = array_merge(static::valueNormalizer($oldValue, false, $column), $infoArrays);
                     }
                 }
                 $json = json_encode($infoArrays, JSON_UNESCAPED_UNICODE);
                 $valueContainer->setRawValue($infoArrays, $json, false)->setValidValue($json, $infoArrays);
             }
+            if (!empty($newFiles)) {
+                $valueContainer->setDataForSavingExtender($newFiles);
+            }
         }
         return $valueContainer;
     }
 
+    /**
+     * @param mixed $value
+     * @param bool $isFromDb
+     * @param Column|ImagesColumn $column
+     * @return array
+     */
     static public function valueNormalizer($value, $isFromDb, Column $column) {
-        if ($isFromDb) {
-            return parent::valueNormalizer($value, $isFromDb, $column);
-        } else if (is_array($value)) {
-            $imagesNames = [];
-            /** @var ImagesColumn $column */
-            foreach ($column as $imageName => $imageConfig) {
-                // todo: implement multifile
-                $imagesNames[] = $imageName;
-                if (empty($value[$imageName])) {
-                    unset($value[$imageName]);
-                    continue;
-                }
-                if ($value[$imageName] instanceof \SplFileInfo) {
-                    $value[$imageName] = ['file' => $value[$imageName]];
-                }
-                if (!is_array($value[$imageName])) {
-                    unset($value[$imageName]);
-                } else if (static::isFileInfoArray($value[$imageName])) {
-                    // not an upload but file info
-                    continue;
-                } else if (
-                    empty($value[$imageName]['file'])
-                    && !(bool)array_get($value[$imageName], 'deleted', false)
-                ) {
-                    unset($value[$imageName]);
-                } else {
-                    $value[$imageName]['deleted'] = (bool)array_get($value[$imageName], 'deleted', false);
-                }
-            }
-            return array_intersect_key($value, array_flip($imagesNames));
+        if ($isFromDb && !is_array($value)) {
+            $value = json_decode($value, true);
         }
-        return $value;
+        if (!is_array($value)) {
+            return [];
+        }
+        $imagesNames = [];
+        /** @var ImagesColumn $column */
+        /** @var ImageConfig $imageConfig */
+        foreach ($column as $imageName => $imageConfig) {
+            $imagesNames[] = $imageName;
+            if (empty($value[$imageName])) {
+                unset($value[$imageName]);
+                continue;
+            }
+            if ($value[$imageName] instanceof \SplFileInfo) {
+                $value[$imageName] = [['file' => $value[$imageName]]];
+            }
+            if (!is_array($value[$imageName])) {
+                unset($value[$imageName]);
+            }
+            if (static::isFileInfoArray($value[$imageName])) {
+                // not an upload but file info
+                $value[$imageName] = [$value[$imageName]];
+                continue;
+            } else {
+                if (array_has($value[$imageName], 'file') || array_has($value[$imageName], 'deleted')) {
+                    // normalize uploaded file info to be indexed array with file uploads inside
+                    $value[$imageName] = [$value[$imageName]];
+                }
+                $normailzedData = [];
+                foreach ($value[$imageName] as $idx => $fileUploadInfo) {
+                    if (
+                        !is_int($idx)
+                        || (
+                            empty($fileUploadInfo['file'])
+                            && !(bool)array_get($fileUploadInfo, 'deleted', false)
+                        )
+                    ) {
+                        continue;
+                    }
+                    $fileUploadInfo['deleted'] = (bool)array_get($fileUploadInfo, 'deleted', false);
+                    $normailzedData[$idx] = $fileUploadInfo;
+                }
+                $value[$imageName] = $normailzedData;
+            }
+        }
+        return array_intersect_key($value, array_flip($imagesNames));
     }
 
 
@@ -127,45 +157,46 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             if (!array_key_exists($imageName, $value)) {
                 continue;
             }
-            // todo: implement multifile
-            if (static::isFileInfoArray($value[$imageName])) {
-                continue;
-            }
-            /** @var bool|\SplFileInfo $file */
-            $file = array_get($value[$imageName], 'file', false);
-            $isUploadedImage = ValidateValue::isUploadedImage($file, true);
-            if (
-                !$isUploadedImage
-                && !array_get($value[$imageName], 'deleted', false)
-            ) {
-                $errors[] = sprintf(
-                    RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_IMAGE),
-                    $imageName
-                );
-            }
-            if (!$isUploadedImage) {
-                // only file deletion requested
-                continue;
-            }
-            $image = new \Imagick($file->getRealPath());
-            if (!$image->valid() || ($image->getImageMimeType() === 'image/jpeg' && ValidateValue::isCorruptedJpeg($file->getRealPath()))) {
-                $errors[] = sprintf(
-                    RecordValueHelpers::getErrorMessage($localizations, $column::FILE_IS_NOT_A_VALID_IMAGE),
-                    $imageName
-                );
-            } else if (!in_array($image->getImageMimeType(), $imageConfig->getAllowedFileTypes(), true)) {
-                $errors[] = sprintf(
-                    RecordValueHelpers::getErrorMessage($localizations, $column::IMAGE_TYPE_IS_NOT_ALLOWED),
-                    $image->getImageMimeType(),
-                    $imageName,
-                    implode(', ', $imageConfig->getAllowedFileTypes())
-                );
-            } else if ($file->getSize() / 1024 > $imageConfig->getMaxFileSize()) {
-                $errors[] = sprintf(
-                    RecordValueHelpers::getErrorMessage($localizations, $column::FILE_SIZE_IS_TOO_LARGE),
-                    $imageName,
-                    $imageConfig->getMaxFileSize()
-                );
+            foreach ($value[$imageName] as $idx => $fileUploadOrFileInfo) {
+                if (static::isFileInfoArray($fileUploadOrFileInfo)) {
+                    continue;
+                }
+                /** @var bool|\SplFileInfo $file */
+                $file = array_get($fileUploadOrFileInfo, 'file', false);
+                $isUploadedImage = ValidateValue::isUploadedImage($file, true);
+                if (
+                    !$isUploadedImage
+                    && !array_get($fileUploadOrFileInfo, 'deleted', false)
+                ) {
+                    $errors[$idx] = sprintf(
+                        RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_IMAGE),
+                        $imageName
+                    );
+                }
+                if (!$isUploadedImage) {
+                    // only file deletion requested
+                    continue;
+                }
+                $image = new \Imagick($file->getRealPath());
+                if (!$image->valid() || ($image->getImageMimeType() === 'image/jpeg' && ValidateValue::isCorruptedJpeg($file->getRealPath()))) {
+                    $errors[$idx] = sprintf(
+                        RecordValueHelpers::getErrorMessage($localizations, $column::FILE_IS_NOT_A_VALID_IMAGE),
+                        $imageName
+                    );
+                } else if (!in_array($image->getImageMimeType(), $imageConfig->getAllowedFileTypes(), true)) {
+                    $errors[$idx] = sprintf(
+                        RecordValueHelpers::getErrorMessage($localizations, $column::IMAGE_TYPE_IS_NOT_ALLOWED),
+                        $image->getImageMimeType(),
+                        $imageName,
+                        implode(', ', $imageConfig->getAllowedFileTypes())
+                    );
+                } else if ($file->getSize() / 1024 > $imageConfig->getMaxFileSize()) {
+                    $errors[$idx] = sprintf(
+                        RecordValueHelpers::getErrorMessage($localizations, $column::FILE_SIZE_IS_TOO_LARGE),
+                        $imageName,
+                        $imageConfig->getMaxFileSize()
+                    );
+                }
             }
         }
         return $errors;
@@ -198,43 +229,56 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
      */
     static public function valueSavingExtender(RecordValue $valueContainer, $isUpdate, array $savedData) {
         /** @var array $newFiles */
-        $newFiles = $valueContainer->getCustomInfo('new_files', []);
+        $newFiles = $valueContainer->pullDataForSavingExtender();
         /** @var ImagesColumn $column */
         $column = $valueContainer->getColumn();
         $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
+        $baseSuffix = time();
         if (!empty($newFiles)) {
             $value = $valueContainer->getRecord()->getValue($valueContainer->getColumn()->getName(), 'array');
-            foreach ($newFiles as $imageName => $uploadInfo) {
-                // todo: implement multifile
+            foreach ($newFiles as $imageName => $fileUploads) {
                 $imageConfig = $column->getImageConfiguration($imageName);
                 $dir = $imageConfig->getAbsolutePathToFileFolder($pkValue);
-                \File::cleanDirectory($dir); //< todo: for multiple files - delete file and subdirectory with same name as file without extension
-                $file = array_get($uploadInfo, 'file', false);
-                if ($file) {
-                    $fileInfo = FileInfo::fromSplFileInfo($file, $imageConfig, $pkValue);
-                    // save not modified file to $dir
-                    if ($file instanceof UploadedFile) {
-                        $file->move($dir, $fileInfo->getFileNameWithExtension());
-                    } else {
-                        /** @var \SplFileInfo $file */
-                        \File::copy($file->getRealPath(), $dir . $fileInfo->getFileNameWithExtension());
-                    }
-                    // modify image size if needed
-                    $filePath = $fileInfo->getAbsoluteFilePath();
-                    $imagick = new \Imagick($filePath);
+                if ($imageConfig->getMaxFilesCount() === 1) {
+                    \File::cleanDirectory($dir);
+                }
+                $filesSaved = 0;
+                foreach ($fileUploads as $idx => $uploadInfo) {
                     if (
-                        $imagick->getImageWidth() > $imageConfig->getMaxWidth()
-                        && $imagick->resizeImage($imageConfig->getMaxWidth(), 0, $imagick::FILTER_LANCZOS, 1)
+                        $imageConfig->getMaxFilesCount() > 1
+                        && array_has($uploadInfo, 'old_file')
+                        && static::isFileInfoArray($uploadInfo['old_file'])
                     ) {
-                        $imagick->writeImage();
+                        $existingFileInfo = FileInfo::fromArray($uploadInfo['old_file'], $imageConfig, $pkValue);
+                        \File::delete($existingFileInfo->getAbsoluteFilePath());
+                        \File::cleanDirectory($existingFileInfo->getAbsolutePathToModifiedImagesFolder());
                     }
-                    // update value
-                    $value[$imageName] = array_merge(
-                        ['info' => (array)array_get($uploadInfo, 'info', [])],
-                        $fileInfo->collectImageInfoForDb()
-                    );
-                } else {
-                    $value[$imageName] = '';
+                    $file = array_get($uploadInfo, 'file', false);
+                    if ($file) {
+                        $fileInfo = FileInfo::fromSplFileInfo($file, $imageConfig, $pkValue, $baseSuffix + $filesSaved);
+                        $filesSaved++;
+                        // save not modified file to $dir
+                        if ($file instanceof UploadedFile) {
+                            $file->move($dir, $fileInfo->getFileNameWithExtension());
+                        } else {
+                            /** @var \SplFileInfo $file */
+                            \File::copy($file->getRealPath(), $dir . $fileInfo->getFileNameWithExtension());
+                        }
+                        // modify image size if needed
+                        $filePath = $fileInfo->getAbsoluteFilePath();
+                        $imagick = new \Imagick($filePath);
+                        if (
+                            $imagick->getImageWidth() > $imageConfig->getMaxWidth()
+                            && $imagick->resizeImage($imageConfig->getMaxWidth(), 0, $imagick::FILTER_LANCZOS, 1)
+                        ) {
+                            $imagick->writeImage();
+                        }
+                        // update value
+                        $fileInfo->setCustomInfo(array_get($uploadInfo, 'info', []));
+                        $value[$imageName][$idx] = $fileInfo->collectImageInfoForDb();
+                    } else {
+                        $value[$imageName][$idx] = '';
+                    }
                 }
             }
             //throw new \Exception('terminate');
@@ -292,21 +336,30 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     $value = $record->getValue($column->getName(), 'array');
                     $pkValue = $record->getPrimaryKeyValue();
                     $imageConfig = $column->getImageConfiguration($format);
-                    if ($imageConfig->getMaxFilesCount() > 1) {
-                        $ret = [];
-                        if (!empty($value[$format]) && is_array($value[$format])) {
-                            foreach ($value[$format] as $imageInfoArray) {
-                                if (static::isFileInfoArray($imageInfoArray)) {
-                                    $imageInfo = FileInfo::fromArray($imageInfoArray, $imageConfig, $pkValue);
-                                    $ret[$imageInfo->getFileNumber()] = $imageInfo;
+                    $ret = [];
+                    if (!empty($value[$format]) && is_array($value[$format])) {
+                        foreach ($value[$format] as $imageInfoArray) {
+                            if (static::isFileInfoArray($imageInfoArray)) {
+                                $imageInfo = FileInfo::fromArray($imageInfoArray, $imageConfig, $pkValue);
+                                if ($imageInfo->exists()) {
+                                    $ret[] = $imageInfo;
                                 }
                             }
                         }
-                        return $ret;
-                    } else {
-                        $fileInfoArray = static::isFileInfoArray($value[$format]) ? $value[$format] : [];
-                        return FileInfo::fromArray($fileInfoArray, $imageConfig, $pkValue);
                     }
+                    return $ret;
+                },
+                true
+            );
+        } else if ($format === 'file_info_arrays') {
+            return $valueContainer->getCustomInfo(
+                'file_info:all',
+                function () use ($valueContainer, $column) {
+                    $ret = [];
+                    foreach ($column as $imageConfig) {
+                        $ret[$imageConfig->getName()] = static::valueFormatter($valueContainer, $imageConfig->getName());
+                    }
+                    return $ret;
                 },
                 true
             );
@@ -318,32 +371,19 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
                     $ret = [];
                     foreach ($value as $imageName => $imageInfo) {
-                        if (is_array($imageInfo) && static::isFileInfoArray($imageInfo)) {
+                        if (is_array($imageInfo)) {
                             $imageConfig = $column->getImageConfiguration($imageName);
-                            if ($imageConfig->getMaxFilesCount() === 1) {
-                                $fileInfo = FileInfo::fromArray($imageInfo, $imageConfig, $pkValue);
-                                if (!$fileInfo->exists()) {
-                                    continue;
-                                }
-                                if ($format === 'paths') {
-                                    $ret[$imageName] = $fileInfo->getAbsoluteFilePath();
-                                } else {
-                                    $ret[$imageName] = $fileInfo->getAbsoluteUrl();
-                                    if ($format === 'urls_with_timestamp') {
-                                        $ret[$imageName] .= '?_' . time();
-                                    }
-                                }
-                            } else {
-                                $ret[$imageName] = [];
-                                foreach ($imageInfo as $index => $realImageInfo) {
+                            $ret[$imageName] = [];
+                            foreach ($imageInfo as $realImageInfo) {
+                                if (static::isFileInfoArray($realImageInfo)) {
                                     $fileInfo = FileInfo::fromArray($realImageInfo, $imageConfig, $pkValue);
                                     if (!$fileInfo->exists()) {
                                         continue;
                                     }
                                     if ($format === 'paths') {
-                                        $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteFilePath();
+                                        $ret[$imageName][$fileInfo->getFileSuffix()] = $fileInfo->getAbsoluteFilePath();
                                     } else {
-                                        $ret[$imageName][$fileInfo->getFileNumber()] = $fileInfo->getAbsoluteUrl();
+                                        $ret[$imageName][$fileInfo->getFileSuffix()] = $fileInfo->getAbsoluteUrl();
                                         if ($format === 'urls_with_timestamp') {
                                             $ret[$imageName] .= '?_' . time();
                                         }

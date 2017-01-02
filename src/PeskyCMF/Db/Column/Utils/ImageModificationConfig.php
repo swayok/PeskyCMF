@@ -232,15 +232,17 @@ class ImageModificationConfig {
 
     /**
      * @param string $absoluteFilePath
+     * @param string $modifiedImagesFolder
      * @return File
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException
      */
-    public function applyModificationTo($absoluteFilePath) {
+    public function applyModificationTo($absoluteFilePath, $modifiedImagesFolder) {
         $originalFile = new File($absoluteFilePath);
-        $baseFileName = preg_replace('%\.' . $originalFile->getExtension() . '$%i', '', $originalFile->getFilename());
         $newFileExt = $this->getImageType() === null ? $originalFile->getExtension() : static::$typeToExt[$this->getImageType()];
+        $baseFileName = preg_replace('%\.' . $originalFile->getExtension() . '$%i', '', $originalFile->getFilename());
+        $newFileName = $baseFileName . '-' . $this->getModificationName();
         $newFile = new File(
-            $originalFile->getPath() . DIRECTORY_SEPARATOR . $baseFileName . DIRECTORY_SEPARATOR . $this->getModificationName() . '.' . $newFileExt,
+            rtrim($modifiedImagesFolder. '/\\ ') . DIRECTORY_SEPARATOR . $newFileName . '.' . $newFileExt,
             false
         );
         // todo: implement $originalFile modification and store result to $newFile
