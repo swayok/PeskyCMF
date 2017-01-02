@@ -57,7 +57,10 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             $valueContainer->setIsFromDb(false);
             if (!empty($infoArrays)) {
                 if ($valueContainer->hasValue()) {
-                    $oldValue = json_decode($valueContainer->getValue(), true);
+                    $oldValue = $valueContainer->getValue();
+                    if (!is_array($oldValue)) {
+                        $oldValue = json_decode($oldValue, true);
+                    }
                     if (is_array($oldValue)) {
                         $infoArrays = array_merge(static::valueNormalizer($oldValue, false, $column), $infoArrays);
                     }
@@ -111,7 +114,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 }
                 $normailzedData = [];
                 foreach ($value[$imageName] as $idx => $fileUploadInfo) {
-                    if (
+                    if (static::isFileInfoArray($fileUploadInfo)) {
+                        $normailzedData[$idx] = $fileUploadInfo;
+                    } else if (
                         !is_int($idx)
                         || (
                             empty($fileUploadInfo['file'])
@@ -143,6 +148,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
      * @throws \BadMethodCallException
      */
     static public function valueValidator($value, $isFromDb, Column $column) {
+        if ($value instanceof RecordValue) {
+            $value = $value->getValue();
+        }
         if ($isFromDb || is_string($value)) {
             return parent::valueValidator($value, $isFromDb, $column);
         }
@@ -247,14 +255,15 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     if (
                         $imageConfig->getMaxFilesCount() > 1
                         && array_has($uploadInfo, 'old_file')
-                        && static::isFileInfoArray($uploadInfo['old_file'])
+                        && is_array($oldFile = json_decode($uploadInfo['old_file'], true))
+                        && static::isFileInfoArray($oldFile)
                     ) {
-                        $existingFileInfo = FileInfo::fromArray($uploadInfo['old_file'], $imageConfig, $pkValue);
+                        $existingFileInfo = FileInfo::fromArray($oldFile, $imageConfig, $pkValue);
                         \File::delete($existingFileInfo->getAbsoluteFilePath());
                         \File::cleanDirectory($existingFileInfo->getAbsolutePathToModifiedImagesFolder());
                     }
                     $file = array_get($uploadInfo, 'file', false);
-                    if ($file) {
+                    if (!empty($file)) {
                         $fileInfo = FileInfo::fromSplFileInfo($file, $imageConfig, $pkValue, $baseSuffix + $filesSaved);
                         $filesSaved++;
                         // save not modified file to $dir
@@ -277,13 +286,18 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                         $fileInfo->setCustomInfo(array_get($uploadInfo, 'info', []));
                         $value[$imageName][$idx] = $fileInfo->collectImageInfoForDb();
                     } else {
-                        $value[$imageName][$idx] = '';
+                        unset($value[$imageName][$idx]);
                     }
+                }
+                if (empty($value[$imageName])) {
+                    \File::cleanDirectory($dir);
+                    unset($value[$imageName]);
                 }
             }
             //throw new \Exception('terminate');
             $valueContainer->removeCustomInfo('new_files');
             $valueContainer->getRecord()
+                ->unsetValue($valueContainer->getColumn()) //< to avoid merging
                 ->begin()
                 ->updateValue($valueContainer->getColumn(), $value, false)
                 ->commit();

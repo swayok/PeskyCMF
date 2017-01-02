@@ -24,7 +24,7 @@ $configNameToInputId = [];
             <span><?php echo cmfTransCustom($translationPrefix . '.' . $fieldConfig->getName() . '.' . $configName) ?></span>
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
-            <div class="image-upload-input-container col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
+            <div class="image-upload-input-container mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
                 <input type="file" class="file-loading"
                 id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
                 <input type="hidden" value="{{= it.info || '{}' }}"
@@ -32,7 +32,7 @@ $configNameToInputId = [];
                 <input type="hidden" value="0"
                 id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
                 {{? it.info }}
-                    <input type="hidden" value="{{= JSON.stringify(it) }}"
+                    <input type="hidden" value="{{! JSON.stringify(it) }}"
                     id="<?php echo $inputId; ?>-{{= it.index }}-old-file" name="<?php echo $inputName; ?>[{{= it.index }}][old_file]">
                 {{?}}
             </div>

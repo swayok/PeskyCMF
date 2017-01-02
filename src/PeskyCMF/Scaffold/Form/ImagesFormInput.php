@@ -87,13 +87,16 @@ class ImagesFormInput extends FormInput {
 
         $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
         foreach ($fileInfoArrays as $imageName => $fileInfoArray) {
+            if (empty($fileInfoArray)) {
+                continue;
+            }
             $ret['preview_info'][$imageName] = [];
             $ret['urls'][$imageName] = [];
             $ret['files'][$imageName] = [];
             /** @var FileInfo $fileInfo */
             foreach ($fileInfoArray as $fileInfo) {
                 $ret['urls'][$imageName][] = $fileInfo->getAbsoluteUrl();
-                $ret['files'] = [
+                $ret['files'][$imageName][] = [
                     'info' => $fileInfo->getCustomInfo(),
                     'name' => $fileInfo->getFileName(),
                     'extension' => $fileInfo->getFileExtension(),
