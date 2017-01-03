@@ -259,6 +259,17 @@ form .error-text {
   padding: 1px 5px 1px 5px;
   text-align: center;
 }
+form .nav-tabs li {
+  -webkit-transition: background-color 0.2s linear;
+  -moz-transition: background-color 0.2s linear;
+  -o-transition: background-color 0.2s linear;
+  transition: background-color 0.2s linear;
+}
+form .nav-tabs li.has-error,
+form .nav-tabs li.active.has-error a,
+form .nav-tabs li a.has-error {
+  background-color: #f2dede !important;
+}
 form .bulk-edit-form-input-container.checkbox-switch .bulk-edit-form-input-enabler {
   padding-top: 6px;
 }

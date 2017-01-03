@@ -186,6 +186,14 @@ FormHelper.showErrorForInput = function ($form, inputName, message) {
             }
         }
         $errorEl.html(message).slideDown(FormHelper.messageAnimDurationMs);
+        // mark current tab that it has an error inside
+        var $tabs = $form.find('.nav-tabs');
+        if ($tabs.length) {
+            var tabId = $container.closest('.tab-pane').attr('id');
+            if (tabId) {
+                $tabs.find('a[href="#' + tabId + '"]').parent('li').addClass('has-error');
+            }
+        }
     }
 };
 

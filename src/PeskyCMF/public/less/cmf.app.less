@@ -280,6 +280,18 @@ form {
         text-align: center;
     }
 
+    .nav-tabs {
+        li {
+            .transition(background-color 0.2s linear);
+
+            &.has-error,
+            &.active.has-error a,
+            a.has-error {
+                background-color: #f2dede !important;
+            }
+        }
+    }
+
     .bulk-edit-form-input-container {
 
         &.checkbox-switch {
