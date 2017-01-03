@@ -33,6 +33,11 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /** @var bool */
     protected $hasOptionsLoader = null;
+    /**
+     * Validators provided by FormImput->getValidators()
+     * @var array
+     */
+    protected $presetValidators = [];
     /** @var \Closure */
     protected $validators;
     /** @var \Closure */
@@ -224,6 +229,13 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
         parent::addValueViewer($name, $viewer);
+        if (!$viewer) {
+            $viewer = static::getValueViewer($name);
+        }
+        $validators = $viewer->getValidators();
+        if (!empty($validators)) {
+            $this->presetValidators = array_merge($validators, $this->presetValidators);
+        }
         if ($this->currentInputsGroup === null) {
             $this->newInputsGroup('');
         }
@@ -522,16 +534,10 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function getValidatorsForEdit() {
         return array_merge(
+            $this->presetValidators,
             $this->validators ? call_user_func($this->validators) : [],
             $this->validatorsForCreate ? call_user_func($this->validatorsForEdit) : []
         );
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasValidatorsForEdit() {
-        return !empty($this->validatorsForEdit);
     }
 
     /**
@@ -548,16 +554,10 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function getValidatorsForCreate() {
         return array_merge(
+            $this->presetValidators,
             $this->validators ? call_user_func($this->validators) : [],
             $this->validatorsForCreate ? call_user_func($this->validatorsForCreate) : []
         );
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasValidatorsForCreate() {
-        return !empty($this->validatorsForCreate);
     }
 
     /**

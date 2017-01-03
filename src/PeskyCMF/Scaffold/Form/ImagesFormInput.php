@@ -4,8 +4,6 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyCMF\Db\Column\Utils\FileInfo;
-use PeskyORM\ORM\RecordValue;
-use Symfony\Component\HttpFoundation\File\File;
 
 class ImagesFormInput extends FormInput {
 
@@ -109,6 +107,30 @@ class ImagesFormInput extends FormInput {
             }
         }
         return $ret;
+    }
+
+    public function getValidators() {
+        /** @var ImagesColumn $column */
+        $column = $this->getTableColumn();
+        $validators = [];
+        foreach ($column as $imageConfig) {
+            $baseName = $this->getName() . '.' . $imageConfig->getName();
+            $isRequired = $imageConfig->getMinFilesCount() > 0
+                ? 'required|array|min:' . $imageConfig->getMinFilesCount()
+                : 'array';
+            $validators[$baseName] = $isRequired . '|max:' . $imageConfig->getMaxFilesCount();
+            $commonValidators = 'image|max:' . $imageConfig->getMaxFileSize()
+                . '|mimetypes:' . implode(',', $imageConfig->getAllowedFileTypes());
+            for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++) {
+                if ($imageConfig->getMinFilesCount() > $i) {
+                    $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.old_file|{$commonValidators}";
+                    $validators["{$baseName}.{$i}.old_file"] = "required_without:{$baseName}.{$i}.file|{$commonValidators}";
+                } else {
+                    $validators["{$baseName}.{$i}.file"] = $commonValidators;
+                }
+            }
+        }
+        return $validators;
     }
 
 

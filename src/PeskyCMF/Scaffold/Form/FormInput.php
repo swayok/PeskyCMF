@@ -212,7 +212,7 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
-     * @param string|array $tooltip - array: array of strings. If processed by getFormattedTooltip()- it will be
+     * @param string|array $tooltip - array: array of strings. If processed by getFormattedTooltip() - it will be
      *      converted to string where each element of array starts with new line (<br>)
      * @return $this
      */
@@ -226,6 +226,13 @@ class FormInput extends RenderableValueViewer {
      */
     public function hasTooltip() {
         return !empty($this->tooltip);
+    }
+
+    /**
+     * @return array
+     */
+    public function getValidators() {
+        return [];
     }
 
 }
