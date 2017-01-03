@@ -115,10 +115,8 @@ class ImagesFormInput extends FormInput {
         $validators = [];
         foreach ($column as $imageConfig) {
             $baseName = $this->getName() . '.' . $imageConfig->getName();
-            $isRequired = $imageConfig->getMinFilesCount() > 0
-                ? 'required|array|min:' . $imageConfig->getMinFilesCount()
-                : 'array';
-            $validators[$baseName] = $isRequired . '|max:' . $imageConfig->getMaxFilesCount();
+            $isRequired = $imageConfig->getMinFilesCount() > 0 ? 'required|' : '';
+            $validators[$baseName] = $isRequired . 'array|max:' . $imageConfig->getMaxFilesCount();
             $commonValidators = 'image|max:' . $imageConfig->getMaxFileSize()
                 . '|mimetypes:' . implode(',', $imageConfig->getAllowedFileTypes());
             for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++) {
@@ -126,9 +124,10 @@ class ImagesFormInput extends FormInput {
                     $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.old_file|{$commonValidators}";
                     $validators["{$baseName}.{$i}.old_file"] = "required_without:{$baseName}.{$i}.file|{$commonValidators}";
                 } else {
-                    $validators["{$baseName}.{$i}.file"] = $commonValidators;
+                    //$validators["{$baseName}.{$i}.file"] = $commonValidators;
                 }
             }
+            $validators["{$baseName}.*.file"] = $commonValidators;
         }
         return $validators;
     }

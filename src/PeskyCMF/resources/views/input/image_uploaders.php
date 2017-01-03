@@ -24,7 +24,7 @@ $configNameToInputId = [];
             <span><?php echo cmfTransCustom($translationPrefix . '.' . $fieldConfig->getName() . '.' . $configName) ?></span>
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
-            <div class="image-upload-input-container mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
+            <div class="image-upload-input-container form-group mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
                 <?php // todo: add error handler feature ?>
                 <input type="file" class="file-loading"
                 id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
@@ -39,8 +39,10 @@ $configNameToInputId = [];
             </div>
         </script>
         <div id="<?php echo $inputId ?>-container" class="row">
-            <?php // todo: add error handler feature ?>
-            <input type="hidden" name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>">
+
+        </div>
+        <div class="form-group">
+            <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>">
         </div>
         <?php if ($imageConfig->getMaxFilesCount() > 1): ?>
             <div class="mv15 text-center">
