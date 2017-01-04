@@ -25,7 +25,6 @@ $configNameToInputId = [];
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
             <div class="image-upload-input-container form-group mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
-                <?php // todo: add error handler feature ?>
                 <input type="file" class="file-loading"
                 id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
                 <input type="hidden" value="{{= it.info || '{}' }}"

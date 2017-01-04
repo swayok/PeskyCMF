@@ -141,14 +141,14 @@ if (!function_exists('cmfTransCustom')) {
     }
 }
 
-if (!function_exists('cmfServiceJsonResponse')) {
+if (!function_exists('cmfJsonResponse')) {
     /**
      * @param int $httpCode
      * @param array $headers
      * @param int $options
      * @return \PeskyCMF\Http\CmfJsonResponse
      */
-    function cmfServiceJsonResponse($httpCode = \PeskyCMF\HttpCode::OK, array $headers = [], $options = 0) {
+    function cmfJsonResponse($httpCode = \PeskyCMF\HttpCode::OK, array $headers = [], $options = 0) {
         return new \PeskyCMF\Http\CmfJsonResponse([], $httpCode, $headers, $options);
     }
 }
@@ -163,7 +163,7 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
         if (empty($message)) {
             $message = cmfTransGeneral('.form.validation_errors');
         }
-        return cmfServiceJsonResponse(\PeskyCMF\HttpCode::INVALID)
+        return cmfJsonResponse(\PeskyCMF\HttpCode::INVALID)
             ->setErrors($errors, $message);
     }
 }
@@ -181,7 +181,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
         if (empty($fallbackUrl)) {
             $fallbackUrl = route('cmf_start_page');
         }
-        return cmfServiceJsonResponse(\PeskyCMF\HttpCode::NOT_FOUND)
+        return cmfJsonResponse(\PeskyCMF\HttpCode::NOT_FOUND)
             ->setMessage($message)
             ->goBack($fallbackUrl);
     }
@@ -196,7 +196,7 @@ if (!function_exists('cmfRedirectResponseWithMessage')) {
      */
     function cmfRedirectResponseWithMessage($url, $message, $type = 'info') {
         if (request()->ajax()) {
-            return cmfServiceJsonResponse()
+            return cmfJsonResponse()
                 ->setMessage($message)
                 ->setRedirect($url);
         } else {

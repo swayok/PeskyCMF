@@ -677,7 +677,7 @@ class CmfConfig extends ConfigsContainer {
             '\\\$1' . static::scaffold_config_class_suffix(),
             get_class($table)
         );
-        return new $className($table);
+        return new $className($table, $tableNameInRoute);
     }
 
     /**

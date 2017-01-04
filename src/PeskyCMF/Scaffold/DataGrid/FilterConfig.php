@@ -3,14 +3,13 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
 
 class FilterConfig {
-    /** @var CmfDbTable */
-    protected $model;
+    /** @var TableInterface */
+    protected $table;
     /** @var array|ColumnFilter[] */
     protected $filters = [];
     protected $defaultConditions = ['condition' => 'AND', 'rules' => []];
@@ -27,20 +26,20 @@ class FilterConfig {
     protected $defaultDataGridColumnFilterConfigClass = ColumnFilter::class;
 
     /**
-     * @param CmfDbTable $model
+     * @param TableInterface $table
      * @return $this
      */
-    static public function create(CmfDbTable $model) {
+    static public function create(TableInterface $table) {
         $class = get_called_class();
-        return new $class($model);
+        return new $class($table);
     }
 
     /**
      * ScaffoldSectionConfig constructor.
-     * @param CmfDbTable $model
+     * @param TableInterface $table
      */
-    public function __construct(CmfDbTable $model) {
-        $this->model = $model;
+    public function __construct(TableInterface $table) {
+        $this->table = $table;
     }
 
     /**
@@ -162,7 +161,7 @@ class FilterConfig {
             $columnName = $colNameParts[1];
             if ($colNameParts[0] !== $table::getAlias()) {
                 // recursively find related table
-                $table = $this->findRelatedModel($table, $colNameParts[0]);
+                $table = $this->findRelatedTable($table, $colNameParts[0]);
             }
         }
         return $table::getStructure()->getColumn($columnName);
@@ -180,26 +179,26 @@ class FilterConfig {
      * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
-    protected function findRelatedModel(TableInterface $table, $relationAlias, array &$scannedTables = [], $depth = 0) {
+    protected function findRelatedTable(TableInterface $table, $relationAlias, array &$scannedTables = [], $depth = 0) {
         $structure = $table->getTableStructure();
         if ($structure::hasRelation($relationAlias)) {
             return $structure::getRelation($relationAlias)->getForeignTable();
         }
         $scannedTables[] = $structure::getTableName();
         foreach ($structure::getRelations() as $alias => $relationConfig) {
-            /** @var CmfDbTable $relTable */
+            /** @var TableInterface $relTable */
             $relTable = $relationConfig->getForeignTable();
             if (!empty($scannedTables[$relTable::getName()])) {
                 continue;
             }
-            $modelFound = $this->findRelatedModel($relTable, $relationAlias, $scannedTables, $depth + 1);
-            if ($modelFound) {
-                return $modelFound;
+            $relatedTableFound = $this->findRelatedTable($relTable, $relationAlias, $scannedTables, $depth + 1);
+            if ($relatedTableFound) {
+                return $relatedTableFound;
             }
             $scannedTables[] = $relTable::getName();
         }
-        if (!$depth === 0 && empty($modelFound)) {
-            throw new ScaffoldException("Cannot find relation [$relationAlias] in model [{$table->getAlias()}] or among its relations");
+        if (!$depth === 0 && empty($relatedTableFound)) {
+            throw new ScaffoldException("Cannot find relation [$relationAlias] in table [{$table->getAlias()}] or among its relations");
         }
         return false;
     }
@@ -232,10 +231,10 @@ class FilterConfig {
     }
 
     /**
-     * @return CmfDbTable
+     * @return TableInterface
      */
     public function getTable() {
-        return $this->model;
+        return $this->table;
     }
 
     /**
