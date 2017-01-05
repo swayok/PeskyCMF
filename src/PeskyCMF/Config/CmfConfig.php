@@ -343,7 +343,15 @@ class CmfConfig extends ConfigsContainer {
      * View that contains all templates for scaffold section
      * @return string
      */
-    static public function scaffold_templates_view() {
+    static public function scaffold_templates_view_for_normal_table() {
+        return 'cmf::scaffold.templates';
+    }
+
+    /**
+     * View that contains all templates for scaffold section
+     * @return string
+     */
+    static public function scaffold_templates_view_for_key_value_table() {
         return 'cmf::scaffold.templates';
     }
 

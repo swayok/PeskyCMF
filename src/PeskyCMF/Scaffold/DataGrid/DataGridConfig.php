@@ -582,7 +582,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      */
     protected function getTableCellForForRowActions() {
         return DataGridColumn::create()
-            ->setIsDbField(false)
+            ->setIsLinkedToDbColumn(false)
             ->setName(static::ROW_ACTIONS_COLUMN_NAME)
             ->setLabel(cmfTransGeneral('.datagrid.actions.column_label'))
             ->setType(DataGridColumn::TYPE_STRING);

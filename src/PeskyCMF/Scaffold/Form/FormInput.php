@@ -58,7 +58,7 @@ class FormInput extends RenderableValueViewer {
     public function getDefaultId() {
         return static::makeDefaultId(
             $this->getName(),
-            request()->route()->getParameter('table_name', $this->getTableColumn()->getTableStructure()->getTableName())
+            request()->route()->getParameter('table_name', $this->getScaffoldSectionConfig()->getTable()->getName())
         );
     }
 

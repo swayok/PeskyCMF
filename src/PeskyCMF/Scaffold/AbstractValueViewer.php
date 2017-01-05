@@ -50,7 +50,7 @@ abstract class AbstractValueViewer {
     /**
      * @var bool
      */
-    protected $isDbField = true;
+    protected $isLinkedToDbColumn = true;
 
     /**
      * @return $this
@@ -91,16 +91,16 @@ abstract class AbstractValueViewer {
      * @param $isDbField
      * @return $this
      */
-    public function setIsDbField($isDbField) {
-        $this->isDbField = $isDbField;
+    public function setIsLinkedToDbColumn($isDbField) {
+        $this->isLinkedToDbColumn = $isDbField;
         return $this;
     }
 
     /**
      * @return bool
      */
-    public function isDbColumn() {
-        return $this->isDbField;
+    public function isLinkedToDbColumn() {
+        return $this->isLinkedToDbColumn;
     }
 
     /**
@@ -132,7 +132,7 @@ abstract class AbstractValueViewer {
      */
     public function getType() {
         if (empty($this->type)) {
-            $this->setType($this->getTableColumn()->getType());
+            $this->setType($this->isLinkedToDbColumn() ? $this->getTableColumn()->getType() : static::TYPE_STRING);
         }
         return $this->type;
     }
@@ -221,13 +221,13 @@ abstract class AbstractValueViewer {
     public function convertValue($value, array $record, $ignoreValueConverter = false) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
         if (!empty($valueConverter)) {
-            if ($this->isDbColumn()) {
+            if ($this->isLinkedToDbColumn()) {
                 $value = call_user_func($valueConverter, $value, $this->getTableColumn(), $record, $this);
             } else {
                 $value = call_user_func($valueConverter, $record, $this, $this->getScaffoldSectionConfig());
             }
         } else if (!empty($value) || is_bool($value)) {
-            if ($this->getType() === static::TYPE_LINK) {
+            if ($this->getType() === static::TYPE_LINK && $this->isLinkedToDbColumn()) {
                 return $this->buildLinkToExternalRecord($this->getTableColumn(), $record);
             } else {
                 return $this->doDefaultValueConversionByType($value, $this->type, $record);

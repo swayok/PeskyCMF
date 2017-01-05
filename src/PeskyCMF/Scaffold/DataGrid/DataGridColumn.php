@@ -80,7 +80,7 @@ class DataGridColumn extends AbstractValueViewer {
             switch ($this->getType()) {
                 case self::TYPE_BOOL:
                     return function ($value) {
-                        if (!$this->isDbColumn()) {
+                        if (!$this->isLinkedToDbColumn()) {
                             if (!array_has($value, $this->getName())) {
                                 return '-';
                             } else {
@@ -94,11 +94,11 @@ class DataGridColumn extends AbstractValueViewer {
         return $this->valueConverter;
     }
 
-    public function setIsDbField($isDbField) {
+    public function setIsLinkedToDbColumn($isDbField) {
         if (!$isDbField) {
             $this->setIsSortable(false);
         }
-        return parent::setIsDbField($isDbField);
+        return parent::setIsLinkedToDbColumn($isDbField);
     }
 
     /**

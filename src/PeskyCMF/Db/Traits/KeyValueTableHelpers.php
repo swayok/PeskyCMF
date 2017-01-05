@@ -5,7 +5,6 @@ namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\CmfDbTable;
 use PeskyORM\ORM\Record;
-use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
 use Swayok\Utils\NormalizeValue;
 
@@ -20,7 +19,7 @@ trait KeyValueTableHelpers {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    protected function getMainForeignKeyColumnName() {
+    public function getMainForeignKeyColumnName() {
         /** @var CmfDbTable|KeyValueTableHelpers $this */
         if (empty($this->_detectedMainForeignKeyColumnName)) {
             foreach ($this->getTableStructure()->getRelations() as $relationConfig) {
@@ -44,7 +43,7 @@ trait KeyValueTableHelpers {
      * @param null $foreignKeyValue
      * @return array
      */
-    static public function makeRecord($key, $value, $foreignKeyValue = null) {
+    static public function makeDataForRecord($key, $value, $foreignKeyValue = null) {
         $record = [
             'key' => $key,
             'value' => static::encodeValue($value),
@@ -66,12 +65,16 @@ trait KeyValueTableHelpers {
     /**
      * @param array $settingsAssoc - associative array of settings
      * @param null $foreignKeyValue
+     * @param array $additionalConstantValues - contains constant values for all records (for example: admin id)
      * @return array
      */
-    static public function makeRecords(array $settingsAssoc, $foreignKeyValue = null) {
+    static public function convertToDataForRecords(array $settingsAssoc, $foreignKeyValue = null, $additionalConstantValues = []) {
         $records = [];
         foreach ($settingsAssoc as $key => $value) {
-            $records[] = static::makeRecord($key, $value, $foreignKeyValue);
+            $records[] = array_merge(
+                $additionalConstantValues,
+                static::makeDataForRecord($key, $value, $foreignKeyValue)
+            );
         }
         return $records;
     }

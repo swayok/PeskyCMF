@@ -140,6 +140,9 @@ return [
         'edit' => [
             'forbidden' => 'It is forbidden to edit Items in this section',
             'forbidden_for_record' => 'It is forbidden to edit this Item',
+            'key_value_table' => [
+                'no_foreign_key_value' => 'There is no ID for object that should be an owner of received values'
+            ]
         ],
         'bulk_edit' => [
             'no_data_to_save' => 'No data received',

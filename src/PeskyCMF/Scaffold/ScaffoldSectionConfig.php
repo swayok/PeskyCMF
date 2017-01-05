@@ -14,6 +14,11 @@ abstract class ScaffoldSectionConfig {
      */
     protected $table;
     /**
+     * This scaffold config uses no db columns
+     * @var bool
+     */
+    protected $thereIsNoDbColumns = false;
+    /**
      * @var array
      */
     protected $fieldsConfigs = [];
@@ -101,6 +106,15 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
+     * Disables any usage of TableStructure (validation, automatic field type guessing, etc)
+     * @return $this
+     */
+    public function thereIsNoDbColumns() {
+        $this->thereIsNoDbColumns = true;
+        return $this;
+    }
+
+    /**
      * @param array $viewers
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldException
@@ -132,7 +146,7 @@ abstract class ScaffoldSectionConfig {
     public function getViewersLinkedToDbColumns() {
         $ret = [];
         foreach ($this->getValueViewers() as $key => $viewer) {
-            if ($viewer->isDbColumn()) {
+            if ($viewer->isLinkedToDbColumn()) {
                 $ret[$key] = $viewer;
             }
         }
@@ -146,7 +160,7 @@ abstract class ScaffoldSectionConfig {
     public function getStandaloneViewers() {
         $ret = [];
         foreach ($this->getValueViewers() as $key => $viewer) {
-            if (!$viewer->isDbColumn()) {
+            if (!$viewer->isLinkedToDbColumn()) {
                 $ret[$key] = $viewer;
             }
         }
@@ -187,11 +201,18 @@ abstract class ScaffoldSectionConfig {
      * @throws ScaffoldSectionException
      */
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
-        if ((!$viewer || $viewer->isDbColumn()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
+        if (
+            !$this->thereIsNoDbColumns
+            && (!$viewer || $viewer->isLinkedToDbColumn())
+            && !$this->getTable()->getTableStructure()->hasColumn($name)
+        ) {
             throw new ScaffoldSectionException($this, "Unknown table column [$name]");
         }
         if (empty($viewer)) {
             $viewer = $this->createValueViewer();
+        }
+        if ($this->thereIsNoDbColumns) {
+            $viewer->setIsLinkedToDbColumn(false);
         }
         $viewer->setName($name);
         $viewer->setPosition($this->getNextValueViewerPosition($viewer));

@@ -144,5 +144,15 @@ return [
                 ]
             ]
         ]
+    ],
+    'settings' => [
+        'menu_title' => 'Настройки',
+        'form' => [
+            'header_create' => 'Настройки системы',
+            'header_edit' => 'Настройки системы',
+        ],
+        'item_details' => [
+            'header' => 'Настройки системы',
+        ]
     ]
 ];

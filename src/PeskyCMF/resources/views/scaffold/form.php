@@ -113,39 +113,6 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
     </div>
 <?php View::stopSection(); ?>
 
-<?php View::startSection('scaffold-form-contents'); ?>
-    <?php if ($hasTabs): ?>
-        <ul class="nav nav-tabs">
-            <?php foreach ($tabs as $idx => $tabInfo): ?>
-                <li class="<?php echo $idx === 0 ? 'active' : '' ?>">
-                    <a href="#<?php echo $formId . '-' . (string)($idx + 1) ?>" data-toggle="tab" role="tab">
-                        <?php echo empty($tabInfo['label']) ? '*' : $tabInfo['label']; ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-
-    <div class="<?php echo $hasTabs ? 'tab-content' : 'box box-primary' ?>">
-        <?php foreach ($tabs as $idx => $tabInfo): ?>
-            <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
-            <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $formId . '-' . (string)($idx + 1) ?>">
-                <?php $buildInputs($tabInfo); ?>
-            </div>
-        <?php endforeach; ?>
-        <?php
-            if (!$hasTabs) {
-                echo View::yieldContent('scaffold-form-footer');
-            }
-        ?>
-    </div>
-    <?php
-        if ($hasTabs) {
-            echo View::yieldContent('scaffold-form-footer');
-        }
-    ?>
-<?php View::stopSection(); ?>
-
 <script type="text/html" id="item-form-tpl">
     <?php echo view('cmf::ui.default_page_header', [
         'header' => $ifEdit . cmfTransCustom("$translationPrefix.form.header_edit")
@@ -185,7 +152,36 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
                     <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>
                     <!-- end of autofill disabler -->
                     <div class="nav-tabs-custom">
-                        <?php echo View::yieldContent('scaffold-form-contents') ;?>
+                        <?php if ($hasTabs): ?>
+                            <ul class="nav nav-tabs">
+                                <?php foreach ($tabs as $idx => $tabInfo): ?>
+                                    <li class="<?php echo $idx === 0 ? 'active' : '' ?>">
+                                        <a href="#<?php echo $formId . '-' . (string)($idx + 1) ?>" data-toggle="tab" role="tab">
+                                            <?php echo empty($tabInfo['label']) ? '*' : $tabInfo['label']; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+
+                        <div class="<?php echo $hasTabs ? 'tab-content' : 'box box-primary' ?>">
+                            <?php foreach ($tabs as $idx => $tabInfo): ?>
+                                <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
+                                <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $formId . '-' . (string)($idx + 1) ?>">
+                                    <?php $buildInputs($tabInfo); ?>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php
+                                if (!$hasTabs) {
+                                    echo View::yieldContent('scaffold-form-footer');
+                                }
+                            ?>
+                        </div>
+                        <?php
+                            if ($hasTabs) {
+                                echo View::yieldContent('scaffold-form-footer');
+                            }
+                        ?>
                     </div>
                 </form>
             </div>

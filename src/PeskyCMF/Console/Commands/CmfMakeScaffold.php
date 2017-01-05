@@ -4,7 +4,7 @@ namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Scaffold\ScaffoldConfig;
+use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\File;
@@ -37,7 +37,7 @@ class CmfMakeScaffold extends Command {
         if (class_exists($abstractTableClass)) {
             return $abstractTableClass;
         }
-        return ScaffoldConfig::class;
+        return NormalTableScaffoldConfig::class;
     }
 
     /**

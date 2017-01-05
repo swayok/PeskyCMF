@@ -366,7 +366,7 @@ class FormConfig extends ScaffoldSectionConfig {
             default:
                 $renderer->setTemplate('cmf::input/text');
         }
-        if ($formInput->isDbColumn()) {
+        if ($formInput->isLinkedToDbColumn()) {
             $this->configureRendererByColumnConfig($renderer, $formInput->getTableColumn());
         }
         if ($formInput->hasDefaultRendererConfigurator()) {
@@ -419,7 +419,7 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws ScaffoldSectionException
      */
     public function addBulkEditableColumns($name, FormInput $formInput = null) {
-        if ((!$formInput || $formInput->isDbColumn()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
+        if ((!$formInput || $formInput->isLinkedToDbColumn()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
             throw new ScaffoldSectionException($this, "Unknown table column [$name]");
         } else if ($this->getTable()->getTableStructure()->getColumn($name)->isItAFile()) {
             throw new ScaffoldSectionException(
