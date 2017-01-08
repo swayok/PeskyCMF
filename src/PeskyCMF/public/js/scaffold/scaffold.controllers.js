@@ -47,7 +47,15 @@ var ScaffoldControllers = {
                 if (json._message) {
                     toastr.success(json._message);
                 }
-                window.adminApp.back(form.attr('data-back-url'));
+                if (json.redirect) {
+                    if (json.redirect === 'reload') {
+                        window.adminApp.reload();
+                    } else {
+                        window.adminApp.nav(json.redirect);
+                    }
+                } else {
+                    window.adminApp.back(form.attr('data-back-url'));
+                }
             });
         }
     }),

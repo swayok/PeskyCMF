@@ -11,8 +11,15 @@ class CmfJsonResponse extends JsonResponse {
     static protected $redirectFallbakKey = 'redirect_fallback';
     static protected $errorsKey = 'errors';
 
-    public function __construct($data, $status, array $headers, $options) {
-        parent::__construct($data, $status, $headers, $options);
+    /**
+     * CmfJsonResponse constructor.
+     * @param array $data
+     * @param int $status
+     * @param array $headers
+     * @param int $options
+     */
+    public function __construct(array $data = null, $status = 200, array $headers = [], $options = 0) {
+        parent::__construct($data === null ? [] : $data, $status, $headers, $options);
     }
 
     /**

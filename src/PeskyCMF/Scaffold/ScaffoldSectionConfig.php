@@ -278,7 +278,7 @@ abstract class ScaffoldSectionConfig {
             )
         ];
         $customData = $this->getCustomDataForRecord($record);
-        $dbFields = $this->getViewersLinkedToDbColumns();
+        $valueViewers = $this->getValueViewers();
         $pkKey = $this->getTable()->getPkColumnName();
         // backup values
         $recordWithBackup = [];
@@ -289,13 +289,13 @@ abstract class ScaffoldSectionConfig {
             if ($this->getTable()->getTableStructure()->hasRelation($key)) {
                 continue;
             }
-            if (empty($dbFields[$key])) {
+            if (empty($valueViewers[$key])) {
                 if ($key !== $pkKey) {
                     unset($recordWithBackup[$key]);
                 }
                 continue;
             }
-            $fieldConfig = $dbFields[$key];
+            $fieldConfig = $valueViewers[$key];
             if (
                 is_object($fieldConfig)
                 && method_exists($fieldConfig, 'convertValue')
@@ -314,14 +314,6 @@ abstract class ScaffoldSectionConfig {
             $recordWithBackup = array_merge($recordWithBackup, $customData);
         }
         $recordWithBackup = array_merge($recordWithBackup, $permissions);
-        foreach ($this->getStandaloneViewers() as $key => $fieldConfig) {
-            $valueConverter = $fieldConfig->getValueConverter();
-            if ($valueConverter instanceof \Closure) {
-                $recordWithBackup[$key] = call_user_func($valueConverter, $recordWithBackup, $fieldConfig, $this);
-            } else if (!array_has($recordWithBackup, $key)) {
-                $recordWithBackup[$key] = '';
-            }
-        }
         return $recordWithBackup;
     }
 

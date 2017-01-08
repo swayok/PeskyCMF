@@ -3,11 +3,14 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbTable;
+use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Relation;
 use Swayok\Utils\NormalizeValue;
 
+/**
+ * @method static KeyValueTableInterface getInstance()
+ */
 trait KeyValueTableHelpers {
 
     private $_detectedMainForeignKeyColumnName;
@@ -20,7 +23,7 @@ trait KeyValueTableHelpers {
      * @throws \BadMethodCallException
      */
     public function getMainForeignKeyColumnName() {
-        /** @var CmfDbTable|KeyValueTableHelpers $this */
+        /** @var KeyValueTableInterface $this */
         if (empty($this->_detectedMainForeignKeyColumnName)) {
             foreach ($this->getTableStructure()->getRelations() as $relationConfig) {
                 if ($relationConfig->getType() === Relation::BELONGS_TO) {
@@ -38,9 +41,10 @@ trait KeyValueTableHelpers {
     }
 
     /**
+     * Make array that represents DB record and can be saved to DB
      * @param string $key
      * @param mixed $value
-     * @param null $foreignKeyValue
+     * @param mixed $foreignKeyValue
      * @return array
      */
     static public function makeDataForRecord($key, $value, $foreignKeyValue = null) {
@@ -63,8 +67,9 @@ trait KeyValueTableHelpers {
     }
 
     /**
+     * Convert associative array to arrays that represent DB record and are ready for saving to DB
      * @param array $settingsAssoc - associative array of settings
-     * @param null $foreignKeyValue
+     * @param mixed $foreignKeyValue
      * @param array $additionalConstantValues - contains constant values for all records (for example: admin id)
      * @return array
      */
@@ -107,14 +112,13 @@ trait KeyValueTableHelpers {
      * @param \Closure $configurator
      * @return array
      */
-    public function selectAssoc($keysColumn = 'key', $valuesColumn = 'value', array $conditions = [], \Closure $configurator = null) {
-        /** @var CmfDbTable|KeyValueTableHelpers $this */
+    static public function selectAssoc($keysColumn = 'key', $valuesColumn = 'value', array $conditions = [], \Closure $configurator = null) {
         return static::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditions, $configurator));
     }
 
     /**
      * Update existing value or create new one
-     * @param array $record - must contain: key, foreign_key, value
+     * @param array $data - must contain: key, foreign_key, value
      * @return Record
      * @throws \PeskyORM\Exception\RecordNotFoundException
      * @throws \UnexpectedValueException
@@ -123,40 +127,36 @@ trait KeyValueTableHelpers {
      * @throws \PeskyORM\Exception\InvalidDataException
      * @throws \PeskyORM\Exception\DbException
      * @throws \PDOException
-     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    public function updateOrCreateRecord(array $record) {
-        /** @var CmfDbTable|KeyValueTableHelpers $this */
-        if (empty($record['key'])) {
+    static public function updateOrCreateRecord(array $data) {
+        if (empty($data['key'])) {
             throw new \InvalidArgumentException('$record argument does not contain [key] key or its value is empty');
-        } else if (!array_key_exists('value', $record)) {
+        } else if (!array_key_exists('value', $data)) {
             throw new \InvalidArgumentException('$record argument does not contain [value] key');
         }
         $conditions = [
-            'key' => $record['key']
+            'key' => $data['key']
         ];
-        $fkName = $this->getMainForeignKeyColumnName();
+        $fkName = static::getInstance()->getMainForeignKeyColumnName();
         if (!empty($fkName)) {
-            if (empty($record[$fkName])) {
+            if (empty($data[$fkName])) {
                 throw new \InvalidArgumentException("\$record argument does not contain [{$fkName}] key or its value is empty");
             }
-            $conditions[$fkName] = $record[$fkName];
+            $conditions[$fkName] = $data[$fkName];
         }
-        $object = $this->newRecord()->fromDb($conditions);
+        /** @var Record $object */
+        $object = static::getInstance()->newRecord()->fromDb($conditions);
         if ($object->existsInDb()) {
             return $object
                 ->begin()
-                ->updateValue('value', $record['value'], false)
+                ->updateValues(array_diff_key($data, ['key' => '', $fkName => '']), false)
                 ->commit();
         } else {
             $object
                 ->reset()
-                ->updateValue('key', $record['key'], false)
-                ->updateValue('value', $record['value'], false);
-            if (!empty($fkName)) {
-                $object->updateValue($fkName, $record[$fkName], false);
-            }
+                ->updateValues($data, false);
             return $object->save();
         }
     }
@@ -165,32 +165,39 @@ trait KeyValueTableHelpers {
      * Update existing values and create new
      * @param array $records
      * @return bool
-     * @throws \Exception
      */
-    public function updateOrCreateRecords(array $records) {
-        /** @var CmfDbTable|KeyValueTableHelpers $this */
-        $this::beginTransaction();
+    static public function updateOrCreateRecords(array $records) {
+        $table = static::getInstance();
+        $alreadyInTransaction = $table::inTransaction();
+        if (!$alreadyInTransaction) {
+            $table::beginTransaction();
+        }
         try {
             foreach ($records as $record) {
-                $success = $this->updateOrCreateRecord($record);
+                $success = $table::updateOrCreateRecord($record);
                 if (!$success) {
-                    $this::rollBackTransaction();
+                    if (!$alreadyInTransaction) {
+                        $table::rollBackTransaction();
+                    }
                     return false;
                 }
             }
-            $this::commitTransaction();
+            if (!$alreadyInTransaction) {
+                $table::commitTransaction();
+            }
             return true;
         } catch (\Exception $exc) {
-            if ($this->inTransaction()) {
-                $this::rollBackTransaction();
+            if (!$alreadyInTransaction && $table->inTransaction()) {
+                $table::rollBackTransaction();
             }
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             throw $exc;
         }
     }
 
     /**
      * @param string $key
-     * @param string|null $foreignKeyValue - use null if there is no main foreign key column and
+     * @param mixed $foreignKeyValue - use null if there is no main foreign key column and
      *      getMainForeignKeyColumnName() method returns null
      * @param mixed $default
      * @return array
@@ -200,12 +207,11 @@ trait KeyValueTableHelpers {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function selectOneByKeyAndForeignKeyValue($key, $foreignKeyValue = null, $default = []) {
-        /** @var CmfDbTable|KeyValueTableHelpers $this */
+    static public function getValueByKeyAndForeignKeyValue($key, $foreignKeyValue = null, $default = null) {
         $conditions = [
             'key' => $key
         ];
-        $fkName = $this->getMainForeignKeyColumnName();
+        $fkName = static::getInstance()->getMainForeignKeyColumnName();
         if ($fkName !== null) {
             if (empty($foreignKeyValue)) {
                 throw new \InvalidArgumentException('$foreignKeyValue argument is required');
@@ -217,7 +223,7 @@ trait KeyValueTableHelpers {
             );
         }
         /** @var array $record */
-        $record = $this::selectOne('*', $conditions);
+        $record = static::selectOne('*', $conditions);
         return empty($record) ? $default : static::decodeValue($record['value']);
     }
 }
