@@ -65,9 +65,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                         $infoArrays = array_merge(static::valueNormalizer($oldValue, false, $column), $infoArrays);
                     }
                 }
-                $json = json_encode($infoArrays, JSON_UNESCAPED_UNICODE);
-                $valueContainer->setRawValue($infoArrays, $json, false)->setValidValue($json, $infoArrays);
             }
+            $json = json_encode($infoArrays, JSON_UNESCAPED_UNICODE);
+            $valueContainer->setRawValue($infoArrays, $json, false)->setValidValue($json, $infoArrays);
             if (!empty($newFiles)) {
                 $valueContainer->setDataForSavingExtender($newFiles);
             }

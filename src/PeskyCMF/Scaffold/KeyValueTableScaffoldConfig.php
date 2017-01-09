@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold;
 
 use Illuminate\Http\JsonResponse;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\KeyValueDataSaver;
 use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
@@ -134,14 +135,13 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $success = $table->updateOrCreateRecords(
-                    $table::convertToDataForRecords($data, $fkValue, $formConfig->getCustomDataForRecord([]))
+                KeyValueDataSaver::saveKeyValuePairs(
+                    $table,
+                    $data,
+                    $fkValue,
+                    $formConfig->getCustomDataForRecord([])
                 );
-                if (!$success) {
-                    $table::rollBackTransaction();
-                    return cmfJsonResponse(HttpCode::SERVER_ERROR)
-                        ->setMessage(cmfTransGeneral('.form.failed_to_save_data'));
-                } else if ($formConfig->hasAfterSaveCallback()) {
+                if ($formConfig->hasAfterSaveCallback()) {
                     $success = call_user_func($formConfig->getAfterSaveCallback(), false, $data, $table->newRecord(), $formConfig);
                     if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
                         if ($success->getStatusCode() < 400) {
@@ -159,12 +159,12 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
                 }
                 $table::commitTransaction();
             } catch (InvalidDataException $exc) {
-                if ($table->inTransaction()) {
+                if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                 }
                 return $this->sendValidationErrorsResponse($exc->getErrors());
             } catch (\Exception $exc) {
-                if ($table->inTransaction()) {
+                if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                 }
                 throw $exc;

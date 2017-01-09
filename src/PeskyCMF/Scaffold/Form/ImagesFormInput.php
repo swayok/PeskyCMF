@@ -4,6 +4,12 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyCMF\Db\Column\Utils\FileInfo;
+use PeskyCMF\Db\Column\Utils\ImagesUploadingColumnClosures;
+use PeskyCMF\Db\KeyValueTableInterface;
+use PeskyORM\ORM\Column;
+use PeskyORM\ORM\FakeRecord;
+use PeskyORM\ORM\FakeTable;
+use PeskyORM\ORM\RecordValue;
 
 class ImagesFormInput extends FormInput {
 
@@ -80,8 +86,13 @@ class ImagesFormInput extends FormInput {
         if (!is_array($value) || empty($value)) {
             return $ret;
         }
+        $table = $this->getScaffoldSectionConfig()->getTable();
         $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-        $record->fromData($data, !empty($data[$record::getPrimaryKeyColumnName()]));
+        if ($table instanceof KeyValueTableInterface) {
+            $record->fromData([$record::getPrimaryKeyColumnName() => 0, $this->getTableColumn()->getName() => $value], true);
+        } else {
+            $record->fromData($data, !empty($data[$record::getPrimaryKeyColumnName()]));
+        }
 
         $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
         foreach ($fileInfoArrays as $imageName => $fileInfoArray) {
