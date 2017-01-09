@@ -89,7 +89,12 @@ class ImagesFormInput extends FormInput {
         $table = $this->getScaffoldSectionConfig()->getTable();
         $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
         if ($table instanceof KeyValueTableInterface) {
-            $record->fromData([$record::getPrimaryKeyColumnName() => 0, $this->getTableColumn()->getName() => $value], true);
+            $fakeData = [$record::getPrimaryKeyColumnName() => 0, $this->getTableColumn()->getName() => $value];
+            $fkName = $table->getMainForeignKeyColumnName();
+            if ($fkName) {
+                $fakeData[$fkName] = array_get($data, $fkName);
+            }
+            $record->fromData($fakeData, true);
         } else {
             $record->fromData($data, !empty($data[$record::getPrimaryKeyColumnName()]));
         }
