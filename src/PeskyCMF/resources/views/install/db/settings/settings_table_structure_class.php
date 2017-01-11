@@ -1,6 +1,6 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
 use PeskyCMF\Db\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
@@ -13,7 +13,7 @@ use PeskyORM\ORM\TableStructure;
  * @property-read Column    $admin_id
  * @property-read Column    $value
  */
-class SettingsTableStructure extends TableStructure {
+class <?php echo $baseClassNamePlural; ?>TableStructure extends TableStructure {
 
     use IdColumn,
         AdminIdColumn;
@@ -22,7 +22,7 @@ class SettingsTableStructure extends TableStructure {
      * @return string
      */
     static public function getTableName() {
-        return 'settings';
+        return '<?php echo $baseClassNameUnderscored; ?>';
     }
 
     /**

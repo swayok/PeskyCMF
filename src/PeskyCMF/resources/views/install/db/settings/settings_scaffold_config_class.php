@@ -1,12 +1,12 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\Settings;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 
-class SettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
+class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends KeyValueTableScaffoldConfig {
 
     protected $isDetailsViewerAllowed = false;
     protected $isCreateAllowed = false;

@@ -1,12 +1,12 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\Settings;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
 use App\<?php echo $dbClassesAppSubfolder ?>\AbstractTable;
 use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyCMF\Db\Traits\KeyValueTableHelpers;
 
-class SettingsTable extends AbstractTable implements KeyValueTableInterface {
+class <?php echo $baseClassNamePlural; ?>Table extends AbstractTable implements KeyValueTableInterface {
 
     use KeyValueTableHelpers;
 
@@ -15,24 +15,24 @@ class SettingsTable extends AbstractTable implements KeyValueTableInterface {
     }
 
     /**
-     * @return SettingsTableStructure
+     * @return <?php echo $baseClassNamePlural; ?>TableStructure
      */
     public function getTableStructure() {
-        return SettingsTableStructure::getInstance();
+        return <?php echo $baseClassNamePlural; ?>TableStructure::getInstance();
     }
 
     /**
-     * @return Setting
+     * @return <?php echo $baseClassNameSingular; ?>
      */
     public function newRecord() {
-        return new Setting();
+        return new <?php echo $baseClassNameSingular; ?>();
     }
 
     /**
      * @return string
      */
     public function getTableAlias() {
-        return 'Settings';
+        return '<?php echo $baseClassNamePlural; ?>';
     }
 
 }

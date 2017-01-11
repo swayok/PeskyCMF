@@ -1,6 +1,6 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\Settings;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
 use App\Db\AbstractRecord;
 
@@ -15,13 +15,13 @@ use App\Db\AbstractRecord;
  * @method $this    setAdminId($value, $isFromDb = false)
  * @method $this    setValue($value, $isFromDb = false)
  */
-class Setting extends AbstractRecord {
+class <?php echo $baseClassNameSingular; ?> extends AbstractRecord {
 
     /**
-     * @return SettingsTable
+     * @return <?php echo $baseClassNamePlural; ?>Table
      */
     static public function getTable() {
-        return SettingsTable::getInstance();
+        return <?php echo $baseClassNamePlural; ?>Table::getInstance();
     }
 
 }

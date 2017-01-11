@@ -1,15 +1,15 @@
 <?php echo "<?php\n"; ?>
 
-use App\<?php echo $dbClassesAppSubfolder ?>\Settings\SettingsTableStructure;
+use App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>\<?php echo $baseClassNamePlural; ?>TableStructure;
 use App\<?php echo $dbClassesAppSubfolder ?>\Admins\AdminsTableStructure;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class CreateSettingsTable extends Migration {
+class Create<?php echo $baseClassNamePlural; ?>Table extends Migration {
 
     public function up() {
-        if (!Schema::hasTable(SettingsTableStructure::getTableName())) {
-            Schema::create('settings', function (Blueprint $table) {
+        if (!Schema::hasTable(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName())) {
+            Schema::create(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('key');
                 $table->integer('admin_id')->nullable()->unsigned();
@@ -31,6 +31,6 @@ class CreateSettingsTable extends Migration {
     }
 
     public function down() {
-        Schema::dropIfExists(SettingsTableStructure::getTableName());
+        Schema::dropIfExists(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName());
     }
 }

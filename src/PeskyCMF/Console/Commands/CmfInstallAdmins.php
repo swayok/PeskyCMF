@@ -10,11 +10,14 @@ use Swayok\Utils\StringUtils;
 class CmfInstallAdmins extends BaseCommand {
 
     protected $description = 'Install Admins into CMF (classes and migration)';
-    protected $signature = 'cmf:install-admins {app_section_name=Admins} {base_class_name=Admins} {database_classes_app_subfolder=Db}';
+    protected $signature = 'cmf:install-admins  
+            {app_section_name=Admin : subfolder name in your app folder where CMF installed (by default: /app/Admin)} 
+            {base_class_name=Admins : base class name for all classes} 
+            {database_classes_app_subfolder=Db : subfolder name in your app folder where all ORM classes strored (by default: /app/Db)}';
 
     public function fire() {
         $viewsPath = __DIR__ . '/../../resources/views/install/db/admins/';
-        $baseClassName = ucfirst(trim(trim($this->input->getArgument('admins_base_class_name')), '/\\'));
+        $baseClassName = ucfirst(trim(trim($this->input->getArgument('base_class_name')), '/\\'));
         $dataForViews = [
             'sectionName' => ucfirst(trim(trim($this->input->getArgument('section_name')), '/\\')),
             'baseClassNameSingular' => StringUtils::singularize($baseClassName),
