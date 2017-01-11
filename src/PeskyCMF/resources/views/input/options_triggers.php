@@ -32,8 +32,8 @@ $defaultName = $rendererConfig->getAttribute('name', $fieldConfig->getName());
         <div class="<?php echo $rendererConfig->getData('grid_class_for_input', 'col-xs-4 col-md-6'); ?>">
             <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
                 {{? !!it.<?php echo $fieldConfig->getName(); ?>.<?php echo $optionName; ?> }}checked{{?}}
-                data-on-text="<?php echo $rendererConfig->getData('label_enable', cmfTransGeneral('.form.field.bool.yes')) ?>"
-                data-off-text="<?php echo $rendererConfig->getData('label_disable', cmfTransGeneral('.form.field.bool.no')) ?>">
+                data-on-text="<?php echo $rendererConfig->getData('label_enable', cmfTransGeneral('.form.input.bool.yes')) ?>"
+                data-off-text="<?php echo $rendererConfig->getData('label_disable', cmfTransGeneral('.form.input.bool.no')) ?>">
         </div>
     </div>
     <?php endforeach; ?>

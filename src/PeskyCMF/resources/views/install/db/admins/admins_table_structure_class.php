@@ -1,6 +1,6 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
 use App\<?php echo $sectionName; ?>\AdminConfig;
 use PeskyCMF\Db\Traits\IdColumn;
@@ -11,7 +11,7 @@ use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableStructure;
 
-class AdminsTableStructure extends TableStructure {
+class <?php echo $baseClassNamePlural; ?>TableStructure extends TableStructure {
 
     use IdColumn,
         TimestampColumns,
@@ -23,7 +23,7 @@ class AdminsTableStructure extends TableStructure {
      * @return string
      */
     static public function getTableName() {
-        return 'admins';
+        return '<?php echo $baseClassNameUnderscored; ?>';
     }
 
     private function parent_id() {
@@ -73,7 +73,7 @@ class AdminsTableStructure extends TableStructure {
             ->allowsNullValues();
     }
 
-    private function ParentAdmin() {
+    private function Parent<?php echo $baseClassNameSingular; ?>() {
         return Relation::create(
                 'parent_id',
                 Relation::BELONGS_TO,

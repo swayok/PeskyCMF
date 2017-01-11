@@ -1,6 +1,6 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
@@ -11,7 +11,7 @@ use PeskyCMF\Scaffold\Form\InputRendererConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
 use PeskyORM\ORM\Column;
 
-class AdminsScaffoldConfig extends ScaffoldSectionConfig {
+class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends ScaffoldSectionConfig {
 
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
@@ -31,7 +31,7 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
                 'role' => DataGridFieldConfig::create()
                     ->setIsSortable(true)
                     ->setValueConverter(function ($value, Column $columnConfig, $record) {
-                        return cmfTransCustom(".admins.role.$value");
+                        return cmfTransCustom(".<?php echo $baseClassNameUnderscored; ?>.role.$value");
                     }),
                 'parent_id' => DataGridFieldConfig::create()
                     ->setType(ItemDetailsFieldConfig::TYPE_LINK),
@@ -53,7 +53,7 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
                 'is_active',
                 'role' => ItemDetailsFieldConfig::create()
                     ->setValueConverter(function ($value, Column $columnConfig, array $record) {
-                        return cmfTransCustom(".admins.role.$value");
+                        return cmfTransCustom(".<?php echo $baseClassNameUnderscored; ?>.role.$value");
                     }),
                 'is_superadmin' => ItemDetailsFieldConfig::create(),
                 'parent_id' => ItemDetailsFieldConfig::create()
@@ -65,7 +65,6 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
 
     protected function createFormConfig() {
         return parent::createFormConfig()
-            ->setHasFiles(false)
             ->setWidth(50)
             ->setFields([
                 'email',
@@ -95,7 +94,7 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
                     ->setOptions(function () {
                         $options = array();
                         foreach (CmfConfig::getInstance()->roles_list() as $roleId) {
-                            $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
+                            $options[$roleId] = cmfTransCustom(".<?php echo $baseClassNameUnderscored; ?>.role.$roleId");
                         }
                         return $options;
                     })
@@ -122,14 +121,14 @@ class AdminsScaffoldConfig extends ScaffoldSectionConfig {
                 'is_superadmin' => 'boolean',
             ])
             ->addValidatorsForCreate([
-                'email' => 'required|email|min:4|max:100|unique:' . AdminsTableStructure::getTableName() . ',email',
-                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . AdminsTableStructure::getTableName() . ',login',
+                'email' => 'required|email|min:4|max:100|unique:' . <?php echo $baseClassNamePlural; ?>TableStructure::getTableName() . ',email',
+                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . <?php echo $baseClassNamePlural; ?>TableStructure::getTableName() . ',login',
                 'password' => 'required|min:6',
             ])
             ->addValidatorsForEdit([
                 'id' => FormConfig::VALIDATOR_FOR_ID,
-                'email' => 'required|email|min:4|max:100|unique:' . AdminsTableStructure::getTableName() . ',email,{{id}},id',
-                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . AdminsTableStructure::getTableName() . ',login,{{id}},id',
+                'email' => 'required|email|min:4|max:100|unique:' . <?php echo $baseClassNamePlural; ?>TableStructure::getTableName() . ',email,{{id}},id',
+                //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . <?php echo $baseClassNamePlural; ?>TableStructure::getTableName() . ',login,{{id}},id',
                 'password' => 'min:6',
             ])
             ;

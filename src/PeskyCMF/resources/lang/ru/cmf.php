@@ -90,7 +90,7 @@ return [
         'validation_errors' => 'Обнаружены недопустимые данные',
         'resource_created_successfully' => 'Объект успешно создан',
         'resource_updated_successfully' => 'Объект успешно изменен',
-        'field' => [
+        'input' => [
             'bool' => [
                 'yes' => 'Да',
                 'no' => 'Нет'
@@ -102,8 +102,8 @@ return [
         ],
         'bulk_edit' => [
             'enabler' => [
-                'edit_field' => 'Изменить',
-                'skip_field' => 'Пропустить'
+                'edit_input' => 'Изменить',
+                'skip_input' => 'Пропустить'
             ]
         ]
     ],

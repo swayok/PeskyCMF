@@ -77,8 +77,8 @@ class FormConfig extends ScaffoldSectionConfig {
     /** @var null|int */
     protected $currentInputsGroup = null;
 
-    /** @var array */
-    protected $tooltips = [];
+    /** @var array|null */
+    protected $tooltips;
 
     /**
      * @param string $laravelViewPath
@@ -230,7 +230,7 @@ class FormConfig extends ScaffoldSectionConfig {
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
         parent::addValueViewer($name, $viewer);
         if (!$viewer) {
-            $viewer = static::getValueViewer($name);
+            $viewer = $this->getValueViewer($name);
         }
         $validators = $viewer->getValidators();
         if (!empty($validators)) {
@@ -245,7 +245,7 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /**
      * @param array $tooltips - anything except array will be ignored so it won't crash when there is no
-     *      translations for tooltips in dictionaries (ex: trans('cmf.admins.form.tooltips') may be array or string)
+     *      translations for tooltips in dictionaries (ex: trans('cmf.admins.form.tooltip') may be array or string)
      * @return $this
      */
     public function setTooltipsForInputs($tooltips) {
@@ -256,13 +256,32 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * @return array
+     */
+    public function getTooltipsForInputs() {
+        if ($this->tooltips === null) {
+            $resourceName = CmfConfig::getInstance()->getTableNameFromCurrentRoute();
+            if (!empty($resourceName)) {
+                $basePath = $this->scaffoldConfig->getLocalizationBasePath($resourceName);
+                $this->setTooltipsForInputs(cmfTransCustom($basePath . '.form.tooltip'));
+            }
+            // make sure tooltips is always an array
+            if (!is_array($this->tooltips)) {
+                $this->tooltips = [];
+            }
+        }
+        return $this->tooltips;
+    }
+
+    /**
      * @param string $inputName
      * @return bool
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      */
-    public function hasTooltip($inputName) {
+    public function hasTooltipForInput($inputName) {
         return (
             $this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip()
-            || !empty($this->tooltips[$inputName])
+            || !empty($this->getTooltipsForInputs()[$inputName])
         );
     }
 
@@ -271,11 +290,11 @@ class FormConfig extends ScaffoldSectionConfig {
      * @return mixed
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      */
-    public function getTooltip($inputName) {
+    public function getTooltipForInput($inputName) {
         if ($this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip()) {
             return $this->getFormInput($inputName)->hasTooltip();
         } else {
-            return array_get($this->tooltips, $inputName, '');
+            return array_get($this->getTooltipsForInputs(), $inputName, '');
         }
     }
 
@@ -472,18 +491,17 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /**
      * @return bool
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function hasFiles() {
+        if ($this->hasFiles === null) {
+            $this->hasFiles = !empty(
+                array_intersect($this->getValueViewers(), $this->getTable()->getTableStructure()->getFileColumns())
+            );
+        }
         return $this->hasFiles;
-    }
-
-    /**
-     * @param bool $value
-     * @return $this
-     */
-    public function setHasFiles($value) {
-        $this->hasFiles = (bool)$value;
-        return $this;
     }
 
     /**
@@ -492,6 +510,7 @@ class FormConfig extends ScaffoldSectionConfig {
     public function hasOptionsLoader() {
         if ($this->hasOptionsLoader === null) {
             $this->hasOptionsLoader = false;
+            /** @var FormInput $viewer */
             foreach ($this->getValueViewers() as $viewer) {
                 if ($viewer->hasOptionsLoader()) {
                     $this->hasOptionsLoader = true;
@@ -509,6 +528,7 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function loadOptions($pkValue) {
         $options = array();
+        /** @var FormInput $viewer */
         foreach ($this->getValueViewers() as $viewer) {
             if ($viewer->hasOptionsLoader()) {
                 $options[$viewer->getName()] = call_user_func(
@@ -965,14 +985,7 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     public function finish() {
-        if (empty($this->tooltips)) {
-            $resourceName = CmfConfig::getInstance()->getTableNameFromCurrentRoute();
-            if (!empty($resourceName)) {
-                $basePath = $this->scaffoldConfig->getLocalizationBasePath($resourceName);
-                $this->setTooltipsForInputs(cmfTransCustom($basePath . '.form.tooltips'));
-            }
-        }
-        foreach ($this->tooltips as $inputName => $tooltip) {
+        foreach ($this->getTooltipsForInputs() as $inputName => $tooltip) {
             if ($this->hasFormInput($inputName)) {
                 $input = $this->getFormInput($inputName);
                 if (!$input->hasTooltip()) {

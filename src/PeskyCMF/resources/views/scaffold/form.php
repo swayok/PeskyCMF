@@ -36,7 +36,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
         foreach ($groupInfo['inputs_names'] as $inputName) {
             $inputConfig = $formConfig->getFormInput($inputName);
             if (!$inputConfig->hasLabel()) {
-                $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.field.{$inputConfig->getName()}"));
+                $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.input.{$inputConfig->getName()}"));
             }
             try {
                 $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);

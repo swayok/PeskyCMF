@@ -1,16 +1,16 @@
 <?php echo "<?php\n"; ?>
 
-use App\<?php echo $dbClassesAppSubfolder ?>\Admins\AdminsTable;
-use App\<?php echo $dbClassesAppSubfolder ?>\Admins\AdminsTableStructure;
+use App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>\<?php echo $baseClassNamePlural; ?>Table;
+use App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>\<?php echo $baseClassNamePlural; ?>TableStructure;
 use App\<?php echo $sectionName; ?>\AdminConfig;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAdminsTable extends Migration {
+class Create<?php echo $baseClassNamePlural; ?>Table extends Migration {
 
     public function up() {
-        if (!Schema::hasTable(AdminsTableStructure::getTableName())) {
-            Schema::create(AdminsTableStructure::getTableName(), function (Blueprint $table) {
+        if (!Schema::hasTable(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName())) {
+            Schema::create(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->string('name');
@@ -21,7 +21,7 @@ class CreateAdminsTable extends Migration {
                 $table->boolean('is_active')->default(true);
                 $table->string('role', 50)->default(AdminConfig::default_role());
                 $table->char('language', 2)->default(AdminConfig::default_locale());
-                $currentTimestamp = DB::raw(AdminsTable::quoteDbExpr(AdminsTable::getCurrentTimeDbExpr()->setWrapInBrackets(false)));
+                $currentTimestamp = DB::raw(AdminsTable::quoteDbExpr(<?php echo $baseClassNamePlural; ?>Table::getCurrentTimeDbExpr()->setWrapInBrackets(false)));
                 $table->timestampTz('created_at')->default($currentTimestamp);
                 $table->timestampTz('updated_at')->default($currentTimestamp);
                 $table->string('timezone')->nullable();
@@ -35,7 +35,7 @@ class CreateAdminsTable extends Migration {
 
                 $table->foreign('parent_id')
                     ->references('id')
-                    ->on(AdminsTableStructure::getTableName())
+                    ->on(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName())
                     ->onDelete('set null')
                     ->onUpdate('cascade');
             });
@@ -43,6 +43,6 @@ class CreateAdminsTable extends Migration {
     }
 
     public function down() {
-        Schema::dropIfExists(AdminsTableStructure::getTableName());
+        Schema::dropIfExists(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName());
     }
 }

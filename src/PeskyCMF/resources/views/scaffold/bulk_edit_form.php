@@ -55,12 +55,12 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                     <!-- end of autofill disabler -->
                     <div class="modal-body">
                     <?php
-                        $enablerTextOn = cmfTransGeneral('.form.bulk_edit.enabler.edit_field');
-                        $enablerTextOff = cmfTransGeneral('.form.bulk_edit.enabler.skip_field');
+                        $enablerTextOn = cmfTransGeneral('.form.bulk_edit.enabler.edit_input');
+                        $enablerTextOff = cmfTransGeneral('.form.bulk_edit.enabler.skip_input');
                         $baseEnablerId = str_random() . '-enabler-for-';
                         foreach ($formConfig->getBulkEditableColumns() as $inputConfig) {
                             if (!$inputConfig->hasLabel()) {
-                                $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.field.{$inputConfig->getName()}"));
+                                $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.input.{$inputConfig->getName()}"));
                             }
                             try {
                                 $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);

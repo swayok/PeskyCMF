@@ -1,29 +1,29 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
 use App\<?php echo $dbClassesAppSubfolder ?>\AbstractTable;
 
-class AdminsTable extends AbstractTable {
+class <?php echo $baseClassNamePlural; ?>Table extends AbstractTable {
 
     /**
-     * @return AdminsTableStructure
+     * @return <?php echo $baseClassNamePlural; ?>TableStructure
      */
     public function getTableStructure() {
-        return AdminsTableStructure::getInstance();
+        return <?php echo $baseClassNamePlural; ?>TableStructure::getInstance();
     }
 
     /**
-     * @return Admin
+     * @return <?php echo $baseClassNameSingular; ?>
      */
     public function newRecord() {
-        return new Admin();
+        return new <?php echo $baseClassNameSingular; ?>();
     }
 
     /**
      * @return string
      */
     public function getTableAlias() {
-        return 'Admins';
+        return '<?php echo $baseClassNamePlural; ?>';
     }
 }

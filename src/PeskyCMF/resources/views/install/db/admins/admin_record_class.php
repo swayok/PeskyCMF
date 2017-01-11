@@ -1,6 +1,6 @@
 <?php echo "<?php\n"; ?>
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\Admins;
+namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
 use PeskyCMF\Db\CmfDbRecord;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -27,7 +27,7 @@ use PeskyCMF\Db\Traits\Authenticatable;
  * @property-read string    $role
  * @property-read string    $ip
  *
- * @property-read Admin     $Parent
+ * @property-read <?php echo $baseClassNameSingular; ?>     $Parent<?php echo $baseClassNameSingular; ?>
  *
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setEmail($value, $isFromDb = false)
@@ -42,12 +42,15 @@ use PeskyCMF\Db\Traits\Authenticatable;
  * @method $this    setRole($value, $isFromDb = false)
  *
  */
-class Admin extends CmfDbRecord implements AuthenticatableContract {
+class <?php echo $baseClassNameSingular; ?> extends CmfDbRecord implements AuthenticatableContract {
 
     use Authenticatable;
 
+    /**
+     * @return <?php echo $baseClassNamePlural; ?>Table
+     */
     static public function getTable() {
-        return AdminsTable::getInstance();
+        return <?php echo $baseClassNamePlural; ?>Table::getInstance();
     }
 
 }

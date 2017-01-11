@@ -91,7 +91,7 @@ return [
         'validation_errors' => 'Invalid data detected',
         'resource_created_successfully' => 'Item successfully created',
         'resource_updated_successfully' => 'Item successfully updated',
-        'field' => [
+        'input' => [
             'bool' => [
                 'yes' => 'Yes',
                 'no' => 'No'
@@ -103,8 +103,8 @@ return [
         ],
         'bulk_edit' => [
             'enabler' => [
-                'edit_field' => 'Change',
-                'skip_field' => 'Skip'
+                'edit_input' => 'Change',
+                'skip_input' => 'Skip'
             ]
         ]
     ],

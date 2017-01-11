@@ -64,7 +64,7 @@ return [
         'form' => [
             'header_create' => 'Adding administrator',
             'header_edit' => 'Editing administrator',
-            'field' => [
+            'input' => [
                 'email' => 'E-mail',
                 'password' => 'Password',
                 'name' => 'Name',
@@ -143,5 +143,19 @@ return [
                 ]
             ]
         ]
+    ],
+    'settings' => [
+        'menu_title' => 'Settings',
+        'form' => [
+            'header_create' => 'System settings',
+            'header_edit' => 'System settings',
+            'input' => [
+                'default_browser_title' => 'Default page title in browser',
+                'browser_title_addition' => 'Addition for page title in browser',
+            ],
+            'tooltip' => [
+                'browser_title_addition' => 'Will not be added if pages title provided by "Default page title in browser" setting'
+            ]
+        ],
     ]
 ];
