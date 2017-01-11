@@ -4,12 +4,6 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyCMF\Db\Column\Utils\FileInfo;
-use PeskyCMF\Db\Column\Utils\ImagesUploadingColumnClosures;
-use PeskyCMF\Db\KeyValueTableInterface;
-use PeskyORM\ORM\Column;
-use PeskyORM\ORM\FakeRecord;
-use PeskyORM\ORM\FakeTable;
-use PeskyORM\ORM\RecordValue;
 
 class ImagesFormInput extends FormInput {
 
@@ -86,18 +80,9 @@ class ImagesFormInput extends FormInput {
         if (!is_array($value) || empty($value)) {
             return $ret;
         }
-        $table = $this->getScaffoldSectionConfig()->getTable();
         $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-        if ($table instanceof KeyValueTableInterface) {
-            $fakeData = [$record::getPrimaryKeyColumnName() => 0, $this->getTableColumn()->getName() => $value];
-            $fkName = $table->getMainForeignKeyColumnName();
-            if ($fkName) {
-                $fakeData[$fkName] = array_get($data, $fkName);
-            }
-            $record->fromData($fakeData, true);
-        } else {
-            $record->fromData($data, !empty($data[$record::getPrimaryKeyColumnName()]));
-        }
+        $pkValue = array_get($data, $record::getPrimaryKeyColumnName());
+        $record->fromData($data, !empty($pkValue) || is_numeric($pkValue), false);
 
         $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
         foreach ($fileInfoArrays as $imageName => $fileInfoArray) {
@@ -139,8 +124,6 @@ class ImagesFormInput extends FormInput {
                 if ($imageConfig->getMinFilesCount() > $i) {
                     $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.old_file|{$commonValidators}";
                     $validators["{$baseName}.{$i}.old_file"] = "required_without:{$baseName}.{$i}.file|{$commonValidators}";
-                } else {
-                    //$validators["{$baseName}.{$i}.file"] = $commonValidators;
                 }
             }
             $validators["{$baseName}.*.file"] = $commonValidators;

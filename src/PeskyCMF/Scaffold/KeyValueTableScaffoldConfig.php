@@ -87,6 +87,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         } else {
             $actionConfig = $this->getFormConfig();
         }
+        $keysAndValues[$table::getPkColumnName()] = 0;
         return cmfJsonResponse()->setData($actionConfig->prepareRecord($keysAndValues));
     }
 

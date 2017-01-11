@@ -2,6 +2,8 @@
 
 namespace PeskyCMF\Db\Column\Utils;
 
+use PeskyORM\ORM\RecordInterface;
+
 class FileConfig {
 
     const TXT = 'text/plain';
@@ -14,11 +16,9 @@ class FileConfig {
     /** @var string */
     protected $name;
     /** @var string */
-    protected $absolutePathToPublicRootFolder;
+    protected $absolutePathToFileFolder;
     /** @var string */
-    protected $relativeUrlToPublicRootFolder;
-    /** @var string */
-    protected $subfolder;
+    protected $relativeUrlToFileFolder;
     /** @var int */
     protected $minFilesCount = 0;
     /** @var int */
@@ -59,57 +59,49 @@ class FileConfig {
 
     public function __construct($name) {
         $this->name = $name;
-        $this->setSubfolder($name);
     }
 
     /**
-     * @param $absolutePath
+     * @param \Closure $pathBuilder - function (RecordInterface $record) { return '/var/www/site/public/table_name/column_name' }
      * @return $this
      */
-    public function setAbsolutePathToPublicRootFolder($absolutePath) {
-        $this->absolutePathToPublicRootFolder = rtrim($absolutePath, ' /\\') . DIRECTORY_SEPARATOR;
+    public function setAbsolutePathToFileFolder(\Closure $pathBuilder) {
+        $this->absolutePathToFileFolder = $pathBuilder;
         return $this;
     }
 
     /**
-     * @param int|string $primaryKeyValue
+     * @param RecordInterface $record
      * @return string
+     * @throws \UnexpectedValueException
      */
-    public function getAbsolutePathToPublicRootFolder($primaryKeyValue) {
-        return $this->absolutePathToPublicRootFolder . $primaryKeyValue . DIRECTORY_SEPARATOR;
+    public function getAbsolutePathToFileFolder(RecordInterface $record) {
+        if (empty($this->absolutePathToFileFolder)) {
+            throw new \UnexpectedValueException('Absolute path to file folder is not set');
+        }
+        return call_user_func($this->absolutePathToFileFolder, $record, $this);
     }
 
     /**
-     * @param int|string $primaryKeyValue
-     * @return string
-     */
-    public function getAbsolutePathToFileFolder($primaryKeyValue) {
-        return rtrim($this->getAbsolutePathToPublicRootFolder($primaryKeyValue) . $this->getSubfolder(), ' /\\') . DIRECTORY_SEPARATOR;
-    }
-
-    /**
-     * @param $relativeUrl
+     * Builder returns relatiove url to folder where all images are
+     * @param \Closure $relativeUrlBuilder - function (RecordInterface $record) { return '/assets/sub/' . $record->getPrimaryKeyValue(); }
      * @return $this
      */
-    public function setRelativeUrlToPublicRootFolder($relativeUrl) {
-        $this->relativeUrlToPublicRootFolder = rtrim($relativeUrl, ' /\\') . '/';
+    public function setRelativeUrlToFileFolder(\Closure $relativeUrlBuilder) {
+        $this->relativeUrlToFileFolder = $relativeUrlBuilder;
         return $this;
     }
 
     /**
-     * @param int|string $primaryKeyValue
+     * @param RecordInterface $record
      * @return string
+     * @throws \UnexpectedValueException
      */
-    protected function getRelativeUrlToPublicRootFolder($primaryKeyValue) {
-        return $this->relativeUrlToPublicRootFolder . preg_replace('%[^a-zA-Z0-9_-]+%', '_', $primaryKeyValue) . '/';
-    }
-
-    /**
-     * @param int|string $primaryKeyValue
-     * @return string
-     */
-    public function getRelativeUrlToFileFolder($primaryKeyValue) {
-        return rtrim($this->getRelativeUrlToPublicRootFolder($primaryKeyValue) . $this->getSubfolder(), ' /\\') . '/';
+    public function getRelativeUrlToFileFolder(RecordInterface $record) {
+        if (empty($this->relativeUrlToFileFolder)) {
+            throw new \UnexpectedValueException('Relative url to file folder is not set');
+        }
+        return call_user_func($this->relativeUrlToFileFolder, $record, $this);
     }
 
     /**
@@ -117,22 +109,6 @@ class FileConfig {
      */
     public function getName() {
         return $this->name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSubfolder() {
-        return $this->subfolder;
-    }
-
-    /**
-     * @param string $subfolder
-     * @return $this
-     */
-    public function setSubfolder($subfolder) {
-        $this->subfolder = preg_replace('%[^a-zA-Z0-9-_]+%', '-', $subfolder);
-        return $this;
     }
 
     /**
@@ -221,9 +197,8 @@ class FileConfig {
 
     /**
      * Function that will build a name for a new file (without extension)
-     * @param \Closure $fileNameBuilder =
-     *      function (FileConfig $fileConfig, $fileNumber = null)
-     *          { return $fileConfig->getName() . (string)$fileNumber }
+     * @param \Closure $fileNameBuilder -
+     *    function (FileConfig $fileConfig, $fileSuffix = null) { return $fileConfig->getName() . (string)$fileSuffix }
      * @return $this
      */
     public function setFileNameBuilder(\Closure $fileNameBuilder) {

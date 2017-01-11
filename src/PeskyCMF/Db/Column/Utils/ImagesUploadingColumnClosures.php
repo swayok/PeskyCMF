@@ -252,13 +252,12 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
         $newFiles = $valueContainer->pullDataForSavingExtender();
         /** @var ImagesColumn $column */
         $column = $valueContainer->getColumn();
-        $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
         $baseSuffix = time();
         if (!empty($newFiles)) {
             $value = $valueContainer->getRecord()->getValue($valueContainer->getColumn()->getName(), 'array');
             foreach ($newFiles as $imageName => $fileUploads) {
                 $imageConfig = $column->getImageConfiguration($imageName);
-                $dir = $imageConfig->getAbsolutePathToFileFolder($pkValue);
+                $dir = $imageConfig->getAbsolutePathToFileFolder($valueContainer->getRecord());
                 if ($imageConfig->getMaxFilesCount() === 1) {
                     \File::cleanDirectory($dir);
                 }
@@ -270,13 +269,13 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                         && is_array($oldFile = json_decode($uploadInfo['old_file'], true))
                         && static::isFileInfoArray($oldFile)
                     ) {
-                        $existingFileInfo = FileInfo::fromArray($oldFile, $imageConfig, $pkValue);
+                        $existingFileInfo = FileInfo::fromArray($oldFile, $imageConfig, $valueContainer->getRecord());
                         \File::delete($existingFileInfo->getAbsoluteFilePath());
                         \File::cleanDirectory($existingFileInfo->getAbsolutePathToModifiedImagesFolder());
                     }
                     $file = array_get($uploadInfo, 'file', false);
                     if (!empty($file)) {
-                        $fileInfo = FileInfo::fromSplFileInfo($file, $imageConfig, $pkValue, $baseSuffix + $filesSaved);
+                        $fileInfo = FileInfo::fromSplFileInfo($file, $imageConfig, $valueContainer->getRecord(), $baseSuffix + $filesSaved);
                         $filesSaved++;
                         // save not modified file to $dir
                         if ($file instanceof UploadedFile) {
@@ -332,9 +331,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             $column = $valueContainer->getColumn();
             $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
             foreach ($column as $imageName => $imageConfig) {
-                \File::cleanDirectory($imageConfig->getAbsolutePathToFileFolder($pkValue));
+                \File::cleanDirectory($imageConfig->getAbsolutePathToFileFolder($valueContainer->getRecord()));
                 if ($pkValue) {
-                    \File::cleanDirectory($imageConfig->getAbsolutePathToPublicRootFolder($pkValue));
+                    \File::cleanDirectory($imageConfig->getAbsolutePathToFileFolder($valueContainer->getRecord()));
                 }
             }
         }
@@ -360,13 +359,12 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     // return FileInfo object or array of FileInfo objects by image config name provided via $format
                     $record = $valueContainer->getRecord();
                     $value = $record->getValue($column->getName(), 'array');
-                    $pkValue = $record->getPrimaryKeyValue();
                     $imageConfig = $column->getImageConfiguration($format);
                     $ret = [];
                     if (!empty($value[$format]) && is_array($value[$format])) {
                         foreach ($value[$format] as $imageInfoArray) {
                             if (static::isFileInfoArray($imageInfoArray)) {
-                                $imageInfo = FileInfo::fromArray($imageInfoArray, $imageConfig, $pkValue);
+                                $imageInfo = FileInfo::fromArray($imageInfoArray, $imageConfig, $record);
                                 if ($imageInfo->exists()) {
                                     $ret[] = $imageInfo;
                                 }
@@ -394,7 +392,6 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 'format:' . $format,
                 function () use ($valueContainer, $format, $column) {
                     $value = parent::valueFormatter($valueContainer, 'array');
-                    $pkValue = $valueContainer->getRecord()->getPrimaryKeyValue();
                     $ret = [];
                     foreach ($value as $imageName => $imageInfo) {
                         if (is_array($imageInfo)) {
@@ -402,7 +399,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                             $ret[$imageName] = [];
                             foreach ($imageInfo as $realImageInfo) {
                                 if (static::isFileInfoArray($realImageInfo)) {
-                                    $fileInfo = FileInfo::fromArray($realImageInfo, $imageConfig, $pkValue);
+                                    $fileInfo = FileInfo::fromArray($realImageInfo, $imageConfig, $valueContainer->getRecord());
                                     if (!$fileInfo->exists()) {
                                         continue;
                                     }

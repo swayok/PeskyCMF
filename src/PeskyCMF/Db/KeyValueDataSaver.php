@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Db;
 
+use PeskyCMF\Db\Traits\KeyValueTableHelpers;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\FakeTable;
 use PeskyORM\ORM\Record;
@@ -60,7 +61,16 @@ class KeyValueDataSaver extends Record {
             }
         }
         static::$originalTable = $table;
-        static::$table = FakeTable::makeNewFakeTable($table::getName(), $columns);
+        $fkName = $table->getMainForeignKeyColumnName();
+        $fkName = empty($fkName) ? 'null' : "'{$fkName}'";
+        static::$table = FakeTable::makeNewFakeTable(
+            $table::getName(),
+            $columns,
+            null,
+            [KeyValueTableInterface::class],
+            [KeyValueTableHelpers::class],
+            "public function getMainForeignKeyColumnName() {return {$fkName};}"
+        );
         static::$table->getTableStructure()->markColumnAsPrimaryKey('fakeid');
         static::new1()
             ->updateValue(static::getPrimaryKeyColumnName(), 0, true)

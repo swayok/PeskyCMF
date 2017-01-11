@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Db\Column\Utils;
 
+use PeskyORM\ORM\RecordInterface;
 use Swayok\Utils\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -10,7 +11,7 @@ class FileInfo {
     /** @var FileConfig|ImageConfig */
     protected $fileConfig;
     /** @var int|string */
-    protected $primaryKeyValue;
+    protected $record;
     /** @var string */
     protected $fileName;
     /** @var null|int|string */
@@ -23,12 +24,12 @@ class FileInfo {
     /**
      * @param array $fileInfo
      * @param FileConfig|ImageConfig $fileConfig
-     * @param int|string $primaryKeyValue
+     * @param RecordInterface $record
      * @return static
      */
-    static public function fromArray(array $fileInfo, FileConfig $fileConfig, $primaryKeyValue) {
+    static public function fromArray(array $fileInfo, FileConfig $fileConfig, RecordInterface $record) {
         /** @var FileInfo $obj */
-        $obj = new static($fileConfig, $primaryKeyValue, array_get($fileInfo, 'suffix', null));
+        $obj = new static($fileConfig, $record, array_get($fileInfo, 'suffix', null));
         $obj
             ->setFileName(array_get($fileInfo, 'name', null))
             ->setFileExtension(array_get($fileInfo, 'extension', null))
@@ -39,12 +40,12 @@ class FileInfo {
     /**
      * @param \SplFileInfo $fileInfo
      * @param FileConfig|ImageConfig $fileConfig
-     * @param int|string $primaryKeyValue
+     * @param RecordInterface $record
      * @param null|int $fileSuffix
      * @return static
      */
-    static public function fromSplFileInfo(\SplFileInfo $fileInfo, FileConfig $fileConfig, $primaryKeyValue, $fileSuffix = null) {
-        $obj = new static($fileConfig, $primaryKeyValue, $fileSuffix);
+    static public function fromSplFileInfo(\SplFileInfo $fileInfo, FileConfig $fileConfig, RecordInterface $record, $fileSuffix = null) {
+        $obj = new static($fileConfig, $record, $fileSuffix);
         $obj->setFileExtension(
             $fileInfo instanceof UploadedFile ? $fileInfo->getClientOriginalExtension() : $fileInfo->getExtension()
         );
@@ -53,12 +54,12 @@ class FileInfo {
 
     /**
      * @param FileConfig $fileConfig
-     * @param int|string $primaryKeyValue
+     * @param RecordInterface $record
      * @param null|int $fileSuffix
      */
-    protected function __construct(FileConfig $fileConfig, $primaryKeyValue, $fileSuffix = null) {
+    protected function __construct(FileConfig $fileConfig, RecordInterface $record, $fileSuffix = null) {
         $this->fileConfig = $fileConfig;
-        $this->primaryKeyValue = $primaryKeyValue;
+        $this->record = $record;
         $this->fileSuffix = $fileSuffix;
     }
 
@@ -120,7 +121,7 @@ class FileInfo {
      * @throws \UnexpectedValueException
      */
     public function getAbsoluteFilePath() {
-        return $this->fileConfig->getAbsolutePathToFileFolder($this->primaryKeyValue) . $this->getFileNameWithExtension();
+        return $this->fileConfig->getAbsolutePathToFileFolder($this->record) . $this->getFileNameWithExtension();
     }
 
     /**
@@ -128,7 +129,7 @@ class FileInfo {
      * @throws \UnexpectedValueException
      */
     public function getAbsolutePathToModifiedImagesFolder() {
-        return $this->fileConfig->getAbsolutePathToFileFolder($this->primaryKeyValue) . $this->getFileName();
+        return $this->fileConfig->getAbsolutePathToFileFolder($this->record) . $this->getFileName();
     }
 
     /**
@@ -166,7 +167,7 @@ class FileInfo {
      * @throws \UnexpectedValueException
      */
     public function getRelativeUrl() {
-        return $this->fileConfig->getRelativeUrlToFileFolder($this->primaryKeyValue) . $this->getFileNameWithExtension();
+        return $this->fileConfig->getRelativeUrlToFileFolder($this->record) . $this->getFileNameWithExtension();
     }
 
     /**
@@ -194,7 +195,7 @@ class FileInfo {
                 $this->getAbsolutePathToModifiedImagesFolder()
             ),
             $this->fileConfig,
-            $this->primaryKeyValue,
+            $this->record,
             null
         );
     }

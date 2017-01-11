@@ -4,7 +4,9 @@ namespace PeskyCMF\Db\Column;
 
 use PeskyCMF\Db\Column\Utils\FileConfig;
 use PeskyCMF\Db\Column\Utils\ImageConfig;
+use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\RecordInterface;
 
 class FilesColumn extends Column implements \Iterator, \ArrayAccess {
 
@@ -12,7 +14,7 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
     /**
      * @var string
      */
-    protected $relativeUploadsFolder;
+    protected $relativeUploadsFolderPath;
     /**
      * @var ImageConfig[]|FileConfig[]|\Closure[]
      */
@@ -44,11 +46,18 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
      * @param null|string $name
      * @param null $notUsed
      * @return static
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     static public function create($name = null, $notUsed = null) {
         return new static($name);
     }
 
+    /**
+     * @param string|null $name
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     */
     public function __construct($name) {
         parent::__construct($name, static::TYPE_JSONB);
         $this
@@ -57,33 +66,77 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
     }
 
     /**
-     * @param string $folder
+     * Path to folder is relative to public_path()
+     * @param string|\Closure $folder - function (RecordInterface $record, FileConfig $fileConfig) { return 'path/to/folder'; }
      * @return $this
      */
-    public function setRelativeUploadsFolder($folder) {
-        $this->relativeUploadsFolder = trim($folder, ' /\\');
+    public function setRelativeUploadsFolderPath($folder) {
+        $this->relativeUploadsFolderPath = $folder;
         return $this;
     }
 
     /**
+     * @param RecordInterface $record
+     * @param FileConfig $fileConfig
      * @return string
      */
-    protected function getRelativeUploadsFolder() {
-        return $this->relativeUploadsFolder;
+    protected function getRelativeUploadsFolderPath(RecordInterface $record, FileConfig $fileConfig) {
+        if ($this->relativeUploadsFolderPath instanceof \Closure) {
+            return call_user_func($this->relativeUploadsFolderPath, $record, $fileConfig);
+        } else {
+            return $this->buildRelativeUploadsFolderPathForRecordAndFileConfig($record, $fileConfig);
+        }
     }
 
     /**
-     * @return string|null
+     * @param RecordInterface $record
+     * @param FileConfig $fileConfig
+     * @return string
      */
-    public function getAbsoluteFileUploadsFolder() {
-        return public_path($this->getRelativeUploadsFolder()) . DIRECTORY_SEPARATOR;
+    protected function buildRelativeUploadsFolderPathForRecordAndFileConfig(RecordInterface $record, FileConfig $fileConfig) {
+        $table = $record::getTable();
+        if ($table instanceof KeyValueTableInterface) {
+            $fkName = $table->getMainForeignKeyColumnName();
+            $subfolder = empty($fkName) ? '' : $record->getValue($fkName);
+        } else {
+            $subfolder = $record->getPrimaryKeyValue();
+        }
+        $subfolder = preg_replace('%[^a-zA-Z0-9_-]+%', '_', $subfolder);
+        return $this->relativeUploadsFolderPath . DIRECTORY_SEPARATOR . $subfolder . DIRECTORY_SEPARATOR . $fileConfig->getName();
     }
 
     /**
+     * @param string $path
      * @return string
      */
-    public function getRelativeFileUploadsUrl() {
-        return '/' . str_replace('\\', '/', $this->relativeUploadsFolder) . '/';
+    static protected function normalizeFolderPath($path) {
+        return preg_replace('%[/\\\]+%', DIRECTORY_SEPARATOR, rtrim($path, ' /\\')) . DIRECTORY_SEPARATOR;
+    }
+
+    /**
+     * @param RecordInterface $record
+     * @param FileConfig $fileConfig
+     * @return string
+     */
+    public function getAbsoluteFileUploadsFolder(RecordInterface $record, FileConfig $fileConfig) {
+        return static::normalizeFolderPath(public_path($this->getRelativeUploadsFolderPath($record, $fileConfig)));
+    }
+
+    /**
+     * @param RecordInterface $record
+     * @param FileConfig $fileConfig
+     * @return string
+     */
+    public function getRelativeFileUploadsUrl(RecordInterface $record, FileConfig $fileConfig) {
+        return static::normalizeFolderUrl($this->getRelativeUploadsFolderPath($record, $fileConfig));
+    }
+
+    /**
+     * @param string $url
+     * @return string
+     */
+    static protected function normalizeFolderUrl($url) {
+        return '/' . trim(preg_replace('%[\\\]+%', '/', $url), ' /') . '/';
     }
 
     /**
@@ -123,8 +176,12 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
             /** @var FileConfig $fileConfig */
             $fileConfig = new $class($name);
             $fileConfig
-                ->setAbsolutePathToPublicRootFolder($this->getAbsoluteFileUploadsFolder())
-                ->setRelativeUrlToPublicRootFolder($this->getRelativeFileUploadsUrl());
+                ->setAbsolutePathToFileFolder(function (RecordInterface $record, FileConfig $fileConfig) {
+                    return $this->getAbsoluteFileUploadsFolder($record, $fileConfig);
+                })
+                ->setRelativeUrlToFileFolder(function (RecordInterface $record, FileConfig $fileConfig) {
+                    return $this->getRelativeFileUploadsUrl($record, $fileConfig);
+                });
             if ($this->configs[$name] instanceof \Closure) {
                 call_user_func($this->configs[$name], $fileConfig);
             }
