@@ -152,6 +152,9 @@ return [
             'input' => [
                 'default_browser_title' => 'Default page title in browser',
                 'browser_title_addition' => 'Addition for page title in browser',
+                'languages' => 'Languages',
+                'languages_key' => 'Language code (2 symbols)',
+                'languages_value' => 'Language title',
             ],
             'tooltip' => [
                 'browser_title_addition' => 'Will not be added if pages title provided by "Default page title in browser" setting'
