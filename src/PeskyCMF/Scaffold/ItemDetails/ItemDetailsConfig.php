@@ -25,8 +25,8 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
      * Alias for setValueViewers
      * @param array $formInputs
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \InvalidArgumentException
      */
     public function setValueCells(array $formInputs) {
         return $this->setValueViewers($formInputs);
@@ -50,11 +50,12 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     /**
      * @param ValueRenderer|ValueCellRenderer $renderer
      * @param AbstractValueViewer|ValueCell $valueCell
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \UnexpectedValueException
      */
-    protected function configureDefaultValueRenderer(
-        ValueRenderer $renderer,
-        AbstractValueViewer $valueCell
-    ) {
+    protected function configureDefaultValueRenderer(ValueRenderer $renderer, AbstractValueViewer $valueCell) {
         switch ($valueCell->getType()) {
             case $valueCell::TYPE_IMAGE:
                 $renderer->setTemplate('cmf::details.image');

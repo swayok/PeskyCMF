@@ -2,12 +2,12 @@
 
 namespace PeskyCMF\Scaffold;
 
-class ScaffoldSectionException extends ScaffoldException {
+class ScaffoldSectionConfigException extends ScaffoldException {
     /** @var ScaffoldSectionConfig|null */
     private $scaffoldSectionConfig;
 
     /**
-     * ScaffoldSectionException constructor.
+     * ScaffoldSectionConfigException constructor.
      * @param ScaffoldSectionConfig|null $config
      * @param string $message
      */

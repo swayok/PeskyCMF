@@ -18,8 +18,8 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
 
     /**
      * @return \Closure
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
-     * @throws ValueViewerException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws ValueViewerConfigException
      */
     public function getRenderer() {
         if (empty($this->renderer)) {
@@ -27,7 +27,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
             if (!empty($defaultRenderer)) {
                 return $defaultRenderer;
             }
-            throw new ValueViewerException($this, 'FromFieldConfig->renderer is not provided');
+            throw new ValueViewerConfigException($this, 'FromFieldConfig->renderer is not provided');
         }
         return $this->renderer;
     }
@@ -45,9 +45,9 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     /**
      * @param array $dataForTemplate
      * @return string
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \Throwable
-     * @throws ValueViewerException
+     * @throws ValueViewerConfigException
      */
     public function render(array $dataForTemplate = []) {
         $configOrString = call_user_func_array($this->getRenderer(), [$this, $this->getScaffoldSectionConfig(), $dataForTemplate]);
@@ -61,7 +61,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
                 'model' => $this->getScaffoldSectionConfig()->getTable(),
             ]))->render() . $configOrString->getJavaScriptBlocks();
         } else {
-            throw new ValueViewerException($this, 'Renderer function returned unsopported result. String or ValueRenderer object expected');
+            throw new ValueViewerConfigException($this, 'Renderer function returned unsopported result. String or ValueRenderer object expected');
         }
     }
 

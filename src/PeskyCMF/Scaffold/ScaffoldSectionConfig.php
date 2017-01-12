@@ -100,7 +100,7 @@ abstract class ScaffoldSectionConfig {
 
     public function getTemplate() {
         if (empty($this->template)) {
-            throw new ScaffoldSectionException($this, 'Scaffold action view file not set');
+            throw new ScaffoldSectionConfigException($this, 'Scaffold section view file not set');
         }
         return $this->template;
     }
@@ -118,7 +118,7 @@ abstract class ScaffoldSectionConfig {
      * @param array $viewers
      * @return $this
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     protected function setValueViewers(array $viewers) {
         /** @var AbstractValueViewer|null $config */
@@ -176,11 +176,11 @@ abstract class ScaffoldSectionConfig {
     /**
      * @param string $name
      * @return DataGridColumn|ValueCell|FormInput|AbstractValueViewer|array
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     public function getValueViewer($name) {
         if (!$this->hasValueViewer($name)) {
-            throw new ScaffoldSectionException($this, "Scaffold action has not field with name [$name]");
+            throw new \InvalidArgumentException('Scaffold ' . get_class($this) . " has no viewer with name [$name]");
         }
         return $this->valueViewers[$name];
     }
@@ -197,8 +197,8 @@ abstract class ScaffoldSectionConfig {
      * @param string $name
      * @param null|AbstractValueViewer $viewer
      * @return $this
+     * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws ScaffoldSectionException
      */
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
         if (
@@ -206,7 +206,7 @@ abstract class ScaffoldSectionConfig {
             && (!$viewer || $viewer->isLinkedToDbColumn())
             && !$this->getTable()->getTableStructure()->hasColumn($name)
         ) {
-            throw new ScaffoldSectionException($this, "Unknown table column [$name]");
+            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$name]");
         }
         if (empty($viewer)) {
             $viewer = $this->createValueViewer();
@@ -259,7 +259,7 @@ abstract class ScaffoldSectionConfig {
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function prepareRecord(array $record) {
         /** @noinspection UnnecessaryParenthesesInspection */
@@ -403,7 +403,7 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @return \Closure|null
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function getDefaultValueRenderer() {
         if (!empty($this->defaultFieldRenderer)) {
@@ -420,7 +420,6 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @return ValueRenderer
-     * @throws ScaffoldSectionException
      */
     abstract protected function createValueRenderer();
 
@@ -560,7 +559,6 @@ abstract class ScaffoldSectionConfig {
             * ->setOnClick('someFunction(this)')
             * //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
      * @return $this
-     * @throws ScaffoldSectionException
      */
     public function setToolbarItems(\Closure $callback) {
         $this->toolbarItems = $callback;
@@ -614,11 +612,11 @@ abstract class ScaffoldSectionConfig {
     /**
      * @param array|\Closure $specialConditions - array or function (ScaffoldSectionConfig $scaffoldSectionConfig) {}
      * @return $this
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     public function setSpecialConditions($specialConditions) {
         if (!is_array($specialConditions) && !($specialConditions instanceof \Closure)) {
-            throw new ScaffoldSectionException($this, 'setSpecialConditions expects array or \Closure');
+            throw new \InvalidArgumentException('setSpecialConditions expects array or \Closure');
         }
         $this->specialConditions = $specialConditions;
         return $this;
@@ -673,11 +671,11 @@ abstract class ScaffoldSectionConfig {
      * - JS function will be called within the context of the data grid (use this to access it)
      * @param string $jsFunctionName
      * @return $this
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     public function setJsInitiator($jsFunctionName) {
         if (!is_string($jsFunctionName) && !preg_match('%^[$_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%s', $jsFunctionName)) {
-            throw new ScaffoldSectionException($this, "Invalid JavaScript funciton name: [$jsFunctionName]");
+            throw new \InvalidArgumentException("Invalid JavaScript funciton name: [$jsFunctionName]");
         }
         $this->jsInitiator = $jsFunctionName;
         return $this;

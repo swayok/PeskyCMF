@@ -4,7 +4,7 @@
 namespace PeskyCMF\Scaffold;
 
 
-class ValueViewerException extends ScaffoldSectionException {
+class ValueViewerConfigException extends ScaffoldSectionConfigException {
 
     /** @var AbstractValueViewer */
     private $valueViewer;

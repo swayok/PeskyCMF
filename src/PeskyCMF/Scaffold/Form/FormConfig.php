@@ -5,7 +5,7 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyCMF\Scaffold\ScaffoldSectionException;
+use PeskyCMF\Scaffold\ScaffoldSectionConfigException;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\ORM\Column;
@@ -91,11 +91,11 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /**
      * @return string
-     * @throws ScaffoldSectionException
+     * @throws ScaffoldSectionConfigException
      */
     public function getBulkEditingTemplate() {
         if (empty($this->bulkEditingTemplate)) {
-            throw new ScaffoldSectionException($this, 'The view file for bulk editing is not set');
+            throw new ScaffoldSectionConfigException($this, 'The view file for bulk editing is not set');
         }
         return $this->bulkEditingTemplate;
     }
@@ -114,7 +114,8 @@ class FormConfig extends ScaffoldSectionConfig {
      * - ['group lablel' => ['name1', 'name2' => FormInput::create(), ...]
      * Also you may use '/' as value to separate inputs with <hr>
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function setFormInputs(array $formInputs) {
@@ -146,6 +147,8 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param string $tabLabel
      * @param array $formInputs
      * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function addTab($tabLabel, array $formInputs) {
@@ -200,7 +203,8 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @param string $name
      * @return FormInput|AbstractValueViewer
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function getFormInput($name) {
         return $this->getValueViewer($name);
@@ -224,7 +228,8 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param string $name
      * @param AbstractValueViewer|null $viewer
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
@@ -257,6 +262,7 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /**
      * @return array
+     * @throws \UnexpectedValueException
      */
     public function getTooltipsForInputs() {
         if ($this->tooltips === null) {
@@ -276,7 +282,9 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @param string $inputName
      * @return bool
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public function hasTooltipForInput($inputName) {
         return (
@@ -288,7 +296,9 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @param string $inputName
      * @return mixed
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function getTooltipForInput($inputName) {
         if ($this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip()) {
@@ -302,7 +312,7 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param InputRenderer|ValueRenderer $renderer
      * @param FormInput|AbstractValueViewer $formInput
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
@@ -408,9 +418,9 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param array $columns
      * @return $this
      * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
     public function setBulkEditableColumns(array $columns) {
@@ -432,16 +442,16 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param null|FormInput $formInput - null: FormInput will be imported from $this->fields or created default one
      * @return $this
      * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws ScaffoldSectionException
      */
     public function addBulkEditableColumns($name, FormInput $formInput = null) {
         if ((!$formInput || $formInput->isLinkedToDbColumn()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
-            throw new ScaffoldSectionException($this, "Unknown table column [$name]");
+            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$name]");
         } else if ($this->getTable()->getTableStructure()->getColumn($name)->isItAFile()) {
-            throw new ScaffoldSectionException(
+            throw new ScaffoldSectionConfigException(
                 $this,
                 "Attaching files in bulk editing form is not suppoted. Table column: [$name]"
             );
@@ -474,7 +484,6 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /**
      * @return mixed|null
-     * @throws ScaffoldSectionException
      */
     public function getItemId() {
         return $this->itemId;
@@ -524,7 +533,7 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @param int|string|null $pkValue - primary key value
      * @return array[]
-     * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function loadOptions($pkValue) {
         $options = array();
@@ -605,10 +614,10 @@ class FormConfig extends ScaffoldSectionConfig {
      * @return array
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws \LogicException
-     * @throws ScaffoldSectionException
      */
     public function validateDataForCreate(array $data, array $messages = [], $isRevalidation = false) {
         return $this->validateData($data, $this->getValidatorsForCreate(), $messages, $isRevalidation);
@@ -621,10 +630,10 @@ class FormConfig extends ScaffoldSectionConfig {
      * @return array
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws \LogicException
-     * @throws ScaffoldSectionException
      */
     public function validateDataForEdit(array $data, array $messages = [], $isRevalidation = false) {
         return $this->validateData($data, $this->getValidatorsForEdit(), $messages, $isRevalidation);
@@ -637,10 +646,10 @@ class FormConfig extends ScaffoldSectionConfig {
      * @return array
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws \LogicException
-     * @throws ScaffoldSectionException
      */
     public function validateDataForBulkEdit(array $data, array $messages = [], $isRevalidation = false) {
         $rules = array_intersect_key($this->getValidatorsForEdit(), $data);
@@ -664,8 +673,18 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param array $data
      * @param $isRevalidation
      * @return array|bool|string - true: no errors | other: errors detected
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function beforeValidate(array $data, $isRevalidation) {
+        if (!$isRevalidation) {
+            foreach ($data as $key => &$value) {
+                if ($this->hasValueViewer($key)) {
+                    $value = $this->getFormInput($key)->modifyIncomingValueBeforeValidation($value, $data);
+                }
+            }
+            unset($value);
+        }
         if (!empty($this->beforeValidateCallback)) {
             $success = call_user_func($this->beforeValidateCallback, $data, $isRevalidation);
             if ($success !== true) {
@@ -682,13 +701,9 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param bool $isRevalidation
      * @param bool $isBulkEdit
      * @return array|string|bool
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      * @throws \LogicException
-     *
-     * @throws ScaffoldSectionException
      */
     public function validateData(
         array $data,
@@ -702,9 +717,6 @@ class FormConfig extends ScaffoldSectionConfig {
             return $success;
         }
 
-        if (!is_array($validators)) {
-            throw new ScaffoldSectionException($this, '$validators must be an array');
-        }
         if (empty($validators)) {
             return [];
         }
@@ -923,33 +935,30 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param array|\Closure $arrayOrCallable
+     * @param array|\Closure $arrayOrClosure
      *      - \Closure: funciton (array $defaults, FormConfig $formConfig) { return $defaults; }
      * @return $this
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
-    public function setDefaultValuesModifier($arrayOrCallable) {
-        if (!is_array($arrayOrCallable) && !($arrayOrCallable instanceof \Closure)) {
-            throw new ScaffoldSectionException($this, 'setDataToAddToRecord($arrayOrCallable) accepts only array or \Closure');
+    public function setDefaultValuesModifier($arrayOrClosure) {
+        if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
+            throw new \InvalidArgumentException('$stringOfFunction argument must be a string or \Closure');
         }
-        $this->defaultValuesModifier = $arrayOrCallable;
+        $this->defaultValuesModifier = $arrayOrClosure;
         return $this;
     }
 
     /**
      * @param array $defaults
      * @return array
-     * @throws ScaffoldSectionException
+     * @throws \UnexpectedValueException
      */
     public function alterDefaultValues(array $defaults) {
         if (!empty($this->defaultValuesModifier)) {
             if ($this->defaultValuesModifier instanceof \Closure) {
                 $defaults = call_user_func($this->defaultValuesModifier, $defaults, $this);
                 if (!is_array($defaults)) {
-                    throw new ScaffoldSectionException(
-                        $this,
-                        'Altering default values is invalid. Callback must return an array'
-                    );
+                    throw new \UnexpectedValueException('Default values modifier must return array');
                 }
             } else {
                 return array_merge($defaults, $this->defaultValuesModifier);
@@ -959,15 +968,15 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param $stringOfFunction - function (FormConfig $formConfig) { return '<div>'; }
+     * @param $stringOfClosure - function (FormConfig $formConfig) { return '<div>'; }
      * @return $this
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
-    public function setAdditionalHtmlForForm($stringOfFunction) {
-        if (!is_string($stringOfFunction) && !($stringOfFunction instanceof \Closure)) {
-            throw new ScaffoldSectionException($this, 'setAdditionalHtmlForForm($stringOfFunction) accepts only string or function');
+    public function setAdditionalHtmlForForm($stringOfClosure) {
+        if (!is_string($stringOfClosure) && !($stringOfClosure instanceof \Closure)) {
+            throw new \InvalidArgumentException('$stringOfFunction argument must be a string or \Closure');
         }
-        $this->additionalHtmlForForm = $stringOfFunction;
+        $this->additionalHtmlForForm = $stringOfClosure;
         return $this;
     }
 

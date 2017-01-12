@@ -4,7 +4,7 @@ namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyCMF\Scaffold\ScaffoldSectionException;
+use PeskyCMF\Scaffold\ScaffoldSectionConfigException;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyCMF\Scaffold\ScaffoldConfig;
@@ -76,8 +76,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * Alias for setValueViewers
      * @param array $formInputs
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \InvalidArgumentException
      */
     public function setColumns(array $formInputs) {
         return $this->setValueViewers($formInputs);
@@ -105,6 +105,10 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param DataGridCellRenderer|ValueRenderer $renderer
      * @param DataGridColumn|AbstractValueViewer $tableCell
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \UnexpectedValueException
      */
     protected function configureDefaultValueRenderer(
         ValueRenderer $renderer,
@@ -120,8 +124,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param array $columnNames
      * @return $this
+     * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function setInvisibleColumns(array $columnNames) {
         foreach ($columnNames as $name) {
@@ -191,11 +196,11 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param int $recordsPerPage
      * @return $this
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     public function setRecordsPerPage($recordsPerPage) {
         if (!ValidateValue::isInteger($recordsPerPage, true)) {
-            throw new ScaffoldSectionException($this, 'Integer value expected');
+            throw new \InvalidArgumentException('$recordsPerPage argument must be an integer value');
         }
         $this->recordsPerPage = min($this->maxLimit, $recordsPerPage);
         return $this;
@@ -211,11 +216,11 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param int $offset
      * @return $this
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     public function setOffset($offset) {
         if (!ValidateValue::isInteger($offset, true)) {
-            throw new ScaffoldSectionException($this, 'Integer value expected');
+            throw new \InvalidArgumentException('$offset argument must be an integer value');
         }
         $this->offset = max($offset, 0);
         return $this;
@@ -232,11 +237,11 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param string $orderBy
      * @param null $direction
      * @return $this
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     public function setOrderBy($orderBy, $direction = null) {
-        if (!($orderBy instanceof DbExpr) && !$this->table->getTableStructure()->hasColumn($orderBy)) {
-            throw new ScaffoldSectionException($this, "Unknown column [$orderBy]");
+        if (!($orderBy instanceof DbExpr) && !$this->getTable()->getTableStructure()->hasColumn($orderBy)) {
+            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$orderBy]");
         }
         if (!empty($direction)) {
             $this->setOrderDirection($direction);
@@ -255,11 +260,11 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param string $orderDirection
      * @return $this
-     * @throws ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     public function setOrderDirection($orderDirection) {
         if (!in_array(strtolower($orderDirection), array(self::ORDER_ASC, self::ORDER_DESC), true)) {
-            throw new ScaffoldSectionException($this, "Invalid order direction [$orderDirection]. Expected 'asc' or 'desc'");
+            throw new \InvalidArgumentException("Invalid order direction [$orderDirection]. Expected 'asc' or 'desc'");
         }
         $this->orderDirection = strtolower($orderDirection);
         return $this;
@@ -436,7 +441,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
             * //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
      * Conditions will be received in the 'conditions' key of the request as JSON string
      * @return $this
-     * @throws ScaffoldSectionException
      */
     public function setBulkActionsToolbarItems(\Closure $callback) {
         $this->bulkActionsToolbarItems = $callback;
@@ -446,7 +450,10 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param array $records
      * @return array
-     * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function prepareRecords(array $records) {
         foreach ($records as $idx => &$record) {
@@ -500,7 +507,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
      *
      * @return $this
      * @throws \Swayok\Html\HtmlTagException
-     * @throws ScaffoldSectionException
      */
     public function setRowActions(\Closure $rowActionsBuilder) {
         $this->rowActions = $rowActionsBuilder;
@@ -568,7 +574,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param null|DataGridColumn|AbstractValueViewer $tableCell
      * @return ScaffoldSectionConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \InvalidArgumentException
      */
     public function addValueViewer($name, AbstractValueViewer $tableCell = null) {
         $tableCell = !$tableCell && $name === static::ROW_ACTIONS_COLUMN_NAME
@@ -591,7 +597,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function finish() {

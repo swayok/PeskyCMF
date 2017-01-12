@@ -18,7 +18,7 @@ class ImagesFormInput extends FormInput {
      * @return \Closure
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
@@ -36,7 +36,7 @@ class ImagesFormInput extends FormInput {
      * @return InputRenderer
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */

@@ -81,7 +81,7 @@ abstract class AbstractValueViewer {
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws ValueViewerException
+     * @throws ValueViewerConfigException
      */
     public function getTableColumn() {
         return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($this->getName());
@@ -105,11 +105,11 @@ abstract class AbstractValueViewer {
 
     /**
      * @return null|string
-     * @throws ValueViewerException
+     * @throws ValueViewerConfigException
      */
     public function getName() {
         if (empty($this->name)) {
-            throw new ValueViewerException($this, 'Field name not provided');
+            throw new ValueViewerConfigException($this, 'Field name not provided');
         }
         return $this->name;
     }
@@ -128,7 +128,7 @@ abstract class AbstractValueViewer {
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getType() {
         if (empty($this->type)) {
@@ -216,7 +216,7 @@ abstract class AbstractValueViewer {
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws ValueViewerException
+     * @throws ValueViewerConfigException
      */
     public function convertValue($value, array $record, $ignoreValueConverter = false) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
@@ -285,7 +285,7 @@ abstract class AbstractValueViewer {
             }
         }
         if (empty($relationConfig)) {
-            throw new ValueViewerException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
+            throw new ValueViewerConfigException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
         if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getDisplayColumnName()])) {
             return cmfTransGeneral('.item_details.field.no_relation');

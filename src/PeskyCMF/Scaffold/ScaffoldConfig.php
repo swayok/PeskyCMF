@@ -82,7 +82,7 @@ abstract class ScaffoldConfig {
     /**
      * @return array
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws ScaffoldSectionException
+     * @throws ScaffoldSectionConfigException
      */
     public function getConfigs() {
         $configs = [
@@ -91,19 +91,19 @@ abstract class ScaffoldConfig {
         ];
         $configs['dataGridConfig'] = $this->getDataGridConfig();
         if (!($configs['dataGridConfig'] instanceof DataGridConfig)) {
-            throw new ScaffoldSectionException(null, 'createDataGridConfig() should return instance of DataGridConfig class');
+            throw new ScaffoldSectionConfigException(null, 'createDataGridConfig() should return instance of DataGridConfig class');
         }
         $configs['dataGridFilterConfig'] = $this->getDataGridFilterConfig();
         if (!($configs['dataGridFilterConfig'] instanceof FilterConfig)) {
-            throw new ScaffoldSectionException(null, 'createDataGridFilterConfig() should return instance of FilterConfig class');
+            throw new ScaffoldSectionConfigException(null, 'createDataGridFilterConfig() should return instance of FilterConfig class');
         }
         $configs['itemDetailsConfig'] = $this->getItemDetailsConfig();
         if (!($configs['itemDetailsConfig'] instanceof ItemDetailsConfig)) {
-            throw new ScaffoldSectionException(null, 'createItemDetailsConfig() should return instance of ItemDetailsConfig class');
+            throw new ScaffoldSectionConfigException(null, 'createItemDetailsConfig() should return instance of ItemDetailsConfig class');
         }
         $configs['formConfig'] = $this->getFormConfig();
         if (!($configs['formConfig'] instanceof FormConfig)) {
-            throw new ScaffoldSectionException(null, 'createFormConfig() should return instance of FormConfig class');
+            throw new ScaffoldSectionConfigException(null, 'createFormConfig() should return instance of FormConfig class');
         }
         return $configs;
     }
@@ -138,7 +138,7 @@ abstract class ScaffoldConfig {
 
     /**
      * @return DataGridConfig
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function getDataGridConfig() {

@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyCMF\Scaffold\ValueViewerException;
+use PeskyCMF\Scaffold\ValueViewerConfigException;
 use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyORM\ORM\Column;
 
@@ -53,7 +53,7 @@ class FormInput extends RenderableValueViewer {
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws ValueViewerException
+     * @throws ValueViewerConfigException
      */
     public function getDefaultId() {
         return static::makeDefaultId(
@@ -82,11 +82,11 @@ class FormInput extends RenderableValueViewer {
     /**
      * @param null|array|callable $options
      * @return $this
-     * @throws ValueViewerException
+     * @throws ValueViewerConfigException
      */
     public function setOptions($options) {
         if (!is_array($options) && !is_callable($options)) {
-            throw new ValueViewerException($this, '$options should be an array');
+            throw new ValueViewerConfigException($this, '$options should be an array');
         }
         $this->options = $options;
         return $this;
@@ -175,7 +175,7 @@ class FormInput extends RenderableValueViewer {
      * @param null|InputRenderer $renderer
      * @return string
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
@@ -233,6 +233,17 @@ class FormInput extends RenderableValueViewer {
      */
     public function getValidators() {
         return [];
+    }
+
+    /**
+     * Modify incoming value before validating it. May be useful for situations when you need to clean
+     * incoming value from unnecessary data
+     * @param mixed $value
+     * @param array $data
+     * @return mixed
+     */
+    public function modifyIncomingValueBeforeValidation($value, array $data) {
+        return $value;
     }
 
 }
