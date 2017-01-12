@@ -106,7 +106,7 @@ body #page-wrapper {
   content: '';
   position: absolute;
   z-index: 51;
-  top: 50%;
+  top: -50px;
   left: 50%;
   margin: -25px 0 0 -25px;
   width: 50px;
@@ -122,10 +122,12 @@ body #page-wrapper {
   -moz-animation: cssload-spin 725ms infinite linear;
   opacity: 0;
   filter: alpha(opacity=0);
-  -webkit-transition: opacity 0.2s linear, top 0.2s linear, left 0.2s linear;
-  -moz-transition: opacity 0.2s linear, top 0.2s linear, left 0.2s linear;
-  -o-transition: opacity 0.2s linear, top 0.2s linear, left 0.2s linear;
-  transition: opacity 0.2s linear, top 0.2s linear, left 0.2s linear;
+  -webkit-transition: opacity 0.2s linear, left 0.2s linear;
+  -moz-transition: opacity 0.2s linear, left 0.2s linear;
+  -o-transition: opacity 0.2s linear, left 0.2s linear;
+  transition: opacity 0.2s linear, left 0.2s linear;
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
 }
 .has-preloader.loading:before,
 .has-preloader.overlay:before {
@@ -144,6 +146,9 @@ body #page-wrapper {
 .has-preloader.loading:after {
   opacity: 1;
   filter: alpha(opacity=100);
+  top: 50%;
+  -webkit-animation-play-state: running;
+  animation-play-state: running;
 }
 .has-preloader.loading.no-overlay:before {
   background-color: transparent;
@@ -345,7 +350,7 @@ div.dataTables_wrapper div.dataTables_processing:after {
   content: '';
   position: absolute;
   z-index: 51;
-  top: 50%;
+  top: -50px;
   left: 50%;
   margin: -25px 0 0 -25px;
   width: 50px;
@@ -361,10 +366,12 @@ div.dataTables_wrapper div.dataTables_processing:after {
   -moz-animation: cssload-spin 725ms infinite linear;
   opacity: 0;
   filter: alpha(opacity=0);
-  -webkit-transition: opacity 0.2s linear, top 0.2s linear, left 0.2s linear;
-  -moz-transition: opacity 0.2s linear, top 0.2s linear, left 0.2s linear;
-  -o-transition: opacity 0.2s linear, top 0.2s linear, left 0.2s linear;
-  transition: opacity 0.2s linear, top 0.2s linear, left 0.2s linear;
+  -webkit-transition: opacity 0.2s linear, left 0.2s linear;
+  -moz-transition: opacity 0.2s linear, left 0.2s linear;
+  -o-transition: opacity 0.2s linear, left 0.2s linear;
+  transition: opacity 0.2s linear, left 0.2s linear;
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
 }
 div.dataTables_wrapper div.dataTables_processing.loading:before,
 div.dataTables_wrapper div.dataTables_processing.overlay:before {
@@ -383,6 +390,9 @@ div.dataTables_wrapper div.dataTables_processing.overlay:before {
 div.dataTables_wrapper div.dataTables_processing.loading:after {
   opacity: 1;
   filter: alpha(opacity=100);
+  top: 50%;
+  -webkit-animation-play-state: running;
+  animation-play-state: running;
 }
 div.dataTables_wrapper div.dataTables_processing.loading.no-overlay:before {
   background-color: transparent;

@@ -158,7 +158,7 @@ return [
             ],
             'tooltip' => [
                 'browser_title_addition' => 'Will not be added if pages title provided by "Default page title in browser" setting'
-            ]
+            ],
         ],
     ]
 ];

@@ -100,6 +100,11 @@ return [
                 'add_file' => 'Add file',
                 'add_image' => 'Add image'
             ],
+            'key_value_set' => [
+                'add_row' => 'Add row',
+                'delete_row' => 'Remove row',
+                'row_delete_action_forbidden' => 'Row delete is forbidden. You need to maintain minimal required row count.'
+            ],
         ],
         'bulk_edit' => [
             'enabler' => [

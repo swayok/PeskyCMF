@@ -118,7 +118,7 @@ body {
         content: '';
         position: absolute;
         z-index: 51;
-        top: 50%;
+        top: -50px;
         left: 50%;
         margin: -25px 0 0 -25px;
 
@@ -127,9 +127,11 @@ body {
 
         @transitions:
             opacity @transitionDuration linear,
-            top @transitionDuration linear,
             left @transitionDuration linear;
         .transition(@transitions);
+
+        -webkit-animation-play-state: paused;
+        animation-play-state: paused;
     }
 
     &.loading,
@@ -152,6 +154,10 @@ body {
     &.loading {
         &:after {
             ._fade-in;
+            top: 50%;
+
+            -webkit-animation-play-state: running;
+            animation-play-state: running;
         }
 
         &.no-overlay:before {
