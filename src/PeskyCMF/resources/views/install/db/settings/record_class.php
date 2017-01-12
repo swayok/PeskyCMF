@@ -2,7 +2,7 @@
 
 namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
-use App\Db\AbstractRecord;
+use <?php echo $parentFullClassNameForRecord ?>;
 
 /**
  * @property-read int         $id
@@ -15,7 +15,7 @@ use App\Db\AbstractRecord;
  * @method $this    setAdminId($value, $isFromDb = false)
  * @method $this    setValue($value, $isFromDb = false)
  */
-class <?php echo $baseClassNameSingular; ?> extends AbstractRecord {
+class <?php echo $baseClassNameSingular; ?> extends <?php echo $parentClassNameForRecord ?> {
 
     /**
      * @return <?php echo $baseClassNamePlural; ?>Table

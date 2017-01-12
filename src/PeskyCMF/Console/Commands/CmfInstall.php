@@ -2,11 +2,11 @@
 
 namespace PeskyCMF\Console\Commands;
 
-use Illuminate\Database\Console\Migrations\BaseCommand;
+use Illuminate\Console\Command;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 
-class CmfInstall extends BaseCommand {
+class CmfInstall extends Command {
 
     protected $description = 'Install CMF';
     protected $signature = 'cmf:install {app_subfolder=Admin} {url_prefix=admin} {database_classes_app_subfolder=Db}';

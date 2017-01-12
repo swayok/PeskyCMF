@@ -2,9 +2,9 @@
 
 namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
-use App\<?php echo $dbClassesAppSubfolder ?>\AbstractTable;
+use <?php echo $parentFullClassNameForTable ?>;
 
-class <?php echo $baseClassNamePlural; ?>Table extends AbstractTable {
+class <?php echo $baseClassNamePlural; ?>Table extends <?php echo $parentClassNameForTable ?> {
 
     /**
      * @return <?php echo $baseClassNamePlural; ?>TableStructure
@@ -14,7 +14,7 @@ class <?php echo $baseClassNamePlural; ?>Table extends AbstractTable {
     }
 
     /**
-     * @return <?php echo $baseClassNameSingular; ?>
+     * @return <?php echo $baseClassNameSingular . "\n"; ?>
      */
     public function newRecord() {
         return new <?php echo $baseClassNameSingular; ?>();

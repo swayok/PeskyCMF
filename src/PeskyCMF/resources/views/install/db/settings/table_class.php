@@ -2,11 +2,11 @@
 
 namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
 
-use App\<?php echo $dbClassesAppSubfolder ?>\AbstractTable;
+use <?php echo $parentFullClassNameForTable ?>;
 use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyCMF\Db\Traits\KeyValueTableHelpers;
 
-class <?php echo $baseClassNamePlural; ?>Table extends AbstractTable implements KeyValueTableInterface {
+class <?php echo $baseClassNamePlural; ?>Table extends <?php echo $parentClassNameForTable ?> implements KeyValueTableInterface {
 
     use KeyValueTableHelpers;
 
@@ -22,7 +22,7 @@ class <?php echo $baseClassNamePlural; ?>Table extends AbstractTable implements 
     }
 
     /**
-     * @return <?php echo $baseClassNameSingular; ?>
+     * @return <?php echo $baseClassNameSingular . "\n"; ?>
      */
     public function newRecord() {
         return new <?php echo $baseClassNameSingular; ?>();

@@ -5,7 +5,7 @@ namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlur
 use PeskyCMF\Db\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyORM\ORM\Column;
-use PeskyORM\ORM\TableStructure;
+use <?php echo $parentFullClassNameForTableStructure ?>;
 
 /**
  * @property-read Column    $id
@@ -13,7 +13,7 @@ use PeskyORM\ORM\TableStructure;
  * @property-read Column    $admin_id
  * @property-read Column    $value
  */
-class <?php echo $baseClassNamePlural; ?>TableStructure extends TableStructure {
+class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $parentClassNameForTableStructure ?> {
 
     use IdColumn,
         AdminIdColumn;

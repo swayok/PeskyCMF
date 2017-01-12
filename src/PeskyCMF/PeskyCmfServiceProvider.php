@@ -6,6 +6,7 @@ use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfInstallAdmins;
+use PeskyCMF\Console\Commands\CmfInstallSettings;
 use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 
@@ -119,6 +120,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
     protected function registerCommands() {
         $this->registerInstallCommand();
         $this->registerInstallAdminsCommand();
+        $this->registerInstallSettingsCommand();
         $this->registerAddAdminCommand();
         $this->registerMakeDbClassesCommand();
         $this->registerMakeScaffoldCommand();
@@ -136,6 +138,13 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             return new CmfInstallAdmins();
         });
         $this->commands('command.cmf.install-admins');
+    }
+
+    protected function registerInstallSettingsCommand() {
+        $this->app->singleton('command.cmf.install-settings', function() {
+            return new CmfInstallSettings();
+        });
+        $this->commands('command.cmf.install-settings');
     }
 
     protected function registerAddAdminCommand() {
