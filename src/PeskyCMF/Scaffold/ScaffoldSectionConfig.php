@@ -72,6 +72,7 @@ abstract class ScaffoldSectionConfig {
      * @var string
      */
     protected $jsInitiator = null;
+    protected $isFinished = false;
 
     /**
      * @param TableInterface $table
@@ -682,11 +683,23 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
+     * Called before scaffold template rendering
+     */
+    public function beforeRender() {
+
+    }
+
+    /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
+     * @throws \BadMethodCallException
      */
     public function finish() {
-
+        if ($this->isFinished) {
+            throw new \BadMethodCallException('Attempt to call ' . get_class($this) . '->finish() twice');
+        } else {
+            $this->isFinished = true;
+        }
     }
 
 }

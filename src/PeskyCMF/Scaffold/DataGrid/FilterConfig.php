@@ -386,4 +386,11 @@ class FilterConfig {
 
     }
 
+    /**
+     * Called before scaffold template rendering
+     */
+    public function beforeRender() {
+
+    }
+
 }

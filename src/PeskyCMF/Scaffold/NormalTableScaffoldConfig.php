@@ -123,7 +123,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $table = $this->getTable();
         $formConfig = $this->getFormConfig();
-        $data = $this->getRequest()->only(array_keys($formConfig->getValueViewers()));
+        $data = $formConfig->modifyIncomingDataBeforeValidation(
+            $this->getRequest()->only(array_keys($formConfig->getValueViewers()))
+        );
         $errors = $formConfig->validateDataForCreate($data);
         if (count($errors) !== 0) {
             return $this->sendValidationErrorsResponse($errors);
@@ -193,7 +195,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $formConfig = $this->getFormConfig();
         $expectedFields = array_keys($formConfig->getValueViewers());
         $expectedFields[] = $table->getPkColumnName();
-        $data = $data = $this->getRequest()->only(array_keys($expectedFields));
+        $data = $formConfig->modifyIncomingDataBeforeValidation(
+            $this->getRequest()->only(array_keys($expectedFields))
+        );
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {
             return $this->sendValidationErrorsResponse($errors);

@@ -42,6 +42,7 @@ $configNameToInputId = [];
         </div>
         <div class="form-group">
             <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>">
+            <?php //todo: echo $imageConfig->getTooltip(); ?>
         </div>
         <?php if ($imageConfig->getMaxFilesCount() > 1): ?>
             <div class="mv15 text-center">

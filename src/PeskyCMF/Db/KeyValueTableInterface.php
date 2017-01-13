@@ -51,6 +51,6 @@ interface KeyValueTableInterface extends TableInterface {
      * @param mixed $default
      * @return array
      */
-    static public function getValueByKeyAndForeignKeyValue($key, $foreignKeyValue = null, $default = null);
+    static public function getValue($key, $foreignKeyValue = null, $default = null);
 
 }

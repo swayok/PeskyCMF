@@ -42,9 +42,9 @@ class CmfScaffoldApiController extends Controller {
             $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getTable(), $this->getTableNameForRoutes());
             if ($customScaffoldConfig instanceof ScaffoldConfig) {
                 $this->scaffoldConfig = $customScaffoldConfig;
-            } else if (!empty($customScaffoldConfig)) {
+            } else {
                 throw new \UnexpectedValueException(
-                    get_class($cmfConfig) . '::getScaffoldConfig() must return null or instance of ScaffoldConfig class. '
+                    get_class($cmfConfig) . '::getScaffoldConfig() must instance of ScaffoldConfig class. '
                         . (is_object($customScaffoldConfig) ? get_class($customScaffoldConfig) : gettype($customScaffoldConfig))
                         . ' Received'
                 );

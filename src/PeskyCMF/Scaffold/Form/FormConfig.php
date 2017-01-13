@@ -677,14 +677,6 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function beforeValidate(array $data, $isRevalidation) {
-        if (!$isRevalidation) {
-            foreach ($data as $key => &$value) {
-                if ($this->hasValueViewer($key)) {
-                    $value = $this->getFormInput($key)->modifyIncomingValueBeforeValidation($value, $data);
-                }
-            }
-            unset($value);
-        }
         if (!empty($this->beforeValidateCallback)) {
             $success = call_user_func($this->beforeValidateCallback, $data, $isRevalidation);
             if ($success !== true) {
@@ -692,6 +684,21 @@ class FormConfig extends ScaffoldSectionConfig {
             }
         }
         return true;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     */
+    public function modifyIncomingDataBeforeValidation(array $data) {
+        foreach ($data as $key => &$value) {
+            if ($this->hasValueViewer($key)) {
+                $value = $this->getFormInput($key)->modifyIncomingValueBeforeValidation($value, $data);
+            }
+        }
+        return $data;
     }
 
     /**
@@ -993,7 +1000,7 @@ class FormConfig extends ScaffoldSectionConfig {
         }
     }
 
-    public function finish() {
+    public function beforeRender() {
         foreach ($this->getTooltipsForInputs() as $inputName => $tooltip) {
             if ($this->hasFormInput($inputName)) {
                 $input = $this->getFormInput($inputName);
@@ -1002,8 +1009,6 @@ class FormConfig extends ScaffoldSectionConfig {
                 }
             }
         }
-        parent::finish();
     }
-
 
 }

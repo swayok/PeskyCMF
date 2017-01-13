@@ -1,19 +1,13 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
+ * @var \PeskyCMF\Scaffold\Form\KeyValueSetFormInput $fieldConfig
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var string $translationPrefix
- * @var int $minValuesCount
- * @var int $maxValuesCount
- * @var string $keysLabel
- * @var string $valuesLabel
  */
-$minValuesCount = empty($minValuesCount) ? 0 : max(0, (int)$minValuesCount);
-$maxValuesCount = empty($maxValuesCount) ? 0 : max(0, (int)$maxValuesCount);
-$keysLabel = empty($keysLabel) ? '' : $keysLabel;
-$valuesLabel = empty($valuesLabel) ? '' : $valuesLabel;
+$keysLabel = $fieldConfig->getKeysLabel();
+$valuesLabel = $fieldConfig->getValuesLabel();
 $defaultId = $fieldConfig->getDefaultId();
 $inputName = $fieldConfig->getName();
 ?>
@@ -34,7 +28,7 @@ $inputName = $fieldConfig->getName();
             </td>
             <td class="delete text-center">
                 <a href="javascript: void(0)" class="text-danger delete-row" data-toggle="tooltip"
-                 title="<?php echo cmfTransGeneral('.form.input.key_value_set.delete_row') ?>">
+                 title="<?php echo $fieldConfig->getDeleteRowButtonLabel() ?>">
                     <i class="glyphicon glyphicon-remove fs16 lh30"></i>
                 </a>
             </td>
@@ -55,15 +49,14 @@ $inputName = $fieldConfig->getName();
         </tbody>
     </table>
     <div class="form-group">
-        <input type="hidden" disabled name="<?php echo $defaultId; ?>[]" id="<?php echo $defaultId; ?>">
+        <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $defaultId; ?>">
     </div>
-    <?php if ($maxValuesCount > 1): ?>
-        <div class="mv15 text-center">
-            <button type="button" class="btn btn-default btn-sm" id="<?php echo $defaultId; ?>-add-row">
-                <?php echo cmfTransGeneral('.form.input.key_value_set.add_row') ?>
-            </button>
-        </div>
-    <?php endif;?>
+    <div class="mv15 text-center">
+        <button type="button" class="btn btn-default btn-sm" id="<?php echo $defaultId; ?>-add-row">
+            <?php echo $fieldConfig->getAddRowButtonLabel() ?>
+        </button>
+    </div>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
     <hr>
 </div>
 
@@ -72,8 +65,8 @@ $inputName = $fieldConfig->getName();
         var $rowsContainer = $('#<?php echo $defaultId ?>-rows-container');
         var rowTpl = doT.template($('#<?php echo $defaultId ?>-row-tpl').html());
         var values = {{= JSON.stringify(<?php echo 'it.' . $fieldConfig->getName() ?>) }};
-        var maxRows = <?php echo $maxValuesCount; ?>;
-        var minRows = <?php echo $minValuesCount; ?>;
+        var maxRows = <?php echo $fieldConfig->getMaxValuesCount(); ?>;
+        var minRows = <?php echo $fieldConfig->getMinValuesCount(); ?>;
         var rowIndex = 0;
         var rowsCount = 0;
         var addRow = function (tplData) {

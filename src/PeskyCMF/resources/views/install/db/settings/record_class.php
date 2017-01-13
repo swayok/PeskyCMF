@@ -17,6 +17,10 @@ use <?php echo $parentFullClassNameForRecord ?>;
  */
 class <?php echo $baseClassNameSingular; ?> extends <?php echo $parentClassNameForRecord ?> {
 
+    const DEFAULT_BROWSER_TITLE = 'default_browser_title';
+    const BROWSER_TITLE_ADDITION = 'browser_title_addition';
+    const LANGUAGES = 'languages';
+
     /**
      * @return <?php echo $baseClassNamePlural; ?>Table
      */

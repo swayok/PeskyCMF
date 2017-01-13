@@ -6,8 +6,14 @@ class KeyValueSetFormInput extends FormInput {
 
     protected $minValuesCount = 0;
     protected $maxValuesCount = 0; //< 0 = infinite
+    /** @var string */
     protected $keysLabel;
+    /** @var string */
     protected $valuesLabel;
+    /** @var string */
+    protected $addRowButtonLabel;
+    /** @var string */
+    protected $deleteRowButtonLabel;
 
     /**
      * @return int
@@ -42,34 +48,66 @@ class KeyValueSetFormInput extends FormInput {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getKeysLabel() {
         return $this->keysLabel ?: cmfTransCustom('.' . $this->getScaffoldSectionConfig()->getTable()->getName() . '.form.input.' . $this->getName() . '_key');
     }
 
     /**
-     * @param mixed $keysLabel
+     * @param string $keysLabel
      * @return $this
      */
     public function setKeysLabel($keysLabel) {
-        $this->keysLabel = $keysLabel;
+        $this->keysLabel = (string)$keysLabel;
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getValuesLabel() {
         return $this->valuesLabel ?: cmfTransCustom('.' . $this->getScaffoldSectionConfig()->getTable()->getName() . '.form.input.' . $this->getName() . '_value');
     }
 
     /**
-     * @param mixed $valuesLabel
+     * @param string $valuesLabel
      * @return $this
      */
     public function setValuesLabel($valuesLabel) {
-        $this->valuesLabel = $valuesLabel;
+        $this->valuesLabel = (string)$valuesLabel;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddRowButtonLabel() {
+        return $this->addRowButtonLabel ?: cmfTransGeneral('.form.input.key_value_set.add_row');
+    }
+
+    /**
+     * @param string $addRowButtonLabel
+     * @return $this
+     */
+    public function setAddRowButtonLabel($addRowButtonLabel) {
+        $this->addRowButtonLabel = $addRowButtonLabel;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDeleteRowButtonLabel() {
+        return $this->deleteRowButtonLabel ?: cmfTransGeneral('.form.input.key_value_set.delete_row');
+    }
+
+    /**
+     * @param string $deleteRowButtonLabel
+     * @return $this
+     */
+    public function setDeleteRowButtonLabel($deleteRowButtonLabel) {
+        $this->deleteRowButtonLabel = (string)$deleteRowButtonLabel;
         return $this;
     }
 
@@ -108,21 +146,29 @@ class KeyValueSetFormInput extends FormInput {
      */
     protected function getDefaultRenderer() {
         $renderer = new InputRenderer();
-        $renderer
-            ->setTemplate('cmf::input.key_value_set')
-            ->addData('minValuesCount', $this->getMinValuesCount())
-            ->addData('maxValuesCount', $this->getMaxValuesCount())
-            ->addData('keysLabel', $this->getKeysLabel())
-            ->addData('valuesLabel', $this->getValuesLabel());
+        $renderer->setTemplate('cmf::input.key_value_set');
         return $renderer;
     }
 
     public function getValidators() {
         return [
-            $this->getName() . '.*' => 'array|min:' . $this->getMinValuesCount() . '|max:' . $this->getMaxValuesCount(),
-            $this->getName() . '.*.key' => 'required',
+            $this->getName() => 'array|min:' . $this->getMinValuesCount() . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
+            $this->getName() . '.*' => 'array',
+            $this->getName() . '.*.key' => 'required|string',
             $this->getName() . '.*.value' => 'required'
         ];
+    }
+
+    public function modifyIncomingValueBeforeValidation($value, array $data) {
+        if (is_array($value)) {
+            foreach ($value as $index => $keyValuePair) {
+                if (empty($keyValuePair['key']) || trim($keyValuePair['key']) === '') {
+                    // remove record with empty key
+                    unset($value[$index]);
+                }
+            }
+        }
+        return $value;
     }
 
     public function doDefaultValueConversionByType($value, $type, array $record) {
@@ -130,7 +176,7 @@ class KeyValueSetFormInput extends FormInput {
             if (!is_string($value)) {
                 throw new \InvalidArgumentException('$value argument must be a string or array');
             }
-            $value = json_decode($value);
+            $value = json_decode($value, true);
             if (!is_array($value)) {
                 $value = [];
             }
@@ -138,10 +184,14 @@ class KeyValueSetFormInput extends FormInput {
         /** @var array $value*/
         $ret = [];
         foreach ($value as $key => $valueForKey) {
-            $ret = [
-                'key' => $key,
-                'value' => $valueForKey
-            ];
+            if (is_int($key)) {
+                $ret[] = $valueForKey;
+            } else {
+                $ret[] = [
+                    'key' => $key,
+                    'value' => $valueForKey
+                ];
+            }
         }
         return $ret;
     }

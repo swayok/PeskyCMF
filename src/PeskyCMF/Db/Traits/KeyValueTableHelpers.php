@@ -207,7 +207,7 @@ trait KeyValueTableHelpers {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static public function getValueByKeyAndForeignKeyValue($key, $foreignKeyValue = null, $default = null) {
+    static public function getValue($key, $foreignKeyValue = null, $default = null) {
         $conditions = [
             'key' => $key
         ];

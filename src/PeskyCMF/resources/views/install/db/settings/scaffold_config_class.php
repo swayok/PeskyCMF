@@ -17,11 +17,21 @@ class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends KeyValueTableSca
         return parent::createFormConfig()
             ->setWidth(50)
             ->setFormInputs([
-                'default_browser_title',
-                'browser_title_addition',
+                Setting::DEFAULT_BROWSER_TITLE,
+                Setting::BROWSER_TITLE_ADDITION,
+                Setting::LANGUAGES => KeyValueSetFormInput::create()
+                    ->setMinValuesCount(1)
+                    ->setAddRowButtonLabel(cmfTransCustom('.settings.form.input.languages_add'))
+                    ->setDeleteRowButtonLabel(cmfTransCustom('.settings.form.input.languages_delete'))
             ])
             ->setDataToAddToRecord(function () {
                 return ['admin_id' => \Auth::guard()->user()->id];
+            })
+            ->setValidators(function () {
+                return [
+                    Setting::LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
+                    Setting::LANGUAGES . '.*.value' => 'required|string|max:88'
+                ];
             });
     }
 

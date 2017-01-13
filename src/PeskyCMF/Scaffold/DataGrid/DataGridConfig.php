@@ -599,8 +599,10 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * This may trigger some actions that should be applied after all configurations were provided
      * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \BadMethodCallException
      */
     public function finish() {
+        parent::finish();
         if (!$this->isRowActionsFloating() && !$this->hasValueViewer(static::ROW_ACTIONS_COLUMN_NAME)) {
             $this->addValueViewer(static::ROW_ACTIONS_COLUMN_NAME, null);
         }

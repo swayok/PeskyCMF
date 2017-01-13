@@ -57,7 +57,7 @@ class KeyValueDataSaver extends Record {
             if ($tableStructure::hasColumn($key)) {
                 $columns[$key] = $tableStructure::getColumn($key);
             } else {
-                $columns[$key] = Column::TYPE_TEXT;
+                $columns[$key] = is_array($value) ? Column::TYPE_JSON : Column::TYPE_TEXT;
             }
         }
         static::$originalTable = $table;

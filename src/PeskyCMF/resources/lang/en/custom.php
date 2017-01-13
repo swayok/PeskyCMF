@@ -155,9 +155,15 @@ return [
                 'languages' => 'Languages',
                 'languages_key' => 'Language code (2 symbols)',
                 'languages_value' => 'Language title',
+                'languages_add' => 'Add language',
+                'languages_delete' => 'Delete language',
             ],
             'tooltip' => [
-                'browser_title_addition' => 'Will not be added if pages title provided by "Default page title in browser" setting'
+                'browser_title_addition' => 'Will not be added if pages title provided by "Default page title in browser" setting',
+                'languages' => [
+                    'It is required to have at least 1 language configured',
+                    'Language code must contain exactly 2 latin letters'
+                ]
             ],
         ],
     ]

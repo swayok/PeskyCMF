@@ -84,7 +84,7 @@ abstract class ScaffoldConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldSectionConfigException
      */
-    public function getConfigs() {
+    public function getConfigsForTemplatesRendering() {
         $configs = [
             'model' => $this->getTable(),
             'scaffoldConfig' => $this
@@ -105,6 +105,10 @@ abstract class ScaffoldConfig {
         if (!($configs['formConfig'] instanceof FormConfig)) {
             throw new ScaffoldSectionConfigException(null, 'createFormConfig() should return instance of FormConfig class');
         }
+        $configs['dataGridConfig']->beforeRender();
+        $configs['dataGridFilterConfig']->beforeRender();
+        $configs['itemDetailsConfig']->beforeRender();
+        $configs['formConfig']->beforeRender();
         return $configs;
     }
 
@@ -254,7 +258,7 @@ abstract class ScaffoldConfig {
         return view(
             CmfConfig::getInstance()->scaffold_templates_view_for_normal_table(),
             array_merge(
-                $this->getConfigs(),
+                $this->getConfigsForTemplatesRendering(),
                 ['tableNameForRoutes' => $this->getTableNameForRoutes()]
             )
         )->render();

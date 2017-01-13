@@ -203,8 +203,8 @@ class FormInput extends RenderableValueViewer {
         if ($this->hasTooltip()) {
             $tooltip = $this->getTooltip();
             return '<span class="help-block">'
-                    . '<i class="glyphicon glyphicon-info-sign text-blue fs16 va-m mr5 lh20" style="top: 0;"></i>'
-                    . (is_array($tooltip) ? implode('<br>', $tooltip) : (string)$tooltip)
+                    . '<i class="glyphicon glyphicon-info-sign text-blue fs16 va-t mr5 lh20" style="top: 0;"></i>'
+                    . '<div class="ib">' . (is_array($tooltip) ? implode('<br>', $tooltip) : (string)$tooltip) . '</div>'
                 . '</span>';
         } else {
             return '';

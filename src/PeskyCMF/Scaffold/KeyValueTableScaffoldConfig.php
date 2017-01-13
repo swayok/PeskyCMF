@@ -56,7 +56,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         return view(
             CmfConfig::getInstance()->scaffold_templates_view_for_key_value_table(),
             array_merge(
-                $this->getConfigs(),
+                $this->getConfigsForTemplatesRendering(),
                 ['tableNameForRoutes' => $this->getTableNameForRoutes()]
             )
         )->render();
@@ -115,7 +115,9 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         }
         $fkValue = empty($fkColumn) ? null : $request->input($fkColumn);
         $inputConfigs = $formConfig->getValueViewers();
-        $data = array_intersect_key($this->getRequest()->all(), $inputConfigs);
+        $data = $formConfig->modifyIncomingDataBeforeValidation(
+            array_intersect_key($this->getRequest()->all(), $inputConfigs)
+        );
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {
             return $this->sendValidationErrorsResponse($errors);
