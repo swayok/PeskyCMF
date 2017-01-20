@@ -226,7 +226,10 @@ Utils.switchBodyClass = function (className) {
     Utils.removeBodyClass();
     if (!!className) {
         className = className.replace(/[^a-zA-Z0-9]+/, '-');
-        $(document.body).addClass(className);
+        $(document.body)
+            .addClass(className)
+            .find('> .tooltip')
+                .remove();
         Utils.bodyClass = className;
     }
 };
