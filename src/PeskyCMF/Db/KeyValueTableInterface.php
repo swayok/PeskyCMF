@@ -53,4 +53,17 @@ interface KeyValueTableInterface extends TableInterface {
      */
     static public function getValue($key, $foreignKeyValue = null, $default = null);
 
+    /**
+     * @param mixed $foreignKeyValue
+     * @param bool $ignoreCache
+     * @return array
+     */
+    static public function getValuesForForeignKey($foreignKeyValue = null, $ignoreCache = false);
+
+    /**
+     * @param mixed $foreignKeyValue
+     * @return void
+     */
+    static public function cleanCachedValues($foreignKeyValue = null);
+
 }

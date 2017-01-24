@@ -152,17 +152,28 @@ return [
             'input' => [
                 'default_browser_title' => 'Default page title in browser',
                 'browser_title_addition' => 'Addition for page title in browser',
+                'default_language' => 'Main language for site',
                 'languages' => 'Languages',
                 'languages_key' => 'Language code (2 symbols)',
                 'languages_value' => 'Language title',
                 'languages_add' => 'Add language',
                 'languages_delete' => 'Delete language',
+                'fallback_languages' => 'Languages translations replacements map',
+                'fallback_languages_key' => 'For language (2 symbols)',
+                'fallback_languages_value' => 'Use translation to language (2 symbols)',
+                'fallback_languages_add' => 'Add language replacement',
+                'fallback_languages_delete' => 'Delete language replacement',
             ],
             'tooltip' => [
                 'browser_title_addition' => 'Will not be added if pages title provided by "Default page title in browser" setting',
                 'languages' => [
                     'It is required to have at least 1 language configured',
                     'Language code must contain exactly 2 latin letters'
+                ],
+                'fallback_languages' => [
+                    'Language codes must contain exactly 2 latin letters',
+                    'This mapping may be used when to provide correct translation language when "Main language" is not preferred',
+                    'For example: "de" (German) as "Main language" is not preferred when "fr" language code is requred. "en" language will fit better here'
                 ]
             ],
         ],

@@ -202,10 +202,10 @@ class FormInput extends RenderableValueViewer {
     public function getFormattedTooltip() {
         if ($this->hasTooltip()) {
             $tooltip = $this->getTooltip();
-            return '<span class="help-block">'
+            return '<span class="help-block"><p class="mn">'
                     . '<i class="glyphicon glyphicon-info-sign text-blue fs16 va-t mr5 lh20" style="top: 0;"></i>'
-                    . '<div class="ib">' . (is_array($tooltip) ? implode('<br>', $tooltip) : (string)$tooltip) . '</div>'
-                . '</span>';
+                    . (is_array($tooltip) ? implode('</p><p class="mn pl20">', $tooltip) : (string)$tooltip)
+                . '</p></span>';
         } else {
             return '';
         }

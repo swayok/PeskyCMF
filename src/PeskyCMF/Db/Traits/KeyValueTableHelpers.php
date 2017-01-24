@@ -4,16 +4,27 @@
 namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\KeyValueTableInterface;
+use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Relation;
+use PeskyORM\ORM\TableStructureInterface;
 use Swayok\Utils\NormalizeValue;
 
 /**
  * @method static KeyValueTableInterface getInstance()
+ * @method static TableStructureInterface getTableStructure()
  */
 trait KeyValueTableHelpers {
 
     private $_detectedMainForeignKeyColumnName;
+
+    static public function getKeysColumnName() {
+        return 'key';
+    }
+
+    static public function getValuesColumnName() {
+        return 'value';
+    }
 
     /**
      * Override if you wish to provide key manually
@@ -41,6 +52,21 @@ trait KeyValueTableHelpers {
     }
 
     /**
+     * @param null $foreignKeyValue
+     * @return null|string
+     */
+    static public function getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue = null) {
+        return null;
+    }
+
+    /**
+     * @return int - minutes
+     */
+    static public function getCacheDurationForAllValues() {
+        return 10;
+    }
+
+    /**
      * Make array that represents DB record and can be saved to DB
      * @param string $key
      * @param mixed $value
@@ -49,8 +75,8 @@ trait KeyValueTableHelpers {
      */
     static public function makeDataForRecord($key, $value, $foreignKeyValue = null) {
         $record = [
-            'key' => $key,
-            'value' => static::encodeValue($value),
+            static::getKeysColumnName() => $key,
+            static::getValuesColumnName() => static::encodeValue($value),
         ];
         if ($foreignKeyValue !== null && ($foreignKeyColumn = static::getInstance()->getMainForeignKeyColumnName())) {
             $record[$foreignKeyColumn] = $foreignKeyValue;
@@ -112,7 +138,13 @@ trait KeyValueTableHelpers {
      * @param \Closure $configurator
      * @return array
      */
-    static public function selectAssoc($keysColumn = 'key', $valuesColumn = 'value', array $conditions = [], \Closure $configurator = null) {
+    static public function selectAssoc($keysColumn = null, $valuesColumn = null, array $conditions = [], \Closure $configurator = null) {
+        if ($keysColumn === null) {
+            $keysColumn = static::getKeysColumnName();
+        }
+        if ($valuesColumn === null) {
+            $valuesColumn = static::getValuesColumnName();
+        }
         return static::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditions, $configurator));
     }
 
@@ -131,34 +163,40 @@ trait KeyValueTableHelpers {
      * @throws \BadMethodCallException
      */
     static public function updateOrCreateRecord(array $data) {
-        if (empty($data['key'])) {
-            throw new \InvalidArgumentException('$record argument does not contain [key] key or its value is empty');
-        } else if (!array_key_exists('value', $data)) {
-            throw new \InvalidArgumentException('$record argument does not contain [value] key');
+        if (empty($data[static::getKeysColumnName()])) {
+            throw new \InvalidArgumentException(
+                '$record argument does not contain value for key \'' . static::getKeysColumnName() . '\' or its value is empty'
+            );
+        } else if (!array_key_exists(static::getValuesColumnName(), $data)) {
+            throw new \InvalidArgumentException(
+                '$record argument does not contain value for key \'' . static::getValuesColumnName() . '\' or its value is empty'
+            );
         }
         $conditions = [
-            'key' => $data['key']
+            static::getKeysColumnName() => $data[static::getKeysColumnName()]
         ];
         $fkName = static::getInstance()->getMainForeignKeyColumnName();
         if (!empty($fkName)) {
             if (empty($data[$fkName])) {
-                throw new \InvalidArgumentException("\$record argument does not contain [{$fkName}] key or its value is empty");
+                throw new \InvalidArgumentException("\$record argument does not contain value for key '{$fkName}' or its value is empty");
             }
             $conditions[$fkName] = $data[$fkName];
         }
         /** @var Record $object */
         $object = static::getInstance()->newRecord()->fromDb($conditions);
         if ($object->existsInDb()) {
-            return $object
+            $success = $object
                 ->begin()
-                ->updateValues(array_diff_key($data, ['key' => '', $fkName => '']), false)
+                ->updateValues(array_diff_key($data, [static::getKeysColumnName() => '', $fkName => '']), false)
                 ->commit();
         } else {
             $object
                 ->reset()
                 ->updateValues($data, false);
-            return $object->save();
+            $success = $object->save();
         }
+        static::cleanCachedValues(empty($fkName) ? null : $data[$fkName]);
+        return $success;
     }
 
     /**
@@ -201,6 +239,7 @@ trait KeyValueTableHelpers {
      *      getMainForeignKeyColumnName() method returns null
      * @param mixed $default
      * @return array
+     * @throws \PeskyORM\Exception\InvalidDataException
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \PDOException
@@ -208,8 +247,12 @@ trait KeyValueTableHelpers {
      * @throws \BadMethodCallException
      */
     static public function getValue($key, $foreignKeyValue = null, $default = null) {
+        $cacheKey = static::getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue);
+        if (!empty($cacheKey)) {
+            return array_get(self::getAllValues($foreignKeyValue), $key, $default);
+        }
         $conditions = [
-            'key' => $key
+            static::getKeysColumnName() => $key
         ];
         $fkName = static::getInstance()->getMainForeignKeyColumnName();
         if ($fkName !== null) {
@@ -224,6 +267,91 @@ trait KeyValueTableHelpers {
         }
         /** @var array $record */
         $record = static::selectOne('*', $conditions);
-        return empty($record) ? $default : static::decodeValue($record['value']);
+        if (static::getTableStructure()->hasColumn($key)) {
+            // modify value so that it is processed by custom column defined in table structure
+            // if $record is empty it uses default value provided by $column prior to $default
+            $column = static::getTableStructure()->getColumn($key);
+            if (!$column->isItExistsInDb()) {
+                $recordObj = static::getInstance()->newRecord();
+                if (empty($record)) {
+                    return $recordObj->hasValue($column, true) ? $recordObj->getValue($column) : $default;
+                } else {
+                    return $recordObj
+                        ->updateValue($column, static::decodeValue($record[static::getValuesColumnName()]), false)
+                        ->getValue($column);
+                }
+            }
+        }
+        return empty($record) ? $default : static::decodeValue($record[static::getValuesColumnName()]);
+
     }
+
+    /**
+     * @param mixed $foreignKeyValue
+     * @param bool $ignoreCache
+     * @return array
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    static public function getValuesForForeignKey($foreignKeyValue = null, $ignoreCache = false) {
+        if (!$ignoreCache) {
+            $cacheKey = static::getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue);
+            if (!empty($cacheKey)) {
+                $data = \Cache::get($cacheKey, null);
+                if (is_array($data)) {
+                    return $data;
+                }
+            }
+        }
+        $conditions = [];
+        $table = static::getInstance();
+        $fkName = $table->getMainForeignKeyColumnName();
+        if ($fkName !== null) {
+            if (empty($foreignKeyValue)) {
+                throw new \InvalidArgumentException('$foreignKeyValue argument is required');
+            }
+            $conditions[$fkName] = $foreignKeyValue;
+        } else if (!empty($foreignKeyValue)) {
+            throw new \InvalidArgumentException(
+                '$foreignKeyValue must be null when model does not have main foreign key column'
+            );
+        }
+        $data = static::selectAssoc(static::getKeysColumnName(), static::getValuesColumnName(), $conditions);
+        if (!empty($data)) {
+            // modify values so that they are processed by custom columns defined in table structure + set defaults
+            $columns = $table->getTableStructure()->getColumns();
+            $record = $table->newRecord()->updateValues($data, false, false);
+            /** @var Column $column */
+            foreach ($columns as $columnName => $column) {
+                if (!$column->isItExistsInDb()) {
+                    if (array_key_exists($columnName, $data) && $record->hasValue($column)) {
+                        // processed value
+                        $data[$columnName] = $record->getValue($column);
+                    } else if ($record->hasValue($column, true)) {
+                        // default value
+                        $data[$columnName] = $record->getValue($column);
+                    } else {
+                        $data[$columnName] = null;
+                    }
+                }
+            }
+        }
+        if (!empty($cacheKey)) {
+            \Cache::put($cacheKey, $data, static::getCacheDurationForAllValues());
+        }
+        return $data;
+    }
+
+    static public function cleanCachedValues($foreignKeyValue = null) {
+        $cacheKey = static::getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue);
+        if ($cacheKey) {
+            \Cache::forget($cacheKey);
+        }
+    }
+
+
 }

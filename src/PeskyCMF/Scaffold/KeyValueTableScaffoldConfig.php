@@ -3,11 +3,9 @@
 
 namespace PeskyCMF\Scaffold;
 
-use Illuminate\Http\JsonResponse;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\KeyValueDataSaver;
 use PeskyCMF\Db\KeyValueTableInterface;
-use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
@@ -19,8 +17,6 @@ use PeskyORM\Exception\InvalidDataException;
 abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
     protected $isCreateAllowed = false;
-    protected $keysColumnName = 'key';
-    protected $valuesColumnName = 'value';
 
     public function __construct(KeyValueTableInterface $table, $tableNameForRoutes) {
         parent::__construct($table, $tableNameForRoutes);
@@ -76,12 +72,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         if (empty($ownerRecordId) && !empty($fkColumn)) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        // todo: read requested related records?
-        $conditions = [];
-        if (!empty($fkColumn)) {
-            $conditions[$fkColumn] = $ownerRecordId;
-        }
-        $keysAndValues = $table->selectAssoc($this->keysColumnName, $this->valuesColumnName, $conditions);
+        $keysAndValues = $table::getValuesForForeignKey(empty($fkColumn) ? null : $ownerRecordId, true);
         if ($isItemDetails) {
             $actionConfig = $this->getItemDetailsConfig();
         } else {
