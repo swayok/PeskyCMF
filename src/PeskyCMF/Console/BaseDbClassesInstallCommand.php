@@ -54,6 +54,7 @@ abstract class BaseDbClassesInstallCommand extends Command {
         $this->createDbClasses($dataForTemplates, $pathToTemplates);
         $this->createMigration($dataForTemplates, $pathToTemplates);
         $this->line('Done');
+        $this->printInfo();
     }
 
     static protected function getParentClasses($dbClassesAppSubfolder) {
@@ -129,6 +130,10 @@ abstract class BaseDbClassesInstallCommand extends Command {
             File::load($migrationFilePath, true, 0755, 0644)
                 ->write(\View::file($pathToTemplates . 'table_migration.php', $dataForTemplates));
         }
+    }
+
+    public function printInfo() {
+
     }
 
 }
