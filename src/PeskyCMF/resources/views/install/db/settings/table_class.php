@@ -15,6 +15,14 @@ class <?php echo $baseClassNamePlural; ?>Table extends <?php echo $parentClassNa
     }
 
     /**
+     * @param null $foreignKeyValue
+     * @return null|string
+     */
+    static public function getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue = null) {
+        return 'app-<?php echo $baseClassNameUnderscored ?>';
+    }
+
+    /**
      * @return <?php echo $baseClassNamePlural; ?>TableStructure
      */
     public function getTableStructure() {

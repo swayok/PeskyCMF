@@ -176,6 +176,10 @@ return [
                     'For example: "de" (German) as "Main language" is not preferred when "fr" language code is requred. "en" language will fit better here'
                 ]
             ],
+            'tab' => [
+                'general' => 'General',
+                'localization' => 'Localizations'
+            ]
         ],
     ]
 ];

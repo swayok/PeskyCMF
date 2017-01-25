@@ -62,6 +62,7 @@ class InputRenderer extends ValueRenderer {
     /**
      * @param array $attributes
      * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function setAttributes($attributes) {
         if (array_key_exists('options', $attributes)) {
@@ -144,6 +145,7 @@ class InputRenderer extends ValueRenderer {
 
     /**
      * @return array
+     * @throws \InvalidArgumentException
      */
     public function getOptions() {
         return $this->collectOptions($this->options);
@@ -152,13 +154,16 @@ class InputRenderer extends ValueRenderer {
     /**
      * @param array|callable $options
      * @return mixed
+     * @throws \InvalidArgumentException
      */
     private function collectOptions($options) {
         if (!is_string($options) && is_callable($options)) {
-            return call_user_func($options);
-        } else {
-            return $options;
+            $options = $options();
+            if (!is_array($options)) {
+                throw new \InvalidArgumentException('$options closure must return an array');
+            }
         }
+        return $options;
     }
 
     /**
@@ -186,6 +191,7 @@ class InputRenderer extends ValueRenderer {
 
     /**
      * @return array
+     * @throws \InvalidArgumentException
      */
     public function getOptionsForCreate() {
         if (empty($this->optionsForCreate)) {
@@ -211,6 +217,7 @@ class InputRenderer extends ValueRenderer {
 
     /**
      * @return array
+     * @throws \InvalidArgumentException
      */
     public function getOptionsForEdit() {
         if (empty($this->optionsForEdit)) {

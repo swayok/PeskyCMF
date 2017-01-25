@@ -249,7 +249,7 @@ trait KeyValueTableHelpers {
     static public function getValue($key, $foreignKeyValue = null, $default = null) {
         $cacheKey = static::getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue);
         if (!empty($cacheKey)) {
-            return array_get(self::getAllValues($foreignKeyValue), $key, $default);
+            return array_get(self::getValuesForForeignKey($foreignKeyValue), $key, $default);
         }
         $conditions = [
             static::getKeysColumnName() => $key
@@ -328,14 +328,13 @@ trait KeyValueTableHelpers {
             /** @var Column $column */
             foreach ($columns as $columnName => $column) {
                 if (!$column->isItExistsInDb()) {
+                    $isJson = in_array($column->getType(), [$column::TYPE_JSON, $column::TYPE_JSONB], true);
                     if (array_key_exists($columnName, $data) && $record->hasValue($column)) {
                         // processed value
-                        $data[$columnName] = $record->getValue($column);
+                        $data[$columnName] = $record->getValue($column, $isJson ? 'array' : null);
                     } else if ($record->hasValue($column, true)) {
                         // default value
-                        $data[$columnName] = $record->getValue($column);
-                    } else {
-                        $data[$columnName] = null;
+                        $data[$columnName] = $record->getValue($column, $isJson ? 'array' : null);
                     }
                 }
             }

@@ -52,8 +52,12 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
                     echo $ifEdit . $renderedInput . $endIf;
                 }
             } catch (Exception $exc) {
-                echo '<div>' . htmlspecialchars($exc->getMessage()) . '</div>';
-                echo '<pre>' . nl2br(htmlspecialchars($exc->getTraceAsString())) . '</pre>';
+                echo '<div class="text-danger">' . htmlspecialchars($exc->getMessage()) . '</div>';
+                echo '<pre style="max-height: 600px; overflow: scroll; border-color: #FF0000">'
+                    . 'In file ' . $exc->getFile() . ' on line ' . $exc->getLine() . '<br>'
+                    //. print_r($exc->getTrace()[0], true)
+                    . nl2br(htmlspecialchars($exc->getTraceAsString()))
+                    . '</pre>';
             }
         }
     }

@@ -17,7 +17,7 @@ trait KeyValueRecordHelpers {
      * @return mixed
      */
     static public function get($key, $foreignKeyValue = null, $default = null) {
-        return array_get(static::getTable()->getValuesForForeignKey($foreignKeyValue), $key, $default);
+        return static::getTable()->getValue($key, $foreignKeyValue, $default);
     }
 
     /**
