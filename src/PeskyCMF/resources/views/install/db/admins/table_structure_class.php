@@ -101,7 +101,7 @@ class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $pare
         return Relation::create(
                 'parent_id',
                 Relation::BELONGS_TO,
-                <?php echo $baseClassNamePlural; ?>Table::getInstance(),
+                <?php echo $baseClassNamePlural; ?>Table::class,
                 'id'
             )
             ->setDisplayColumnName(<?php echo $sectionName; ?>Config::user_login_column());

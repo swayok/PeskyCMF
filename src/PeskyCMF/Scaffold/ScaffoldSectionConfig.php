@@ -5,8 +5,10 @@ namespace PeskyCMF\Scaffold;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
+use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
+use Swayok\Utils\StringUtils;
 
 abstract class ScaffoldSectionConfig {
     /**
@@ -73,6 +75,8 @@ abstract class ScaffoldSectionConfig {
      */
     protected $jsInitiator = null;
     protected $isFinished = false;
+    /** @var  bool */
+    protected $allowRelationsInValueViewers = false;
 
     /**
      * @param TableInterface $table
@@ -141,13 +145,14 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * Get field configs only for fields that exist in DB ($valueViewer->isDbColumn() === true)
-     * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
+     * Get only viewers that are linked to real table columns ($valueViewer->isDbColumn() === true)
+     * @param bool $includeViewersForRelations - false: only vievers linked to main table's columns will be returned
+     * @return AbstractValueViewer[]|DataGridColumn[]|FormInput[]|ValueCell[]
      */
-    public function getViewersLinkedToDbColumns() {
+    public function getViewersLinkedToDbColumns($includeViewersForRelations = false) {
         $ret = [];
         foreach ($this->getValueViewers() as $key => $viewer) {
-            if ($viewer->isLinkedToDbColumn()) {
+            if ($viewer->isLinkedToDbColumn() && ($includeViewersForRelations || !$viewer->hasRelation())) {
                 $ret[$key] = $viewer;
             }
         }
@@ -155,13 +160,27 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * Get field configs only for fields that does not exist in DB ($valueViewer->isDbColumn() === false)
+     * Get only viewers that are not linked to real table columns ($valueViewer->isDbColumn() === false)
      * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
      */
     public function getStandaloneViewers() {
         $ret = [];
         foreach ($this->getValueViewers() as $key => $viewer) {
             if (!$viewer->isLinkedToDbColumn()) {
+                $ret[$key] = $viewer;
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * Get only viewrs that are linked to main table's relation
+     * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
+     */
+    public function getViewersForRelations() {
+        $ret = [];
+        foreach ($this->getValueViewers() as $key => $viewer) {
+            if ($viewer->isLinkedToDbColumn() && $viewer->hasRelation()) {
                 $ret[$key] = $viewer;
             }
         }
@@ -198,16 +217,35 @@ abstract class ScaffoldSectionConfig {
      * @param string $name
      * @param null|AbstractValueViewer $viewer
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
+        $usesRelation = false;
         if (
             !$this->thereIsNoDbColumns
             && (!$viewer || $viewer->isLinkedToDbColumn())
             && !$this->getTable()->getTableStructure()->hasColumn($name)
         ) {
-            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$name]");
+            if ($this->allowRelationsInValueViewers) {
+                $nameParts = explode('.', $name);
+                if (!count($nameParts) === 2) {
+                    throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
+                } else if (!$this->getTable()->getTableStructure()->hasRelation($nameParts[0])) {
+                    throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no relation '{$nameParts[0]}'");
+                }
+                $relation = $this->getTable()->getTableStructure()->getRelation($nameParts[0]);
+                if (!$relation->getForeignTable()->getTableStructure()->hasColumn($nameParts[1])) {
+                    throw new \InvalidArgumentException(
+                        "Relation {$nameParts[0]} of table {$this->getTable()->getName()} has no column '{$nameParts[1]}'"
+                    );
+                }
+                $usesRelation = true;
+            } else {
+                throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
+            }
         }
         if (empty($viewer)) {
             $viewer = $this->createValueViewer();
@@ -218,6 +256,9 @@ abstract class ScaffoldSectionConfig {
         $viewer->setName($name);
         $viewer->setPosition($this->getNextValueViewerPosition($viewer));
         $viewer->setScaffoldSectionConfig($this);
+        if ($usesRelation) {
+            $viewer->setRelation($relation, $nameParts[1]);
+        }
         $this->valueViewers[$name] = $viewer;
         return $this;
     }
@@ -288,6 +329,8 @@ abstract class ScaffoldSectionConfig {
         }
         foreach ($record as $key => $notUsed) {
             if ($this->getTable()->getTableStructure()->hasRelation($key)) {
+                unset($recordWithBackup['__' . $key]);
+                $recordWithBackup[$key] = $this->prepareRelatedRecord($key, $record[$key]);
                 continue;
             }
             if (empty($valueViewers[$key])) {
@@ -305,16 +348,52 @@ abstract class ScaffoldSectionConfig {
                     || $fieldConfig->isVisible()
                 )
             ) {
-                $recordWithBackup[$key] = $fieldConfig->convertValue(
-                    $recordWithBackup[$key],
-                    $record
-                );
+                $recordWithBackup[$key] = $fieldConfig->convertValue($recordWithBackup[$key], $record);
             }
         }
         if (!empty($customData) && is_array($customData)) {
             $recordWithBackup = array_merge($recordWithBackup, $customData);
         }
         $recordWithBackup = array_merge($recordWithBackup, $permissions);
+        return $recordWithBackup;
+    }
+
+    /**
+     * Process related record's data by viewers attached to it
+     * @param string $relationName
+     * @param array $relationRecordData
+     * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    protected function prepareRelatedRecord($relationName, array $relationRecordData) {
+        $recordWithBackup = $relationRecordData;
+        $valueViewers = $this->getViewersForRelations();
+        foreach ($relationRecordData as $columnName => $value) {
+            $viewerName = $relationName . '.' . $columnName;
+            if (
+                array_key_exists($viewerName, $valueViewers)
+                && $valueViewers[$viewerName]->getRelation()->getName() === $relationName
+            ) {
+                $recordWithBackup[$columnName] = $recordWithBackup['__' . $columnName] = $value;
+                $fieldConfig = $valueViewers[$viewerName];
+                if (
+                    is_object($fieldConfig)
+                    && method_exists($fieldConfig, 'convertValue')
+                    && (
+                        !method_exists($fieldConfig, 'isVisible')
+                        || $fieldConfig->isVisible()
+                    )
+                ) {
+                    $recordWithBackup[$columnName] = $fieldConfig->convertValue(
+                        $recordWithBackup[$columnName],
+                        $relationRecordData
+                    );
+                }
+            }
+        }
         return $recordWithBackup;
     }
 

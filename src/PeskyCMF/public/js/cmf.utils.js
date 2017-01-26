@@ -247,6 +247,7 @@ Utils.removeBodyClass = function () {
         $(document.body).removeClass(Utils.bodyClass);
         Utils.bodyClass = false;
     }
+    $(document.body).find('> .tooltip').remove(); //< remove hanged tooltips directly inside <body>
 };
 
 Utils.getPageWrapper = function () {

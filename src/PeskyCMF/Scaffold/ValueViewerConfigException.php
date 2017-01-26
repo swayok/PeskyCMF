@@ -1,8 +1,6 @@
 <?php
 
-
 namespace PeskyCMF\Scaffold;
-
 
 class ValueViewerConfigException extends ScaffoldSectionConfigException {
 

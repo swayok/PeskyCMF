@@ -1,9 +1,7 @@
 <?php
 
-
 namespace PeskyCMF\Scaffold;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
@@ -47,10 +45,19 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
-        $columnsToSelect = array_merge(
-            array_keys($dataGridConfig->getViewersLinkedToDbColumns()),
-            $dataGridConfig->getRelationsToRead()
-        );
+        $columnsToSelect = array_keys($dataGridConfig->getViewersLinkedToDbColumns(false));
+        foreach ($dataGridConfig->getRelationsToRead() as $relationName => $columns) {
+            if (is_int($relationName)) {
+                $relationName = $columns;
+                $columns = ['*'];
+            }
+            $columnsToSelect[$relationName] = $columns;
+        }
+        foreach ($dataGridConfig->getViewersForRelations() as $viewer) {
+            if (!array_key_exists($viewer->getRelation()->getName(), $columnsToSelect)) {
+                $columnsToSelect[$viewer->getRelation()->getName()] = ['*'];
+            }
+        }
         $result = $this->getTable()->select($columnsToSelect, $conditions);
         $records = [];
         if ($result->count()) {
@@ -64,7 +71,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         ]);
     }
 
-    public function getRecordValuesForFormInputs($id = null) {
+    public function getRecordValues($id = null) {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
         $table = $this->getTable();
         if (
@@ -85,7 +92,20 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $conditions = $actionConfig->getSpecialConditions();
         $conditions[$table->getPkColumnName()] = $id;
-        if (!$object->fromDb($conditions, [], $actionConfig->getRelationsToRead())->existsInDb()) {
+        $relationsToRead = [];
+        foreach ($actionConfig->getRelationsToRead() as $relationName => $columns) {
+            if (is_int($relationName)) {
+                $relationName = $columns;
+                $columns = ['*'];
+            }
+            $relationsToRead[$relationName] = $columns;
+        }
+        foreach ($actionConfig->getViewersForRelations() as $viewer) {
+            if (!array_key_exists($viewer->getRelation()->getName(), $relationsToRead)) {
+                $relationsToRead[$viewer->getRelation()->getName()] = ['*'];
+            }
+        }
+        if (!$object->fromDb($conditions, [], array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
         $data = $object->toArray([], $actionConfig->getRelationsToRead(), false);

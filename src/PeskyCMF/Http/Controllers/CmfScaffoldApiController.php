@@ -81,7 +81,7 @@ class CmfScaffoldApiController extends Controller {
     }
 
     public function getItem($tableName, $id = null) {
-        return $this->getScaffoldConfig()->getRecordValuesForFormInputs($id);
+        return $this->getScaffoldConfig()->getRecordValues($id);
     }
 
     public function getItemDefaults() {

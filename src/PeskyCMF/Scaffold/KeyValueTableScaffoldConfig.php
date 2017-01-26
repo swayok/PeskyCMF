@@ -58,7 +58,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         )->render();
     }
 
-    public function getRecordValuesForFormInputs($ownerRecordId = null) {
+    public function getRecordValues($ownerRecordId = null) {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
         $table = $this->getTable();
         if (

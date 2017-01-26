@@ -47,10 +47,12 @@ abstract class AbstractValueViewer {
     const FORMAT_DATE = 'Y-m-d';
     const FORMAT_TIME = 'H:i:s';
     const FORMAT_DATETIME = 'Y-m-d H:i:s';
-    /**
-     * @var bool
-     */
+    /** @var bool */
     protected $isLinkedToDbColumn = true;
+    /** @var Relation */
+    protected $relation;
+    /** @var string */
+    protected $relationColumn;
 
     /**
      * @return $this
@@ -84,7 +86,43 @@ abstract class AbstractValueViewer {
      * @throws ValueViewerConfigException
      */
     public function getTableColumn() {
-        return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($this->getName());
+        if ($this->relation) {
+            return $this->relation->getForeignTable()->getTableStructure()->getColumn($this->relationColumn);
+        } else {
+            return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($this->getName());
+        }
+    }
+
+    /**
+     * @param Relation $relation
+     * @param string $columnName
+     * @return $this
+     */
+    public function setRelation(Relation $relation, $columnName) {
+        $this->relation = $relation;
+        $this->relationColumn = $columnName;
+        return $this;
+    }
+
+    /**
+     * @return Relation
+     */
+    public function getRelation() {
+        return $this->relation;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasRelation() {
+        return !empty($this->relation);
+    }
+
+    /**
+     * @return string
+     */
+    public function getRelationColumn() {
+        return $this->relationColumn;
     }
 
     /**
@@ -277,30 +315,40 @@ abstract class AbstractValueViewer {
         }
         $relationConfig = null;
         $relationAlias = null;
-        foreach ($columnConfig->getRelations() as $alias => $relation) {
-            if (in_array($relation->getType(), [Relation::BELONGS_TO, Relation::HAS_ONE], true)) {
-                $relationConfig = $relation;
-                $relationAlias = $alias;
-                break;
+        $relationColumn = null;
+        $relationData = [];
+        if ($this->hasRelation()) {
+            $relationConfig = $this->getRelation();
+            $relationData = $record;
+            $relationColumn = $this->getRelationColumn();
+        } else {
+            foreach ($columnConfig->getRelations() as $alias => $relation) {
+                if (in_array($relation->getType(), [Relation::BELONGS_TO, Relation::HAS_ONE], true)) {
+                    $relationConfig = $relation;
+                    $relationAlias = $alias;
+                    $relationData = array_get($record, $relationAlias);
+                    $relationColumn = $relationConfig->getDisplayColumnName();
+                    break;
+                }
             }
         }
         if (empty($relationConfig)) {
             throw new ValueViewerConfigException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
-        if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getDisplayColumnName()])) {
+        $relationPkColumn = $relationConfig->getForeignTable()->getPkColumnName();
+        if (empty($relationData) || empty($relationData[$relationPkColumn])) {
             return cmfTransGeneral('.item_details.field.no_relation');
         } else {
             if (empty($linkLabel)) {
-                $displayField = $relationConfig->getDisplayColumnName();
-                if (empty($record[$relationAlias][$displayField])) {
-                    $displayField = $relationConfig->getDisplayColumnName();
+                if (empty($relationData[$relationColumn])) {
+                    $relationColumn = $relationPkColumn;
                 }
-                $linkLabel = $record[$relationAlias][$displayField];
+                $linkLabel = $relationData[$relationColumn];
             }
             return Tag::a($linkLabel)
                 ->setHref(routeToCmfItemDetails(
                     $relationConfig->getForeignTable()->getName(),
-                    $record[$columnConfig->getName()]
+                    $relationData[$relationPkColumn]
                 ))
                 ->build();
         }

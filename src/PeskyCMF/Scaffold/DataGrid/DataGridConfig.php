@@ -15,6 +15,8 @@ use Swayok\Utils\ValidateValue;
 
 class DataGridConfig extends ScaffoldSectionConfig {
 
+    protected $allowRelationsInValueViewers = true;
+
     protected $template = 'cmf::scaffold/datagrid';
     /**
      * @var int

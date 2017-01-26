@@ -71,6 +71,8 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             if (!empty($newFiles)) {
                 $valueContainer->setDataForSavingExtender($newFiles);
             }
+        } else {
+            $valueContainer->setRawValue('{}', '{}', false)->setValidValue('{}', '{}');
         }
         return $valueContainer;
     }

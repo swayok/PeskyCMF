@@ -8,6 +8,8 @@ use PeskyCMF\Scaffold\ValueRenderer;
 
 class ItemDetailsConfig extends ScaffoldSectionConfig {
 
+    protected $allowRelationsInValueViewers = true;
+
     protected $template = 'cmf::scaffold/item_details';
 
     /**

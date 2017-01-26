@@ -324,7 +324,7 @@ abstract class ScaffoldConfig {
 
     abstract public function getRecordsForDataGrid();
 
-    abstract public function getRecordValuesForFormInputs($id = null);
+    abstract public function getRecordValues($id = null);
 
     abstract public function getDefaultValuesForFormInputs();
 

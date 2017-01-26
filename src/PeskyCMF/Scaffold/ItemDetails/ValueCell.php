@@ -62,7 +62,7 @@ class ValueCell extends RenderableValueViewer {
                 }
                 return json_encode($value, JSON_UNESCAPED_UNICODE);
             default:
-                return parent::doDefaultValueConversionByType($value, $type);
+                return parent::doDefaultValueConversionByType($value, $type, $record);
         }
     }
 
