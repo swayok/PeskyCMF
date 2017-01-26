@@ -138,6 +138,10 @@
     <script src="{{ route('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
 
     <script src="/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-en_US.min.js" type="text/javascript"></script>
+    @if (app()->getLocale() !== 'en')
+        <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-{{ app()->getLocale() }}_{{ strtoupper(app()->getLocale()) }}.js" type="text/javascript"></script>
+    @endif
     <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/fileinput/js/locales/{{ app()->getLocale() }}.js" type="text/javascript"></script>

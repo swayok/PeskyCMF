@@ -28,24 +28,41 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
     <?php if (!$fieldConfig->hasOptionsLoader()) : ?>
         <?php if ($rendererConfig->areOptionsDifferent()) : ?>
             {{? !!it.isCreation }}
-            <?php foreach ($rendererConfig->getOptionsForCreate() as $value => $label): ?>
-                <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
-            <?php endforeach; ?>
+                <?php $options = $rendererConfig->getOptionsForCreate(); ?>
+                <?php if (!$rendererConfig->isRequiredForCreate() && !array_key_exists('', $options)) : ?>
+                    <option value=""><?php echo $fieldConfig->getEmptyOptionLabel() ?></option>
+                <?php endif; ?>
+                <?php foreach ($options as $value => $label): ?>
+                    <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
+                <?php endforeach; ?>
             {{??}}
-            <?php foreach ($rendererConfig->getAttributesForEdit() as $value => $label): ?>
-                <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
-            <?php endforeach; ?>
+                <?php $options = $rendererConfig->getOptionsForEdit(); ?>
+                <?php if (!$rendererConfig->isRequiredForEdit() && !array_key_exists('', $options)) : ?>
+                    <option value=""><?php echo $fieldConfig->getEmptyOptionLabel() ?></option>
+                <?php endif; ?>
+                <?php foreach ($options as $value => $label): ?>
+                    <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
+                <?php endforeach; ?>
             {{?}}
         <?php else : ?>
-            <?php foreach ($rendererConfig->getOptions() as $value => $label): ?>
+            <?php $options = $rendererConfig->getOptions(); ?>
+            <?php if (!$rendererConfig->isRequired() && !array_key_exists('', $options)) : ?>
+                <option value=""><?php echo $fieldConfig->getEmptyOptionLabel() ?></option>
+            <?php endif; ?>
+            <?php foreach ($options as $value => $label): ?>
                 <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
             <?php endforeach; ?>
         <?php endif; ?>
     <?php else: ?>
         {{? it._options && it._options.<?php echo $fieldConfig->getName(); ?> }}
-        {{= it._options.<?php echo $fieldConfig->getName(); ?> }}
+            {{= it._options.<?php echo $fieldConfig->getName(); ?> }}
         {{?}}
     <?php endif; ?>
     </select>
+    <?php if ($rendererConfig->isRequired() && $fieldConfig->hasOptionsLoader()) : ?>
+        <script type="application/javascript">
+            $('#<?php echo $rendererConfig->getAttribute('id') ?>').find('option[value=""]').remove();
+        </script>
+    <?php endif; ?>
     <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>

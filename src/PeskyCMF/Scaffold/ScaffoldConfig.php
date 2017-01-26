@@ -268,10 +268,14 @@ abstract class ScaffoldConfig {
         if (!$this->isEditAllowed() && !$this->isCreateAllowed()) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
         }
-        $columnsOptions = $this->getFormConfig()->loadOptions($this->getRequest()->query('id'));
+        $formConfig = $this->getFormConfig();
+        $columnsOptions = $formConfig->loadOptions($this->getRequest()->query('id'));
         foreach ($columnsOptions as $columnName => $options) {
             if (is_array($options)) {
-                $columnsOptions[$columnName] = $this->renderOptionsForSelectInput($options);
+                $columnsOptions[$columnName] = $this->renderOptionsForSelectInput(
+                    $options,
+                    $formConfig->getValueViewer($columnName)->getEmptyOptionLabel()
+                );
             } else if (!is_string($options)) {
                 unset($columnsOptions[$columnName]);
             }
@@ -281,11 +285,14 @@ abstract class ScaffoldConfig {
 
     /**
      * @param array $options
+     * @param bool|string $addEmptyOption - false: do not add default empty option | string: add default empty option
      * @return string
-     * @throws \Swayok\Html\HtmlTagException
      */
-    protected function renderOptionsForSelectInput(array $options) {
+    protected function renderOptionsForSelectInput(array $options, $addEmptyOption = false) {
         $ret = '';
+        if ($addEmptyOption !== false || array_key_exists('', $options)) {
+            $ret .= '<option value="">' . (array_key_exists('', $options) ? $options[''] : $addEmptyOption) . '</option>';
+        }
         foreach ($options as $value => $label) {
             if (!is_array($label)) {
                 $ret .= '<option value="' . htmlentities($value) . '">' . $label . '</option>';

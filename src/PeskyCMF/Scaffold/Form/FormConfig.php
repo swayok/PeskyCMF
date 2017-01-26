@@ -542,9 +542,9 @@ class FormConfig extends ScaffoldSectionConfig {
             if ($viewer->hasOptionsLoader()) {
                 $options[$viewer->getName()] = call_user_func(
                     $viewer->getOptionsLoader(),
+                    $pkValue,
                     $viewer,
-                    $this,
-                    $pkValue
+                    $this
                 );
             }
         }

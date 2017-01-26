@@ -39,10 +39,13 @@ class FormInput extends RenderableValueViewer {
      * 3. callable
      * @var null|array|callable
      */
-    protected $options = null;
+    protected $options;
 
     /** @var callable|null */
-    protected $optionsLoader = null;
+    protected $optionsLoader;
+
+    /** @var null|string */
+    protected $emptyOptionLabel;
 
     /** @var null|string */
     protected $tooltip;
@@ -93,7 +96,7 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
-     * @param callable $loader = function (FormInput $formInput, FormConfig $formConfig, $pkValue = null) { return [] }
+     * @param callable $loader = function ($pkValue, FormInput $formInput, FormConfig $formConfig) { return [] }
      * @return $this
      */
     public function setOptionsLoader(callable $loader) {
@@ -113,6 +116,29 @@ class FormInput extends RenderableValueViewer {
      */
     public function hasOptionsLoader() {
         return !empty($this->optionsLoader);
+    }
+
+    /**
+     * @param $label
+     * @return $this
+     */
+    public function setEmptyOptionLabel($label) {
+        $this->emptyOptionLabel = $label;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getEmptyOptionLabel() {
+        return $this->emptyOptionLabel === null ? '' : $this->emptyOptionLabel;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasEmptyOptionLabel() {
+        return $this->emptyOptionLabel !== null;
     }
 
     /**
@@ -244,6 +270,17 @@ class FormInput extends RenderableValueViewer {
      */
     public function modifyIncomingValueBeforeValidation($value, array $data) {
         return $value;
+    }
+
+    /**
+     * Set other input name and value to enable/disable this input
+     * @param string $inputName
+     * @param mixed $onValue - bool: if enabler is checkbox/trigger | string or array: if enabler is select or radios
+     * @param bool $setReadOnly - true: input will be marked with "readonly" attribute | false: input will be disabled
+     * @param null|string|bool $forceValue - null: do not force value | string or bool: set this value forcefully
+     */
+    public function setEnablerInput($inputName, $onValue, $setReadOnly = false, $forceValue = null) {
+        // todo: inplement this
     }
 
 }
