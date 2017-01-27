@@ -197,6 +197,53 @@ FormHelper.showErrorForInput = function ($form, inputName, message) {
     }
 };
 
+FormHelper.initInputsEnablers = function (formSelector, enablers) {
+    var $form = $(formSelector);
+    if ($form.length === 0 || !$.isPlainObject(enablers)) {
+        return;
+    }
+    for (var inputName in enablers) {
+        var enablerConfig = enablers[inputName];
+        if (!$.isPlainObject(enablerConfig) || !enablerConfig.name || typeof enablerConfig.value === 'undefined') {
+            continue;
+        }
+        var $input = $form
+            .find('[name="' + inputName + '"], [name="' + inputName + '[]"]')
+            .filter('input, select, textarea')
+            .not('[type="hidden"]')
+            .first();
+        if ($input.length === 0) {
+            continue;
+        }
+        var $enablerInput = $form
+            .find('[name="' + enablerConfig.name + '"], [name="' + enablerConfig.name + '[]"]')
+            .filter('input, select, textarea')
+            .not('[type="hidden"]')
+            .first();
+        if ($enablerInput.length === 0) {
+            continue;
+        }
+        console.log(inputName, $input, $enablerInput);
+        FormHelper.setEnablerHandler($input, $enablerInput, enablerConfig);
+    }
+};
+
+FormHelper.setEnablerHandler = function ($targetInput, $enablerInput, enablerConfig) {
+    if ($enablerInput.prop("tagName").toLowerCase() === 'select') {
+        $enablerInput.on('change', function () {
+            var isMatch = $(this).val().match(enablerConfig.value) !== null;
+            console.log($(this).val(), isMatch);
+
+            $targetInput.prop(enablerConfig.readonly ? 'readonly' : 'disabled', !isMatch);
+            if (!isMatch && typeof enablerConfig.readonly_value !== 'undefined' && enablerConfig.readonly_value !== null) {
+                $targetInput.val(enablerConfig.readonly_value);
+            }
+        });
+    } else {
+        // input / textarea
+    }
+};
+
 var AdminUI = {
     $el: null,
     visible: false,

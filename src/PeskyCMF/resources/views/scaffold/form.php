@@ -61,7 +61,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
             }
         }
     }
-    echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());;
+    echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());
 }
 ?>
 
@@ -115,6 +115,22 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
             </div>
         <?php endif; ?>
     </div>
+<?php View::stopSection(); ?>
+
+<?php View::startSection('scaffold-form-enablers-script'); ?>
+    <?php
+        $enablers = [];
+        foreach ($formConfig->getFormInputs() as $inputConfig) {
+            if ($inputConfig->hasEnablerConfig()) {
+                $enablers[$inputConfig->getName()] = $inputConfig->getEnablerConfig();
+            }
+        }
+    ?>
+    <?php if (count($enablers) > 0) : ?>
+        <script type="application/javascript">
+            FormHelper.initInputsEnablers('#<?php echo $formId; ?>', <?php echo json_encode($enablers, JSON_UNESCAPED_UNICODE); ?>);
+        </script>
+    <?php endif ?>
 <?php View::stopSection(); ?>
 
 <script type="text/html" id="item-form-tpl">
@@ -188,6 +204,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
                         ?>
                     </div>
                 </form>
+                <?php echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates(View::yieldContent('scaffold-form-enablers-script')); ?>
             </div>
         </div>
     </div>

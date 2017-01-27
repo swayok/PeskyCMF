@@ -49,6 +49,8 @@ class FormInput extends RenderableValueViewer {
 
     /** @var null|string */
     protected $tooltip;
+    /** @var null|array */
+    protected $enablerConfig;
 
     /**
      * Default input id
@@ -275,12 +277,48 @@ class FormInput extends RenderableValueViewer {
     /**
      * Set other input name and value to enable/disable this input
      * @param string $inputName
-     * @param mixed $onValue - bool: if enabler is checkbox/trigger | string or array: if enabler is select or radios
+     * @param mixed $onValue
+     *      - bool: if enabler is checkbox/trigger |
+     *      - string or array: if enabler is select or radios
+     *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
+     *          start & end delitmiter is '/'; must do exact matching using ^ and $
+     *          Example: "/^(val1|val2)$/", "/^([a-d][c-z])+/"
      * @param bool $setReadOnly - true: input will be marked with "readonly" attribute | false: input will be disabled
-     * @param null|string|bool $forceValue - null: do not force value | string or bool: set this value forcefully
+     * @param null|string|bool $readonlyValue - null: leave as is | string or bool: change input's value when it gets "readonly" attribute
+     * @return $this
      */
-    public function setEnablerInput($inputName, $onValue, $setReadOnly = false, $forceValue = null) {
-        // todo: inplement this
+    public function setEnablerConfig($inputName, $onValue, $setReadOnly = false, $readonlyValue = null) {
+        $this->enablerConfig = function () use ($inputName, $onValue, $setReadOnly, $readonlyValue) {
+            if (is_array($onValue)) {
+                array_walk($onValue, function (&$value) {
+                    $value = preg_quote($value, '/');
+                });
+                $onValue = '/^(' . implode('|', $onValue) . ')$/';
+            } else if (!is_bool($onValue) && !preg_match('%^/.*/[a-z]*$%', $onValue)) {
+                $onValue = '/^(' . preg_quote($onValue, '%') . ')$/';
+            }
+            return [
+                'name' => $inputName,
+                'value' => $onValue,
+                'readonly' => (bool)$setReadOnly,
+                'readonly_value' => $readonlyValue
+            ];
+        };
+        return $this;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getEnablerConfig() {
+        return call_user_func($this->enablerConfig);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasEnablerConfig() {
+        return !empty($this->enablerConfig);
     }
 
 }
