@@ -122,7 +122,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
         $enablers = [];
         foreach ($formConfig->getFormInputs() as $inputConfig) {
             if ($inputConfig->hasEnablerConfig()) {
-                $enablers[$inputConfig->getName()] = $inputConfig->getEnablerConfig();
+                $enablers[] = $inputConfig->getEnablerConfig();
             }
         }
     ?>

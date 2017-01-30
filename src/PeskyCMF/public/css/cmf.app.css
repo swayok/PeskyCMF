@@ -859,6 +859,18 @@ aside.main-sidebar .sidebar-menu li .badge {
   border-color: #d2d6de !important;
   opacity: 1;
 }
+.bootstrap-select > button.dropdown-toggle.bs-placeholder .bs-caret,
+.bootstrap-select > button.dropdown-toggle.bs-placeholder .bs-caret:hover,
+.bootstrap-select > button.dropdown-toggle.bs-placeholder .bs-caret:focus,
+.bootstrap-select > button.dropdown-toggle.bs-placeholder .bs-caret:active {
+  color: #000;
+}
+.bootstrap-select > button.dropdown-toggle.bs-placeholder.disabled .bs-caret,
+.bootstrap-select > button.dropdown-toggle.bs-placeholder.disabled .bs-caret:hover,
+.bootstrap-select > button.dropdown-toggle.bs-placeholder.disabled .bs-caret:focus,
+.bootstrap-select > button.dropdown-toggle.bs-placeholder.disabled .bs-caret:active {
+  color: #999;
+}
 .bootstrap-select.open > button.dropdown-toggle {
   border-color: #3c8dbc !important;
 }

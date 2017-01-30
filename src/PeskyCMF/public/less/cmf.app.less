@@ -872,6 +872,28 @@ aside.main-sidebar {
             border-color: #d2d6de !important;
             opacity: 1;
         }
+
+        &.bs-placeholder {
+
+            .bs-caret {
+                &,
+                &:hover,
+                &:focus,
+                &:active {
+                    color: #000;
+                }
+            }
+
+            &.disabled .bs-caret {
+                &,
+                &:hover,
+                &:focus,
+                &:active {
+                    color: #999;
+                }
+            }
+
+        }
     }
 
     &.open > button.dropdown-toggle {

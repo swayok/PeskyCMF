@@ -276,7 +276,7 @@ class FormInput extends RenderableValueViewer {
 
     /**
      * Set other input name and value to enable/disable this input
-     * @param string $inputName
+     * @param string $enablerInputName
      * @param mixed $onValue
      *      - bool: if enabler is checkbox/trigger |
      *      - string or array: if enabler is select or radios
@@ -286,9 +286,13 @@ class FormInput extends RenderableValueViewer {
      * @param bool $setReadOnly - true: input will be marked with "readonly" attribute | false: input will be disabled
      * @param null|string|bool $readonlyValue - null: leave as is | string or bool: change input's value when it gets "readonly" attribute
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    public function setEnablerConfig($inputName, $onValue, $setReadOnly = false, $readonlyValue = null) {
-        $this->enablerConfig = function () use ($inputName, $onValue, $setReadOnly, $readonlyValue) {
+    public function setEnablerConfig($enablerInputName, $onValue, $setReadOnly = false, $readonlyValue = null) {
+        $this->enablerConfig = function () use ($enablerInputName, $onValue, $setReadOnly, $readonlyValue) {
             if (is_array($onValue)) {
                 array_walk($onValue, function (&$value) {
                     $value = preg_quote($value, '/');
@@ -298,10 +302,11 @@ class FormInput extends RenderableValueViewer {
                 $onValue = '/^(' . preg_quote($onValue, '%') . ')$/';
             }
             return [
-                'name' => $inputName,
-                'value' => $onValue,
-                'readonly' => (bool)$setReadOnly,
-                'readonly_value' => $readonlyValue
+                'input_name' => $this->getName(),
+                'enabler_input_name' => $enablerInputName,
+                'on_value' => $this->getType() === static::TYPE_BOOL ? (bool)$onValue : $onValue,
+                'set_readonly_state' => (bool)$setReadOnly,
+                'set_readonly_value' => $readonlyValue
             ];
         };
         return $this;

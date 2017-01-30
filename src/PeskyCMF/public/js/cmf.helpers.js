@@ -199,49 +199,148 @@ FormHelper.showErrorForInput = function ($form, inputName, message) {
 
 FormHelper.initInputsEnablers = function (formSelector, enablers) {
     var $form = $(formSelector);
-    if ($form.length === 0 || !$.isPlainObject(enablers)) {
+    if ($form.length === 0) {
         return;
     }
-    for (var inputName in enablers) {
-        var enablerConfig = enablers[inputName];
-        if (!$.isPlainObject(enablerConfig) || !enablerConfig.name || typeof enablerConfig.value === 'undefined') {
+    if (!$.isArray(enablers)) {
+        console.log('Enablers argument must be a plain array');
+    }
+    var findInput = function (name) {
+        var $matchingInputs = $form
+            .find('[name="' + name + '[]"], [name="' + name + '"]')
+            .filter('input, select, textarea');
+        if ($matchingInputs.length === 0) {
+            return null;
+        } else if ($matchingInputs.length === 1) {
+            return $matchingInputs.first();
+        } else {
+            var $notHiddenInputs = $matchingInputs.not('[type="hidden"]');
+            if ($notHiddenInputs.length > 0) {
+                return $notHiddenInputs.first();
+            } else {
+                var $multiValueInputs = $matchingInputs.filter('[name="' + name + '[]"]');
+                if ($multiValueInputs.length > 0) {
+                    return $multiValueInputs; //< for select multiple and checkboxes list
+                } else {
+                    return $matchingInputs; //< for radios
+                }
+            }
+        }
+    };
+    for (var i = 0; i < enablers.length; i++) {
+        var enablerConfig = $.extend({}, enablers[i]);
+        if (
+            !$.isPlainObject(enablerConfig)
+            || !enablerConfig.input_name
+            || !enablerConfig.enabler_input_name
+            || typeof enablerConfig.on_value === 'undefined'
+        ) {
             continue;
         }
-        var $input = $form
-            .find('[name="' + inputName + '"], [name="' + inputName + '[]"]')
-            .filter('input, select, textarea')
-            .not('[type="hidden"]')
-            .first();
-        if ($input.length === 0) {
+        var $input = findInput(enablerConfig.input_name);
+        if (!$input) {
+            console.log(
+                "Target input with name '" + enablerConfig.input_name + "' or '"
+                + enablerConfig.input_name + "[]' was not found in form"
+            );
             continue;
         }
-        var $enablerInput = $form
-            .find('[name="' + enablerConfig.name + '"], [name="' + enablerConfig.name + '[]"]')
-            .filter('input, select, textarea')
-            .not('[type="hidden"]')
-            .first();
-        if ($enablerInput.length === 0) {
+        var $enablerInput = findInput(enablerConfig.enabler_input_name);
+        if (!$enablerInput) {
+            console.log(
+                "Enabler input with name '" + enablerConfig.enabler_input_name + "' or '"
+                + enablerConfig.enabler_input_name + "[]' were not found in form"
+            );
             continue;
         }
-        console.log(inputName, $input, $enablerInput);
+        if (enablerConfig.on_value !== true && enablerConfig.on_value !== false) {
+            var regexpParts = enablerConfig.on_value.match(/^\/(.*)\/(i?g?m?|i?m?g?|g?m?i?|g?i?m?|m?i?g?|m?g?i?)$/);
+            if (regexpParts === null) {
+                console.log(
+                    "Invalid regexp '" + enablerConfig.on_value + "' for enabler on input '" + enablerConfig.input_name +
+                    + "'. Expected string like: '/<regexp_body>/<flags>' where flags: mix of 'i', 'm', 'g'"
+                );
+                continue;
+            }
+            enablerConfig.regexp = new RegExp(regexpParts[1], regexpParts[2]);
+        }
         FormHelper.setEnablerHandler($input, $enablerInput, enablerConfig);
     }
 };
 
 FormHelper.setEnablerHandler = function ($targetInput, $enablerInput, enablerConfig) {
     if ($enablerInput.prop("tagName").toLowerCase() === 'select') {
-        $enablerInput.on('change', function () {
-            var isMatch = $(this).val().match(enablerConfig.value) !== null;
-            console.log($(this).val(), isMatch);
-
-            $targetInput.prop(enablerConfig.readonly ? 'readonly' : 'disabled', !isMatch);
-            if (!isMatch && typeof enablerConfig.readonly_value !== 'undefined' && enablerConfig.readonly_value !== null) {
-                $targetInput.val(enablerConfig.readonly_value);
-            }
+        $enablerInput.on('change blur', function () {
+            FormHelper.handleEnableDisasbleOnTargetInput($targetInput, $(this), enablerConfig);
         });
     } else {
-        // input / textarea
+        if ($enablerInput.not('[type="checkbox"], [type="radio"]').length > 0) {
+            // input (excluding checkbox and radio) or textarea
+            $enablerInput.on('change blur keyup', function () {
+                FormHelper.handleEnableDisasbleOnTargetInput($targetInput, $(this), enablerConfig);
+            });
+        } else {
+            // checkbox or radio
+            $enablerInput.on('change switchChange.bootstrapSwitch', function (e) {
+                FormHelper.handleEnableDisasbleOnTargetInput($targetInput, $enablerInput, enablerConfig, true);
+            });
+        }
     }
+};
+
+FormHelper.handleEnableDisasbleOnTargetInput = function ($targetInput, $enablerInput, enablerConfig, isCheckboxOrRadio) {
+    var isDisabled = false;
+    if (!isCheckboxOrRadio) {
+        isDisabled = enablerConfig.regexp.test($enablerInput.val());
+    } else {
+        if ($enablerInput.attr('type').toLowerCase() === 'checkbox' && $enablerInput.length === 1) {
+            // single checkbox
+            isDisabled = $enablerInput.prop('checked') === !!enablerConfig.on_value;
+        } else {
+            // multiple checkboxes or set of radios
+            $targetInput.filter(':checked').each(function () {
+                if (enablerConfig.regexp.test($(this).val())) {
+                    isDisabled = true;
+                }
+            });
+        }
+    }
+    if (isDisabled && typeof enablerConfig.set_readonly_value !== 'undefined' && enablerConfig.set_readonly_value !== null) {
+        if ($targetInput.not('[type="checkbox"], [type="radio"]').length > 0) {
+            $targetInput.val(enablerConfig.set_readonly_value).change();
+        } else {
+            if ($targetInput.attr('type') && $targetInput.attr('type').toLowerCase() === 'checkbox' && $targetInput.length === 1) {
+                // single checkbox
+                $targetInput.prop('checked', !!enablerConfig.set_readonly_value).change();
+            } else {
+                // multiple checkboxes or set of radios
+                $targetInput
+                    .prop('checked', false)
+                    .filter('[value="' + enablerConfig.set_readonly_value + '"]')
+                        .prop('checked', true)
+                        .end()
+                    .change();
+            }
+        }
+    }
+    if ($targetInput.hasClass('selectpicker')) {
+        if (isDisabled) {
+            $targetInput.prop({disabled: true, readOnly: true});
+        } else {
+            $targetInput.prop({disabled: false, readOnly: false});
+        }
+        $targetInput.selectpicker('refresh');
+    } else if ($targetInput.attr('data-editor-name')) {
+        var editor = CKEDITOR.instances[$targetInput.attr('data-editor-name')];
+        if (editor) {
+            editor.setReadOnly(isDisabled);
+        }
+    }
+    $targetInput.prop({
+        disabled: enablerConfig.set_readonly_state ? false : isDisabled,
+        readOnly: enablerConfig.set_readonly_state ? isDisabled : false
+    });
+    $targetInput.change();
 };
 
 var AdminUI = {
