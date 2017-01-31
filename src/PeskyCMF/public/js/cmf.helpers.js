@@ -28,6 +28,8 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             return;
         }
     }
+    // run enablers
+    FormHelper.runEnablersOnFormDataChange($form);
     // init plugins
     $form
         .find('.selectpicker')
@@ -205,6 +207,7 @@ FormHelper.initInputsEnablers = function (formSelector, enablers) {
     if (!$.isArray(enablers)) {
         console.log('Enablers argument must be a plain array');
     }
+    $form.data('enablers', enablers);
     var findInput = function (name) {
         var $matchingInputs = $form
             .find('[name="' + name + '[]"], [name="' + name + '"]')
@@ -228,7 +231,7 @@ FormHelper.initInputsEnablers = function (formSelector, enablers) {
         }
     };
     for (var i = 0; i < enablers.length; i++) {
-        var enablerConfig = $.extend({}, enablers[i]);
+        var enablerConfig = enablers[i];
         if (
             !$.isPlainObject(enablerConfig)
             || !enablerConfig.input_name
@@ -253,6 +256,8 @@ FormHelper.initInputsEnablers = function (formSelector, enablers) {
             );
             continue;
         }
+        enablerConfig.$targetInput = $input;
+        enablerConfig.$enablerInput = $enablerInput;
         if (enablerConfig.on_value !== true && enablerConfig.on_value !== false) {
             var regexpParts = enablerConfig.on_value.match(/^\/(.*)\/(i?g?m?|i?m?g?|g?m?i?|g?i?m?|m?i?g?|m?g?i?)$/);
             if (regexpParts === null) {
@@ -264,32 +269,34 @@ FormHelper.initInputsEnablers = function (formSelector, enablers) {
             }
             enablerConfig.regexp = new RegExp(regexpParts[1], regexpParts[2]);
         }
-        FormHelper.setEnablerHandler($input, $enablerInput, enablerConfig);
+        FormHelper.setEnablerHandler(enablers[i]);
     }
 };
 
-FormHelper.setEnablerHandler = function ($targetInput, $enablerInput, enablerConfig) {
+FormHelper.setEnablerHandler = function (enablerConfig) {
+    var $enablerInput = enablerConfig.$enablerInput;
     if ($enablerInput.prop("tagName").toLowerCase() === 'select') {
         $enablerInput.on('change blur', function () {
-            FormHelper.handleEnableDisasbleOnTargetInput($targetInput, $(this), enablerConfig);
+            FormHelper.handleEnableDisasbleOnTargetInput($(this), enablerConfig);
         });
     } else {
         if ($enablerInput.not('[type="checkbox"], [type="radio"]').length > 0) {
             // input (excluding checkbox and radio) or textarea
             $enablerInput.on('change blur keyup', function () {
-                FormHelper.handleEnableDisasbleOnTargetInput($targetInput, $(this), enablerConfig);
+                FormHelper.handleEnableDisasbleOnTargetInput($(this), enablerConfig);
             });
         } else {
             // checkbox or radio
             $enablerInput.on('change switchChange.bootstrapSwitch', function (e) {
-                FormHelper.handleEnableDisasbleOnTargetInput($targetInput, $enablerInput, enablerConfig, true);
+                FormHelper.handleEnableDisasbleOnTargetInput($enablerInput, enablerConfig, true);
             });
         }
     }
 };
 
-FormHelper.handleEnableDisasbleOnTargetInput = function ($targetInput, $enablerInput, enablerConfig, isCheckboxOrRadio) {
+FormHelper.handleEnableDisasbleOnTargetInput = function ($enablerInput, enablerConfig, isCheckboxOrRadio) {
     var isDisabled = false;
+    var $targetInput = enablerConfig.$targetInput;
     if (!isCheckboxOrRadio) {
         isDisabled = enablerConfig.regexp.test($enablerInput.val());
     } else {
@@ -309,7 +316,11 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($targetInput, $enablerI
         if ($targetInput.not('[type="checkbox"], [type="radio"]').length > 0) {
             $targetInput.val(enablerConfig.set_readonly_value).change();
         } else {
-            if ($targetInput.attr('type') && $targetInput.attr('type').toLowerCase() === 'checkbox' && $targetInput.length === 1) {
+            if (
+                $targetInput.attr('type')
+                && $targetInput.attr('type').toLowerCase() === 'checkbox'
+                && $targetInput.length === 1
+            ) {
                 // single checkbox
                 $targetInput.prop('checked', !!enablerConfig.set_readonly_value).change();
             } else {
@@ -329,6 +340,7 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($targetInput, $enablerI
         } else {
             $targetInput.prop({disabled: false, readOnly: false});
         }
+        $targetInput.selectpicker('hide');
         $targetInput.selectpicker('refresh');
     } else if ($targetInput.attr('data-editor-name')) {
         var editor = CKEDITOR.instances[$targetInput.attr('data-editor-name')];
@@ -336,11 +348,23 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($targetInput, $enablerI
             editor.setReadOnly(isDisabled);
         }
     }
+    // todo: date/time input support
     $targetInput.prop({
         disabled: enablerConfig.set_readonly_state ? false : isDisabled,
         readOnly: enablerConfig.set_readonly_state ? isDisabled : false
     });
     $targetInput.change();
+};
+
+FormHelper.runEnablersOnFormDataChange = function (form) {
+    var enablers = $(form).data('enablers');
+    if (enablers && $.isArray(enablers)) {
+        for (var i = 0; i < enablers.length; i++) {
+            if (enablers[i].$enablerInput) {
+                enablers[i].$enablerInput.change();
+            }
+        }
+    }
 };
 
 var AdminUI = {
