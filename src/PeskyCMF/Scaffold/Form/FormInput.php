@@ -275,11 +275,11 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
-     * Set other input name and value to enable/disable this input
-     * @param string $enablerInputName
-     * @param mixed $onValue
-     *      - bool: if enabler is checkbox/trigger |
-     *      - string or array: if enabler is select or radios
+     * This input should be enabled only when $otherInput has provided value ($hasValue)
+     * @param string $otherInput
+     * @param mixed $hasValue
+     *      - bool: if $otherInput is checkbox/trigger |
+     *      - string or array: if $otherInput is select or radios
      *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
      *          start & end delitmiter is '/'; must do exact matching using ^ and $
      *          Example: "/^(val1|val2)$/", "/^([a-d][c-z])+/"
@@ -291,20 +291,46 @@ class FormInput extends RenderableValueViewer {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function setEnablerConfig($enablerInputName, $onValue, $setReadOnly = false, $readonlyValue = null) {
-        $this->enablerConfig = function () use ($enablerInputName, $onValue, $setReadOnly, $readonlyValue) {
-            if (is_array($onValue)) {
-                array_walk($onValue, function (&$value) {
+    public function setEnabledWhen($otherInput, $hasValue, $setReadOnly = false, $readonlyValue = null) {
+        return $this->setEnablerConfig($otherInput, $hasValue, false, $setReadOnly, $readonlyValue);
+    }
+
+    /**
+     * This input should be disabled only when $otherInput has no provided value ($hasValue)
+     * @param string $otherInput
+     * @param mixed $hasValue
+     *      - bool: if $otherInput is checkbox/trigger |
+     *      - string or array: if $otherInput is select or radios
+     *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
+     *          start & end delitmiter is '/'; must do exact matching using ^ and $
+     *          Example: "/^(val1|val2)$/", "/^([a-d][c-z])+/"
+     * @param bool $setReadOnly - true: input will be marked with "readonly" attribute | false: input will be disabled
+     * @param null|string|bool $readonlyValue - null: leave as is | string or bool: change input's value when it gets "readonly" attribute
+     * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function setDisabledWhen($otherInput, $hasValue, $setReadOnly = false, $readonlyValue = null) {
+        return $this->setEnablerConfig($otherInput, $hasValue, true, $setReadOnly, $readonlyValue);
+    }
+
+    protected function setEnablerConfig($enablerInputName, $hasValue, $shouldDisableInput, $setReadOnly = false, $readonlyValue = null) {
+        $this->enablerConfig = function () use ($enablerInputName, $shouldDisableInput, $hasValue, $setReadOnly, $readonlyValue) {
+            if (is_array($hasValue)) {
+                array_walk($hasValue, function (&$value) {
                     $value = preg_quote($value, '/');
                 });
-                $onValue = '/^(' . implode('|', $onValue) . ')$/';
-            } else if (!is_bool($onValue) && !preg_match('%^/.*/[a-z]*$%', $onValue)) {
-                $onValue = '/^(' . preg_quote($onValue, '%') . ')$/';
+                $hasValue = '/^(' . implode('|', $hasValue) . ')$/';
+            } else if (!is_bool($hasValue) && !preg_match('%^/.*/[a-z]*$%', $hasValue)) {
+                $hasValue = '/^(' . preg_quote($hasValue, '%') . ')$/';
             }
             return [
                 'input_name' => $this->getName(),
                 'enabler_input_name' => $enablerInputName,
-                'on_value' => $this->getType() === static::TYPE_BOOL ? (bool)$onValue : $onValue,
+                'on_value' => $this->getType() === static::TYPE_BOOL ? (bool)$hasValue : $hasValue,
+                'should_disable_input' => !(bool)$shouldDisableInput,
                 'set_readonly_state' => (bool)$setReadOnly,
                 'set_readonly_value' => $readonlyValue
             ];

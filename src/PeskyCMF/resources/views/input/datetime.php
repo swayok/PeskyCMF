@@ -5,21 +5,19 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var array $config
- * @var array $enabler
  */
-$attributes = array(
-    'name' => $fieldConfig->getName(),
-    'id' => $fieldConfig->getDefaultId(),
-    'type' => 'text',
-    'class' => 'form-control'
-);
+$rendererConfig
+    ->addAttribute('name', $fieldConfig->getName(), false)
+    ->addAttribute('id', $fieldConfig->getDefaultId(), false)
+    ->addAttribute('type','text', false)
+    ->addAttribute('class', 'form-control', false);
 $attributesForCreate = $rendererConfig->getAttributesForCreate();
 $attributesForEdit = $rendererConfig->getAttributesForEdit();
-$visibleOnCreate = !array_key_exists('visible', $attributesForCreate) || !empty($attributesForCreate['visible']);
-$visibleOnEdit = !array_key_exists('visible', $attributesForEdit) || !empty($attributesForEdit['visible']);
+$visibleOnCreate = (bool)array_get($attributesForCreate, 'visible', false);
+$visibleOnEdit = (bool)array_get($attributesForEdit, 'visible', false);
 unset($attributesForCreate['visible'], $attributesForEdit['visible']);
-$attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $attributesForCreate));
-$attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $attributesForEdit));
+$attributesForCreate = \Swayok\Html\Tag::buildAttributes($attributesForCreate);
+$attributesForEdit = \Swayok\Html\Tag::buildAttributes($attributesForEdit);
 ?>
 <?php if (!$visibleOnCreate) : ?>
     {{? !it.isCreation }}
@@ -28,7 +26,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <?php endif; ?>
 
 <div class="form-group">
-    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <div class="input-group w200">
         <input value="{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}"
             {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
@@ -58,23 +56,8 @@ $config = array_merge([
 
 <script type="application/javascript">
     setTimeout(function () {
-        var $input = $('#<?php echo $attributes['id']; ?>');
+        var $input = $('#<?php echo $rendererConfig->getAttribute('id'); ?>');
         $input.datetimepicker(<?php echo json_encode($config); ?>);
-        <?php if (!empty($enabler)) : ?>
-            var toggleVisibility = function ($enablerInput) {
-                var val = $enablerInput[0].type === 'checkbox' ? $enablerInput[0].checked : $enablerInput.val().length > 0;
-                if (val) {
-                    $input.closest('.form-group').slideDown(100);
-                } else {
-                    $input.closest('.form-group').slideUp(100);
-                }
-            };
-            var $enablerInput = $('#<?php echo $actionConfig->getValueViewer($enabler)->getDefaultId(); //< todo: use renderer's getId ?>');
-            toggleVisibility($enablerInput);
-            $enablerInput.on('change switchChange.bootstrapSwitch', function () {
-                toggleVisibility($(this));
-            });
-        <?php endif; ?>
         $input.parent().find('.input-group-addon.cursor').on('click', function () {
             $input.data("DateTimePicker").show();
         });

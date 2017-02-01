@@ -28,8 +28,6 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             return;
         }
     }
-    // run enablers
-    FormHelper.runEnablersOnFormDataChange($form);
     // init plugins
     $form
         .find('.selectpicker')
@@ -115,6 +113,8 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             }
         }
     });
+    // notify that form was initiated
+    $form.trigger('init.cmfform');
 };
 
 FormHelper.removeAllFormMessagesAndErrors = function ($form) {
@@ -199,7 +199,7 @@ FormHelper.showErrorForInput = function ($form, inputName, message) {
     }
 };
 
-FormHelper.initInputsEnablers = function (formSelector, enablers) {
+FormHelper.initInputsEnablers = function (formSelector, enablers, runEnablers) {
     var $form = $(formSelector);
     if ($form.length === 0) {
         return;
@@ -271,23 +271,26 @@ FormHelper.initInputsEnablers = function (formSelector, enablers) {
         }
         FormHelper.setEnablerHandler(enablers[i]);
     }
+    if (runEnablers) {
+        FormHelper.runEnablersOnFormDataChange($form);
+    }
 };
 
 FormHelper.setEnablerHandler = function (enablerConfig) {
     var $enablerInput = enablerConfig.$enablerInput;
     if ($enablerInput.prop("tagName").toLowerCase() === 'select') {
-        $enablerInput.on('change blur', function () {
+        $enablerInput.on('run-enabler.cmfform change blur', function () {
             FormHelper.handleEnableDisasbleOnTargetInput($(this), enablerConfig);
         });
     } else {
         if ($enablerInput.not('[type="checkbox"], [type="radio"]').length > 0) {
             // input (excluding checkbox and radio) or textarea
-            $enablerInput.on('change blur keyup', function () {
+            $enablerInput.on('run-enabler.cmfform change blur keyup', function () {
                 FormHelper.handleEnableDisasbleOnTargetInput($(this), enablerConfig);
             });
         } else {
             // checkbox or radio
-            $enablerInput.on('change switchChange.bootstrapSwitch', function (e) {
+            $enablerInput.on('run-enabler.cmfform change switchChange.bootstrapSwitch', function () {
                 FormHelper.handleEnableDisasbleOnTargetInput($enablerInput, enablerConfig, true);
             });
         }
@@ -298,19 +301,22 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($enablerInput, enablerC
     var isDisabled = false;
     var $targetInput = enablerConfig.$targetInput;
     if (!isCheckboxOrRadio) {
-        isDisabled = enablerConfig.regexp.test($enablerInput.val());
+        isDisabled = !enablerConfig.regexp.test($enablerInput.val());
     } else {
         if ($enablerInput.attr('type').toLowerCase() === 'checkbox' && $enablerInput.length === 1) {
             // single checkbox
-            isDisabled = $enablerInput.prop('checked') === !!enablerConfig.on_value;
+            isDisabled = $enablerInput.prop('checked') !== !!enablerConfig.on_value;
         } else {
             // multiple checkboxes or set of radios
             $targetInput.filter(':checked').each(function () {
                 if (enablerConfig.regexp.test($(this).val())) {
-                    isDisabled = true;
+                    isDisabled = false;
                 }
             });
         }
+    }
+    if (typeof enablerConfig.should_disable_input !== 'undefined' && !enablerConfig.should_disable_input) {
+        isDisabled = !isDisabled;
     }
     if (isDisabled && typeof enablerConfig.set_readonly_value !== 'undefined' && enablerConfig.set_readonly_value !== null) {
         if ($targetInput.not('[type="checkbox"], [type="radio"]').length > 0) {
@@ -340,7 +346,6 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($enablerInput, enablerC
         } else {
             $targetInput.prop({disabled: false, readOnly: false});
         }
-        $targetInput.selectpicker('hide');
         $targetInput.selectpicker('refresh');
     } else if ($targetInput.attr('data-editor-name')) {
         var editor = CKEDITOR.instances[$targetInput.attr('data-editor-name')];
@@ -348,7 +353,6 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($enablerInput, enablerC
             editor.setReadOnly(isDisabled);
         }
     }
-    // todo: date/time input support
     $targetInput.prop({
         disabled: enablerConfig.set_readonly_state ? false : isDisabled,
         readOnly: enablerConfig.set_readonly_state ? isDisabled : false
@@ -361,7 +365,7 @@ FormHelper.runEnablersOnFormDataChange = function (form) {
     if (enablers && $.isArray(enablers)) {
         for (var i = 0; i < enablers.length; i++) {
             if (enablers[i].$enablerInput) {
-                enablers[i].$enablerInput.change();
+                enablers[i].$enablerInput.trigger('run-enabler.cmfform');
             }
         }
     }
