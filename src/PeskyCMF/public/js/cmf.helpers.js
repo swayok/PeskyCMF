@@ -114,7 +114,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
         }
     });
     // notify that form was initiated
-    $form.trigger('init.cmfform');
+    $form.trigger('ready.cmfform');
 };
 
 FormHelper.removeAllFormMessagesAndErrors = function ($form) {
@@ -205,7 +205,7 @@ FormHelper.initInputsEnablers = function (formSelector, enablers, runEnablers) {
         return;
     }
     if (!$.isArray(enablers)) {
-        console.log('Enablers argument must be a plain array');
+        console.error('Enablers argument must be a plain array');
     }
     $form.data('enablers', enablers);
     var findInput = function (name) {
@@ -242,7 +242,7 @@ FormHelper.initInputsEnablers = function (formSelector, enablers, runEnablers) {
         }
         var $input = findInput(enablerConfig.input_name);
         if (!$input) {
-            console.log(
+            console.error(
                 "Target input with name '" + enablerConfig.input_name + "' or '"
                 + enablerConfig.input_name + "[]' was not found in form"
             );
@@ -250,7 +250,7 @@ FormHelper.initInputsEnablers = function (formSelector, enablers, runEnablers) {
         }
         var $enablerInput = findInput(enablerConfig.enabler_input_name);
         if (!$enablerInput) {
-            console.log(
+            console.error(
                 "Enabler input with name '" + enablerConfig.enabler_input_name + "' or '"
                 + enablerConfig.enabler_input_name + "[]' were not found in form"
             );
@@ -261,7 +261,7 @@ FormHelper.initInputsEnablers = function (formSelector, enablers, runEnablers) {
         if (enablerConfig.on_value !== true && enablerConfig.on_value !== false) {
             var regexpParts = enablerConfig.on_value.match(/^\/(.*)\/(i?g?m?|i?m?g?|g?m?i?|g?i?m?|m?i?g?|m?g?i?)$/);
             if (regexpParts === null) {
-                console.log(
+                console.error(
                     "Invalid regexp '" + enablerConfig.on_value + "' for enabler on input '" + enablerConfig.input_name +
                     + "'. Expected string like: '/<regexp_body>/<flags>' where flags: mix of 'i', 'm', 'g'"
                 );

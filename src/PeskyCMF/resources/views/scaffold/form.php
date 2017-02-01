@@ -128,7 +128,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
     ?>
     <?php if (count($enablers) > 0) : ?>
         <script type="application/javascript">
-            $('#<?php echo $formId; ?>').on('init.cmfform', function () {
+            $('#<?php echo $formId; ?>').on('ready.cmfform', function () {
                 FormHelper.initInputsEnablers(this, <?php echo json_encode($enablers, JSON_UNESCAPED_UNICODE); ?>, true);
             });
         </script>

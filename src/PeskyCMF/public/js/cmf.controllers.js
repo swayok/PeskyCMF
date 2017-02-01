@@ -25,14 +25,10 @@ var CmfControllerHelpers = {
                 deferred.resolve($el);
             } else {
                 Utils.fadeOut(CmfControllerHelpers.currentContentEl, function () {
-                    $el.fadeOut();
-                    CmfControllerHelpers.currentContentContainer.append($el);
-                    if (CmfControllerHelpers.currentContentEl.attr('data-detachable') == '1') {
-                        CmfControllerHelpers.currentContentEl.detach();
-                    } else {
-                        CmfControllerHelpers.currentContentEl.remove();
-                    }
+                    CmfControllerHelpers.currentContentEl.remove();
                     CmfControllerHelpers.currentContentEl = $el;
+                    CmfControllerHelpers.currentContentEl.fadeOut();
+                    CmfControllerHelpers.currentContentContainer.append($el);
                     Utils.fadeIn(CmfControllerHelpers.currentContentEl, function () {
                         Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
                         deferred.resolve($el);
@@ -79,12 +75,7 @@ var CmfView = Pilot.View.extend({
     onRoute: function (event, request) {
         //console.log('route');
         this.request = request;
-        var deferred;
-        if (this.showUI) {
-            deferred = AdminUI.showUI();
-        } else {
-            deferred = AdminUI.destroyUI();
-        }
+        var deferred = this.showUI ? AdminUI.showUI() : AdminUI.destroyUI();
         var _this = this;
         deferred.done(function () {
             _this.render();
@@ -96,10 +87,13 @@ var CmfView = Pilot.View.extend({
         if (container) {
             CmfControllerHelpers.setCurrentContentContainer(container);
             this.$el.attr('data-detachable', this.detachable ? '1' : '0');
-            CmfControllerHelpers.setCurrentContentEl(this.$el);
+            var _this = this;
+            CmfControllerHelpers.setCurrentContentEl(this.$el)
+                .done(function () {
+                    _this.afterRender(event, _this.request);
+                });
             this.switchBodyClass(this.request);
             this.switchPageTitle();
-            this.afterRender(event, this.request);
         } else {
             Utils.handleMissingContainerError();
         }
