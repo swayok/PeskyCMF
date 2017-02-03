@@ -50,7 +50,7 @@ class FormInput extends RenderableValueViewer {
     /** @var null|string */
     protected $tooltip;
     /** @var null|array */
-    protected $enablerConfig;
+    protected $disablersConfigs = [];
 
     /**
      * Default input id
@@ -275,7 +275,9 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
-     * This input should be enabled only when $otherInput has provided value ($hasValue)
+     * This input should be disabled only when $otherInput has no provided value ($hasValue)
+     * Note: can be called several times to add more conditions. Conditions will be preocessed "1 OR 2 OR 3..."
+     * If any condition matches - input will be disabled
      * @param string $otherInput
      * @param mixed $hasValue
      *      - bool: if $otherInput is checkbox/trigger |
@@ -283,20 +285,23 @@ class FormInput extends RenderableValueViewer {
      *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
      *          start & end delitmiter is '/'; must do exact matching using ^ and $
      *          Example: "/^(val1|val2)$/", "/^([a-d][c-z])+/"
-     * @param bool $setReadOnly - true: input will be marked with "readonly" attribute | false: input will be disabled
-     * @param null|string|bool $readonlyValue - null: leave as is | string or bool: change input's value when it gets "readonly" attribute
+     * @param bool $ignoreIfInputIsAbsent
+     *      - true: if input is not present in form this condition will be ignored
+     *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function setEnabledWhen($otherInput, $hasValue, $setReadOnly = false, $readonlyValue = null) {
-        return $this->setEnablerConfig($otherInput, $hasValue, false, $setReadOnly, $readonlyValue);
+    public function setDisabledUntil($otherInput, $hasValue, $ignoreIfInputIsAbsent = false) {
+        return $this->addDisablerConfig($otherInput, false, $hasValue, $ignoreIfInputIsAbsent, false);
     }
 
     /**
-     * This input should be disabled only when $otherInput has no provided value ($hasValue)
+     * This input should be disabled only when $otherInput has provided value ($hasValue).
+     * Note: can be called several times to add more conditions. Conditions will be processed as "1 OR 2 OR 3..."
+     * If any condition matches - input will be disabled
      * @param string $otherInput
      * @param mixed $hasValue
      *      - bool: if $otherInput is checkbox/trigger |
@@ -304,52 +309,131 @@ class FormInput extends RenderableValueViewer {
      *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
      *          start & end delitmiter is '/'; must do exact matching using ^ and $
      *          Example: "/^(val1|val2)$/", "/^([a-d][c-z])+/"
-     * @param bool $setReadOnly - true: input will be marked with "readonly" attribute | false: input will be disabled
-     * @param null|string|bool $readonlyValue - null: leave as is | string or bool: change input's value when it gets "readonly" attribute
+     * @param bool $ignoreIfInputIsAbsent
+     *      - true: if input is not present in form this condition will be ignored
+     *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function setDisabledWhen($otherInput, $hasValue, $setReadOnly = false, $readonlyValue = null) {
-        return $this->setEnablerConfig($otherInput, $hasValue, true, $setReadOnly, $readonlyValue);
+    public function setDisabledWhen($otherInput, $hasValue, $ignoreIfInputIsAbsent = false) {
+        return $this->addDisablerConfig($otherInput, true, $hasValue, $ignoreIfInputIsAbsent, false);
     }
 
-    protected function setEnablerConfig($enablerInputName, $hasValue, $shouldDisableInput, $setReadOnly = false, $readonlyValue = null) {
-        $this->enablerConfig = function () use ($enablerInputName, $shouldDisableInput, $hasValue, $setReadOnly, $readonlyValue) {
-            if (is_array($hasValue)) {
-                array_walk($hasValue, function (&$value) {
+    /**
+     * This input should be marked as 'readonly' only when $otherInput has no provided value ($hasValue)
+     * Note: can be called several times to add more conditions. Conditions will be preocessed "1 OR 2 OR 3..."
+     * If any condition matches - input will be readonly
+     * @param string $otherInput
+     * @param mixed $hasValue
+     *      - bool: if $otherInput is checkbox/trigger |
+     *      - string or array: if $otherInput is select or radios
+     *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
+     *          start & end delitmiter is '/'; must do exact matching using ^ and $
+     *          Example: "/^(val1|val2)$/", "/^([a-d][c-z])+/"
+     * @param bool $ignoreIfInputIsAbsent
+     *      - true: if input is not present in form this condition will be ignored
+     *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
+     * @param null $changeValue
+     *      - null: leave as is
+     *      - string or bool: change value of this input when it gets "readonly" attribute
+     * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function setReadonlyUntil($otherInput, $hasValue, $ignoreIfInputIsAbsent = false, $changeValue = null) {
+        return $this->addDisablerConfig($otherInput, false, $hasValue, $ignoreIfInputIsAbsent, true, $changeValue);
+    }
+
+    /**
+     * This input should be marked as 'readonly' only when $otherInput has provided value ($hasValue)
+     * Note: can be called several times to add more conditions. Conditions will be preocessed "1 OR 2 OR 3..."
+     * If any condition matches - input will be readonly
+     * @param string $otherInput
+     * @param mixed $hasValue
+     *      - bool: if $otherInput is checkbox/trigger |
+     *      - string or array: if $otherInput is select or radios
+     *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
+     *          start & end delitmiter is '/'; must do exact matching using ^ and $
+     *          Example: "/^(val1|val2)$/", "/^([a-d][c-z])+/"
+     * @param bool $ignoreIfInputIsAbsent
+     *      - true: if input is not present in form this condition will be ignored
+     *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
+     * @param null $changeValue
+ *          - null: leave as is
+     *      - string or bool: change value of this input when it gets "readonly" attribute
+     * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function setReadonlyWhen($otherInput, $hasValue, $ignoreIfInputIsAbsent = false, $changeValue = null) {
+        return $this->addDisablerConfig($otherInput, true, $hasValue, $ignoreIfInputIsAbsent, true, $changeValue);
+    }
+
+    protected function addDisablerConfig(
+        $enablerInputName,
+        $isEqualsTo,
+        $value,
+        $ignoreIfInputIsAbsent = true,
+        $setReadOnly = false,
+        $readonlyValue = null
+    ) {
+        $closure = function () use ($enablerInputName, $isEqualsTo, $value, $ignoreIfInputIsAbsent, $setReadOnly, $readonlyValue) {
+            if (is_array($value)) {
+                array_walk($value, function (&$value) {
                     $value = preg_quote($value, '/');
                 });
-                $hasValue = '/^(' . implode('|', $hasValue) . ')$/';
-            } else if (!is_bool($hasValue) && !preg_match('%^/.*/[a-z]*$%', $hasValue)) {
-                $hasValue = '/^(' . preg_quote($hasValue, '%') . ')$/';
+                $value = '/^(' . implode('|', $value) . ')$/';
+            } else if (!is_bool($value) && !preg_match('%^/.*/[a-z]*$%', $value)) {
+                $value = '/^(' . preg_quote($value, '%') . ')$/';
             }
             return [
-                'input_name' => $this->getName(),
-                'enabler_input_name' => $enablerInputName,
-                'on_value' => $this->getType() === static::TYPE_BOOL ? (bool)$hasValue : $hasValue,
-                'should_disable_input' => !(bool)$shouldDisableInput,
-                'set_readonly_state' => (bool)$setReadOnly,
-                'set_readonly_value' => $readonlyValue
+                'disabler_input_name' => $enablerInputName,
+                'on_value' => $value,
+                'value_is_equals' => (bool)$isEqualsTo,
+                'attribute' => (bool)$setReadOnly ? 'readonly' : 'disabled',
+                'set_readonly_value' => (bool)$setReadOnly ? $readonlyValue : null,
+                'ignore_if_disabler_input_is_absent' => $ignoreIfInputIsAbsent
             ];
         };
+        if (array_key_exists('conditions', $this->disablersConfigs)) {
+            $this->disablersConfigs['conditions'][] = $closure();
+        } else {
+            $this->disablersConfigs[] = $closure;
+        }
         return $this;
     }
 
     /**
-     * @return array|null
+     * @return array
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
-    public function getEnablerConfig() {
-        return call_user_func($this->enablerConfig);
+    public function getDisablersConfigs() {
+        if (!array_key_exists('input_name', $this->disablersConfigs)) {
+            $ret = [
+                'input_name' => $this->getName(),
+                'conditions' => [],
+            ];
+            foreach ($this->disablersConfigs as $closure) {
+                $config = $closure();
+                $ret['conditions'][] = $config;
+            }
+            $this->disablersConfigs = $ret;
+        }
+        return $this->disablersConfigs;
     }
 
     /**
      * @return bool
      */
-    public function hasEnablerConfig() {
-        return !empty($this->enablerConfig);
+    public function hasDisablersConfigs() {
+        return !empty($this->disablersConfigs);
     }
 
 }

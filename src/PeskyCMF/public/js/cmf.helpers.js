@@ -199,15 +199,16 @@ FormHelper.showErrorForInput = function ($form, inputName, message) {
     }
 };
 
-FormHelper.initInputsEnablers = function (formSelector, enablers, runEnablers) {
+FormHelper.inputsDisablers = {};
+
+FormHelper.inputsDisablers.init = function (formSelector, disablers, runDisablers) {
     var $form = $(formSelector);
     if ($form.length === 0) {
         return;
     }
-    if (!$.isArray(enablers)) {
-        console.error('Enablers argument must be a plain array');
+    if (!$.isArray(disablers)) {
+        console.error('Disablers argument must be a plain array');
     }
-    $form.data('enablers', enablers);
     var findInput = function (name) {
         var $matchingInputs = $form
             .find('[name="' + name + '[]"], [name="' + name + '"]')
@@ -230,97 +231,114 @@ FormHelper.initInputsEnablers = function (formSelector, enablers, runEnablers) {
             }
         }
     };
-    for (var i = 0; i < enablers.length; i++) {
-        var enablerConfig = enablers[i];
+    var validDisablers = [];
+    for (var i = 0; i < disablers.length; i++) {
+        var disablerConfig = disablers[i];
         if (
-            !$.isPlainObject(enablerConfig)
-            || !enablerConfig.input_name
-            || !enablerConfig.enabler_input_name
-            || typeof enablerConfig.on_value === 'undefined'
+            !$.isPlainObject(disablerConfig)
+            || !disablerConfig.input_name
+            || !disablerConfig.conditions
+            || !$.isArray(disablerConfig.conditions)
+            || disablerConfig.conditions.length === 0
         ) {
             continue;
         }
-        var $input = findInput(enablerConfig.input_name);
-        if (!$input) {
+        var $inputToDisable = findInput(disablerConfig.input_name);
+        if (!$inputToDisable) {
             console.error(
-                "Target input with name '" + enablerConfig.input_name + "' or '"
-                + enablerConfig.input_name + "[]' was not found in form"
+                "Target input with name '" + disablerConfig.input_name + "' or '"
+                + disablerConfig.input_name + "[]' was not found in form"
             );
             continue;
         }
-        var $enablerInput = findInput(enablerConfig.enabler_input_name);
-        if (!$enablerInput) {
-            console.error(
-                "Enabler input with name '" + enablerConfig.enabler_input_name + "' or '"
-                + enablerConfig.enabler_input_name + "[]' were not found in form"
-            );
-            continue;
-        }
-        enablerConfig.$targetInput = $input;
-        enablerConfig.$enablerInput = $enablerInput;
-        if (enablerConfig.on_value !== true && enablerConfig.on_value !== false) {
-            var regexpParts = enablerConfig.on_value.match(/^\/(.*)\/(i?g?m?|i?m?g?|g?m?i?|g?i?m?|m?i?g?|m?g?i?)$/);
-            if (regexpParts === null) {
-                console.error(
-                    "Invalid regexp '" + enablerConfig.on_value + "' for enabler on input '" + enablerConfig.input_name +
-                    + "'. Expected string like: '/<regexp_body>/<flags>' where flags: mix of 'i', 'm', 'g'"
-                );
-                continue;
+        var allDisablersAreValid = true;
+        var validConditions = [];
+        for (var k = 0; k < disablerConfig.conditions.length; k++) {
+            var condition = disablerConfig.conditions[k];
+            var $disablerInput = findInput(condition.disabler_input_name);
+            if (!$disablerInput) {
+                if (condition.ignore_if_disabler_input_is_absent) {
+                    continue;
+                } else {
+                    console.error(
+                        "Enabler input with name '" + condition.disabler_input_name + "' or '"
+                        + condition.disabler_input_name + "[]' were not found in form"
+                    );
+                    allDisablersAreValid = false;
+                    break;
+                }
+            } else {
+                if (typeof condition.on_value === 'undefined') {
+                    console.error(
+                        "No value provided in condition for disabler '" + condition.disabler_input_name
+                        + "' on input '" + disablerConfig.input_name
+                    );
+                    allDisablersAreValid = false;
+                    break;
+                } else if (condition.on_value !== true && condition.on_value !== false) {
+                    var regexpParts = condition.on_value.match(/^\/(.*)\/(i?g?m?|i?m?g?|g?m?i?|g?i?m?|m?i?g?|m?g?i?)$/);
+                    if (regexpParts === null) {
+                        console.error(
+                            "Invalid regexp '" + condition.on_value + "' for disabler '" + condition.disabler_input_name
+                            + "' on input '" + disablerConfig.input_name +
+                            + "'. Expected string like: '/<regexp_body>/<flags>' where flags: mix of 'i', 'm', 'g'"
+                        );
+                        allDisablersAreValid = false;
+                        break;
+                    }
+                    condition.regexp = new RegExp(regexpParts[1], regexpParts[2]);
+                }
+                condition.$disablerInput = $disablerInput;
+                condition.isDisablerInputChecboxOrRadio = $disablerInput.filter('[type="checkbox"], [type="radio"]').length > 0;
+                condition.value_is_equals = typeof condition.value_is_equals === 'undefined' ? true : !!condition.value_is_equals;
+                validConditions.push(condition);
             }
-            enablerConfig.regexp = new RegExp(regexpParts[1], regexpParts[2]);
         }
-        FormHelper.setEnablerHandler(enablers[i]);
+        if (!allDisablersAreValid || validConditions.length === 0) {
+            continue;
+        }
+        disablerConfig.conditions = validConditions;
+        disablerConfig.$targetInput = $inputToDisable;
+        for (var h = 0; h < disablerConfig.conditions.length; h++) {
+            if (disablerConfig.conditions[h] && disablerConfig.conditions[h].$disablerInput) {
+                FormHelper.inputsDisablers.setDisablerInputValueChangeEventHandlers(disablerConfig, disablerConfig.conditions[h]);
+            }
+        }
+        validDisablers.push(disablerConfig);
     }
-    if (runEnablers) {
-        FormHelper.runEnablersOnFormDataChange($form);
+    $form.data('disablers', validDisablers);
+    if (runDisablers) {
+        FormHelper.inputsDisablers.onFormDataChanged($form);
     }
 };
 
-FormHelper.setEnablerHandler = function (enablerConfig) {
-    var $enablerInput = enablerConfig.$enablerInput;
-    if ($enablerInput.prop("tagName").toLowerCase() === 'select') {
-        $enablerInput.on('run-enabler.cmfform change blur', function () {
-            FormHelper.handleEnableDisasbleOnTargetInput($(this), enablerConfig);
+FormHelper.inputsDisablers.setDisablerInputValueChangeEventHandlers = function (disablerConfig, condition) {
+    var $disablerInput = condition.$disablerInput;
+    if ($disablerInput.prop("tagName").toLowerCase() === 'select') {
+        $disablerInput.on('run-disabler.cmfform change blur', function () {
+            FormHelper.inputsDisablers.handleDisablerInputValueChange(disablerConfig);
         });
     } else {
-        if ($enablerInput.not('[type="checkbox"], [type="radio"]').length > 0) {
+        if ($disablerInput.not('[type="checkbox"], [type="radio"]').length > 0) {
             // input (excluding checkbox and radio) or textarea
-            $enablerInput.on('run-enabler.cmfform change blur keyup', function () {
-                FormHelper.handleEnableDisasbleOnTargetInput($(this), enablerConfig);
+            $disablerInput.on('run-disabler.cmfform change blur keyup', function () {
+                FormHelper.inputsDisablers.handleDisablerInputValueChange(disablerConfig);
             });
         } else {
             // checkbox or radio
-            $enablerInput.on('run-enabler.cmfform change switchChange.bootstrapSwitch', function () {
-                FormHelper.handleEnableDisasbleOnTargetInput($enablerInput, enablerConfig, true);
+            $disablerInput.on('run-disabler.cmfform change switchChange.bootstrapSwitch', function () {
+                FormHelper.inputsDisablers.handleDisablerInputValueChange(disablerConfig);
             });
         }
     }
 };
 
-FormHelper.handleEnableDisasbleOnTargetInput = function ($enablerInput, enablerConfig, isCheckboxOrRadio) {
-    var isDisabled = false;
-    var $targetInput = enablerConfig.$targetInput;
-    if (!isCheckboxOrRadio) {
-        isDisabled = !enablerConfig.regexp.test($enablerInput.val());
-    } else {
-        if ($enablerInput.attr('type').toLowerCase() === 'checkbox' && $enablerInput.length === 1) {
-            // single checkbox
-            isDisabled = $enablerInput.prop('checked') !== !!enablerConfig.on_value;
-        } else {
-            // multiple checkboxes or set of radios
-            $targetInput.filter(':checked').each(function () {
-                if (enablerConfig.regexp.test($(this).val())) {
-                    isDisabled = false;
-                }
-            });
-        }
-    }
-    if (typeof enablerConfig.should_disable_input !== 'undefined' && !enablerConfig.should_disable_input) {
-        isDisabled = !isDisabled;
-    }
-    if (isDisabled && typeof enablerConfig.set_readonly_value !== 'undefined' && enablerConfig.set_readonly_value !== null) {
+FormHelper.inputsDisablers.handleDisablerInputValueChange = function (disablerConfig) {
+    var $targetInput = disablerConfig.$targetInput;
+    var disablerCondition = FormHelper.inputsDisablers.isInputMustBeDisabled(disablerConfig);
+    if (disablerCondition && typeof disablerCondition.set_readonly_value !== 'undefined' && disablerCondition.set_readonly_value !== null) {
         if ($targetInput.not('[type="checkbox"], [type="radio"]').length > 0) {
-            $targetInput.val(enablerConfig.set_readonly_value).change();
+            $targetInput.val(disablerCondition.set_readonly_value).change();
         } else {
             if (
                 $targetInput.attr('type')
@@ -328,12 +346,12 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($enablerInput, enablerC
                 && $targetInput.length === 1
             ) {
                 // single checkbox
-                $targetInput.prop('checked', !!enablerConfig.set_readonly_value).change();
+                $targetInput.prop('checked', !!disablerCondition.set_readonly_value).change();
             } else {
                 // multiple checkboxes or set of radios
                 $targetInput
                     .prop('checked', false)
-                    .filter('[value="' + enablerConfig.set_readonly_value + '"]')
+                    .filter('[value="' + disablerCondition.set_readonly_value + '"]')
                         .prop('checked', true)
                         .end()
                     .change();
@@ -341,7 +359,7 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($enablerInput, enablerC
         }
     }
     if ($targetInput.hasClass('selectpicker')) {
-        if (isDisabled) {
+        if (disablerCondition) {
             $targetInput.prop({disabled: true, readOnly: true});
         } else {
             $targetInput.prop({disabled: false, readOnly: false});
@@ -350,23 +368,77 @@ FormHelper.handleEnableDisasbleOnTargetInput = function ($enablerInput, enablerC
     } else if ($targetInput.attr('data-editor-name')) {
         var editor = CKEDITOR.instances[$targetInput.attr('data-editor-name')];
         if (editor) {
-            editor.setReadOnly(isDisabled);
+            editor.setReadOnly(!!disablerCondition);
+        }
+    } else if ($targetInput.hasClass('switch')) {
+        if (disablerCondition) {
+            $targetInput.bootstrapSwitch(disablerCondition.attribute, true)
+        } else {
+            $targetInput.bootstrapSwitch('readonly', false);
+            $targetInput.bootstrapSwitch('disabled', false);
         }
     }
-    $targetInput.prop({
-        disabled: enablerConfig.set_readonly_state ? false : isDisabled,
-        readOnly: enablerConfig.set_readonly_state ? isDisabled : false
-    });
+    $targetInput.prop({disabled: false, readOnly: false});
+    if (disablerCondition) {
+        $targetInput.prop(disablerCondition.attribute, true);
+    }
     $targetInput.change();
 };
 
-FormHelper.runEnablersOnFormDataChange = function (form) {
-    var enablers = $(form).data('enablers');
-    if (enablers && $.isArray(enablers)) {
-        for (var i = 0; i < enablers.length; i++) {
-            if (enablers[i].$enablerInput) {
-                enablers[i].$enablerInput.trigger('run-enabler.cmfform');
+/**
+ * @param {object} disablerConfig
+ * @return {null|object} - disabler condition that disables the input first
+ */
+FormHelper.inputsDisablers.isInputMustBeDisabled = function (disablerConfig) {
+    for (var i = 0; i < disablerConfig.conditions.length; i++) {
+        var condition = disablerConfig.conditions[i];
+        var isConditionDisablesInput = false;
+        var valueIsAffectedByValueIsEquals = false;
+        if (condition.isDisablerInputChecboxOrRadio) {
+            if (condition.$disablerInput.attr('type').toLowerCase() === 'checkbox' && condition.$disablerInput.length === 1) {
+                // single checkbox
+                isConditionDisablesInput = condition.$disablerInput.prop('checked') === !!condition.on_value;
+            } else {
+                // multiple checkboxes or set of radios
+                for (var k = 0; k < condition.$disablerInput.filter(':checked').length; k++) {
+                    if (condition.regexp.test($(this).val())) {
+                        if (condition.value_is_equals) {
+                            isConditionDisablesInput = true;
+                            break;
+                        }
+                    } else if (!condition.value_is_equals) {
+                        isConditionDisablesInput = true;
+                        break;
+                    }
+                }
+                valueIsAffectedByValueIsEquals = true;
             }
+        } else {
+            // text input, select, textarea
+            isConditionDisablesInput = condition.regexp.test(condition.$disablerInput.val());
+        }
+        if (!valueIsAffectedByValueIsEquals && !condition.value_is_equals) {
+            isConditionDisablesInput = !isConditionDisablesInput;
+        }
+        if (isConditionDisablesInput) {
+            return condition;
+        }
+    }
+    return null;
+};
+
+FormHelper.inputsDisablers.onFormDataChanged = function (form) {
+    var disablers = $(form).data('disablers');
+    if (disablers && $.isArray(disablers)) {
+        for (var i = 0; i < disablers.length; i++) {
+            if (disablers[i] && disablers[i].conditions && $.isArray(disablers[i].conditions)) {
+                for (var k = 0; k < disablers[i].conditions.length; k++) {
+                    if (disablers[i].conditions[k] && disablers[i].conditions[k].$disablerInput) {
+                        disablers[i].conditions[k].$disablerInput.trigger('run-disabler.cmfform');
+                    }
+                }
+            }
+
         }
     }
 };

@@ -121,15 +121,15 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
     <?php
         $enablers = [];
         foreach ($formConfig->getFormInputs() as $inputConfig) {
-            if ($inputConfig->hasEnablerConfig()) {
-                $enablers[] = $inputConfig->getEnablerConfig();
+            if ($inputConfig->hasDisablersConfigs()) {
+                $enablers[] = $inputConfig->getDisablersConfigs();
             }
         }
     ?>
     <?php if (count($enablers) > 0) : ?>
         <script type="application/javascript">
             $('#<?php echo $formId; ?>').on('ready.cmfform', function () {
-                FormHelper.initInputsEnablers(this, <?php echo json_encode($enablers, JSON_UNESCAPED_UNICODE); ?>, true);
+                FormHelper.inputsDisablers.init(this, <?php echo json_encode($enablers, JSON_UNESCAPED_UNICODE); ?>, true);
             });
         </script>
     <?php endif ?>
