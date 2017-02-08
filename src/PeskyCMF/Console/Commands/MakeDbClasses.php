@@ -20,7 +20,6 @@ use Swayok\Utils\Set;
 
 class MakeDbClasses extends Command {
 
-    use OpenFileInPhpStormTrait;
     /**
      * The name and signature of the console command.
      *
@@ -72,8 +71,6 @@ class MakeDbClasses extends Command {
         if ((!$only && $this->option('with-scaffold')) || $only === 'scaffold') {
             $this->createScaffoldConfig($dataForViews);
         }
-
-        $this->openFileInPhpStorm($dataForViews['files']['table_config']);
 
         $this->line('Done');
     }
@@ -178,7 +175,6 @@ class MakeDbClasses extends Command {
             File::remove();
         }
         File::save($modelFile, view($this->dbModelView, $dataForViews)->render(), 0664);
-        $this->openFileInPhpStorm($modelFile);
         $this->line("Model class created ($modelFile)");
     }
 
@@ -188,7 +184,6 @@ class MakeDbClasses extends Command {
             File::remove();
         }
         File::save($objectFile, view($this->dbObjectView, $dataForViews)->render(), 0664);
-        $this->openFileInPhpStorm($objectFile);
         $this->line("Object class created ($objectFile)");
     }
 
@@ -198,7 +193,6 @@ class MakeDbClasses extends Command {
             File::remove();
         }
         File::save($tableConfigFile, view($this->dbTableConfigView, $dataForViews)->render(), 0664);
-        $this->openFileInPhpStorm($tableConfigFile);
         $this->line("TableConfig class created ($tableConfigFile)");
     }
 
@@ -208,7 +202,6 @@ class MakeDbClasses extends Command {
             File::remove();
         }
         File::save($scaffoldConfigFile, view($this->scaffoldConfigView, $dataForViews)->render(), 0664);
-        $this->openFileInPhpStorm($scaffoldConfigFile);
         $this->line("ScaffoldConfig class created ({$scaffoldConfigFile})");
     }
 
