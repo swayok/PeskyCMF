@@ -14,7 +14,7 @@ Utils.configureAppLibs = function () {
 };
 
 Utils.configureToastr = function () {
-    toastr.options = GlobalVars.toastrOptions;
+    toastr.options = CmfConfig.toastrOptions;
 };
 
 Utils.configureAjax = function () {
@@ -23,7 +23,7 @@ Utils.configureAjax = function () {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
-    if (GlobalVars.isDebug) {
+    if (CmfConfig.isDebug) {
         $(document).ajaxComplete(function (event, xhr, settings) {
             var request = Pilot.parseURL(settings.url);
             console.group('Ajax: %s %s', settings.type || 'GET', request.path, xhr.status, xhr.statusText);
@@ -164,7 +164,7 @@ Utils.handleAjaxError = function (xhr) {
             return;
         }
     }
-    GlobalVars.getDebugDialog().showDebug(
+    CmfConfig.getDebugDialog().showDebug(
         'HTTP Error ' + xhr.status + ' ' + xhr.statusText,
         xhr.responseText
     );
@@ -211,7 +211,7 @@ Utils.hidePreloader = function (el) {
 
 Utils.fadeOut = function (el, callback) {
     $(document.body).queue(function (next) {
-        el.fadeOut(GlobalVars.contentChangeAnimationDurationMs, function () {
+        el.fadeOut(CmfConfig.contentChangeAnimationDurationMs, function () {
             if ($.isFunction(callback)) {
                 callback(el);
             }
@@ -225,7 +225,7 @@ Utils.fadeIn = function (el, callback) {
         if ($.isFunction(callback)) {
             callback(el);
         }
-        el.fadeIn(GlobalVars.contentChangeAnimationDurationMs, next);
+        el.fadeIn(CmfConfig.contentChangeAnimationDurationMs, next);
     });
 };
 
@@ -286,15 +286,15 @@ Utils.makeTemplateFromText = function (text, clarification) {
     } catch (exc) {
         var title = 'Failed to convert text into doT.js template' + (!clarification ? '' : ' (' + clarification + ')');
         var content = '<h1>' + exc.name + ': ' + exc.message + '</h1><pre>' + exc.stack + '</pre><h2>Template:</h2>';
-        GlobalVars.getDebugDialog().showDebug(title, content + '<pre>' + $('<div/>').text(text).html() + '</pre>');
+        CmfConfig.getDebugDialog().showDebug(title, content + '<pre>' + $('<div/>').text(text).html() + '</pre>');
         return '';
     }
 };
 
 Utils.downloadHtml = function (url, cache, template) {
     var deferred = $.Deferred();
-    url = (url[0] === '/' ? url : GlobalVars.rootUrl + '/' + url).replace(/\.html$/i, '') + '.html';
-    if (!cache || !Cache.views[url]) {
+    url = (url[0] === '/' ? url : CmfConfig.rootUrl + '/' + url).replace(/\.html$/i, '') + '.html';
+    if (!cache || !CmfCache.views[url]) {
         return $.ajax({
             url: url,
             cache: false,
@@ -305,12 +305,12 @@ Utils.downloadHtml = function (url, cache, template) {
                 html = Utils.makeTemplateFromText(html, url);
             }
             if (cache) {
-                Cache.views[url] = html;
+                CmfCache.views[url] = html;
             }
             deferred.resolve(html);
         }).fail(Utils.handleAjaxError);
     } else {
-        deferred.resolve(Cache.views[url]);
+        deferred.resolve(CmfCache.views[url]);
         return deferred;
     }
 };
@@ -319,11 +319,11 @@ Utils.getUser = function (reload) {
     var deferred = $.Deferred();
     if (
         !!reload
-        || !Cache.user
-        || Math.abs((new Date()).getMilliseconds() - Cache.userLastUpdateMs) > GlobalVars.userDataCacheTimeoutMs
+        || !CmfCache.user
+        || Math.abs((new Date()).getMilliseconds() - CmfCache.userLastUpdateMs) > CmfConfig.userDataCacheTimeoutMs
     ) {
         $.ajax({
-            url: GlobalVars.rootUrl + '/' + GlobalVars.userDataUrl,
+            url: CmfConfig.rootUrl + '/' + CmfConfig.userDataUrl,
             cache: false,
             dataType: 'json',
             method: 'GET'
@@ -332,16 +332,16 @@ Utils.getUser = function (reload) {
             deferred.resolve(user);
         }).fail(Utils.handleAjaxError);
     } else {
-        deferred.resolve(Cache.user);
+        deferred.resolve(CmfCache.user);
     }
     return deferred;
 };
 
 Utils.setUser = function (userData) {
-    Cache.user = userData;
-    Cache.userLastUpdateMs = (new Date()).getMilliseconds();
-    $(document).trigger('change:user', Cache.user);
-    return Cache.user;
+    CmfCache.user = userData;
+    CmfCache.userLastUpdateMs = (new Date()).getMilliseconds();
+    $(document).trigger('change:user', CmfCache.user);
+    return CmfCache.user;
 };
 
 Utils.highlightLinks = function (url) {
@@ -374,7 +374,7 @@ Utils.cleanCache = function () {
 
 Utils.updatePageTitleFromH1 = function ($content) {
     var $h1 = $content && $content.length ? $content.find('h1').first() : $('#section-content h1, h1').first();
-    var defaultPageTitle = $.trim(String(GlobalVars.defaultPageTitle));
+    var defaultPageTitle = $.trim(String(CmfConfig.defaultPageTitle));
     if ($h1.length) {
         var $pageTitle = $h1.find('.page-title');
         document.title = ($pageTitle.length ? $pageTitle.text() : $h1.text()) + (defaultPageTitle.length ? ' - ' + defaultPageTitle : '');
@@ -384,7 +384,7 @@ Utils.updatePageTitleFromH1 = function ($content) {
 };
 
 Utils.initDebuggingTools = function () {
-    if (GlobalVars.isDebug) {
+    if (CmfConfig.isDebug) {
         var $opener = $('<button type="button" class="btn btn-xs btn-default">&nbsp;</button>')
             .fadeOut()
             .css({

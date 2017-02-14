@@ -130,7 +130,7 @@ var ScaffoldActionsHelper = {
                 ScaffoldsManager.app.reload();
                 break;
             case 'back':
-                var defaultUrl = $el.attr('data-url') || GlobalVars.rootUrl;
+                var defaultUrl = $el.attr('data-url') || CmfConfig.rootUrl;
                 ScaffoldsManager.app.back(defaultUrl);
                 break;
         }
@@ -208,7 +208,7 @@ var ScaffoldDataGridHelper = {
                 try {
                     return rison.decode_object(window.adminApp.request.query[settings.sTableId]);
                 } catch (e) {
-                    if (GlobalVars.isDebug) {
+                    if (CmfConfig.isDebug) {
                         console.log('Invalid Rison object');
                     }
                 }
@@ -223,7 +223,7 @@ var ScaffoldDataGridHelper = {
                         return {};
                     }
                 } catch (e) {
-                    if (GlobalVars.isDebug) {
+                    if (CmfConfig.isDebug) {
                         console.log('Invalid json for "filter" query arg');
                     }
                 }
@@ -239,7 +239,7 @@ var ScaffoldDataGridHelper = {
                 configs = {};
             }
             var mergedConfigs = $.extend(
-                {language: GlobalVars.getLocalizationStringsForComponent('data_tables')},
+                {language: CmfConfig.getLocalizationStringsForComponent('data_tables')},
                 ScaffoldDataGridHelper.defaultConfig,
                 configs
             );
@@ -272,7 +272,7 @@ var ScaffoldDataGridHelper = {
         var $toolbarEl = $tableWrapper.find('.toolbar');
         var $filterToolbar = $tableWrapper.find('.filter-toolbar');
         var $reloadBtn = $('<button class="btn btn-default" data-action="reload"></button>')
-            .html(GlobalVars.getLocalizationStringsForComponent('data_tables').toolbar.reloadData);
+            .html(CmfConfig.getLocalizationStringsForComponent('data_tables').toolbar.reloadData);
         if ($filterToolbar.length) {
             $filterToolbar.prepend($reloadBtn);
         }
@@ -992,5 +992,84 @@ var ScaffoldFormHelper = {
                 clearTimeout(timeout);
                 Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
             });
+    },
+    initWysiwyg: function (textareaSelector, config) {
+        if (!$.isPlainObject(config)) {
+            config = {}
+        }
+        if (config.data_inserts && $.isArray(config.data_inserts)) {
+            config = ScaffoldFormHelper.addDataInsertsPluginToWysiwyg(config);
+        }
+        $(textareaSelector).ckeditor(config || {});
+    },
+    addDataInsertsPluginToWysiwyg: function (curentWysiwygConfig) {
+        var allowedContent = 'span(wysiwyg-data-insert)[title];div(wysiwyg-data-insert)[title]';
+        var pluginName = 'cmf_scaffold_data_inserter';
+        if (curentWysiwygConfig.extraAllowedContent) {
+            curentWysiwygConfig.extraAllowedContent += ';' + allowedContent;
+        } else {
+            curentWysiwygConfig.extraAllowedContent = allowedContent;
+        }
+        if (curentWysiwygConfig.extraPlugins) {
+            curentWysiwygConfig.extraPlugins += ',' + pluginName;
+        } else {
+            curentWysiwygConfig.extraPlugins = pluginName;
+        }
+        if (!CKEDITOR.plugins.get(pluginName)) {
+            var comboboxPanelCss = 'body{font-family:Arial,sans-serif;font-size:14px;}';
+            var locale = CmfConfig.getLocalizationStringsForComponent('ckeditor');
+            var insertTpl = doT.template(
+                '<{{= it.tag }} title="{{! it.title }}" class="wysiwyg-data-insert">{{= it.code }}</{{= it.tag }}>'
+            );
+            CKEDITOR.plugins.add(pluginName, {
+                requires: 'widget',
+                allowedContent: allowedContent,
+                init: function (editor) {
+                    editor.ui.addRichCombo('cmfScaffoldDataInserter', {
+                        label: locale.cmf_scaffold_inserts_plugin_title,
+                        title: locale.cmf_scaffold_inserts_plugin_title,
+                        toolbar: 'insert',
+                        className: 'cke_combo_full_width',
+                        multiSelect: false,
+                        panel: {
+                            css: [CKEDITOR.skin.getPath("editor")].concat(comboboxPanelCss + (editor.contentsCss || '')),
+                            multiSelect: false
+                        },
+                        init: function () {
+                            var combobox = this;
+                            for (var i = 0; i < editor.config.data_inserts.length; i++) {
+                                var insertInfo = editor.config.data_inserts[i];
+                                insertInfo.tag = insertInfo.is_block ? 'div' : 'span';
+                                combobox.add(insertTpl(insertInfo), insertInfo.title, insertInfo.title);
+                                combobox._.committed = 0;
+                                combobox.commit(); //< ty good people of web!!!
+                            }
+                        },
+                        onClick: function (value) {
+                            editor.focus();
+                            editor.fire('saveSnapshot');
+                            editor.insertHtml(value);
+                            editor.fire('saveSnapshot');
+                        }
+                    });
+                    editor.widgets.add('CmfScaffoldInsertedData', {
+                        allowedContent: allowedContent,
+                        requiredContent: allowedContent,
+                        upcast: function (element) {
+                            return (element.name === 'span' || element.name === 'div') && element.hasClass('wysiwyg-data-insert');
+                        }
+                    });
+                },
+                onLoad: function () {
+                    CKEDITOR.addCss(
+                        '.wysiwyg-data-insert{font-size:0}'
+                        + 'span.wysiwyg-data-insert{display:inline-block;}'
+                        + '.wysiwyg-data-insert:before{content:attr(title);position:static;display:block;font-size:12px;padding:0 5px;background:#DDD;border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;border:1px solid #555;white-space:nowrap;cursor:pointer;text-align:center;}'
+                        + 'span.wysiwyg-data-insert:before{display: inline-block}'
+                    );
+                }
+            });
+        }
+        return curentWysiwygConfig;
     }
 };

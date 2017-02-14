@@ -149,7 +149,7 @@
 
     <script src="/packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/cropperjs/cropper.min.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.global.vars.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.config.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.helpers.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.utils.js" type="text/javascript"></script>

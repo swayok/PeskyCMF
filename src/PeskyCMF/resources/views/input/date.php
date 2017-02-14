@@ -9,7 +9,7 @@
 $rendererConfig
     ->addAttribute('name', $fieldConfig->getName(), false)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
-    ->addAttribute('type','text', false)
+    ->addAttribute('type', 'text', false)
     ->addAttribute('class', 'form-control', false);
 $attributesForCreate = $rendererConfig->getAttributesForCreate();
 $attributesForEdit = $rendererConfig->getAttributesForEdit();

@@ -1,4 +1,4 @@
-var GlobalVars = {
+var CmfConfig = {
     isDebug: false,
     debugDialog: null,
     defaultPageTitle: '',
@@ -27,22 +27,22 @@ var GlobalVars = {
         "hideMethod": "slideUp"
     },
     setLocalizationStrings: function (data) {
-        Cache.localization = data;
+        CmfCache.localization = data;
     },
     getLocalizationStringsForComponent: function (componentName) {
-        return (componentName && !!Cache.localization[componentName]) ? Cache.localization[componentName] : {};
+        return (componentName && !!CmfCache.localization[componentName]) ? CmfCache.localization[componentName] : {};
     }
 };
 
 /**
  * @return DebugDialog
  */
-GlobalVars.getDebugDialog = function () {
-    if (GlobalVars.debugDialog === null) {
-        if (GlobalVars.isDebug && typeof DebugDialog === 'function') {
-            GlobalVars.debugDialog = new DebugDialog();
+CmfConfig.getDebugDialog = function () {
+    if (CmfConfig.debugDialog === null) {
+        if (CmfConfig.isDebug && typeof DebugDialog === 'function') {
+            CmfConfig.debugDialog = new DebugDialog();
         } else {
-            GlobalVars.debugDialog = {
+            CmfConfig.debugDialog = {
                 showDebug: function (title, content) {
                     toastr.error(title);
                 },
@@ -50,10 +50,10 @@ GlobalVars.getDebugDialog = function () {
             }
         }
     }
-    return GlobalVars.debugDialog;
+    return CmfConfig.debugDialog;
 };
 
-var Cache = {
+var CmfCache = {
     localization: {},
     views: {},
     user: null,

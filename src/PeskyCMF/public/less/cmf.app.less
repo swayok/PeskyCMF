@@ -70,6 +70,16 @@ body {
         -moz-animation: cssload-spin 725ms infinite linear;
 }
 
+.preloader-play() {
+    -webkit-animation-play-state: running;
+            animation-play-state: running;
+}
+
+.preloader-pause() {
+    -webkit-animation-play-state: paused;
+            animation-play-state: paused;
+}
+
 @keyframes cssload-spin {
     100%{ transform: rotate(360deg); }
 }
@@ -118,7 +128,7 @@ body {
         content: '';
         position: absolute;
         z-index: 51;
-        top: -50px;
+        top: 50%;
         left: 50%;
         margin: -25px 0 0 -25px;
 
@@ -130,8 +140,7 @@ body {
             left @transitionDuration linear;
         .transition(@transitions);
 
-        -webkit-animation-play-state: paused;
-        animation-play-state: paused;
+        .preloader-pause;
     }
 
     &.loading,
@@ -156,8 +165,7 @@ body {
             ._fade-in;
             top: 50%;
 
-            -webkit-animation-play-state: running;
-            animation-play-state: running;
+            .preloader-play;
         }
 
         &.no-overlay:before {
@@ -382,6 +390,7 @@ div.dataTables_wrapper {
 
         &:after {
             ._fade-in;
+            .preloader-play;
         }
     }
 
@@ -1016,4 +1025,31 @@ aside.main-sidebar {
         word-break: break-all;
         word-wrap: break-word;
     }
+
+    .wysiwyg-data-insert {
+        font-size: 0;
+
+        span& {
+            display:inline-block;
+        }
+
+        &:before {
+            content: attr(title);
+            position: static;
+            display: block;
+            font-size: 12px;
+            padding: 0 5px;
+            background: #DDD;
+            .border-radius(2px);
+            border: 1px solid #555;
+            white-space: nowrap;
+            cursor: pointer;
+            text-align: center;
+
+            span& {
+                display: inline-block;
+            }
+        }
+    }
+
 }

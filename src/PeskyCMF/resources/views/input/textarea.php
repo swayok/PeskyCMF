@@ -5,19 +5,17 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
  */
-$attributes = array(
-    'name' => $fieldConfig->getName(),
-    'id' => $fieldConfig->getDefaultId(),
-    'type' => 'text',
-    'class' => 'form-control'
-);
+$rendererConfig
+    ->addAttribute('name', $fieldConfig->getName(), false)
+    ->addAttribute('id', $fieldConfig->getDefaultId(), false)
+    ->addAttribute('class', 'form-control', false);
 $attributesForCreate = $rendererConfig->getAttributesForCreate();
 $attributesForEdit = $rendererConfig->getAttributesForEdit();
-$visibleOnCreate = !array_key_exists('visible', $attributesForCreate) || !empty($attributesForCreate['visible']);
-$visibleOnEdit = !array_key_exists('visible', $attributesForEdit) || !empty($attributesForEdit['visible']);
+$visibleOnCreate = (bool)array_get($attributesForCreate, 'visible', true);
+$visibleOnEdit = (bool)array_get($attributesForEdit, 'visible', true);
 unset($attributesForCreate['visible'], $attributesForEdit['visible']);
-$attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $attributesForCreate));
-$attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $attributesForEdit));
+$attributesForCreate = \Swayok\Html\Tag::buildAttributes($attributesForCreate);
+$attributesForEdit = \Swayok\Html\Tag::buildAttributes($attributesForEdit);
 ?>
 <?php if (!$visibleOnCreate) : ?>
     {{? !it.isCreation }}
@@ -26,7 +24,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <?php endif; ?>
 
 <div class="form-group">
-    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <textarea {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
     >{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}</textarea>
     <?php echo $fieldConfig->getFormattedTooltip(); ?>

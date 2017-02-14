@@ -144,7 +144,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $table = $this->getTable();
         $formConfig = $this->getFormConfig();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            $this->getRequest()->only(array_keys($formConfig->getValueViewers()))
+            array_intersect_key($this->getRequest()->all(), $formConfig->getValueViewers())
         );
         $errors = $formConfig->validateDataForCreate($data);
         if (count($errors) !== 0) {
@@ -216,7 +216,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $expectedFields = array_keys($formConfig->getValueViewers());
         $expectedFields[] = $table->getPkColumnName();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            $this->getRequest()->only(array_keys($expectedFields))
+            array_intersect_key($this->getRequest()->all(), array_flip($expectedFields))
         );
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {

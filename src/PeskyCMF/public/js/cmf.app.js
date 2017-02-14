@@ -3,10 +3,10 @@ $(document).ready(function () {
     fixAdminLte();
 
     if (CmfSettings) {
-        $.extend(GlobalVars, CmfSettings);
+        $.extend(CmfConfig, CmfSettings);
     }
 
-    if (GlobalVars.isDebug) {
+    if (CmfConfig.isDebug) {
         Utils.initDebuggingTools();
     }
 
@@ -17,11 +17,11 @@ $(document).ready(function () {
     var app = window.adminApp = new Pilot({
         el: $(document.body),
         selector:
-            'a[href^="' + GlobalVars.rootUrl + '/"],' +
-            'a[href^="' + document.location.origin + GlobalVars.rootUrl + '/"],' +
+            'a[href^="' + CmfConfig.rootUrl + '/"],' +
+            'a[href^="' + document.location.origin + CmfConfig.rootUrl + '/"],' +
             '[data-nav]',
-        production: !GlobalVars.isDebug,
-        basePath: GlobalVars.rootUrl,
+        production: !CmfConfig.isDebug,
+        basePath: CmfConfig.rootUrl,
         useOnlyFirstMatchedRoute: true,
         reloadable: true
         //profile: true
@@ -47,16 +47,16 @@ $(document).ready(function () {
     ScaffoldsManager.init(app);
 
     app.on('404', function (event, request) {
-        if (request.path === GlobalVars.rootUrl) {
+        if (request.path === CmfConfig.rootUrl) {
             // only CMF knows where to redirect from root url
-            document.location = GlobalVars.rootUrl;
+            document.location = CmfConfig.rootUrl;
             return;
         }
-        if (GlobalVars.isDebug) {
+        if (CmfConfig.isDebug) {
             console.log('No route found for: ' + request.url);
             toastr.error('Page not found')
         }
-        app.back(GlobalVars.rootUrl + '/login');
+        app.back(CmfConfig.rootUrl + '/login');
     }).on('routestart', function (event, request) {
         if (request.routeDetected && !app.disableUrlChangeOnce && request.url !== document.location.href) {
             Pilot.setLocation(request);
@@ -76,7 +76,7 @@ $(document).ready(function () {
             app.ignoreDocumentHistoryPopStateOnce = false;
             return;
         }
-        if (document.location.pathname.match(new RegExp('^' + GlobalVars.rootUrl + '(/|$)'))) {
+        if (document.location.pathname.match(new RegExp('^' + CmfConfig.rootUrl + '(/|$)'))) {
             app.nav(Pilot.getLocation());
         } else {
             document.location.reload();

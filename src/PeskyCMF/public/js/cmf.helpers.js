@@ -454,7 +454,7 @@ var AdminUI = {
 AdminUI.destroyUI = function () {
     var deferred = $.Deferred();
     var wrapper = Utils.getPageWrapper();
-    wrapper.fadeOut(GlobalVars.contentChangeAnimationDurationMs, function () {
+    wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs, function () {
         Utils.showPreloader(wrapper);
         if (AdminUI.$el) {
             AdminUI.$el.detach();
@@ -477,12 +477,12 @@ AdminUI.showUI = function () {
         Utils.showPreloader(wrapper);
         $.when(
             AdminUI.loadUI(),
-            wrapper.fadeOut(GlobalVars.contentChangeAnimationDurationMs)
+            wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs)
         ).done(function (uiEl) {
             wrapper.addClass('with-ui').empty().append(uiEl[0]);
             AdminUI.visible = true;
             AdminUI.updateUserInfo();
-            wrapper.fadeIn(GlobalVars.contentChangeAnimationDurationMs);
+            wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
             Utils.hidePreloader(wrapper);
             Utils.highlightLinks(window.adminApp.request.path);
             deferred.resolve();
@@ -495,7 +495,7 @@ AdminUI.showUI = function () {
 AdminUI.loadUI = function () {
     var deferred = $.Deferred();
     if (!AdminUI.$el) {
-        Utils.downloadHtml(GlobalVars.uiUrl, true, false)
+        Utils.downloadHtml(CmfConfig.uiUrl, true, false)
             .done(function (html) {
                 AdminUI.$el = $('<div class="ui-container">' + html + '</div>');
                 deferred.resolve(AdminUI.$el);

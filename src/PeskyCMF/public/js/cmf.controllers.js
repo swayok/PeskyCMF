@@ -50,7 +50,7 @@ var CmfControllerHelpers = {
 
 var CmfView = Pilot.View.extend({
     getContainer: Utils.getAvailableContentContainer,
-    tag: 'div.' + GlobalVars.contentWrapperCssClass,
+    tag: 'div.' + CmfConfig.contentWrapperCssClass,
     viewIntro: CmfControllerHelpers.viewIntro,
     viewOutro: CmfControllerHelpers.viewOutro,
     beforeRouteLoad: CmfControllerHelpers.beforeRouteLoad,

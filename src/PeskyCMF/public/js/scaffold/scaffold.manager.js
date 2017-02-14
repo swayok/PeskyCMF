@@ -12,7 +12,7 @@ ScaffoldsManager.init = function (app) {
         .route('/resource/:resource/list', function (event, request) {
             setTimeout(function () {
                 // timeout required to make previous route change end before this one started
-                ScaffoldsManager.app.nav(GlobalVars.rootUrl + '/resource/' + request.params.resource);
+                ScaffoldsManager.app.nav(CmfConfig.rootUrl + '/resource/' + request.params.resource);
             }, 50);
         })
         .route('resource_create', '/resource/:resource/create', ScaffoldControllers.itemForm)
@@ -21,7 +21,7 @@ ScaffoldsManager.init = function (app) {
 };
 
 ScaffoldsManager.getResourceBaseUrl = function (resourceName, additionalParameter) {
-    return GlobalVars.rootUrl + '/' + GlobalVars.scaffoldApiUrlSection + '/' + ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)
+    return CmfConfig.rootUrl + '/' + CmfConfig.scaffoldApiUrlSection + '/' + ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)
 };
 
 ScaffoldsManager.buildResourceUrlSuffix = function (resourceName, additionalParameter) {
@@ -50,7 +50,7 @@ ScaffoldsManager.findResourceNameInUrl = function (url) {
 
 /* ============ Templates ============ */
 
-$.extend(Cache, {
+$.extend(CmfCache, {
     rawTemplates: {},
     compiledTemplates: {
         itemForm: {},

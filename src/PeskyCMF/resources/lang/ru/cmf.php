@@ -28,7 +28,10 @@ return [
                 'toolbar' => [
                     'reloadData' => 'Обновить'
                 ]
-            ]
+            ],
+            'ckeditor' => [
+                'cmf_scaffold_inserts_plugin_title' => 'Вставка данных в текст',
+            ],
         ]
     ],
     'error' => [
