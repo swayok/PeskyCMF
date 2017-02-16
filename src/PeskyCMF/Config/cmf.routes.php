@@ -247,6 +247,15 @@ Route::group(
             ]
         ]);
 
+        Route::get('{table_name}/service/custom_data/{data_id}', [
+            'as' => 'cmf_api_get_custom_data',
+            'uses' => CmfConfig::getInstance()->cmf_scaffold_api_controller_class() . '@getCustomData',
+            'fallback' => [
+                'route' => 'cmf_items_table',
+                'params' => true
+            ]
+        ]);
+
         Route::delete('{table_name}/bulk', [
             'as' => 'cmf_api_delete_bulk',
             'uses' => CmfConfig::getInstance()->cmf_scaffold_api_controller_class() . '@deleteBulk',

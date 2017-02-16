@@ -345,4 +345,8 @@ abstract class ScaffoldConfig {
 
     abstract public function deleteBulkOfRecords();
 
+    public function getCustomData($dataId) {
+        return cmfJsonResponse(HttpCode::NOT_FOUND);
+    }
+
 }

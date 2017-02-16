@@ -951,9 +951,6 @@ aside.main-sidebar .sidebar-menu li .badge {
 .item-details-table .wysiwyg-data-insert {
   font-size: 0;
 }
-span.item-details-table .wysiwyg-data-insert {
-  display: inline-block;
-}
 .item-details-table .wysiwyg-data-insert:before {
   content: attr(title);
   position: static;
@@ -969,6 +966,11 @@ span.item-details-table .wysiwyg-data-insert {
   cursor: pointer;
   text-align: center;
 }
-span.item-details-table .wysiwyg-data-insert:before {
+.item-details-table span.wysiwyg-data-insert,
+.item-details-table span.wysiwyg-data-insert:before {
   display: inline-block;
+}
+.item-details-table div.wysiwyg-data-insert:before {
+  margin: 10px 0 10px 0;
+  padding: 10px;
 }

@@ -119,10 +119,12 @@ class WysiwygFormInput extends FormInput {
     }
 
     /**
-     * Create valid config for
-     * @param $phpCode - php code that returns some text content. Code is inserted using Blade's command '{!! your_code_here !!}'
-     * @param $title
-     * @param bool $showAsBlock
+     * Create valid single item config for wysiwyg's data inserter plugin
+     * @param string $phpCode - php code that returns some text content. Code is inserted using Blade's command '{!! your_code_here !!}'
+     * @param string $title - insert's label to display inside wysiwyg editor
+     * @param bool $showAsBlock -
+     *      - true: inserted data is separate block (<div>, <p> or some other block element);
+     *      - false (default): inserted data is inline (simple text, <span>, etc)
      * @return array
      * @throws \InvalidArgumentException
      */
@@ -138,6 +140,56 @@ class WysiwygFormInput extends FormInput {
             'title' => $title,
             'is_block' => (bool)$showAsBlock
         ];
+    }
+
+    /**
+     * Create valid single item config for wysiwyg's data inserter plugin
+     * @param string $phpCode - php code that returns some text content. Code is inserted using Blade's command '{!! your_code_here !!}'
+     * @param string $title - insert's label to display inside wysiwyg editor
+     * @param bool $showAsBlock -
+     *  - true: inserted data is separate block (<div>, <p> or some other block element);
+     *  - false (default): inserted data is inline (simple text, <span>, etc)
+     * @param array $optionsForArguments - list of options for each argument to be passed into $phpCode.
+     *  Example: $phpCode = 'printPageData(":page_code", ":page_field")'. Args are: 'page_code' and 'page_field'.
+     *  $optionsForArguments should be: array(
+     *      'page_code' => [
+     *          'label' => 'Page',
+     *          'type' => 'select'
+     *          'options' => 'http://domain/admin/api/pages/options_for_inserts'
+     *      ],
+     *      'page_field' => [
+     *          'label' => 'Field'
+     *          'type' => 'select'
+     *          'options' => [
+     *              'title' => 'Title',
+     *              'content' => 'Text'
+     *          ],
+     *          'value' => 'content'
+     *      ],
+     *      'some_text' => [
+     *          'label' => 'Page',
+     *          'type' => 'text'
+     *      ],
+     *  )
+     *  Types: 'select', 'text', 'checkbox'
+     *  Additional options: 'value' (default one), 'checked' (bool, for checkbox)
+     *  Resulting insert may look like 'printPageData("home", "content")'
+     *  Note that for options loaded via URL, URL will be modified to contain 'pk' URL query argument that holds
+     *  current item id loaded into edit form. This is the way to exclude some items from returned options.
+     *  For example if we editing item with primary key value '13' then options url will be
+     *  'http://domain/admin/api/pages/options_for_inserts?pk=13'
+     * @param null|string $widgetTitleTpl - an alternative title template for insert's representation (widget) inside text editor
+     *  You can use args from $optionsForArguments to insert into template.
+     *  For example template can be like this: ':some_text (:page_code.label / :page_feild.value)'
+     *  Args for select is an object with 2 keys: 'label' and 'value', other args are plain text
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    static public function createDataInsertConfigWithArguments($phpCode, $title, $showAsBlock = false, array $optionsForArguments, $widgetTitleTpl = null) {
+        $config = static::createDataInsertConfig($phpCode, $title, $showAsBlock);
+        $config['args_options'] = $optionsForArguments;
+        $config['widget_title_tpl'] = $widgetTitleTpl;
+        return $config;
     }
 
     /**

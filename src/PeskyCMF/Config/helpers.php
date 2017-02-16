@@ -47,6 +47,18 @@ if (!function_exists('routeToCmfItemsTable')) {
     }
 }
 
+if (!function_exists('routeToCmfTableCustomData')) {
+    /**
+     * @param string $tableName
+     * @param string $dataId - identifier of data to be returned. For example: 'special_options'
+     * @param bool $absolute
+     * @return mixed
+     */
+    function routeToCmfTableCustomData($tableName, $dataId, $absolute = false) {
+        return route('cmf_api_get_custom_data', array_merge(['table_name' => $tableName, 'data_id' => $dataId]), $absolute);
+    }
+}
+
 if (!function_exists('routeToCmfItemAddForm')) {
     /**
      * @param string $tableName

@@ -112,4 +112,8 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->deleteBulkOfRecords();
     }
 
+    public function getCustomData($tableName, $dataId) {
+        return $this->getScaffoldConfig()->getCustomData($dataId);
+    }
+
 }

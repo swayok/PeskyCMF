@@ -17,9 +17,11 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      */
     public function boot() {
         $driver = config('database.default');
-        DbConnectionsManager::createConnectionFromArray($driver, config("database.connections.$driver"));
-        DbConnectionsManager::addAlternativeNameForConnection($driver, 'default');
-
+        $connectionConfig = config("database.connections.$driver");
+        if (!empty($connectionConfig['password'])) {
+            DbConnectionsManager::createConnectionFromArray($driver, $connectionConfig);
+            DbConnectionsManager::addAlternativeNameForConnection($driver, 'default');
+        }
         $this->addPdoCollectorForDebugbar();
     }
 

@@ -1029,10 +1029,6 @@ aside.main-sidebar {
     .wysiwyg-data-insert {
         font-size: 0;
 
-        span& {
-            display:inline-block;
-        }
-
         &:before {
             content: attr(title);
             position: static;
@@ -1045,10 +1041,20 @@ aside.main-sidebar {
             white-space: nowrap;
             cursor: pointer;
             text-align: center;
+        }
+    }
 
-            span& {
-                display: inline-block;
-            }
+    span.wysiwyg-data-insert {
+        &,
+        &:before {
+            display: inline-block;
+        }
+    }
+
+    div.wysiwyg-data-insert {
+        &:before {
+            margin: 10px 0 10px 0;
+            padding: 10px;
         }
     }
 
