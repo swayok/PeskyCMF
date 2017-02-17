@@ -1,8 +1,8 @@
-<?php echo "<?php\n"; ?>
+<?php
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
+namespace PeskyCMF\CMS\Admins;
 
-use App\<?php echo $sectionName; ?>\<?php echo $sectionName; ?>Config;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
@@ -11,7 +11,7 @@ use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\Column;
 
-class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends NormalTableScaffoldConfig {
+class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
@@ -20,18 +20,19 @@ class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends NormalTableScaff
 
     protected function createDataGridConfig() {
         return parent::createDataGridConfig()
-            ->readRelations(['Parent<?php echo $baseClassNameSingular; ?>' => ['id', 'email']])
+            ->readRelations(['ParentAdmin' => ['id', 'email']])
             ->setOrderBy('id', 'desc')
             ->setColumns([
                 'id',
                 'email',
+                'login',
                 'name',
                 'is_active',
                 'is_superadmin',
                 'role' => DataGridColumn::create()
                     ->setIsSortable(true)
-                    ->setValueConverter(function ($value, Column $columnConfig, $record) {
-                        return cmfTransCustom(".<?php echo $baseClassNameUnderscored; ?>.role.$value");
+                    ->setValueConverter(function ($value) {
+                        return cmfTransCustom(".admins.role.$value");
                     }),
                 'parent_id' => DataGridColumn::create()
                     ->setType(ValueCell::TYPE_LINK),
@@ -41,19 +42,20 @@ class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends NormalTableScaff
 
     protected function createItemDetailsConfig() {
         return parent::createItemDetailsConfig()
-            ->readRelations(['Parent<?php echo $baseClassNameSingular; ?>'])
+            ->readRelations(['ParentAdmin'])
             ->setValueCells([
                 'id',
                 'email',
+                'login',
                 'name',
                 'language' => ValueCell::create()
-                    ->setValueConverter(function ($value, Column $columnConfig, array $record) {
+                    ->setValueConverter(function ($value) {
                         return cmfTransCustom(".language.$value");
                     }),
                 'is_active',
                 'role' => ValueCell::create()
-                    ->setValueConverter(function ($value, Column $columnConfig, array $record) {
-                        return cmfTransCustom(".<?php echo $baseClassNameUnderscored; ?>.role.$value");
+                    ->setValueConverter(function ($value) {
+                        return cmfTransCustom(".admins.role.$value");
                     }),
                 'is_superadmin' => ValueCell::create(),
                 'parent_id' => ValueCell::create()
@@ -68,6 +70,7 @@ class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends NormalTableScaff
             ->setWidth(50)
             ->setFormInputs([
                 'email',
+                'login',
                 'password' => FormInput::create()
                     ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {
                         $renderer
@@ -78,7 +81,7 @@ class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends NormalTableScaff
                 'language' => FormInput::create()
                     ->setOptions(function () {
                         $options = array();
-                        foreach (<?php echo $sectionName; ?>Config::locales() as $lang) {
+                        foreach (CmfConfig::getInstance()->locales() as $lang) {
                             $options[$lang] = cmfTransCustom(".language.$lang");
                         }
                         return $options;
@@ -93,8 +96,8 @@ class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends NormalTableScaff
                 'role' => FormInput::create()
                     ->setOptions(function () {
                         $options = array();
-                        foreach (<?php echo $sectionName; ?>Config::roles_list() as $roleId) {
-                            $options[$roleId] = cmfTransCustom(".<?php echo $baseClassNameUnderscored; ?>.role.$roleId");
+                        foreach (CmfConfig::getInstance()->roles_list() as $roleId) {
+                            $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
                         }
                         return $options;
                     })
@@ -108,36 +111,54 @@ class <?php echo $baseClassNamePlural; ?>ScaffoldConfig extends NormalTableScaff
                         return InputRenderer::create('cmf::input/hidden');
                     })->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         if (empty($record['id']) && empty($value)) {
-                            return \Auth::guard()->user()->id;
+                            return \Auth::guard()->user()->getAuthIdentifier();
                         } else {
                             return $value;
                         }
                     })
             ])
             ->setValidators(function () {
-                return [
-                    'role' => 'required|in:' . implode(',', <?php echo $sectionName; ?>Config::roles_list()),
-                    'language' => 'required|in:' . implode(',', <?php echo $sectionName; ?>Config::locales()),
-                    'is_active' => 'boolean',
-                    'is_superadmin' => 'boolean',
-                ];
+                return $this->getBaseValidators();
             })
             ->addValidatorsForCreate(function () {
-                return [
-                    'email' => 'required|email|min:4|max:100|unique:' . <?php echo $baseClassNamePlural; ?>TableStructure::getTableName() . ',email',
-                    //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . <?php echo $baseClassNamePlural; ?>TableStructure::getTableName() . ',login',
-                    'password' => 'required|min:6',
-                ];
+                return $this->getValidatorsForCreate();
             })
             ->addValidatorsForEdit(function () {
-                return [
-                    'id' => FormConfig::VALIDATOR_FOR_ID,
-                    'email' => 'required|email|min:4|max:100|unique:' . <?php echo $baseClassNamePlural; ?>TableStructure::getTableName() . ',email,{{id}},id',
-                    //'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . <?php echo $baseClassNamePlural; ?>TableStructure::getTableName() . ',login,{{id}},id',
-                    'password' => 'min:6',
-                ];
+                return $this->getValidatorsForEdit();
             })
             ;
+    }
+
+    protected function getBaseValidators() {
+        return [
+            'role' => 'required|in:' . implode(',', CmfConfig::getInstance()->roles_list()),
+            'language' => 'required|in:' . implode(',', CmfConfig::getInstance()->locales()),
+            'is_active' => 'boolean',
+            'is_superadmin' => 'boolean',
+        ];
+    }
+
+    protected function getValidatorsForEdit() {
+        $validators = [
+            'id' => FormConfig::VALIDATOR_FOR_ID,
+            'password' => 'min:6',
+            'login' => 'regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',login,{{id}},id',
+            'email' => 'email|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',email,{{id}},id',
+        ];
+        $loginColumn = CmfConfig::getInstance()->user_login_column();
+        $validators[$loginColumn] = rtrim('required|' . array_get($validators, $loginColumn, ''), '|');
+        return $validators;
+    }
+
+    protected function getValidatorsForCreate() {
+        $validators = [
+            'password' => 'required|min:6',
+            'email' => 'required|email|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',email',
+            'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',login',
+        ];
+        $loginColumn = CmfConfig::getInstance()->user_login_column();
+        $validators[$loginColumn] = rtrim('required|' . array_get($validators, $loginColumn, ''), '|');
+        return $validators;
     }
 
 }

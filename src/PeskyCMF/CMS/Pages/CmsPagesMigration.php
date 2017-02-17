@@ -1,27 +1,25 @@
-<?php echo "<?php\n"; ?>
+<?php
 
-use App\<?php echo $dbClassesAppSubfolder ?>\Pages\PagesTable;
-use App\<?php echo $dbClassesAppSubfolder ?>\Pages\PagesTableStructure;
-use App\<?php echo $dbClassesAppSubfolder ?>\Admins\AdminsTableStructure;
-use Illuminate\Database\Schema\Blueprint;
+namespace PeskyCMF\CMS\Pages;
+
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
+use PeskyCMF\CMS\Texts\CmsTextsTableStructure;
 
-class CreatePagesTable extends Migration {
+class CmsPagesMigration extends Migration {
 
     public function up() {
-        if (!Schema::hasTable(PagesTableStructure::getTableName())) {
-            Schema::create(PagesTableStructure::getTableName(), function (Blueprint $table) {
+        if (!\Schema::hasTable(CmsPagesTableStructure::getTableName())) {
+            \Schema::create(CmsPagesTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->integer('admin_id')->nullable()->unsigned();
-                $table->string('title');
-                $table->string('browser_title')->default('');
-                $table->string('menu_title')->default('');
-                $table->string('type', 50)->default('page');
+                $table->integer('text_id')->nullable()->unsigned();
+                $table->string('type', 50)->default(CmsPagesTableStructure::getColumn('type')->getDefaultValueAsIs());
                 $table->string('comment', 1000)->default('');
                 $table->string('url_alias')->nullable();
                 $table->string('page_code')->nullable();
-                $table->text('content')->nullable();
                 if (config('database.connections.' . config('database.default') . '.driver') === 'pgsql') {
                     $table->jsonb('images')->default('{}');
                 } else {
@@ -33,7 +31,7 @@ class CreatePagesTable extends Migration {
                 $table->integer('order')->nullable();
                 $table->boolean('with_contact_form')->default(false);
                 $table->boolean('is_published')->default(true);
-                $currentTimestamp = DB::raw(PagesTable::quoteDbExpr(PagesTable::getCurrentTimeDbExpr()->setWrapInBrackets(false)));
+                $currentTimestamp = \DB::raw(CmsPagesTable::quoteDbExpr(CmsPagesTable::getCurrentTimeDbExpr()->setWrapInBrackets(false)));
                 $table->timestampTz('created_at')->default($currentTimestamp);
                 $table->timestampTz('updated_at')->default($currentTimestamp);
 
@@ -44,6 +42,7 @@ class CreatePagesTable extends Migration {
                 }
 
                 $table->index('parent_id');
+                $table->index('text_id');
                 $table->index('created_at');
                 $table->index('updated_at');
                 $table->index('order');
@@ -53,12 +52,17 @@ class CreatePagesTable extends Migration {
 
                 $table->foreign('parent_id')
                     ->references('id')
-                    ->on(PagesTableStructure::getTableName())
+                    ->on(CmsPagesTableStructure::getTableName())
+                    ->onDelete('cascade')
+                    ->onUpdate('cascade');
+                $table->foreign('text_id')
+                    ->references('id')
+                    ->on(CmsTextsTableStructure::getTableName())
                     ->onDelete('cascade')
                     ->onUpdate('cascade');
                 $table->foreign('admin_id')
                     ->references('id')
-                    ->on(AdminsTableStructure::getTableName())
+                    ->on(CmsAdminsTableStructure::getTableName())
                     ->onDelete('set null')
                     ->onUpdate('cascade');
             });
@@ -66,6 +70,6 @@ class CreatePagesTable extends Migration {
     }
 
     public function down() {
-        Schema::dropIfExists(PagesTableStructure::getTableName());
+        \Schema::dropIfExists(CmsPagesTableStructure::getTableName());
     }
 }

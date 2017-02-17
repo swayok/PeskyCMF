@@ -5,10 +5,8 @@ namespace PeskyCMF\Scaffold;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
-use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
-use Swayok\Utils\StringUtils;
 
 abstract class ScaffoldSectionConfig {
     /**
@@ -231,7 +229,7 @@ abstract class ScaffoldSectionConfig {
         ) {
             if ($this->allowRelationsInValueViewers) {
                 $nameParts = explode('.', $name);
-                if (!count($nameParts) === 2) {
+                if (count($nameParts) === 1) {
                     throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
                 } else if (!$this->getTable()->getTableStructure()->hasRelation($nameParts[0])) {
                     throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no relation '{$nameParts[0]}'");

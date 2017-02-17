@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF;
+namespace PeskyCMF\Config;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Traversable;
@@ -8,28 +8,6 @@ use Traversable;
 abstract class ConfigsContainer implements \IteratorAggregate, \Countable, Arrayable {
 
     private $array = null;
-    static protected $instances = [];
-
-    public function __construct() {
-        self::$instances[get_called_class()] = $this;
-    }
-
-    /**
-     * Returns instance of config class it was called from
-     * Note: method excluded from toArray() results but key "config_instance" added instead of it
-     * @return $this
-     */
-    static public function getInstance() {
-        $class = get_called_class();
-        if (empty(self::$instances[$class])) {
-            self::$instances[$class] = new $class;
-        }
-        return self::$instances[$class];
-    }
-
-    static public function replaceConfigInstance($classToReplace, $instance) {
-        self::$instances[$classToReplace] = $instance;
-    }
 
     /**
      * Retrieve an external iterator

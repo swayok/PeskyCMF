@@ -1,15 +1,14 @@
-<?php echo "<?php\n"; ?>
+<?php
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
+namespace PeskyCMF\CMS\Admins;
 
-use App\<?php echo $sectionName; ?>\<?php echo $sectionName; ?>Config;
+use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyCMF\Db\Traits\UserAuthColumns;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
-use <?php echo $parentFullClassNameForTableStructure ?>;
 
 /**
  * @property-read Column    $id
@@ -27,7 +26,7 @@ use <?php echo $parentFullClassNameForTableStructure ?>;
  * @property-read Column    $timezone
  * @property-read Column    $remember_token
  */
-class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $parentClassNameForTableStructure ?> {
+class CmsAdminsTableStructure extends CmsTableStructure {
 
     use IdColumn,
         TimestampColumns,
@@ -39,11 +38,7 @@ class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $pare
      * @return string
      */
     static public function getTableName() {
-        return '<?php echo $baseClassNameUnderscored; ?>';
-    }
-
-    static public function getSchema() {
-        return null;
+        return 'admins';
     }
 
     private function parent_id() {
@@ -52,11 +47,25 @@ class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $pare
     }
 
     private function email() {
-        return Column::create(Column::TYPE_EMAIL)
-            ->disallowsNullValues()
+        $column = Column::create(Column::TYPE_EMAIL)
             ->convertsEmptyStringToNull()
             ->trimsValue()
             ->uniqueValues();
+        if (static::getCmsConfig()->user_login_column() === 'email') {
+            $column->disallowsNullValues();
+        }
+        return $column;
+    }
+
+    private function login() {
+        $column = Column::create(Column::TYPE_EMAIL)
+            ->convertsEmptyStringToNull()
+            ->trimsValue()
+            ->uniqueValues();
+        if (static::getCmsConfig()->user_login_column() === 'login') {
+            $column->disallowsNullValues();
+        }
+        return $column;
     }
 
     private function name() {
@@ -78,18 +87,18 @@ class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $pare
 
     private function role() {
         return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues(<?php echo $sectionName; ?>Config::roles_list())
+            ->setAllowedValues(static::getCmsConfig()->roles_list())
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
-            ->setDefaultValue(<?php echo $sectionName; ?>Config::default_role());
+            ->setDefaultValue(static::getCmsConfig()->default_role());
     }
 
     private function language() {
         return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues(<?php echo $sectionName; ?>Config::locales())
+            ->setAllowedValues(static::getCmsConfig()->locales())
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
-            ->setDefaultValue(<?php echo $sectionName; ?>Config::default_locale());
+            ->setDefaultValue(static::getCmsConfig()->default_locale());
     }
 
     private function timezone() {
@@ -97,14 +106,14 @@ class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $pare
             ->convertsEmptyStringToNull();
     }
 
-    private function Parent<?php echo $baseClassNameSingular; ?>() {
+    private function ParentAdmin() {
         return Relation::create(
                 'parent_id',
                 Relation::BELONGS_TO,
-                <?php echo $baseClassNamePlural; ?>Table::class,
+                CmsAdminsTable::class,
                 'id'
             )
-            ->setDisplayColumnName(<?php echo $sectionName; ?>Config::user_login_column());
+            ->setDisplayColumnName(static::getCmsConfig()->user_login_column());
     }
 
 }

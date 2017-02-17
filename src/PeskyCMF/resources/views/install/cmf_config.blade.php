@@ -53,7 +53,7 @@ class {{ $sectionName }}Config extends CmfConfig {
     }
 
     static public function user_object_class() {
-        return \App\Db\Admins\Admin::class;
+        return \PeskyCMF\CMS\Admins\CmsAdmin::class;
     }
 
     /**

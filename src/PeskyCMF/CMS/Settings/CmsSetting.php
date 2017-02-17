@@ -1,8 +1,9 @@
-<?php echo "<?php\n"; ?>
+<?php
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
+namespace PeskyCMF\CMS\Settings;
 
-use <?php echo $parentFullClassNameForRecord ?>;
+use PeskyCMF\CMS\CmsRecord;
+use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyCMF\Db\Traits\KeyValueRecordHelpers;
 
 /**
@@ -22,7 +23,7 @@ use PeskyCMF\Db\Traits\KeyValueRecordHelpers;
  * @method static string default_language($fkValue = null, $default = null)
  * @method static array fallback_languages($fkValue = null, $default = null)
  */
-class <?php echo $baseClassNameSingular; ?> extends <?php echo $parentClassNameForRecord ?> {
+class CmsSetting extends CmsRecord {
 
     use KeyValueRecordHelpers;
 
@@ -33,10 +34,10 @@ class <?php echo $baseClassNameSingular; ?> extends <?php echo $parentClassNameF
     const FALLBACK_LANGUAGES = 'fallback_languages';
 
     /**
-     * @return <?php echo $baseClassNamePlural; ?>Table
+     * @return CmsSettingsTable|KeyValueTableInterface
      */
     static public function getTable() {
-        return <?php echo $baseClassNamePlural; ?>Table::getInstance();
+        return CmsSettingsTable::getInstance();
     }
 
 }

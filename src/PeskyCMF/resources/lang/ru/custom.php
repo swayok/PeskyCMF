@@ -51,6 +51,7 @@ return [
                 'id' => 'ID',
                 'parent_id' => 'Создатель',
                 'email' => 'E-mail',
+                'login' => 'Логин',
                 'name' => 'Имя',
                 'is_active' => 'Действующий?',
                 'is_superadmin' => 'Суперадмин?',
@@ -66,6 +67,7 @@ return [
             'header_edit' => 'Редактирование администратора',
             'input' => [
                 'email' => 'E-mail',
+                'login' => 'Логин',
                 'password' => 'Пароль',
                 'name' => 'Имя',
                 'language' => 'Язык',
@@ -81,6 +83,7 @@ return [
             'field' => [
                 'id' => 'ID',
                 'email' => 'E-mail',
+                'login' => 'Логин',
                 'password' => 'Пароль',
                 'name' => 'Имя',
                 'language' => 'Язык',

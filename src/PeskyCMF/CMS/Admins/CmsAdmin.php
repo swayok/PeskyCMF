@@ -1,9 +1,9 @@
-<?php echo "<?php\n"; ?>
+<?php
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
+namespace PeskyCMF\CMS\Admins;
 
-use <?php echo $parentFullClassNameForRecord ?>;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use PeskyCMF\CMS\CmsRecord;
 use PeskyCMF\Db\Traits\Authenticatable;
 
 /**
@@ -11,6 +11,7 @@ use PeskyCMF\Db\Traits\Authenticatable;
  * @property-read null|string $parent_id
  * @property-read string      $name
  * @property-read string      $email
+ * @property-read string      $login
  * @property-read string      $password
  * @property-read string      $ip
  * @property-read string      $is_superadmin
@@ -28,7 +29,7 @@ use PeskyCMF\Db\Traits\Authenticatable;
  * @property-read null|string $timezone
  * @property-read null|string $remember_token
  *
- * @property-read <?php echo $baseClassNameSingular; ?>       $Parent<?php echo $baseClassNameSingular . "\n"; ?>
+ * @property-read CmsAdmin       $ParentAdmin
  *
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setParentId($value, $isFromDb = false)
@@ -43,15 +44,15 @@ use PeskyCMF\Db\Traits\Authenticatable;
  * @method $this    setTimezone($value, $isFromDb = false)
  * @method $this    setRememberToken($value, $isFromDb = false)
  */
-class <?php echo $baseClassNameSingular; ?> extends <?php echo $parentClassNameForRecord ?> implements AuthenticatableContract {
+class CmsAdmin extends CmsRecord implements AuthenticatableContract {
 
     use Authenticatable;
 
     /**
-     * @return <?php echo $baseClassNamePlural; ?>Table
+     * @return CmsAdminsTable
      */
     static public function getTable() {
-        return <?php echo $baseClassNamePlural; ?>Table::getInstance();
+        return CmsAdminsTable::getInstance();
     }
 
 }

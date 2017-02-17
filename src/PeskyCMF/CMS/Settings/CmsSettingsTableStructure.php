@@ -1,12 +1,12 @@
-<?php echo "<?php\n"; ?>
+<?php
 
-namespace App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>;
+namespace PeskyCMF\CMS\Settings;
 
+use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\Db\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\DefaultColumnClosures;
-use <?php echo $parentFullClassNameForTableStructure ?>;
 
 /**
  * @property-read Column    $id
@@ -14,7 +14,7 @@ use <?php echo $parentFullClassNameForTableStructure ?>;
  * @property-read Column    $admin_id
  * @property-read Column    $value
  */
-class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $parentClassNameForTableStructure ?> {
+class CmsSettingsTableStructure extends CmsTableStructure {
 
     use IdColumn,
         AdminIdColumn;
@@ -23,14 +23,7 @@ class <?php echo $baseClassNamePlural; ?>TableStructure extends <?php echo $pare
      * @return string
      */
     static public function getTableName() {
-        return '<?php echo $baseClassNameUnderscored; ?>';
-    }
-
-    /**
-     * @return string|null
-     */
-    static public function getSchema() {
-        return null;
+        return 'settings';
     }
 
     private function key() {

@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Db\Admins\Admin $admin
+ * @var \PeskyCMF\CMS\Admins\CmsAdmin $admin
  */
 ?>
 <div class="content-header">

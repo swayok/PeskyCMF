@@ -3,7 +3,6 @@
 namespace PeskyCMF;
 
 use LaravelSiteLoader\AppSiteLoader;
-use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Event\AdminAuthorised;
 use PeskyCMF\Listeners\AdminAuthorisedEventListener;
@@ -14,14 +13,18 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     /** @var CmfConfig */
     static protected $cmfConfig;
     /** @var string */
-    static protected $cmfConfigsClass = CmfConfig::class;
+    static protected $cmfConfigsClass;
+    /** @var bool */
+    static protected $useCmfConfigAsDefault = true;
 
     /**
      * @return CmfConfig
      */
     static public function getCmfConfig() {
         if (static::$cmfConfig === null) {
-            static::$cmfConfig = new static::$cmfConfigsClass;
+            /** @var CmfConfig $cmfConfigsClass */
+            $cmfConfigsClass = static::$cmfConfigsClass;
+            static::$cmfConfig = $cmfConfigsClass::getInstance();
         }
         return static::$cmfConfig;
     }
@@ -31,8 +34,9 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     }
 
     public function boot() {
-
-        static::getCmfConfig()->replaceConfigInstance(CmfConfig::class, static::getCmfConfig());
+        if (static::$useCmfConfigAsDefault) {
+            static::getCmfConfig()->useAsDefault();
+        }
 
         // custom configurations
         $this->configure();

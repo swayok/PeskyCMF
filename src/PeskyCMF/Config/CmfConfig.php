@@ -3,7 +3,6 @@
 namespace PeskyCMF\Config;
 
 use Illuminate\Http\Request;
-use PeskyCMF\ConfigsContainer;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
@@ -13,14 +12,35 @@ use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\StringUtils;
 
-class CmfConfig extends ConfigsContainer {
+abstract class CmfConfig extends ConfigsContainer {
 
-    public function __construct() {
-        parent::__construct();
-        // make it possible to return child class instance by calling CmfConfig::getInstance()
-        if (get_class($this) !== __CLASS__) {
-            self::replaceConfigInstance(__CLASS__, $this);
+    static private $instances = [];
+
+    protected function __construct() {
+        self::$instances[get_class($this)] = $this;
+        if (!array_key_exists(__CLASS__, self::$instances)) {
+            self::$instances[__CLASS__] = $this;
         }
+    }
+
+    /**
+     * Use this class instance as default config
+     */
+    public function useAsDefault() {
+        self::$instances[__CLASS__] = $this;
+    }
+
+    /**
+     * Returns instance of config class it was called from
+     * Note: method excluded from toArray() results but key "config_instance" added instead of it
+     * @return $this
+     */
+    static public function getInstance() {
+        $class = get_called_class();
+        if (!array_key_exists($class, self::$instances)) {
+            self::$instances[$class] = new $class;
+        }
+        return self::$instances[$class];
     }
 
     static public function cmf_routes_config_files() {
@@ -511,7 +531,7 @@ class CmfConfig extends ConfigsContainer {
      * is allowed to view the admin section. Any "falsey" response will send the user back to the 'login_path' defined below.
      *
      * @param Request $request
-     * @return callable
+     * @return bool
      */
     static public function isAuthorised(Request $request) {
         return PeskyCmfAccessManager::isAuthorised($request);
@@ -665,6 +685,22 @@ class CmfConfig extends ConfigsContainer {
         return [];
     }
 
+    static private $tableNameInRouteMap = [];
+
+    /**
+     * Map $tableNameInRoute to $table and $scaffoldConfigClass to be used in CmfConfig::getScaffoldConfig() and
+     * CmfConfig::getTableByUnderscoredName()
+     * @param TableInterface $table
+     * @param string $scaffoldConfigClass - name of class that extends PeskyCMF\Scaffold\ScaffoldConfig class
+     * @param null|string $tableNameInRoute - null: use table name from $table
+     */
+    static public function registerDbTableAndScaffoldConfig(TableInterface $table, $scaffoldConfigClass, $tableNameInRoute = null) {
+        self::$tableNameInRouteMap[$tableNameInRoute ?: $table->getTableStructure()->getTableName()] = [
+            'table' => $table,
+            'scaffold_class' => $scaffoldConfigClass
+        ];
+    }
+
     /**
      * Get ScaffoldConfig instance
      * @param TableInterface $table - a model to be used in ScaffoldConfig
@@ -678,13 +714,17 @@ class CmfConfig extends ConfigsContainer {
      * @throws \BadMethodCallException
      */
     static public function getScaffoldConfig(TableInterface $table, $tableNameInRoute) {
-        /** @var ClassBuilder $builderClass */
-        $builderClass = static::getDbClassesBuilderClass();
-        $className = preg_replace(
-            '%\\\([A-Za-z0-9]+?)' . $builderClass::makeTableClassName('') . '$%',
-            '\\\$1' . static::scaffold_config_class_suffix(),
-            get_class($table)
-        );
+        if (array_key_exists($tableNameInRoute, self::$tableNameInRouteMap)) {
+            $className = self::$tableNameInRouteMap[$tableNameInRoute]['scaffold_class'];
+        } else {
+            /** @var ClassBuilder $builderClass */
+            $builderClass = static::getDbClassesBuilderClass();
+            $className = preg_replace(
+                '%\\\([A-Za-z0-9]+?)' . $builderClass::makeTableClassName('') . '$%',
+                '\\\$1' . static::scaffold_config_class_suffix(),
+                get_class($table)
+            );
+        }
         return new $className($table, $tableNameInRoute);
     }
 
@@ -700,11 +740,15 @@ class CmfConfig extends ConfigsContainer {
      * @throws \BadMethodCallException
      */
     static public function getTableByUnderscoredName($tableName) {
-        /** @var ClassBuilder $builderClass */
-        $builderClass = static::getDbClassesBuilderClass();
-        /** @var Table $class */
-        $class = static::getDbClassesNamespaceForTable($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
-        return $class::getInstance();
+        if (array_key_exists($tableName, self::$tableNameInRouteMap)) {
+            return self::$tableNameInRouteMap[$tableName]['table'];
+        } else {
+            /** @var ClassBuilder $builderClass */
+            $builderClass = static::getDbClassesBuilderClass();
+            /** @var Table $class */
+            $class = static::getDbClassesNamespaceForTable($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
+            return $class::getInstance();
+        }
     }
 
     /**

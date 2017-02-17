@@ -7,11 +7,12 @@ use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Relation;
+use PeskyORM\ORM\TableInterface;
 use PeskyORM\ORM\TableStructureInterface;
 use Swayok\Utils\NormalizeValue;
 
 /**
- * @method static KeyValueTableInterface getInstance()
+ * @method static KeyValueTableInterface|TableInterface getInstance()
  * @method static TableStructureInterface getTableStructure()
  */
 trait KeyValueTableHelpers {

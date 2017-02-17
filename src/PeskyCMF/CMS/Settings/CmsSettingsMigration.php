@@ -1,15 +1,16 @@
-<?php echo "<?php\n"; ?>
+<?php
 
-use App\<?php echo $dbClassesAppSubfolder ?>\<?php echo $baseClassNamePlural; ?>\<?php echo $baseClassNamePlural; ?>TableStructure;
-use App\<?php echo $dbClassesAppSubfolder ?>\Admins\AdminsTableStructure;
+namespace PeskyCMF\CMS\Settings;
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
 
-class Create<?php echo $baseClassNamePlural; ?>Table extends Migration {
+class CmsSettingsMigration extends Migration {
 
     public function up() {
-        if (!Schema::hasTable(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName())) {
-            Schema::create(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName(), function (Blueprint $table) {
+        if (!\Schema::hasTable(CmsSettingsTableStructure::getTableName())) {
+            \Schema::create('settings', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('key');
                 $table->integer('admin_id')->nullable()->unsigned();
@@ -23,7 +24,7 @@ class Create<?php echo $baseClassNamePlural; ?>Table extends Migration {
 
                 $table->foreign('admin_id')
                     ->references('id')
-                    ->on(AdminsTableStructure::getTableName())
+                    ->on(CmsAdminsTableStructure::getTableName())
                     ->onDelete('set null')
                     ->onUpdate('cascade');
             });
@@ -31,6 +32,6 @@ class Create<?php echo $baseClassNamePlural; ?>Table extends Migration {
     }
 
     public function down() {
-        Schema::dropIfExists(<?php echo $baseClassNamePlural; ?>TableStructure::getTableName());
+        \Schema::dropIfExists(CmsSettingsTableStructure::getTableName());
     }
 }

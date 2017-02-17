@@ -51,6 +51,7 @@ return [
                 'id' => 'ID',
                 'parent_id' => 'Creator',
                 'email' => 'E-mail',
+                'login' => 'Login',
                 'name' => 'Name',
                 'is_active' => 'Active?',
                 'is_superadmin' => 'Superadmin?',
@@ -66,6 +67,7 @@ return [
             'header_edit' => 'Editing administrator',
             'input' => [
                 'email' => 'E-mail',
+                'login' => 'Login',
                 'password' => 'Password',
                 'name' => 'Name',
                 'language' => 'Language',
@@ -80,6 +82,7 @@ return [
             'field' => [
                 'id' => 'ID',
                 'email' => 'E-mail',
+                'login' => 'Login',
                 'password' => 'Password',
                 'name' => 'Name',
                 'language' => 'Language',
