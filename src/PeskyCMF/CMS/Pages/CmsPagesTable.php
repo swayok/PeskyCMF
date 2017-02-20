@@ -17,7 +17,9 @@ class CmsPagesTable extends CmsTable {
      * @return CmsPage
      */
     public function newRecord() {
-        return app(CmsPage::class);
+        /** @var CmsPage $class */
+        $class = app(CmsPage::class);
+        return $class::newEmptyRecord();
     }
 
     /**

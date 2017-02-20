@@ -3,6 +3,7 @@
 namespace PeskyCMF\CMS\Admins;
 
 use PeskyCMF\CMS\CmsTable;
+use PeskyORM\ORM\RecordInterface;
 
 class CmsAdminsTable extends CmsTable {
 
@@ -17,7 +18,9 @@ class CmsAdminsTable extends CmsTable {
      * @return CmsAdmin
      */
     public function newRecord() {
-        return app(CmsAdmin::class);
+        /** @var CmsAdmin $class */
+        $class = app(CmsAdmin::class);
+        return $class::newEmptyRecord();
     }
 
     /**

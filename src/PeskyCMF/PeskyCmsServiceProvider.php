@@ -29,14 +29,16 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
     // admins
 
     public function registerAdminsDbClasses() {
-        $this->registerAdminsDbRecord();
+        $this->registerAdminsDbRecordClassName();
         $this->registerAdminsDbTable();
         $this->registerAdminsDbTableStructure();
     }
 
-    public function registerAdminsDbRecord() {
-        $this->app->bind(CmsAdmin::class, function () {
-            return CmsAdmin::newEmptyRecord();
+    public function registerAdminsDbRecordClassName() {
+        $this->app->singleton(CmsAdmin::class, function () {
+            // note: do not create record here or you will possibly encounter infinite loop because this class may be
+            // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
+            return CmsAdmin::class;
         });
     }
 
@@ -55,14 +57,16 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
     // settings
 
     public function registerSettingsDbClasses() {
-        $this->registerSettingsDbRecord();
+        $this->registerSettingsDbRecordClassName();
         $this->registerSettingsDbTable();
         $this->registerSettingsDbTableStructure();
     }
 
-    public function registerSettingsDbRecord() {
-        $this->app->bind(CmsSetting::class, function () {
-            return CmsSetting::newEmptyRecord();
+    public function registerSettingsDbRecordClassName() {
+        $this->app->singleton(CmsSetting::class, function () {
+            // note: do not create record here or you will possibly encounter infinite loop because this class may be
+            // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
+            return CmsSetting::class;
         });
     }
 
@@ -81,14 +85,16 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
     // pages
 
     public function registerPagesDbClasses() {
-        $this->registerPagesDbRecord();
+        $this->registerPagesDbRecordClassName();
         $this->registerPagesDbTable();
         $this->registerPagesDbTableStructure();
     }
 
-    public function registerPagesDbRecord() {
-        $this->app->bind(CmsPage::class, function () {
-            return CmsPage::newEmptyRecord();
+    public function registerPagesDbRecordClassName() {
+        $this->app->singleton(CmsPage::class, function () {
+            // note: do not create record here or you will possibly encounter infinite loop because this class may be
+            // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
+            return CmsPage::class;
         });
     }
 
@@ -107,14 +113,16 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
     // texts
 
     public function registerTextsDbClasses() {
-        $this->registerTextsDbRecord();
+        $this->registerTextsDbRecordClassName();
         $this->registerTextsDbTable();
         $this->registerTextsDbTableStructure();
     }
 
-    public function registerTextsDbRecord() {
-        $this->app->bind(CmsText::class, function () {
-            return CmsText::newEmptyRecord();
+    public function registerTextsDbRecordClassName() {
+        $this->app->singleton(CmsText::class, function () {
+            // note: do not create record here or you will possibly encounter infinite loop because this class may be
+            // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
+            return CmsText::class;
         });
     }
 

@@ -4,9 +4,9 @@ namespace PeskyCMF\CMS\Pages;
 
 use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\CMS\Texts\CmsTextsTable;
+use PeskyCMF\CMS\Traits\AdminIdColumn;
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyCMF\Db\Column\Utils\ImageConfig;
-use PeskyCMF\Db\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsPublishedColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
@@ -47,10 +47,12 @@ class CmsPagesTableStructure extends CmsTableStructure {
     }
 
     private function type() {
+        /** @var CmsPage $page */
+        $page = app()->offsetGet(CmsPage::class);
         return Column::create(Column::TYPE_ENUM)
             ->disallowsNullValues()
-            ->setAllowedValues(CmsPage::getTypes())
-            ->setDefaultValue(CmsPage::TYPE_PAGE);
+            ->setAllowedValues($page::getTypes())
+            ->setDefaultValue($page::TYPE_PAGE);
     }
 
     private function parent_id() {
@@ -139,12 +141,12 @@ class CmsPagesTableStructure extends CmsTableStructure {
     }
 
     private function Parent() {
-        return Relation::create('parent_id', Relation::BELONGS_TO, CmsPagesTable::class, 'id')
+        return Relation::create('parent_id', Relation::BELONGS_TO, app(CmsPagesTable::class), 'id')
             ->setDisplayColumnName('title');
     }
 
     private function PrimaryText() {
-        return Relation::create('text_id', Relation::BELONGS_TO, CmsTextsTable::class, 'id')
+        return Relation::create('text_id', Relation::BELONGS_TO, app(CmsTextsTable::class), 'id')
             ->setDisplayColumnName('title');
     }
 

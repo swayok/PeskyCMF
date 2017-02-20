@@ -110,7 +110,7 @@ class CmsAdminsTableStructure extends CmsTableStructure {
         return Relation::create(
                 'parent_id',
                 Relation::BELONGS_TO,
-                CmsAdminsTable::class,
+                app(CmsAdminsTable::class),
                 'id'
             )
             ->setDisplayColumnName(static::getCmsConfig()->user_login_column());

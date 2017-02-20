@@ -3,8 +3,9 @@
 namespace PeskyCMF\CMS\Texts;
 
 use PeskyCMF\CMS\CmsTableStructure;
+use PeskyCMF\CMS\Pages\CmsPage;
 use PeskyCMF\CMS\Settings\CmsSetting;
-use PeskyCMF\Db\Traits\AdminIdColumn;
+use PeskyCMF\CMS\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyORM\ORM\Column;
@@ -50,6 +51,15 @@ class CmsTextsTableStructure extends CmsTableStructure {
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
             ->setDefaultValue($cmsSettings::default_language(null, static::getCmsConfig()->default_locale()));
+    }
+
+    private function type() {
+        /** @var CmsPage $page */
+        $page = app(CmsPage::class);
+        return Column::create(Column::TYPE_ENUM)
+            ->disallowsNullValues()
+            ->setAllowedValues($page::getTypes())
+            ->setDefaultValue($page::TYPE_PAGE);
     }
 
     private function title() {
@@ -100,7 +110,7 @@ class CmsTextsTableStructure extends CmsTableStructure {
     }
 
     private function Parent() {
-        return Relation::create('parent_id', Relation::BELONGS_TO, CmsTextsTable::class, 'id')
+        return Relation::create('parent_id', Relation::BELONGS_TO, app(CmsTextsTable::class), 'id')
             ->setDisplayColumnName('title');
     }
 

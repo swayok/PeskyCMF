@@ -49,11 +49,15 @@ use PeskyCMF\CMS\CmsRecord;
 class CmsPage extends CmsRecord {
 
     const TYPE_PAGE = 'page';
+    const TYPE_CATEGORY = 'category';
+    const TYPE_ITEM = 'item';
     const TYPE_NEWS = 'news';
 
     static protected $types = [
         self::TYPE_PAGE,
         self::TYPE_NEWS,
+        self::TYPE_CATEGORY,
+        self::TYPE_ITEM,
     ];
 
     /**

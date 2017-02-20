@@ -17,7 +17,9 @@ class CmsTextsTable extends CmsTable {
      * @return CmsText
      */
     public function newRecord() {
-        return app(CmsText::class);
+        /** @var CmsText $class */
+        $class = app(CmsText::class);
+        return $class::newEmptyRecord();
     }
 
     /**

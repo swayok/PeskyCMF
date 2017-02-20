@@ -33,7 +33,9 @@ class CmsSettingsTable extends CmsTable implements KeyValueTableInterface {
      * @return CmsSetting
      */
     public function newRecord() {
-        return app(CmsSetting::class);
+        /** @var CmsSetting $class */
+        $class = app(CmsSetting::class);
+        return $class::newEmptyRecord();
     }
 
     /**

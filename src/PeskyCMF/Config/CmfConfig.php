@@ -3,6 +3,8 @@
 namespace PeskyCMF\Config;
 
 use Illuminate\Http\Request;
+use PeskyCMF\CMS\Admins\CmsAdmin;
+use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
@@ -157,7 +159,24 @@ abstract class CmfConfig extends ConfigsContainer {
      * @throws \BadMethodCallException
      */
     static public function user_object_class() {
-        return get_class(static::getTableByUnderscoredName(static::users_table_name())->newRecord());
+        return app(CmsAdmin::class);
+    }
+
+    /**
+     * Table name where admins/users stored
+     * @return string
+     */
+    static public function users_table_name() {
+        /** @var CmsAdminsTableStructure $adminsTableStructure */
+        $adminsTableStructure = app(CmsAdminsTableStructure::class);
+        return $adminsTableStructure::getTableName();
+    }
+
+    /**
+     * @return string
+     */
+    static public function user_login_column() {
+        return 'email';
     }
 
     /**
@@ -181,21 +200,6 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function password_recovery_email_view() {
         return 'cmf::emails.password_restore_instructions';
-    }
-
-    /**
-     * Table name where admins/users stored
-     * @return string
-     */
-    static public function users_table_name() {
-        return 'admins';
-    }
-
-    /**
-     * @return string
-     */
-    static public function user_login_column() {
-        return 'email';
     }
 
     /**

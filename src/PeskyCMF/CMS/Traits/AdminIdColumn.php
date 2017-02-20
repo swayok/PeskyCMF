@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF\Db\Traits;
+namespace PeskyCMF\CMS\Traits;
 
 use PeskyCMF\CMS\Admins\CmsAdminsTable;
 use PeskyORM\ORM\Column;
@@ -17,7 +17,7 @@ trait AdminIdColumn {
         return Relation::create(
                 'admin_id',
                 Relation::BELONGS_TO,
-                CmsAdminsTable::class,
+                app(CmsAdminsTable::class),
                 'id'
             )
             ->setDisplayColumnName('email');
