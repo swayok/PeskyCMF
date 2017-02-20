@@ -2,8 +2,8 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyCMF\Scaffold\ValueViewerConfigException;
 use PeskyCMF\Scaffold\RenderableValueViewer;
+use PeskyCMF\Scaffold\ValueViewerConfigException;
 use PeskyORM\ORM\Column;
 
 class FormInput extends RenderableValueViewer {

@@ -16,36 +16,38 @@ class CmsSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
     protected $isDeleteAllowed = false;
 
     protected function createFormConfig() {
+        /** @var CmsSetting $cmsSetting */
+        $cmsSetting = app(CmsSetting::class);
         return parent::createFormConfig()
             ->setWidth(50)
             ->addTab(cmfTransCustom('.settings.form.tab.general'), [
-                CmsSetting::DEFAULT_BROWSER_TITLE,
-                CmsSetting::BROWSER_TITLE_ADDITION,
+                $cmsSetting::DEFAULT_BROWSER_TITLE,
+                $cmsSetting::BROWSER_TITLE_ADDITION,
             ])
             ->addTab(cmfTransCustom('.settings.form.tab.localization'), [
-                CmsSetting::LANGUAGES => KeyValueSetFormInput::create()
+                $cmsSetting::LANGUAGES => KeyValueSetFormInput::create()
                     ->setMinValuesCount(1)
                     ->setAddRowButtonLabel(cmfTransCustom('.settings.form.input.languages_add'))
                     ->setDeleteRowButtonLabel(cmfTransCustom('.settings.form.input.languages_delete')),
-                CmsSetting::DEFAULT_LANGUAGE => FormInput::create()
+                $cmsSetting::DEFAULT_LANGUAGE => FormInput::create()
                     ->setType(FormInput::TYPE_SELECT)
-                    ->setOptions(function () {
-                        return CmsSetting::languages(null, []);
+                    ->setOptions(function () use ($cmsSetting) {
+                        return $cmsSetting::languages(null, []);
                     }),
-                CmsSetting::FALLBACK_LANGUAGES => KeyValueSetFormInput::create()
+                $cmsSetting::FALLBACK_LANGUAGES => KeyValueSetFormInput::create()
                     ->setAddRowButtonLabel(cmfTransCustom('.settings.form.input.fallback_languages_add'))
                     ->setDeleteRowButtonLabel(cmfTransCustom('.settings.form.input.fallback_languages_delete')),
             ])
             ->setDataToAddToRecord(function () {
                 return ['admin_id' => \Auth::guard()->user()->getAuthIdentifier()];
             })
-            ->setValidators(function () {
+            ->setValidators(function () use ($cmsSetting) {
                 return [
-                    CmsSetting::DEFAULT_LANGUAGE => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%|in:' . implode(',', array_keys(CmsSetting::languages(null, []))),
-                    CmsSetting::LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
-                    CmsSetting::LANGUAGES . '.*.value' => 'required|string|max:88',
-                    CmsSetting::FALLBACK_LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
-                    CmsSetting::FALLBACK_LANGUAGES . '.*.value' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%'
+                    $cmsSetting::DEFAULT_LANGUAGE => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%|in:' . implode(',', array_keys($cmsSetting::languages(null, []))),
+                    $cmsSetting::LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
+                    $cmsSetting::LANGUAGES . '.*.value' => 'required|string|max:88',
+                    $cmsSetting::FALLBACK_LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
+                    $cmsSetting::FALLBACK_LANGUAGES . '.*.value' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%'
                 ];
             });
     }

@@ -6,7 +6,6 @@ use PeskyCMF\Db\Traits\KeyValueTableHelpers;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\FakeTable;
 use PeskyORM\ORM\Record;
-use PeskyORM\ORM\TableInterface;
 
 class KeyValueDataSaver extends Record {
 

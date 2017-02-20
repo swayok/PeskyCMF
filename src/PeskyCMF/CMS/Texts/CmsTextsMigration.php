@@ -5,6 +5,7 @@ namespace PeskyCMF\CMS\Texts;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
+use PeskyCMF\CMS\Pages\CmsPagesTableStructure;
 
 class CmsTextsMigration extends Migration {
 
@@ -14,6 +15,7 @@ class CmsTextsMigration extends Migration {
                 $table->increments('id');
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->integer('admin_id')->nullable()->unsigned();
+                $table->string('type', 50)->default(CmsPagesTableStructure::getColumn('type')->getDefaultValueAsIs());
                 $table->char('language', 2);
                 $table->string('title');
                 $table->string('browser_title')->default('');

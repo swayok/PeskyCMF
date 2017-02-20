@@ -3,8 +3,8 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Db\CmfDbRecord;
+use PeskyCMF\Db\CmfDbTable;
 
 trait CacheHelpersTrait {
 

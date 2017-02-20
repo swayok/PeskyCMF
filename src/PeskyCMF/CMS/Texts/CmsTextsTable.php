@@ -10,14 +10,14 @@ class CmsTextsTable extends CmsTable {
      * @return CmsTextsTableStructure
      */
     public function getTableStructure() {
-        return CmsTextsTableStructure::getInstance();
+        return app(CmsTextsTableStructure::class);
     }
 
     /**
      * @return CmsText
      */
     public function newRecord() {
-        return new CmsText();
+        return app(CmsText::class);
     }
 
     /**

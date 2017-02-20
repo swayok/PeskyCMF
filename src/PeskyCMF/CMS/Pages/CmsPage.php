@@ -60,7 +60,7 @@ class CmsPage extends CmsRecord {
      * @return CmsPagesTable
      */
     static public function getTable() {
-        return CmsPagesTable::getInstance();
+        return app(CmsPagesTable::class);
     }
 
     static public function getTypes($asOptions = false) {

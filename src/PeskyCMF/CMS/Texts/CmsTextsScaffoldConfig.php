@@ -27,7 +27,9 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
                 'id',
                 'language' => DataGridColumn::create()
                     ->setValueConverter(function ($value) {
-                        $ret = array_get(CmsSetting::languages(null, []), $value, $value);
+                        /** @var CmsSetting $cmsSetting */
+                        $cmsSetting = app(CmsSetting::class);
+                        $ret = array_get($cmsSetting::languages(null, []), $value, $value);
                         return empty($ret) ? $value : $ret;
                     }),
                 'title',
@@ -84,7 +86,9 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
                 'language' => FormInput::create()
                     ->setType(FormInput::TYPE_SELECT)
                     ->setOptions(function () {
-                        return CmsSetting::languages(null, []);
+                        /** @var CmsSetting $cmsSetting */
+                        $cmsSetting = app(CmsSetting::class);
+                        return $cmsSetting::languages(null, []);
                     })
                     ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {
                         $renderer->setIsRequired(true);

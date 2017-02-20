@@ -3,8 +3,8 @@
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
-use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Db\CmfDbRecord;
+use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Db\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;

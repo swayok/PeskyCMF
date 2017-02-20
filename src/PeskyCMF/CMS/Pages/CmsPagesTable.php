@@ -10,14 +10,14 @@ class CmsPagesTable extends CmsTable {
      * @return CmsPagesTableStructure
      */
     public function getTableStructure() {
-        return CmsPagesTableStructure::getInstance();
+        return app(CmsPagesTableStructure::class);
     }
 
     /**
      * @return CmsPage
      */
     public function newRecord() {
-        return new CmsPage();
+        return app(CmsPage::class);
     }
 
     /**

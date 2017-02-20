@@ -10,14 +10,14 @@ class CmsAdminsTable extends CmsTable {
      * @return CmsAdminsTableStructure
      */
     public function getTableStructure() {
-        return CmsAdminsTableStructure::getInstance();
+        return app(CmsAdminsTableStructure::class);
     }
 
     /**
      * @return CmsAdmin
      */
     public function newRecord() {
-        return new CmsAdmin();
+        return app(CmsAdmin::class);
     }
 
     /**

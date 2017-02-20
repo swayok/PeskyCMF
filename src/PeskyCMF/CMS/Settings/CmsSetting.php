@@ -37,7 +37,7 @@ class CmsSetting extends CmsRecord {
      * @return CmsSettingsTable|KeyValueTableInterface
      */
     static public function getTable() {
-        return CmsSettingsTable::getInstance();
+        return app(CmsSettingsTable::class);
     }
 
 }

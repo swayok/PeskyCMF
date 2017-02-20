@@ -716,6 +716,8 @@ abstract class CmfConfig extends ConfigsContainer {
     static public function getScaffoldConfig(TableInterface $table, $tableNameInRoute) {
         if (array_key_exists($tableNameInRoute, self::$tableNameInRouteMap)) {
             $className = self::$tableNameInRouteMap[$tableNameInRoute]['scaffold_class'];
+        } else if (app()->offsetExists("cms.section.{$tableNameInRoute}.scaffold")) {
+            return app("cms.section.{$tableNameInRoute}.scaffold");
         } else {
             /** @var ClassBuilder $builderClass */
             $builderClass = static::getDbClassesBuilderClass();
@@ -742,6 +744,8 @@ abstract class CmfConfig extends ConfigsContainer {
     static public function getTableByUnderscoredName($tableName) {
         if (array_key_exists($tableName, self::$tableNameInRouteMap)) {
             return self::$tableNameInRouteMap[$tableName]['table'];
+        } else if (app()->offsetExists("cms.section.{$tableName}.table")) {
+            return app("cms.section.{$tableName}.table");
         } else {
             /** @var ClassBuilder $builderClass */
             $builderClass = static::getDbClassesBuilderClass();
@@ -773,7 +777,11 @@ abstract class CmfConfig extends ConfigsContainer {
      * @throws \BadMethodCallException
      */
     static public function getScaffoldConfigByTableName($tableName) {
-        return static::getScaffoldConfig(static::getTableByUnderscoredName($tableName), $tableName);
+        if (app()->offsetExists("cms.section.{$tableName}.scaffold")) {
+            return app("cms.section.{$tableName}.scaffold");
+        } else {
+            return static::getScaffoldConfig(static::getTableByUnderscoredName($tableName), $tableName);
+        }
     }
 
     /**

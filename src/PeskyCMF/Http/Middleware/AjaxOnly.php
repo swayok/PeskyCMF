@@ -4,7 +4,6 @@ namespace PeskyCMF\Http\Middleware;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
 use PeskyORM\Exception\DbObjectValidationException;
 use Swayok\Utils\StringUtils;

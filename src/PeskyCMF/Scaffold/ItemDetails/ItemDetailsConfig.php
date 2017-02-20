@@ -2,8 +2,8 @@
 
 namespace PeskyCMF\Scaffold\ItemDetails;
 
-use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Scaffold\AbstractValueViewer;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Scaffold\ValueRenderer;
 
 class ItemDetailsConfig extends ScaffoldSectionConfig {

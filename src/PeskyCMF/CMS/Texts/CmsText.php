@@ -47,7 +47,7 @@ class CmsText extends CmsRecord {
      * @return CmsTextsTable
      */
     static public function getTable() {
-        return CmsTextsTable::getInstance();
+        return app(CmsTextsTable::class);
     }
 
 }

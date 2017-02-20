@@ -45,9 +45,11 @@ class CmsTextsTableStructure extends CmsTableStructure {
     }
 
     private function language() {
+        /** @var CmsSetting $cmsSettings */
+        $cmsSettings = app(CmsSetting::class);
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
-            ->setDefaultValue(CmsSetting::default_language(null, static::getCmsConfig()->default_locale()));
+            ->setDefaultValue($cmsSettings::default_language(null, static::getCmsConfig()->default_locale()));
     }
 
     private function title() {

@@ -3,7 +3,6 @@
 namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Routing\Route;
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\HttpCode;
 

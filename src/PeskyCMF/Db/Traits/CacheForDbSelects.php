@@ -4,7 +4,6 @@ namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\CmfDbTable;
 use PeskyORM\Core\DbExpr;
-use PeskyORM\Core\Utils;
 use PeskyORM\ORM\RecordsArray;
 use PeskyORM\ORM\RecordsSet;
 use Swayok\Utils\Set;

@@ -3,11 +3,10 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyCMF\Scaffold\ScaffoldSectionConfigException;
 use PeskyCMF\Scaffold\AbstractValueViewer;
-use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyCMF\Scaffold\ScaffoldConfig;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;

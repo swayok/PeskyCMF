@@ -26,14 +26,14 @@ class CmsSettingsTable extends CmsTable implements KeyValueTableInterface {
      * @return CmsSettingsTableStructure
      */
     public function getTableStructure() {
-        return CmsSettingsTableStructure::getInstance();
+        return app(CmsSettingsTableStructure::class);
     }
 
     /**
      * @return CmsSetting
      */
     public function newRecord() {
-        return new CmsSetting();
+        return app(CmsSetting::class);
     }
 
     /**

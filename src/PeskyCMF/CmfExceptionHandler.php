@@ -5,7 +5,6 @@ namespace PeskyCMF;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Session\TokenMismatchException;
 use LaravelExtendedErrors\ExceptionHandler;
-use PeskyCMF\Config\CmfConfig;
 use PeskyORM\Exception\DbObjectValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

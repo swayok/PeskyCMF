@@ -4,7 +4,6 @@ namespace PeskyCMF\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Traits\DataValidationHelper;
 

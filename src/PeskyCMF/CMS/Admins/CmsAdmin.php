@@ -52,7 +52,7 @@ class CmsAdmin extends CmsRecord implements AuthenticatableContract {
      * @return CmsAdminsTable
      */
     static public function getTable() {
-        return CmsAdminsTable::getInstance();
+        return app(CmsAdminsTable::class);
     }
 
 }
