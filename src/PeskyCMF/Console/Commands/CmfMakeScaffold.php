@@ -60,7 +60,7 @@ class CmfMakeScaffold extends Command {
                     );
                 }
             } else {
-                $this->cmfConfigClass = CmfConfig::getInstance();
+                $this->cmfConfigClass = CmfConfig::getDefault();
                 if (get_class($this->cmfConfigClass) === CmfConfig::class) {
                     throw new \InvalidArgumentException(
                         'Child class for CmfConfig was not found. You need to provide it through --cmf-config-class option '

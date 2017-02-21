@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF;
+namespace PeskyCMF\Providers;
 
 use Illuminate\Validation\ValidationServiceProvider;
 use Validator;

@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF;
+namespace PeskyCMF\Http;
 
 use LaravelSiteLoader\AppSiteLoader;
 use PeskyCMF\Config\CmfConfig;
@@ -34,9 +34,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     }
 
     public function boot() {
-        if (static::$useCmfConfigAsDefault) {
-            static::getCmfConfig()->useAsDefault();
-        }
+        static::getCmfConfig()->useAsPrimary();
 
         // custom configurations
         $this->configure();
@@ -71,6 +69,10 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         return [
             CmfConfig::class,
         ];
+    }
+
+    static public function configureDefaults() {
+
     }
 
     protected function includeFiles() {

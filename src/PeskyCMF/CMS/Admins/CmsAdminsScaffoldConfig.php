@@ -81,7 +81,7 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                 'language' => FormInput::create()
                     ->setOptions(function () {
                         $options = array();
-                        foreach (CmfConfig::getInstance()->locales() as $lang) {
+                        foreach (CmfConfig::getPrimary()->locales() as $lang) {
                             $options[$lang] = cmfTransCustom(".language.$lang");
                         }
                         return $options;
@@ -96,7 +96,7 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                 'role' => FormInput::create()
                     ->setOptions(function () {
                         $options = array();
-                        foreach (CmfConfig::getInstance()->roles_list() as $roleId) {
+                        foreach (CmfConfig::getPrimary()->roles_list() as $roleId) {
                             $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
                         }
                         return $options;
@@ -131,8 +131,8 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected function getBaseValidators() {
         return [
-            'role' => 'required|in:' . implode(',', CmfConfig::getInstance()->roles_list()),
-            'language' => 'required|in:' . implode(',', CmfConfig::getInstance()->locales()),
+            'role' => 'required|in:' . implode(',', CmfConfig::getPrimary()->roles_list()),
+            'language' => 'required|in:' . implode(',', CmfConfig::getPrimary()->locales()),
             'is_active' => 'boolean',
             'is_superadmin' => 'boolean',
         ];
@@ -145,7 +145,7 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
             'login' => 'regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',login,{{id}},id',
             'email' => 'email|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',email,{{id}},id',
         ];
-        $loginColumn = CmfConfig::getInstance()->user_login_column();
+        $loginColumn = CmfConfig::getPrimary()->user_login_column();
         $validators[$loginColumn] = rtrim('required|' . array_get($validators, $loginColumn, ''), '|');
         return $validators;
     }
@@ -156,7 +156,7 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
             'email' => 'required|email|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',email',
             'login' => 'required|regex:%^[a-zA-Z0-9@_.-]+$%is|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',login',
         ];
-        $loginColumn = CmfConfig::getInstance()->user_login_column();
+        $loginColumn = CmfConfig::getPrimary()->user_login_column();
         $validators[$loginColumn] = rtrim('required|' . array_get($validators, $loginColumn, ''), '|');
         return $validators;
     }

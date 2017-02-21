@@ -5,8 +5,6 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
  */
-
-$allAttributes = $rendererConfig->getAttributes();
 $isMultiple = $rendererConfig->getAttribute('multiple', false);
 $rendererConfig
     ->addAttribute('name', $fieldConfig->getName() . ($isMultiple ? '[]' : ''), false)
@@ -16,6 +14,7 @@ $rendererConfig
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
+
 <div class="form-group">
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <select {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}

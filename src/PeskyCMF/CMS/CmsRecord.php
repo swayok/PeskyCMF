@@ -9,10 +9,4 @@ use PeskyCMF\Db\CmfDbRecord;
  */
 abstract class CmsRecord extends CmfDbRecord {
 
-    /**
-     * @return \PeskyCMF\Config\CmfConfig
-     */
-    static protected function getCmsConfig() {
-        return static::getTableStructure()->getCmsConfig();
-    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF;
+namespace PeskyCMF\Providers;
 
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\Admins\CmsAdminsTable;

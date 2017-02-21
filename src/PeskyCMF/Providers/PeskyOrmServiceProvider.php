@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF;
+namespace PeskyCMF\Providers;
 
 use Auth;
 use Illuminate\Support\ServiceProvider;
@@ -32,7 +32,7 @@ class PeskyOrmServiceProvider extends ServiceProvider {
             $pdoCollector->setRenderSqlWithParams(true);
             debugbar()->addCollector($pdoCollector);
             DbAdapter::setConnectionWrapper(function (DbAdapterInterface $adapter, \PDO $pdo) {
-                $pdoTracer = new PeskyOrmPdoTracer($pdo);
+                $pdoTracer = new \PeskyCMF\Db\PeskyOrmPdoTracer($pdo);
                 if (debugbar()->hasCollector('pdo')) {
                     debugbar()->getCollector('pdo')->addConnection(
                         $pdoTracer,

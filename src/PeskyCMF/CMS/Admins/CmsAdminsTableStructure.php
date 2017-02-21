@@ -3,6 +3,7 @@
 namespace PeskyCMF\CMS\Admins;
 
 use PeskyCMF\CMS\CmsTableStructure;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsActiveColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
@@ -51,7 +52,7 @@ class CmsAdminsTableStructure extends CmsTableStructure {
             ->convertsEmptyStringToNull()
             ->trimsValue()
             ->uniqueValues();
-        if (static::getCmsConfig()->user_login_column() === 'email') {
+        if (CmfConfig::getDefault()->user_login_column() === 'email') {
             $column->disallowsNullValues();
         }
         return $column;
@@ -62,7 +63,7 @@ class CmsAdminsTableStructure extends CmsTableStructure {
             ->convertsEmptyStringToNull()
             ->trimsValue()
             ->uniqueValues();
-        if (static::getCmsConfig()->user_login_column() === 'login') {
+        if (CmfConfig::getDefault()->user_login_column() === 'login') {
             $column->disallowsNullValues();
         }
         return $column;
@@ -87,18 +88,18 @@ class CmsAdminsTableStructure extends CmsTableStructure {
 
     private function role() {
         return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues(static::getCmsConfig()->roles_list())
+            ->setAllowedValues(CmfConfig::getDefault()->roles_list())
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
-            ->setDefaultValue(static::getCmsConfig()->default_role());
+            ->setDefaultValue(CmfConfig::getDefault()->default_role());
     }
 
     private function language() {
         return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues(static::getCmsConfig()->locales())
+            ->setAllowedValues(CmfConfig::getDefault()->locales())
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
-            ->setDefaultValue(static::getCmsConfig()->default_locale());
+            ->setDefaultValue(CmfConfig::getDefault()->default_locale());
     }
 
     private function timezone() {
@@ -113,7 +114,7 @@ class CmsAdminsTableStructure extends CmsTableStructure {
                 app(CmsAdminsTable::class),
                 'id'
             )
-            ->setDisplayColumnName(static::getCmsConfig()->user_login_column());
+            ->setDisplayColumnName(CmfConfig::getDefault()->user_login_column());
     }
 
 }

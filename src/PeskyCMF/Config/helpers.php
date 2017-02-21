@@ -212,7 +212,7 @@ if (!function_exists('cmfRedirectResponseWithMessage')) {
                 ->setMessage($message)
                 ->setRedirect($url);
         } else {
-            return Redirect::to($url)->with(\PeskyCMF\Config\CmfConfig::getInstance()->session_message_key(), [
+            return Redirect::to($url)->with(\PeskyCMF\Config\CmfConfig::getPrimary()->session_message_key(), [
                 'message' => $message,
                 'type' => $type
             ]);
@@ -243,11 +243,11 @@ if (!function_exists('pickLocalization')) {
     /**
      * @param array $translations - format: ['lang1_code' => 'translation1', 'lang2_code' => 'translation2', ...]
      * @param null|string $default - default value to return when there is no translation for app()->getLocale()
-     *      language and for CmfConfig::getInstance()->default_locale()
+     *      language and for CmfConfig::getPrimary()->default_locale()
      * @return string|null
      */
     function pickLocalization(array $translations, $default = null) {
-        $langCodes = [app()->getLocale(), \PeskyCMF\Config\CmfConfig::getInstance()->default_locale()];
+        $langCodes = [app()->getLocale(), \PeskyCMF\Config\CmfConfig::getPrimary()->default_locale()];
         foreach ($langCodes as $langCode) {
             if (
                 array_key_exists($langCode, $translations)

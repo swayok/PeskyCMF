@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF;
+namespace PeskyCMF\Providers;
 
 use Hash;
 use Illuminate\Auth\Authenticatable;

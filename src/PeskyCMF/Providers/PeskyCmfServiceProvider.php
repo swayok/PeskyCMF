@@ -1,12 +1,11 @@
 <?php
 
-namespace PeskyCMF;
+namespace PeskyCMF\Providers;
 
 use LaravelSiteLoader\Providers\AppSitesServiceProvider;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
-use PeskyCMF\Console\Commands\CmfInstallAdmins;
-use PeskyCMF\Console\Commands\CmfInstallSettings;
 use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 
@@ -25,8 +24,13 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
     public function boot() {
         $this->configurePublishes();
+        /** @var CmfConfig|string $defaultCmfConfig */
+        $defaultCmfConfig = config('cmf.default_scaffold_config');
+        if (!empty($defaultCmfConfig)) {
+            $defaultCmfConfig::getInstance()->useAsDefault();
+        }
         parent::boot();
-        require_once __DIR__ . '/Config/helpers.php';
+        require_once __DIR__ . '/../Config/helpers.php';
     }
 
     public function register() {
@@ -119,8 +123,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
     protected function registerCommands() {
         $this->registerInstallCommand();
-        $this->registerInstallAdminsCommand();
-        $this->registerInstallSettingsCommand();
         $this->registerAddAdminCommand();
         $this->registerMakeDbClassesCommand();
         $this->registerMakeScaffoldCommand();
@@ -131,20 +133,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             return new CmfInstall();
         });
         $this->commands('command.cmf.install');
-    }
-
-    protected function registerInstallAdminsCommand() {
-        $this->app->singleton('command.cmf.install-admins', function() {
-            return new CmfInstallAdmins();
-        });
-        $this->commands('command.cmf.install-admins');
-    }
-
-    protected function registerInstallSettingsCommand() {
-        $this->app->singleton('command.cmf.install-settings', function() {
-            return new CmfInstallSettings();
-        });
-        $this->commands('command.cmf.install-settings');
     }
 
     protected function registerAddAdminCommand() {

@@ -21,15 +21,39 @@ abstract class CmfConfig extends ConfigsContainer {
     protected function __construct() {
         self::$instances[get_class($this)] = $this;
         if (!array_key_exists(__CLASS__, self::$instances)) {
-            self::$instances[__CLASS__] = $this;
+            $this->useAsPrimary();
         }
     }
 
     /**
-     * Use this class instance as default config
+     * Use this object as default config
+     * Note: this is used in *Record, *Table, and *TableStructure DB classes of CMS
      */
     public function useAsDefault() {
+        self::$instances['default'] = $this;
+    }
+
+    /**
+     * Get CmfConfig marked as default one (or primary config if default one not provided)
+     * @return $this
+     */
+    static public function getDefault() {
+        return array_key_exists('default', self::$instances) ? self::$instances['default'] : self::getInstance();
+    }
+
+    /**
+     * Use this object as primary config
+     * Note: this object will be returned when you call CmfConfig::getInstance() instead of CustomConfig::getInstance()
+     */
+    public function useAsPrimary() {
         self::$instances[__CLASS__] = $this;
+    }
+
+    /**
+     * @return $this
+     */
+    static public function getPrimary() {
+        return CmfConfig::getInstance();
     }
 
     /**
@@ -226,6 +250,13 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function url_prefix() {
         return 'admin';
+    }
+
+    /**
+     * @return string
+     */
+    static public function recaptcha_private_key() {
+        return config('app.recaptcha_private_key');
     }
 
     /**
@@ -460,7 +491,7 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Translate from custom dictionary. Uses CmfConfig::getInstance()
+     * Translate from custom dictionary. Uses CmfConfig::getPrimary()
      * @param $path - must strat with '.'
      * @param array $parameters
      * @param string $domain
@@ -468,7 +499,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function transCustom($path, array $parameters = [], $domain = 'messages', $locale = null) {
-        $dict = CmfConfig::getInstance()->custom_dictionary_name();
+        $dict = CmfConfig::getPrimary()->custom_dictionary_name();
         $trans = trans($dict . $path, $parameters, $domain, $locale);
         if ($trans === $dict . $path && $dict !== 'cmf::custom') {
             $trans = trans('cmf::custom' . $path, $parameters, $domain, $locale);
@@ -492,7 +523,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function transGeneral($path, array $parameters = [], $domain = 'messages', $locale = null) {
-        $dict = CmfConfig::getInstance()->cmf_general_dictionary_name();
+        $dict = CmfConfig::getPrimary()->cmf_general_dictionary_name();
         $trans = trans($dict . $path, $parameters, $domain, $locale);
         if ($trans === $dict . $path && $dict !== 'cmf::cmf') {
             $trans = trans('cmf::cmf' . $path, $parameters, $domain, $locale);

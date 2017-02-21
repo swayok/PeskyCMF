@@ -25,6 +25,10 @@ class InputRenderer extends ValueRenderer {
     protected $isRequiredForCreate = null;
     /** @var bool */
     protected $isRequiredForEdit = null;
+    /** @var string */
+    protected $prefix = '';
+    /** @var string */
+    protected $suffix = '';
 
     /**
      * @param null $view
@@ -98,15 +102,19 @@ class InputRenderer extends ValueRenderer {
     }
 
     /**
+     * @param array $excludeAttributes
      * @return array
      */
-    public function getAttributesForCreate() {
+    public function getAttributesForCreate(array $excludeAttributes = []) {
         $ret = array_merge($this->attributes, $this->attributesForCreate);
         if ($this->isRequiredForCreate()) {
             $ret['required'] = true;
         }
         if (empty($ret['type']) || !in_array($ret['type'], ['checkbox', 'radio'], true)) {
             unset($ret['value']);
+        }
+        foreach ($excludeAttributes as $attr) {
+            unset($ret[$attr]);
         }
         return $ret;
     }
@@ -121,15 +129,19 @@ class InputRenderer extends ValueRenderer {
     }
 
     /**
+     * @param array $excludeAttributes
      * @return array
      */
-    public function getAttributesForEdit() {
+    public function getAttributesForEdit(array $excludeAttributes = []) {
         $ret = array_merge($this->attributes, $this->attributesForEdit);
         if ($this->isRequiredForEdit()) {
             $ret['required'] = true;
         }
         if (empty($ret['type']) || !in_array($ret['type'], ['checkbox', 'radio'], true)) {
             unset($ret['value']);
+        }
+        foreach ($excludeAttributes as $attr) {
+            unset($ret[$attr]);
         }
         return $ret;
     }
@@ -343,5 +355,57 @@ class InputRenderer extends ValueRenderer {
         $this->isRequired = $this->isRequiredForCreate && $this->isRequiredForEdit;
         return $this;
     }
+
+    /**
+     * Add prefix text to input (text for left side addon in terms of bootstrap css)
+     * Note: not all templates support this feature
+     * @param string $string
+     * @return $this
+     */
+    public function setPrefixText($string) {
+        $this->prefix = trim((string)$string);
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasPrefixText() {
+        return !empty($this->prefix);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPrefixText() {
+        return $this->prefix;
+    }
+
+    /**
+     * Add suffix text to input (text for right side addon in terms of bootstrap css)
+     * Note: not all templates support this feature
+     * @param string $string
+     * @return $this
+     */
+    public function setSuffixText($string) {
+        $this->suffix = trim((string)$string);
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSuffixText() {
+        return !empty($this->suffix);
+    }
+
+    /**
+     * @return string
+     */
+    public function getSuffixText() {
+        return $this->suffix;
+    }
+
+
 
 }

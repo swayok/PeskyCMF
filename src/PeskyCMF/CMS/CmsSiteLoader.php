@@ -10,7 +10,7 @@ use PeskyCMF\CMS\Settings\CmsSettingsScaffoldConfig;
 use PeskyCMF\CMS\Settings\CmsSettingsTable;
 use PeskyCMF\CMS\Texts\CmsTextsScaffoldConfig;
 use PeskyCMF\CMS\Texts\CmsTextsTable;
-use PeskyCMF\PeskyCmfSiteLoader;
+use PeskyCMF\Http\PeskyCmfSiteLoader;
 
 abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
 

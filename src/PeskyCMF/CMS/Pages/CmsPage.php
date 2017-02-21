@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\CMS\Pages;
 use PeskyCMF\CMS\CmsRecord;
+use PeskyCMF\Config\CmfConfig;
 
 /**
  * @property-read int         $id
@@ -68,7 +69,7 @@ class CmsPage extends CmsRecord {
     }
 
     static public function getTypes($asOptions = false) {
-        return static::toOptions(static::$types, $asOptions, static::getCmsConfig()->custom_dictionary_name() . '.pages.types.', true);
+        return static::toOptions(static::$types, $asOptions, CmfConfig::getPrimary()->custom_dictionary_name() . '.pages.types.', true);
     }
 
 }

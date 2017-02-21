@@ -34,7 +34,7 @@ class CmfAddAdmin extends Command {
                 'role' => $args['role'],
                 'is_superadmin' => true,
                 $authField => $emailOrLogin,
-                'language' => CmfConfig::getInstance()->default_locale()
+                'language' => CmfConfig::getDefault()->default_locale()
             ];
             if ($exists > 0) {
                 $result = $db->update($table, $data, DbExpr::create("`{$authField}`=``{$emailOrLogin}``"));

@@ -3,6 +3,7 @@
 namespace PeskyCMF\CMS\Pages;
 
 use PeskyCMF\CMS\Texts\CmsTextsTable;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\ImagesFormInput;
@@ -90,7 +91,9 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
 //                'parent_id',
                 'url_alias' => FormInput::create()
                     ->setDefaultRendererConfigurator(function (InputRenderer $rendererConfig) {
-                        $rendererConfig->setIsRequired(true);
+                        $rendererConfig
+                            ->setIsRequired(true)
+                            ->addData('prefix', CmfConfig::getPrimary());
                     }),
                 'page_code',
                 'text_id' => FormInput::create()
@@ -114,8 +117,10 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'images' => ImagesFormInput::create(),
             ])
             ->setValidators(function () {
+                /** @var CmsPage $pageClass */
+                $pageClass = app(CmsPage::class);
                 return [
-                    'type' => 'required|in:' . implode(',', CmsPage::getTypes()),
+                    'type' => 'required|in:' . implode(',', $pageClass::getTypes()),
                     'is_published' => 'required|bool',
                 ];
             })

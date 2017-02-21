@@ -35,7 +35,7 @@
                 <input type="password" class="hidden" formnovalidate disabled>
                 <!-- end of autofill disabler -->
                 <div class="box-body">
-                    <?php $loginColumn = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column(); ?>
+                    <?php $loginColumn = \PeskyCMF\Config\CmfConfig::getPrimary()->user_login_column(); ?>
                     @if ($loginColumn !== 'email')
                         <div class="form-group">
                             <label for="{{ $loginColumn }}-input">{{ cmfTransCustom('.page.profile.input.' . $loginColumn) }}*</label>
@@ -63,7 +63,7 @@
                         <div class="form-group">
                             <label for="language-input">{{ cmfTransCustom('.page.profile.input.language') }}</label>
                             <select class="form-control" data-value=" {{ $admin->language }}" name="language" id="language-input" required="required">
-                                @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->locales() as $lang)
+                                @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->locales() as $lang)
                                     <option value="{{ $lang }}">{{ cmfTransCustom('.language.' . $lang) }}</option>
                                 @endforeach
                             </select>
@@ -76,8 +76,8 @@
                             <select class="form-control" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input"
                             @if ($isRequired) required="required" @endif>
                                 <?php
-                                    $usersTable = \PeskyCMF\Config\CmfConfig::getInstance()->getTableByUnderscoredName(
-                                        \PeskyCMF\Config\CmfConfig::getInstance()->users_table_name()
+                                    $usersTable = \PeskyCMF\Config\CmfConfig::getPrimary()->getTableByUnderscoredName(
+                                        \PeskyCMF\Config\CmfConfig::getPrimary()->users_table_name()
                                     );
                                 ?>
                                 <?php if (!$isRequired) ?>

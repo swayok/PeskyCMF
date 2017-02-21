@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::getInstance()->default_page_title() }} @show</title>
+    <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }} @show</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 
@@ -26,7 +26,7 @@
     <link href="/packages/cmf-vendors/cropperjs/cropper.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/adminlte/css/skins/{{ \PeskyCMF\Config\CmfConfig::getInstance()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/adminlte/css/skins/{{ \PeskyCMF\Config\CmfConfig::getPrimary()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/cmf-vendors/db-query-builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
@@ -35,7 +35,7 @@
     <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css" id="place-dynamic-css-files-before"/>
     <link href="/packages/cmf/css/cmf.app.css" rel="stylesheet" type="text/css"/>
 
-    @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->layout_css_includes() as $cssPath)
+    @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_css_includes() as $cssPath)
         <link href="{{ $cssPath }}" rel="stylesheet" type="text/css"/>
     @endforeach
 
@@ -50,7 +50,7 @@
     <![endif]-->
 </head>
 
-<body class="{{ \PeskyCMF\Config\CmfConfig::getInstance()->ui_skin() }}" data-locale="{{ app()->getLocale() }}">
+<body class="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->ui_skin() }}" data-locale="{{ app()->getLocale() }}">
     <div class="wrapper has-preloader loading" id="page-wrapper">
 
     </div>
@@ -96,16 +96,16 @@
     </div>
 
     <script type="application/javascript">
-        <?php $urlPrefix = \PeskyCMF\Config\CmfConfig::getInstance()->url_prefix(); ?>
+        <?php $urlPrefix = \PeskyCMF\Config\CmfConfig::getPrimary()->url_prefix(); ?>
         var CmfSettings = {
             isDebug: {{ config('app.debug') ? 'true' : 'false' }},
             rootUrl: '/{{ $urlPrefix }}',
             uiUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_main_ui', [], false)) }}',
             userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}',
-            defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getInstance()->default_page_title() }}'
+            defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }}'
         };
 
-        var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getInstance()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
+        var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
     <script src="/packages/cmf-vendors/jquery/jquery.min.js" type="text/javascript"></script>
@@ -158,14 +158,14 @@
     <script src="/packages/cmf/js/scaffold/scaffold.manager.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.app.js" type="text/javascript"></script>
 
-    @foreach(\PeskyCMF\Config\CmfConfig::getInstance()->layout_js_includes() as $jsPath)
+    @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_js_includes() as $jsPath)
         <script src="{{ $jsPath }}" rel="stylesheet" type="text/javascript"></script>
     @endforeach
 
     @yield('js')
     @yield('js2')
 
-    <?php $message = Session::pull(\PeskyCMF\Config\CmfConfig::getInstance()->session_message_key(), false); ?>
+    <?php $message = Session::pull(\PeskyCMF\Config\CmfConfig::getPrimary()->session_message_key(), false); ?>
     @if (!empty($message) && (is_string($message) || is_array($message) && !empty($message['message'])))
         <script type="application/javascript">
             <?php $type = is_string($message) || empty($message['type']) || !in_array($message['type'], ['success', 'info', 'warning', 'error']) ? 'info' : $message['type'] ?>

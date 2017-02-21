@@ -18,6 +18,7 @@ $rendererConfig
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
+
 <div class="checkbox checkbox-primary">
     <input name="<?php echo $fieldConfig->getName(); ?>" id="_<?php echo $rendererConfig->getAttribute('id'); ?>" type="hidden" value="0">
     <input {{? !!it.<?php echo $fieldConfig->getName(); ?> }}checked{{?}}

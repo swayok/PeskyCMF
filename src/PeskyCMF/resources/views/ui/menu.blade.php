@@ -1,6 +1,6 @@
 <ul class="sidebar-menu" id="common-menu">
     <li class="header">{{ cmfTransCustom('.main_menu.header') }}</li>
-    @foreach (\PeskyCMF\Config\CmfConfig::getInstance()->menu() as $info)
+    @foreach (\PeskyCMF\Config\CmfConfig::getPrimary()->menu() as $info)
         @if (!empty($info['submenu']))
             <li class="treeview">
                 <a href="@if (empty($info['url']))javascript: void(0)@else{{ $info['url'] }}@endif"

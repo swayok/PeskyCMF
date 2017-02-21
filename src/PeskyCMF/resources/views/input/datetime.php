@@ -11,19 +11,9 @@ $rendererConfig
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('type','text', false)
     ->addAttribute('class', 'form-control', false);
-$attributesForCreate = $rendererConfig->getAttributesForCreate();
-$attributesForEdit = $rendererConfig->getAttributesForEdit();
-$visibleOnCreate = (bool)array_get($attributesForCreate, 'visible', false);
-$visibleOnEdit = (bool)array_get($attributesForEdit, 'visible', false);
-unset($attributesForCreate['visible'], $attributesForEdit['visible']);
-$attributesForCreate = \Swayok\Html\Tag::buildAttributes($attributesForCreate);
-$attributesForEdit = \Swayok\Html\Tag::buildAttributes($attributesForEdit);
+$attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
+$attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
-<?php if (!$visibleOnCreate) : ?>
-    {{? !it.isCreation }}
-<?php elseif (!$visibleOnEdit) : ?>
-    {{? !!it.isCreation }}
-<?php endif; ?>
 
 <div class="form-group">
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
@@ -36,10 +26,6 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($attributesForEdit);
     </div>
     <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>
-
-<?php if (!$visibleOnCreate || !$visibleOnEdit) : ?>
-    {{?}}
-<?php endif; ?>
 
 <?php
 if (empty($config)) {
@@ -63,4 +49,3 @@ $config = array_merge([
         });
     }, 50);
 </script>
-

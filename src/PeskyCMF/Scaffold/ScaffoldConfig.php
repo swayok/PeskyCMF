@@ -256,7 +256,7 @@ abstract class ScaffoldConfig {
 
     public function renderTemplates() {
         return view(
-            CmfConfig::getInstance()->scaffold_templates_view_for_normal_table(),
+            CmfConfig::getPrimary()->scaffold_templates_view_for_normal_table(),
             array_merge(
                 $this->getConfigsForTemplatesRendering(),
                 ['tableNameForRoutes' => $this->getTableNameForRoutes()]

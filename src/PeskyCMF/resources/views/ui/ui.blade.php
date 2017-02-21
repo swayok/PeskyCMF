@@ -1,14 +1,14 @@
 <aside class="main-sidebar">
     <section class="sidebar">
-        @include(\PeskyCMF\Config\CmfConfig::getInstance()->sidebar_admin_info_view())
-        @include(\PeskyCMF\Config\CmfConfig::getInstance()->menu_view())
+        @include(\PeskyCMF\Config\CmfConfig::getPrimary()->sidebar_admin_info_view())
+        @include(\PeskyCMF\Config\CmfConfig::getPrimary()->menu_view())
     </section>
 </aside>
 
 <header class="main-header">
     <a href="{{ route('cmf_start_page', [], false, '/') }}" class="logo">
         <span class="logo-lg">
-            {!! \PeskyCMF\Config\CmfConfig::getInstance()->sidebar_logo() !!}
+            {!! \PeskyCMF\Config\CmfConfig::getPrimary()->sidebar_logo() !!}
         </span>
     </a>
 </header>
@@ -17,7 +17,7 @@
 
 </div>
 
-@include(\PeskyCMF\Config\CmfConfig::getInstance()->footer_view())
+@include(\PeskyCMF\Config\CmfConfig::getPrimary()->footer_view())
 
 <script type="application/javascript">
     CmfConfig.setLocalizationStrings(<?php echo json_encode(cmfTransGeneral('.ui.js_component'), JSON_UNESCAPED_UNICODE) ?>);

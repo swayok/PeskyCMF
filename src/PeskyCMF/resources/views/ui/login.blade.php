@@ -1,13 +1,13 @@
 <?php
-$loginInputName = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column();
+$loginInputName = \PeskyCMF\Config\CmfConfig::getPrimary()->user_login_column();
 ?>
 <div class="login-box">
     <div class="login-logo">
-        {!! \PeskyCMF\Config\CmfConfig::getInstance()->login_logo() !!}
+        {!! \PeskyCMF\Config\CmfConfig::getPrimary()->login_logo() !!}
         <b>{!! cmfTransCustom('.login_form.header') !!}</b>
     </div>
     <div class="login-box-body" id="login-form-container">
-        <form action="{{ route(\PeskyCMF\Config\CmfConfig::getInstance()->login_route(), [], false) }}" method="post" id="login-form">
+        <form action="{{ route(\PeskyCMF\Config\CmfConfig::getPrimary()->login_route(), [], false) }}" method="post" id="login-form">
             <div class="form-group has-feedback">
                 <input type="{{ $loginInputName === 'email' ? 'email' : 'text' }}" name="{{ $loginInputName }}" required
                     class="form-control" placeholder="{{ cmfTransCustom(".login_form.{$loginInputName}_label") }}">
@@ -20,7 +20,7 @@ $loginInputName = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column()
             </div>
             <div class="row login-submit">
                 <div class="col-xs-8 forgot-password">
-                    @if (\PeskyCMF\Config\CmfConfig::getInstance()->is_password_restore_allowed())
+                    @if (\PeskyCMF\Config\CmfConfig::getPrimary()->is_password_restore_allowed())
                         <a href="{{ route('cmf_forgot_password') }}">{{ cmfTransCustom('.login_form.forgot_password_label') }}</a>
                     @endif
                 </div>

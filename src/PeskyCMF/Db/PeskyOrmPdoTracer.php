@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF;
+namespace PeskyCMF\Db;
 
 use DebugBar\DataCollector\PDO\TraceablePDO;
 

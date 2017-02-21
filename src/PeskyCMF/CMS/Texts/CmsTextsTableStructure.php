@@ -6,6 +6,7 @@ use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\CMS\Pages\CmsPage;
 use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Traits\AdminIdColumn;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyORM\ORM\Column;
@@ -50,7 +51,7 @@ class CmsTextsTableStructure extends CmsTableStructure {
         $cmsSettings = app(CmsSetting::class);
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
-            ->setDefaultValue($cmsSettings::default_language(null, static::getCmsConfig()->default_locale()));
+            ->setDefaultValue($cmsSettings::default_language(null, CmfConfig::getDefault()->default_locale()));
     }
 
     private function type() {

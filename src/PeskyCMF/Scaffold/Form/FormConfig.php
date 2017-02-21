@@ -266,7 +266,7 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function getTooltipsForInputs() {
         if ($this->tooltips === null) {
-            $resourceName = CmfConfig::getInstance()->getTableNameFromCurrentRoute();
+            $resourceName = CmfConfig::getPrimary()->getTableNameFromCurrentRoute();
             if (!empty($resourceName)) {
                 $basePath = $this->scaffoldConfig->getLocalizationBasePath($resourceName);
                 $this->setTooltipsForInputs(cmfTransCustom($basePath . '.form.tooltip'));

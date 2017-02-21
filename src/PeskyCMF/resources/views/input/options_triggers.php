@@ -8,6 +8,7 @@
 $defaultId = $rendererConfig->getAttribute('id', $fieldConfig->getDefaultId());
 $defaultName = $rendererConfig->getAttribute('name', $fieldConfig->getName());
 ?>
+
 <div class="section-divider">
     <span><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></span>
 </div>

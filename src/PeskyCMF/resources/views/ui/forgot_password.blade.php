@@ -1,6 +1,6 @@
 <div class="login-box">
     <div class="login-logo">
-        {!! \PeskyCMF\Config\CmfConfig::getInstance()->login_logo() !!}
+        {!! \PeskyCMF\Config\CmfConfig::getPrimary()->login_logo() !!}
         <b>{!! cmfTransCustom('.forgot_password.header') !!}</b>
     </div>
     <div class="login-box-body" id="forgot-password-form-container">

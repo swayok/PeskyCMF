@@ -4,6 +4,7 @@ namespace PeskyCMF\Db;
 
 use Illuminate\Validation\PresenceVerifierInterface;
 use PeskyCMF\Config\CmfConfig;
+use PeskyORM\ORM\TableInterface;
 
 class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
@@ -60,10 +61,14 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
     /**
      * @param $tableName
-     * @return CmfDbTable
+     * @return TableInterface|CmfDbTable
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     private function getModel($tableName) {
-        return CmfConfig::getInstance()->getTableByUnderscoredName($tableName);
+        return CmfConfig::getPrimary()->getTableByUnderscoredName($tableName);
     }
 
     /**

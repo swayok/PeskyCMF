@@ -50,7 +50,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
     public function renderTemplates() {
         return view(
-            CmfConfig::getInstance()->scaffold_templates_view_for_key_value_table(),
+            CmfConfig::getPrimary()->scaffold_templates_view_for_key_value_table(),
             array_merge(
                 $this->getConfigsForTemplatesRendering(),
                 ['tableNameForRoutes' => $this->getTableNameForRoutes()]

@@ -5,17 +5,16 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
  */
-
-$attributes = array(
-    'name' => $fieldConfig->getName() . '[]',
-    'id' => $fieldConfig->getDefaultId(),
-    'class' => 'form-control select2',
-);
-$attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
-$attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
+$rendererConfig
+    ->addAttribute('name', $fieldConfig->getName() . '[]', false)
+    ->addAttribute('id', $fieldConfig->getDefaultId(), false)
+    ->addAttribute('class', 'form-control select2', false);
+$attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
+$attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
+
 <div class="form-group">
-    <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <div>
         <select multiple {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
             data-value="{{! it.<?php echo $fieldConfig->getName(); ?> && $.isArray(it.<?php echo $fieldConfig->getName(); ?>) ? JSON.stringify(it.<?php echo $fieldConfig->getName(); ?>) : (it.<?php echo $fieldConfig->getName(); ?> || '[]') }}"
@@ -30,7 +29,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
         .done(function () {
             Utils.requireFiles('/packages/cmf-vendors/select2/js/i18n/<?php echo app()->getLocale(); ?>.js')
                 .done(function () {
-                    var $select = $('#<?php echo $attributes['id']; ?>');
+                    var $select = $('#<?php echo $rendererConfig->getAttribute('id'); ?>');
                     var tags = $select.attr('data-value');
                     try {
                         tags = JSON.parse(tags);

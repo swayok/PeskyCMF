@@ -23,7 +23,7 @@ class CmfScaffoldApiController extends Controller {
      */
     public function getTable() {
         if ($this->table === null) {
-            $this->table = CmfConfig::getInstance()->getTableByUnderscoredName($this->getTableNameForRoutes());
+            $this->table = CmfConfig::getPrimary()->getTableByUnderscoredName($this->getTableNameForRoutes());
         }
         return $this->table;
     }
@@ -38,7 +38,7 @@ class CmfScaffoldApiController extends Controller {
      */
     public function getScaffoldConfig() {
         if ($this->scaffoldConfig === null) {
-            $cmfConfig = CmfConfig::getInstance();
+            $cmfConfig = CmfConfig::getPrimary();
             $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getTable(), $this->getTableNameForRoutes());
             if ($customScaffoldConfig instanceof ScaffoldConfig) {
                 $this->scaffoldConfig = $customScaffoldConfig;
@@ -59,7 +59,7 @@ class CmfScaffoldApiController extends Controller {
      */
     public function getTableNameForRoutes() {
         if ($this->tableNameForRoutes === null) {
-            $tableName = CmfConfig::getInstance()->getTableNameFromCurrentRoute();
+            $tableName = CmfConfig::getPrimary()->getTableNameFromCurrentRoute();
             if (empty($tableName)) {
                 abort(404, 'Table name not found in route');
             }

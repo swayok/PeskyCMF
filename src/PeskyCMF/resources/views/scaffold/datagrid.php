@@ -248,7 +248,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         (function() {
             <?php
                 $dataTablesConfig = array_replace(
-                    \PeskyCMF\Config\CmfConfig::getInstance()->data_tables_config(),
+                    \PeskyCMF\Config\CmfConfig::getPrimary()->data_tables_config(),
                     $dataGridConfig->getAdditionalDataTablesConfig(),
                     [
                         'processing' => true,

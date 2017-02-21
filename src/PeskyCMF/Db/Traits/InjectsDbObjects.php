@@ -5,6 +5,7 @@ namespace PeskyCMF\Db\Traits;
 use Illuminate\Routing\Route;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\HttpCode;
+use PeskyORM\ORM\RecordInterface;
 
 trait InjectsDbObjects {
 
@@ -64,7 +65,7 @@ trait InjectsDbObjects {
      * @param CmfDbRecord $object
      * @param array $conditions
      */
-    protected function addConditionsForDbObjectInjection(Route $route, CmfDbRecord $object, array &$conditions) {
+    protected function addConditionsForDbObjectInjection(Route $route, RecordInterface $object, array &$conditions) {
 
     }
 
@@ -77,7 +78,7 @@ trait InjectsDbObjects {
      * @throws \PeskyORM\Exception\OrmException
      * @throws \UnexpectedValueException
      */
-    protected function addParentIdsConditionsForDbObjectInjection(Route $route, CmfDbRecord $object, array &$conditions) {
+    protected function addParentIdsConditionsForDbObjectInjection(Route $route, RecordInterface $object, array &$conditions) {
         foreach ($route->parameterNames() as $name) {
             if ($object::hasColumn($name)) {
                 $conditions[$name] = $route->parameter($name);

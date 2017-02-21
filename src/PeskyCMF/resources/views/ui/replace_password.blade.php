@@ -6,7 +6,7 @@
 ?>
 <div class="login-box">
     <div class="login-logo">
-        {!! \PeskyCMF\Config\CmfConfig::getInstance()->login_logo() !!}
+        {!! \PeskyCMF\Config\CmfConfig::getPrimary()->login_logo() !!}
         <b>{!! cmfTransCustom('.replace_password.header') !!}</b>
     </div>
     <div class="login-box-body" id="replace-password-form-container">

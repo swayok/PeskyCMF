@@ -69,7 +69,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfigConfig) {
         parent::__construct($table, $scaffoldConfigConfig);
-        $this->recordsPerPage = CmfConfig::getInstance()->rows_per_page();
+        $this->recordsPerPage = CmfConfig::getPrimary()->rows_per_page();
         $this->setOrderBy($table->getPkColumnName());
     }
 
