@@ -64,8 +64,6 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                             }
                             try {
                                 $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
-                                // replace <script> tags to be able to render that template
-                                $renderedInput = modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
                                 $enablerSwitchId = $baseEnablerId . str_slug($inputConfig->getName());
                                 $enablerSwitch = "
                                     <div class=\"bulk-edit-form-input-enabler pull-left va-t mr15\">

@@ -30,6 +30,7 @@ var ScaffoldControllers = {
             $.when(model.fetch(), ScaffoldFormHelper.loadOptions(request.params.resource, model.get('id')))
                 .done(function (modelResponse, optionsResponse) {
                     model.set('_options', optionsResponse);
+                    model.set('_is_creation', (!model.get('id') || String(model.get('id')).length === 0));
                     deferred.resolve(model);
                 });
             return deferred;
@@ -1015,11 +1016,12 @@ var ScaffoldFormHelper = {
         } else {
             curentWysiwygConfig.extraPlugins = pluginName;
         }
+        curentWysiwygConfig.dialog_noConfirmCancel = true;
         if (!CKEDITOR.plugins.get(pluginName)) {
             var comboboxPanelCss = 'body{font-family:Arial,sans-serif;font-size:14px;}';
             var locale = CmfConfig.getLocalizationStringsForComponent('ckeditor');
             var insertTpl = doT.template(
-                '<{{= it.tag }} title="{{! it.title }}" class="wysiwyg-data-insert">{{= it.code }}</{{= it.tag }}>'
+                '<{{= it.__tag }} title="{{! it.title }}" class="wysiwyg-data-insert">{{= it.code }}</{{= it.__tag }}>'
             );
             CKEDITOR.plugins.add(pluginName, {
                 requires: 'widget',
@@ -1038,18 +1040,85 @@ var ScaffoldFormHelper = {
                         init: function () {
                             var combobox = this;
                             for (var i = 0; i < editor.config.data_inserts.length; i++) {
+                                var optionValue;
                                 var insertInfo = editor.config.data_inserts[i];
-                                insertInfo.tag = insertInfo.is_block ? 'div' : 'span';
-                                combobox.add(insertTpl(insertInfo), insertInfo.title, insertInfo.title);
-                                combobox._.committed = 0;
-                                combobox.commit(); //< ty good people of web!!!
+                                if (insertInfo.args_options && $.isPlainObject(insertInfo.args_options)) {
+                                    insertInfo.args_options.__tag = {
+                                        type: 'select',
+                                        label: locale.cmf_scaffold_inserts_dialog_insert_tag_name,
+                                        options: {
+                                            span: locale.cmf_scaffold_inserts_dialog_insert_tag_is_span,
+                                            div: locale.cmf_scaffold_inserts_dialog_insert_tag_is_div
+                                        },
+                                        value: 'span'
+                                    };
+                                    var dialogName = editor.id + '_dialog_for_data_insert_' + i;
+                                    var dialogAdded = (function (insertInfo, dialogName) {
+                                        return ScaffoldFormHelper.makeWysiwygDialogForDataInserts(
+                                            insertInfo.args_options,
+                                            dialogName,
+                                            insertInfo.title,
+                                            function (data, optionsOfAllSelects) {
+                                                // this === dialog
+                                                var tplData = $.extend({}, insertInfo);
+                                                tplData.__tag = data.__tag || 'span';
+                                                delete data.__tag;
+                                                for (var argName in data) {
+                                                    tplData.code = tplData.code.replace(':' + argName, data[argName]);
+                                                }
+                                                if (insertInfo.widget_title_tpl) {
+                                                    tplData.title = tplData.widget_title_tpl;
+                                                    for (argName in data) {
+                                                        if (insertInfo.args_options[argName] && insertInfo.args_options[argName].type === 'select') {
+                                                            tplData.title = tplData.title.replace(
+                                                                ':' + argName + '.value',
+                                                                data[argName]
+                                                            );
+                                                            if (optionsOfAllSelects[argName]) {
+                                                                tplData.title = tplData.title.replace(
+                                                                    ':' + argName + '.label',
+                                                                    optionsOfAllSelects[argName][data[argName]] || ''
+                                                                );
+                                                            }
+                                                        } else {
+                                                            // text or checkbox
+                                                            tplData.title = tplData.title.replace(':' + argName, data[argName]);
+                                                        }
+                                                    }
+                                                }
+                                                /*if (data.__title) {
+                                                    insertInfo.title = data
+                                                }*/
+                                                editor.focus();
+                                                editor.fire('saveSnapshot');
+                                                editor.insertHtml(insertTpl(tplData));
+                                                editor.fire('saveSnapshot');
+                                            }
+                                        )
+                                    })(insertInfo, dialogName);
+                                    if (!dialogAdded) {
+                                        continue; //< skip invalid option
+                                    }
+                                    optionValue = 'dialog:' + dialogName;
+                                } else {
+                                    insertInfo.__tag = insertInfo.is_block ? 'div' : 'span';
+                                    optionValue = insertTpl(insertInfo);
+                                }
+                                combobox.add(optionValue, insertInfo.title, insertInfo.title);
+                                // combobox._.committed = 0;
+                                // combobox.commit(); //< ty good people of web!!!
                             }
                         },
                         onClick: function (value) {
-                            editor.focus();
-                            editor.fire('saveSnapshot');
-                            editor.insertHtml(value);
-                            editor.fire('saveSnapshot');
+                            var matches = value.match(/^dialog:(.*)$/);
+                            if (matches !== null) {
+                                editor.openDialog(matches[1]);
+                            } else {
+                                editor.focus();
+                                editor.fire('saveSnapshot');
+                                editor.insertHtml(value);
+                                editor.fire('saveSnapshot');
+                            }
                         }
                     });
                     editor.widgets.add('CmfScaffoldInsertedData', {
@@ -1071,5 +1140,138 @@ var ScaffoldFormHelper = {
             });
         }
         return curentWysiwygConfig;
+    },
+    makeWysiwygDialogForDataInserts: function (inputsConfigs, dialogName, dialogHeader, onSubmit) {
+        var argsAreValid = true;
+        var argsCount = 0;
+        var dialogElements = [];
+        var optionsOfAllSelects = {};
+        for (var inputName in inputsConfigs) {
+            var inputConfig = inputsConfigs[inputName];
+            if (!inputConfig.label) {
+                console.error(dialogHeader + ': label is required for each selector config for input "' + inputName + '"');
+                argsAreValid = false;
+                break;
+            }
+            if (!inputConfig.type) {
+                inputConfig.type = inputConfig.options ? 'select' : 'text';
+            }
+            var tmpConfig;
+            switch (inputConfig.type) {
+                case 'select':
+                    if (!inputConfig.options) {
+                        console.error(dialogHeader + ': options are required for input "' + inputName + '"');
+                        argsAreValid = false;
+                    }
+                    tmpConfig = {
+                        type: 'select',
+                        label: inputConfig.label,
+                        id: inputName,
+                        items: [],
+                        'default': typeof inputConfig.value !== 'undefined' ? inputConfig.value : null
+                    };
+                    if ($.isPlainObject(inputConfig.options)) {
+                        optionsOfAllSelects[inputName] = inputConfig.options;
+                        for (var optionValue in inputConfig.options) {
+                            tmpConfig.items.push([inputConfig.options[optionValue], optionValue]);
+                        }
+                    } else {
+                        // url
+                        (function (inputConfig, inputName) {
+                            // needed to avoid mutable variable problems die to iteration
+                            tmpConfig.onLoad = function () {
+                                var select = this;
+                                var form = select._.dialog._.editor.element.$.form;
+                                var idInputName = $(form).attr('data-id-field');
+                                var data = {};
+                                if (idInputName && form[idInputName] && form[idInputName].value) {
+                                    data['pk'] = form[idInputName].value;
+                                }
+                                $.ajax({
+                                        url: inputConfig.options,
+                                        method: 'GET',
+                                        data: data,
+                                        dataType: 'json',
+                                        cache: false
+                                    })
+                                    .done(function (json) {
+                                        for (var value in json) {
+                                            if (!select.default) {
+                                                select.default = value;
+                                            }
+                                            select.add(json[value], value);
+                                        }
+                                        optionsOfAllSelects[inputName] = json;
+                                    })
+                                    .fail(Utils.handleAjaxError)
+                            };
+                            tmpConfig.onShow = function () {
+                                var $select = $(this.getInputElement().$);
+                                $select.val(
+                                    typeof inputConfig.value === 'undefined'
+                                        ? $select.find('option').first().attr('value')
+                                        : inputConfig.value
+                                )
+                            }
+                        })(inputConfig, inputName);
+                    }
+                    dialogElements.push(tmpConfig);
+                    break;
+                case 'checkbox':
+                    dialogElements.push({
+                        type: 'checkbox',
+                        label: inputConfig.label,
+                        id: inputName,
+                        'default': !!inputConfig.checked
+                    });
+                    break;
+                default:
+                    dialogElements.push({
+                        type: 'text',
+                        label: inputConfig.label,
+                        id: inputName,
+                        'default': typeof inputConfig.value !== 'undefined' ? inputConfig.value : ''
+                    });
+            }
+            argsCount++;
+        }
+        if (argsAreValid) {
+            if (!CKEDITOR.dialog.exists(dialogName)) {
+                CKEDITOR.dialog.add(dialogName, function () {
+                    return {
+                        title: dialogHeader,
+                        minWidth: 400,
+                        minHeight: 40 * argsCount,
+                        contents: [
+                            {
+                                id: 'tab1',
+                                label: '-',
+                                title: '-',
+                                expand: true,
+                                padding: 0,
+                                elements: dialogElements
+                            }
+                        ],
+                        buttons: [CKEDITOR.dialog.okButton, CKEDITOR.dialog.cancelButton],
+                        onOk: function () {
+                            var data = {};
+                            for (var inputName in inputsConfigs) {
+                                var element = this.getContentElement('tab1', inputName);
+                                if (element) {
+                                    data[inputName] = this.getContentElement('tab1', inputName).getValue();
+                                } else {
+                                    data[inputName] = '';
+                                }
+                            }
+                            if (typeof onSubmit === 'function') {
+                                onSubmit.call(this, data, optionsOfAllSelects);
+                            }
+                        }
+                    }
+                });
+            }
+            return true;
+        }
+        return false;
     }
 };

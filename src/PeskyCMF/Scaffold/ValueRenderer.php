@@ -7,8 +7,6 @@ abstract class ValueRenderer {
     protected $template = null;
     /** @var array */
     protected $data = [];
-    /** @var string */
-    protected $jsBlocks = '';
 
     /**
      * @param null $view
@@ -76,19 +74,4 @@ abstract class ValueRenderer {
         return $this;
     }
 
-    /**
-     * @param string $jsBlockContents
-     * @return $this
-     */
-    public function addJavaScriptBlock($jsBlockContents) {
-        $this->jsBlocks .= '<script type="application/javascript">' . $jsBlockContents . '</script>';
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getJavaScriptBlocks() {
-        return $this->jsBlocks;
-    }
 }

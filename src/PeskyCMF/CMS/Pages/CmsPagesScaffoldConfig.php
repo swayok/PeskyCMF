@@ -10,6 +10,7 @@ use PeskyCMF\Scaffold\Form\ImagesFormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
+use Swayok\Utils\Set;
 
 class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
 
@@ -87,7 +88,8 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setType(FormInput::TYPE_SELECT)
                     ->setOptions(function () {
                         return CmsPage::getTypes(true);
-                    }),
+                    })
+                    ->addJavaScriptBlock($this->getJsCodeForTextTypeSelector()),
 //                'parent_id',
                 'url_alias' => FormInput::create()
                     ->setDefaultRendererConfigurator(function (InputRenderer $rendererConfig) {
@@ -139,8 +141,24 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
     }
 
     protected function getTextsOptions() {
-        return CmsTextsTable::selectAssoc('id', 'title', [
+        /** @var CmsTextsTable $textsTable */
+        $textsTable = app(CmsTextsTable::class);
+        $options = $textsTable::select(['id', 'title', 'type'], [
             'parent_id' => null
         ]);
+        return Set::combine($options->toArrays(), '/id', '/title', '/type');
+    }
+
+    protected function getJsCodeForTextTypeSelector() {
+        return <<<SCRIPT
+            var textIdSelect = $('#t-pages-c-text_id-input');
+            var groups = textIdSelect.find('optgroup').remove();
+            var baseHtml = textIdSelect.html();
+            $('#t-pages-c-type-input').on('change', function() {
+                $('#t-pages-c-text_id-input')
+                    .html(baseHtml + groups.filter('[label="' + $(this).val() + '"]').html())
+                    .selectpicker('refresh');
+            }).change();
+SCRIPT;
     }
 }

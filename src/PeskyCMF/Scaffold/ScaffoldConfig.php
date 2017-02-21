@@ -291,7 +291,7 @@ abstract class ScaffoldConfig {
     protected function renderOptionsForSelectInput(array $options, $addEmptyOption = false) {
         $ret = '';
         if ($addEmptyOption !== false || array_key_exists('', $options)) {
-            $ret .= '<option value="">' . (array_key_exists('', $options) ? $options[''] : $addEmptyOption) . '</option>';
+            $ret .= '<option value="">' . (array_key_exists('', $options) ? $options[''] : $addEmptyOption === true ? '' : $addEmptyOption) . '</option>';
         }
         foreach ($options as $value => $label) {
             if (!is_array($label)) {

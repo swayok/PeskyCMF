@@ -15,6 +15,8 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     protected $renderer = null;
     /** @var null|\Closure */
     protected $defaultRendererConfigurator = null;
+    /** @var string  */
+    protected $jsBlocks = '';
 
     /**
      * @return \Closure
@@ -52,17 +54,19 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     public function render(array $dataForTemplate = []) {
         $configOrString = call_user_func_array($this->getRenderer(), [$this, $this->getScaffoldSectionConfig(), $dataForTemplate]);
         if (is_string($configOrString)) {
-            return $configOrString;
+            $rendered = $configOrString;
         } else if ($configOrString instanceof ValueRenderer) {
-            return view($configOrString->getTemplate(), array_merge($configOrString->getData(), $dataForTemplate, [
+            $rendered = view($configOrString->getTemplate(), array_merge($configOrString->getData(), $dataForTemplate, [
                 'fieldConfig' => $this,
                 'rendererConfig' => $configOrString,
                 'actionConfig' => $this->getScaffoldSectionConfig(),
                 'model' => $this->getScaffoldSectionConfig()->getTable(),
-            ]))->render() . $configOrString->getJavaScriptBlocks();
+            ]))->render();
         } else {
             throw new ValueViewerConfigException($this, 'Renderer function returned unsopported result. String or ValueRenderer object expected');
         }
+        // replace <script> tags to be able to render that template
+        return modifyDotJsTemplateToAllowInnerScriptsAndTemplates($rendered . $this->getJavaScriptBlocks());
     }
 
     /**
@@ -86,6 +90,29 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      */
     public function getDefaultRendererConfigurator() {
         return $this->defaultRendererConfigurator;
+    }
+
+    /**
+     * Note: input jQuery object is tored in $input variable
+     * @param string $jsBlockContents
+     * @return $this
+     */
+    public function addJavaScriptBlock($jsBlockContents) {
+        $this->jsBlocks .= $jsBlockContents . "\n\n" ;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getJavaScriptBlocks() {
+        return (trim($this->jsBlocks) === '')
+            ? ''
+            : '<script type="application/javascript">'
+                . '$(function() {'
+                    . $this->jsBlocks
+                . '});'
+                . '</script>';
     }
 
 }

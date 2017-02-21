@@ -406,6 +406,4 @@ class InputRenderer extends ValueRenderer {
         return $this->suffix;
     }
 
-
-
 }

@@ -32,9 +32,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
             <td width="80%">
                 <?php
                     try {
-                        echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates(
-                            $viewer->render(['translationPrefix' => $translationPrefix])
-                        );
+                        echo $viewer->render(['translationPrefix' => $translationPrefix]);
                     } catch (Exception $exc) {
                         echo '<div>' . htmlspecialchars($exc->getMessage()) . '</div>';
                         echo '<pre>' . nl2br(htmlspecialchars($exc->getTraceAsString())) . '</pre>';

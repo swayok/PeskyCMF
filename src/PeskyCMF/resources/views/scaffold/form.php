@@ -10,8 +10,8 @@
 $formId = "scaffold-form-{$idSuffix}";
 $pkColName = $model->getPkColumnName();
 
-$ifEdit = "{{? it.{$pkColName} > 0 }}";
-$ifCreate = "{{? !it.{$pkColName} }}";
+$ifEdit = '{{? !it._is_creation }}';
+$ifCreate = '{{? it._is_creation }}';
 $else = '{{??}}';
 $endIf = '{{?}}';
 $printPk = "{{= it.{$pkColName} }}";
@@ -21,7 +21,7 @@ $tabs = $formConfig->getTabs();
 $groups = $formConfig->getInputsGroups();
 $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 
-$buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix, $ifCreate, $ifEdit, $endIf) {
+$buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix) {
     $isFirstGroup = true;
     foreach ($tabInfo['groups'] as $groupIndex) {
         $groupInfo = $groups[$groupIndex];
@@ -39,18 +39,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
                 $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.input.{$inputConfig->getName()}"));
             }
             try {
-                $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
-                // replace <script> tags to be able to render that template
-                $renderedInput = modifyDotJsTemplateToAllowInnerScriptsAndTemplates($renderedInput);
-                if ($inputConfig->isShownOnCreate() && $inputConfig->isShownOnEdit()) {
-                    echo $renderedInput;
-                } else if ($inputConfig->isShownOnCreate()) {
-                    // display only when creating
-                    echo $ifCreate . $renderedInput . $endIf;
-                } else {
-                    // display only when editing
-                    echo $ifEdit . $renderedInput . $endIf;
-                }
+                echo $inputConfig->render(['translationPrefix' => $translationPrefix]);
             } catch (Exception $exc) {
                 echo '<div class="text-danger">' . htmlspecialchars($exc->getMessage()) . '</div>';
                 echo '<pre style="max-height: 600px; overflow: scroll; border-color: #FF0000">'

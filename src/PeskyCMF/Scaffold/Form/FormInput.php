@@ -77,6 +77,16 @@ class FormInput extends RenderableValueViewer {
         return 't-' . $tableName . '-c-' . preg_replace('%[^a-zA-Z0-9-]+%', '_', $formInputName) . '-input';
     }
 
+    public function render(array $dataForTemplate = []) {
+        $renderedInput = parent::render($dataForTemplate);
+        if ($this->isShownOnCreate() && $this->isShownOnEdit()) {
+            return $renderedInput;
+        } else {
+            // display only when creating or editing
+            return '{{? ' . ($this->isShownOnCreate() ? '' : '!') . "it._is_creation }}{$renderedInput}{{?}}";
+        }
+    }
+
     /**
      * @return null|array|callable
      */

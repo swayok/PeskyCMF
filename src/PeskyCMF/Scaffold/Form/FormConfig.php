@@ -411,7 +411,7 @@ class FormConfig extends ScaffoldSectionConfig {
         InputRenderer $rendererConfig,
         Column $columnConfig
     ) {
-        $rendererConfig->setIsRequired(!$columnConfig->isValueCanBeNull() && !$columnConfig->hasDefaultValue());
+        $rendererConfig->setIsRequired(!$columnConfig->isValueCanBeNull());
     }
 
     /**
