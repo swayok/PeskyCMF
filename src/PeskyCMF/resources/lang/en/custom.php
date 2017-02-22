@@ -1,6 +1,6 @@
 <?php
 
-return [
+$dictionary = [
     'default_page_title' => 'PeskyCMF',
     'language' => [
         'en' => 'English',
@@ -184,5 +184,256 @@ return [
                 'localization' => 'Localizations'
             ]
         ],
-    ]
+    ],
+    'pages' => [
+        'menu_title' => 'Pages',
+        'types' => [
+            'page' => 'Page',
+            'news' => 'News item',
+            'category' => 'Category',
+            'item' => 'Item'
+        ],
+        'datagrid' => [
+            'header' => 'Pages',
+            'column' => [
+                'id' => 'ID',
+                'type' => 'Type',
+                'comment' => 'Comment',
+                'url_alias' => 'Relative URL',
+                'relative_url' => 'URL',
+                'page_code' => 'Text ID',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'order' => 'Position',
+                'with_contact_form' => 'Contact form?',
+                'custom_info' => 'Info',
+                'admin_id' => 'Last modifier',
+                'is_published' => 'Is published?',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+                'text_id' => 'Page title',
+            ],
+            'filter' => [
+                'pages' => [
+                    'id' => 'ID',
+                    'type' => 'Type',
+                    'comment' => 'Comment',
+                    'url_alias' => 'Relative URL',
+                    'page_code' => 'Text ID',
+                    'meta_description' => 'Meta-description',
+                    'meta_keywords' => 'Meta-keywords',
+                    'order' => 'Position',
+                    'with_contact_form' => 'Contact form?',
+                    'custom_info' => 'Info',
+                    'admin_id' => 'Last modifier',
+                    'is_published' => 'Is published?',
+                    'created_at' => 'Created',
+                    'updated_at' => 'Updated',
+                    'text_id' => 'Text ID',
+                    'parent_id' => 'Parent page',
+                ],
+                'primary_text' => [
+                    'id' => 'Text ID',
+                    'title' => 'Page title',
+                    'browser_title' => 'Browser title',
+                    'menu_title' => 'Menu title',
+                    'content' => 'Page content',
+                ]
+            ]
+        ],
+        'form' => [
+            'header_create' => 'Page creation',
+            'header_edit' => 'Page edititng',
+            'tab' => [
+                'general' => 'General',
+                'images' => 'Images'
+            ],
+            'input' => [
+                'id' => 'ID',
+                'type' => 'Type',
+                'comment' => 'Comment',
+                'url_alias' => 'URL',
+                'url_alias_placeholder' => 'Examples: /page-title, /category/item',
+                'page_code' => 'Text ID (used by programmer when required)',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'order' => 'Position',
+                'with_contact_form' => 'Add contact form?',
+                'custom_info' => 'Additional info',
+                'admin_id' => 'Last modifier',
+                'is_published' => 'Is published?',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+                'text_id' => 'Texts for the page',
+                'images' => 'Images',
+            ],
+            'tooltip' => [
+                'meta_description' => 'Used in cases when Meta-description is not provided by attached texts',
+                'meta_keywords' => 'Used in cases when Meta-keywords is not provided by attached texts',
+                'url_alias' => 'Must start with "/" symbol and may only contain latin letters, digits, "-", "_" and "/"',
+            ],
+            'validation' => [
+                'unique_page_url' => 'Page with same URL already <a href=":url" target="_blank">exists</a>'
+            ]
+        ],
+        'item_details' => [
+            'header' => 'Page details',
+            'field' => [
+                'id' => 'ID',
+                'type' => 'Type',
+                'comment' => 'Comment',
+                'url_alias' => 'Relative URL',
+                'relative_url' => 'URL',
+                'page_code' => 'Text ID',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'order' => 'Position',
+                'with_contact_form' => 'Add contact form?',
+                'custom_info' => 'Additional info',
+                'admin_id' => 'Last modifier',
+                'is_published' => 'Is published?',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+                'text_id' => 'Texts for the page',
+                'images' => 'Images',
+                'parent_id' => 'Parent page',
+            ]
+        ]
+    ],
+    'texts' => [
+        'menu_title' => 'Texts for pages',
+        'datagrid' => [
+            'header' => 'Texts for pages',
+            'column' => [
+                'id' => 'ID',
+                'parent_id' => 'Translation for',
+                'language' => 'Language',
+                'title' => 'Full title',
+                'menu_title' => 'Short title (for menus)',
+                'browser_title' => 'Browser title',
+                'comment' => 'Comment',
+                'content' => 'Text',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'custom_info' => 'Info',
+                'admin_id' => 'Last modifier',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+            ],
+            'filter' => [
+                'texts' => [
+                    'id' => 'ID',
+                    'parent_id' => 'Translation for',
+                    'language' => 'Language',
+                    'title' => 'Full title',
+                    'menu_title' => 'Short title (for menus)',
+                    'browser_title' => 'Browser title',
+                    'comment' => 'Comment',
+                    'content' => 'Text',
+                    'meta_description' => 'Meta-description',
+                    'meta_keywords' => 'Meta-keywords',
+                    'custom_info' => 'Info',
+                    'admin_id' => 'Last modifier',
+                    'created_at' => 'Created',
+                    'updated_at' => 'Updated',
+                ]
+            ]
+        ],
+        'form' => [
+            'header_create' => 'Texts for pages: creation',
+            'header_edit' => 'Texts for pages: editing',
+            'tab' => [
+                'general' => 'General',
+                'content' => 'Text',
+            ],
+            'input' => [
+                'id' => 'ID',
+                'is_translation' => 'Is translation of existing texts?',
+                'parent_id' => 'Translation for',
+                'language' => 'Language',
+                'title' => 'Full title',
+                'menu_title' => 'Short title (for menus)',
+                'browser_title' => 'Browser title',
+                'comment' => 'Comment for text editing',
+                'content' => 'Text',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'custom_info' => 'Additional info',
+                'admin_id' => 'Last modifier',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+                'insert_other_text_widget_title_template' => 'Insert field ":text_field.label" from texts ":text_id.label"',
+            ],
+            'validation' => [
+                'unique_language_within_parent_id' => 'Translation for ":parent_title" texts already <a href=":url" data-toggle="tooltip" title="Загрузить перевод">exists</a> for selected language',
+            ]
+        ],
+        'item_details' => [
+            'header' => 'Texts for page: details',
+            'field' => [
+                'id' => 'ID',
+                'parent_id' => 'Translation for',
+                'language' => 'Language',
+                'title' => 'Full title',
+                'menu_title' => 'Short title (for menus)',
+                'browser_title' => 'Browser title',
+                'comment' => 'Comment for text editing',
+                'content' => 'Text',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'custom_info' => 'Additional info',
+                'admin_id' => 'Last modifier',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+            ]
+        ]
+    ],
+    'texts_for_pages' => [
+    ],
+    'texts_for_news' => [
+        'menu_title' => 'Texts for news',
+        'datagrid' => [
+            'header' => 'Texts for news',
+        ],
+        'form' => [
+            'header_create' => 'Texts for news item: creation',
+            'header_edit' => 'Texts for news item: editing',
+        ],
+        'item_details' => [
+            'header' => 'Texts for news item: details',
+        ]
+    ],
+    'texts_for_categories' => [
+        'menu_title' => 'Texts for categories',
+        'datagrid' => [
+            'header' => 'Texts for categories',
+        ],
+        'form' => [
+            'header_create' => 'Texts for category: creation',
+            'header_edit' => 'Texts for category: editing',
+        ],
+        'item_details' => [
+            'header' => 'Texts for category: details',
+        ]
+    ],
+    'texts_for_items' => [
+        'menu_title' => 'Texts for items',
+        'datagrid' => [
+            'header' => 'Texts for items',
+        ],
+        'form' => [
+            'header_create' => 'Texts for item: creation',
+            'header_edit' => 'Texts for item: editing',
+        ],
+        'item_details' => [
+            'header' => 'Texts for item: details',
+        ]
+    ],
 ];
+
+$dictionary['texts_for_pages'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_pages']);
+$dictionary['texts_for_news'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_news']);
+$dictionary['texts_for_categories'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_categories']);
+$dictionary['texts_for_items'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_items']);
+
+return $dictionary;

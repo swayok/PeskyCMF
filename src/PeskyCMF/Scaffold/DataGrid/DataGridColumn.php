@@ -94,11 +94,11 @@ class DataGridColumn extends AbstractValueViewer {
         return $this->valueConverter;
     }
 
-    public function setIsLinkedToDbColumn($isDbField) {
-        if (!$isDbField) {
+    public function setIsLinkedToDbColumn($isDbColumn) {
+        if (!$isDbColumn) {
             $this->setIsSortable(false);
         }
-        return parent::setIsLinkedToDbColumn($isDbField);
+        return parent::setIsLinkedToDbColumn($isDbColumn);
     }
 
     /**

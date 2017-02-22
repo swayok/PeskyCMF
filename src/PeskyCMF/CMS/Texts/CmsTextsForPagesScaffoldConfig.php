@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\CMS\Texts;
 
+use PeskyCMF\CMS\Pages\CmsPage;
 use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
@@ -11,7 +12,7 @@ use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 
-class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
+class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
@@ -20,8 +21,6 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
     
     protected function createDataGridConfig() {
         return parent::createDataGridConfig()
-            ->readRelations([
-            ])
             ->setOrderBy('id', 'asc')
             ->setColumns([
                 'id',
@@ -35,6 +34,13 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
                 'title',
                 'menu_title',
             ])
+            ->setSpecialConditions(function () {
+                /** @var CmsPage $pageClass */
+                $pageClass = app(CmsPage::class);
+                return [
+                    'type' => $pageClass::TYPE_PAGE
+                ];
+            })
             ->setFilterIsOpenedByDefault(false);
     }
     
@@ -76,6 +82,13 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
         return parent::createFormConfig()
             ->setWidth(100)
             ->addTab(trans('admin.texts.form.tab.general'), [
+                'type' => FormInput::create()
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setSubmittedValueModifier(function () {
+                        /** @var CmsPage $pageClass */
+                        $pageClass = app(CmsPage::class);
+                        return $pageClass::TYPE_PAGE;
+                    }),
                 'is_translation' => FormInput::create()
                     ->setIsLinkedToDbColumn(false)
                     ->setType(FormInput::TYPE_BOOL)
@@ -97,8 +110,11 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
                 'parent_id' => FormInput::create()
                     ->setType(FormInput::TYPE_SELECT)
                     ->setOptionsLoader(function ($excludeId) {
+                        /** @var CmsPage $pageClass */
+                        $pageClass = app(CmsPage::class);
                         return CmsTextsTable::selectAssoc('id', 'title', array_merge(
                             [
+                                'type' => $pageClass::TYPE_PAGE,
                                 'parent_id' => null,
                                 'ORDER' => ['title' => 'asc']
                             ],
@@ -113,9 +129,8 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
                 'meta_description',
                 'meta_keywords',
                 'admin_id' => FormInput::create()
-                    ->setRenderer(function () {
-                        return InputRenderer::create('cmf::input/hidden');
-                    })->setValueConverter(function () {
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setSubmittedValueModifier(function () {
                         return \Auth::guard()->user()->id;
                     }),
             ])
@@ -137,11 +152,13 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
     }
 
     public function addSpecialValidators() {
-        \Validator::extend('unique_language_within_parent_id', function ($attribute, $value, $parameters) {
+        /** @var CmsTextsTable $textsTable */
+        $textsTable = app(CmsTextsTable::class);
+        \Validator::extend('unique_language_within_parent_id', function ($attribute, $value, $parameters) use ($textsTable) {
             if (!request()->input('parent_id')) {
                 return true;
             } else {
-                return CmsTextsTable::count([
+                return $textsTable::count([
                     'OR' => [
                         'id' => request()->input('parent_id'),
                         'parent_id' => request()->input('parent_id'),
@@ -150,15 +167,15 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
                 ]) === 0;
             }
         });
-        \Validator::replacer('unique_language_within_parent_id', function ($message, $attribute, $rule, $parameters) {
+        \Validator::replacer('unique_language_within_parent_id', function ($message, $attribute, $rule, $parameters) use ($textsTable) {
             return cmfTransCustom('.texts.form.validation.unique_language_within_parent_id', [
-                'parent_title' => CmsTextsTable::selectValue(
+                'parent_title' => $textsTable::selectValue(
                     DbExpr::create('`title`'),
                     ['id' => request()->input('parent_id')]
                 ),
                 'url' => routeToCmfItemEditForm(
-                    CmsTextsTableStructure::getTableName(),
-                    CmsTextsTable::selectValue(
+                    $this->getTableNameForRoutes(),
+                    $textsTable::selectValue(
                         DbExpr::create('`id`'),
                         [
                             'OR' => [
@@ -183,7 +200,7 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
                     'text_id' => [
                         'label' => 'Выберите Текст',
                         'type' => 'select',
-                        'options' => routeToCmfTableCustomData(CmsTextsTableStructure::getTableName(), 'texts_for_inserts', true),
+                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'texts_for_inserts', true),
                     ],
                     'text_field' => [
                         'label' => 'Выберите какую часть выбранного Текста вставить',
@@ -202,8 +219,13 @@ class CmsTextsScaffoldConfig extends NormalTableScaffoldConfig {
 
     public function getCustomData($dataId) {
         if ($dataId === 'texts_for_inserts') {
-            return CmsTextsTable::selectAssoc('id', 'title', [
-                'id !=' => (int)request()->query('pk', 0) ?: 0
+            /** @var CmsTextsTable $textsTable */
+            $textsTable = app(CmsTextsTable::class);
+            /** @var CmsPage $pageClass */
+            $pageClass = app(CmsPage::class);
+            return $textsTable::selectAssoc('id', 'title', [
+                'type' => $pageClass::TYPE_PAGE,
+                'id !=' => (int)request()->query('pk', 0) ?: 0,
             ]);
         } else {
             return parent::getCustomData($dataId);

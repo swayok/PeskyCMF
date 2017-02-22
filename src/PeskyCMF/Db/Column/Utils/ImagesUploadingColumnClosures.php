@@ -17,16 +17,17 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
      * @param mixed $newValue
      * @param boolean $isFromDb
      * @param RecordValue $valueContainer
+     * @param bool $trustDataReceivedFromDb
      * @return RecordValue
      * @throws \PeskyORM\Exception\OrmException
      * @throws \PDOException
-     * @throws \BadMethodCallException
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    static public function valueSetter($newValue, $isFromDb, RecordValue $valueContainer) {
+    static public function valueSetter($newValue, $isFromDb, RecordValue $valueContainer, $trustDataReceivedFromDb) {
         if ($isFromDb || empty($newValue)) {
-            return parent::valueSetter($newValue, $isFromDb, $valueContainer);
+            return parent::valueSetter($newValue, $isFromDb, $valueContainer, $trustDataReceivedFromDb);
         }
         /** @var ImagesColumn $column */
         $column = $valueContainer->getColumn();

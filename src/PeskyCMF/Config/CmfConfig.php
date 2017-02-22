@@ -444,34 +444,37 @@ abstract class CmfConfig extends ConfigsContainer {
      *    )
      */
     static public function menu() {
-        return [
+        return array_merge(
             [
-                'label' => self::transCustom('.page.dashboard.menu_title'),
-                'url' => routeToCmfPage('dashboard'),
-                'icon' => 'glyphicon glyphicon-dashboard',
+                [
+                    'label' => self::transCustom('.page.dashboard.menu_title'),
+                    'url' => routeToCmfPage('dashboard'),
+                    'icon' => 'glyphicon glyphicon-dashboard',
+                ],
+                /*[
+                    'label' => self::transCustom('.users.menu_title'),
+                    'url' => '/resource/users',
+                    'icon' => 'fa fa-group'
+                ],*/
+                /*[
+                    'label' => self::transCustom('.menu.section_utils'),
+                    'icon' => 'glyphicon glyphicon-align-justify',
+                    'submenu' => [
+                        [
+                            'label' => self::transCustom('.admins.menu_title'),
+                            'url' => '/resource/admins',
+                            'icon' => 'glyphicon glyphicon-user'
+                        ],
+                    ]
+                ]*/
             ],
-            [
-                'label' => self::transCustom('.admins.menu_title'),
-                'url' => routeToCmfItemsTable('admins'),
-                'icon' => 'fa fa-group'
-            ]
-            /*[
-                'label' => self::transCustom('.users.menu_title'),
-                'url' => '/resource/users',
-                'icon' => 'fa fa-group'
-            ],*/
-            /*[
-                'label' => self::transCustom('.menu.section_utils'),
-                'icon' => 'glyphicon glyphicon-align-justify',
-                'submenu' => [
-                    [
-                        'label' => self::transCustom('.admins.menu_title'),
-                        'url' => '/resource/admins',
-                        'icon' => 'glyphicon glyphicon-user'
-                    ],
-                ]
-            ]*/
-        ];
+            static::$menuItems
+        );
+    }
+
+    static protected $menuItems = [];
+    static public function addMenuItem($itemKey, array $menuItem) {
+        static::$menuItems[$itemKey] = $menuItem;
     }
 
     /**

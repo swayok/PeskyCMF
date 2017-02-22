@@ -13,10 +13,13 @@ $rendererConfig
 
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
+$isHidden = (bool)$rendererConfig->getData('isHidden', false);
 ?>
 
-<div class="form-group">
-    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+<div class="form-group <?php echo $isHidden ? 'hidden' : ''; ?>">
+    <?php if (!$isHidden) : ?>
+        <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <?php endif; ?>
     <select {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
         <?php if ($isMultiple): ?>
             data-value="{{! it.<?php echo $fieldConfig->getName(); ?> && $.isArray(it.<?php echo $fieldConfig->getName(); ?>) ? JSON.stringify(it.<?php echo $fieldConfig->getName(); ?>) : (it.<?php echo $fieldConfig->getName(); ?> || '[]') }}"
@@ -63,5 +66,5 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
             $('#<?php echo $rendererConfig->getAttribute('id') ?>').find('option[value=""]').remove();
         </script>
     <?php endif; ?>
-    <?php echo $fieldConfig->getFormattedTooltip(); ?>
+    <?php echo $isHidden ? '' : $fieldConfig->getFormattedTooltip(); ?>
 </div>

@@ -1,6 +1,6 @@
 <?php
 
-return [
+$dictionary = [
     'default_page_title' => 'PeskyCMF',
     'language' => [
         'en' => 'English',
@@ -182,8 +182,262 @@ return [
             ],
             'tab' => [
                 'general' => 'Общее',
-                'localization' => 'Локлизации'
+                'localization' => 'Локализации'
             ]
         ],
-    ]
+    ],
+    'pages' => [
+        'menu_title' => 'Страницы',
+        'types' => [
+            'page' => 'Страница',
+            'news' => 'Новость',
+            'category' => 'Категория',
+            'item' => 'Товар'
+        ],
+        'datagrid' => [
+            'header' => 'Страницы',
+            'column' => [
+                'id' => 'ID',
+                'type' => 'Тип',
+                'comment' => 'Комментарий',
+                'url_alias' => 'Относительный URL',
+                'relative_url' => 'URL',
+                'page_code' => 'Текстовый ID',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'order' => 'Порядковый номер',
+                'with_contact_form' => 'Форма связи?',
+                'custom_info' => 'Доп. информация',
+                'admin_id' => 'Последний редактор',
+                'is_published' => 'Опубликована?',
+                'created_at' => 'Создана',
+                'updated_at' => 'Изменена',
+                'text_id' => 'Заголовок страницы',
+            ],
+            'filter' => [
+                'pages' => [
+                    'id' => 'ID',
+                    'parent_id' => 'ID родительской страницы',
+                    'type' => 'Тип',
+                    'comment' => 'Комментарий',
+                    'url_alias' => 'Относительный URL',
+                    'page_code' => 'Текстовый ID',
+                    'images' => 'Картинки',
+                    'meta_description' => 'Meta-description',
+                    'meta_keywords' => 'Meta-keywords',
+                    'order' => 'Порядковый номер',
+                    'with_contact_form' => 'Добавить форму обратной связи?',
+                    'custom_info' => 'Доп. информация',
+                    'admin_id' => 'Последний редактор',
+                    'is_published' => 'Опубликована?',
+                    'created_at' => 'Создана',
+                    'updated_at' => 'Изменена',
+                ],
+                'primary_text' => [
+                    'id' => 'ID текста',
+                    'title' => 'Заголовок страницы',
+                    'browser_title' => 'Заголовок браузера',
+                    'menu_title' => 'Название в меню',
+                    'content' => 'Текcт страницы',
+                ],
+                'parent' => [
+                    'id' => 'ID родительской страницы',
+                    'url_alias' => 'Относительный URL родительской страницы'
+                ]
+            ]
+        ],
+        'form' => [
+            'header_create' => 'Добавление страницы',
+            'header_edit' => 'Редактирование страницы',
+            'tab' => [
+                'general' => 'Общее',
+                'images' => 'Картинки'
+            ],
+            'input' => [
+                'id' => 'ID',
+                'type' => 'Тип',
+                'comment' => 'Комментарий',
+                'url_alias' => 'URL страницы',
+                'url_alias_placeholder' => 'Примеры: /nazvanie-stranici, /ketegoriya/tovar',
+                'page_code' => 'Текстовый идентификатор страницы (используется программистом по необходимости)',
+                'images' => 'Картинки',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'order' => 'Порядковый номер',
+                'with_contact_form' => 'Добавить форму обратной связи?',
+                'custom_info' => 'Доп. информация',
+                'admin_id' => 'Последний редактор',
+                'is_published' => 'Опубликована?',
+                'created_at' => 'Создана',
+                'updated_at' => 'Изменена',
+                'text_id' => 'Тексты для страницы',
+            ],
+            'tooltip' => [
+                'meta_description' => 'Используется в случае если Meta-description не указан в прикрепленных текстах',
+                'meta_keywords' => 'Используется в случае если Meta-keywords не указан в прикрепленных текстах',
+                'url_alias' => 'Должен начинаться с символа "/" и может содержать только латинские буквы, цифры, "-", "_" и "/"',
+            ],
+            'validation' => [
+                'unique_page_url' => 'Страница с тким URL уже <a href=":url" target="_blank">существует</a>'
+            ]
+        ],
+        'item_details' => [
+            'header' => 'Информация о странице',
+            'field' => [
+                'id' => 'ID',
+                'parent_id' => 'Принадлежит странице',
+                'type' => 'Тип',
+                'comment' => 'Комментарий',
+                'relative_url' => 'URL',
+                'url_alias' => 'Относительный URL',
+                'page_code' => 'Текстовый идентификатор страницы',
+                'images' => 'Картинки',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'order' => 'Порядковый номер',
+                'with_contact_form' => 'Добавить форму обратной связи?',
+                'custom_info' => 'Доп. информация',
+                'admin_id' => 'Последний редактор',
+                'is_published' => 'Опубликована?',
+                'created_at' => 'Создана',
+                'updated_at' => 'Изменена',
+                'text_id' => 'Тексты для страницы',
+            ]
+        ]
+    ],
+    'texts' => [
+        'menu_title' => 'Тексты для страниц',
+        'datagrid' => [
+            'header' => 'Тексты для страниц',
+            'column' => [
+                'id' => 'ID',
+                'parent_id' => 'Перевод для',
+                'language' => 'Язык текстов',
+                'title' => 'Полное название',
+                'menu_title' => 'Короткое название (для меню)',
+                'browser_title' => 'Заголовок браузера',
+                'comment' => 'Комментарий',
+                'content' => 'Текcт',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'custom_info' => 'Доп. информация',
+                'admin_id' => 'Последний редактор',
+                'created_at' => 'Создана',
+                'updated_at' => 'Изменена'
+            ],
+            'filter' => [
+                'texts' => [
+                    'id' => 'ID',
+                    'parent_id' => 'Перевод для',
+                    'language' => 'Язык текстов',
+                    'title' => 'Полное название',
+                    'menu_title' => 'Короткое название (для меню)',
+                    'browser_title' => 'Заголовок браузера',
+                    'comment' => 'Комментарий',
+                    'content' => 'Текcт',
+                    'meta_description' => 'Meta-description',
+                    'meta_keywords' => 'Meta-keywords',
+                    'custom_info' => 'Доп. информация',
+                    'created_at' => 'Создана',
+                    'updated_at' => 'Изменена',
+                    'admin_id' => 'Последний редактор'
+                ]
+            ]
+        ],
+        'form' => [
+            'header_create' => 'Добавление текстов для страницы',
+            'header_edit' => 'Редактирование текстов для страницы',
+            'tab' => [
+                'general' => 'Общее',
+                'content' => 'Текст',
+            ],
+            'input' => [
+                'id' => 'ID',
+                'is_translation' => 'Перевод существующих текстов?',
+                'parent_id' => 'Перевод для текстов',
+                'language' => 'Язык текстов',
+                'title' => 'Полное название',
+                'menu_title' => 'Короткое название (для меню)',
+                'browser_title' => 'Заголовок браузера',
+                'comment' => 'Комментарий к редактированию текста',
+                'content' => 'Текcт',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'custom_info' => 'Доп. информация',
+                'created_at' => 'Создана',
+                'updated_at' => 'Изменена',
+                'insert_other_text_widget_title_template' => 'Вставка поля ":text_field.label" из текстов ":text_id.label"'
+            ],
+            'validation' => [
+                'unique_language_within_parent_id' => 'Перевод для текста ":parent_title" на указанный язык уже <a href=":url" data-toggle="tooltip" title="Загрузить перевод">существует</a>'
+            ]
+        ],
+        'item_details' => [
+            'header' => 'Тексты для страницы',
+            'field' => [
+                'id' => 'ID',
+                'parent_id' => 'Перевод для текстов',
+                'language' => 'Язык текстов',
+                'title' => 'Полное название',
+                'menu_title' => 'Короткое название (для меню)',
+                'browser_title' => 'Заголовок браузера',
+                'comment' => 'Комментарий',
+                'content' => 'Текcт',
+                'meta_description' => 'Meta-description',
+                'meta_keywords' => 'Meta-keywords',
+                'custom_info' => 'Доп. информация',
+                'created_at' => 'Создана',
+                'updated_at' => 'Изменена',
+                'admin_id' => 'Последний редактор'
+            ]
+        ]
+    ],
+    'texts_for_pages' => [
+    ],
+    'texts_for_news' => [
+        'menu_title' => 'Тексты для новостей',
+        'datagrid' => [
+            'header' => 'Тексты для новостей',
+        ],
+        'form' => [
+            'header_create' => 'Добавление текстов для новости',
+            'header_edit' => 'Редактирование текстов для новости',
+        ],
+        'item_details' => [
+            'header' => 'Тексты для новости',
+        ]
+    ],
+    'texts_for_categories' => [
+        'menu_title' => 'Тексты для категорий',
+        'datagrid' => [
+            'header' => 'Тексты для категорий',
+        ],
+        'form' => [
+            'header_create' => 'Добавление текстов для категории',
+            'header_edit' => 'Редактирование текстов для категории',
+        ],
+        'item_details' => [
+            'header' => 'Тексты для категории',
+        ]
+    ],
+    'texts_for_items' => [
+        'menu_title' => 'Тексты для товаров',
+        'datagrid' => [
+            'header' => 'Тексты для товаров',
+        ],
+        'form' => [
+            'header_create' => 'Добавление текстов для товара',
+            'header_edit' => 'Редактирование текстов для товара',
+        ],
+        'item_details' => [
+            'header' => 'Тексты для товара',
+        ]
+    ],
 ];
+
+$dictionary['texts_for_pages'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_pages']);
+$dictionary['texts_for_news'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_news']);
+$dictionary['texts_for_categories'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_categories']);
+$dictionary['texts_for_items'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_items']);
+
+return $dictionary;

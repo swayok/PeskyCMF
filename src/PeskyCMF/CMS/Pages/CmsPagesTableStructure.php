@@ -6,11 +6,11 @@ use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\CMS\Texts\CmsTextsTable;
 use PeskyCMF\CMS\Traits\AdminIdColumn;
 use PeskyCMF\Db\Column\ImagesColumn;
-use PeskyCMF\Db\Column\Utils\ImageConfig;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\IsPublishedColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\RecordValue;
 use PeskyORM\ORM\Relation;
 
 /**
@@ -22,7 +22,7 @@ use PeskyORM\ORM\Relation;
  * @property-read Column    $comment
  * @property-read Column    $url_alias
  * @property-read Column    $page_code
- * @property-read Column    $images
+ * @property-read ImagesColumn    $images
  * @property-read Column    $meta_description
  * @property-read Column    $meta_keywords
  * @property-read Column    $order
@@ -77,6 +77,30 @@ class CmsPagesTableStructure extends CmsTableStructure {
             ->convertsEmptyStringToNull();
     }
 
+    private function relative_url() {
+        return Column::create(Column::TYPE_STRING)
+            ->doesNotExistInDb()
+            ->valueCannotBeSetOrChanged()
+            ->setValueGetter(function (RecordValue $value, $format = null) {
+                $baseUrl = '';
+                /** @var CmsPage $record */
+                $record = $value->getRecord();
+                if (
+                    (
+                        $record->hasValue('parent_id', false)
+                        && $record->parent_id !== null
+                    )
+                    || (
+                        $record->isRelatedRecordAttached('Parent')
+                        && $record->Parent->existsInDb()
+                    )
+                ) {
+                    $baseUrl = $record->Parent->relative_url;
+                }
+                return $baseUrl . $record->url_alias;
+            });
+    }
+
     private function page_code() {
         return Column::create(Column::TYPE_STRING)
             ->uniqueValues()
@@ -84,31 +108,10 @@ class CmsPagesTableStructure extends CmsTableStructure {
     }
 
     private function images() {
-        return ImagesColumn::create()
-            ->setRelativeUploadsFolderPath('assets/pages')
-            ->addImageConfiguration('resize', function (ImageConfig $config) {
-                $config
-                    ->setMinFilesCount(1)
-                    ->setMaxWidth(500)
-                    ->setAllowedFileTypes([$config::JPEG]);
-            })
-            ->addImageConfiguration('cover', function (ImageConfig $config) {
-                $config
-                    ->setMaxWidth(500)
-                    ->setAllowedFileTypes([$config::JPEG]);
-            })
-            ->addImageConfiguration('contain', function (ImageConfig $config) {
-                $config
-                    ->setMaxFilesCount(3)
-                    ->setMaxWidth(500)
-                    ->setAllowedFileTypes([$config::PNG]);
-            })
-            ->addImageConfiguration('aspect', function (ImageConfig $config) {
-                $config
-                    ->setMaxWidth(500)
-                    ->setAspectRatio(4, 3)
-                    ->setAllowedFileTypes([$config::JPEG]);
-            });
+        $column = ImagesColumn::create()
+            ->setRelativeUploadsFolderPath('assets/pages');
+        $this->configureImages($column);
+        return $column;
     }
 
     private function meta_description() {
@@ -148,6 +151,10 @@ class CmsPagesTableStructure extends CmsTableStructure {
     private function PrimaryText() {
         return Relation::create('text_id', Relation::BELONGS_TO, app(CmsTextsTable::class), 'id')
             ->setDisplayColumnName('title');
+    }
+
+    protected function configureImages(ImagesColumn $column) {
+
     }
 
 }

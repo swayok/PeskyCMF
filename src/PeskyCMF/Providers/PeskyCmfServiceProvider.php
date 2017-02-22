@@ -29,8 +29,8 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         if (!empty($defaultCmfConfig)) {
             $defaultCmfConfig::getInstance()->useAsDefault();
         }
-        parent::boot();
         require_once __DIR__ . '/../Config/helpers.php';
+        parent::boot();
     }
 
     public function register() {

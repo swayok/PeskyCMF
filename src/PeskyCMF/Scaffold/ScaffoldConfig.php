@@ -290,8 +290,15 @@ abstract class ScaffoldConfig {
      */
     protected function renderOptionsForSelectInput(array $options, $addEmptyOption = false) {
         $ret = '';
-        if ($addEmptyOption !== false || array_key_exists('', $options)) {
-            $ret .= '<option value="">' . (array_key_exists('', $options) ? $options[''] : $addEmptyOption === true ? '' : $addEmptyOption) . '</option>';
+        $hasEmptyOption = array_key_exists('', $options);
+        if ($addEmptyOption !== false || $hasEmptyOption) {
+            if ($hasEmptyOption) {
+                $label = $options[''];
+                unset($options['']);
+            } else {
+                $label = $addEmptyOption === true ? '' : $addEmptyOption;
+            }
+            $ret .= '<option value="">' . $label . '</option>';
         }
         foreach ($options as $value => $label) {
             if (!is_array($label)) {

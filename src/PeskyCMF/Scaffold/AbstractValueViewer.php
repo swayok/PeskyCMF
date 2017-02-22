@@ -126,11 +126,11 @@ abstract class AbstractValueViewer {
     }
 
     /**
-     * @param $isDbField
+     * @param bool $isDbColumn
      * @return $this
      */
-    public function setIsLinkedToDbColumn($isDbField) {
-        $this->isLinkedToDbColumn = $isDbField;
+    public function setIsLinkedToDbColumn($isDbColumn) {
+        $this->isLinkedToDbColumn = $isDbColumn;
         return $this;
     }
 

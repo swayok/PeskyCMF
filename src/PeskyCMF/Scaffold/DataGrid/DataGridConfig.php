@@ -77,6 +77,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * Alias for setValueViewers
      * @param array $formInputs
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \InvalidArgumentException
      */
@@ -125,11 +127,16 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param array $columnNames
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
-    public function setInvisibleColumns(array $columnNames) {
+    public function setInvisibleColumns(...$columnNames) {
+        if (count($columnNames) && is_array($columnNames[0])) {
+            $columnNames = $columnNames[0];
+        }
         foreach ($columnNames as $name) {
             $this->addValueViewer($name, DataGridColumn::create()->setIsVisible(false));
         }
@@ -450,15 +457,19 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     /**
      * @param array $records
+     * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
      * @return array
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
      * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
-    public function prepareRecords(array $records) {
+    public function prepareRecords(array $records, array $virtualColumns = []) {
         foreach ($records as $idx => &$record) {
-            $record = $this->prepareRecord($record);
+            $record = $this->prepareRecord($record, $virtualColumns);
         }
         return $records;
     }
@@ -574,6 +585,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param string $name
      * @param null|DataGridColumn|AbstractValueViewer $tableCell
      * @return ScaffoldSectionConfig
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \InvalidArgumentException
      */
@@ -601,6 +614,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \BadMethodCallException
+     * @throws \UnexpectedValueException
      */
     public function finish() {
         parent::finish();

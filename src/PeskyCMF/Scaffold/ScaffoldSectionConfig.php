@@ -120,6 +120,8 @@ abstract class ScaffoldSectionConfig {
     /**
      * @param array $viewers
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \InvalidArgumentException
      */
@@ -143,7 +145,7 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * Get only viewers that are linked to real table columns ($valueViewer->isDbColumn() === true)
+     * Get only viewers that are linked to table columns defined in TableConfig class ($valueViewer->isDbColumn() === true)
      * @param bool $includeViewersForRelations - false: only vievers linked to main table's columns will be returned
      * @return AbstractValueViewer[]|DataGridColumn[]|FormInput[]|ValueCell[]
      */
@@ -158,7 +160,7 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * Get only viewers that are not linked to real table columns ($valueViewer->isDbColumn() === false)
+     * Get only viewers that are not linked to columns defined in TableConfig class ($valueViewer->isDbColumn() === false)
      * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
      */
     public function getStandaloneViewers() {
@@ -172,7 +174,7 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * Get only viewrs that are linked to main table's relation
+     * Get only viewers that are linked to main table's relation
      * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
      */
     public function getViewersForRelations() {
@@ -295,13 +297,17 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @param array $record
+     * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
      * @return array
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \PeskyORM\Exception\OrmException
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
-    public function prepareRecord(array $record) {
+    public function prepareRecord(array $record, array $virtualColumns = []) {
         /** @noinspection UnnecessaryParenthesesInspection */
         $permissions = [
             '___delete_allowed' => (
@@ -317,6 +323,12 @@ abstract class ScaffoldSectionConfig {
                 && $this->scaffoldConfig->isRecordDetailsAllowed($record)
             )
         ];
+        if (!empty($virtualColumns)) {
+            $recordObj = $this->getTable()->newRecord()->enableTrustModeForDbData()->fromDbData($record);
+            foreach ($virtualColumns as $virtualColumn) {
+                $record[$virtualColumn] = $recordObj->getValue($virtualColumn);
+            }
+        }
         $customData = $this->getCustomDataForRecord($record);
         $valueViewers = $this->getValueViewers();
         $pkKey = $this->getTable()->getPkColumnName();

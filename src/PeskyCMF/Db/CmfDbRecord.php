@@ -9,7 +9,7 @@ abstract class CmfDbRecord extends Record {
     /**
      * @param array $values
      * @param bool|false $withLabels
-     * @param string $translationsPath
+     * @param string|\Closure $translationsPath - Closure: function ($value) { return 'translated value'; }
      * @param bool|false $asValueLabelPair
      * @return array
      */
@@ -18,8 +18,11 @@ abstract class CmfDbRecord extends Record {
             return $values;
         }
         $options = array();
+        $translator = $translationsPath instanceof \Closure ? $translationsPath : function ($value) use ($translationsPath) {
+            return trans($translationsPath . $value);
+        };
         foreach ($values as $value) {
-            $label = trans($translationsPath . $value);
+            $label = $translator($value);
             if ($asValueLabelPair) {
                 $options[$value] = $label;
             } else {

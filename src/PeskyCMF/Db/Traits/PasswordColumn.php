@@ -23,11 +23,11 @@ trait PasswordColumn {
                     return $value;
                 }
             })
-            ->setValueSetter(function ($newValue, $isFromDb, RecordValue $valueContainer) {
+            ->setValueSetter(function ($newValue, $isFromDb, RecordValue $valueContainer, $trustDataReceivedFromDb) {
                 if (!$isFromDb && ($newValue === null || (is_string($newValue) && trim($newValue) === ''))) {
                     return;
                 }
-                DefaultColumnClosures::valueSetter($newValue, $isFromDb, $valueContainer);
+                DefaultColumnClosures::valueSetter($newValue, $isFromDb, $valueContainer, $trustDataReceivedFromDb);
             })
             ->privateValue();
     }

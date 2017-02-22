@@ -26,7 +26,6 @@ $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText(
 
             <input value="{{! it.<?php echo $fieldConfig->getName(); ?> || (it.<?php echo $fieldConfig->getName(); ?> === 0 ? '0' : '') }}"
                 {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
-            <?php echo $fieldConfig->getFormattedTooltip(); ?>
 
     <?php if ($hasAddons) : ?>
             <?php if ($rendererConfig->hasSuffixText()) : ?>
@@ -34,4 +33,5 @@ $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText(
             <?php endif ;?>
         </div>
     <?php endif; ?>
+    <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>

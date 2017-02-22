@@ -15,8 +15,8 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     protected $renderer = null;
     /** @var null|\Closure */
     protected $defaultRendererConfigurator = null;
-    /** @var string  */
-    protected $jsBlocks = '';
+    /** @var array  */
+    protected $jsBlocks = [];
 
     /**
      * @return \Closure
@@ -98,7 +98,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @return $this
      */
     public function addJavaScriptBlock($jsBlockContents) {
-        $this->jsBlocks .= $jsBlockContents . "\n\n" ;
+        $this->jsBlocks[] = $jsBlockContents;
         return $this;
     }
 
@@ -106,13 +106,23 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @return string
      */
     public function getJavaScriptBlocks() {
-        return (trim($this->jsBlocks) === '')
-            ? ''
-            : '<script type="application/javascript">'
+        if (empty($this->jsBlocks)) {
+            return '';
+        } else {
+            $jsCode = '';
+            foreach ($this->jsBlocks as $jsBlock) {
+                if ($jsBlock instanceof \Closure) {
+                    $jsCode .= $jsBlock();
+                } else {
+                    $jsCode .= $jsBlock;
+                }
+            }
+            return '<script type="application/javascript">'
                 . '$(function() {'
-                    . $this->jsBlocks
+                    . $jsCode
                 . '});'
                 . '</script>';
+        }
     }
 
 }

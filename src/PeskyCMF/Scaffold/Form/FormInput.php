@@ -51,6 +51,8 @@ class FormInput extends RenderableValueViewer {
     protected $tooltip;
     /** @var null|array */
     protected $disablersConfigs = [];
+    /** @var null|\Closure */
+    protected $submittedValueModifier;
 
     /**
      * Default input id
@@ -219,8 +221,7 @@ class FormInput extends RenderableValueViewer {
      */
     public function getLabel($default = '', InputRenderer $renderer = null) {
         if ($renderer === null) {
-            $column = $this->getTableColumn();
-            $isRequired = !$column->isValueCanBeNull() && !$column->hasDefaultValue();
+            $isRequired = $this->getTableColumn()->isValueRequiredToBeNotEmpty();
         } else {
             $isRequired = $renderer->isRequiredForCreate() || $renderer->isRequiredForEdit();
         }
@@ -280,8 +281,22 @@ class FormInput extends RenderableValueViewer {
      * @param array $data
      * @return mixed
      */
-    public function modifyIncomingValueBeforeValidation($value, array $data) {
-        return $value;
+    public function modifySubmitedValueBeforeValidation($value, array $data) {
+        if (!empty($this->submittedValueModifier)) {
+            return call_user_func($this->submittedValueModifier, $value, $data);
+        } else {
+            return $value;
+        }
+    }
+
+    /**
+     * Closure may modify incoming value before it is validated.
+     * @param \Closure $normalizer - function ($value, array $data) { return $value; }
+     * @return $this
+     */
+    public function setSubmittedValueModifier(\Closure $normalizer) {
+        $this->submittedValueModifier = $normalizer;
+        return $this;
     }
 
     /**

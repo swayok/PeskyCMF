@@ -151,7 +151,7 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
     }
 
     /**
-     * @return FileConfig[]
+     * @return FileConfig[]|ImageConfig[]
      * @throws \UnexpectedValueException
      */
     public function getFilesConfigurations() {
@@ -165,7 +165,7 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
 
     /**
      * @param string $name
-     * @return FileConfig
+     * @return FileConfig|ImageConfig
      * @throws \UnexpectedValueException
      */
     public function getFileConfiguration($name) {
@@ -188,6 +188,13 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
             $this->configs[$name] = $fileConfig;
         }
         return $this->configs[$name];
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasFilesConfigurations() {
+        return !empty($this->configs);
     }
 
     /**

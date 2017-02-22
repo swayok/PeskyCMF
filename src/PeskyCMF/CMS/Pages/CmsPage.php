@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\CMS\Pages;
 use PeskyCMF\CMS\CmsRecord;
+use PeskyCMF\CMS\Texts\CmsText;
 use PeskyCMF\Config\CmfConfig;
 
 /**
@@ -11,7 +12,8 @@ use PeskyCMF\Config\CmfConfig;
  * @property-read null|int    $text_id
  * @property-read string      $type
  * @property-read string      $comment
- * @property-read null|string $url_alias
+ * @property-read string      $url_alias
+ * @property-read string      $relative_url
  * @property-read null|string $page_code
  * @property-read null|string $images
  * @property-read string      $meta_description
@@ -28,6 +30,8 @@ use PeskyCMF\Config\CmfConfig;
  * @property-read string      $updated_at_as_time
  * @property-read int         $updated_at_as_unix_ts
  * @property-read string      $custom_info
+ * @property-read CmsPage     $Parent
+ * @property-read CmsText     $PrimaryText
  *
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setParentId($value, $isFromDb = false)
@@ -69,7 +73,9 @@ class CmsPage extends CmsRecord {
     }
 
     static public function getTypes($asOptions = false) {
-        return static::toOptions(static::$types, $asOptions, CmfConfig::getPrimary()->custom_dictionary_name() . '.pages.types.', true);
+        return static::toOptions(static::$types, $asOptions, function ($value) {
+            return cmfTransCustom('.pages.types.' . $value);
+        }, true);
     }
 
 }

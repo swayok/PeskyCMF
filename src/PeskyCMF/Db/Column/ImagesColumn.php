@@ -36,4 +36,11 @@ class ImagesColumn extends FilesColumn {
         return $this->getFileConfiguration($name);
     }
 
+    /**
+     * @return bool
+     */
+    public function hasImagesConfigurations() {
+        return $this->hasFilesConfigurations();
+    }
+
 }

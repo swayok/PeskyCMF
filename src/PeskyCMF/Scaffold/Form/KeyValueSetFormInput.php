@@ -159,7 +159,8 @@ class KeyValueSetFormInput extends FormInput {
         ];
     }
 
-    public function modifyIncomingValueBeforeValidation($value, array $data) {
+    public function modifySubmitedValueBeforeValidation($value, array $data) {
+        $value = parent::modifySubmitedValueBeforeValidation($value, $data);
         if (is_array($value)) {
             foreach ($value as $index => $keyValuePair) {
                 if (empty($keyValuePair['key']) || trim($keyValuePair['key']) === '') {

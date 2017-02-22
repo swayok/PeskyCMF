@@ -228,6 +228,8 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param string $name
      * @param AbstractValueViewer|null $viewer
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
@@ -317,10 +319,7 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      */
-    protected function configureDefaultValueRenderer(
-        ValueRenderer $renderer,
-        AbstractValueViewer $formInput
-    ) {
+    protected function configureDefaultValueRenderer(ValueRenderer $renderer, AbstractValueViewer $formInput) {
         switch ($formInput->getType()) {
             case $formInput::TYPE_BOOL:
                 $renderer->setTemplate('cmf::input/trigger');
@@ -406,12 +405,11 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @param InputRenderer $rendererConfig
      * @param Column $columnConfig
+     * @throws \BadMethodCallException
+     * @throws \UnexpectedValueException
      */
-    protected function configureRendererByColumnConfig(
-        InputRenderer $rendererConfig,
-        Column $columnConfig
-    ) {
-        $rendererConfig->setIsRequired(!$columnConfig->isValueCanBeNull());
+    protected function configureRendererByColumnConfig(InputRenderer $rendererConfig, Column $columnConfig) {
+        $rendererConfig->setIsRequired($columnConfig->isValueRequiredToBeNotEmpty());
     }
 
     /**
@@ -695,7 +693,7 @@ class FormConfig extends ScaffoldSectionConfig {
     public function modifyIncomingDataBeforeValidation(array $data) {
         foreach ($data as $key => &$value) {
             if ($this->hasValueViewer($key)) {
-                $value = $this->getFormInput($key)->modifyIncomingValueBeforeValidation($value, $data);
+                $value = $this->getFormInput($key)->modifySubmitedValueBeforeValidation($value, $data);
             }
         }
         return $data;

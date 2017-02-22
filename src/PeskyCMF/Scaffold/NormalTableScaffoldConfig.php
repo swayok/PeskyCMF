@@ -45,7 +45,20 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
-        $columnsToSelect = array_keys($dataGridConfig->getViewersLinkedToDbColumns(false));
+        $dbColumns = $this->getTable()->getTableStructure()->getColumns();
+        $columnsToSelect = [];
+        $virtualColumns = [];
+        foreach (array_keys($dataGridConfig->getViewersLinkedToDbColumns(false)) as $colName) {
+            if (array_key_exists($colName, $dbColumns)) {
+                if ($dbColumns[$colName]->isItExistsInDb()) {
+                    $columnsToSelect[] = $colName;
+                } else {
+                    $virtualColumns[] = $colName;
+                }
+            } else {
+                throw new \UnexpectedValueException("Column '{$colName}' does not exist in DB");
+            }
+        }
         foreach ($dataGridConfig->getRelationsToRead() as $relationName => $columns) {
             if (is_int($relationName)) {
                 $relationName = $columns;
@@ -61,7 +74,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $result = $this->getTable()->select($columnsToSelect, $conditions);
         $records = [];
         if ($result->count()) {
-            $records = $dataGridConfig->prepareRecords($result->toArrays());
+            $records = $dataGridConfig->prepareRecords($result->toArrays(), $virtualColumns);
         }
         return cmfJsonResponse()->setData([
             'draw' => $request->query('draw'),
