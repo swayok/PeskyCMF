@@ -52,13 +52,14 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
     }
 
     protected function configurePublishes() {
+        $cmfPublicDir = __DIR__ . '/..';
         $this->publishes([
             // cmf
-            __DIR__ . '/public/css' => public_path('packages/cmf/css'),
-            __DIR__ . '/public/js' => public_path('packages/cmf/js'),
-            __DIR__ . '/public/less' => public_path('packages/cmf/less'),
-            __DIR__ . '/public/img' => public_path('packages/cmf/img'),
-            __DIR__ . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
+            $cmfPublicDir . '/public/css' => public_path('packages/cmf/css'),
+            $cmfPublicDir . '/public/js' => public_path('packages/cmf/js'),
+            $cmfPublicDir . '/public/less' => public_path('packages/cmf/less'),
+            $cmfPublicDir . '/public/img' => public_path('packages/cmf/img'),
+            $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
             // AdminLTE
             base_path('vendor/almasaeed2010/adminlte/dist/js/app.js') => public_path('packages/adminlte/js/app.js'),
             base_path('vendor/almasaeed2010/adminlte/dist/js/app.min.js') => public_path('packages/adminlte/js/app.min.js'),
@@ -99,7 +100,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             base_path('vendor/ckeditor/ckeditor/lang') => public_path('packages/cmf-vendors/ckeditor/lang'),
             base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
             base_path('vendor/ckeditor/ckeditor/skins') => public_path('packages/cmf-vendors/ckeditor/skins'),
-            __DIR__ . '/public/cmf-vendors/ckeditor/config.empty.js' => public_path('packages/cmf-vendors/ckeditor/config.js'),
+            $cmfPublicDir . '/public/cmf-vendors/ckeditor/config.empty.js' => public_path('packages/cmf-vendors/ckeditor/config.js'),
             // libs
             base_path('vendor/datatables/datatables/media') => public_path('packages/cmf-vendors/datatables'),
             base_path('vendor/grimmlink/toastr/build') => public_path('packages/cmf-vendors/toastr'),
@@ -117,7 +118,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         ], 'public');
 
         $this->publishes([
-            __DIR__ . '/Config/cmf.config.php' => config_path('cmf.php')
+            $cmfPublicDir . '/Config/cmf.config.php' => config_path('cmf.php')
         ], 'config');
     }
 
