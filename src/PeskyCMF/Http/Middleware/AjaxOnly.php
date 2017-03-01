@@ -5,7 +5,7 @@ use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use PeskyCMF\HttpCode;
-use PeskyORM\Exception\DbObjectValidationException;
+use PeskyORM\Exception\InvalidDataException;
 use Swayok\Utils\StringUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -62,10 +62,10 @@ class AjaxOnly {
         }
         try {
             return $next($request);
-        } catch (DbObjectValidationException $exc) {
+        } catch (InvalidDataException $exc) {
             return new JsonResponse([
                 '_message' => trans(cmfTransGeneral('.error.invalid_data_received')),
-                'errors' => $exc->getValidationErrors()
+                'errors' => $exc->getErrors()
             ], HttpCode::INVALID);
         } catch (HttpException $exc) {
             if ($exc->getStatusCode() === HttpCode::INVALID) {

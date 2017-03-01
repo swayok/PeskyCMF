@@ -131,7 +131,7 @@ class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'admin_id' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
                     ->setSubmittedValueModifier(function () {
-                        return \Auth::guard()->user()->id;
+                        return \Auth::guard()->user()->getAuthIdentifier();
                     }),
             ])
             ->addTab(trans('admin.texts.form.tab.content'), [

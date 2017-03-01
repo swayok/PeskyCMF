@@ -2,8 +2,8 @@
 
 namespace PeskyCMF;
 
-use App\Db\Admin\Admin;
 use Illuminate\Http\Request;
+use PeskyORM\ORM\Record;
 
 class PeskyCmfAccessManager extends BaseAccessManager {
 
@@ -12,11 +12,11 @@ class PeskyCmfAccessManager extends BaseAccessManager {
     }
 
     static public function getUserRole() {
-        return self::getAdmin()->role;
+        return self::getAdmin()->getValue('role');
     }
 
     /**
-     * @return Admin
+     * @return Record
      */
     static public function getAdmin() {
         return \Auth::guard()->user();

@@ -5,7 +5,7 @@ namespace PeskyCMF;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Session\TokenMismatchException;
 use LaravelExtendedErrors\ExceptionHandler;
-use PeskyORM\Exception\DbObjectValidationException;
+use PeskyORM\Exception\InvalidDataException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -21,17 +21,18 @@ class CmfExceptionHandler extends ExceptionHandler {
 
     protected function convertSomeExceptionsToJsonResponses(\Exception $exc) {
         switch (get_class($exc)) {
-            case DbObjectValidationException::class:
-                /** @var DbObjectValidationException $exc */
+            case InvalidDataException::class:
+                /** @var InvalidDataException $exc */
                 return new JsonResponse([
                     '_message' => $this->errorCodeToMessage('invalid_data_received'),
-                    'errors' => $exc->getValidationErrors()
+                    'errors' => $exc->getErrors()
                 ], HttpCode::INVALID);
             case NotFoundHttpException::class:
                 /*return new JsonResponse([
                     '_message' => CmfConfig::transBase('.error.http404')
                 ], HttpCode::NOT_FOUND);*/
             case HttpException::class:
+                /** @var HttpException $exc */
                 return $this->convertHttpExceptionToJsonResponse($exc);
             case TokenMismatchException::class:
                 $message = $this->errorCodeToMessage('csrf_token_missmatch');
