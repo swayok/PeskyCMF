@@ -3,7 +3,7 @@
 namespace PeskyCMF\CMS\Pages;
 
 use PeskyCMF\CMS\Texts\CmsTextsTable;
-use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\ImagesFormInput;
@@ -32,7 +32,10 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'id',
                 'text_id' => DataGridColumn::create()
                     ->setType(DataGridColumn::TYPE_LINK),
-                'type',
+                'type' => DataGridColumn::create()
+                    ->setValueConverter(function ($value) {
+                        return cmfTransCustom('.pages.types.' . $value);
+                    }),
                 'relative_url',
                 'page_code',
                 'with_contact_form',
@@ -47,7 +50,11 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'id',
                 'PrimaryText.title',
                 'PrimaryText.menu_title',
-                'type',
+                'type' => ColumnFilter::create()
+                    ->setInputType(ColumnFilter::INPUT_TYPE_MULTISELECT)
+                    ->setAllowedValues(function () {
+                        return CmsPage::getTypes(true);
+                    }),
                 'url_alias',
                 'page_code',
                 'with_contact_form',
@@ -66,7 +73,10 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'id',
                 'parent_id' => ValueCell::create()
                     ->setType(ValueCell::TYPE_LINK),
-                'type',
+                'type' => ValueCell::create()
+                    ->setValueConverter(function ($value) {
+                        return cmfTransCustom('.pages.types.' . $value);
+                    }),
                 'relative_url',
                 'page_code',
                 'text_id' => ValueCell::create()

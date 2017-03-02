@@ -58,9 +58,8 @@ class CmsTextsTableStructure extends CmsTableStructure {
         /** @var CmsPage $page */
         $page = app(CmsPage::class);
         return Column::create(Column::TYPE_ENUM)
-            ->disallowsNullValues()
             ->setAllowedValues($page::getTypes())
-            ->setDefaultValue($page::TYPE_PAGE);
+            ->convertsEmptyStringToNull();
     }
 
     private function title() {

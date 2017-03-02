@@ -81,7 +81,7 @@ class CmsTextsForNewsScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createFormConfig() {
         return parent::createFormConfig()
             ->setWidth(100)
-            ->addTab(trans('admin.texts.form.tab.general'), [
+            ->addTab(cmfTransCustom('.texts_for_news.form.tab.general'), [
                 'type' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
                     ->setSubmittedValueModifier(function () {
@@ -134,7 +134,7 @@ class CmsTextsForNewsScaffoldConfig extends NormalTableScaffoldConfig {
                         return \Auth::guard()->user()->getAuthIdentifier();
                     }),
             ])
-            ->addTab(trans('admin.texts.form.tab.content'), [
+            ->addTab(cmfTransCustom('.texts_for_news.form.tab.content'), [
                 'comment',
                 'content' => WysiwygFormInput::create()
                     ->setRelativeImageUploadsFolder('/assets/wysiwyg/pages')
@@ -168,7 +168,7 @@ class CmsTextsForNewsScaffoldConfig extends NormalTableScaffoldConfig {
             }
         });
         \Validator::replacer('unique_language_within_parent_id', function ($message, $attribute, $rule, $parameters) use ($textsTable) {
-            return cmfTransCustom('.texts.form.validation.unique_language_within_parent_id', [
+            return cmfTransCustom('.texts_for_news.form.validation.unique_language_within_parent_id', [
                 'parent_title' => $textsTable::selectValue(
                     DbExpr::create('`title`'),
                     ['id' => request()->input('parent_id')]
@@ -206,13 +206,13 @@ class CmsTextsForNewsScaffoldConfig extends NormalTableScaffoldConfig {
                         'label' => 'Выберите какую часть выбранного Текста вставить',
                         'type' => 'select',
                         'options' => [
-                            'title' => cmfTransCustom('.texts.form.input.title'),
-                            'content' => cmfTransCustom('.texts.form.input.content'),
+                            'title' => cmfTransCustom('.texts_for_news.form.input.title'),
+                            'content' => cmfTransCustom('.texts_for_news.form.input.content'),
                         ],
                         'value' => 'content'
                     ]
                 ],
-                cmfTransCustom('.texts.form.input.insert_other_text_widget_title_template')
+                cmfTransCustom('.texts_for_news.form.input.insert_other_text_widget_title_template')
             ),
         ];
     }

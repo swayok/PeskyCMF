@@ -215,7 +215,7 @@ $dictionary = [
                 'text_id' => 'Заголовок страницы',
             ],
             'filter' => [
-                'pages' => [
+                'cms_pages' => [
                     'id' => 'ID',
                     'parent_id' => 'ID родительской страницы',
                     'type' => 'Тип',
@@ -326,7 +326,7 @@ $dictionary = [
                 'updated_at' => 'Изменена'
             ],
             'filter' => [
-                'texts' => [
+                'cms_texts' => [
                     'id' => 'ID',
                     'parent_id' => 'Перевод для',
                     'language' => 'Язык текстов',
@@ -404,7 +404,7 @@ $dictionary = [
             'header_edit' => 'Редактирование текстов для новости',
         ],
         'item_details' => [
-            'header' => 'Тексты для новости',
+            'header' => 'Просмотр текстов для новости',
         ]
     ],
     'texts_for_categories' => [
@@ -417,7 +417,7 @@ $dictionary = [
             'header_edit' => 'Редактирование текстов для категории',
         ],
         'item_details' => [
-            'header' => 'Тексты для категории',
+            'header' => 'Просмотр текстов для категории',
         ]
     ],
     'texts_for_items' => [
@@ -430,7 +430,20 @@ $dictionary = [
             'header_edit' => 'Редактирование текстов для товара',
         ],
         'item_details' => [
-            'header' => 'Тексты для товара',
+            'header' => 'Просмотр текстов для товара',
+        ]
+    ],
+    'common_texts' => [
+        'menu_title' => 'Общие тексты',
+        'datagrid' => [
+            'header' => 'Общие тексты',
+        ],
+        'form' => [
+            'header_create' => 'Добавление общих текстов',
+            'header_edit' => 'Редактирование общих текстов',
+        ],
+        'item_details' => [
+            'header' => 'Просмотр общих текстов',
         ]
     ],
 ];
@@ -439,5 +452,6 @@ $dictionary['texts_for_pages'] = array_replace_recursive($dictionary['texts'], $
 $dictionary['texts_for_news'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_news']);
 $dictionary['texts_for_categories'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_categories']);
 $dictionary['texts_for_items'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_items']);
+$dictionary['common_texts'] = array_replace_recursive($dictionary['texts'], $dictionary['common_texts']);
 
 return $dictionary;

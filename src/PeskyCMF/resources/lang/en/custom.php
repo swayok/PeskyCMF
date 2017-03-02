@@ -429,11 +429,25 @@ $dictionary = [
             'header' => 'Texts for item: details',
         ]
     ],
+    'common_texts' => [
+        'menu_title' => 'Common texts',
+        'datagrid' => [
+            'header' => 'Common texts',
+        ],
+        'form' => [
+            'header_create' => 'Common texts: creation',
+            'header_edit' => 'Common texts: editing',
+        ],
+        'item_details' => [
+            'header' => 'Common texts: details',
+        ]
+    ],
 ];
 
 $dictionary['texts_for_pages'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_pages']);
 $dictionary['texts_for_news'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_news']);
 $dictionary['texts_for_categories'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_categories']);
 $dictionary['texts_for_items'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_items']);
+$dictionary['common_texts'] = array_replace_recursive($dictionary['texts'], $dictionary['common_texts']);
 
 return $dictionary;

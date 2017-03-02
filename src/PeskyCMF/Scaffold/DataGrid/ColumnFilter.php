@@ -41,6 +41,7 @@ class ColumnFilter {
     const OPERATOR_GROUP_STRINGS = 'strings';
     const OPERATOR_GROUP_NULLS = 'nulls';
     const OPERATOR_GROUP_IN_ARRAY = 'in';
+    const OPERATOR_GROUP_ONLY_EQUALS = 'equals';
     const OPERATOR_GROUP_TIMESTAMP = 'timestamp';
     const OPERATOR_GROUP_BOOL = 'boolean';
     const OPERATOR_GROUP_ALL = 'all';
@@ -75,6 +76,10 @@ class ColumnFilter {
             self::OPERATOR_IN_ARRAY,
             self::OPERATOR_NOT_IN_ARRAY,
         ],
+        self::OPERATOR_GROUP_ONLY_EQUALS => [
+            self::OPERATOR_EQUAL,
+            self::OPERATOR_NOT_EQUAL,
+        ],
         self::OPERATOR_GROUP_NUMBERS => [
             self::OPERATOR_EQUAL,
             self::OPERATOR_NOT_EQUAL,
@@ -88,12 +93,10 @@ class ColumnFilter {
             self::OPERATOR_NOT_BETWEEN,
         ],
         self::OPERATOR_GROUP_STRINGS => [
-            self::OPERATOR_EQUAL,
-            self::OPERATOR_NOT_EQUAL,
-            self::OPERATOR_IN_ARRAY,
-            self::OPERATOR_NOT_IN_ARRAY,
             self::OPERATOR_CONTAINS,
             self::OPERATOR_NOT_CONTAINS,
+            self::OPERATOR_EQUAL,
+            self::OPERATOR_NOT_EQUAL,
             self::OPERATOR_BEGINS_WITH,
             self::OPERATOR_NOT_BEGINS_WITH,
             self::OPERATOR_ENDS_WITH,
@@ -115,6 +118,8 @@ class ColumnFilter {
             self::OPERATOR_EQUAL,
         ],
         self::OPERATOR_GROUP_ALL => [
+            self::OPERATOR_CONTAINS,
+            self::OPERATOR_NOT_CONTAINS,
             self::OPERATOR_EQUAL,
             self::OPERATOR_NOT_EQUAL,
             self::OPERATOR_IN_ARRAY,
@@ -125,8 +130,6 @@ class ColumnFilter {
             self::OPERATOR_GREATER_OR_EQUAL,
             self::OPERATOR_BETWEEN,
             self::OPERATOR_NOT_BETWEEN,
-            self::OPERATOR_CONTAINS,
-            self::OPERATOR_NOT_CONTAINS,
             self::OPERATOR_BEGINS_WITH,
             self::OPERATOR_NOT_BEGINS_WITH,
             self::OPERATOR_ENDS_WITH,
@@ -182,7 +185,8 @@ class ColumnFilter {
     protected $dataType = null;
     protected $inputType = null;
     protected $multiselect = false;
-    protected $operators = [];
+    /** @var null|array */
+    protected $operators = null;
     protected $allowedValues = [
         //'value' => 'label'
     ];
@@ -201,6 +205,8 @@ class ColumnFilter {
     ];
     /** @var null|string|DbExpr */
     protected $columnNameReplacementForCondition = null;
+    /** @var bool  */
+    protected $nullable = false;
 
     /**
      * @param string $dataType
@@ -292,7 +298,6 @@ class ColumnFilter {
             throw new ScaffoldException("Unknown filter type: $type");
         }
         $this->dataType = $type;
-        $this->operators = static::$operatorGroups[static::$dataTypeDefaultOperatorsGroup[$type]];
         if ($canBeNull) {
             $this->canBeNull();
         }
@@ -338,14 +343,26 @@ class ColumnFilter {
      * @return $this
      */
     public function canBeNull() {
-        $this->operators = array_merge($this->operators, static::$operatorGroups[static::OPERATOR_GROUP_NULLS]);
+        $this->nullable = true;
         return $this;
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getOperators() {
+        if ($this->operators === null) {
+            if ($this->getInputType() === static::INPUT_TYPE_SELECT) {
+                $this->operators = $this->multiselect
+                    ? static::$operatorGroups[static::OPERATOR_GROUP_IN_ARRAY]
+                    : static::$operatorGroups[static::OPERATOR_GROUP_ONLY_EQUALS];
+            } else {
+                $this->operators = static::$operatorGroups[static::$dataTypeDefaultOperatorsGroup[$this->getDataType()]];
+            }
+            if ($this->nullable) {
+                $this->operators = array_merge($this->operators, static::$operatorGroups[static::OPERATOR_GROUP_NULLS]);
+            }
+        }
         return $this->operators;
     }
 
@@ -361,6 +378,19 @@ class ColumnFilter {
             }
         }
         $this->operators = $operators;
+        return $this;
+    }
+
+    /**
+     * @param string $presetName - one of static::OPERATOR_GROUP_*
+     * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     */
+    public function setOperatorsFromPreset($presetName) {
+        if (!array_key_exists($presetName, static::$operatorGroups)) {
+            throw new ScaffoldException("Unknown filter operators preset: $presetName");
+        }
+        $this->operators = static::$operatorGroups[$presetName];
         return $this;
     }
 
@@ -749,7 +779,9 @@ class ColumnFilter {
                 $this->getDataType() === static::TYPE_STRING
                 && in_array($operator, [static::OPERATOR_IN_ARRAY, static::OPERATOR_NOT_IN_ARRAY], true)
             ) {
-                $value = '^(' . implode('|', array_map('preg_quote', $value)) . ')$';
+                $value = '^(' . implode('|', array_map(function ($item) {
+                    return preg_quote($item, null);
+                }, $value)) . ')$';
             }
             return array_values($value);
         }
@@ -776,20 +808,20 @@ class ColumnFilter {
         switch ($operator) {
             case static::OPERATOR_BEGINS_WITH:
             case static::OPERATOR_NOT_BEGINS_WITH:
-                return '^' . preg_quote($value);
+                return '^' . preg_quote($value, null);
                 break;
             case static::OPERATOR_ENDS_WITH:
             case static::OPERATOR_NOT_ENDS_WITH:
-                return preg_quote($value) . '$';
+                return preg_quote($value, null) . '$';
                 break;
             case static::OPERATOR_CONTAINS:
             case static::OPERATOR_NOT_CONTAINS:
-                return preg_quote($value);
+                return preg_quote($value, null);
                 break;
             case static::OPERATOR_EQUAL:
             case static::OPERATOR_NOT_EQUAL:
                 if ($this->getDataType() === static::TYPE_STRING) {
-                    return '^' . preg_quote($value) . '$';
+                    return '^' . preg_quote($value, null) . '$';
                 }
                 break;
             case static::OPERATOR_IS_NULL:

@@ -12,7 +12,7 @@ use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 
-class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
+class CmsCommonTextsScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
@@ -35,10 +35,8 @@ class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'menu_title',
             ])
             ->setSpecialConditions(function () {
-                /** @var CmsPage $pageClass */
-                $pageClass = app(CmsPage::class);
                 return [
-                    'type' => $pageClass::TYPE_PAGE
+                    'type' => null
                 ];
             })
             ->setFilterIsOpenedByDefault(false);
@@ -65,11 +63,8 @@ class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setType(ValueCell::TYPE_LINK),
                 'language',
                 'title',
-                'browser_title',
                 'menu_title',
                 'content',
-                'meta_description',
-                'meta_keywords',
                 'custom_info',
                 'admin_id' => ValueCell::create()
                     ->setType(ValueCell::TYPE_LINK),
@@ -81,13 +76,11 @@ class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createFormConfig() {
         return parent::createFormConfig()
             ->setWidth(100)
-            ->addTab(cmfTransCustom('.texts_for_pages.form.tab.general'), [
+            ->addTab(cmfTransCustom('.common_texts.form.tab.general'), [
                 'type' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
                     ->setSubmittedValueModifier(function () {
-                        /** @var CmsPage $pageClass */
-                        $pageClass = app(CmsPage::class);
-                        return $pageClass::TYPE_PAGE;
+                        return null;
                     }),
                 'is_translation' => FormInput::create()
                     ->setIsLinkedToDbColumn(false)
@@ -124,17 +117,14 @@ class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setDisabledUntil('id', '/^$/', true)
                     ->setDisabledUntil('is_translation', true),
                 'title',
-                'browser_title',
                 'menu_title',
-                'meta_description',
-                'meta_keywords',
                 'admin_id' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
                     ->setSubmittedValueModifier(function () {
                         return \Auth::guard()->user()->getAuthIdentifier();
                     }),
             ])
-            ->addTab(cmfTransCustom('.texts_for_pages.form.tab.content'), [
+            ->addTab(cmfTransCustom('.common_texts.form.tab.content'), [
                 'comment',
                 'content' => WysiwygFormInput::create()
                     ->setRelativeImageUploadsFolder('/assets/wysiwyg/pages')
@@ -168,7 +158,7 @@ class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
             }
         });
         \Validator::replacer('unique_language_within_parent_id', function ($message, $attribute, $rule, $parameters) use ($textsTable) {
-            return cmfTransCustom('.texts_for_pages.form.validation.unique_language_within_parent_id', [
+            return cmfTransCustom('.common_texts.form.validation.unique_language_within_parent_id', [
                 'parent_title' => $textsTable::selectValue(
                     DbExpr::create('`title`'),
                     ['id' => request()->input('parent_id')]
@@ -206,13 +196,13 @@ class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
                         'label' => 'Выберите какую часть выбранного Текста вставить',
                         'type' => 'select',
                         'options' => [
-                            'title' => cmfTransCustom('.texts_for_pages.form.input.title'),
-                            'content' => cmfTransCustom('.texts_for_pages.form.input.content'),
+                            'title' => cmfTransCustom('.common_texts.form.input.title'),
+                            'content' => cmfTransCustom('.common_texts.form.input.content'),
                         ],
                         'value' => 'content'
                     ]
                 ],
-                cmfTransCustom('.texts_for_pages.form.input.insert_other_text_widget_title_template')
+                cmfTransCustom('.common_texts.form.input.insert_other_text_widget_title_template')
             ),
         ];
     }
@@ -221,10 +211,8 @@ class CmsTextsForPagesScaffoldConfig extends NormalTableScaffoldConfig {
         if ($dataId === 'texts_for_inserts') {
             /** @var CmsTextsTable $textsTable */
             $textsTable = app(CmsTextsTable::class);
-            /** @var CmsPage $pageClass */
-            $pageClass = app(CmsPage::class);
             return $textsTable::selectAssoc('id', 'title', [
-                'type' => $pageClass::TYPE_PAGE,
+                'type' => null,
                 'id !=' => (int)request()->query('pk', 0) ?: 0,
             ]);
         } else {

@@ -8,6 +8,7 @@ use PeskyCMF\CMS\Pages\CmsPagesScaffoldConfig;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
 use PeskyCMF\CMS\Settings\CmsSettingsScaffoldConfig;
 use PeskyCMF\CMS\Settings\CmsSettingsTable;
+use PeskyCMF\CMS\Texts\CmsCommonTextsScaffoldConfig;
 use PeskyCMF\CMS\Texts\CmsTextsForCategoriesScaffoldConfig;
 use PeskyCMF\CMS\Texts\CmsTextsForItemsScaffoldConfig;
 use PeskyCMF\CMS\Texts\CmsTextsForNewsScaffoldConfig;
@@ -67,6 +68,11 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
             'url' => routeToCmfItemsTable('texts_for_items'),
             'icon' => 'fa fa-files-o'
         ]);
+        $cmfConfig::addMenuItem('common_texts', [
+            'label' => $cmfConfig::transCustom('.common_texts.menu_title'),
+            'url' => routeToCmfItemsTable('common_texts'),
+            'icon' => 'fa fa-file-code-o'
+        ]);
         $cmfConfig::addMenuItem('settings', [
             'label' => $cmfConfig::transCustom('.settings.menu_title'),
             'url' => routeToCmfItemEditForm('settings', 'all'),
@@ -109,6 +115,7 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
         $this->app->alias(CmsTextsTable::class, 'cms.section.texts_for_news.table');
         $this->app->alias(CmsTextsTable::class, 'cms.section.texts_for_categories.table');
         $this->app->alias(CmsTextsTable::class, 'cms.section.texts_for_items.table');
+        $this->app->alias(CmsTextsTable::class, 'cms.section.common_texts.table');
     }
 
     public function registerTextsScaffolds() {
@@ -123,6 +130,9 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
         });
         $this->app->singleton('cms.section.texts_for_items.scaffold', function () {
             return new CmsTextsForItemsScaffoldConfig($this->app->make('cms.section.texts_for_items.table'), 'texts_for_items');
+        });
+        $this->app->singleton('cms.section.common_texts.scaffold', function () {
+            return new CmsCommonTextsScaffoldConfig($this->app->make('cms.section.common_texts.table'), 'common_texts');
         });
     }
 
