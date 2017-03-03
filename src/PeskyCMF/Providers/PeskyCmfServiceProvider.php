@@ -59,7 +59,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             $cmfPublicDir . '/public/js' => public_path('packages/cmf/js'),
             $cmfPublicDir . '/public/less' => public_path('packages/cmf/less'),
             $cmfPublicDir . '/public/img' => public_path('packages/cmf/img'),
-            $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
             // AdminLTE
             base_path('vendor/almasaeed2010/adminlte/dist/js/app.js') => public_path('packages/adminlte/js/app.js'),
             base_path('vendor/almasaeed2010/adminlte/dist/js/app.min.js') => public_path('packages/adminlte/js/app.min.js'),
@@ -100,7 +99,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             base_path('vendor/ckeditor/ckeditor/lang') => public_path('packages/cmf-vendors/ckeditor/lang'),
             base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
             base_path('vendor/ckeditor/ckeditor/skins') => public_path('packages/cmf-vendors/ckeditor/skins'),
-            $cmfPublicDir . '/public/cmf-vendors/ckeditor/config.empty.js' => public_path('packages/cmf-vendors/ckeditor/config.js'),
             // libs
             base_path('vendor/datatables/datatables/media') => public_path('packages/cmf-vendors/datatables'),
             base_path('vendor/grimmlink/toastr/build') => public_path('packages/cmf-vendors/toastr'),
@@ -114,6 +112,8 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
             base_path('vendor/bower-asset/cropper/dist') => public_path('packages/cmf-vendors/cropperjs'),
+            // additions to vendors
+            $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
 
         ], 'public');
 

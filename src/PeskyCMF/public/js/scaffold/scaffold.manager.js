@@ -83,7 +83,7 @@ ScaffoldsManager.setResourceTemplates = function (resourceName, additionalParame
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var templates = $('<div id="templates">' + html + '</div>');
     var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
-    Cache.rawTemplates[resourceId] = {
+    CmfCache.rawTemplates[resourceId] = {
         datagrid: false,
         itemForm: false,
         bulkEditForm: false,
@@ -91,31 +91,31 @@ ScaffoldsManager.setResourceTemplates = function (resourceName, additionalParame
     };
     var dataGridTpl = templates.find('#data-grid-tpl');
     if (dataGridTpl.length) {
-        Cache.rawTemplates[resourceId].datagrid = dataGridTpl.html();
+        CmfCache.rawTemplates[resourceId].datagrid = dataGridTpl.html();
     }
     var itemFormTpl = templates.find('#item-form-tpl');
     if (itemFormTpl.length) {
-        Cache.rawTemplates[resourceId].itemForm = itemFormTpl.html();
+        CmfCache.rawTemplates[resourceId].itemForm = itemFormTpl.html();
     }
     var bulkEditFormTpl = templates.find('#bulk-edit-form-tpl');
     if (bulkEditFormTpl.length) {
-        Cache.rawTemplates[resourceId].bulkEditForm = bulkEditFormTpl.html();
+        CmfCache.rawTemplates[resourceId].bulkEditForm = bulkEditFormTpl.html();
     }
     var itemDetailsTpl = templates.find('#item-details-tpl');
     if (itemDetailsTpl.length) {
-        Cache.rawTemplates[resourceId].itemDetails = itemDetailsTpl.html();
+        CmfCache.rawTemplates[resourceId].itemDetails = itemDetailsTpl.html();
     }
 };
 
 ScaffoldsManager.isTemplatesLoaded = function (resourceName, additionalParameter) {
-    return !!Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)];
+    return !!CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)];
 };
 
 ScaffoldsManager.hasDataGridTemplate = function (resourceName, additionalParameter) {
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     return (
         ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
-        && Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
     )
 };
 
@@ -123,7 +123,7 @@ ScaffoldsManager.hasItemFormTemplate = function (resourceName, additionalParamet
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     return (
         ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
-        && Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemForm
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemForm
     );
 };
 
@@ -131,7 +131,7 @@ ScaffoldsManager.hasBulkEditFormTemplate = function (resourceName, additionalPar
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     return (
         ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
-        && Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].bulkEditForm
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].bulkEditForm
     );
 };
 
@@ -139,7 +139,7 @@ ScaffoldsManager.hasItemDetailsTemplate = function (resourceName, additionalPara
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     return (
         ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
-        && Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemDetails
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemDetails
     );
 };
 
@@ -152,7 +152,7 @@ ScaffoldsManager.getDataGridTpl = function (resourceName, additionalParameter) {
                 + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
         deferred.resolve(
-            Cache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+            CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
         );
     });
     return deferred;
@@ -168,13 +168,13 @@ ScaffoldsManager.getItemFormTpl = function (resourceName, additionalParameter) {
                 + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
         var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
-        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.itemForm[resourceId]) {
-            Cache.compiledTemplates.itemForm[resourceId] = Utils.makeTemplateFromText(
-                Cache.rawTemplates[resourceId].itemForm,
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemForm[resourceId]) {
+            CmfCache.compiledTemplates.itemForm[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].itemForm,
                 'Item form template for ' + resourceId
             );
         }
-        deferred.resolve(Cache.compiledTemplates.itemForm[resourceId]);
+        deferred.resolve(CmfCache.compiledTemplates.itemForm[resourceId]);
     });
     return deferred;
 };
@@ -189,13 +189,13 @@ ScaffoldsManager.getBulkEditFormTpl = function (resourceName, additionalParamete
                 + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
         var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
-        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.bulkEditForm[resourceId]) {
-            Cache.compiledTemplates.bulkEditForm[resourceId] = Utils.makeTemplateFromText(
-                Cache.rawTemplates[resourceId].bulkEditForm,
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.bulkEditForm[resourceId]) {
+            CmfCache.compiledTemplates.bulkEditForm[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].bulkEditForm,
                 'Bulk edit form template for ' + resourceId
             );
         }
-        deferred.resolve(Cache.compiledTemplates.bulkEditForm[resourceId]);
+        deferred.resolve(CmfCache.compiledTemplates.bulkEditForm[resourceId]);
     });
     return deferred;
 };
@@ -210,13 +210,13 @@ ScaffoldsManager.getItemDetailsTpl = function (resourceName, additionalParameter
                 + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
         var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
-        if (!ScaffoldsManager.cacheTemplates || !Cache.compiledTemplates.itemDetails[resourceId]) {
-            Cache.compiledTemplates.itemDetails[resourceId] = Utils.makeTemplateFromText(
-                Cache.rawTemplates[resourceId].itemDetails,
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemDetails[resourceId]) {
+            CmfCache.compiledTemplates.itemDetails[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].itemDetails,
                 'Item details template for ' + resourceId
             );
         }
-        deferred.resolve(Cache.compiledTemplates.itemDetails[resourceId]);
+        deferred.resolve(CmfCache.compiledTemplates.itemDetails[resourceId]);
     });
     return deferred;
 };

@@ -128,6 +128,7 @@
     <script src="/packages/cmf-vendors/moment/locale/{{ app()->getLocale() }}.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/jQuery-extendext/jQuery.extendext.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/db-query-builder/js/query-builder.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/db-query-builder/plugins/bt-selectpicker-values/plugin.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/db-query-builder/i18n/query-builder.{{ app()->getLocale() }}.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/jquery.plugins.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/jquery.form.js" type="text/javascript"></script>
