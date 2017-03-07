@@ -89,7 +89,7 @@ trait KeyValueModelHelpers {
      * @return mixed
      */
     static public function decodeValue($encodedValue) {
-        return json_decode($encodedValue, true);
+        return $encodedValue === '""' ? '' : json_decode($encodedValue, true);
     }
 
     /**
