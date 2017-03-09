@@ -248,16 +248,16 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected function getJsCodeForUrlAliasInput() {
         return <<<SCRIPT
-            var parentIdSelect = $('#t-pages-c-parent_id-input').parent();
+            var parentIdSelect = $('#t-pages-c-parent_id-input').selectpicker().parent().removeClass('hidden');
             $('#parent-id-url-alias')
                 .append(parentIdSelect)
                 .parent()
                     .addClass('pn');
             parentIdSelect
                 .css('height', '32px')
-                .find('> button.dropdown-toggle')
+                .addClass('mn')
+                .find('button.dropdown-toggle')
                     .addClass('br-n');
-            
 SCRIPT;
 
     }
