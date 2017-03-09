@@ -230,18 +230,7 @@ abstract class ScaffoldSectionConfig {
             && !$this->getTable()->getTableStructure()->hasColumn($name)
         ) {
             if ($this->allowRelationsInValueViewers) {
-                $nameParts = explode('.', $name);
-                if (count($nameParts) === 1) {
-                    throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
-                } else if (!$this->getTable()->getTableStructure()->hasRelation($nameParts[0])) {
-                    throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no relation '{$nameParts[0]}'");
-                }
-                $relation = $this->getTable()->getTableStructure()->getRelation($nameParts[0]);
-                if (!$relation->getForeignTable()->getTableStructure()->hasColumn($nameParts[1])) {
-                    throw new \InvalidArgumentException(
-                        "Relation {$nameParts[0]} of table {$this->getTable()->getName()} has no column '{$nameParts[1]}'"
-                    );
-                }
+                list($relation, $relationColumnName) = $this->validateRelationValueViewerName($name);
                 $usesRelation = true;
             } else {
                 throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
@@ -257,10 +246,34 @@ abstract class ScaffoldSectionConfig {
         $viewer->setPosition($this->getNextValueViewerPosition($viewer));
         $viewer->setScaffoldSectionConfig($this);
         if ($usesRelation) {
-            $viewer->setRelation($relation, $nameParts[1]);
+            $viewer->setRelation($relation, $relationColumnName);
         }
         $this->valueViewers[$name] = $viewer;
         return $this;
+    }
+
+    /**
+     * @param $name
+     * @return array - array(Relation, column_name)
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     */
+    protected function validateRelationValueViewerName($name) {
+        $nameParts = explode('.', $name);
+        if (count($nameParts) === 1) {
+            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
+        } else if (!$this->getTable()->getTableStructure()->hasRelation($nameParts[0])) {
+            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no relation '{$nameParts[0]}'");
+        }
+        $relation = $this->getTable()->getTableStructure()->getRelation($nameParts[0]);
+        $columnName = end($nameParts); //< allows something like RelationName.i.column_name
+        if (!$relation->getForeignTable()->getTableStructure()->hasColumn($columnName)) {
+            throw new \InvalidArgumentException(
+                "Relation {$nameParts[0]} of table {$this->getTable()->getName()} has no column '{$columnName}'"
+            );
+        }
+        return [$relation, $columnName];
     }
 
     /**

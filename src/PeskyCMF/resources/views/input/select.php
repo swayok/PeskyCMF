@@ -22,9 +22,9 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
     <?php endif; ?>
     <select {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
         <?php if ($isMultiple): ?>
-            data-value="{{! it.<?php echo $fieldConfig->getName(); ?> && $.isArray(it.<?php echo $fieldConfig->getName(); ?>) ? JSON.stringify(it.<?php echo $fieldConfig->getName(); ?>) : (it.<?php echo $fieldConfig->getName(); ?> || '[]') }}"
+            data-value="<?php echo $fieldConfig->getDotJsJsonInsertForValue(true); ?>"
         <?php else: ?>
-            data-value="{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}"
+            data-value="<?php echo $fieldConfig->getDotJsInsertForValue(); ?>"
         <?php endif; ?>
     >
     <?php if (!$fieldConfig->hasOptionsLoader()) : ?>

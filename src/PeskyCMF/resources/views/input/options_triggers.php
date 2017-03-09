@@ -32,7 +32,7 @@ $defaultName = $rendererConfig->getAttribute('name', $fieldConfig->getName());
         </label>
         <div class="<?php echo $rendererConfig->getData('grid_class_for_input', 'col-xs-4 col-md-6'); ?>">
             <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
-                {{? !!it.<?php echo $fieldConfig->getName(); ?>.<?php echo $optionName; ?> }}checked{{?}}
+                <?php echo $fieldConfig->getDotJsInsertForValue('checked', $optionName); ?>
                 data-on-text="<?php echo $rendererConfig->getData('label_enable', cmfTransGeneral('.form.input.bool.yes')) ?>"
                 data-off-text="<?php echo $rendererConfig->getData('label_disable', cmfTransGeneral('.form.input.bool.no')) ?>">
         </div>

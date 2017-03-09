@@ -19,7 +19,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
     <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
     {{? !it.isCreation && !!it.icon }}
     <div class="image-preview" id="<?php echo $attributes['id']; ?>-image-preview">
-        <img src="{{= it.icon }}?_=<?php echo time() ?>">
+        <img src="<?php echo $fieldConfig->getDotJsInsertForValue() ?>?_=<?php echo time() ?>">
     </div>
     {{?}}
     <?php echo $fieldConfig->getFormattedTooltip(); ?>

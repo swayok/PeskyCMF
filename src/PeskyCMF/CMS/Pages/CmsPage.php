@@ -3,13 +3,12 @@
 namespace PeskyCMF\CMS\Pages;
 use PeskyCMF\CMS\CmsRecord;
 use PeskyCMF\CMS\Texts\CmsText;
-use PeskyCMF\Config\CmfConfig;
+use PeskyORM\ORM\RecordsSet;
 
 /**
  * @property-read int         $id
  * @property-read null|int    $parent_id
  * @property-read null|int    $admin_id
- * @property-read null|int    $text_id
  * @property-read string      $type
  * @property-read string      $comment
  * @property-read string      $url_alias
@@ -31,7 +30,7 @@ use PeskyCMF\Config\CmfConfig;
  * @property-read int         $updated_at_as_unix_ts
  * @property-read string      $custom_info
  * @property-read CmsPage     $Parent
- * @property-read CmsText     $PrimaryText
+ * @property-read CmsText[]|RecordsSet   $Texts
  *
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setParentId($value, $isFromDb = false)

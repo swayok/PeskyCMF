@@ -17,6 +17,8 @@ class FormConfig extends ScaffoldSectionConfig {
     protected $template = 'cmf::scaffold/form';
     protected $bulkEditingTemplate = 'cmf::scaffold/bulk_edit_form';
 
+    protected $allowRelationsInValueViewers = true;
+
     /**
      * Fields list that can be edited in bulk (for many records at once)
      * @var FormInput[]
@@ -114,9 +116,11 @@ class FormConfig extends ScaffoldSectionConfig {
      * - ['group lablel' => ['name1', 'name2' => FormInput::create(), ...]
      * Also you may use '/' as value to separate inputs with <hr>
      * @return $this
-     * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
      */
     public function setFormInputs(array $formInputs) {
         /** @var AbstractValueViewer|null $config */
@@ -147,6 +151,8 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param string $tabLabel
      * @param array $formInputs
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException

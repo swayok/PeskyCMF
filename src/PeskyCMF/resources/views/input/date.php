@@ -18,7 +18,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 <div class="form-group">
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <div class="input-group w200">
-        <input value="{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}"
+        <input value="<?php echo $fieldConfig->getDotJsInsertForValue(); ?>"
             {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
         <div class="input-group-addon cursor">
             <i class="fa fa-calendar"></i>

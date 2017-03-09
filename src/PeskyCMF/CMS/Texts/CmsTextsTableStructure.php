@@ -4,6 +4,7 @@ namespace PeskyCMF\CMS\Texts;
 
 use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\CMS\Pages\CmsPage;
+use PeskyCMF\CMS\Pages\CmsPagesTable;
 use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Traits\AdminIdColumn;
 use PeskyCMF\Config\CmfConfig;
@@ -14,7 +15,7 @@ use PeskyORM\ORM\Relation;
 
 /**
  * @property-read Column    $id
- * @property-read Column    $parent_id
+ * @property-read Column    $paget_id
  * @property-read Column    $admin_id
  * @property-read Column    $language
  * @property-read Column    $title
@@ -41,7 +42,7 @@ class CmsTextsTableStructure extends CmsTableStructure {
         return 'texts';
     }
 
-    private function parent_id() {
+    private function page_id() {
         return Column::create(Column::TYPE_INT)
             ->convertsEmptyStringToNull();
     }
@@ -109,9 +110,9 @@ class CmsTextsTableStructure extends CmsTableStructure {
             ->setDefaultValue('{}');
     }
 
-    private function Parent() {
-        return Relation::create('parent_id', Relation::BELONGS_TO, app(CmsTextsTable::class), 'id')
-            ->setDisplayColumnName('title');
+    private function Page() {
+        return Relation::create('page_id', Relation::BELONGS_TO, app(CmsPagesTable::class), 'id')
+            ->setDisplayColumnName('url_alias');
     }
 
 }

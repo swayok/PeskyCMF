@@ -17,7 +17,6 @@ use PeskyORM\ORM\Relation;
  * @property-read Column    $id
  * @property-read Column    $parent_id
  * @property-read Column    $admin_id
- * @property-read Column    $text_id
  * @property-read Column    $type
  * @property-read Column    $comment
  * @property-read Column    $url_alias
@@ -56,11 +55,6 @@ class CmsPagesTableStructure extends CmsTableStructure {
     }
 
     private function parent_id() {
-        return Column::create(Column::TYPE_INT)
-            ->convertsEmptyStringToNull();
-    }
-
-    private function text_id() {
         return Column::create(Column::TYPE_INT)
             ->convertsEmptyStringToNull();
     }
@@ -145,11 +139,11 @@ class CmsPagesTableStructure extends CmsTableStructure {
 
     private function Parent() {
         return Relation::create('parent_id', Relation::BELONGS_TO, app(CmsPagesTable::class), 'id')
-            ->setDisplayColumnName('title');
+            ->setDisplayColumnName('url_alias');
     }
 
-    private function PrimaryText() {
-        return Relation::create('text_id', Relation::BELONGS_TO, app(CmsTextsTable::class), 'id')
+    private function Texts() {
+        return Relation::create('parent_id', Relation::BELONGS_TO, app(CmsTextsTable::class), 'id')
             ->setDisplayColumnName('title');
     }
 

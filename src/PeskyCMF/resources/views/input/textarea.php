@@ -16,6 +16,6 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 <div class="form-group">
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
     <textarea {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
-    >{{! it.<?php echo $fieldConfig->getName(); ?> || '' }}</textarea>
+    ><?php echo $fieldConfig->getDotJsInsertForValue() ?></textarea>
     <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>

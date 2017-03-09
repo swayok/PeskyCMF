@@ -3,10 +3,11 @@
 namespace PeskyCMF\CMS\Texts;
 
 use PeskyCMF\CMS\CmsRecord;
+use PeskyCMF\CMS\Pages\CmsPage;
 
 /**
  * @property-read int         $id
- * @property-read null|int    $parent_id
+ * @property-read null|int    $page_id
  * @property-read null|int    $admin_id
  * @property-read string      $language
  * @property-read string      $title
@@ -25,9 +26,10 @@ use PeskyCMF\CMS\CmsRecord;
  * @property-read string      $updated_at_as_time
  * @property-read int         $updated_at_as_unix_ts
  * @property-read string      $custom_info
+ * @property-read CmsPage     $Page
  *
  * @method $this    setId($value, $isFromDb = false)
- * @method $this    setParentId($value, $isFromDb = false)
+ * @method $this    setPageId($value, $isFromDb = false)
  * @method $this    setAdminId($value, $isFromDb = false)
  * @method $this    setLanguage($value, $isFromDb = false)
  * @method $this    setTitle($value, $isFromDb = false)

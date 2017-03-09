@@ -2,16 +2,17 @@
 
 namespace PeskyCMF\CMS\Pages;
 
+use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Texts\CmsTextsTable;
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\ImagesFormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;
+use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\Core\DbExpr;
-use Swayok\Utils\Set;
 
 class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
 
@@ -23,15 +24,12 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createDataGridConfig() {
         return parent::createDataGridConfig()
             ->readRelations([
-                'PrimaryText' => ['title', 'id'],
                 'Parent' => ['id', 'url_alias', 'parent_id']
             ])
             ->setOrderBy('id', 'asc')
             ->setInvisibleColumns('url_alias')
             ->setColumns([
                 'id',
-                'text_id' => DataGridColumn::create()
-                    ->setType(DataGridColumn::TYPE_LINK),
                 'type' => DataGridColumn::create()
                     ->setValueConverter(function ($value) {
                         return cmfTransCustom('.pages.types.' . $value);
@@ -48,8 +46,6 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
         return parent::createDataGridFilterConfig()
             ->setFilters([
                 'id',
-                'PrimaryText.title',
-                'PrimaryText.menu_title',
                 'type' => ColumnFilter::create()
                     ->setInputType(ColumnFilter::INPUT_TYPE_MULTISELECT)
                     ->setAllowedValues(function () {
@@ -67,7 +63,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createItemDetailsConfig() {
         return parent::createItemDetailsConfig()
             ->readRelations([
-                'Parent', 'Admin', 'PrimaryText' => ['id', 'title']
+                'Parent', 'Admin'
             ])
             ->setValueCells([
                 'id',
@@ -79,8 +75,6 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     }),
                 'relative_url',
                 'page_code',
-                'text_id' => ValueCell::create()
-                    ->setType(ValueCell::TYPE_LINK),
                 'images',
                 'meta_description',
                 'meta_keywords',
@@ -101,12 +95,11 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
             ->setWidth(80)
             ->addTab(cmfTransCustom('.pages.form.tab.general'), [
                 'type' => FormInput::create()
-                    ->setType(FormInput::TYPE_SELECT)
-                    ->setOptions(function () {
-                        return CmsPage::getTypes(true);
-                    })
-                    ->addJavaScriptBlock(function () {
-                        return $this->getJsCodeForTextTypeSelector();
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setValueConverter(function () {
+                        /** @var CmsPage $pageClass */
+                        $pageClass = app(CmsPage::class);
+                        return $pageClass::TYPE_PAGE;
                     }),
                 'parent_id' => FormInput::create()
                     ->setType(FormInput::TYPE_SELECT)
@@ -130,11 +123,6 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                         return $this->getJsCodeForUrlAliasInput();
                     }),
                 'page_code',
-                'text_id' => FormInput::create()
-                    ->setType(FormInput::TYPE_SELECT)
-                    ->setOptionsLoader(function () {
-                        return $this->getTextsOptions();
-                    }),
                 'comment',
                 'meta_description',
                 'meta_keywords',
@@ -176,6 +164,32 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'images' => ImagesFormInput::create(),
             ]);
         }
+        /** @var CmsSetting $cmsSetting */
+        $cmsSetting = app(CmsSetting::class);
+        /** @var CmsTextsTable $textsTable */
+        $textsTable = app(CmsTextsTable::class);
+        foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
+            $formConfig->addTab(cmfTransCustom('.pages.form.tab.texts', ['language' => $langLabel]), [
+                "Texts.$langId.title",
+                "Texts.$langId.menu_title",
+                "Texts.$langId.language" => FormInput::create()
+                    ->setType(FormInput::TYPE_HIDDEN)
+                   ->setValueConverter(function () use ($langId) {
+                       return $langId;
+                   }),
+                "Texts.$langId.admin_id" => FormInput::create()
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setSubmittedValueModifier(function () {
+                        return \Auth::guard()->user()->getAuthIdentifier();
+                    }),
+                "Texts.$langId.comment",
+                "Texts.$langId.content" => WysiwygFormInput::create()
+                    ->setRelativeImageUploadsFolder('/assets/wysiwyg/pages')
+                    ->setDataInserts(function () {
+                        return $this->getDataInsertsForContentEditor();
+                    })
+            ]);
+        }
         return $formConfig;
     }
 
@@ -215,52 +229,21 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
         });
     }
 
-    protected function getTextsOptions() {
-        /** @var CmsTextsTable $textsTable */
-        $textsTable = app(CmsTextsTable::class);
-        $options = $textsTable::select(['id', 'title', 'type'], [
-            'parent_id' => null
-        ]);
-        return Set::combine($options->toArrays(), '/id', '/title', '/type');
-    }
-
     protected function getPagesOptions() {
         /** @var CmsPagesTable $pagesTable */
         $pagesTable = app(CmsPagesTable::class);
-        $options = $pagesTable::select(['id', 'url_alias', 'type'], [
+        /** @var CmsPage $pageClass */
+        $pageClass = app(CmsPage::class);
+        $options = $pagesTable::selectAssoc('id', 'url_alias', [
             'parent_id' => null,
+            'type' => $pageClass::TYPE_PAGE,
             'url_alias !=' => '/'
-        ])->toArrays();
+        ]);
         $baseUrl = request()->getSchemeAndHttpHost();
-        foreach ($options as &$page) {
-            $page['url_alias'] = $baseUrl . $page['url_alias'];
+        foreach ($options as $pageId => &$urlAlias) {
+            $urlAlias = $baseUrl . $urlAlias;
         }
-        return array_merge(
-            ['' => $baseUrl],
-            Set::combine($options, '/id', '/url_alias', '/type')
-        );
-    }
-
-    protected function getJsCodeForTextTypeSelector() {
-        return <<<SCRIPT
-            var textIdSelect = $('#t-pages-c-text_id-input');
-            var textIdGroups = textIdSelect.find('optgroup').remove();
-            var textIdBaseHtml = textIdSelect.html();
-            
-            var parentIdSelect = $('#t-pages-c-parent_id-input');
-            var parentIdGroups = parentIdSelect.find('optgroup').remove();
-            var parentIdBaseHtml = parentIdSelect.html();
-            
-            $('#t-pages-c-type-input').on('change', function() {
-                textIdSelect
-                    .html(textIdBaseHtml + textIdGroups.filter('[label="' + $(this).val() + '"]').html())
-                    .selectpicker('refresh');
-                    
-                parentIdSelect
-                    .html(parentIdBaseHtml + parentIdGroups.filter('[label="' + $(this).val() + '"]').html())
-                    .selectpicker('refresh');
-            }).change();
-SCRIPT;
+        return array_merge(['' => $baseUrl], $options);
     }
 
     protected function getJsCodeForUrlAliasInput() {
@@ -277,5 +260,45 @@ SCRIPT;
             
 SCRIPT;
 
+    }
+
+    protected function getDataInsertsForContentEditor() {
+        return [
+            WysiwygFormInput::createDataInsertConfigWithArguments(
+                'pageData(":text_id", ":text_field")',
+                'Вставить часть другого текста',
+                false,
+                [
+                    'text_id' => [
+                        'label' => 'Выберите Текст',
+                        'type' => 'select',
+                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'texts_for_inserts', true),
+                    ],
+                    'text_field' => [
+                        'label' => 'Выберите какую часть выбранного Текста вставить',
+                        'type' => 'select',
+                        'options' => [
+                            'title' => cmfTransCustom('.common_texts.form.input.title'),
+                            'content' => cmfTransCustom('.common_texts.form.input.content'),
+                        ],
+                        'value' => 'content'
+                    ]
+                ],
+                cmfTransCustom('.common_texts.form.input.insert_other_text_widget_title_template')
+            ),
+        ];
+    }
+
+    public function getCustomData($dataId) {
+        if ($dataId === 'texts_for_inserts') {
+            /** @var CmsTextsTable $textsTable */
+            $textsTable = app(CmsTextsTable::class);
+            return $textsTable::selectAssoc('id', 'title', [
+                'type' => null,
+                'id !=' => (int)request()->query('pk', 0) ?: 0,
+            ]);
+        } else {
+            return parent::getCustomData($dataId);
+        }
     }
 }

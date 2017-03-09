@@ -9,7 +9,6 @@
 /** @var \PeskyCMF\Db\Column\ImagesColumn $column */
 $column = $fieldConfig->getTableColumn();
 $defaultId = $fieldConfig->getDefaultId();
-$dotJsInputName = 'it.' . $fieldConfig->getName();
 $configNameToInputId = [];
 ?>
 
@@ -58,7 +57,7 @@ $configNameToInputId = [];
     $(function () {
         Utils.requireFiles(['/packages/cmf/js/inputs/cmf.fileuploads.js']).done(function () {
             var data = {
-                files: {{= JSON.stringify(<?php echo $dotJsInputName ?>) }},
+                files: <?php echo $fieldConfig->getDotJsJsonInsertForValue() ?>,
                 configs: <?php echo json_encode($configNameToInputId); ?>
             };
             CmfFileUploads.initImageUploaders(data);

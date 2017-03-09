@@ -13,7 +13,7 @@ class CmsTextsMigration extends Migration {
         if (!\Schema::hasTable(CmsTextsTableStructure::getTableName())) {
             \Schema::create(CmsTextsTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
-                $table->integer('parent_id')->nullable()->unsigned();
+                $table->integer('page_id')->nullable()->unsigned();
                 $table->integer('admin_id')->nullable()->unsigned();
                 $table->string('type', 50)->nullable()->default(null);
                 $table->char('language', 2);
@@ -37,11 +37,11 @@ class CmsTextsMigration extends Migration {
                 $table->index('parent_id');
                 $table->index('created_at');
                 $table->index('updated_at');
-                $table->unique(['parent_id', 'language']);
+                $table->unique(['page_id', 'language']);
 
-                $table->foreign('parent_id')
+                $table->foreign('page_id')
                     ->references('id')
-                    ->on(CmsTextsTableStructure::getTableName())
+                    ->on(CmsPagesTableStructure::getTableName())
                     ->onDelete('cascade')
                     ->onUpdate('cascade');
                 $table->foreign('admin_id')

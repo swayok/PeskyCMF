@@ -64,7 +64,7 @@ $inputName = $fieldConfig->getName();
     $(function () {
         var $rowsContainer = $('#<?php echo $defaultId ?>-rows-container');
         var rowTpl = doT.template($('#<?php echo $defaultId ?>-row-tpl').html());
-        var values = {{= JSON.stringify(<?php echo 'it.' . $fieldConfig->getName() ?>) }};
+        var values = <?php echo 'it.' . $fieldConfig->getDotJsJsonInsertForValue() ?>;
         var maxRows = <?php echo $fieldConfig->getMaxValuesCount(); ?>;
         var minRows = <?php echo $fieldConfig->getMinValuesCount(); ?>;
         var rowIndex = 0;

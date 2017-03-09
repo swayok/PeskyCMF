@@ -53,6 +53,8 @@ class FormInput extends RenderableValueViewer {
     protected $disablersConfigs = [];
     /** @var null|\Closure */
     protected $submittedValueModifier;
+    /** @var string|null */
+    protected $varNameForDotJs;
 
     /**
      * Default input id
@@ -67,6 +69,89 @@ class FormInput extends RenderableValueViewer {
             $this->getName(),
             request()->route()->getParameter('table_name', $this->getScaffoldSectionConfig()->getTable()->getName())
         );
+    }
+
+    /**
+     * @return null|string
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     */
+    public function getName() {
+        $nameParts = explode('.', parent::getName());
+        if (count($nameParts) > 1) {
+            return $nameParts[0] . '[' . implode('][', array_slice($nameParts, 1)) . ']';
+        } else {
+            return $nameParts[0];
+        }
+    }
+
+    /**
+     * @param string $name - something like 'RelationName.column_name' (Do not add 'it.' in the beginning!!!)
+     * @return $this
+     */
+    public function setVarNameForDotJs($name) {
+        $this->varNameForDotJs = $name;
+        return $this;
+    }
+
+    /**
+     * @return string
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     */
+    public function getVarNameForDotJs() {
+        if ($this->varNameForDotJs === null) {
+            $this->varNameForDotJs = preg_replace('%[^a-zA-Z0-9_]+%', '.', parent::getName());
+        }
+        return 'it.' . $this->varNameForDotJs;
+    }
+
+    /**
+     * @param string|null $htmlPropertyName - null: normal insert; string: HTML property name to insert when value is positive
+     * @param array $additionalVarNameParts - additional parts of var name
+     * @return string
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     */
+    public function getDotJsInsertForValue($htmlPropertyName = null, array $additionalVarNameParts = []) {
+        $fullName = $this->getVarNameForDotJs();
+        $parts = array_merge(explode('.', $fullName), $additionalVarNameParts);
+        $conditions = [];
+        $chain = 'it';
+        for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
+            $chain .= '.' . $parts[$i];
+            if ($htmlPropertyName) {
+                $conditions[] = '!!' . $chain;
+            } else {
+                $conditions[] = "(typeof $chain != 'undefined')";
+            }
+        }
+        if ($htmlPropertyName) {
+            return '{{? ' . implode(' && ', $conditions) . '}}' . $htmlPropertyName . '{{?}}';
+        } else {
+            $conditions[] = "$fullName !== null";
+            return '{{! ' . implode(' && ', $conditions) . " ? (typeof $fullName === 'boolean' ? ($fullName ? '1' : '0') : String($fullName)) : '' }}";
+        }
+    }
+
+    /**
+     * Wraps value isert into JSON.stringify()
+     * @param bool $isPlainArray - true: value is expected to be a plain array | false: value may be of any type
+     * @param array $additionalVarNameParts
+     * @return string
+     */
+    public function getDotJsJsonInsertForValue($isPlainArray = false, array $additionalVarNameParts = []) {
+        $fullName = $this->getVarNameForDotJs();
+        $parts = array_merge(explode('.', $fullName), $additionalVarNameParts);
+        $conditions = [];
+        $chain = 'it';
+        for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
+            $chain .= '.' . $parts[$i];
+            $conditions[] = "(typeof $chain !== 'undefined')";
+        }
+        $default = '{}';
+        if ($isPlainArray) {
+            $conditions[] = "$.isArray($fullName)";
+            $default = "($fullName || [])";
+        }
+        return '{{! ' . implode(' && ', $conditions) . " ? JSON.stringify($fullName) : $default }}";
     }
 
     /**

@@ -13,5 +13,5 @@ $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAtt
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
 
-<input value="{{= it.<?php echo $fieldConfig->getName(); ?> || '' }}"
+<input value="<?php echo $fieldConfig->getDotJsInsertForValue(); ?>"
     {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>

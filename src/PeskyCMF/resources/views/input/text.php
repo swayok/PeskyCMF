@@ -24,7 +24,7 @@ $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText(
             <?php endif;?>
     <?php endif; ?>
 
-            <input value="{{! it.<?php echo $fieldConfig->getName(); ?> || (it.<?php echo $fieldConfig->getName(); ?> === 0 ? '0' : '') }}"
+            <input value="<?php echo $fieldConfig->getDotJsInsertForValue() ?>"
                 {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
 
     <?php if ($hasAddons) : ?>

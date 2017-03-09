@@ -5,7 +5,6 @@ namespace PeskyCMF\CMS\Pages;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
-use PeskyCMF\CMS\Texts\CmsTextsTableStructure;
 
 class CmsPagesMigration extends Migration {
 
@@ -15,7 +14,6 @@ class CmsPagesMigration extends Migration {
                 $table->increments('id');
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->integer('admin_id')->nullable()->unsigned();
-                $table->integer('text_id')->nullable()->unsigned();
                 $table->string('type', 50)->default(CmsPagesTableStructure::getColumn('type')->getDefaultValueAsIs());
                 $table->string('comment', 1000)->default('');
                 $table->string('url_alias')->nullable();
@@ -42,7 +40,6 @@ class CmsPagesMigration extends Migration {
                 }
 
                 $table->index('parent_id');
-                $table->index('text_id');
                 $table->index('created_at');
                 $table->index('updated_at');
                 $table->index('order');
@@ -53,11 +50,6 @@ class CmsPagesMigration extends Migration {
                 $table->foreign('parent_id')
                     ->references('id')
                     ->on(CmsPagesTableStructure::getTableName())
-                    ->onDelete('cascade')
-                    ->onUpdate('cascade');
-                $table->foreign('text_id')
-                    ->references('id')
-                    ->on(CmsTextsTableStructure::getTableName())
                     ->onDelete('cascade')
                     ->onUpdate('cascade');
                 $table->foreign('admin_id')
