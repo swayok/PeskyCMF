@@ -15,7 +15,7 @@ use PeskyORM\ORM\Relation;
 
 /**
  * @property-read Column    $id
- * @property-read Column    $paget_id
+ * @property-read Column    $page_id
  * @property-read Column    $admin_id
  * @property-read Column    $language
  * @property-read Column    $title
@@ -55,17 +55,10 @@ class CmsTextsTableStructure extends CmsTableStructure {
             ->setDefaultValue($cmsSettings::default_language(null, CmfConfig::getDefault()->default_locale()));
     }
 
-    private function type() {
-        /** @var CmsPage $page */
-        $page = app(CmsPage::class);
-        return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues($page::getTypes())
-            ->convertsEmptyStringToNull();
-    }
-
     private function title() {
         return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues();
+            ->disallowsNullValues()
+            ->setDefaultValue('');
     }
 
     private function browser_title() {

@@ -13,6 +13,8 @@ use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\Core\DbExpr;
+use PeskyORM\ORM\OrmSelect;
+use Swayok\Utils\Set;
 
 class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
 
@@ -32,7 +34,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'id',
                 'type' => DataGridColumn::create()
                     ->setValueConverter(function ($value) {
-                        return cmfTransCustom('.pages.types.' . $value);
+                        return $this->translate('types', $value);
                     }),
                 'relative_url',
                 'page_code',
@@ -71,7 +73,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setType(ValueCell::TYPE_LINK),
                 'type' => ValueCell::create()
                     ->setValueConverter(function ($value) {
-                        return cmfTransCustom('.pages.types.' . $value);
+                        return $this->translate('types', $value);
                     }),
                 'relative_url',
                 'page_code',
@@ -91,12 +93,15 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
     
     protected function createFormConfig() {
         $formConfig = parent::createFormConfig();
+        /** @var CmsSetting $cmsSetting */
+        $cmsSetting = app(CmsSetting::class);
         $formConfig
             ->setWidth(80)
-            ->addTab(cmfTransCustom('.pages.form.tab.general'), [
+            ->addTab($this->translate('form.tab', 'general'), [
                 'type' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
                     ->setValueConverter(function () {
+                        /** @noinspection OneTimeUseVariablesInspection */
                         /** @var CmsPage $pageClass */
                         $pageClass = app(CmsPage::class);
                         return $pageClass::TYPE_PAGE;
@@ -114,9 +119,9 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                         $rendererConfig
                             ->setIsRequired(true)
                             ->setPrefixText('<span id="parent-id-url-alias"></span>')
-                            ->addAttribute('placeholder', cmfTransCustom('.pages.form.input.url_alias_placeholder'));
+                            ->addAttribute('placeholder', $this->translate('form.input', 'url_alias_placeholder'));
                     })
-                    ->setSubmittedValueModifier(function ($value, array $data) {
+                    ->setSubmittedValueModifier(function ($value) {
                         return $value === '/' ? $value : preg_replace('%//+%', '/', rtrim($value, '/'));
                     })
                     ->addJavaScriptBlock(function () {
@@ -135,42 +140,58 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                         return \Auth::guard()->user()->getAuthIdentifier();
                     }),
             ])
-            ->setValidators(function () {
+            ->setValidators(function () use ($cmsSetting) {
                 $this->addUniquePageUrlValidator();
                 /** @var CmsPage $pageClass */
                 $pageClass = app(CmsPage::class);
-                return [
+                $validators = [
                     'type' => 'required|in:' . implode(',', $pageClass::getTypes()),
                     'is_published' => 'required|bool',
                 ];
+                foreach ($cmsSetting::languages() as $lang => $lebel) {
+                    $validators["Texts.$lang.browser_title"] = "required_with:Texts.$lang.content";
+                }
+                return $validators;
             })
             ->addValidatorsForCreate(function () {
                 return [
                     'url_alias' => 'required|regex:%^/[a-z0-9_/-]*$%|unique_page_url',
-                    'page_code' => 'regex:%^/[a-z0-9_-]*$%|unique:pages,page_code,{{parent_id}},parent_id',
+                    'page_code' => 'regex:%^[a-z0-9_-]*$%|unique:pages,page_code',
                 ];
             })
             ->addValidatorsForEdit(function () {
                 return [
                     'url_alias' => 'required|regex:%^/[a-z0-9_/-]*$%|unique_page_url',
-                    'page_code' => 'regex:%^/[a-z0-9_-]*$%|unique:pages,page_code,{{parent_id}},parent_id,{{id}},id',
+                    'page_code' => 'regex:%^[a-z0-9_-]*$%|unique:pages,page_code,{{id}},id',
                 ];
+            })
+            ->setRawRecordDataModifier(function (array $record) {
+                if (!empty($record['Texts'])) {
+                    $record['Texts'] = Set::combine($record['Texts'], '/language', '/');
+                }
+                return $record;
+            })
+            ->setIncomingDataModifier(function (array $data) {
+                if (!empty($data['Texts']) && is_array($data['Texts'])) {
+                    foreach ($data['Texts'] as $i => &$textData) {
+                        if (empty($textData['id'])) {
+                            unset($textData['id']);
+                        }
+                    }
+                }
+                return $data;
             });
 
         /** @var CmsPagesTable $pagesTable */
         $pagesTable = app(CmsPagesTable::class);
         if ($pagesTable->getTableStructure()->images->hasImagesConfigurations()) {
-            $formConfig->addTab(cmfTransCustom('.pages.form.tab.images'), [
+            $formConfig->addTab($this->translate('form.tab', 'images'), [
                 'images' => ImagesFormInput::create(),
             ]);
         }
-        /** @var CmsSetting $cmsSetting */
-        $cmsSetting = app(CmsSetting::class);
-        /** @var CmsTextsTable $textsTable */
-        $textsTable = app(CmsTextsTable::class);
         foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
-            $formConfig->addTab(cmfTransCustom('.pages.form.tab.texts', ['language' => $langLabel]), [
-                "Texts.$langId.title" => FormInput::create()->setNameForTranslation('Texts.title'),
+            $formConfig->addTab($this->translate('form.tab', 'texts', ['language' => $langLabel]), [
+                "Texts.$langId.id" => FormInput::create()->setType(FormInput::TYPE_HIDDEN),
                 "Texts.$langId.browser_title" => FormInput::create()->setNameForTranslation('Texts.browser_title'),
                 "Texts.$langId.menu_title" => FormInput::create()->setNameForTranslation('Texts.menu_title'),
                 "Texts.$langId.meta_description" => FormInput::create()->setNameForTranslation('Texts.meta_description'),
@@ -184,7 +205,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setNameForTranslation('Texts.content'),
                 "Texts.$langId.language" => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
-                    ->setValueConverter(function () use ($langId) {
+                    ->setSubmittedValueModifier(function () use ($langId) {
                         return $langId;
                     }),
                 "Texts.$langId.admin_id" => FormInput::create()
@@ -200,7 +221,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
     protected function addUniquePageUrlValidator() {
         /** @var CmsPagesTable $pagesTable */
         $pagesTable = app(CmsPagesTable::class);
-        \Validator::extend('unique_page_url', function ($attribute, $value, $parameters) use ($pagesTable) {
+        \Validator::extend('unique_page_url', function () use ($pagesTable) {
             $urlAlias = request()->input('url_alias');
             $parentId = (int)request()->input('parent_id');
             if ($parentId > 0 && $urlAlias === '/') {
@@ -213,7 +234,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 ]) === 0;
             }
         });
-        \Validator::replacer('unique_page_url', function ($message, $attribute, $rule, $parameters) use ($pagesTable) {
+        \Validator::replacer('unique_page_url', function () use ($pagesTable) {
             $urlAlias = request()->input('url_alias');
             $parentId = (int)request()->input('parent_id');
             if ($parentId > 0 && $urlAlias === '/') {
@@ -227,7 +248,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     ]
                 );
             }
-            return cmfTransCustom('.pages.form.validation.unique_page_url', [
+            return $this->translate('form.validation', 'unique_page_url', [
                 'url' => routeToCmfItemEditForm($this->getTableNameForRoutes(), $otherPageId)
             ]);
         });
@@ -269,40 +290,93 @@ SCRIPT;
     protected function getDataInsertsForContentEditor() {
         return [
             WysiwygFormInput::createDataInsertConfigWithArguments(
-                'pageData(":text_id", ":text_field")',
-                'Вставить часть другого текста',
+                'insertPageData(":page_id", ":page_field")',
+                $this->translate('form.input.content_inserts', 'part_of_other_page'),
                 false,
                 [
-                    'text_id' => [
-                        'label' => 'Выберите Текст',
+                    'page_id' => [
+                        'label' => $this->translate('form.input.content_inserts', 'page_id_arg_label'),
                         'type' => 'select',
-                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'texts_for_inserts', true),
+                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'pages_for_inserts', true),
                     ],
-                    'text_field' => [
-                        'label' => 'Выберите какую часть выбранного Текста вставить',
+                    'page_field' => [
+                        'label' => $this->translate('form.input.content_inserts', 'page_field_arg_label'),
                         'type' => 'select',
                         'options' => [
-                            'title' => cmfTransCustom('.common_texts.form.input.title'),
-                            'content' => cmfTransCustom('.common_texts.form.input.content'),
+                            'menu_title' => $this->translate('form.input', 'Texts.menu_title'),
+                            'content' => $this->translate('form.input', 'Texts.content'),
                         ],
                         'value' => 'content'
                     ]
                 ],
-                cmfTransCustom('.pages.form.input.Texts.insert_other_text_widget_title_template')
+                $this->translate('form.input.content_inserts', 'page_insert_widget_title_template')
+            ),
+            WysiwygFormInput::createDataInsertConfigWithArguments(
+                'insertLinkToPage(":page_id", ":title")',
+                $this->translate('form.input.content_inserts', 'link_to_other_page'),
+                false,
+                [
+                    'page_id' => [
+                        'label' => $this->translate('form.input.content_inserts', 'page_id_arg_label'),
+                        'type' => 'select',
+                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'pages_for_inserts', true),
+                    ],
+                    'title' => [
+                        'label' => $this->translate('form.input.content_inserts', 'page_link_title_arg_label'),
+                        'type' => 'text',
+                    ]
+                ],
+                $this->translate('form.input.content_inserts', 'insert_link_to_page_widget_title_template')
+            ),
+            WysiwygFormInput::createDataInsertConfigWithArguments(
+                'insertTextData(":text_id", ":text_field")',
+                $this->translate('form.input.content_inserts', 'part_of_text'),
+                false,
+                [
+                    'text_id' => [
+                        'label' => $this->translate('form.input.content_inserts', 'text_id_arg_label'),
+                        'type' => 'select',
+                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'texts_for_inserts', true),
+                    ],
+                    'text_field' => [
+                        'label' => $this->translate('form.input.content_inserts', 'text_field_arg_label'),
+                        'type' => 'select',
+                        'options' => [
+                            'title' => $this->translate('form.input', 'Texts.title'),
+                            'menu_title' => $this->translate('form.input', 'Texts.menu_title'),
+                            'content' => $this->translate('form.input', 'Texts.content'),
+                        ],
+                        'value' => 'content'
+                    ]
+                ],
+                $this->translate('form.input.content_inserts', 'text_insert_widget_title_template')
             ),
         ];
     }
 
     public function getCustomData($dataId) {
-        if ($dataId === 'texts_for_inserts') {
-            /** @var CmsTextsTable $textsTable */
-            $textsTable = app(CmsTextsTable::class);
-            return $textsTable::selectAssoc('id', 'title', [
-                'type' => null,
-                'id !=' => (int)request()->query('pk', 0) ?: 0,
-            ]);
-        } else {
-            return parent::getCustomData($dataId);
+        switch ($dataId) {
+            case 'texts_for_inserts':
+                /** @var CmsTextsTable $textsTable */
+                $textsTable = app(CmsTextsTable::class);
+                return $textsTable::selectAssoc('id', 'title', [
+                    'type' => null,
+                    'page_id !=' => (int)request()->query('pk', 0) ?: 0,
+                ]);
+            case 'pages_for_inserts':
+                /** @var CmsPagesTable $pagesTable */
+                $pagesTable = app(CmsPagesTable::class);
+                $pages = $pagesTable::select(['id', 'url_alias', 'Parent' => ['id', 'url_alias']], [
+                    'id !=' => (int)request()->query('pk', 0) ?: 0,
+                ]);
+                $options = [];
+                /** @var CmsPage $pageData */
+                foreach ($pages as $pageData) {
+                    $options[$pageData['id']] = $pageData->relative_url;
+                }
+                return $options;
+            default:
+                return parent::getCustomData($dataId);
         }
     }
 }

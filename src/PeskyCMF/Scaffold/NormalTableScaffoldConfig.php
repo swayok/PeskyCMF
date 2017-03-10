@@ -106,22 +106,24 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $conditions = $sectionConfig->getSpecialConditions();
         $conditions[$table->getPkColumnName()] = $id;
         $relationsToRead = [];
-        foreach ($sectionConfig->getRelationsToRead() as $relationName => $columns) {
-            if (is_int($relationName)) {
-                $relationName = $columns;
-                $columns = ['*'];
+        if ($id !== null) {
+            foreach ($sectionConfig->getRelationsToRead() as $relationName => $columns) {
+                if (is_int($relationName)) {
+                    $relationName = $columns;
+                    $columns = ['*'];
+                }
+                $relationsToRead[$relationName] = $columns;
             }
-            $relationsToRead[$relationName] = $columns;
-        }
-        foreach ($sectionConfig->getViewersForRelations() as $viewer) {
-            if (!array_key_exists($viewer->getRelation()->getName(), $relationsToRead)) {
-                $relationsToRead[$viewer->getRelation()->getName()] = ['*'];
+            foreach ($sectionConfig->getViewersForRelations() as $viewer) {
+                if (!array_key_exists($viewer->getRelation()->getName(), $relationsToRead)) {
+                    $relationsToRead[$viewer->getRelation()->getName()] = ['*'];
+                }
             }
         }
         if (!$object->fromDb($conditions, [], array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        $data = $object->toArray([], $sectionConfig->getRelationsToRead(), false);
+        $data = $object->toArray([], $relationsToRead, false);
         if (
             (
                 $isItemDetails
@@ -157,7 +159,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $table = $this->getTable();
         $formConfig = $this->getFormConfig();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            array_intersect_key($this->getRequest()->all(), $formConfig->getValueViewers())
+            $this->getRequest()->only(array_keys($formConfig->getValueViewers())),
+            true
         );
         $errors = $formConfig->validateDataForCreate($data);
         if (count($errors) !== 0) {
@@ -183,12 +186,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             try {
                 $dataToSave = array_diff_key($data, $formConfig->getStandaloneViewers());
                 $object = $table->newRecord()->fromData($dataToSave, false);
-                $success = $object->save();
-                if (!$success) {
-                    $table::rollBackTransaction();
-                    return cmfJsonResponse(HttpCode::SERVER_ERROR)
-                        ->setMessage(cmfTransGeneral('.form.failed_to_save_data'));
-                } else if ($formConfig->hasAfterSaveCallback()) {
+                $object->save(['*']);
+                if ($formConfig->hasAfterSaveCallback()) {
                     $success = call_user_func($formConfig->getAfterSaveCallback(), true, $data, $object, $formConfig);
                     if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
                         if ($success->getStatusCode() < 400) {
@@ -229,7 +228,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $expectedFields = array_keys($formConfig->getValueViewers());
         $expectedFields[] = $table->getPkColumnName();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            array_intersect_key($this->getRequest()->all(), array_flip($expectedFields))
+            $this->getRequest()->only($expectedFields),
+            false
         );
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {
@@ -269,12 +269,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             $table::beginTransaction();
             try {
                 $dbData = array_diff_key($data, $formConfig->getStandaloneViewers());
-                $success = $object->begin()->updateValues($dbData)->commit();
-                if (!$success) {
-                    $table::rollBackTransaction();
-                    return cmfJsonResponse(HttpCode::SERVER_ERROR)
-                        ->setMessage(cmfTransGeneral('.form.failed_to_save_data'));
-                } else if ($formConfig->hasAfterSaveCallback()) {
+                $object->begin()->updateValues($dbData)->commit(['*']);
+                if ($formConfig->hasAfterSaveCallback()) {
                     $success = call_user_func($formConfig->getAfterSaveCallback(), false, $data, $object, $formConfig);
                     if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
                         if ($success->getStatusCode() < 400) {

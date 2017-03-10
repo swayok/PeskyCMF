@@ -276,8 +276,20 @@ $dictionary = [
                     'meta_description' => 'Meta-description',
                     'meta_keywords' => 'Meta-keywords',
                     'custom_info' => 'Additional info',
-                    'insert_other_text_widget_title_template' => 'Insert field ":text_field.label" from texts ":text_id.label"',
-                ]
+                ],
+                'content_inserts' => [
+                    'part_of_other_page' => 'Part of other page',
+                    'page_id_arg_label' => 'Select page',
+                    'page_field_arg_label' => 'Select page\'s field',
+                    'page_insert_widget_title_template' => 'Insert field ":page_field.label" from texts ":page_id.label"',
+                    'part_of_text' => 'Text element',
+                    'text_id_arg_label' => 'Select text element',
+                    'text_field_arg_label' => 'Select element\'s field',
+                    'text_insert_widget_title_template' => 'Insert field ":text_field.label" from texts ":text_id.label"',
+                    'link_to_other_page' => 'Link to page',
+                    'page_link_title_arg_label' => 'Link label (by default: "Short title" field value of selected page)',
+                    'insert_link_to_page_widget_title_template' => 'Link to ":page_id.label" (Label: :title)',
+                ],
             ],
             'tooltip' => [
                 'meta_description' => 'Used in cases when Meta-description is not provided by attached texts',

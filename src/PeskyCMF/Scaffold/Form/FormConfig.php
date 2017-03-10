@@ -53,20 +53,22 @@ class FormConfig extends ScaffoldSectionConfig {
     protected $additionalHtmlForForm = '';
 
     const VALIDATOR_FOR_ID = 'required|integer|min:1';
-    /** @var \Closure */
+    /** @var \Closure|null */
+    protected $incomingDataModifier;
+    /** @var \Closure|null */
     protected $beforeSaveCallback;
-    /** @var \Closure */
-    protected $beforeBulkEditDataSaveCallback;
+     /** @var \Closure|null */
+    protected $afterSaveCallback;
     /** @var bool */
     protected $revalidateDataAfterBeforeSaveCallbackForCreation = false;
     /** @var bool */
     protected $revalidateDataAfterBeforeSaveCallbackForUpdate = false;
-    /** @var \Closure */
+    /** @var \Closure|null */
     protected $beforeValidateCallback;
     /** @var \Closure|null */
     protected $validationSuccessCallback;
     /** @var \Closure|null */
-    protected $afterSaveCallback;
+    protected $beforeBulkEditDataSaveCallback;
     /** @var \Closure|null */
     protected $afterBulkEditDataSaveCallback;
 
@@ -692,17 +694,32 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /**
      * @param array $data
+     * @param bool $isCreation
      * @return array
-     * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
-    public function modifyIncomingDataBeforeValidation(array $data) {
-        foreach ($data as $key => &$value) {
-            if ($this->hasValueViewer($key)) {
-                $value = $this->getFormInput($key)->modifySubmitedValueBeforeValidation($value, $data);
+    public function modifyIncomingDataBeforeValidation(array $data, $isCreation) {
+        foreach ($this->getFormInputs() as $inputName => $formInput) {
+            array_set($data, $inputName, $formInput->modifySubmitedValueBeforeValidation(array_get($data, $inputName, ''), $data));
+        }
+        if ($this->incomingDataModifier) {
+            $data = call_user_func($this->incomingDataModifier, $data, $isCreation, $this);
+            if (!is_array($data)) {
+                throw new \UnexpectedValueException('incomingDataModifier closure must return an array');
             }
         }
         return $data;
+    }
+
+    /**
+     * @param \Closure $modifier - function (array $data, $isCreation, FormConfig $formConfig) { return $data; }
+     * @return $this
+     */
+    public function setIncomingDataModifier(\Closure $modifier) {
+        $this->incomingDataModifier = $modifier;
+        return $this;
     }
 
     /**
@@ -1018,13 +1035,14 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @param AbstractValueViewer|null $viewer
      * @param string $suffix
+     * @param array $parameters
      * @return string
      */
-    public function translate(AbstractValueViewer $viewer = null, $suffix = '') {
+    public function translate(AbstractValueViewer $viewer = null, $suffix = '', array $parameters = []) {
         if ($viewer) {
-            return $this->getScaffoldConfig()->translateForViewer('form.input', $viewer, $suffix);
+            return $this->getScaffoldConfig()->translateForViewer('form.input', $viewer, $suffix, $parameters);
         } else {
-            return $this->getScaffoldConfig()->translate('form', $suffix);
+            return $this->getScaffoldConfig()->translate('form', $suffix, $parameters);
         }
     }
 

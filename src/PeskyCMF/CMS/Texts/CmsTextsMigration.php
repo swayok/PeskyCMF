@@ -15,9 +15,8 @@ class CmsTextsMigration extends Migration {
                 $table->increments('id');
                 $table->integer('page_id')->nullable()->unsigned();
                 $table->integer('admin_id')->nullable()->unsigned();
-                $table->string('type', 50)->nullable()->default(null);
                 $table->char('language', 2);
-                $table->string('title');
+                $table->string('title')->default('');
                 $table->string('browser_title')->default('');
                 $table->string('menu_title')->default('');
                 $table->string('comment', 1000)->default('');

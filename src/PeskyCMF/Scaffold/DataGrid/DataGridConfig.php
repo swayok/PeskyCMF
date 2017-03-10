@@ -626,13 +626,14 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param AbstractValueViewer|null $viewer
      * @param string $suffix
+     * @param array $parameters
      * @return string
      */
-    public function translate(AbstractValueViewer $viewer = null, $suffix = '') {
+    public function translate(AbstractValueViewer $viewer = null, $suffix = '', array $parameters = []) {
         if ($viewer) {
-            return $this->getScaffoldConfig()->translateForViewer('datagrid.column', $viewer, $suffix);
+            return $this->getScaffoldConfig()->translateForViewer('datagrid.column', $viewer, $suffix, $parameters);
         } else {
-            return $this->getScaffoldConfig()->translate('datagrid', $suffix);
+            return $this->getScaffoldConfig()->translate('datagrid', $suffix, $parameters);
         }
     }
 

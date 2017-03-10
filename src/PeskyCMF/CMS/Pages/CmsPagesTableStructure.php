@@ -143,7 +143,7 @@ class CmsPagesTableStructure extends CmsTableStructure {
     }
 
     private function Texts() {
-        return Relation::create('parent_id', Relation::BELONGS_TO, app(CmsTextsTable::class), 'id')
+        return Relation::create('id', Relation::HAS_MANY, app(CmsTextsTable::class), 'page_id')
             ->setDisplayColumnName('title');
     }
 

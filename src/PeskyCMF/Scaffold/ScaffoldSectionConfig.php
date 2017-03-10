@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
+use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 
@@ -39,6 +40,10 @@ abstract class ScaffoldSectionConfig {
      * @var null|\Closure
      */
     protected $defaultFieldRenderer = null;
+    /**
+     * @var null|\Closure
+     */
+    protected $rawRecordDataModifier;
     /**
      * Container width (percents)
      * @var int
@@ -118,9 +123,10 @@ abstract class ScaffoldSectionConfig {
     /**
      * @param AbstractValueViewer|null $viewer
      * @param string $suffix
+     * @param array $parameters
      * @return string
      */
-    abstract public function translate(AbstractValueViewer $viewer = null, $suffix = '');
+    abstract public function translate(AbstractValueViewer $viewer = null, $suffix = '', array $parameters = []);
 
     /**
      * Disables any usage of TableStructure (validation, automatic field type guessing, etc)
@@ -324,6 +330,32 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @param array $record
+     * @return array
+     * @throws \UnexpectedValueException
+     */
+    protected function modifyRawRecordData(array $record) {
+        if ($this->rawRecordDataModifier !== null) {
+            $record = call_user_func($this->rawRecordDataModifier, $record, $this);
+            if (!is_array($record)) {
+                throw new \UnexpectedValueException('modifyRawDataRecord must return array');
+            }
+        }
+        return $record;
+    }
+
+    /**
+     * Modify record's data before it is processed by ScaffoldSectionConfig->prepareRecord()
+     * Must return array
+     * @param \Closure $modifier - function (array $record, ScaffoldSectionConfig $sectionConfig) { return $record }
+     * @return $this
+     */
+    public function setRawRecordDataModifier(\Closure $modifier) {
+        $this->rawRecordDataModifier = $modifier;
+        return $this;
+    }
+
+    /**
+     * @param array $record
      * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
      * @return array
      * @throws \PeskyORM\Exception\InvalidDataException
@@ -356,6 +388,7 @@ abstract class ScaffoldSectionConfig {
                 $record[$virtualColumn] = $recordObj->getValue($virtualColumn);
             }
         }
+        $record = $this->modifyRawRecordData($record);
         $customData = $this->getCustomDataForRecord($record);
         $valueViewers = $this->getValueViewers();
         $pkKey = $this->getTable()->getPkColumnName();
@@ -367,7 +400,14 @@ abstract class ScaffoldSectionConfig {
         foreach ($record as $key => $notUsed) {
             if ($this->getTable()->getTableStructure()->hasRelation($key)) {
                 unset($recordWithBackup['__' . $key]);
-                $recordWithBackup[$key] = $this->prepareRelatedRecord($key, $record[$key]);
+                if ($this->getTable()->getTableStructure()->getRelation($key)->getType() === Relation::HAS_MANY) {
+                    $recordWithBackup[$key] = [];
+                    foreach ($record[$key] as $index => $relationData) {
+                        $recordWithBackup[$key][$index] = $this->prepareRelatedRecord($key, $relationData, $index);
+                    }
+                } else {
+                    $recordWithBackup[$key] = $this->prepareRelatedRecord($key, $record[$key]);
+                }
                 continue;
             }
             if (empty($valueViewers[$key])) {
@@ -399,17 +439,18 @@ abstract class ScaffoldSectionConfig {
      * Process related record's data by viewers attached to it
      * @param string $relationName
      * @param array $relationRecordData
+     * @param null|string $index - string: passed for HAS_MANY relation | null: for relations other then HAS_MANY
      * @return array
      * @throws \UnexpectedValueException
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    protected function prepareRelatedRecord($relationName, array $relationRecordData) {
+    protected function prepareRelatedRecord($relationName, array $relationRecordData, $index = null) {
         $recordWithBackup = $relationRecordData;
         $valueViewers = $this->getViewersForRelations();
         foreach ($relationRecordData as $columnName => $value) {
-            $viewerName = $relationName . '.' . $columnName;
+            $viewerName = $relationName . '.' . ($index === null ? '' : $index . '.') . $columnName;
             if (
                 array_key_exists($viewerName, $valueViewers)
                 && $valueViewers[$viewerName]->getRelation()->getName() === $relationName

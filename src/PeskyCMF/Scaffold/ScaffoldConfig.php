@@ -250,19 +250,21 @@ abstract class ScaffoldConfig {
      * @param string $section - main sections are: 'datagrid.column', 'item_details.field', 'form.input'
      * @param AbstractValueViewer $viewer
      * @param string $suffix
+     * @param array $parameters
      * @return string
      */
-    public function translateForViewer($section, AbstractValueViewer $viewer, $suffix = '') {
-        return $this->translate($section, $viewer->getNameForTranslation() . '.' . $suffix);
+    public function translateForViewer($section, AbstractValueViewer $viewer, $suffix = '', array $parameters = []) {
+        return $this->translate($section, "{$viewer->getNameForTranslation()}.{$suffix}", $parameters);
     }
 
     /**
      * @param string $section - main sections are: 'form.tooltip'
      * @param string $suffix
+     * @param array $parameters
      * @return array|string
      */
-    public function translate($section, $suffix = '') {
-        return cmfTransCustom(rtrim(".{$this->viewsBaseTranslationKey}.{$section}.$suffix", '.'));
+    public function translate($section, $suffix = '', array $parameters = []) {
+        return cmfTransCustom(rtrim(".{$this->viewsBaseTranslationKey}.{$section}.$suffix", '.'), $parameters);
     }
 
     public function renderTemplates() {

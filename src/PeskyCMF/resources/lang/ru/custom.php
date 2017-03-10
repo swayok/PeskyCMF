@@ -280,8 +280,20 @@ $dictionary = [
                     'content' => 'Текcт',
                     'meta_description' => 'Meta-description',
                     'meta_keywords' => 'Meta-keywords',
-                    'insert_other_text_widget_title_template' => 'Вставка поля ":text_field.label" из текстов ":text_id.label"'
-                ]
+                ],
+                'content_inserts' => [
+                    'part_of_other_page' => 'Часть другой страницы',
+                    'page_id_arg_label' => 'Выберите страницу',
+                    'page_field_arg_label' => 'Выберите какую часть выбранной страницы вставить',
+                    'page_insert_widget_title_template' => 'Вставка поля ":page_field.label" со страницы ":page_id.label"',
+                    'part_of_text' => 'Текстовый элемент',
+                    'text_id_arg_label' => 'Выберите текстовый элемент',
+                    'text_field_arg_label' => 'Выберите какую часть выбранного текстового элемента вставить',
+                    'text_insert_widget_title_template' => 'Вставка поля ":text_field.label" из текстового элемента ":text_id.label"',
+                    'link_to_other_page' => 'Ссылка на страницу',
+                    'page_link_title_arg_label' => 'Текст ссылки (по умолчанию берется из поля "Короткое название" страницы)',
+                    'insert_link_to_page_widget_title_template' => 'Ссылка на страницу ":page_id.label" (Текст: :title)',
+                ],
             ],
             'tooltip' => [
                 'meta_description' => 'Используется в случае если Meta-description не указан в прикрепленных текстах',

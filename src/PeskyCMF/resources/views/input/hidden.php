@@ -6,7 +6,7 @@
  * @var \PeskyORM\ORM\TableInterface $table
  */
 $rendererConfig
-    ->addAttribute('name', $valueViewer->getName(), true)
+    ->addAttribute('name', $valueViewer->getName(true), true)
     ->addAttribute('id', $valueViewer->getDefaultId(), false)
     ->addAttribute('type', 'hidden', true);
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());

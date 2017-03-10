@@ -107,7 +107,8 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         $fkValue = empty($fkColumn) ? null : $request->input($fkColumn);
         $inputConfigs = $formConfig->getValueViewers();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            array_intersect_key($this->getRequest()->all(), $inputConfigs)
+            array_intersect_key($this->getRequest()->all(), $inputConfigs),
+            false
         );
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {
