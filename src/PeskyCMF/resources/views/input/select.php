@@ -1,14 +1,14 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\FormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
 $isMultiple = $rendererConfig->getAttribute('multiple', false);
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(true) . ($isMultiple ? '[]' : ''), false)
-    ->addAttribute('id', $fieldConfig->getDefaultId(), false)
+    ->addAttribute('name', $valueViewer->getName(true) . ($isMultiple ? '[]' : ''), false)
+    ->addAttribute('id', $valueViewer->getDefaultId(), false)
     ->addAttribute('class', 'form-control selectpicker', false);
 
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
@@ -18,21 +18,21 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
 
 <div class="form-group <?php echo $isHidden ? 'hidden' : ''; ?>">
     <?php if (!$isHidden) : ?>
-        <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
+        <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
     <?php endif; ?>
     <select {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
         <?php if ($isMultiple): ?>
-            data-value="<?php echo $fieldConfig->getDotJsJsonInsertForValue(true); ?>"
+            data-value="<?php echo $valueViewer->getDotJsJsonInsertForValue(true); ?>"
         <?php else: ?>
-            data-value="<?php echo $fieldConfig->getDotJsInsertForValue(); ?>"
+            data-value="<?php echo $valueViewer->getDotJsInsertForValue(); ?>"
         <?php endif; ?>
     >
-    <?php if (!$fieldConfig->hasOptionsLoader()) : ?>
+    <?php if (!$valueViewer->hasOptionsLoader()) : ?>
         <?php if ($rendererConfig->areOptionsDifferent()) : ?>
             {{? !!it.isCreation }}
                 <?php $options = $rendererConfig->getOptionsForCreate(); ?>
                 <?php if (!$rendererConfig->isRequiredForCreate() && !array_key_exists('', $options)) : ?>
-                    <option value=""><?php echo $fieldConfig->getEmptyOptionLabel() ?></option>
+                    <option value=""><?php echo $valueViewer->getEmptyOptionLabel() ?></option>
                 <?php endif; ?>
                 <?php foreach ($options as $value => $label): ?>
                     <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
@@ -40,7 +40,7 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
             {{??}}
                 <?php $options = $rendererConfig->getOptionsForEdit(); ?>
                 <?php if (!$rendererConfig->isRequiredForEdit() && !array_key_exists('', $options)) : ?>
-                    <option value=""><?php echo $fieldConfig->getEmptyOptionLabel() ?></option>
+                    <option value=""><?php echo $valueViewer->getEmptyOptionLabel() ?></option>
                 <?php endif; ?>
                 <?php foreach ($options as $value => $label): ?>
                     <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
@@ -49,22 +49,22 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
         <?php else : ?>
             <?php $options = $rendererConfig->getOptions(); ?>
             <?php if (!$rendererConfig->isRequired() && !array_key_exists('', $options)) : ?>
-                <option value=""><?php echo $fieldConfig->getEmptyOptionLabel() ?></option>
+                <option value=""><?php echo $valueViewer->getEmptyOptionLabel() ?></option>
             <?php endif; ?>
             <?php foreach ($options as $value => $label): ?>
                 <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
             <?php endforeach; ?>
         <?php endif; ?>
     <?php else: ?>
-        {{? it._options && it._options.<?php echo $fieldConfig->getName(); ?> }}
-            {{= it._options.<?php echo $fieldConfig->getName(); ?> }}
+        {{? it._options && it._options.<?php echo $valueViewer->getName(); ?> }}
+            {{= it._options.<?php echo $valueViewer->getName(); ?> }}
         {{?}}
     <?php endif; ?>
     </select>
-    <?php if ($rendererConfig->isRequired() && $fieldConfig->hasOptionsLoader()) : ?>
+    <?php if ($rendererConfig->isRequired() && $valueViewer->hasOptionsLoader()) : ?>
         <script type="application/javascript">
             $('#<?php echo $rendererConfig->getAttribute('id') ?>').find('option[value=""]').remove();
         </script>
     <?php endif; ?>
-    <?php echo $isHidden ? '' : $fieldConfig->getFormattedTooltip(); ?>
+    <?php echo $isHidden ? '' : $valueViewer->getFormattedTooltip(); ?>
 </div>

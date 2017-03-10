@@ -376,16 +376,16 @@ abstract class ScaffoldSectionConfig {
                 }
                 continue;
             }
-            $fieldConfig = $valueViewers[$key];
+            $valueViewer = $valueViewers[$key];
             if (
-                is_object($fieldConfig)
-                && method_exists($fieldConfig, 'convertValue')
+                is_object($valueViewer)
+                && method_exists($valueViewer, 'convertValue')
                 && (
-                    !method_exists($fieldConfig, 'isVisible')
-                    || $fieldConfig->isVisible()
+                    !method_exists($valueViewer, 'isVisible')
+                    || $valueViewer->isVisible()
                 )
             ) {
-                $recordWithBackup[$key] = $fieldConfig->convertValue($recordWithBackup[$key], $record);
+                $recordWithBackup[$key] = $valueViewer->convertValue($recordWithBackup[$key], $record);
             }
         }
         if (!empty($customData) && is_array($customData)) {
@@ -415,16 +415,16 @@ abstract class ScaffoldSectionConfig {
                 && $valueViewers[$viewerName]->getRelation()->getName() === $relationName
             ) {
                 $recordWithBackup[$columnName] = $recordWithBackup['__' . $columnName] = $value;
-                $fieldConfig = $valueViewers[$viewerName];
+                $valueViewer = $valueViewers[$viewerName];
                 if (
-                    is_object($fieldConfig)
-                    && method_exists($fieldConfig, 'convertValue')
+                    is_object($valueViewer)
+                    && method_exists($valueViewer, 'convertValue')
                     && (
-                        !method_exists($fieldConfig, 'isVisible')
-                        || $fieldConfig->isVisible()
+                        !method_exists($valueViewer, 'isVisible')
+                        || $valueViewer->isVisible()
                     )
                 ) {
-                    $recordWithBackup[$columnName] = $fieldConfig->convertValue(
+                    $recordWithBackup[$columnName] = $valueViewer->convertValue(
                         $recordWithBackup[$columnName],
                         $relationRecordData
                     );
@@ -463,7 +463,7 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * @param array|\Closure $arrayOrClosure - function (ScaffoldSectionConfig $actionConfig) { return [] }
+     * @param array|\Closure $arrayOrClosure - function (ScaffoldSectionConfig $sectionConfig) { return [] }
      * @return $this
      * @throws ScaffoldException
      */
@@ -526,9 +526,9 @@ abstract class ScaffoldSectionConfig {
         if (!empty($this->defaultFieldRenderer)) {
             return $this->defaultFieldRenderer;
         } else {
-            $this->setDefaultValueRenderer(function (AbstractValueViewer $fieldConfig, $actionConfig, array $dataForView) {
+            $this->setDefaultValueRenderer(function (AbstractValueViewer $valueViewer, $sectionConfig, array $dataForView) {
                 $rendererConfig = $this->createValueRenderer()->setData($dataForView);
-                $this->configureDefaultValueRenderer($rendererConfig, $fieldConfig);
+                $this->configureDefaultValueRenderer($rendererConfig, $valueViewer);
                 return $rendererConfig;
             });
             return $this->defaultFieldRenderer;

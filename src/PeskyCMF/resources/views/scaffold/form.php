@@ -1,13 +1,13 @@
 <?php
 /**
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyORM\ORM\TableInterface $table
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  * @var string $tableNameForRoutes
  * @var string $idSuffix
  */
 
 $formId = "scaffold-form-{$idSuffix}";
-$pkColName = $model->getPkColumnName();
+$pkColName = $table->getPkColumnName();
 
 $ifEdit = '{{? !it._is_creation }}';
 $ifCreate = '{{? it._is_creation }}';
@@ -69,7 +69,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     <?php
                         $deleteUrl = str_ireplace(
                             ':id:',
-                            "{{= it.{$model->getPkColumnName()} }}",
+                            "{{= it.{$table->getPkColumnName()} }}",
                             route('cmf_api_delete_item', [$tableNameForRoutes, ':id:'])
                         );
                     ?>

@@ -1,9 +1,9 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\FormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
 $rendererConfig
     ->addAttribute('autocomplete', 'off', false)

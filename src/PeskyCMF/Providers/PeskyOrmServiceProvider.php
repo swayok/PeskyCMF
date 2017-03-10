@@ -4,6 +4,7 @@ namespace PeskyCMF\Providers;
 
 use Auth;
 use Illuminate\Support\ServiceProvider;
+use PeskyCMF\Config\CmfConfig;
 use PeskyORM\Core\DbAdapter;
 use PeskyORM\Core\DbAdapterInterface;
 use PeskyORM\Core\DbConnectionsManager;
@@ -50,8 +51,8 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      * @return void
      */
     public function register() {
-        Auth::provider('peskyorm', function($app, array $config) {
-            return new PeskyOrmUserProvider($config['model']);
+        Auth::provider('peskyorm', function() {
+            return new PeskyOrmUserProvider(CmfConfig::getPrimary()->user_object_class());
         });
     }
 }

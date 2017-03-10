@@ -1,12 +1,12 @@
 <?php
 /**
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyORM\ORM\TableInterface $table
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  * @var string $tableNameForRoutes
  * @var string $idSuffix
  */
 $formId = "scaffold-bulk-edit-form-{$idSuffix}";
-$pkColName = $model->getPkColumnName();
+$pkColName = $table->getPkColumnName();
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 ?>
 

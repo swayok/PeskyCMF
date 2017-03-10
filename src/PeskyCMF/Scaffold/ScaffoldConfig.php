@@ -88,7 +88,7 @@ abstract class ScaffoldConfig {
      */
     public function getConfigsForTemplatesRendering() {
         $configs = [
-            'model' => $this->getTable(),
+            'table' => $this->getTable(),
             'scaffoldConfig' => $this
         ];
         $configs['dataGridConfig'] = $this->getDataGridConfig();

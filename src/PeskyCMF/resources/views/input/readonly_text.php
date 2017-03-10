@@ -1,14 +1,14 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\FormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
 ?>
 
 <div class="form-group">
-    <label><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
-    <div><?php echo $fieldConfig->getDotJsJsonInsertForValue(); ?></div>
-    <?php echo $fieldConfig->getFormattedTooltip(); ?>
+    <label><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
+    <div><?php echo $valueViewer->getDotJsJsonInsertForValue(); ?></div>
+    <?php echo $valueViewer->getFormattedTooltip(); ?>
 </div>

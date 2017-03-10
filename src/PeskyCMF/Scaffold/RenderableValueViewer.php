@@ -29,13 +29,13 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
             if (!empty($defaultRenderer)) {
                 return $defaultRenderer;
             }
-            throw new ValueViewerConfigException($this, 'FromFieldConfig->renderer is not provided');
+            throw new ValueViewerConfigException($this, get_class($this) . '->renderer is not provided');
         }
         return $this->renderer;
     }
 
     /**
-     * @param \Closure $renderer - function (RenderableValueViewer $valueViewer, ScaffoldSectionConfig $actionConfig, array $dataForTemplate) {}
+     * @param \Closure $renderer - function (RenderableValueViewer $valueViewer, ScaffoldSectionConfig $sectionConfig, array $dataForTemplate) {}
      *      function may return either string or instance of ValueRenderer
      * @return $this
      */
@@ -57,10 +57,10 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
             $rendered = $configOrString;
         } else if ($configOrString instanceof ValueRenderer) {
             $rendered = view($configOrString->getTemplate(), array_merge($configOrString->getData(), $dataForTemplate, [
-                'fieldConfig' => $this,
+                'valueViewer' => $this,
                 'rendererConfig' => $configOrString,
-                'actionConfig' => $this->getScaffoldSectionConfig(),
-                'model' => $this->getScaffoldSectionConfig()->getTable(),
+                'sectionConfig' => $this->getScaffoldSectionConfig(),
+                'table' => $this->getScaffoldSectionConfig()->getTable(),
             ]))->render();
         } else {
             throw new ValueViewerConfigException($this, 'Renderer function returned unsopported result. String or ValueRenderer object expected');

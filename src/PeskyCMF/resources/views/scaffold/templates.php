@@ -1,7 +1,7 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\ScaffoldConfig $scaffoldConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyORM\ORM\TableInterface $table
  * @var string $tableNameForRoutes
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\FilterConfig $dataGridFilterConfig
@@ -9,7 +9,7 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  */
 $data = compact([
-    'model', 'tableNameForRoutes', 'dataGridConfig', 'dataGridFilterConfig', 'formConfig', 'itemDetailsConfig'
+    'table', 'tableNameForRoutes', 'dataGridConfig', 'dataGridFilterConfig', 'formConfig', 'itemDetailsConfig'
 ]);
 $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
 ?>

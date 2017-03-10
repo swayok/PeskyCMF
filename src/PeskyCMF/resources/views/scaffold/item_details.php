@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyORM\ORM\TableInterface $table
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
  * @var string $tableNameForRoutes
  * @var string $idSuffix
@@ -65,7 +65,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
                 <?php
                     $deleteUrl = str_ireplace(
                         ':id:',
-                        "{{= it.{$model->getPkColumnName()} }}",
+                        "{{= it.{$table->getPkColumnName()} }}",
                         route('cmf_api_delete_item', [$tableNameForRoutes, ':id:'])
                     );
                 ?>
@@ -81,7 +81,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
                 <?php
                     $editUrl = str_ireplace(
                         ':id:',
-                        "{{= it.{$model->getPkColumnName()} }}",
+                        "{{= it.{$table->getPkColumnName()} }}",
                         routeToCmfItemEditForm($tableNameForRoutes, ':id:')
                     );
                 ?>

@@ -1,14 +1,14 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\FormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(true), false)
+    ->addAttribute('name', $valueViewer->getName(true), false)
     ->addAttribute('type', 'checkbox', true)
-    ->addAttribute('id', $fieldConfig->getDefaultId(), false)
+    ->addAttribute('id', $valueViewer->getDefaultId(), false)
     ->addAttribute('value', 1, false)
     ->addAttribute('class', 'styled', false)
     ->addAttribute('required', false, false)
@@ -21,8 +21,8 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 
 <div class="checkbox checkbox-primary">
     <input name="<?php echo $rendererConfig->getAttribute('name'); ?>" id="_<?php echo $rendererConfig->getAttribute('id'); ?>" type="hidden" value="0">
-    <input <?php echo $fieldConfig->getDotJsInsertForValue('checked'); ?>
+    <input <?php echo $valueViewer->getDotJsInsertForValue('checked'); ?>
             {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
-    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
-    <?php echo $fieldConfig->getFormattedTooltip(); ?>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
+    <?php echo $valueViewer->getFormattedTooltip(); ?>
 </div>

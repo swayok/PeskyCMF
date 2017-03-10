@@ -74,12 +74,12 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         }
         $keysAndValues = $table::getValuesForForeignKey(empty($fkColumn) ? null : $ownerRecordId, true);
         if ($isItemDetails) {
-            $actionConfig = $this->getItemDetailsConfig();
+            $sectionConfig = $this->getItemDetailsConfig();
         } else {
-            $actionConfig = $this->getFormConfig();
+            $sectionConfig = $this->getFormConfig();
         }
         $keysAndValues[$table::getPkColumnName()] = 0;
-        return cmfJsonResponse()->setData($actionConfig->prepareRecord($keysAndValues));
+        return cmfJsonResponse()->setData($sectionConfig->prepareRecord($keysAndValues));
     }
 
     public function getDefaultValuesForFormInputs() {

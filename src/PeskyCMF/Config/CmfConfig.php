@@ -742,7 +742,7 @@ abstract class CmfConfig extends ConfigsContainer {
     /**
      * Get ScaffoldConfig instance
      * @param TableInterface $table - a model to be used in ScaffoldConfig
-     * @param string $tableNameInRoute - table name passed via route parameter, may differ from $model->getTableName()
+     * @param string $tableNameInRoute - table name passed via route parameter, may differ from $table->getTableName()
      *      and added here to be used in child configs when you need to use scaffolds with fake table names.
      *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
      * @return ScaffoldConfig

@@ -1,15 +1,15 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $fieldConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $sectionConfig
+ * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $valueViewer
+ * @var \PeskyORM\ORM\TableInterface $table
  */
 ?>
-{{? !!it.<?php echo $fieldConfig->getName() ?> && it.<?php echo $fieldConfig->getName() ?>.length > 0 }}
+{{? !!it.<?php echo $valueViewer->getName() ?> && it.<?php echo $valueViewer->getName() ?>.length > 0 }}
 <div class="image-previews-container">
-    {{? $.isArray(it.<?php echo $fieldConfig->getName() ?>) }}
-        {{~ it.<?php echo $fieldConfig->getName() ?> :imageInfo}}
+    {{? $.isArray(it.<?php echo $valueViewer->getName() ?>) }}
+        {{~ it.<?php echo $valueViewer->getName() ?> :imageInfo}}
             <div class="img-thumbnail image-preview" style="vertical-align: top">
             {{? !!imageInfo.url }}
                 {{? imageInfo.label }}<p class="text-center">{{= imageInfo.label }}</p>{{?}}
@@ -21,7 +21,7 @@
         {{~}}
     {{??}}
         <div class="img-thumbnail image-preview">
-            <img src="{{= it.<?php echo $fieldConfig->getName() ?> }}?_=<?php echo time(); ?>">
+            <img src="{{= it.<?php echo $valueViewer->getName() ?> }}?_=<?php echo time(); ?>">
         </div>
     {{?}}
 </div>

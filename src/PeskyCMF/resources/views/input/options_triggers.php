@@ -1,16 +1,16 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\FormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
-$defaultId = $rendererConfig->getAttribute('id', $fieldConfig->getDefaultId());
-$defaultName = $rendererConfig->getAttribute('name', $fieldConfig->getName(true));
+$defaultId = $rendererConfig->getAttribute('id', $valueViewer->getDefaultId());
+$defaultName = $rendererConfig->getAttribute('name', $valueViewer->getName(true));
 ?>
 
 <div class="section-divider">
-    <span><?php echo $fieldConfig->getLabel($rendererConfig); ?></span>
+    <span><?php echo $valueViewer->getLabel($rendererConfig); ?></span>
 </div>
 <div class="form-group">
     <?php foreach ($rendererConfig->getOptions() as $optionName => $optionLabel): ?>
@@ -32,12 +32,12 @@ $defaultName = $rendererConfig->getAttribute('name', $fieldConfig->getName(true)
         </label>
         <div class="<?php echo $rendererConfig->getData('grid_class_for_input', 'col-xs-4 col-md-6'); ?>">
             <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
-                <?php echo $fieldConfig->getDotJsInsertForValue('checked', $optionName); ?>
+                <?php echo $valueViewer->getDotJsInsertForValue('checked', $optionName); ?>
                 data-on-text="<?php echo $rendererConfig->getData('label_enable', cmfTransGeneral('.form.input.bool.yes')) ?>"
                 data-off-text="<?php echo $rendererConfig->getData('label_disable', cmfTransGeneral('.form.input.bool.no')) ?>">
         </div>
     </div>
     <?php endforeach; ?>
-    <?php echo $fieldConfig->getFormattedTooltip(); ?>
+    <?php echo $valueViewer->getFormattedTooltip(); ?>
 </div>
 <hr>

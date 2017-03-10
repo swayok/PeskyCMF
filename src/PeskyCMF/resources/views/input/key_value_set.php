@@ -1,19 +1,19 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\KeyValueSetFormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\KeyValueSetFormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
-$keysLabel = $fieldConfig->getKeysLabel();
-$valuesLabel = $fieldConfig->getValuesLabel();
-$defaultId = $fieldConfig->getDefaultId();
-$inputName = $fieldConfig->getName(true);
+$keysLabel = $valueViewer->getKeysLabel();
+$valuesLabel = $valueViewer->getValuesLabel();
+$defaultId = $valueViewer->getDefaultId();
+$inputName = $valueViewer->getName(true);
 ?>
 
 <div id="<?php echo $defaultId; ?>-container">
     <div class="section-divider">
-        <span><?php echo $fieldConfig->getLabel($rendererConfig) ?></span>
+        <span><?php echo $valueViewer->getLabel($rendererConfig) ?></span>
     </div>
     <script type="text/html" id="<?php echo $defaultId ?>-row-tpl">
         <tr>
@@ -27,7 +27,7 @@ $inputName = $fieldConfig->getName(true);
             </td>
             <td class="delete text-center">
                 <a href="javascript: void(0)" class="text-danger delete-row" data-toggle="tooltip"
-                 title="<?php echo $fieldConfig->getDeleteRowButtonLabel() ?>">
+                 title="<?php echo $valueViewer->getDeleteRowButtonLabel() ?>">
                     <i class="glyphicon glyphicon-remove fs16 lh30"></i>
                 </a>
             </td>
@@ -52,10 +52,10 @@ $inputName = $fieldConfig->getName(true);
     </div>
     <div class="mv15 text-center">
         <button type="button" class="btn btn-default btn-sm" id="<?php echo $defaultId; ?>-add-row">
-            <?php echo $fieldConfig->getAddRowButtonLabel() ?>
+            <?php echo $valueViewer->getAddRowButtonLabel() ?>
         </button>
     </div>
-    <?php echo $fieldConfig->getFormattedTooltip(); ?>
+    <?php echo $valueViewer->getFormattedTooltip(); ?>
     <hr>
 </div>
 
@@ -63,9 +63,9 @@ $inputName = $fieldConfig->getName(true);
     $(function () {
         var $rowsContainer = $('#<?php echo $defaultId ?>-rows-container');
         var rowTpl = doT.template($('#<?php echo $defaultId ?>-row-tpl').html());
-        var values = <?php echo 'it.' . $fieldConfig->getDotJsJsonInsertForValue() ?>;
-        var maxRows = <?php echo $fieldConfig->getMaxValuesCount(); ?>;
-        var minRows = <?php echo $fieldConfig->getMinValuesCount(); ?>;
+        var values = <?php echo 'it.' . $valueViewer->getDotJsJsonInsertForValue() ?>;
+        var maxRows = <?php echo $valueViewer->getMaxValuesCount(); ?>;
+        var minRows = <?php echo $valueViewer->getMinValuesCount(); ?>;
         var rowIndex = 0;
         var rowsCount = 0;
         var addRow = function (tplData) {

@@ -115,7 +115,7 @@ class CmfMakeScaffold extends Command {
         $this->comment(<<<INFO
 Menu item for CmfConfig:
 [
-    'label' => self::transCustom('.{$table->getTableStructure()->getTableName()}.menu_title'),
+    'label' => cmfTransCustom('.{$table->getTableStructure()->getTableName()}.menu_title'),
     'url' => routeToCmfItemsTable('{$table->getTableStructure()->getTableName()}'),
     'icon' => ''
 ]
@@ -149,11 +149,10 @@ INFO
 namespace $namespace;
 
 use {$parentClass};
-
-use PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig;
-use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
-use PeskyCMF\Scaffold\Form\FormFieldConfig;
-use PeskyCMF\Scaffold\Form\InputRendererConfig;
+use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
+use PeskyCMF\Scaffold\Form\FormInput;
+use PeskyCMF\Scaffold\Form\InputRenderer;
+use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 
 class {$className} extends {$parentClassShort} {
 

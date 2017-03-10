@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyORM\ORM\TableInterface $table
  * @var string $tableNameForRoutes
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\FilterConfig $dataGridFilterConfig
@@ -9,7 +9,7 @@
  *      Possible use: add datatable cell templates and use them in $dataTablesInitializer
  *      All views receive:
             * var string $idSuffix
-            * var \PeskyCMF\Db\CmfDbTable $model
+            * var \PeskyCMF\Db\CmfDbTable $table
             * var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var string|null $dataTablesInitializer - js function like
         funciton (tableSelector, dataTablesConfig, originalInitializer) {
@@ -99,7 +99,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             if (!is_array($includes)) {
                 $includes = [$includes];
             }
-            $dataForViews = compact('idSuffix', 'model', 'dataGridConfig');
+            $dataForViews = compact('idSuffix', 'table', 'dataGridConfig');
             foreach ($includes as $include) {
                 echo view($include, $dataForViews)->render();
                 echo "\n\n";
@@ -110,7 +110,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
 
 <?php View::startSection('scaffold-datagrid-js'); ?>
     <?php
-        $pkName = $model->getPkColumnName();
+        $pkName = $table->getPkColumnName();
         $dblClickUrl = null;
         // bulk actions
         $bulkActions = [];
@@ -248,7 +248,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     [
                         'processing' => true,
                         'serverSide' => true,
-                        'ajax' => route('cmf_api_get_items', ['model' => $tableNameForRoutes], false),
+                        'ajax' => route('cmf_api_get_items', ['table_name' => $tableNameForRoutes], false),
                         'pageLength' => $dataGridConfig->getRecordsPerPage(),
                         'toolbarItems' => array_values($toolbar),
                         'order' => []
@@ -271,15 +271,15 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 dataTablesConfig.rowActions = rowActionsTpl;
             <?php else: ?>
                 <?php
-                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $actionsFieldConfig */
-                    $actionsFieldConfig = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
+                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $actionsValueViewer */
+                    $actionsValueViewer = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
                 ?>
-                <?php if ($actionsFieldConfig->getPosition() === (int)$dataGridConfig->isAllowedMultiRowSelection()): ?>
+                <?php if ($actionsValueViewer->getPosition() === (int)$dataGridConfig->isAllowedMultiRowSelection()): ?>
                     fixedColumns++;
                 <?php endif; ?>
                 dataTablesConfig.columnDefs = [
                     {
-                        targets: <?php echo $actionsFieldConfig->getPosition(); ?>,
+                        targets: <?php echo $actionsValueViewer->getPosition(); ?>,
                         render: function (data, type, row) {
                             return rowActionsTpl(row);
                         }

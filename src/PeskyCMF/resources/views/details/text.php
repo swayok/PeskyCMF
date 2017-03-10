@@ -1,9 +1,9 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $fieldConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $sectionConfig
+ * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $valueViewer
+ * @var \PeskyORM\ORM\TableInterface $table
  */
-echo '{{= it.' . $fieldConfig->getName() . ' || "" }}';
+echo '{{= it.' . $valueViewer->getName() . ' || "" }}';
 

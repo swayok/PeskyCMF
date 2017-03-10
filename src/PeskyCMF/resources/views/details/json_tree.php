@@ -1,9 +1,9 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $fieldConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $sectionConfig
+ * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $valueViewer
+ * @var \PeskyORM\ORM\TableInterface $table
  * @var array $pluginOptions
  */
 $id = 'json-' . \Ramsey\Uuid\Uuid::uuid4()->toString();
@@ -26,7 +26,7 @@ $pluginOptions = array_merge([
             )
             .done(function () {
                 $('#<?php echo $id; ?>').jsonView(
-                    <?php echo "{{= it.{$fieldConfig->getName()} || ''}}"; ?>,
+                    <?php echo "{{= it.{$valueViewer->getName()} || ''}}"; ?>,
                     <?php echo json_encode($pluginOptions, JSON_UNESCAPED_UNICODE); ?>
                 );
             });

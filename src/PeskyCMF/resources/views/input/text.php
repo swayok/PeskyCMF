@@ -1,13 +1,13 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\FormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(true), false)
-    ->addAttribute('id', $fieldConfig->getDefaultId(), false)
+    ->addAttribute('name', $valueViewer->getName(true), false)
+    ->addAttribute('id', $valueViewer->getDefaultId(), false)
     ->addAttribute('class', 'form-control', false)
     ->addAttribute('type', 'text', false);
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
@@ -16,7 +16,7 @@ $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText(
 ?>
 
 <div class="form-group">
-    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
     <?php if ($hasAddons) : ?>
         <div class="input-group">
             <?php if ($rendererConfig->hasPrefixText()) : ?>
@@ -24,7 +24,7 @@ $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText(
             <?php endif;?>
     <?php endif; ?>
 
-            <input value="<?php echo $fieldConfig->getDotJsInsertForValue() ?>"
+            <input value="<?php echo $valueViewer->getDotJsInsertForValue() ?>"
                 {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
 
     <?php if ($hasAddons) : ?>
@@ -33,5 +33,5 @@ $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText(
             <?php endif ;?>
         </div>
     <?php endif; ?>
-    <?php echo $fieldConfig->getFormattedTooltip(); ?>
+    <?php echo $valueViewer->getFormattedTooltip(); ?>
 </div>

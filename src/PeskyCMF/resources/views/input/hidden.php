@@ -1,17 +1,17 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\FormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\FormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(), true)
-    ->addAttribute('id', $fieldConfig->getDefaultId(), false)
+    ->addAttribute('name', $valueViewer->getName(), true)
+    ->addAttribute('id', $valueViewer->getDefaultId(), false)
     ->addAttribute('type', 'hidden', true);
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
 
-<input value="<?php echo $fieldConfig->getDotJsInsertForValue(); ?>"
+<input value="<?php echo $valueViewer->getDotJsInsertForValue(); ?>"
     {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>

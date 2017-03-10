@@ -149,10 +149,10 @@ class DataGridConfig extends ScaffoldSectionConfig {
      */
     protected function getNextValueViewerPosition(AbstractValueViewer $viewer) {
         if ($viewer->isVisible()) {
-            /** @var DataGridColumn $otherFieldConfig */
+            /** @var DataGridColumn $otherValueViewer */
             $count = 0;
-            foreach ($this->valueViewers as $otherFieldConfig) {
-                if ($otherFieldConfig->isVisible()) {
+            foreach ($this->valueViewers as $otherValueViewer) {
+                if ($otherValueViewer->isVisible()) {
                     $count++;
                 }
             }

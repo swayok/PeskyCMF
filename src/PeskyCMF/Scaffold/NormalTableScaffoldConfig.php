@@ -99,21 +99,21 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeRecordNotFoundResponse($table);
         }
         if ($isItemDetails) {
-            $actionConfig = $this->getItemDetailsConfig();
+            $sectionConfig = $this->getItemDetailsConfig();
         } else {
-            $actionConfig = $this->getFormConfig();
+            $sectionConfig = $this->getFormConfig();
         }
-        $conditions = $actionConfig->getSpecialConditions();
+        $conditions = $sectionConfig->getSpecialConditions();
         $conditions[$table->getPkColumnName()] = $id;
         $relationsToRead = [];
-        foreach ($actionConfig->getRelationsToRead() as $relationName => $columns) {
+        foreach ($sectionConfig->getRelationsToRead() as $relationName => $columns) {
             if (is_int($relationName)) {
                 $relationName = $columns;
                 $columns = ['*'];
             }
             $relationsToRead[$relationName] = $columns;
         }
-        foreach ($actionConfig->getViewersForRelations() as $viewer) {
+        foreach ($sectionConfig->getViewersForRelations() as $viewer) {
             if (!array_key_exists($viewer->getRelation()->getName(), $relationsToRead)) {
                 $relationsToRead[$viewer->getRelation()->getName()] = ['*'];
             }
@@ -121,7 +121,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$object->fromDb($conditions, [], array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        $data = $object->toArray([], $actionConfig->getRelationsToRead(), false);
+        $data = $object->toArray([], $sectionConfig->getRelationsToRead(), false);
         if (
             (
                 $isItemDetails
@@ -137,7 +137,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 cmfTransGeneral('.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden_for_record')
             );
         }
-        return cmfJsonResponse()->setData($actionConfig->prepareRecord($data));
+        return cmfJsonResponse()->setData($sectionConfig->prepareRecord($data));
     }
 
     public function getDefaultValuesForFormInputs() {

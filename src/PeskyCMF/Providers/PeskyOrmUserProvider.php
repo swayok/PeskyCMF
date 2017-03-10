@@ -15,19 +15,19 @@ class PeskyOrmUserProvider implements UserProvider {
      *
      * @var string
      */
-    protected $model;
+    protected $dbRecordClass;
 
     /**
      * Create a new database user provider.
      *
-     * @param  string $dbObjectName
+     * @param  string $dbRecordClass
      * @throws \InvalidArgumentException
      */
-    public function __construct($dbObjectName) {
-        if (empty($dbObjectName)) {
+    public function __construct($dbRecordClass) {
+        if (empty($dbRecordClass)) {
             throw new \InvalidArgumentException('PeskyOrmUserProvider received empty class name of DbObject');
         }
-        $this->model = $dbObjectName;
+        $this->dbRecordClass = $dbRecordClass;
     }
 
     /**
@@ -142,7 +142,7 @@ class PeskyOrmUserProvider implements UserProvider {
      */
     public function createDbObject() {
         /** @var RecordInterface $class */
-        $class = '\\' . ltrim($this->model, '\\');
+        $class = $this->dbRecordClass;
         return new $class();
     }
 }

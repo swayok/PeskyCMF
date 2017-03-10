@@ -1,9 +1,9 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\WysiwygFormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyORM\ORM\TableInterface $model
+ * @var \PeskyCMF\Scaffold\Form\WysiwygFormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  * @var string|null $ckeditorInitializer - js function like
         * function (textareaSelector) {
             * $(textareaSelector).ckeditor();
@@ -11,7 +11,7 @@
  */
 $rendererConfig->addAttribute(
     'data-editor-name',
-    request()->route()->getParameter('table_name', $model->getTableStructure()->getTableName()) . ':' . $fieldConfig->getVarNameForDotJs()
+    request()->route()->getParameter('table_name', $table->getTableStructure()->getTableName()) . ':' . $valueViewer->getVarNameForDotJs()
 );
 include __DIR__ . '/textarea.php';
 
@@ -20,12 +20,12 @@ include __DIR__ . '/textarea.php';
 <script type="application/javascript">
     $(document).ready(function () {
         <?php
-            echo $fieldConfig->getCustomJsCode();
+            echo $valueViewer->getCustomJsCode();
             $initializerArgs = implode(',', [
                 '"#' . $rendererConfig->getAttribute('id') . '"',
-                json_encode($fieldConfig->getWysiwygConfig(), JSON_UNESCAPED_UNICODE)
+                json_encode($valueViewer->getWysiwygConfig(), JSON_UNESCAPED_UNICODE)
             ]);
-            echo "{$fieldConfig->getWysiwygInitializerFunctionName()}($initializerArgs);";
+            echo "{$valueViewer->getWysiwygInitializerFunctionName()}($initializerArgs);";
         ?>
     });
 </script>

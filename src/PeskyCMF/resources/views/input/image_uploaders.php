@@ -1,13 +1,13 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\ImagesFormInput $fieldConfig
- * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
- * @var \PeskyCMF\Db\CmfDbTable $model
+ * @var \PeskyCMF\Scaffold\Form\ImagesFormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
+ * @var \PeskyORM\ORM\TableInterface $table
  */
 /** @var \PeskyCMF\Db\Column\ImagesColumn $column */
-$column = $fieldConfig->getTableColumn();
-$defaultId = $fieldConfig->getDefaultId();
+$column = $valueViewer->getTableColumn();
+$defaultId = $valueViewer->getDefaultId();
 $configNameToInputId = [];
 ?>
 
@@ -16,10 +16,10 @@ $configNameToInputId = [];
         <?php
             $inputId = $defaultId . '-' . preg_replace('%[^a-zA-Z0-9]+%', '-', $configName);
             $configNameToInputId[$configName] = array_merge(['id' => $inputId], $imageConfig->getConfigsArrayForJs());
-            $inputName = $fieldConfig->getName(true) . '[' . $configName . ']';
+            $inputName = $valueViewer->getName(true) . '[' . $configName . ']';
         ?>
         <div class="section-divider">
-            <span><?php echo $actionConfig->translate($fieldConfig, '.' . $configName); ?></span>
+            <span><?php echo $sectionConfig->translate($valueViewer, '.' . $configName); ?></span>
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
             <div class="image-upload-input-container form-group mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
@@ -56,7 +56,7 @@ $configNameToInputId = [];
     $(function () {
         Utils.requireFiles(['/packages/cmf/js/inputs/cmf.fileuploads.js']).done(function () {
             var data = {
-                files: <?php echo $fieldConfig->getDotJsJsonInsertForValue() ?>,
+                files: <?php echo $valueViewer->getDotJsJsonInsertForValue() ?>,
                 configs: <?php echo json_encode($configNameToInputId); ?>
             };
             CmfFileUploads.initImageUploaders(data);
