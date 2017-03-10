@@ -10,7 +10,7 @@ class ValueCell extends RenderableValueViewer {
     const TYPE_JSON_TREE = 'json_collapsed';
 
     /**
-     * @return callable|null
+     * @return \Closure|null
      * @throws \UnexpectedValueException
      */
     public function getValueConverter() {

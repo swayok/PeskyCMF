@@ -221,11 +221,11 @@ trait CacheForDbSelects {
      *          'tags' => ['custom', 'cache', 'tags'],
      *          'recache' => 'bool, ignore cached data and replace it with fresh data'
      *      ]
-     * @param callable $callback
+     * @param \Closure $callback
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function getCachedData($affectsSingleRecord, $cacheSettings, callable $callback) {
+    public function getCachedData($affectsSingleRecord, $cacheSettings, \Closure $callback) {
         $defaultTimeout = $affectsSingleRecord
                 ? $this->_getCacheDurationForSelectOneInMinutes()
                 : $this->_getCacheDurationForSelectManyInMinutes();
@@ -247,10 +247,10 @@ trait CacheForDbSelects {
      * Get data from cache or put data from $callback to cache (for internal use)
      * @param bool $affectsSingleRecord
      * @param array $cacheSettings - prepared cache settings. Always contains 'key' key
-     * @param callable $callback
+     * @param \Closure $callback
      * @return array
      */
-    abstract protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback);
+    abstract protected function _getCachedData($affectsSingleRecord, array $cacheSettings, \Closure $callback);
 
     /**
      * @param bool $affectsSingleRecord
@@ -270,10 +270,10 @@ trait CacheForDbSelects {
     /**
      * @param mixed $cacheSettings
      * @param int|bool|\DateTime $defaultTimeout
-     * @param callable $defaultCacheKey
+     * @param \Closure $defaultCacheKey
      * @return array|bool - bool: false - when caching is not possible
      */
-    protected function resolveCacheSettings($cacheSettings, $defaultTimeout, callable $defaultCacheKey) {
+    protected function resolveCacheSettings($cacheSettings, $defaultTimeout, \Closure $defaultCacheKey) {
         if (!is_array($cacheSettings)) {
             $tmp = [
                 'timeout' => $defaultTimeout,

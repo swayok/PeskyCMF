@@ -13,11 +13,11 @@ class InputRenderer extends ValueRenderer {
     protected $attributesForCreate = [];
     /** @var array */
     protected $attributesForEdit = [];
-    /** @var array|callable */
+    /** @var array|\Closure */
     protected $options = [];
-    /** @var array|callable */
+    /** @var array|\Closure */
     protected $optionsForCreate = [];
-    /** @var array|callable */
+    /** @var array|\Closure */
     protected $optionsForEdit = [];
     /** @var bool */
     protected $isRequired = false;
@@ -164,12 +164,12 @@ class InputRenderer extends ValueRenderer {
     }
 
     /**
-     * @param array|callable $options
+     * @param array|\Closure $options
      * @return mixed
      * @throws \InvalidArgumentException
      */
     private function collectOptions($options) {
-        if (!is_string($options) && is_callable($options)) {
+        if (!is_string($options) && $options instanceof \Closure) {
             $options = $options();
             if (!is_array($options)) {
                 throw new \InvalidArgumentException('$options closure must return an array');
@@ -179,12 +179,12 @@ class InputRenderer extends ValueRenderer {
     }
 
     /**
-     * @param array|callable $options
+     * @param array|\Closure $options
      * @return $this
      * @throws ScaffoldException
      */
     public function setOptions($options) {
-        if (!is_array($options) && !is_callable($options)) {
+        if (!is_array($options) && !($options instanceof \Closure)) {
             throw new ScaffoldException('Invalid $options passed to InputRenderer');
         }
         $this->options = $options;
@@ -214,13 +214,13 @@ class InputRenderer extends ValueRenderer {
     }
 
     /**
-     * @param array|callable $options
+     * @param array|\Closure $options
      * @return $this
      * @throws ScaffoldException
      * @internal param array $optionsForCreate
      */
     public function setOptionsForCreate($options) {
-        if (!is_array($options) && !is_callable($options)) {
+        if (!is_array($options) && !($options instanceof \Closure)) {
             throw new ScaffoldException('Invalid $options passed to InputRenderer');
         }
         $this->optionsForCreate = $options;
@@ -240,13 +240,13 @@ class InputRenderer extends ValueRenderer {
     }
 
     /**
-     * @param array|callable $options
+     * @param array|\Closure $options
      * @return $this
      * @throws ScaffoldException
      * @internal param array $optionsForEdit
      */
     public function setOptionsForEdit($options) {
-        if (!is_array($options) && !is_callable($options)) {
+        if (!is_array($options) && !($options instanceof \Closure)) {
             throw new ScaffoldException('Invalid $options passed to InputRenderer');
         }
         $this->optionsForEdit = $options;

@@ -73,7 +73,7 @@ class DataGridColumn extends AbstractValueViewer {
     }
 
     /**
-     * @return callable|null
+     * @return \Closure|null
      */
     public function getValueConverter() {
         if (empty($this->valueConverter)) {

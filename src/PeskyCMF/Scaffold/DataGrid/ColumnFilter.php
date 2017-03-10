@@ -506,7 +506,7 @@ class ColumnFilter {
         if (empty($this->allowedValues) && $this->isItRequireAllowedValues()) {
             throw new ScaffoldException('List of allowed values is empty');
         }
-        return is_callable($this->allowedValues) ? call_user_func($this->allowedValues) : $this->allowedValues;
+        return $this->allowedValues instanceof \Closure ? call_user_func($this->allowedValues) : $this->allowedValues;
     }
 
     /**
@@ -522,7 +522,7 @@ class ColumnFilter {
     }
 
     /**
-     * @param array|callable $allowedValues
+     * @param array|\Closure $allowedValues
      * @return $this
      * @throws ScaffoldException
      */
@@ -531,8 +531,8 @@ class ColumnFilter {
             throw new ScaffoldException("Cannot set allowed values list to a filter input type: {$this->inputType}");
         } else if (empty($allowedValues)) {
             throw new ScaffoldException('List of allowed values is empty');
-        } else if (!is_array($allowedValues) && !is_callable($allowedValues)) {
-            throw new ScaffoldException('List of allowed values should be array or callable');
+        } else if (!is_array($allowedValues) && !($allowedValues instanceof \Closure)) {
+            throw new ScaffoldException('List of allowed values should be array or \Closure');
         }
         $this->allowedValues = $allowedValues;
         return $this;

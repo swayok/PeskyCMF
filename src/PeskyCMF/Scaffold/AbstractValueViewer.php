@@ -41,7 +41,7 @@ abstract class AbstractValueViewer {
     protected $position = null;
 
     /**
-     * @var null|callable
+     * @var null|\Closure
      */
     protected $valueConverter = null;
     const FORMAT_DATE = 'Y-m-d';
@@ -245,19 +245,19 @@ abstract class AbstractValueViewer {
     }
 
     /**
-     * @return callable|null
+     * @return \Closure|null
      */
     public function getValueConverter() {
         return $this->valueConverter;
     }
 
     /**
-     * @param callable $valueConverter 
+     * @param \Closure $valueConverter
      *      - when $this->isDbField() === true: function ($value, Column $columnConfig, array $record, AbstractValueViewer $valueViewer) { return 'value' }
      *      - when $this->isDbField() === false: function (array $record, AbstractValueViewer $valueViewer, ScaffoldSectionConfig $scaffoldSectionConfig) { return 'value' }
      * @return $this
      */
-    public function setValueConverter(callable $valueConverter) {
+    public function setValueConverter(\Closure $valueConverter) {
         $this->valueConverter = $valueConverter;
         return $this;
     }

@@ -193,7 +193,7 @@ trait TaggedCacheForDbSelects {
      *      'tags' => ['custom', 'cache', 'tags'],
      *      'recache' => 'bool, ignore cached data and replace it with fresh data'
      * ]
-     * @param callable $callback
+     * @param \Closure $callback
      *
      * @return array
      * @throws \PeskyORM\Exception\DbObjectException
@@ -201,7 +201,7 @@ trait TaggedCacheForDbSelects {
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \BadMethodCallException
      */
-    protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback) {
+    protected function _getCachedData($affectsSingleRecord, array $cacheSettings, \Closure $callback) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         $data = empty($cacheSettings['recache']) ? \Cache::get($cacheSettings['key'], '{!404!}') : '{!404!}';
         if ($data === '{!404!}') {

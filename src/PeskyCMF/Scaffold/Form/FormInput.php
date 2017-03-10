@@ -36,12 +36,12 @@ class FormInput extends RenderableValueViewer {
      * value can be:
      * 1. <array> of pairs:
      *      'option_value' => 'option_label'
-     * 3. callable
-     * @var null|array|callable
+     * 3. \Closure
+     * @var null|array|\Closure
      */
     protected $options;
 
-    /** @var callable|null */
+    /** @var \Closure|null */
     protected $optionsLoader;
 
     /** @var null|string */
@@ -182,36 +182,36 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
-     * @return null|array|callable
+     * @return null|array|\Closure
      */
     public function getOptions() {
         return $this->hasOptionsLoader() ? [] : $this->options;
     }
 
     /**
-     * @param null|array|callable $options
+     * @param null|array|\Closure $options
      * @return $this
      * @throws ValueViewerConfigException
      */
     public function setOptions($options) {
-        if (!is_array($options) && !is_callable($options)) {
-            throw new ValueViewerConfigException($this, '$options should be an array');
+        if (!is_array($options) && !($options instanceof \Closure)) {
+            throw new ValueViewerConfigException($this, '$options argument should be an array or \Closure');
         }
         $this->options = $options;
         return $this;
     }
 
     /**
-     * @param callable $loader = function ($pkValue, FormInput $formInput, FormConfig $formConfig) { return [] }
+     * @param \Closure $loader = function ($pkValue, FormInput $formInput, FormConfig $formConfig) { return [] }
      * @return $this
      */
-    public function setOptionsLoader(callable $loader) {
+    public function setOptionsLoader(\Closure $loader) {
         $this->optionsLoader = $loader;
         return $this;
     }
 
     /**
-     * @return callable|null
+     * @return \Closure|null
      */
     public function getOptionsLoader() {
         return $this->optionsLoader;

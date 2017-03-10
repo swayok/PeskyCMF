@@ -485,7 +485,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @return Tag[]
      */
     public function getRowActions() {
-        return is_callable($this->rowActions) ? call_user_func($this->rowActions, $this) : $this->rowActions;
+        return $this->rowActions instanceof \Closure ? call_user_func($this->rowActions, $this) : $this->rowActions;
     }
 
     /**
