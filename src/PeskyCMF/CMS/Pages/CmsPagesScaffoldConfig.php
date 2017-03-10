@@ -170,24 +170,28 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
         $textsTable = app(CmsTextsTable::class);
         foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
             $formConfig->addTab(cmfTransCustom('.pages.form.tab.texts', ['language' => $langLabel]), [
-                "Texts.$langId.title",
-                "Texts.$langId.menu_title",
-                "Texts.$langId.language" => FormInput::create()
-                    ->setType(FormInput::TYPE_HIDDEN)
-                   ->setValueConverter(function () use ($langId) {
-                       return $langId;
-                   }),
-                "Texts.$langId.admin_id" => FormInput::create()
-                    ->setType(FormInput::TYPE_HIDDEN)
-                    ->setSubmittedValueModifier(function () {
-                        return \Auth::guard()->user()->getAuthIdentifier();
-                    }),
-                "Texts.$langId.comment",
+                "Texts.$langId.title" => FormInput::create()->setNameForTranslation('Texts.title'),
+                "Texts.$langId.browser_title" => FormInput::create()->setNameForTranslation('Texts.browser_title'),
+                "Texts.$langId.menu_title" => FormInput::create()->setNameForTranslation('Texts.menu_title'),
+                "Texts.$langId.meta_description" => FormInput::create()->setNameForTranslation('Texts.meta_description'),
+                "Texts.$langId.meta_keywords" => FormInput::create()->setNameForTranslation('Texts.meta_keywords'),
+                "Texts.$langId.comment" => FormInput::create()->setNameForTranslation('Texts.comment'),
                 "Texts.$langId.content" => WysiwygFormInput::create()
                     ->setRelativeImageUploadsFolder('/assets/wysiwyg/pages')
                     ->setDataInserts(function () {
                         return $this->getDataInsertsForContentEditor();
                     })
+                    ->setNameForTranslation('Texts.content'),
+                "Texts.$langId.language" => FormInput::create()
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setValueConverter(function () use ($langId) {
+                        return $langId;
+                    }),
+                "Texts.$langId.admin_id" => FormInput::create()
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setSubmittedValueModifier(function () {
+                        return \Auth::guard()->user()->getAuthIdentifier();
+                    }),
             ]);
         }
         return $formConfig;
@@ -284,7 +288,7 @@ SCRIPT;
                         'value' => 'content'
                     ]
                 ],
-                cmfTransCustom('.common_texts.form.input.insert_other_text_widget_title_template')
+                cmfTransCustom('.pages.form.input.Texts.insert_other_text_widget_title_template')
             ),
         ];
     }

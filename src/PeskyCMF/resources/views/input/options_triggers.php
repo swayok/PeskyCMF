@@ -6,11 +6,11 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  */
 $defaultId = $rendererConfig->getAttribute('id', $fieldConfig->getDefaultId());
-$defaultName = $rendererConfig->getAttribute('name', $fieldConfig->getName());
+$defaultName = $rendererConfig->getAttribute('name', $fieldConfig->getName(true));
 ?>
 
 <div class="section-divider">
-    <span><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></span>
+    <span><?php echo $fieldConfig->getLabel($rendererConfig); ?></span>
 </div>
 <div class="form-group">
     <?php foreach ($rendererConfig->getOptions() as $optionName => $optionLabel): ?>

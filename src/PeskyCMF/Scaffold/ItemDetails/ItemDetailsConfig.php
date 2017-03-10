@@ -73,4 +73,17 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         }
     }
 
+    /**
+     * @param AbstractValueViewer|null $viewer
+     * @param string $suffix
+     * @return string
+     */
+    public function translate(AbstractValueViewer $viewer = null, $suffix = '') {
+        if ($viewer) {
+            return $this->getScaffoldConfig()->translateForViewer('item_details.field', $viewer, $suffix);
+        } else {
+            return $this->getScaffoldConfig()->translate('item_details', $suffix);
+        }
+    }
+
 }

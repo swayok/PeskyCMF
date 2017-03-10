@@ -96,6 +96,13 @@ abstract class ScaffoldSectionConfig {
         $this->scaffoldConfig = $scaffoldConfig;
     }
 
+    /**
+     * @return ScaffoldConfig
+     */
+    public function getScaffoldConfig() {
+        return $this->scaffoldConfig;
+    }
+
     public function setTemplate($template) {
         $this->template = $template;
         return $this;
@@ -107,6 +114,13 @@ abstract class ScaffoldSectionConfig {
         }
         return $this->template;
     }
+
+    /**
+     * @param AbstractValueViewer|null $viewer
+     * @param string $suffix
+     * @return string
+     */
+    abstract public function translate(AbstractValueViewer $viewer = null, $suffix = '');
 
     /**
      * Disables any usage of TableStructure (validation, automatic field type guessing, etc)
@@ -325,15 +339,15 @@ abstract class ScaffoldSectionConfig {
         $permissions = [
             '___delete_allowed' => (
                 $this->isDeleteAllowed()
-                && $this->scaffoldConfig->isRecordDeleteAllowed($record)
+                && $this->getScaffoldConfig()->isRecordDeleteAllowed($record)
             ),
             '___edit_allowed' => (
                 $this->isEditAllowed()
-                && $this->scaffoldConfig->isRecordEditAllowed($record)
+                && $this->getScaffoldConfig()->isRecordEditAllowed($record)
             ),
             '___details_allowed' => (
                 $this->isDetailsViewerAllowed()
-                && $this->scaffoldConfig->isRecordDetailsAllowed($record)
+                && $this->getScaffoldConfig()->isRecordDetailsAllowed($record)
             )
         ];
         if (!empty($virtualColumns)) {
@@ -672,28 +686,28 @@ abstract class ScaffoldSectionConfig {
      * @return boolean
      */
     public function isCreateAllowed() {
-        return $this->scaffoldConfig->isCreateAllowed();
+        return $this->getScaffoldConfig()->isCreateAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isEditAllowed() {
-        return $this->scaffoldConfig->isEditAllowed();
+        return $this->getScaffoldConfig()->isEditAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isDeleteAllowed() {
-        return $this->scaffoldConfig->isDeleteAllowed();
+        return $this->getScaffoldConfig()->isDeleteAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isDetailsViewerAllowed() {
-        return $this->scaffoldConfig->isDetailsViewerAllowed();
+        return $this->getScaffoldConfig()->isDetailsViewerAllowed();
     }
 
     /**

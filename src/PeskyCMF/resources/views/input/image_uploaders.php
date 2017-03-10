@@ -4,7 +4,6 @@
  * @var \PeskyCMF\Scaffold\Form\ImagesFormInput $fieldConfig
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
- * @var string $translationPrefix
  */
 /** @var \PeskyCMF\Db\Column\ImagesColumn $column */
 $column = $fieldConfig->getTableColumn();
@@ -17,10 +16,10 @@ $configNameToInputId = [];
         <?php
             $inputId = $defaultId . '-' . preg_replace('%[^a-zA-Z0-9]+%', '-', $configName);
             $configNameToInputId[$configName] = array_merge(['id' => $inputId], $imageConfig->getConfigsArrayForJs());
-            $inputName = $fieldConfig->getName() . '[' . $configName . ']';
+            $inputName = $fieldConfig->getName(true) . '[' . $configName . ']';
         ?>
         <div class="section-divider">
-            <span><?php echo cmfTransCustom($translationPrefix . '.' . $fieldConfig->getName() . '.' . $configName) ?></span>
+            <span><?php echo $actionConfig->translate($fieldConfig, '.' . $configName); ?></span>
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
             <div class="image-upload-input-container form-group mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">

@@ -8,7 +8,7 @@
 ?>
 
 <div class="form-group">
-    <label><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <label><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
     <div><?php echo $fieldConfig->getDotJsJsonInsertForValue(); ?></div>
     <?php echo $fieldConfig->getFormattedTooltip(); ?>
 </div>

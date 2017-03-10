@@ -42,11 +42,10 @@ abstract class ScaffoldConfig {
     /**
      * Path to localization of views.
      * Usage: see $this->getLocalizationBasePath() method.
-     * By default if $localizationKey is empty - cmf::scaffold.templates view
-     * will call $this->getLocalizationBasePath($tableNameForRoutes)
+     * By default if $viewsBaseTranslationKey is empty - $this->tableNameForRoutes will be used
      * @return null|string
      */
-    protected $viewsLocalizationKey = null;
+    protected $viewsBaseTranslationKey = null;
 
     /**
      * ScaffoldConfig constructor.
@@ -56,6 +55,9 @@ abstract class ScaffoldConfig {
     public function __construct(TableInterface $table, $tableNameForRoutes) {
         $this->table = $table;
         $this->tableNameForRoutes = $tableNameForRoutes;
+        if ($this->viewsBaseTranslationKey === null) {
+            $this->viewsBaseTranslationKey = $tableNameForRoutes;
+        }
     }
 
     /**
@@ -123,7 +125,7 @@ abstract class ScaffoldConfig {
      * @return FilterConfig
      */
     protected function createDataGridFilterConfig() {
-        return FilterConfig::create($this->getTable());
+        return FilterConfig::create($this->getTable(), $this);
     }
 
     /**
@@ -245,13 +247,22 @@ abstract class ScaffoldConfig {
     }
 
     /**
-     * Base path to localization of scaffold views for this resource
-     * @param $defaultLocalizationKey
+     * @param string $section - main sections are: 'datagrid.column', 'item_details.field', 'form.input'
+     * @param AbstractValueViewer $viewer
+     * @param string $suffix
      * @return string
      */
-    public function getLocalizationBasePath($defaultLocalizationKey) {
-        $key = $this->viewsLocalizationKey ?: $defaultLocalizationKey;
-        return '.' . $key;
+    public function translateForViewer($section, AbstractValueViewer $viewer, $suffix = '') {
+        return $this->translate($section, $viewer->getNameForTranslation() . '.' . $suffix);
+    }
+
+    /**
+     * @param string $section - main sections are: 'form.tooltip'
+     * @param string $suffix
+     * @return array|string
+     */
+    public function translate($section, $suffix = '') {
+        return cmfTransCustom(rtrim(".{$this->viewsBaseTranslationKey}.{$section}.$suffix", '.'));
     }
 
     public function renderTemplates() {

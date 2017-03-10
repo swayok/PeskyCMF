@@ -7,7 +7,7 @@
  * @var array $config
  */
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(), false)
+    ->addAttribute('name', $fieldConfig->getName(true), false)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('type', 'text', false)
     ->addAttribute('class', 'form-control', false);
@@ -16,7 +16,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 ?>
 
 <div class="form-group">
-    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
     <div class="input-group w200">
         <input value="<?php echo $fieldConfig->getDotJsInsertForValue(); ?>"
             {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>

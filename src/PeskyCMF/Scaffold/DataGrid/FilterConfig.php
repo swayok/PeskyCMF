@@ -3,6 +3,7 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
+use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
@@ -24,22 +25,34 @@ class FilterConfig {
         Column::TYPE_TIME => ColumnFilter::TYPE_TIME,
     ];
     protected $defaultDataGridColumnFilterConfigClass = ColumnFilter::class;
+    /** @var ScaffoldConfig */
+    protected $scaffoldConfig;
 
     /**
      * @param TableInterface $table
+     * @param ScaffoldConfig $scaffoldConfig
      * @return $this
      */
-    static public function create(TableInterface $table) {
+    static public function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         $class = get_called_class();
-        return new $class($table);
+        return new $class($table, $scaffoldConfig);
     }
 
     /**
      * ScaffoldSectionConfig constructor.
      * @param TableInterface $table
+     * @param ScaffoldConfig $scaffoldConfig
      */
-    public function __construct(TableInterface $table) {
+    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         $this->table = $table;
+        $this->scaffoldConfig = $scaffoldConfig;
+    }
+
+    /**
+     * @return ScaffoldConfig
+     */
+    public function getScaffoldConfig() {
+        return $this->scaffoldConfig;
     }
 
     /**
@@ -84,6 +97,7 @@ class FilterConfig {
         if (!$config->hasColumnName()) {
             $config->setColumnName($this->getColumnNameWithAlias($columnName));
         }
+        $config->setFilterConfig($this);
         $this->filters[$config->getColumnName()] = $config;
         return $this;
     }
@@ -391,6 +405,15 @@ class FilterConfig {
      */
     public function beforeRender() {
 
+    }
+
+    /**
+     * @param ColumnFilter $columnFilter
+     * @param string $suffix
+     * @return string
+     */
+    public function translate(ColumnFilter $columnFilter, $suffix = '') {
+        return $this->getScaffoldConfig()->translate('datagrid.filter.' . $columnFilter->getColumnNameForTranslation(), $suffix);
     }
 
 }

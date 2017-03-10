@@ -53,6 +53,8 @@ abstract class AbstractValueViewer {
     protected $relation;
     /** @var string */
     protected $relationColumn;
+    /** @var string|null */
+    protected $nameForTranslation;
 
     /**
      * @return $this
@@ -161,6 +163,22 @@ abstract class AbstractValueViewer {
         return $this;
     }
 
+    public function getNameForTranslation() {
+        if ($this->nameForTranslation === null) {
+            $this->nameForTranslation = $this->getName();
+        }
+        return $this->nameForTranslation;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setNameForTranslation($name) {
+        $this->nameForTranslation = $name;
+        return $this;
+    }
+
     /**
      * @return string
      * @throws \UnexpectedValueException
@@ -185,11 +203,13 @@ abstract class AbstractValueViewer {
     }
 
     /**
-     * @param string $default
      * @return string
      */
-    public function getLabel($default = '') {
-        return empty($this->label) ? $default : $this->label;
+    public function getLabel() {
+        if (empty($this->label)) {
+            $this->label = $this->getScaffoldSectionConfig()->translate($this);
+        }
+        return $this->label;
     }
 
     /**
@@ -199,10 +219,6 @@ abstract class AbstractValueViewer {
     public function setLabel($label) {
         $this->label = $label;
         return $this;
-    }
-
-    public function hasLabel() {
-        return !empty($this->label);
     }
 
     /**

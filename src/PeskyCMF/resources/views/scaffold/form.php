@@ -3,7 +3,6 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  * @var string $tableNameForRoutes
- * @var string $translationPrefix
  * @var string $idSuffix
  */
 
@@ -21,7 +20,7 @@ $tabs = $formConfig->getTabs();
 $groups = $formConfig->getInputsGroups();
 $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 
-$buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix) {
+$buildInputs = function ($tabInfo) use ($groups, $formConfig) {
     $isFirstGroup = true;
     foreach ($tabInfo['groups'] as $groupIndex) {
         $groupInfo = $groups[$groupIndex];
@@ -35,11 +34,8 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
         $isFirstGroup = false;
         foreach ($groupInfo['inputs_names'] as $inputName) {
             $inputConfig = $formConfig->getFormInput($inputName);
-            if (!$inputConfig->hasLabel()) {
-                $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.input.{$inputConfig->getName()}"));
-            }
             try {
-                echo $inputConfig->render(['translationPrefix' => $translationPrefix]);
+                echo $inputConfig->render();
             } catch (Exception $exc) {
                 echo '<div class="text-danger">' . htmlspecialchars($exc->getMessage()) . '</div>';
                 echo '<pre style="max-height: 600px; overflow: scroll; border-color: #FF0000">'
@@ -126,8 +122,8 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig, $translationPrefix
 
 <script type="text/html" id="item-form-tpl">
     <?php echo view('cmf::ui.default_page_header', [
-        'header' => $ifEdit . cmfTransCustom("$translationPrefix.form.header_edit")
-                    . $else . cmfTransCustom("$translationPrefix.form.header_create")
+        'header' => $ifEdit . $formConfig->translate(null, 'header_edit')
+                    . $else . $formConfig->translate(null, 'header_create')
                     . $endIf,
         'defaultBackUrl' => $backUrl,
     ])->render(); ?>

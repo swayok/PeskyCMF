@@ -276,8 +276,8 @@ class FormConfig extends ScaffoldSectionConfig {
         if ($this->tooltips === null) {
             $resourceName = CmfConfig::getPrimary()->getTableNameFromCurrentRoute();
             if (!empty($resourceName)) {
-                $basePath = $this->scaffoldConfig->getLocalizationBasePath($resourceName);
-                $this->setTooltipsForInputs(cmfTransCustom($basePath . '.form.tooltip'));
+                /** @noinspection PhpParamsInspection */
+                $this->setTooltipsForInputs($this->translate(null, 'tooltip'));
             }
             // make sure tooltips is always an array
             if (!is_array($this->tooltips)) {
@@ -1012,6 +1012,19 @@ class FormConfig extends ScaffoldSectionConfig {
                     $input->setTooltip($tooltip);
                 }
             }
+        }
+    }
+
+    /**
+     * @param AbstractValueViewer|null $viewer
+     * @param string $suffix
+     * @return string
+     */
+    public function translate(AbstractValueViewer $viewer = null, $suffix = '') {
+        if ($viewer) {
+            return $this->getScaffoldConfig()->translateForViewer('form.input', $viewer, $suffix);
+        } else {
+            return $this->getScaffoldConfig()->translate('form', $suffix);
         }
     }
 

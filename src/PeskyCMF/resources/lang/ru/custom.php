@@ -251,7 +251,8 @@ $dictionary = [
             'header_edit' => 'Редактирование страницы',
             'tab' => [
                 'general' => 'Общее',
-                'images' => 'Картинки'
+                'images' => 'Картинки',
+                'texts' => 'Тексты (:language)'
             ],
             'input' => [
                 'id' => 'ID',
@@ -271,6 +272,16 @@ $dictionary = [
                 'created_at' => 'Создана',
                 'updated_at' => 'Изменена',
                 'text_id' => 'Тексты для страницы',
+                'Texts' => [
+                    'title' => 'Полное название',
+                    'menu_title' => 'Короткое название (для меню)',
+                    'browser_title' => 'Заголовок браузера',
+                    'comment' => 'Комментарий к редактированию текста',
+                    'content' => 'Текcт',
+                    'meta_description' => 'Meta-description',
+                    'meta_keywords' => 'Meta-keywords',
+                    'insert_other_text_widget_title_template' => 'Вставка поля ":text_field.label" из текстов ":text_id.label"'
+                ]
             ],
             'tooltip' => [
                 'meta_description' => 'Используется в случае если Meta-description не указан в прикрепленных текстах',

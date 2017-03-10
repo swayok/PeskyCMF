@@ -179,8 +179,10 @@ class ColumnFilter {
         self::INPUT_TYPE_CHECKBOX,
         self::INPUT_TYPE_RADIO,
     ];
-
+    /** @var string|null */
     protected $columnName = null;
+    /** @var string|null */
+    protected $columnNameForTranslation;
     protected $filterLabel = null;
     protected $dataType = null;
     protected $inputType = null;
@@ -207,6 +209,8 @@ class ColumnFilter {
     protected $columnNameReplacementForCondition = null;
     /** @var bool  */
     protected $nullable = false;
+    /** @var null|FilterConfig */
+    protected $filterConfig;
 
     /**
      * @param string $dataType
@@ -246,6 +250,25 @@ class ColumnFilter {
     }
 
     /**
+     * @param FilterConfig $config
+     * @return $this
+     */
+    public function setFilterConfig(FilterConfig $config) {
+        $this->filterConfig = $config;
+        return $this;
+    }
+
+    /**
+     * @return FilterConfig
+     */
+    public function getFilterConfig() {
+        if (!$this->filterConfig) {
+            throw new \BadMethodCallException('FilterConfig not set');
+        }
+        return $this->filterConfig;
+    }
+
+    /**
      * @param $operator
      * @return bool
      */
@@ -278,6 +301,25 @@ class ColumnFilter {
             throw new ScaffoldException('Column name is empty for this filter');
         }
         return $this->columnName;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setColumnNameForTranslation($name) {
+        $this->columnNameForTranslation = $name;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getColumnNameForTranslation() {
+        if ($this->columnNameForTranslation === null) {
+            $this->columnNameForTranslation = str_slug($this->columnName, '_');
+        }
+        return $this->columnNameForTranslation;
     }
 
     /**
@@ -395,18 +437,14 @@ class ColumnFilter {
     }
 
     /**
-     * @return bool
-     */
-    public function hasFilterLabel() {
-        return !empty($this->filterLabel);
-    }
-
-    /**
      * @return string
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function getFilterLabel() {
-        return empty($this->filterLabel) ? $this->getColumnName() : $this->filterLabel;
+        if (empty($this->filterLabel)) {
+            $this->filterLabel = $this->getFilterConfig()->translate($this);
+        }
+        return $this->filterLabel;
     }
 
     /**

@@ -246,7 +246,8 @@ $dictionary = [
             'header_edit' => 'Page edititng',
             'tab' => [
                 'general' => 'General',
-                'images' => 'Images'
+                'images' => 'Images',
+                'texts' => 'Texts (:language)'
             ],
             'input' => [
                 'id' => 'ID',
@@ -266,6 +267,17 @@ $dictionary = [
                 'updated_at' => 'Updated',
                 'text_id' => 'Texts for the page',
                 'images' => 'Images',
+                'Texts' => [
+                    'title' => 'Full title',
+                    'menu_title' => 'Short title (for menus)',
+                    'browser_title' => 'Browser title',
+                    'comment' => 'Comment for text editing',
+                    'content' => 'Text',
+                    'meta_description' => 'Meta-description',
+                    'meta_keywords' => 'Meta-keywords',
+                    'custom_info' => 'Additional info',
+                    'insert_other_text_widget_title_template' => 'Insert field ":text_field.label" from texts ":text_id.label"',
+                ]
             ],
             'tooltip' => [
                 'meta_description' => 'Used in cases when Meta-description is not provided by attached texts',

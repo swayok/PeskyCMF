@@ -72,15 +72,20 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
+     * @param bool $forHtmlInput - convert name into a valid HTML input name('Relation.coln_name' to 'Relation[col_name]')
      * @return null|string
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
-    public function getName() {
-        $nameParts = explode('.', parent::getName());
-        if (count($nameParts) > 1) {
-            return $nameParts[0] . '[' . implode('][', array_slice($nameParts, 1)) . ']';
+    public function getName($forHtmlInput = false) {
+        if ($forHtmlInput) {
+            $nameParts = explode('.', $this->getName());
+            if (count($nameParts) > 1) {
+                return $nameParts[0] . '[' . implode('][', array_slice($nameParts, 1)) . ']';
+            } else {
+                return $nameParts[0];
+            }
         } else {
-            return $nameParts[0];
+            return parent::getName();
         }
     }
 
@@ -94,14 +99,15 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
+     * @param bool $addIt - true: adds 'it.' before var name ('it' is name of var that contains template data in doT.js)
      * @return string
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
-    public function getVarNameForDotJs() {
+    public function getVarNameForDotJs($addIt = true) {
         if ($this->varNameForDotJs === null) {
-            $this->varNameForDotJs = preg_replace('%[^a-zA-Z0-9_]+%', '.', parent::getName());
+            $this->varNameForDotJs = preg_replace('%[^a-zA-Z0-9_]+%', '.', $this->getName());
         }
-        return 'it.' . $this->varNameForDotJs;
+        return ($addIt ? 'it.' : '') . $this->varNameForDotJs;
     }
 
     /**
@@ -136,6 +142,7 @@ class FormInput extends RenderableValueViewer {
      * @param bool $isPlainArray - true: value is expected to be a plain array | false: value may be of any type
      * @param array $additionalVarNameParts
      * @return string
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getDotJsJsonInsertForValue($isPlainArray = false, array $additionalVarNameParts = []) {
         $fullName = $this->getVarNameForDotJs();
@@ -304,13 +311,13 @@ class FormInput extends RenderableValueViewer {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function getLabel($default = '', InputRenderer $renderer = null) {
+    public function getLabel(InputRenderer $renderer = null) {
         if ($renderer === null) {
             $isRequired = $this->getTableColumn()->isValueRequiredToBeNotEmpty();
         } else {
             $isRequired = $renderer->isRequiredForCreate() || $renderer->isRequiredForEdit();
         }
-        return parent::getLabel($default) . ($isRequired ? '*' : '');
+        return parent::getLabel() . ($isRequired ? '*' : '');
     }
 
     /**
@@ -527,7 +534,7 @@ class FormInput extends RenderableValueViewer {
     public function getDisablersConfigs() {
         if (!array_key_exists('input_name', $this->disablersConfigs)) {
             $ret = [
-                'input_name' => $this->getName(),
+                'input_name' => $this->getName(true),
                 'conditions' => [],
             ];
             foreach ($this->disablersConfigs as $closure) {

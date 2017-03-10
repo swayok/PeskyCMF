@@ -4,12 +4,10 @@
  * @var string $tableNameForRoutes
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\FilterConfig $dataGridFilterConfig
- * @var string $translationPrefix
  * @var string $idSuffix
  * @var array $includes - views to include into this template.
  *      Possible use: add datatable cell templates and use them in $dataTablesInitializer
  *      All views receive:
-            * var string $translationPrefix
             * var string $idSuffix
             * var \PeskyCMF\Db\CmfDbTable $model
             * var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
@@ -79,10 +77,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $config */
                     foreach ($gridColumnsConfigs as $config) {
                         $th = \Swayok\Html\Tag::th()
-                            ->setContent($config->isVisible()
-                                ? $config->getLabel(cmfTransCustom("$translationPrefix.datagrid.column.{$config->getName()}"))
-                                : '&nbsp'
-                            )
+                            ->setContent($config->isVisible() ? $config->getLabel() : '&nbsp;')
                             ->setClass('text-nowrap')
                             ->setDataAttr('visible', $config->isVisible() ? null : 'false')
                             ->setDataAttr('orderable', $config->isVisible() && $config->isSortable() ? 'true' : 'false')
@@ -104,7 +99,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             if (!is_array($includes)) {
                 $includes = [$includes];
             }
-            $dataForViews = compact('translationPrefix', 'idSuffix', 'model', 'dataGridConfig');
+            $dataForViews = compact('idSuffix', 'model', 'dataGridConfig');
             foreach ($includes as $include) {
                 echo view($include, $dataForViews)->render();
                 echo "\n\n";
@@ -335,10 +330,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             <?php
                 $fitlers = [];
                 foreach($dataGridFilterConfig->getFilters() as $filterConfig) {
-                    if (!$filterConfig->hasFilterLabel()) {
-                        $path = "$translationPrefix.datagrid.filter." . \Swayok\Utils\StringUtils::underscore($filterConfig->getColumnName());
-                        $filterConfig->setFilterLabel(cmfTransCustom($path));
-                    }
                     $fitlers[] = $filterConfig->buildConfig();
                 }
             ?>
@@ -363,7 +354,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
 
 <div id="data-grid-tpl">
     <?php echo view('cmf::ui.default_page_header', [
-        'header' => cmfTransCustom("$translationPrefix.datagrid.header"),
+        'header' => $dataGridConfig->translate(null, 'header'),
         'defaultBackUrl' => route('cmf_start_page'),
     ])->render(); ?>
     <div class="content">

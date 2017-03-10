@@ -6,7 +6,7 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  */
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(), false)
+    ->addAttribute('name', $fieldConfig->getName(true), false)
     ->addAttribute('type', 'checkbox', true)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('value', 1, false)
@@ -20,8 +20,8 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 ?>
 
 <div class="form-group">
-    <input name="<?php echo $fieldConfig->getName(); ?>" id="_<?php echo $rendererConfig->getAttribute('id'); ?>" type="hidden" value="0">
-    <label class="ib mr15 lh35" for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <input name="<?php echo $rendererConfig->getAttribute('name'); ?>" id="_<?php echo $rendererConfig->getAttribute('id'); ?>" type="hidden" value="0">
+    <label class="ib mr15 lh35" for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
     <div class="ib">
         <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
             <?php echo $fieldConfig->getDotJsInsertForValue('checked') ?>

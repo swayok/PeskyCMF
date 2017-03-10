@@ -5,7 +5,6 @@
  * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $fieldConfig
  * @var array|null $options
  * @var \PeskyCMF\Db\CmfDbTable $model
- * @var string $translationPrefix
  */
 if (empty($options)) {
     $options = [];

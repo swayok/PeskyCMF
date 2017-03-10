@@ -6,7 +6,7 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  */
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(), false)
+    ->addAttribute('name', $fieldConfig->getName(), true)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('type', 'hidden', true);
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());

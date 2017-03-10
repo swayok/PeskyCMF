@@ -3,7 +3,6 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $itemDetailsConfig
  * @var string $tableNameForRoutes
- * @var string $translationPrefix
  * @var string $idSuffix
  */
 $dataGridId = "scaffold-data-grid-{$idSuffix}";
@@ -21,18 +20,12 @@ if ($itemDetailsConfig->hasJsInitiator()) {
         <?php foreach ($valueViewers as $viewer) : ?>
         <tr id="item-details-<?php echo $viewer->getName(); ?>">
             <th class="text-nowrap">
-                <?php
-                    if ($viewer->hasLabel()) {
-                        echo $viewer->getLabel();
-                    } else {
-                        echo cmfTransCustom("$translationPrefix.item_details.field.{$viewer->getName()}");
-                    }
-                ?>
+                <?php echo $viewer->getLabel(); ?>
             </th>
             <td width="80%">
                 <?php
                     try {
-                        echo $viewer->render(['translationPrefix' => $translationPrefix]);
+                        echo $viewer->render();
                     } catch (Exception $exc) {
                         echo '<div>' . htmlspecialchars($exc->getMessage()) . '</div>';
                         echo '<pre>' . nl2br(htmlspecialchars($exc->getTraceAsString())) . '</pre>';
@@ -112,7 +105,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
                         aria-label="<?php echo cmfTransGeneral('.form.toolbar.close'); ?>">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h4 class="modal-title"><?php echo cmfTransCustom("$translationPrefix.item_details.header"); ?></h4>
+                        <h4 class="modal-title"><?php echo $itemDetailsConfig->translate(null, 'header'); ?></h4>
                     </div>
                     <div class="modal-body pn">
                         <?php echo View::yieldContent('item-detials-table'); ?>
@@ -125,7 +118,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
         </div>
     {{??}}
         <?php echo view('cmf::ui.default_page_header', [
-            'header' => cmfTransCustom("$translationPrefix.item_details.header"),
+            'header' => $itemDetailsConfig->translate(null, 'header'),
             'defaultBackUrl' => $backUrl,
         ])->render(); ?>
         <div class="content">

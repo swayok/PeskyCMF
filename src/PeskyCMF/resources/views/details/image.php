@@ -4,7 +4,6 @@
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $fieldConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
- * @var string $translationPrefix
  */
 ?>
 {{? !!it.<?php echo $fieldConfig->getName() ?> && it.<?php echo $fieldConfig->getName() ?>.length > 0 }}

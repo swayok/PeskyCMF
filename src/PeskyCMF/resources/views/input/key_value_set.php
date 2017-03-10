@@ -4,17 +4,16 @@
  * @var \PeskyCMF\Scaffold\Form\KeyValueSetFormInput $fieldConfig
  * @var \PeskyCMF\Scaffold\Form\FormConfig $actionConfig
  * @var \PeskyCMF\Db\CmfDbTable $model
- * @var string $translationPrefix
  */
 $keysLabel = $fieldConfig->getKeysLabel();
 $valuesLabel = $fieldConfig->getValuesLabel();
 $defaultId = $fieldConfig->getDefaultId();
-$inputName = $fieldConfig->getName();
+$inputName = $fieldConfig->getName(true);
 ?>
 
 <div id="<?php echo $defaultId; ?>-container">
     <div class="section-divider">
-        <span><?php echo $fieldConfig->getLabel('', $rendererConfig) ?></span>
+        <span><?php echo $fieldConfig->getLabel($rendererConfig) ?></span>
     </div>
     <script type="text/html" id="<?php echo $defaultId ?>-row-tpl">
         <tr>

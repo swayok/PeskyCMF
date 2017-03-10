@@ -3,7 +3,6 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
  * @var string $tableNameForRoutes
- * @var string $translationPrefix
  * @var string $idSuffix
  */
 $formId = "scaffold-bulk-edit-form-{$idSuffix}";
@@ -22,9 +21,9 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                     </button>
                     <h4 class="modal-title" id="scaffold-bulk-edit-<?php echo $idSuffix; ?>-header">
                         {{? it._ids && it._ids.length }}
-                            <?php echo cmfTransCustom("$translationPrefix.form.header_bulk_edit_selected"); ?>
+                            <?php echo $formConfig->translate(null, 'header_bulk_edit_selected'); ?>
                         {{??}}
-                            <?php echo cmfTransCustom("$translationPrefix.form.header_bulk_edit_filtered"); ?>
+                            <?php echo $formConfig->translate(null, 'header_bulk_edit_filtered'); ?>
                         {{?}}
                     </h4>
                 </div>
@@ -59,11 +58,8 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                         $enablerTextOff = cmfTransGeneral('.form.bulk_edit.enabler.skip_input');
                         $baseEnablerId = str_random() . '-enabler-for-';
                         foreach ($formConfig->getBulkEditableColumns() as $inputConfig) {
-                            if (!$inputConfig->hasLabel()) {
-                                $inputConfig->setLabel(cmfTransCustom("$translationPrefix.form.input.{$inputConfig->getName()}"));
-                            }
                             try {
-                                $renderedInput = $inputConfig->render(['translationPrefix' => $translationPrefix]);
+                                $renderedInput = $inputConfig->render();
                                 $enablerSwitchId = $baseEnablerId . str_slug($inputConfig->getName());
                                 $enablerSwitch = "
                                     <div class=\"bulk-edit-form-input-enabler pull-left va-t mr15\">

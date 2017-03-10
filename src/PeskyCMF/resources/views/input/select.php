@@ -7,7 +7,7 @@
  */
 $isMultiple = $rendererConfig->getAttribute('multiple', false);
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName() . ($isMultiple ? '[]' : ''), false)
+    ->addAttribute('name', $fieldConfig->getName(true) . ($isMultiple ? '[]' : ''), false)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('class', 'form-control selectpicker', false);
 
@@ -18,7 +18,7 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
 
 <div class="form-group <?php echo $isHidden ? 'hidden' : ''; ?>">
     <?php if (!$isHidden) : ?>
-        <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+        <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
     <?php endif; ?>
     <select {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
         <?php if ($isMultiple): ?>

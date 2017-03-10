@@ -6,7 +6,7 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  */
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(), false)
+    ->addAttribute('name', $fieldConfig->getName(true), false)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('class', 'form-control', false)
     ->addAttribute('type', 'text', false);
@@ -16,7 +16,7 @@ $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText(
 ?>
 
 <div class="form-group">
-    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
     <?php if ($hasAddons) : ?>
         <div class="input-group">
             <?php if ($rendererConfig->hasPrefixText()) : ?>

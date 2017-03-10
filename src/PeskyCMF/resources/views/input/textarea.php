@@ -6,7 +6,7 @@
  * @var \PeskyCMF\Db\CmfDbTable $model
  */
 $rendererConfig
-    ->addAttribute('name', $fieldConfig->getName(), false)
+    ->addAttribute('name', $fieldConfig->getName(true), false)
     ->addAttribute('id', $fieldConfig->getDefaultId(), false)
     ->addAttribute('class', 'form-control', false);
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
@@ -14,7 +14,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 ?>
 
 <div class="form-group">
-    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel('', $rendererConfig); ?></label>
+    <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $fieldConfig->getLabel($rendererConfig); ?></label>
     <textarea {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
     ><?php echo $fieldConfig->getDotJsInsertForValue() ?></textarea>
     <?php echo $fieldConfig->getFormattedTooltip(); ?>
