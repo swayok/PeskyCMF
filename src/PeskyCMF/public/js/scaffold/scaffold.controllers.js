@@ -1070,6 +1070,7 @@ var ScaffoldFormHelper = {
                                                     tplData.title = tplData.widget_title_tpl;
                                                     for (argName in data) {
                                                         if (insertInfo.args_options[argName] && insertInfo.args_options[argName].type === 'select') {
+                                                            // select
                                                             tplData.title = tplData.title.replace(
                                                                 ':' + argName + '.value',
                                                                 data[argName]
@@ -1195,11 +1196,28 @@ var ScaffoldFormHelper = {
                                         cache: false
                                     })
                                     .done(function (json) {
+                                        var $select = $(select._.select.getElement().$);
                                         for (var value in json) {
-                                            if (!select.default) {
-                                                select.default = value;
+                                            if ($.isPlainObject(json[value])) {
+                                                // optgroup
+                                                var $group = $('<optgroup>').attr('label', value);
+                                                $select.append($group);
+                                                for (var valueInGroup in json[value]) {
+                                                    if (!select.default) {
+                                                        select.default = valueInGroup;
+                                                    }
+                                                    $group.append(
+                                                        $('<option>')
+                                                            .attr('value', valueInGroup)
+                                                            .html(json[value][valueInGroup])
+                                                    );
+                                                }
+                                            } else {
+                                                if (!select.default) {
+                                                    select.default = value;
+                                                }
+                                                select.add(json[value], value);
                                             }
-                                            select.add(json[value], value);
                                         }
                                         optionsOfAllSelects[inputName] = json;
                                     })

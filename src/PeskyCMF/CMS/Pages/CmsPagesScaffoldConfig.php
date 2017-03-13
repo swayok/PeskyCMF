@@ -13,7 +13,6 @@ use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\Core\DbExpr;
-use PeskyORM\ORM\OrmSelect;
 use Swayok\Utils\Set;
 
 class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
@@ -366,13 +365,20 @@ SCRIPT;
             case 'pages_for_inserts':
                 /** @var CmsPagesTable $pagesTable */
                 $pagesTable = app(CmsPagesTable::class);
-                $pages = $pagesTable::select(['id', 'url_alias', 'Parent' => ['id', 'url_alias']], [
+                $pages = $pagesTable::select(['id', 'url_alias', 'type', 'Parent' => ['id', 'url_alias']], [
                     'id !=' => (int)request()->query('pk', 0) ?: 0,
                 ]);
                 $options = [];
+                $typesTrans = [];
                 /** @var CmsPage $pageData */
                 foreach ($pages as $pageData) {
-                    $options[$pageData['id']] = $pageData->relative_url;
+                    if (!array_key_exists($pageData->type, $typesTrans)) {
+                        $typesTrans[$pageData->type] = $this->translate('types', $pageData->type);
+                    }
+                    if (!array_key_exists($typesTrans[$pageData->type], $options)) {
+                        $options[$typesTrans[$pageData->type]] = [];
+                    }
+                    $options[$typesTrans[$pageData->type]][$pageData->id] = $pageData->relative_url;
                 }
                 return $options;
             default:
