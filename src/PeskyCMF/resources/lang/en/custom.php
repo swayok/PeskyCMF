@@ -212,6 +212,8 @@ $dictionary = [
                 'created_at' => 'Created',
                 'updated_at' => 'Updated',
                 'text_id' => 'Page title',
+                'title' => 'Title',
+                'publish at' => 'Publishing date',
             ],
             'filter' => [
                 'pages' => [
@@ -231,6 +233,13 @@ $dictionary = [
                     'updated_at' => 'Updated',
                     'text_id' => 'Text ID',
                     'parent_id' => 'Parent page',
+                    'title' => 'Title',
+                    'publish at' => 'Publishing date',
+                ],
+                'parent' => [
+                    'id' => 'Parent\'s ID',
+                    'url_alias' => 'Parent\'s relative URL',
+                    'title' => 'Parent\'s title',
                 ],
                 'primary_text' => [
                     'id' => 'Text ID',
@@ -267,6 +276,8 @@ $dictionary = [
                 'updated_at' => 'Updated',
                 'text_id' => 'Texts for the page',
                 'images' => 'Images',
+                'title' => 'Title (used only as text identfier of the page)',
+                'publish at' => 'Publishing date',
                 'Texts' => [
                     'title' => 'Full title',
                     'menu_title' => 'Short title (for menus)',
@@ -321,6 +332,8 @@ $dictionary = [
                 'text_id' => 'Texts for the page',
                 'images' => 'Images',
                 'parent_id' => 'Parent page',
+                'title' => 'Title',
+                'publish at' => 'Publishing date',
             ]
         ]
     ],
@@ -412,66 +425,62 @@ $dictionary = [
             ]
         ]
     ],
-    'texts_for_pages' => [
-    ],
-    'texts_for_news' => [
-        'menu_title' => 'Texts for news',
+    'news' => [
+        'menu_title' => 'News',
         'datagrid' => [
-            'header' => 'Texts for news',
+            'header' => 'News',
         ],
         'form' => [
-            'header_create' => 'Texts for news item: creation',
-            'header_edit' => 'Texts for news item: editing',
+            'header_create' => 'News item creation',
+            'header_edit' => 'News item editing',
         ],
         'item_details' => [
-            'header' => 'Texts for news item: details',
+            'header' => 'News item details',
         ]
     ],
-    'texts_for_categories' => [
-        'menu_title' => 'Texts for categories',
+    'shop_categories' => [
+        'menu_title' => 'Shop categories',
         'datagrid' => [
-            'header' => 'Texts for categories',
+            'header' => 'Shop categories',
         ],
         'form' => [
-            'header_create' => 'Texts for category: creation',
-            'header_edit' => 'Texts for category: editing',
+            'header_create' => 'Shop category creation',
+            'header_edit' => 'Shop category editing',
         ],
         'item_details' => [
-            'header' => 'Texts for category: details',
+            'header' => 'Shop category details',
         ]
     ],
-    'texts_for_items' => [
-        'menu_title' => 'Texts for items',
+    'shop_items' => [
+        'menu_title' => 'Shop items',
         'datagrid' => [
-            'header' => 'Texts for items',
+            'header' => 'Shop items',
         ],
         'form' => [
-            'header_create' => 'Texts for item: creation',
-            'header_edit' => 'Texts for item: editing',
+            'header_create' => 'Shop item creation',
+            'header_edit' => 'Shop item editing',
         ],
         'item_details' => [
-            'header' => 'Texts for item: details',
+            'header' => 'Shop item details',
         ]
     ],
-    'common_texts' => [
-        'menu_title' => 'Common texts',
+    'text_elements' => [
+        'menu_title' => 'Text blocks',
         'datagrid' => [
-            'header' => 'Common texts',
+            'header' => 'Text blocks',
         ],
         'form' => [
-            'header_create' => 'Common texts: creation',
-            'header_edit' => 'Common texts: editing',
+            'header_create' => 'Text block creation',
+            'header_edit' => 'Text block editing',
         ],
         'item_details' => [
-            'header' => 'Common texts: details',
+            'header' => 'Text block details',
         ]
     ],
 ];
 
-$dictionary['texts_for_pages'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_pages']);
-$dictionary['texts_for_news'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_news']);
-$dictionary['texts_for_categories'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_categories']);
-$dictionary['texts_for_items'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_items']);
-$dictionary['common_texts'] = array_replace_recursive($dictionary['texts'], $dictionary['common_texts']);
+$dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);
+$dictionary['shop_categories'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_categories']);
+$dictionary['shop_items'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_items']);
 
 return $dictionary;

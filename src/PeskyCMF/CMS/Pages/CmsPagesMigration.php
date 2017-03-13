@@ -15,6 +15,7 @@ class CmsPagesMigration extends Migration {
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->integer('admin_id')->nullable()->unsigned();
                 $table->string('type', 50)->default(CmsPagesTableStructure::getColumn('type')->getDefaultValueAsIs());
+                $table->string('title', 500)->default('');
                 $table->string('comment', 1000)->default('');
                 $table->string('url_alias')->nullable();
                 $table->string('page_code')->nullable();
@@ -30,6 +31,7 @@ class CmsPagesMigration extends Migration {
                 $table->boolean('with_contact_form')->default(false);
                 $table->boolean('is_published')->default(true);
                 $currentTimestamp = \DB::raw(CmsPagesTable::quoteDbExpr(CmsPagesTable::getCurrentTimeDbExpr()->setWrapInBrackets(false)));
+                $table->timestampTz('publish_at')->default($currentTimestamp);
                 $table->timestampTz('created_at')->default($currentTimestamp);
                 $table->timestampTz('updated_at')->default($currentTimestamp);
 
@@ -40,6 +42,7 @@ class CmsPagesMigration extends Migration {
                 }
 
                 $table->index('parent_id');
+                $table->index('publish_at');
                 $table->index('created_at');
                 $table->index('updated_at');
                 $table->index('order');

@@ -15,7 +15,7 @@ use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 use Swayok\Utils\Set;
 
-class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
+class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
@@ -28,9 +28,10 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 /** @var CmsPage $pageClass */
                 $pageClass = app(CmsPage::class);
                 return [
-                    'type' => $pageClass::TYPE_PAGE
+                    'type' => $pageClass::TYPE_NEWS,
                 ];
             })
+            ->setOrderBy('publish_at', 'desc')
             ->readRelations([
                 'Parent' => ['id', 'url_alias', 'parent_id']
             ])
@@ -44,8 +45,8 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     }),
                 'relative_url',
                 'title',
-                'page_code',
                 'is_published',
+                'publish_at',
             ])
             ->setFilterIsOpenedByDefault(false);
     }
@@ -57,12 +58,14 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'type' => ColumnFilter::create()
                     ->setInputType(ColumnFilter::INPUT_TYPE_MULTISELECT)
                     ->setAllowedValues(function () {
-                        return CmsPage::getTypes(true);
+                        /** @var CmsPage $pageClass */
+                        $pageClass = app(CmsPage::class);
+                        return $pageClass::getTypes(true);
                     }),
-                'url_alias',
                 'title',
-                'page_code',
+                'url_alias',
                 'is_published',
+                'publish_at',
                 'Parent.id',
                 'Parent.url_alias',
                 'Parent.title'
@@ -83,16 +86,14 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                         return $this->translate('types', $value);
                     }),
                 'relative_url',
-                'page_code',
                 'title',
                 'images',
-//                'meta_description',
-//                'meta_keywords',
 //                'order',
 //                'custom_info',
                 'admin_id' => ValueCell::create()
                     ->setType(ValueCell::TYPE_LINK),
                 'is_published',
+                'publish_at',
                 'created_at',
                 'updated_at'
             ]);
@@ -105,19 +106,19 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
         $formConfig
             ->setWidth(80)
             ->addTab($this->translate('form.tab', 'general'), [
+                'title',
                 'type' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
                     ->setValueConverter(function () {
                         /** @noinspection OneTimeUseVariablesInspection */
                         /** @var CmsPage $pageClass */
                         $pageClass = app(CmsPage::class);
-                        return $pageClass::TYPE_PAGE;
+                        return $pageClass::TYPE_NEWS;
                     }),
-                'title',
                 'parent_id' => FormInput::create()
                     ->setType(FormInput::TYPE_SELECT)
-                    ->setOptionsLoader(function ($valueViewer) {
-                        return $this->getPagesOptions($valueViewer);
+                    ->setOptionsLoader(function () {
+                        return $this->getPagesOptions();
                     })
                     ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {
                         $renderer->addData('isHidden', true);
@@ -132,15 +133,19 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setSubmittedValueModifier(function ($value) {
                         return $value === '/' ? $value : preg_replace('%//+%', '/', rtrim($value, '/'));
                     })
-                    ->addJavaScriptBlock(function (FormInput $valueViewer) {
-                        return $this->getJsCodeForUrlAliasInput($valueViewer);
+                    ->addJavaScriptBlock(function (FormInput $formInput) {
+                        return $this->getJsCodeForUrlAliasInput($formInput);
                     }),
-                'page_code',
                 'comment',
-//                'meta_description',
-//                'meta_keywords',
-                'with_contact_form',
                 'is_published',
+                'publish_at' => FormInput::create()
+                    ->setType(FormInput::TYPE_DATE)
+                    ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {
+                        $renderer->addData('config', [
+                            'minDate' => null,
+                            'useCurrent' => true
+                        ]);
+                    }),
                 'admin_id' => FormInput::create()
                     ->setRenderer(function () {
                         return InputRenderer::create('cmf::input/hidden');
@@ -264,7 +269,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
         });
     }
 
-    protected function getPagesOptions($valueViewer) {
+    protected function getPagesOptions() {
         /** @var CmsPagesTable $pagesTable */
         $pagesTable = app(CmsPagesTable::class);
         /** @var CmsPage $pageClass */

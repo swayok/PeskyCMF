@@ -213,6 +213,8 @@ $dictionary = [
                 'created_at' => 'Создана',
                 'updated_at' => 'Изменена',
                 'text_id' => 'Заголовок страницы',
+                'publish_at' => 'Дата публикации',
+                'title' => 'Название',
             ],
             'filter' => [
                 'cms_pages' => [
@@ -232,6 +234,7 @@ $dictionary = [
                     'is_published' => 'Опубликована?',
                     'created_at' => 'Создана',
                     'updated_at' => 'Изменена',
+                    'publish_at' => 'Дата публикации',
                 ],
                 'primary_text' => [
                     'id' => 'ID текста',
@@ -242,7 +245,8 @@ $dictionary = [
                 ],
                 'parent' => [
                     'id' => 'ID родительской страницы',
-                    'url_alias' => 'Относительный URL родительской страницы'
+                    'url_alias' => 'Относительный URL родительской страницы',
+                    'title' => 'Название родительской страницы',
                 ]
             ]
         ],
@@ -272,6 +276,8 @@ $dictionary = [
                 'created_at' => 'Создана',
                 'updated_at' => 'Изменена',
                 'text_id' => 'Тексты для страницы',
+                'publish_at' => 'Дата публикации',
+                'title' => 'Название (используется только в качестве текстового идентификатора страницы)',
                 'Texts' => [
                     'title' => 'Полное название',
                     'menu_title' => 'Короткое название (для меню)',
@@ -325,6 +331,8 @@ $dictionary = [
                 'created_at' => 'Создана',
                 'updated_at' => 'Изменена',
                 'text_id' => 'Тексты для страницы',
+                'publish_at' => 'Дата публикации',
+                'title' => 'Название',
             ]
         ]
     ],
@@ -415,66 +423,62 @@ $dictionary = [
             ]
         ]
     ],
-    'texts_for_pages' => [
-    ],
-    'texts_for_news' => [
-        'menu_title' => 'Тексты для новостей',
+    'news' => [
+        'menu_title' => 'Новости',
         'datagrid' => [
-            'header' => 'Тексты для новостей',
+            'header' => 'Новости',
         ],
         'form' => [
-            'header_create' => 'Добавление текстов для новости',
-            'header_edit' => 'Редактирование текстов для новости',
+            'header_create' => 'Добавление новости',
+            'header_edit' => 'Редактирование новости',
         ],
         'item_details' => [
-            'header' => 'Просмотр текстов для новости',
+            'header' => 'Просмотр новости',
         ]
     ],
-    'texts_for_categories' => [
-        'menu_title' => 'Тексты для категорий',
+    'shop_categories' => [
+        'menu_title' => 'Магазин: категории',
         'datagrid' => [
-            'header' => 'Тексты для категорий',
+            'header' => 'Магазин: категории',
         ],
         'form' => [
-            'header_create' => 'Добавление текстов для категории',
-            'header_edit' => 'Редактирование текстов для категории',
+            'header_create' => 'Добавление категории в магазин',
+            'header_edit' => 'Редактирование категории магазина',
         ],
         'item_details' => [
-            'header' => 'Просмотр текстов для категории',
+            'header' => 'Просмотр категории магазина',
         ]
     ],
-    'texts_for_items' => [
-        'menu_title' => 'Тексты для товаров',
+    'shop_items' => [
+        'menu_title' => 'Магазин: товары',
         'datagrid' => [
-            'header' => 'Тексты для товаров',
+            'header' => 'Магазин: товары',
         ],
         'form' => [
-            'header_create' => 'Добавление текстов для товара',
-            'header_edit' => 'Редактирование текстов для товара',
+            'header_create' => 'Добавление товара в магазин',
+            'header_edit' => 'Редактирование товара в магазине',
         ],
         'item_details' => [
-            'header' => 'Просмотр текстов для товара',
+            'header' => 'Просмотр товара в магазине',
         ]
     ],
-    'common_texts' => [
-        'menu_title' => 'Общие тексты',
+    'text_elements' => [
+        'menu_title' => 'Текстовые блоки',
         'datagrid' => [
-            'header' => 'Общие тексты',
+            'header' => 'Текстовые блоки',
         ],
         'form' => [
-            'header_create' => 'Добавление общих текстов',
-            'header_edit' => 'Редактирование общих текстов',
+            'header_create' => 'Добавление текстового блока',
+            'header_edit' => 'Редактирование текстового блока',
         ],
         'item_details' => [
-            'header' => 'Просмотр общих текстов',
+            'header' => 'Просмотр текстового блока',
         ]
     ],
 ];
 
-$dictionary['texts_for_pages'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_pages']);
-$dictionary['texts_for_news'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_news']);
-$dictionary['texts_for_categories'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_categories']);
-$dictionary['texts_for_items'] = array_replace_recursive($dictionary['texts'], $dictionary['texts_for_items']);
-$dictionary['common_texts'] = array_replace_recursive($dictionary['texts'], $dictionary['common_texts']);
+$dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);
+$dictionary['shop_categories'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_categories']);
+$dictionary['shop_items'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_items']);
 
 return $dictionary;

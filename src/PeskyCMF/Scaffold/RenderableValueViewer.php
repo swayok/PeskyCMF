@@ -94,7 +94,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
 
     /**
      * Note: input jQuery object is tored in $input variable
-     * @param string $jsBlockContents
+     * @param string|\Closure $jsBlockContents - \Closure: function (RenderableValueViewer $valueViewer) { return 'js code'; }
      * @return $this
      */
     public function addJavaScriptBlock($jsBlockContents) {
@@ -112,7 +112,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
             $jsCode = '';
             foreach ($this->jsBlocks as $jsBlock) {
                 if ($jsBlock instanceof \Closure) {
-                    $jsCode .= $jsBlock();
+                    $jsCode .= $jsBlock($this);
                 } else {
                     $jsCode .= $jsBlock;
                 }

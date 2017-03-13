@@ -33,7 +33,7 @@ if (empty($config)) {
 }
 $config = array_merge([
     'useCurrent' => $rendererConfig->isRequired() ? true : false,
-    'minDate' => date('Y-m-d H:i'),
+    'minDate' => 'now',
     'format' => 'YYYY-MM-DD HH:mm',
     'locale' => app()->getLocale(),
     'sideBySide' => true
@@ -43,7 +43,16 @@ $config = array_merge([
 <script type="application/javascript">
     setTimeout(function () {
         var $input = $('#<?php echo $rendererConfig->getAttribute('id'); ?>');
-        $input.datetimepicker(<?php echo json_encode($config); ?>);
+        var config = <?php echo json_encode($config); ?>;
+        if (config.useCurrent) {
+            config.defaultDate = moment();
+        }
+        if (!config.minDate) {
+            delete config.minDate;
+        } else if (config.minDate === 'now') {
+            config.minDate = moment().startOf('minute');
+        }
+        $input.datetimepicker(config);
         $input.parent().find('.input-group-addon.cursor').on('click', function () {
             $input.data("DateTimePicker").show();
         });

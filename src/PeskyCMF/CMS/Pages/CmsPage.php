@@ -10,6 +10,7 @@ use PeskyORM\ORM\RecordsSet;
  * @property-read null|int    $parent_id
  * @property-read null|int    $admin_id
  * @property-read string      $type
+ * @property-read string      $title
  * @property-read string      $comment
  * @property-read string      $url_alias
  * @property-read string      $relative_url
@@ -20,6 +21,10 @@ use PeskyORM\ORM\RecordsSet;
  * @property-read null|int    $order
  * @property-read string      $with_contact_form
  * @property-read string      $is_published
+ * @property-read string      $publish_at
+ * @property-read string      $publish_at_as_date
+ * @property-read string      $publish_at_as_time
+ * @property-read int         $publish_at_as_unix_ts
  * @property-read string      $created_at
  * @property-read string      $created_at_as_date
  * @property-read string      $created_at_as_time
@@ -37,6 +42,7 @@ use PeskyORM\ORM\RecordsSet;
  * @method $this    setAdminId($value, $isFromDb = false)
  * @method $this    setTextId($value, $isFromDb = false)
  * @method $this    setType($value, $isFromDb = false)
+ * @method $this    setTitle($value, $isFromDb = false)
  * @method $this    setComment($value, $isFromDb = false)
  * @method $this    setUrlAlias($value, $isFromDb = false)
  * @method $this    setPageCode($value, $isFromDb = false)
@@ -46,8 +52,7 @@ use PeskyORM\ORM\RecordsSet;
  * @method $this    setOrder($value, $isFromDb = false)
  * @method $this    setWithContactForm($value, $isFromDb = false)
  * @method $this    setIsPublished($value, $isFromDb = false)
- * @method $this    setCreatedAt($value, $isFromDb = false)
- * @method $this    setUpdatedAt($value, $isFromDb = false)
+ * @method $this    setPublishAt($value, $isFromDb = false)
  * @method $this    setCustomInfo($value, $isFromDb = false)
  */
 class CmsPage extends CmsRecord {

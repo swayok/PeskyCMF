@@ -39,8 +39,6 @@ use PeskyCMF\CMS\Pages\CmsPage;
  * @method $this    setContent($value, $isFromDb = false)
  * @method $this    setMetaDescription($value, $isFromDb = false)
  * @method $this    setMetaKeywords($value, $isFromDb = false)
- * @method $this    setCreatedAt($value, $isFromDb = false)
- * @method $this    setUpdatedAt($value, $isFromDb = false)
  * @method $this    setCustomInfo($value, $isFromDb = false)
  */
 class CmsText extends CmsRecord {
