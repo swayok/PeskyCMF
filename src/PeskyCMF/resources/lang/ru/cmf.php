@@ -76,7 +76,9 @@ return [
             'delete_item' => 'Удалить',
             'select_all' => 'Выбрать все',
             'select_none' => 'Отменить выбор',
-            'invert_selection' => 'Обратить выделение'
+            'invert_selection' => 'Обратить выделение',
+            'show_children' => 'Показать дочерние элементы',
+            'hide_children' => 'Скрыть дочерние элементы',
         ],
         'filter' => [
             'bool' => [

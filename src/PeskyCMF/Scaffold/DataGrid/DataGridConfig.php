@@ -6,13 +6,14 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
 
 class DataGridConfig extends ScaffoldSectionConfig {
+
+    const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
     protected $allowRelationsInValueViewers = true;
 
@@ -64,8 +65,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $isRowActionsColumnFixed = true;
     /** @var bool */
     protected $isFilterOpened = true;
-
-    const ROW_ACTIONS_COLUMN_NAME = '__actions';
+    /** @var string|null */
+    protected $enableNestedViewBasedOnColumn;
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfigConfig) {
         parent::__construct($table, $scaffoldConfigConfig);
@@ -602,6 +603,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
         if (!$this->isRowActionsFloating() && !$this->hasValueViewer(static::ROW_ACTIONS_COLUMN_NAME)) {
             $this->addValueViewer(static::ROW_ACTIONS_COLUMN_NAME, null);
         }
+        if ($this->isNestedViewEnabled() && !$this->hasValueViewer($this->getColumnNameForNestedView())) {
+            $this->addValueViewer($this->getColumnNameForNestedView(), DataGridColumn::create()->setIsVisible(false));
+        }
     }
 
     /**
@@ -618,4 +622,28 @@ class DataGridConfig extends ScaffoldSectionConfig {
         }
     }
 
+    /**
+     * @param string $parentIdColumnName
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
+    public function enableNestedView($parentIdColumnName = 'parent_id') {
+        $this->getTable()->getTableStructure()->getColumn($parentIdColumnName); //< validates column existence
+        $this->enableNestedViewBasedOnColumn = $parentIdColumnName;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNestedViewEnabled() {
+        return !empty($this->enableNestedViewBasedOnColumn);
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getColumnNameForNestedView() {
+        return $this->enableNestedViewBasedOnColumn;
+    }
 }

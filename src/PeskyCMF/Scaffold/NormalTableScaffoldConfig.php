@@ -27,6 +27,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $conditions = array_replace($dataGridFilterConfig->buildConditionsFromSearchRules($search), $conditions);
             }
         }
+        if ($dataGridConfig->isNestedViewEnabled()) {
+            // set parent id column value to null when nested view is enabled
+            $parentPkValue = $request->get('parent');
+            $conditions[$dataGridConfig->getColumnNameForNestedView()] = empty($parentPkValue) ? null : $parentPkValue;
+        }
         $order = $request->query('order', [[
             'column' => $dataGridConfig->getOrderBy(),
             'dir' => $dataGridConfig->getOrderDirection()

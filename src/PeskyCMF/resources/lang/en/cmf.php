@@ -76,7 +76,9 @@ return [
             'delete_item' => 'Delete',
             'select_all' => 'Select all',
             'select_none' => 'Select none',
-            'invert_selection' => 'Invert selection'
+            'invert_selection' => 'Invert selection',
+            'show_children' => 'Show children',
+            'hide_children' => 'Hide children',
         ],
         'filter' => [
             'bool' => [

@@ -190,6 +190,24 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         // row actions
         $actionsTpl = '';
+        if ($dataGridConfig->isNestedViewEnabled()) {
+            $actionsTpl .= \Swayok\Html\Tag::a()
+                ->setClass('row-action link-muted show-children')
+                ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
+                ->setTitle(cmfTransGeneral('.datagrid.actions.show_children'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setDataAttr('container', '#section-content .content')
+                ->setHref('javascript: void(0)')
+                ->build();
+            $actionsTpl .= \Swayok\Html\Tag::a()
+                ->setClass('row-action link-muted hide-children hidden')
+                ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
+                ->setTitle(cmfTransGeneral('.datagrid.actions.hide_children'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setDataAttr('container', '#section-content .content')
+                ->setHref('javascript: void(0)')
+                ->build();
+        }
         if ($dataGridConfig->isDetailsViewerAllowed()) {
             $url = $dblClickUrl = routeToCmfItemDetails($tableNameForRoutes, ":{$pkName}:");
             $btn = \Swayok\Html\Tag::a()
@@ -262,6 +280,12 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         ]
                     ];
                 }
+                if ($dataGridConfig->isNestedViewEnabled()) {
+                    $dataTablesConfig['nested_data_grid'] = [
+                        'value_column' => '__' . $table::getPkColumnName(),
+                        'filter_column' => '__' . $dataGridConfig->getColumnNameForNestedView()
+                    ];
+                }
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig + ['resource_name' => $tableNameForRoutes], JSON_UNESCAPED_UNICODE); ?>;
             var rowActionsTpl = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
@@ -304,11 +328,13 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     info: false
                 };
             <?php endif; ?>
-            if (fixedColumns > 0) {
-                dataTablesConfig.fixedColumns = {
-                    leftColumns: fixedColumns
-                };
-            }
+            <?php if ($dataGridConfig->isRowActionsColumnFixed()) : ?>
+                if (fixedColumns > 0) {
+                    dataTablesConfig.fixedColumns = {
+                        leftColumns: fixedColumns
+                    };
+                }
+            <?php endif; ?>
             <?php if (!empty($dblClickUrl)): ?>
                 dataTablesConfig.doubleClickUrl = Utils.makeTemplateFromText(
                     '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%i', '{{= it.$2 }}', $dblClickUrl)); ?>',

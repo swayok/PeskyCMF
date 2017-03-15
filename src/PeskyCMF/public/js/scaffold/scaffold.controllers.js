@@ -234,11 +234,12 @@ var ScaffoldDataGridHelper = {
         }
     },
     init: function (dataGrid, configs) {
-        dataGrid = $(dataGrid);
-        if (dataGrid.length) {
+        var $dataGrid = $(dataGrid);
+        if ($dataGrid.length) {
             if (!$.isPlainObject(configs)) {
                 configs = {};
             }
+            var tableOuterHtml = $dataGrid[0].outerHTML;
             var mergedConfigs = $.extend(
                 {language: CmfConfig.getLocalizationStringsForComponent('data_tables')},
                 ScaffoldDataGridHelper.defaultConfig,
@@ -250,7 +251,8 @@ var ScaffoldDataGridHelper = {
                     error: Utils.handleAjaxError
                 }
             }
-            dataGrid.DataTable(mergedConfigs)
+            var configsBackup = $.extend({}, mergedConfigs);
+            $dataGrid.DataTable(mergedConfigs)
                 .on('init', function (event, settings) {
                     var $table = $(settings.nTable);
                     var $tableWrapper = $(settings.nTableWrapper);
@@ -261,12 +263,13 @@ var ScaffoldDataGridHelper = {
                     ScaffoldDataGridHelper.initMultiselect($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initBulkLinks($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initBulkEditing($table, $tableWrapper, configs);
+                    ScaffoldDataGridHelper.initNestedView($table, $tableWrapper, configsBackup, tableOuterHtml);
                 }).on('preXhr', function (event, settings) {
                     ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                 });
-            return dataGrid;
+            return $dataGrid;
         } else {
-            throw 'Invalid data grid id: ' + dataGrid
+            throw 'Invalid data grid id: ' + $dataGrid
         }
     },
     initToolbar: function ($tableWrapper, customToolbarItems, customFilterToolbarItems) {
@@ -564,6 +567,71 @@ var ScaffoldDataGridHelper = {
             ScaffoldFormHelper.handleBulkEditForm($link, configs.resource_name, api);
             return false;
         })
+    },
+    initNestedView: function ($table, $tableWrapper, configs, tableOuterHtml) {
+        if (configs.nested_data_grid) {
+            var api = $table.dataTable().api();
+            var subTableConfigs = $.extend({}, configs, {
+                dom: "<tr><<'col-md-3 hidden-xs hidden-sm'i><'col-xs-12 col-md-6'p><'col-md-3 hidden-xs hidden-sm'l>>",
+                stateSave: false,
+                fixedHeader: {
+                    header: false,
+                    footer: false
+                },
+                scrollY: false,
+                scrollX: false
+            });
+            delete subTableConfigs.fixedColumns;
+            console.log(subTableConfigs);
+            $tableWrapper
+                .on('click', 'a.show-children', function () {
+                    var $tr = $(this).closest('tr');
+                    var row = api.row($tr);
+                    if (!$tr.hasClass('subtable-opened')) {
+                        $(this).addClass('hidden');
+                        $tr
+                            .addClass('subtable-opened')
+                            .find('a.hide-children')
+                                .removeClass('hidden');
+                        var parentId = row.data()[subTableConfigs.nested_data_grid.value_column];
+                        //console.log(parentId, tableOuterHtml);
+                        var $subTable = $(tableOuterHtml);
+                        $subTable.attr('id', $subTable.attr('id') + '-children-for-' + parentId);
+                        row.child($subTable).show();
+                        var configs = $.extend({}, subTableConfigs);
+                        configs.ajax.url += '?parent=' + parentId;
+                        $subTable.DataTable(configs)
+                            .on('init', function (event, settings) {
+                                var $subTable = $(settings.nTable);
+                                var $subTableWrapper = $(settings.nTableWrapper);
+                                $subTableWrapper
+                                    .addClass('pl10')
+                                    .parent()
+                                        .addClass('pn pb10 sub-data-grid');
+                                $subTable.data('configs', configs);
+                                ScaffoldDataGridHelper.initClickEvents($subTableWrapper, $subTable, configs);
+                                ScaffoldDataGridHelper.initRowActions($subTable, configs);
+                                ScaffoldDataGridHelper.initNestedView($subTable, $subTableWrapper, subTableConfigs, tableOuterHtml);
+                            }).on('preXhr', function (event, settings) {
+                                ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
+                            });
+                    } else {
+                        row.child.show();
+                    }
+                })
+                .on('click', 'a.hide-children', function () {
+                    var $tr = $(this).closest('tr');
+                    var row = api.row($tr);
+                    if (row.child.isShown()) {
+                        $(this).addClass('hidden');
+                        $tr
+                            .removeClass('subtable-opened')
+                            .find('a.show-children')
+                                .removeClass('hidden');
+                        row.child.hide();
+                    }
+                });
+        }
     }
 };
 

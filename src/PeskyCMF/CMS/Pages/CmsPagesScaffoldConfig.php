@@ -4,8 +4,8 @@ namespace PeskyCMF\CMS\Pages;
 
 use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Texts\CmsTextsTable;
-use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
+use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\ImagesFormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;
@@ -30,21 +30,25 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 /** @var CmsPage $pageClass */
                 $pageClass = app(CmsPage::class);
                 return [
-                    'type' => $pageClass::TYPE_PAGE
+                    'type' => $pageClass::TYPE_PAGE,
                 ];
             })
+            ->enableNestedView()
             ->readRelations([
                 'Parent' => ['id', 'url_alias', 'parent_id']
             ])
             ->setOrderBy('id', 'asc')
             ->setInvisibleColumns('url_alias')
             ->setColumns([
+                DataGridConfig::ROW_ACTIONS_COLUMN_NAME,
                 'id',
                 'title',
-                'relative_url',
+                'relative_url' => DataGridColumn::create()
+                    ->setIsSortable(false),
                 'page_code',
                 'is_published',
             ])
+            ->setIsRowActionsColumnFixed(false)
             ->setFilterIsOpenedByDefault(false);
     }
     
