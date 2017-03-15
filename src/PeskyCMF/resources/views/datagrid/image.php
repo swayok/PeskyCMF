@@ -1,15 +1,15 @@
 <?php
 /**
- * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $sectionConfig
- * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $valueViewer
+ * @var \PeskyCMF\Scaffold\DataGrid\DataGridCellRenderer $rendererConfig
+ * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $sectionConfig
+ * @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $valueViewer
  * @var \PeskyORM\ORM\TableInterface $table
  */
 ?>
 {{? !!it.<?php echo $valueViewer->getName() ?> && it.<?php echo $valueViewer->getName() ?>.length > 0 }}
 <div class="image-previews-container">
-    {{? $.isArray(it.<?php echo $valueViewer->getName() ?>) }}
-        {{~ it.<?php echo $valueViewer->getName() ?> :imageInfo}}
+    {{? $.isArray(<?php echo $valueViewer->getFailsafeValueForDotJs([], 'array', 'null') ?>) }}
+        {{~ <?php echo $valueViewer->getFailsafeValueForDotJs([], 'array') ?> :imageInfo}}
             <div class="img-thumbnail image-preview" style="vertical-align: top">
             {{? !!imageInfo.url }}
                 {{? imageInfo.label }}<p class="text-center">{{= imageInfo.label }}</p>{{?}}
@@ -21,7 +21,7 @@
         {{~}}
     {{??}}
         <div class="img-thumbnail image-preview">
-            <img src="{{= it.<?php echo $valueViewer->getName() ?> }}?_=<?php echo time(); ?>">
+            <img src="<?php echo $valueViewer->getDotJsInsertForValue() ?>?_=<?php echo time(); ?>">
         </div>
     {{?}}
 </div>

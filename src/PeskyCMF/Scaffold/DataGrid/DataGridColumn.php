@@ -2,9 +2,10 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Scaffold\AbstractValueViewer;
+use PeskyCMF\Scaffold\RenderableValueViewer;
+use PeskyCMF\Scaffold\ValueRenderer;
 
-class DataGridColumn extends AbstractValueViewer {
+class DataGridColumn extends RenderableValueViewer {
 
     /**
      * @var bool
@@ -74,12 +75,16 @@ class DataGridColumn extends AbstractValueViewer {
 
     /**
      * @return \Closure|null
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getValueConverter() {
         if (empty($this->valueConverter)) {
             switch ($this->getType()) {
                 case self::TYPE_BOOL:
-                    return function ($value) {
+                    $this->valueConverter = function ($value) {
                         if (!$this->isLinkedToDbColumn()) {
                             if (!array_has($value, $this->getName())) {
                                 return '-';
@@ -89,6 +94,7 @@ class DataGridColumn extends AbstractValueViewer {
                         }
                         return cmfTransGeneral('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
                     };
+                    break;
             }
         }
         return $this->valueConverter;
@@ -103,6 +109,7 @@ class DataGridColumn extends AbstractValueViewer {
 
     /**
      * @return int
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getPosition() {
         if ($this->getName() === DataGridConfig::ROW_ACTIONS_COLUMN_NAME && $this->getScaffoldSectionConfig()->isRowActionsColumnFixed()) {
@@ -113,5 +120,18 @@ class DataGridColumn extends AbstractValueViewer {
                 + ($this->getScaffoldSectionConfig()->isRowActionsColumnFixed() ? 1 : 0);
         }
     }
+
+    public function configureDefaultRenderer(ValueRenderer $renderer) {
+        parent::configureDefaultRenderer($renderer);
+        if (!$renderer->hasTemplate()) {
+            if ($this->getType() === static::TYPE_IMAGE) {
+                $renderer->setTemplate('cmf::datagrid.image');
+            } else {
+                $renderer->setTemplate('cmf::datagrid.text');
+            }
+        }
+        return $this;
+    }
+
 
 }

@@ -56,7 +56,7 @@ $configNameToInputId = [];
     $(function () {
         Utils.requireFiles(['/packages/cmf/js/inputs/cmf.fileuploads.js']).done(function () {
             var data = {
-                files: <?php echo $valueViewer->getDotJsJsonInsertForValue() ?>,
+                files: <?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode') ?>,
                 configs: <?php echo json_encode($configNameToInputId); ?>
             };
             CmfFileUploads.initImageUploaders(data);

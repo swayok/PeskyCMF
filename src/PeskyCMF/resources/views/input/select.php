@@ -22,7 +22,7 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
     <?php endif; ?>
     <select {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
         <?php if ($isMultiple): ?>
-            data-value="<?php echo $valueViewer->getDotJsJsonInsertForValue(true); ?>"
+            data-value="<?php echo $valueViewer->getDotJsInsertForValue([], 'array_encode'); ?>"
         <?php else: ?>
             data-value="<?php echo $valueViewer->getDotJsInsertForValue(); ?>"
         <?php endif; ?>

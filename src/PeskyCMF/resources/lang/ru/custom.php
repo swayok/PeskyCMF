@@ -312,6 +312,11 @@ $dictionary = [
         ],
         'item_details' => [
             'header' => 'Информация о странице',
+            'tab' => [
+                'general' => 'Общее',
+                'images' => 'Картинки',
+                'texts' => 'Тексты (:language)'
+            ],
             'field' => [
                 'id' => 'ID',
                 'parent_id' => 'Принадлежит странице',
@@ -333,6 +338,18 @@ $dictionary = [
                 'text_id' => 'Тексты для страницы',
                 'publish_at' => 'Дата публикации',
                 'title' => 'Название',
+                'Texts' => [
+                    'id' => 'ID',
+                    'title' => 'Полное название',
+                    'language' => 'Язык',
+                    'menu_title' => 'Короткое название (для меню)',
+                    'browser_title' => 'Заголовок браузера',
+                    'comment' => 'Комментарий к редактированию текста',
+                    'content' => 'Текcт',
+                    'meta_description' => 'Meta-description',
+                    'meta_keywords' => 'Meta-keywords',
+                    'admin_id' => 'Последний редактор',
+                ],
             ]
         ]
     ],

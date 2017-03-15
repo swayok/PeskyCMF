@@ -1026,6 +1026,33 @@ aside.main-sidebar {
         word-wrap: break-word;
     }
 
+    tbody {
+        tr.table-group {
+            background-color: #efefef;
+
+            td,
+            th {
+                border-color: #efefef;
+                border-bottom-color: #3c8dbc;
+                position: relative;
+
+                &:before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 1px;
+                    background-color: #3c8dbc;
+                }
+            }
+        }
+
+        td.item-details-html-cell {
+            background-color: #FFFFFF !important;
+        }
+    }
+
     .wysiwyg-data-insert {
         font-size: 0;
 

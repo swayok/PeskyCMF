@@ -83,7 +83,7 @@ var ScaffoldControllers = {
         },
         afterRender : function (event, request) {
             ScaffoldActionsHelper.initActions(this.$el);
-            var customInitiator = this.$el.find('table.item-details-table').attr('data-initiator');
+            var customInitiator = this.$el.find('.item-details-tabsheet-container').attr('data-initiator');
             if (customInitiator && customInitiator.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
                 eval('customInitiator = ' + customInitiator);
                 if (typeof customInitiator === 'function') {

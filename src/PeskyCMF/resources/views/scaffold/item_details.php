@@ -5,36 +5,91 @@
  * @var string $tableNameForRoutes
  * @var string $idSuffix
  */
-$dataGridId = "scaffold-data-grid-{$idSuffix}";
-$valueViewers = $itemDetailsConfig->getValueCells();
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
-
-$jsInitiator = '';
-if ($itemDetailsConfig->hasJsInitiator()) {
-    $jsInitiator = 'data-initiator="' . addslashes($itemDetailsConfig->getJsInitiator()) . '"';
-}
+$tabs = $itemDetailsConfig->getTabs();
+$hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 ?>
 
-<?php View::startSection('item-detials-table') ;?>
-    <table class="table table-striped table-bordered mn item-details-table" <?php echo $jsInitiator; ?>>
-        <?php foreach ($valueViewers as $viewer) : ?>
-        <tr id="item-details-<?php echo $viewer->getName(); ?>">
-            <th class="text-nowrap">
-                <?php echo $viewer->getLabel(); ?>
-            </th>
-            <td width="80%">
-                <?php
-                    try {
-                        echo $viewer->render();
-                    } catch (Exception $exc) {
-                        echo '<div>' . htmlspecialchars($exc->getMessage()) . '</div>';
-                        echo '<pre>' . nl2br(htmlspecialchars($exc->getTraceAsString())) . '</pre>';
-                    }
-                ?>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </table>
+<?php View::startSection('item-detials-tabsheet') ;?>
+    <?php
+        $groups = $itemDetailsConfig->getRowsGroups();
+        $jsInitiator = '';
+        if ($itemDetailsConfig->hasJsInitiator()) {
+            $jsInitiator = 'data-initiator="' . addslashes($itemDetailsConfig->getJsInitiator()) . '"';
+        }
+        $containerId = "scaffold-item-details-{$idSuffix}";
+    ?>
+    <div id="<?php echo $containerId; ?>" class="item-details-tabsheet-container" <?php echo $jsInitiator; ?>>
+        <div class="nav-tabs-custom mn">
+            <?php if ($hasTabs): ?>
+                <ul class="nav nav-tabs">
+                    <?php foreach ($tabs as $idx => $tabInfo): ?>
+                        <li class="<?php echo $idx === 0 ? 'active' : '' ?>">
+                            <a href="#<?php echo $containerId . '-' . (string)($idx + 1) ?>" data-toggle="tab" role="tab">
+                                <?php echo empty($tabInfo['label']) ? '*' : $tabInfo['label']; ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+
+        <div class="<?php echo $hasTabs ? 'tab-content' : 'box box-primary' ?>">
+            <?php foreach ($tabs as $idx => $tabInfo) : ?>
+                <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
+                <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $containerId . '-' . (string)($idx + 1) ?>">
+                    <table class="table table-striped table-bordered mn item-details-table">
+                        <?php
+                            $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body';
+                            foreach ($tabInfo['groups'] as $groupIndex) {
+                                $groupInfo = $groups[$groupIndex];
+                                if (empty($groupInfo['keys_for_values']) || !is_array($groupInfo['keys_for_values'])) {
+                                    continue;
+                                }
+                                // group label
+                                if (!empty($groupInfo['label'])) {
+                                    echo \Swayok\Html\Tag::tr(['class' => 'table-group'])
+                                        ->append(
+                                            \Swayok\Html\Tag::th([
+                                                    'colspan' => 2,
+                                                    'class' => 'fw400 fs18 text-center text-primary'
+                                                ])
+                                                ->setContent($groupInfo['label'])
+                                                ->build()
+                                        )
+                                        ->build() . "\n";
+                                }
+                                // group values
+                                foreach ($groupInfo['keys_for_values'] as $keyForValue) {
+                                    try {
+                                        $viewer = $itemDetailsConfig->getValueCell($keyForValue);
+                                        echo Swayok\Html\Tag::tr(['id' => 'item-details-' . $viewer->getName()])
+                                            ->append(
+                                                Swayok\Html\Tag::th(['class' => 'text-nowrap'])
+                                                    ->setContent($viewer->getLabel())
+                                                    ->build()
+                                            )
+                                            ->append(
+                                                \Swayok\Html\Tag::td(['width' => '80%'])
+                                                    ->setContent($viewer->render())
+                                                    ->build()
+                                            )
+                                            ->build() . "\n";
+                                    } catch (Exception $exc) {
+                                        echo '<tr><td colspan="2">';
+                                        echo '<div>Key: <b>' . $keyForValue . '</b></div>';
+                                        echo '<div>' . htmlspecialchars($exc->getMessage()) . '</div>';
+                                        echo '<pre>' . nl2br(htmlspecialchars($exc->getTraceAsString())) . '</pre>';
+                                        echo '</td></tr>';
+                                    }
+                                }
+                            }
+                        ?>
+                    </table>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
 <?php View::stopSection(); ?>
 
 <?php View::startSection('item-detials-footer') ;?>
@@ -96,6 +151,12 @@ if ($itemDetailsConfig->hasJsInitiator()) {
 <?php View::stopSection(); ?>
 
 <script type="text/html" id="item-details-tpl">
+    {{##def.tabsheet:
+        <?php echo View::yieldContent('item-detials-tabsheet'); ?>
+    #}}
+    {{##def.footer:
+        <?php echo View::yieldContent('item-detials-footer'); ?>
+    #}}
     {{? it._modal }}
         <div class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-lg">
@@ -108,10 +169,10 @@ if ($itemDetailsConfig->hasJsInitiator()) {
                         <h4 class="modal-title"><?php echo $itemDetailsConfig->translate(null, 'header'); ?></h4>
                     </div>
                     <div class="modal-body pn">
-                        <?php echo View::yieldContent('item-detials-table'); ?>
+                        {{# def.tabsheet }}
                     </div>
                     <div class="modal-footer">
-                        <?php echo View::yieldContent('item-detials-footer'); ?>
+                        {{# def.footer }}
                     </div>
                 </div>
             </div>
@@ -122,16 +183,18 @@ if ($itemDetailsConfig->hasJsInitiator()) {
             'defaultBackUrl' => $backUrl,
         ])->render(); ?>
         <div class="content">
-            <div class="row"><div class="<?php echo $itemDetailsConfig->getCssClassesForContainer() ?>">
-                <div class="box">
-                    <div class="box-body pn">
-                        <?php echo View::yieldContent('item-detials-table'); ?>
-                    </div>
-                    <div class="box-footer">
-                        <?php echo View::yieldContent('item-detials-footer'); ?>
+            <div class="row">
+                <div class="<?php echo $itemDetailsConfig->getCssClassesForContainer() ?>">
+                    <div class="box <?php if ($hasTabs) : ?>br-t-n<?php endif; ?>">
+                        <div class="box-body pn">
+                            {{# def.tabsheet }}
+                        </div>
+                        <div class="box-footer">
+                            {{# def.footer }}
+                        </div>
                     </div>
                 </div>
-            </div></div>
+            </div>
         </div>
     {{?}}
 </script>

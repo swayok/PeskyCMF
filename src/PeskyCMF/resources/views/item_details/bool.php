@@ -11,5 +11,5 @@ if (empty($options)) {
 }
 $yes = empty($options['yes']) ? cmfTransGeneral('.item_details.field.bool.yes') : $options['yes'];
 $no = empty($options['no']) ? cmfTransGeneral('.item_details.field.bool.no') : $options['no'];
-echo '{{? !!it.' . $valueViewer->getName() . ' }}' . $yes . '{{??}}' . $no . '{{?}}';
+echo $valueViewer->getConditionalDotJsInsertForValue($yes, $no);
 

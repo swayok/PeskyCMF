@@ -74,4 +74,11 @@ abstract class ValueRenderer {
         return $this;
     }
 
+    /**
+     * @return bool
+     */
+    public function hasTemplate() {
+        return !empty($this->template);
+    }
+
 }

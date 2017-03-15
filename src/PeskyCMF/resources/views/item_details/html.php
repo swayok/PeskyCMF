@@ -5,5 +5,9 @@
  * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $valueViewer
  * @var \PeskyORM\ORM\TableInterface $table
  */
-echo '{{= it.' . $valueViewer->getName() . ' || "" }}';
-
+?>
+{{? $.trim(<?php echo $valueViewer->getFailsafeValueForDotJs() ?>).length }}
+</td></tr>
+<tr><td colspan="2" class="item-details-html-cell">
+    <?php echo $valueViewer->getDotJsInsertForValue([], 'srting', null, false); ?>
+{{?}}

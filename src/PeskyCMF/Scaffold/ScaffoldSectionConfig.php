@@ -209,13 +209,12 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @return AbstractValueViewer
-     * @throws ScaffoldException
      */
     abstract public function createValueViewer();
 
     /**
      * @param string $name
-     * @return DataGridColumn|ValueCell|FormInput|AbstractValueViewer|array
+     * @return DataGridColumn|ValueCell|FormInput|AbstractValueViewer
      * @throws \InvalidArgumentException
      */
     public function getValueViewer($name) {
@@ -240,7 +239,6 @@ abstract class ScaffoldSectionConfig {
      * @throws \UnexpectedValueException
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
         $usesRelation = false;
@@ -583,13 +581,13 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @param ValueRenderer $renderer
-     * @param AbstractValueViewer $viewer
+     * @param RenderableValueViewer $valueViewer
      */
     protected function configureDefaultValueRenderer(
         ValueRenderer $renderer,
-        AbstractValueViewer $viewer
+        RenderableValueViewer $valueViewer
     ) {
-
+        $valueViewer->configureDefaultRenderer($renderer);
     }
 
     /**

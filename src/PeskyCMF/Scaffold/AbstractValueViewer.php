@@ -333,19 +333,13 @@ abstract class AbstractValueViewer {
         $relationAlias = null;
         $relationColumn = null;
         $relationData = [];
-        if ($this->hasRelation()) {
-            $relationConfig = $this->getRelation();
-            $relationData = $record;
-            $relationColumn = $this->getRelationColumn();
-        } else {
-            foreach ($columnConfig->getRelations() as $alias => $relation) {
-                if (in_array($relation->getType(), [Relation::BELONGS_TO, Relation::HAS_ONE], true)) {
-                    $relationConfig = $relation;
-                    $relationAlias = $alias;
-                    $relationData = array_get($record, $relationAlias);
-                    $relationColumn = $relationConfig->getDisplayColumnName();
-                    break;
-                }
+        foreach ($columnConfig->getRelations() as $alias => $relation) {
+            if (in_array($relation->getType(), [Relation::BELONGS_TO, Relation::HAS_ONE], true)) {
+                $relationConfig = $relation;
+                $relationAlias = $alias;
+                $relationData = array_get($record, $relationAlias);
+                $relationColumn = $relationConfig->getDisplayColumnName();
+                break;
             }
         }
         if (empty($relationConfig)) {

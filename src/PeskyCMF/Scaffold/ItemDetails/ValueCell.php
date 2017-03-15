@@ -3,14 +3,19 @@
 namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyCMF\Scaffold\RenderableValueViewer;
+use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\ORM\Column;
 
 class ValueCell extends RenderableValueViewer {
 
     const TYPE_JSON_TREE = 'json_collapsed';
+    const TYPE_HTML = 'html';
 
     /**
      * @return \Closure|null
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \UnexpectedValueException
      */
     public function getValueConverter() {
@@ -64,6 +69,29 @@ class ValueCell extends RenderableValueViewer {
             default:
                 return parent::doDefaultValueConversionByType($value, $type, $record);
         }
+    }
+
+    public function configureDefaultRenderer(ValueRenderer $renderer) {
+        parent::configureDefaultRenderer($renderer);
+        if (!$renderer->hasTemplate()) {
+            switch ($this->getType()) {
+                case static::TYPE_IMAGE:
+                    $renderer->setTemplate('cmf::item_details.image');
+                    break;
+                case static::TYPE_BOOL:
+                    $renderer->setTemplate('cmf::item_details.bool');
+                    break;
+                case static::TYPE_JSON_TREE:
+                    $renderer->setTemplate('cmf::item_details.json_tree');
+                    break;
+                case static::TYPE_HTML:
+                    $renderer->setTemplate('cmf::item_details.html');
+                    break;
+                default:
+                    $renderer->setTemplate('cmf::item_details.text');
+            }
+        }
+        return $this;
     }
 
 }

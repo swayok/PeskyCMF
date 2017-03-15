@@ -83,6 +83,9 @@ class CmsPagesTableStructure extends CmsTableStructure {
         return Column::create(Column::TYPE_STRING)
             ->doesNotExistInDb()
             ->valueCannotBeSetOrChanged()
+            ->setValueExistenceChecker(function (RecordValue $value) {
+                return $value->getRecord()->existsInDb();
+            })
             ->setValueGetter(function (RecordValue $value, $format = null) {
                 $baseUrl = '';
                 /** @var CmsPage $record */

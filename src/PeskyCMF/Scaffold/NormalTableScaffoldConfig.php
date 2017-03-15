@@ -123,7 +123,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$object->fromDb($conditions, [], array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        $data = $object->toArray([], $relationsToRead, false);
+        $data = $object->toArray([], $relationsToRead, true);
         if (
             (
                 $isItemDetails

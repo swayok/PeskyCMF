@@ -12,22 +12,35 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
 
     protected $template = 'cmf::scaffold/item_details';
 
+    /** @var array */
+    protected $tabs = [];
+    /** @var null|int */
+    protected $currentTab;
+    /** @var array */
+    protected $rowsGroups = [];
+    /** @var null|int */
+    protected $currentRowsGroup;
+
     /**
-     * @inheritdoc
+     * @return ValueCell;
      */
     public function createValueViewer() {
         return ValueCell::create();
     }
 
+    /**
+     * @return ItemDetailsValueRenderer
+     */
     protected function createValueRenderer() {
-        return ValueCellRenderer::create();
+        return ItemDetailsValueRenderer::create();
     }
 
     /**
      * Alias for setValueViewers
      * @param array $formInputs
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
     public function setValueCells(array $formInputs) {
@@ -50,27 +63,121 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param ValueRenderer|ValueCellRenderer $renderer
-     * @param AbstractValueViewer|ValueCell $valueCell
+     * @param string $name
+     * @return ValueCell
+     * @throws \InvalidArgumentException
+     */
+    public function getValueCell($name) {
+        return $this->getValueViewer($name);
+    }
+
+    /**
+     * @param array $valueCells
+     * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function setValueViewers(array $valueCells) {
+        /** @var AbstractValueViewer|null $config */
+        foreach ($valueCells as $name => $config) {
+            if (is_array($config)) {
+                /** @var array $config */
+                $this->newRowsGroup(is_int($name) ? '' : $name);
+                foreach ($config as $groupInputName => $groupInputConfig) {
+                    if (is_int($groupInputName)) {
+                        $groupInputName = $groupInputConfig;
+                        $groupInputConfig = null;
+                    }
+                    $this->addValueViewer($groupInputName, $groupInputConfig);
+                }
+                $this->currentRowsGroup = null;
+            } else {
+                if (is_int($name)) {
+                    $name = $config;
+                    $config = null;
+                }
+                $this->addValueViewer($name, $config);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param AbstractValueViewer|null $viewer
+     * @return $this
+     * @throws \UnexpectedValueException
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \UnexpectedValueException
      */
-    protected function configureDefaultValueRenderer(ValueRenderer $renderer, AbstractValueViewer $valueCell) {
-        switch ($valueCell->getType()) {
-            case $valueCell::TYPE_IMAGE:
-                $renderer->setTemplate('cmf::details.image');
-                break;
-            case $valueCell::TYPE_BOOL:
-                $renderer->setTemplate('cmf::details.bool');
-                break;
-            case $valueCell::TYPE_JSON_TREE:
-                $renderer->setTemplate('cmf::details.json_tree');
-                break;
-            default:
-                $renderer->setTemplate('cmf::details.text');
+    public function addValueViewer($name, AbstractValueViewer $viewer = null) {
+        parent::addValueViewer($name, $viewer);
+        if (!$viewer) {
+            $viewer = $this->getValueViewer($name);
         }
+        if ($this->currentRowsGroup === null) {
+            $this->newRowsGroup('');
+        }
+        $this->rowsGroups[$this->currentRowsGroup]['keys_for_values'][] = $name;
+        return $this;
+    }
+
+    /**
+     * @param string $tabLabel
+     * @param array $formInputs
+     * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \InvalidArgumentException
+     */
+    public function addTab($tabLabel, array $formInputs) {
+        $this->newTab($tabLabel);
+        $this->setValueCells($formInputs);
+        $this->currentTab = null;
+        return $this;
+    }
+    
+    /**
+     * @param $label
+     */
+    protected function newRowsGroup($label) {
+        if ($this->currentTab === null) {
+            $this->newTab('');
+        }
+        $this->currentRowsGroup = count($this->rowsGroups);
+        $this->tabs[$this->currentTab]['groups'][] = $this->currentRowsGroup;
+        $this->rowsGroups[] = [
+            'label' => $label,
+            'keys_for_values' => []
+        ];
+    }
+    
+    /**
+     * @param $label
+     */
+    protected function newTab($label) {
+        $this->currentTab = count($this->tabs);
+        $this->tabs[] = [
+            'label' => $label,
+            'groups' => []
+        ];
+        $this->currentRowsGroup = null;
+    }
+    
+    /**
+     * @return array
+     */
+    public function getTabs() {
+        return $this->tabs;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRowsGroups() {
+        return $this->rowsGroups;
     }
 
     /**

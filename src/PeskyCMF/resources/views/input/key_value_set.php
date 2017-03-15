@@ -63,7 +63,7 @@ $inputName = $valueViewer->getName(true);
     $(function () {
         var $rowsContainer = $('#<?php echo $defaultId ?>-rows-container');
         var rowTpl = doT.template($('#<?php echo $defaultId ?>-row-tpl').html());
-        var values = <?php echo 'it.' . $valueViewer->getDotJsJsonInsertForValue() ?>;
+        var values = <?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode') ?>;
         var maxRows = <?php echo $valueViewer->getMaxValuesCount(); ?>;
         var minRows = <?php echo $valueViewer->getMinValuesCount(); ?>;
         var rowIndex = 0;

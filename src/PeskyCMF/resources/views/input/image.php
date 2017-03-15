@@ -16,7 +16,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <div class="form-group">
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
     <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
-    {{? !it.isCreation && !!it.icon }}
+    {{? !it.isCreation && !!(<?php echo $valueViewer->getFailsafeValueForDotJs(); ?>) }}
     <div class="image-preview" id="<?php echo $rendererConfig->getAttribute('id'); ?>-image-preview">
         <img src="<?php echo $valueViewer->getDotJsInsertForValue() ?>?_=<?php echo time() ?>">
     </div>

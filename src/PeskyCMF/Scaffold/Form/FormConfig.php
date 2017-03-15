@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\AbstractValueViewer;
+use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfigException;
 use PeskyCMF\Scaffold\ValueRenderer;
@@ -75,11 +76,11 @@ class FormConfig extends ScaffoldSectionConfig {
     /** @var array */
     protected $tabs = [];
     /** @var null|int */
-    protected $currentTab = null;
+    protected $currentTab;
     /** @var array */
     protected $inputGroups = [];
     /** @var null|int */
-    protected $currentInputsGroup = null;
+    protected $currentInputsGroup;
 
     /** @var array|null */
     protected $tooltips;
@@ -112,19 +113,13 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * Alias for setValueViewers
-     * @param array $formInputs - formats:
-     * - ['name1', 'name2' => FormInput::create(), ...]
-     * - ['group lablel' => ['name1', 'name2' => FormInput::create(), ...]
-     * Also you may use '/' as value to separate inputs with <hr>
+     * @param array $formInputs
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
-    public function setFormInputs(array $formInputs) {
+    public function setValueViewers(array $formInputs) {
         /** @var AbstractValueViewer|null $config */
         foreach ($formInputs as $name => $config) {
             if (is_array($config)) {
@@ -147,6 +142,21 @@ class FormConfig extends ScaffoldSectionConfig {
             }
         }
         return $this;
+    }
+
+    /**
+     * Alias for setValueViewers
+     * @param array $formInputs - formats:
+     * - ['name1', 'name2' => FormInput::create(), ...]
+     * - ['group lablel' => ['name1', 'name2' => FormInput::create(), ...]
+     * Also you may use '/' as value to separate inputs with <hr>
+     * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function setFormInputs(array $formInputs) {
+        return $this->setValueViewers($formInputs);
     }
 
     /**
@@ -239,8 +249,6 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \UnexpectedValueException
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
         parent::addValueViewer($name, $viewer);
@@ -318,90 +326,8 @@ class FormConfig extends ScaffoldSectionConfig {
         }
     }
 
-    /**
-     * @param InputRenderer|ValueRenderer $renderer
-     * @param FormInput|AbstractValueViewer $formInput
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
-     * @throws \UnexpectedValueException
-     */
-    protected function configureDefaultValueRenderer(ValueRenderer $renderer, AbstractValueViewer $formInput) {
-        switch ($formInput->getType()) {
-            case $formInput::TYPE_BOOL:
-                $renderer->setTemplate('cmf::input/trigger');
-                break;
-            case $formInput::TYPE_HIDDEN:
-                $renderer->setTemplate('cmf::input/hidden');
-                break;
-            case $formInput::TYPE_TEXT:
-                $renderer->setTemplate('cmf::input/textarea');
-                break;
-            case $formInput::TYPE_WYSIWYG:
-                $renderer->setTemplate('cmf::input/wysiwyg');
-                break;
-            case $formInput::TYPE_SELECT:
-                $renderer
-                    ->setTemplate('cmf::input/select')
-                    ->setOptions($formInput->getOptions());
-                break;
-            case $formInput::TYPE_MULTISELECT:
-                $renderer
-                    ->setTemplate('cmf::input/multiselect')
-                    ->setOptions($formInput->getOptions());
-                if (
-                    !$formInput->hasValueConverter()
-                    && in_array(
-                        $formInput->getTableColumn()->getType(),
-                        [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
-                        true
-                    )
-                ) {
-                    $formInput->setValueConverter(function ($value) {
-                        return $value;
-                    });
-                }
-                break;
-            case $formInput::TYPE_TAGS:
-                $renderer->setTemplate('cmf::input/tags');
-                $options = $formInput->getOptions();
-                if (!empty($options)) {
-                    $renderer->setOptions($options);
-                }
-                if (
-                    !$formInput->hasValueConverter()
-                    && in_array(
-                        $formInput->getTableColumn()->getType(),
-                        [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
-                        true
-                    )
-                ) {
-                    $formInput->setValueConverter(function ($value) {
-                        return $value;
-                    });
-                }
-                break;
-            case $formInput::TYPE_IMAGE:
-                $renderer->setTemplate('cmf::input/image');
-                break;
-            case $formInput::TYPE_DATETIME:
-                $renderer->setTemplate('cmf::input/datetime');
-                break;
-            case $formInput::TYPE_DATE:
-                $renderer->setTemplate('cmf::input/date');
-                break;
-            case $formInput::TYPE_EMAIL:
-                $renderer
-                    ->setTemplate('cmf::input/text')
-                    ->setAttributes(['type' => 'email']);
-                break;
-            case $formInput::TYPE_PASSWORD:
-                $renderer->setTemplate('cmf::input/password');
-                break;
-            default:
-                $renderer->setTemplate('cmf::input/text');
-        }
+    protected function configureDefaultValueRenderer(ValueRenderer $renderer, RenderableValueViewer $formInput) {
+        parent::configureDefaultValueRenderer($renderer, $formInput);
         if ($formInput->isLinkedToDbColumn()) {
             $this->configureRendererByColumnConfig($renderer, $formInput->getTableColumn());
         }
@@ -411,13 +337,13 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param InputRenderer $rendererConfig
+     * @param InputRenderer|ValueRenderer $renderer
      * @param Column $columnConfig
      * @throws \BadMethodCallException
      * @throws \UnexpectedValueException
      */
-    protected function configureRendererByColumnConfig(InputRenderer $rendererConfig, Column $columnConfig) {
-        $rendererConfig->setIsRequired($columnConfig->isValueRequiredToBeNotEmpty());
+    protected function configureRendererByColumnConfig(ValueRenderer $renderer, Column $columnConfig) {
+        $renderer->setIsRequired($columnConfig->isValueRequiredToBeNotEmpty());
     }
 
     /**

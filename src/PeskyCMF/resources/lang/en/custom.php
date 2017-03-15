@@ -313,6 +313,11 @@ $dictionary = [
         ],
         'item_details' => [
             'header' => 'Page details',
+            'tab' => [
+                'general' => 'General',
+                'images' => 'Images',
+                'texts' => 'Texts (:language)'
+            ],
             'field' => [
                 'id' => 'ID',
                 'type' => 'Type',
@@ -334,6 +339,19 @@ $dictionary = [
                 'parent_id' => 'Parent page',
                 'title' => 'Title',
                 'publish at' => 'Publishing date',
+                'Texts' => [
+                    'id' => 'ID',
+                    'title' => 'Full title',
+                    'language' => 'Language',
+                    'menu_title' => 'Short title (for menus)',
+                    'browser_title' => 'Browser title',
+                    'comment' => 'Comment for text editing',
+                    'content' => 'Text',
+                    'meta_description' => 'Meta-description',
+                    'meta_keywords' => 'Meta-keywords',
+                    'custom_info' => 'Additional info',
+                    'admin_id' => 'Last modifier',
+                ],
             ]
         ]
     ],

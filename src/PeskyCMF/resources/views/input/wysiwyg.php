@@ -11,7 +11,7 @@
  */
 $rendererConfig->addAttribute(
     'data-editor-name',
-    request()->route()->getParameter('table_name', $table->getTableStructure()->getTableName()) . ':' . $valueViewer->getVarNameForDotJs()
+    request()->route()->getParameter('table_name', $table->getTableStructure()->getTableName()) . ':' . $valueViewer->getName()
 );
 include __DIR__ . '/textarea.php';
 

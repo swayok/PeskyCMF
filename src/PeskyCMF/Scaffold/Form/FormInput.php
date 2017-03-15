@@ -3,6 +3,7 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Scaffold\RenderableValueViewer;
+use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyCMF\Scaffold\ValueViewerConfigException;
 use PeskyORM\ORM\Column;
 
@@ -53,8 +54,6 @@ class FormInput extends RenderableValueViewer {
     protected $disablersConfigs = [];
     /** @var null|\Closure */
     protected $submittedValueModifier;
-    /** @var string|null */
-    protected $varNameForDotJs;
 
     /**
      * Default input id
@@ -87,78 +86,6 @@ class FormInput extends RenderableValueViewer {
         } else {
             return parent::getName();
         }
-    }
-
-    /**
-     * @param string $name - something like 'RelationName.column_name' (Do not add 'it.' in the beginning!!!)
-     * @return $this
-     */
-    public function setVarNameForDotJs($name) {
-        $this->varNameForDotJs = $name;
-        return $this;
-    }
-
-    /**
-     * @param bool $addIt - true: adds 'it.' before var name ('it' is name of var that contains template data in doT.js)
-     * @return string
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     */
-    public function getVarNameForDotJs($addIt = true) {
-        if ($this->varNameForDotJs === null) {
-            $this->varNameForDotJs = preg_replace('%[^a-zA-Z0-9_]+%', '.', $this->getName());
-        }
-        return ($addIt ? 'it.' : '') . $this->varNameForDotJs;
-    }
-
-    /**
-     * @param string|null $htmlPropertyName - null: normal insert; string: HTML property name to insert when value is positive
-     * @param array $additionalVarNameParts - additional parts of var name
-     * @return string
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     */
-    public function getDotJsInsertForValue($htmlPropertyName = null, array $additionalVarNameParts = []) {
-        $fullName = $this->getVarNameForDotJs();
-        $parts = array_merge(explode('.', $fullName), $additionalVarNameParts);
-        $conditions = [];
-        $chain = 'it';
-        for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
-            $chain .= '.' . $parts[$i];
-            if ($htmlPropertyName) {
-                $conditions[] = '!!' . $chain;
-            } else {
-                $conditions[] = "(typeof $chain != 'undefined')";
-            }
-        }
-        if ($htmlPropertyName) {
-            return '{{? ' . implode(' && ', $conditions) . '}}' . $htmlPropertyName . '{{?}}';
-        } else {
-            $conditions[] = "$fullName !== null";
-            return '{{! ' . implode(' && ', $conditions) . " ? (typeof $fullName === 'boolean' ? ($fullName ? '1' : '0') : String($fullName)) : '' }}";
-        }
-    }
-
-    /**
-     * Wraps value isert into JSON.stringify()
-     * @param bool $isPlainArray - true: value is expected to be a plain array | false: value may be of any type
-     * @param array $additionalVarNameParts
-     * @return string
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     */
-    public function getDotJsJsonInsertForValue($isPlainArray = false, array $additionalVarNameParts = []) {
-        $fullName = $this->getVarNameForDotJs();
-        $parts = array_merge(explode('.', $fullName), $additionalVarNameParts);
-        $conditions = [];
-        $chain = 'it';
-        for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
-            $chain .= '.' . $parts[$i];
-            $conditions[] = "(typeof $chain !== 'undefined')";
-        }
-        $default = '{}';
-        if ($isPlainArray) {
-            $conditions[] = "$.isArray($fullName)";
-            $default = "($fullName || [])";
-        }
-        return '{{! ' . implode(' && ', $conditions) . " ? JSON.stringify($fullName) : $default }}";
     }
 
     /**
@@ -552,5 +479,96 @@ class FormInput extends RenderableValueViewer {
     public function hasDisablersConfigs() {
         return !empty($this->disablersConfigs);
     }
+
+    /**
+     * @param ValueRenderer|InputRenderer $renderer
+     * @return $this
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \UnexpectedValueException
+     */
+    public function configureDefaultRenderer(ValueRenderer $renderer) {
+        parent::configureDefaultRenderer($renderer);
+        if (!$renderer->hasTemplate()) {
+            switch ($this->getType()) {
+                case static::TYPE_BOOL:
+                    $renderer->setTemplate('cmf::input.trigger');
+                    break;
+                case static::TYPE_HIDDEN:
+                    $renderer->setTemplate('cmf::input.hidden');
+                    break;
+                case static::TYPE_TEXT:
+                    $renderer->setTemplate('cmf::input.textarea');
+                    break;
+                case static::TYPE_WYSIWYG:
+                    $renderer->setTemplate('cmf::input.wysiwyg');
+                    break;
+                case static::TYPE_SELECT:
+                    $renderer
+                        ->setTemplate('cmf::input.select')
+                        ->setOptions($this->getOptions());
+                    break;
+                case static::TYPE_MULTISELECT:
+                    $renderer
+                        ->setTemplate('cmf::input.multiselect')
+                        ->setOptions($this->getOptions());
+                    if (
+                        !$this->hasValueConverter()
+                        && in_array(
+                            $this->getTableColumn()->getType(),
+                            [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
+                            true
+                        )
+                    ) {
+                        $this->setValueConverter(function ($value) {
+                            return $value;
+                        });
+                    }
+                    break;
+                case static::TYPE_TAGS:
+                    $renderer->setTemplate('cmf::input.tags');
+                    $options = $this->getOptions();
+                    if (!empty($options)) {
+                        $renderer->setOptions($options);
+                    }
+                    if (
+                        !$this->hasValueConverter()
+                        && in_array(
+                            $this->getTableColumn()->getType(),
+                            [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
+                            true
+                        )
+                    ) {
+                        $this->setValueConverter(function ($value) {
+                            return $value;
+                        });
+                    }
+                    break;
+                case static::TYPE_IMAGE:
+                    $renderer->setTemplate('cmf::input.image');
+                    break;
+                case static::TYPE_DATETIME:
+                    $renderer->setTemplate('cmf::input.datetime');
+                    break;
+                case static::TYPE_DATE:
+                    $renderer->setTemplate('cmf::input.date');
+                    break;
+                case static::TYPE_EMAIL:
+                    $renderer
+                        ->setTemplate('cmf::input.text')
+                        ->setAttributes(['type' => 'email']);
+                    break;
+                case static::TYPE_PASSWORD:
+                    $renderer->setTemplate('cmf::input.password');
+                    break;
+                default:
+                    $renderer->setTemplate('cmf::input.text');
+            }
+        }
+        return $this;
+    }
+
 
 }

@@ -13,6 +13,7 @@ use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\Core\DbExpr;
+use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\Set;
 
 class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
@@ -39,12 +40,8 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
             ->setInvisibleColumns('url_alias')
             ->setColumns([
                 'id',
-                'type' => DataGridColumn::create()
-                    ->setValueConverter(function ($value) {
-                        return $this->translate('types', $value);
-                    }),
-                'relative_url',
                 'title',
+                'relative_url',
                 'is_published',
                 'publish_at',
             ])
@@ -55,70 +52,90 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
         return parent::createDataGridFilterConfig()
             ->setFilters([
                 'id',
-                'type' => ColumnFilter::create()
-                    ->setInputType(ColumnFilter::INPUT_TYPE_MULTISELECT)
-                    ->setAllowedValues(function () {
-                        /** @var CmsPage $pageClass */
-                        $pageClass = app(CmsPage::class);
-                        return $pageClass::getTypes(true);
-                    }),
                 'title',
                 'url_alias',
                 'is_published',
                 'publish_at',
                 'Parent.id',
+                'Parent.title',
                 'Parent.url_alias',
-                'Parent.title'
             ]);
     }
 
     protected function createItemDetailsConfig() {
-        return parent::createItemDetailsConfig()
-            ->readRelations([
-                'Parent', 'Admin'
+        $itemDetailsConfig = parent::createItemDetailsConfig();
+        $itemDetailsConfig
+             ->readRelations([
+                'Parent', 'Admin', 'Texts'
             ])
-            ->setValueCells([
+            ->addTab($this->translate('item_details.tab', 'general'), [
                 'id',
+                'title',
+                'relative_url',
                 'parent_id' => ValueCell::create()
                     ->setType(ValueCell::TYPE_LINK),
-                'type' => ValueCell::create()
-                    ->setValueConverter(function ($value) {
-                        return $this->translate('types', $value);
-                    }),
-                'relative_url',
-                'title',
-                'images',
 //                'order',
 //                'custom_info',
-                'admin_id' => ValueCell::create()
-                    ->setType(ValueCell::TYPE_LINK),
                 'is_published',
                 'publish_at',
                 'created_at',
-                'updated_at'
+                'updated_at',
+                'admin_id' => ValueCell::create()
+                    ->setType(ValueCell::TYPE_LINK),
+            ])
+            ->setRawRecordDataModifier(function ($record) {
+                if (!empty($record['Texts'])) {
+                    $record['Texts'] = Set::combine($record['Texts'], '/language', '/');
+                }
+                return $record;
+            });
+        /** @var CmsPagesTable $pagesTable */
+        $pagesTable = app(CmsPagesTable::class);
+        if ($pagesTable->getTableStructure()->images->hasImagesConfigurations()) {
+            $itemDetailsConfig->addTab($this->translate('item_details.tab', 'images'), [
+                'images',
             ]);
+        }
+        /** @var CmsSetting $cmsSetting */
+        $cmsSetting = app(CmsSetting::class);
+        foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
+            $itemDetailsConfig->addTab($this->translate('item_details.tab', 'texts', ['language' => $langLabel]), [
+                "Texts.$langId.id" => ValueCell::create()->setNameForTranslation('Texts.id'),
+                "Texts.$langId.language" => ValueCell::create()
+                    ->setNameForTranslation('Texts.language')
+                    ->setValueConverter(function () use ($langLabel) {
+                        return $langLabel;
+                    }),
+                "Texts.$langId.browser_title" => ValueCell::create()->setNameForTranslation('Texts.browser_title'),
+                "Texts.$langId.menu_title" => ValueCell::create()->setNameForTranslation('Texts.menu_title'),
+                "Texts.$langId.meta_description" => ValueCell::create()->setNameForTranslation('Texts.meta_description'),
+                "Texts.$langId.meta_keywords" => ValueCell::create()->setNameForTranslation('Texts.meta_keywords'),
+//                "Texts.$langId.comment" => ValueCell::create()->setNameForTranslation('Texts.comment'),
+                "Texts.$langId.content" => ValueCell::create()
+                    ->setType(ValueCell::TYPE_HTML)
+                    ->setNameForTranslation('Texts.content'),
+
+            ]);
+        }
+        return $itemDetailsConfig;
     }
     
     protected function createFormConfig() {
         $formConfig = parent::createFormConfig();
         /** @var CmsSetting $cmsSetting */
         $cmsSetting = app(CmsSetting::class);
+        /** @var CmsPagesTable $pagesTable */
+        $pagesTable = app(CmsPagesTable::class);
+        /** @var CmsPage $pageClass */
+        $pageClass = app(CmsPage::class);
         $formConfig
             ->setWidth(80)
             ->addTab($this->translate('form.tab', 'general'), [
                 'title',
-                'type' => FormInput::create()
-                    ->setType(FormInput::TYPE_HIDDEN)
-                    ->setValueConverter(function () {
-                        /** @noinspection OneTimeUseVariablesInspection */
-                        /** @var CmsPage $pageClass */
-                        $pageClass = app(CmsPage::class);
-                        return $pageClass::TYPE_NEWS;
-                    }),
                 'parent_id' => FormInput::create()
                     ->setType(FormInput::TYPE_SELECT)
-                    ->setOptionsLoader(function () {
-                        return $this->getPagesOptions();
+                    ->setOptionsLoader(function () use ($pagesTable, $pageClass) {
+                        return $this->getPagesOptions($pagesTable, $pageClass::TYPE_NEWS);
                     })
                     ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {
                         $renderer->addData('isHidden', true);
@@ -146,20 +163,23 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                             'useCurrent' => true
                         ]);
                     }),
+                'type' => FormInput::create()
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setValueConverter(function () use ($pageClass) {
+                        return $pageClass::TYPE_NEWS;
+                    }),
                 'admin_id' => FormInput::create()
-                    ->setRenderer(function () {
-                        return InputRenderer::create('cmf::input/hidden');
-                    })->setValueConverter(function () {
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setValueConverter(function () {
                         return \Auth::guard()->user()->getAuthIdentifier();
                     }),
             ])
-            ->setValidators(function () use ($cmsSetting) {
-                $this->addUniquePageUrlValidator();
-                /** @var CmsPage $pageClass */
-                $pageClass = app(CmsPage::class);
+            ->setValidators(function () use ($cmsSetting, $pagesTable, $pageClass) {
+                $pagesTable::registerUniquePageUrlValidator($this);
                 $validators = [
                     'type' => 'required|in:' . implode(',', $pageClass::getTypes()),
                     'is_published' => 'required|bool',
+                    'publish_at' => 'required|date',
                     'title' => 'string|max:500',
                     'comment' => 'string|max:1000',
                 ];
@@ -197,8 +217,6 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                 return $data;
             });
 
-        /** @var CmsPagesTable $pagesTable */
-        $pagesTable = app(CmsPagesTable::class);
         if ($pagesTable->getTableStructure()->images->hasImagesConfigurations()) {
             $formConfig->addTab($this->translate('form.tab', 'images'), [
                 'images' => ImagesFormInput::create(),
@@ -233,50 +251,15 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
         return $formConfig;
     }
 
-    protected function addUniquePageUrlValidator() {
-        /** @var CmsPagesTable $pagesTable */
-        $pagesTable = app(CmsPagesTable::class);
-        \Validator::extend('unique_page_url', function () use ($pagesTable) {
-            $urlAlias = request()->input('url_alias');
-            $parentId = (int)request()->input('parent_id');
-            if ($parentId > 0 && $urlAlias === '/') {
-                return false;
-            } else {
-                return $pagesTable::count([
-                    'url_alias' => $urlAlias,
-                    'id !=' => (int)request()->input('id'),
-                    'parent_id' => $parentId > 0 ? $parentId : null
-                ]) === 0;
-            }
-        });
-        \Validator::replacer('unique_page_url', function () use ($pagesTable) {
-            $urlAlias = request()->input('url_alias');
-            $parentId = (int)request()->input('parent_id');
-            if ($parentId > 0 && $urlAlias === '/') {
-                $otherPageId = $parentId;
-            } else {
-                $otherPageId = $pagesTable::selectValue(
-                    DbExpr::create('`id`'),
-                    [
-                        'url_alias' => $urlAlias,
-                        'parent_id' => $parentId > 0 ? $parentId : null
-                    ]
-                );
-            }
-            return $this->translate('form.validation', 'unique_page_url', [
-                'url' => routeToCmfItemEditForm($this->getTableNameForRoutes(), $otherPageId)
-            ]);
-        });
-    }
-
-    protected function getPagesOptions() {
-        /** @var CmsPagesTable $pagesTable */
-        $pagesTable = app(CmsPagesTable::class);
-        /** @var CmsPage $pageClass */
-        $pageClass = app(CmsPage::class);
+    /**
+     * @param TableInterface|CmsPagesTable $pagesTable
+     * @param string $type
+     * @return array
+     */
+    protected function getPagesOptions(TableInterface $pagesTable, $type) {
         $options = $pagesTable::selectAssoc('id', 'url_alias', [
             'parent_id' => null,
-            'type' => $pageClass::TYPE_PAGE,
+            'type' => $type,
             'url_alias !=' => '/'
         ]);
         $baseUrl = request()->getSchemeAndHttpHost();

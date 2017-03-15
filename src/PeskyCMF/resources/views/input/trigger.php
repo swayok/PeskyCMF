@@ -24,7 +24,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
     <label class="ib mr15 lh35" for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
     <div class="ib">
         <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
-            <?php echo $valueViewer->getDotJsInsertForValue('checked') ?>
+            <?php echo $valueViewer->getConditionalDotJsInsertForValue('checked', '') ?>
             data-on-text="<?php echo $rendererConfig->getData('label_yes', cmfTransGeneral('.form.input.bool.yes')) ?>"
             data-off-text="<?php echo $rendererConfig->getData('label_no', cmfTransGeneral('.form.input.bool.no')) ?>">
     </div>

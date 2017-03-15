@@ -106,25 +106,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param DataGridCellRenderer|ValueRenderer $renderer
-     * @param DataGridColumn|AbstractValueViewer $tableCell
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \UnexpectedValueException
-     */
-    protected function configureDefaultValueRenderer(
-        ValueRenderer $renderer,
-        AbstractValueViewer $tableCell
-    ) {
-        switch ($tableCell->getType()) {
-            case $tableCell::TYPE_IMAGE:
-                $renderer->setTemplate('cmf::details/image');
-                break;
-        }
-    }
-
-    /**
      * @param array $columnNames
      * @return $this
      * @throws \UnexpectedValueException

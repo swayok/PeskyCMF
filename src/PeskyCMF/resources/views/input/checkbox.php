@@ -21,7 +21,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 
 <div class="checkbox checkbox-primary">
     <input name="<?php echo $rendererConfig->getAttribute('name'); ?>" id="_<?php echo $rendererConfig->getAttribute('id'); ?>" type="hidden" value="0">
-    <input <?php echo $valueViewer->getDotJsInsertForValue('checked'); ?>
+    <input <?php echo $valueViewer->getConditionalDotJsInsertForValue('checked', ''); ?>
             {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
     <?php echo $valueViewer->getFormattedTooltip(); ?>

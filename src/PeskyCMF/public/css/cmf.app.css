@@ -948,6 +948,28 @@ aside.main-sidebar .sidebar-menu li .badge {
   word-break: break-all;
   word-wrap: break-word;
 }
+.item-details-table tbody tr.table-group {
+  background-color: #efefef;
+}
+.item-details-table tbody tr.table-group td,
+.item-details-table tbody tr.table-group th {
+  border-color: #efefef;
+  border-bottom-color: #3c8dbc;
+  position: relative;
+}
+.item-details-table tbody tr.table-group td:before,
+.item-details-table tbody tr.table-group th:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #3c8dbc;
+}
+.item-details-table tbody td.item-details-html-cell {
+  background-color: #FFFFFF !important;
+}
 .item-details-table .wysiwyg-data-insert {
   font-size: 0;
 }

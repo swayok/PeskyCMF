@@ -17,6 +17,144 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     protected $defaultRendererConfigurator = null;
     /** @var array  */
     protected $jsBlocks = [];
+    /** @var string|null */
+    protected $varNameForDotJs;
+    /** @var string|null */
+    protected $templateForDefaultRenderer;
+
+    /**
+     * @param string $name - something like 'RelationName.column_name' (Do not add 'it.' in the beginning!!!)
+     * @return $this
+     */
+    public function setVarNameForDotJs($name) {
+        $this->varNameForDotJs = $name;
+        return $this;
+    }
+
+    /**
+     * @param bool $addIt - true: adds 'it.' before var name ('it' is name of var that contains template data in doT.js)
+     * @param array $additionalVarNameParts - additional parts of var name
+     * @return string
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     */
+    public function getVarNameForDotJs($addIt = true, array $additionalVarNameParts = []) {
+        if ($this->varNameForDotJs === null) {
+            $this->varNameForDotJs = preg_replace('%[^a-zA-Z0-9_]+%', '.', $this->getName());
+        }
+        return ($addIt ? 'it.' : '') . rtrim($this->varNameForDotJs . implode('.', $additionalVarNameParts), '.');
+    }
+
+    /**
+     * @param array $additionalVarNameParts - additional parts of var name
+     * @param string|null $type - forces value to be converted to specific type.
+     *      Accepted types: 'string', 'array', 'json', null (insert value without conversion)
+     * @param string|null $default - default value for cases when value is not provided or null.
+     *      Don't forget to wrap strings into quotes:
+     *      - "''" - inserts empty string (used instead of null),
+     *      - "[]" inserts array
+     * @return string
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     */
+    public function getFailsafeValueForDotJs(array $additionalVarNameParts = [], $type = 'string', $default = null) {
+        $fullName = $this->getVarNameForDotJs();
+        $parts = array_merge(explode('.', $fullName), $additionalVarNameParts);
+        $conditions = [];
+        $chain = 'it';
+        for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
+            $chain .= '.' . $parts[$i];
+            $conditions[] = "(typeof $chain != 'undefined')";
+        }
+        $conditions[] = "$fullName !== null";
+        switch ($type) {
+            case 'string':
+                $value = "(typeof $fullName === 'boolean' ? ($fullName ? '1' : '0') : String($fullName))";
+                break;
+            case 'array':
+                $conditions[] = "$.isArray($fullName)";
+                $value = "($fullName || [])";
+                if ($default === null) {
+                    $default = '[]';
+                }
+                break;
+            case 'json':
+                $conditions[] = "$.isPlainObject($fullName)";
+                $value = "($fullName || {})";
+                if ($default === null) {
+                    $default = '{}';
+                }
+                break;
+            default:
+                $value = $fullName;
+        }
+        if ($default === null) {
+            $default = "''";
+        }
+        return implode(' && ', $conditions) . " ? $value : $default";
+    }
+
+    /**
+     * Get failsafe value insert for doT.js
+     * Normal insert looks like:
+     * {{! it.viewer_name || '' }} or {{= it.viewer_name || '' }} but more complicated to provide failsafe insert
+     * @param array $additionalVarNameParts - additional parts of var name
+     * @param string $type - @see $this->getFailsafeValueForDotJs();
+     *      Special types: 'json_encode', 'array_encode' - both apply JSON.stringify() to
+     *      inserted value of type 'json' or 'array' respectively
+     * @param string|null $default - default value for cases when value is not provided or null.
+     *      Don't forget to wrap strings into quotes:
+     *      - "''" - inserts empty string (used instead of null),
+     *      - "[]" inserts array
+     * @param bool|null $encodeHtml
+     *      - true: encode value to allow it to be inserten into HTML arguments;
+     *      - false: insert as is
+     *      - null: uatodetect depending on $type
+     * @return string
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     */
+    public function getDotJsInsertForValue(array $additionalVarNameParts = [], $type = 'string', $default = null, $encodeHtml = null) {
+        $jsonStringify = false;
+        switch ($type) {
+            case 'json_encode':
+                $jsonStringify = true;
+                $type = 'json';
+                break;
+            case 'array_encode':
+                $jsonStringify = true;
+                $type = 'array';
+                break;
+        }
+        if ($encodeHtml === null) {
+            $encodeHtml = !in_array($type, ['json', 'array'], true);
+        }
+        $encoding = $encodeHtml ? '!' : '=';
+        if ($jsonStringify) {
+            return "{{{$encoding} JSON.stringify(" . $this->getFailsafeValueForDotJs($additionalVarNameParts, $type, $default) . ') }}';
+        } else {
+            return "{{{$encoding} " . $this->getFailsafeValueForDotJs($additionalVarNameParts, $type, $default) . ' }}';
+        }
+    }
+
+    /**
+     * Get failsafe conditional value insert for doT.js
+     * Conditional insert looks like:
+     * {{? !!it.viewer_name }}$thenInsert{{??}}$elseInsert{{?}} but more complicated to provide failsafe insert
+     * @param string $thenInsert - insert this data when condition is positive
+     * @param string $elseInsert - insert this data when condition is negative
+     * @param array $additionalVarNameParts - additional parts of var name
+     * @return string
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     */
+    public function getConditionalDotJsInsertForValue($thenInsert, $elseInsert, array $additionalVarNameParts = []) {
+        $fullName = $this->getVarNameForDotJs();
+        $parts = array_merge(explode('.', $fullName), $additionalVarNameParts);
+        $conditions = [];
+        $chain = 'it';
+        for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
+            $chain .= '.' . $parts[$i];
+            $conditions[] = '!!' . $chain;
+        }
+        return '{{? ' . implode(' && ', $conditions) . '}}' . $thenInsert  . '{{??}}' . $elseInsert . '{{?}}';
+    }
 
     /**
      * @return \Closure
@@ -123,6 +261,26 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
                 . '});'
                 . '</script>';
         }
+    }
+
+    /**
+     * @param ValueRenderer $renderer
+     * @return $this
+     */
+    public function configureDefaultRenderer(ValueRenderer $renderer) {
+        if ($this->templateForDefaultRenderer) {
+            $renderer->setTemplate($this->templateForDefaultRenderer);
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $template - path to template (in Laravel templates stored in /resources/views by default)
+     * @return $this
+     */
+    public function setTemplateForDefaultRenderer($template) {
+        $this->templateForDefaultRenderer = $template;
+        return $this;
     }
 
 }

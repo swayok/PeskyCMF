@@ -17,7 +17,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
     <label for="<?php echo $rendererConfig->getAttribute('id'); ?>"><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
     <div>
         <select multiple {{? !!it.isCreation }}<?php echo $attributesForCreate ?>{{??}}<?php echo $attributesForEdit ?>{{?}}
-            data-value="<?php echo $valueViewer->getDotJsJsonInsertForValue(true); ?>"
+            data-value="<?php echo $valueViewer->getDotJsInsertForValue([], 'array_encode'); ?>"
         >
         </select>
     </div>
