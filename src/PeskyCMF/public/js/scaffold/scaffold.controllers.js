@@ -241,6 +241,7 @@ var ScaffoldDataGridHelper = {
             }
             var tableOuterHtml = $dataGrid[0].outerHTML;
             var mergedConfigs = $.extend(
+                true,
                 {language: CmfConfig.getLocalizationStringsForComponent('data_tables')},
                 ScaffoldDataGridHelper.defaultConfig,
                 configs
@@ -251,7 +252,7 @@ var ScaffoldDataGridHelper = {
                     error: Utils.handleAjaxError
                 }
             }
-            var configsBackup = $.extend({}, mergedConfigs);
+            var configsBackup = $.extend(true, {}, mergedConfigs);
             $dataGrid.DataTable(mergedConfigs)
                 .on('init', function (event, settings) {
                     var $table = $(settings.nTable);
@@ -346,8 +347,21 @@ var ScaffoldDataGridHelper = {
         });
         if (configs && configs.doubleClickUrl) {
             $table.on('dblclick dbltap', 'tbody tr', function (event) {
-                if (!$(event.target).hasClass('select-checkbox')) {
-                    ScaffoldsManager.app.nav(configs.doubleClickUrl(api.row($(this)).data()));
+                var targetTagName =  event.target.tagName;
+                if (targetTagName === 'I' || targetTagName === 'SPAN') {
+                    // usually this is icon or text iside <a> or <button>
+                    targetTagName = $(event.target).parent()[0].tagName;
+                }
+                if (
+                    !$(event.target).hasClass('select-checkbox')
+                    && targetTagName !== 'A'
+                    && targetTagName !== 'BUTTON'
+                    && targetTagName !== 'INPUT'
+                ) {
+                    var data = api.row($(this)).data();
+                    if (data) {
+                        ScaffoldsManager.app.nav(configs.doubleClickUrl(api.row($(this)).data()));
+                    }
                 }
                 return false;
             });
@@ -571,65 +585,80 @@ var ScaffoldDataGridHelper = {
     initNestedView: function ($table, $tableWrapper, configs, tableOuterHtml) {
         if (configs.nested_data_grid) {
             var api = $table.dataTable().api();
-            var subTableConfigs = $.extend({}, configs, {
-                dom: "<tr><<'col-md-3 hidden-xs hidden-sm'i><'col-xs-12 col-md-6'p><'col-md-3 hidden-xs hidden-sm'l>>",
+            var subTableConfigs = $.extend(true, {}, configs, {
+                dom: "<tr><'children-data-grid-pagination container-fluid'<'row'<'col-md-3 hidden-xs hidden-sm'i><'col-xs-12 col-md-9'p>>>",
                 stateSave: false,
                 fixedHeader: {
                     header: false,
                     footer: false
-                },
-                scrollY: false,
-                scrollX: false
+                }
             });
+            delete subTableConfigs.scrollY;
+            delete subTableConfigs.scrollX;
             delete subTableConfigs.fixedColumns;
-            console.log(subTableConfigs);
             $tableWrapper
                 .on('click', 'a.show-children', function () {
+                    // console.log(subTableConfigs);
                     var $tr = $(this).closest('tr');
                     var row = api.row($tr);
-                    if (!$tr.hasClass('subtable-opened')) {
-                        $(this).addClass('hidden');
-                        $tr
-                            .addClass('subtable-opened')
-                            .find('a.hide-children')
-                                .removeClass('hidden');
+                    $(this).addClass('hidden');
+                    if (!$tr.hasClass('has-children-table')) {
+                        $tr.addClass('has-children-table');
                         var parentId = row.data()[subTableConfigs.nested_data_grid.value_column];
                         //console.log(parentId, tableOuterHtml);
                         var $subTable = $(tableOuterHtml);
-                        $subTable.attr('id', $subTable.attr('id') + '-children-for-' + parentId);
+                        $subTable
+                            .attr('id', $subTable.attr('id') + '-children-for-' + parentId)
+                            .addClass('table-condensed');
                         row.child($subTable).show();
-                        var configs = $.extend({}, subTableConfigs);
+                        var configs = $.extend(true, {}, subTableConfigs);
                         configs.ajax.url += '?parent=' + parentId;
-                        $subTable.DataTable(configs)
+                        $subTable
+                            .DataTable(configs)
                             .on('init', function (event, settings) {
                                 var $subTable = $(settings.nTable);
                                 var $subTableWrapper = $(settings.nTableWrapper);
                                 $subTableWrapper
                                     .addClass('pl10')
                                     .parent()
-                                        .addClass('pn pb10 sub-data-grid');
+                                        .addClass('pn pb5 children-data-grid-cell')
+                                        .closest('tr')
+                                            .addClass('children-data-grid-row');
                                 $subTable.data('configs', configs);
                                 ScaffoldDataGridHelper.initClickEvents($subTableWrapper, $subTable, configs);
                                 ScaffoldDataGridHelper.initRowActions($subTable, configs);
                                 ScaffoldDataGridHelper.initNestedView($subTable, $subTableWrapper, subTableConfigs, tableOuterHtml);
                             }).on('preXhr', function (event, settings) {
                                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
+                            }).on('draw', function (event, settings) {
+                                var $subTableWrapper = $(settings.nTableWrapper);
+                                if ($(settings.nTable).dataTable().api().page.info().recordsTotal === 0) {
+                                    $subTableWrapper.find('thead').hide();
+                                    $subTableWrapper.find('.children-data-grid-pagination').hide();
+                                } else {
+                                    $subTableWrapper.find('thead').show();
+                                    $subTableWrapper.find('.children-data-grid-pagination').show();
+                                }
                             });
                     } else {
                         row.child.show();
                     }
+                    $tr
+                        .addClass('children-table-opened')
+                        .find('a.hide-children')
+                            .removeClass('hidden');
                 })
                 .on('click', 'a.hide-children', function () {
                     var $tr = $(this).closest('tr');
                     var row = api.row($tr);
+                    $(this).addClass('hidden');
                     if (row.child.isShown()) {
-                        $(this).addClass('hidden');
-                        $tr
-                            .removeClass('subtable-opened')
-                            .find('a.show-children')
-                                .removeClass('hidden');
                         row.child.hide();
                     }
+                    $tr
+                        .removeClass('children-table-opened')
+                        .find('a.show-children')
+                            .removeClass('hidden');
                 });
         }
     }

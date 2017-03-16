@@ -385,7 +385,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
     ])->render(); ?>
     <div class="content">
         <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">
-            <div class="box"><div class="box-body">
+            <div class="box"><div class="box-body scaffold-data-grid-container">
                 <?php echo View::yieldContent('scaffold-datagrid-table'); ?>
             </div></div>
         </div></div>

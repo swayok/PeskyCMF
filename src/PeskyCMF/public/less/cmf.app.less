@@ -316,11 +316,6 @@ form {
     }
 }
 
-.scaffold-datagrid .no-items {
-    text-align: center;
-    font-weight: bold;
-}
-
 .checkbox.icheck label .icheckbox_square-blue {
     margin-right: 4px;
     vertical-align: top;
@@ -666,6 +661,82 @@ div.dataTables_wrapper {
     }
 
 } //< .dataTables_wrapper
+
+.scaffold-data-grid-container {
+    .no-items {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    table {
+        &.table-condensed {
+            .row-actions {
+                margin-top: 1px;
+
+                a {
+                    font-size: 14px;
+                }
+
+                > a:first-child {
+                    margin-left: 0;
+                }
+            }
+        }
+
+        tbody {
+            tr.children-data-grid-row {
+                border-left-width: 0;
+                background-color: #FFFFFF;
+
+                &:hover {
+                    background-color: #FFFFFF;
+                }
+
+                td.children-data-grid-cell {
+                    position: relative;
+
+                    &:before {
+                        content: '';
+                        position: absolute;
+                        left: -1px;
+                        width: 1px;
+                        top: 0;
+                        bottom: 0;
+                        background-color: #FFFFFF;
+                    }
+
+                    .children-data-grid-pagination {
+                        font-size: 14px;
+                        border: 1px solid #f4f4f4;
+                        border-top-width: 0;
+                        padding-bottom: 2px;
+
+                        .dataTables_info {
+                            margin-top: 2px;
+                        }
+
+                        .dataTables_length {
+                            margin-top: 7px;
+                        }
+
+                        .dataTables_paginate {
+                            text-align: right;
+                        }
+
+                        .pagination {
+                            margin-top: 5px;
+
+                            > li > a {
+                                padding: 4px 10px 4px 10px;
+                                text-decoration: none;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 .skin-blue .sidebar-menu > li.header {
     color: #678b97;

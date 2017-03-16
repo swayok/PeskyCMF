@@ -278,10 +278,6 @@ form .nav-tabs li a.has-error {
 form .bulk-edit-form-input-container.checkbox-switch .bulk-edit-form-input-enabler {
   padding-top: 6px;
 }
-.scaffold-datagrid .no-items {
-  text-align: center;
-  font-weight: bold;
-}
 .checkbox.icheck label .icheckbox_square-blue {
   margin-right: 4px;
   vertical-align: top;
@@ -641,6 +637,60 @@ div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled {
 div.dataTables_wrapper .toolbar ul.dropdown-menu a.disabled .label,
 div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
   background-color: #999999 !important;
+}
+.scaffold-data-grid-container .no-items {
+  text-align: center;
+  font-weight: bold;
+}
+.scaffold-data-grid-container table.table-condensed .row-actions {
+  margin-top: 1px;
+}
+.scaffold-data-grid-container table.table-condensed .row-actions a {
+  font-size: 14px;
+}
+.scaffold-data-grid-container table.table-condensed .row-actions > a:first-child {
+  margin-left: 0;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row {
+  border-left-width: 0;
+  background-color: #FFFFFF;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row:hover {
+  background-color: #FFFFFF;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell {
+  position: relative;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell:before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  width: 1px;
+  top: 0;
+  bottom: 0;
+  background-color: #FFFFFF;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination {
+  font-size: 14px;
+  border: 1px solid #f4f4f4;
+  border-top-width: 0;
+  padding-bottom: 2px;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination .dataTables_info {
+  margin-top: 2px;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination .dataTables_length {
+  margin-top: 7px;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination .dataTables_paginate {
+  text-align: right;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination .pagination {
+  margin-top: 5px;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination .pagination > li > a {
+  padding: 4px 10px 4px 10px;
+  text-decoration: none;
 }
 .skin-blue .sidebar-menu > li.header {
   color: #678b97;
