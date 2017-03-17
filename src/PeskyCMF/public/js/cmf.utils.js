@@ -229,12 +229,18 @@ Utils.fadeIn = function (el, callback) {
     });
 };
 
-Utils.switchBodyClass = function (className) {
+Utils.switchBodyClass = function (className, section, itemPk) {
     Utils.removeBodyClass();
     if (!!className) {
-        className = className.replace(/[^a-zA-Z0-9]+/, '-');
+        className = className.replace(/[^a-zA-Z0-9]+/g, '-');
         $(document.body).addClass(className);
         Utils.bodyClass = className;
+    }
+    if (section) {
+        $(document.body).attr('data-section', section);
+    }
+    if (itemPk) {
+        $(document.body).attr('data-item-pk', itemPk);
     }
 };
 
@@ -247,7 +253,11 @@ Utils.removeBodyClass = function () {
         $(document.body).removeClass(Utils.bodyClass);
         Utils.bodyClass = false;
     }
-    $(document.body).find('> .tooltip').remove(); //< remove hanged tooltips directly inside <body>
+    $(document.body)
+        .removeAttr('data-section')
+        .removeAttr('data-item-pk')
+        .find('> .tooltip')
+            .remove(); //< remove hanged tooltips directly inside <body>
 };
 
 Utils.getPageWrapper = function () {

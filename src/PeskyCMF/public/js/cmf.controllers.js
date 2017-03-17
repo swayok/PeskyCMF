@@ -111,7 +111,7 @@ var NotAuthorisedCmfView = CmfView.extend({
     formSelector: false,
     formContainerSelector: false,
     switchBodyClass: function (request) {
-        Utils.switchBodyClass('login-page ' + this.bodyClass);
+        Utils.switchBodyClass('login-page ' + this.bodyClass, 'not-authorised');
     },
     afterRender: function (event, request){
         if (this.formSelector && this.formContainerSelector) {
@@ -147,7 +147,7 @@ var CmfControllers = {
         cacheTemplate: false,
         bodyClass: null,
         switchBodyClass: function (request) {
-            Utils.switchBodyClass(this.bodyClass || 'page-' + request.params.uri.replace(/[^a-zA-Z0-9]+/, '-'));
+            Utils.switchBodyClass(this.bodyClass || 'page-' + request.params.uri.replace(/[^a-zA-Z0-9]+/, '-'), 'page');
         },
         afterRender : function (event, request) {
 

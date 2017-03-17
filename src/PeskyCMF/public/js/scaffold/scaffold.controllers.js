@@ -3,7 +3,7 @@ var ScaffoldControllers = {
         getContainer: Utils.getContentContainer,
         sigleton: true,
         switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource);
+            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:table');
         },
         loadTemplate: function (request) {
             return ScaffoldsManager.getDataGridTpl(request.params.resource);
@@ -16,7 +16,7 @@ var ScaffoldControllers = {
         getContainer: Utils.getContentContainer,
         sigleton: true,
         switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource + '-' + request.params.id);
+            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:form', request.params.id);
         },
         loadTemplate: function (request) {
             return ScaffoldsManager.getItemFormTpl(request.params.resource);
@@ -64,7 +64,7 @@ var ScaffoldControllers = {
         getContainer: Utils.getContentContainer,
         sigleton: true,
         switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource + '-view-' + request.params.id);
+            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:details', request.params.id);
         },
         loadTemplate: function (request) {
             return ScaffoldsManager.getItemDetailsTpl(request.params.resource);
@@ -94,7 +94,11 @@ var ScaffoldControllers = {
     }),
     itemCustomPage: CmfControllers.pageController.extend({
         switchBodyClass: function (request) {
-            Utils.switchBodyClass(this.bodyClass || 'resource-' + request.params.resource + '-' + request.params.page + '-' + request.params.id);
+            Utils.switchBodyClass(
+                this.bodyClass || 'resource-' + request.params.resource + '-' + request.params.page,
+                'resource:page',
+                request.params.id
+            );
         }
     })
 };
