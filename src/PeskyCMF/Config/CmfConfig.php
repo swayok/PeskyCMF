@@ -127,7 +127,7 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Session connection for redis and db drivers
+     * Connection name for session. Required when you use redis or any db driver to store sessions
      * @return string
      * @throws \BadMethodCallException
      */
@@ -667,12 +667,12 @@ abstract class CmfConfig extends ConfigsContainer {
             'filter' => true,
             'stateSave' => true,
             'dom' => "<'row'<'col-sm-12'<'#query-builder'>>>
-                <'row'
+                <'row toolbar-container'
                     <'col-xs-12 col-md-5'<'filter-toolbar btn-toolbar text-left'>>
                     <'col-xs-12 col-md-7'<'toolbar btn-toolbar text-right'>>
                 >
-                <'row'<'col-sm-12'tr>>
-                <'row'
+                <'row data-grid-container'<'col-sm-12'tr>>
+                <'row pagination-container'
                     <'col-md-3 hidden-xs hidden-sm'i>
                     <'col-xs-12 col-md-6'p>
                     <'col-md-3 hidden-xs hidden-sm'l>

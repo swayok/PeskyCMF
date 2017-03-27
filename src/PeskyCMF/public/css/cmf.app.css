@@ -638,6 +638,42 @@ div.dataTables_wrapper .toolbar ul.dropdown-menu a.disabled .label,
 div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
   background-color: #999999 !important;
 }
+body[data-section="resource:table"] .content-wrapper {
+  background-color: #FFFFFF;
+}
+body[data-section="resource:table"] .section-content-wrapper {
+  padding-bottom: 54px;
+}
+body[data-section="resource:table"] .section-content-wrapper .content-header {
+  height: 51px;
+  background-color: #ecf0f5;
+}
+body[data-section="resource:table"] .section-content-wrapper .content {
+  padding: 0;
+}
+body[data-section="resource:table"] .section-content-wrapper .content > .row > div > .box {
+  box-shadow: none;
+}
+body[data-section="resource:table"] .section-content-wrapper .pagination-container {
+  position: fixed;
+  left: 230px;
+  bottom: 51px;
+  height: 54px;
+  right: 0;
+  background-color: #ffffff;
+  margin: 0;
+  border-top: 1px solid #d2d6de;
+}
+.table-bordered > tr > th,
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > th,
+.table-bordered > tfoot > tr > th,
+.table-bordered > tr > td,
+.table-bordered > thead > tr > td,
+.table-bordered > tbody > tr > td,
+.table-bordered > tfoot > tr > td {
+  border-color: #ebebeb !important;
+}
 .scaffold-data-grid-container .no-items {
   text-align: center;
   font-weight: bold;
@@ -660,14 +696,24 @@ div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell {
   position: relative;
+  border-top-color: #82afbb !important;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell td.children-data-grid-cell {
+  padding-bottom: 0 !important;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell td.children-data-grid-cell:before {
+  display: none;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell td.dataTables_empty {
+  background-color: #FFFFFF;
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell:before {
   content: '';
   position: absolute;
   left: -1px;
   width: 1px;
-  top: 0;
   bottom: 0;
+  height: 5px;
   background-color: #FFFFFF;
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination {
@@ -691,6 +737,21 @@ div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination .pagination > li > a {
   padding: 4px 10px 4px 10px;
   text-decoration: none;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container {
+  border-left: 10px solid #82afbb;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table,
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination {
+  border-left-color: #82afbb;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination,
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table.empty {
+  border-bottom-color: #82afbb;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table .children-data-grid-pagination,
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table .children-data-grid-table.empty {
+  border-bottom-color: transparent;
 }
 .skin-blue .sidebar-menu > li.header {
   color: #678b97;

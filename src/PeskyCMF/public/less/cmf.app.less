@@ -662,6 +662,54 @@ div.dataTables_wrapper {
 
 } //< .dataTables_wrapper
 
+body[data-section="resource:table"] {
+    .content-wrapper {
+        background-color: #FFFFFF;
+    }
+
+    .section-content-wrapper {
+        padding-bottom: 54px;
+
+        .content-header {
+            height: 51px;
+            background-color: #ecf0f5;
+        }
+
+        .content {
+            padding: 0;
+
+            > .row > div > .box {
+                box-shadow: none;
+            }
+        }
+
+        .pagination-container {
+            position: fixed;
+            left: 230px;
+            bottom: 51px;
+            height: 54px;
+            right: 0;
+            background-color: #ffffff;
+            margin: 0;
+            border-top: 1px solid #d2d6de;
+        }
+    }
+}
+
+.table-bordered {
+    &,
+    > thead,
+    > tbody,
+    > tfoot {
+        > tr {
+            > th,
+            > td {
+                border-color: #ebebeb !important;
+            }
+        }
+    }
+}
+
 .scaffold-data-grid-container {
     .no-items {
         text-align: center;
@@ -695,13 +743,25 @@ div.dataTables_wrapper {
                 td.children-data-grid-cell {
                     position: relative;
 
+                    td.children-data-grid-cell {
+                        padding-bottom: 0 !important;
+
+                        &:before {
+                            display: none;
+                        }
+                    }
+
+                    td.dataTables_empty {
+                        background-color: #FFFFFF;
+                    }
+
                     &:before {
                         content: '';
                         position: absolute;
                         left: -1px;
                         width: 1px;
-                        top: 0;
                         bottom: 0;
+                        height: 5px;
                         background-color: #FFFFFF;
                     }
 
@@ -732,6 +792,31 @@ div.dataTables_wrapper {
                             }
                         }
                     }
+
+                    @subtable-indication-color: #82afbb;
+                    border-top-color: @subtable-indication-color !important;
+                    .children-data-grid-table-container {
+                        border-left: 10px solid @subtable-indication-color;
+
+                        .children-data-grid-table,
+                        .children-data-grid-pagination {
+                            border-left-color: @subtable-indication-color;
+                        }
+
+                        .children-data-grid-pagination,
+                        .children-data-grid-table.empty {
+                            border-bottom-color: @subtable-indication-color;
+                        }
+
+
+                        .children-data-grid-table {
+                            .children-data-grid-pagination,
+                            .children-data-grid-table.empty {
+                                border-bottom-color: transparent;
+                            }
+                        }
+                    }
+
                 }
             }
         }

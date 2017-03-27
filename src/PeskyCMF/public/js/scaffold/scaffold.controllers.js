@@ -623,12 +623,14 @@ var ScaffoldDataGridHelper = {
                                 var $subTable = $(settings.nTable);
                                 var $subTableWrapper = $(settings.nTableWrapper);
                                 $subTableWrapper
-                                    .addClass('pl10')
+                                    .addClass('children-data-grid-table-container')
                                     .parent()
                                         .addClass('pn pb5 children-data-grid-cell')
                                         .closest('tr')
                                             .addClass('children-data-grid-row');
-                                $subTable.data('configs', configs);
+                                $subTable
+                                    .data('configs', configs)
+                                    .addClass('children-data-grid-table');
                                 ScaffoldDataGridHelper.initClickEvents($subTableWrapper, $subTable, configs);
                                 ScaffoldDataGridHelper.initRowActions($subTable, configs);
                                 ScaffoldDataGridHelper.initNestedView($subTable, $subTableWrapper, subTableConfigs, tableOuterHtml);
@@ -639,9 +641,11 @@ var ScaffoldDataGridHelper = {
                                 if ($(settings.nTable).dataTable().api().page.info().recordsTotal === 0) {
                                     $subTableWrapper.find('thead').hide();
                                     $subTableWrapper.find('.children-data-grid-pagination').hide();
+                                    $subTable.addClass('empty');
                                 } else {
                                     $subTableWrapper.find('thead').show();
                                     $subTableWrapper.find('.children-data-grid-pagination').show();
+                                    $subTable.removeClass('empty');
                                 }
                             });
                     } else {
