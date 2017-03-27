@@ -661,7 +661,7 @@ abstract class CmfConfig extends ConfigsContainer {
     static public function data_tables_config() {
         return [
             'scrollX' => true,
-            'scrollY' => '65vh',
+            'scrollY' => '100%',
             'scrollCollapse' => true,
             'width' => '100%',
             'filter' => true,
