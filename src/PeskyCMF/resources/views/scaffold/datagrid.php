@@ -349,9 +349,9 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     $defaultConditions = json_encode($defaultConditions, JSON_UNESCAPED_UNICODE);
                 }
             ?>
-            var defaultSearchRules = <?php echo $defaultConditions; ?>;
-            if (defaultSearchRules.rules) {
-                dataTablesConfig.search = {search: DataGridSearchHelper.encodeRulesForDataTable(defaultSearchRules)};
+            dataTablesConfig.defaultSearchRules = <?php echo $defaultConditions; ?>;
+            if (dataTablesConfig.defaultSearchRules.rules) {
+                dataTablesConfig.search = {search: DataGridSearchHelper.encodeRulesForDataTable(dataTablesConfig.defaultSearchRules)};
             }
             <?php
                 $fitlers = [];
@@ -359,10 +359,11 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     $fitlers[] = $filterConfig->buildConfig();
                 }
             ?>
-            var queryBuilderConfig = {
+            dataTablesConfig.queryBuilderConfig = {
                 filters: <?php echo json_encode($fitlers, JSON_UNESCAPED_UNICODE); ?>,
                 is_opened: <?php echo $dataGridConfig->isFilterOpenedByDefault() ? 'true' : 'false'; ?>
             };
+
             DataGridSearchHelper.locale = <?php echo json_encode(cmfTransGeneral('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
 
             <?php if ($dataGridConfig->hasJsInitiator()): ?>
@@ -373,7 +374,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             <?php else: ?>
                 var dataGrid = <?php echo $dataTablesInitializer; ?>('#<?php echo $dataGridId; ?>', dataTablesConfig, ScaffoldDataGridHelper.init);
             <?php endif; ?>
-            DataGridSearchHelper.init(queryBuilderConfig, defaultSearchRules, dataGrid);
         })();
     </script>
 <?php View::stopSection(); ?>

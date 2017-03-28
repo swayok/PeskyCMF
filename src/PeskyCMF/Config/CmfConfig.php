@@ -661,16 +661,17 @@ abstract class CmfConfig extends ConfigsContainer {
     static public function data_tables_config() {
         return [
             'scrollX' => true,
-            'scrollY' => '100%',
+            'scrollY' => 'calc(100vh - 248px)',
             'scrollCollapse' => true,
             'width' => '100%',
             'filter' => true,
             'stateSave' => true,
-            'dom' => "<'row'<'col-sm-12'<'#query-builder'>>>
+            'dom' => "
                 <'row toolbar-container'
                     <'col-xs-12 col-md-5'<'filter-toolbar btn-toolbar text-left'>>
                     <'col-xs-12 col-md-7'<'toolbar btn-toolbar text-right'>>
                 >
+                <'#query-builder-container'<'#query-builder'>>
                 <'row data-grid-container'<'col-sm-12'tr>>
                 <'row pagination-container'
                     <'col-md-3 hidden-xs hidden-sm'i>

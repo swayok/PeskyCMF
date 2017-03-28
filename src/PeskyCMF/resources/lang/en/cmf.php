@@ -51,7 +51,8 @@ return [
                 'header' => 'Filtering rules',
                 'reset' => 'Reset filter',
                 'submit' => 'Apply filter',
-                'toggle' => 'Filters'
+                'toggle' => 'Filters',
+                'close' => 'Close',
             ],
         ],
         'bulk_actions' => [

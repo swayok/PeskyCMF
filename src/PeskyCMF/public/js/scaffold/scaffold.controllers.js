@@ -263,6 +263,9 @@ var ScaffoldDataGridHelper = {
                     var $tableWrapper = $(settings.nTableWrapper);
                     $table.data('configs', mergedConfigs);
                     ScaffoldDataGridHelper.initToolbar($tableWrapper, configs.toolbarItems, configs.filterToolbarItems);
+                    if (configs.queryBuilderConfig) {
+                        DataGridSearchHelper.init(configs.queryBuilderConfig, configs.defaultSearchRules, $table);
+                    }
                     ScaffoldDataGridHelper.initClickEvents($tableWrapper, $table, configs);
                     ScaffoldDataGridHelper.initRowActions($table, configs);
                     ScaffoldDataGridHelper.initMultiselect($table, $tableWrapper, configs);
@@ -673,7 +676,8 @@ var ScaffoldDataGridHelper = {
 };
 
 var DataGridSearchHelper = {
-    container: '#query-builder',
+    id: 'query-builder',
+    containerId: 'query-builder-container',
     defaultConfig: {
         plugins: ['bt-tooltip-errors', 'bt-checkbox', 'bt-selectpicker', 'bt-selectpicker-values'],
         allow_empty: true
@@ -691,8 +695,10 @@ var DataGridSearchHelper = {
     },
     init: function (config, defaultRules, $dataGrid) {
         if (config && config.filters && config.filters.length > 0) {
-            var $builder = $(DataGridSearchHelper.container);
+            var $builder = $('#' + DataGridSearchHelper.id);
             $builder.prepend('<h4>' + DataGridSearchHelper.locale.header + '</h4>');
+            var $builderContent = $('<div></div>').attr('id' , DataGridSearchHelper.id + '-content');
+            $builder.append($builderContent);
             var tableApi = $dataGrid.dataTable().api();
             for (var i in config.filters) {
                 if (
@@ -709,7 +715,7 @@ var DataGridSearchHelper = {
                 builderConfig = $.extend({}, defaultRules);
             }
             builderConfig = $.extend(builderConfig, DataGridSearchHelper.defaultConfig, config);
-            $builder.queryBuilder(builderConfig);
+            $builderContent.queryBuilder(builderConfig);
             try {
                 var currentSearch = JSON.parse(tableApi.search());
                 var decoded = DataGridSearchHelper.decodeRulesForDataTable(
@@ -717,24 +723,24 @@ var DataGridSearchHelper = {
                     DataGridSearchHelper.getFieldNameToFilterIdMap(config.filters)
                 );
                 if (decoded.rules && decoded.rules.length) {
-                    $builder.queryBuilder('setRules', decoded);
+                    $builderContent.queryBuilder('setRules', decoded);
                 } else {
-                    $builder.queryBuilder('reset');
+                    $builderContent.queryBuilder('reset');
                 }
             } catch (ignore) {}
             var $runFilteringBtn = $('<button class="btn btn-success" type="button"></button>')
                 .text(DataGridSearchHelper.locale.submit);
             $runFilteringBtn.on('click', function () {
                 // clean empty filters
-                $builder.find('.rule-container').each(function () {
-                    var model = $builder.queryBuilder('getModel', $(this));
+                $builderContent.find('.rule-container').each(function () {
+                    var model = $builderContent.queryBuilder('getModel', $(this));
                     if (model && !model.filter) {
                         model.drop();
                     }
                 });
                 // clean empty filter groups
-                $builder.find('.rules-group-container').each(function () {
-                    var group = $builder.queryBuilder('getModel', $(this));
+                $builderContent.find('.rules-group-container').each(function () {
+                    var group = $builderContent.queryBuilder('getModel', $(this));
                     if (group && group.length() <= 0 && !group.isRoot()) {
                         var parentGroup = group.parent;
                         group.drop();
@@ -745,68 +751,92 @@ var DataGridSearchHelper = {
                         }
                     }
                 });
-                if ($builder.queryBuilder('validate')) {
-                    var rules = $builder.queryBuilder('getRules');
+                if ($builderContent.queryBuilder('validate')) {
+                    var rules = $builderContent.queryBuilder('getRules');
                     var encoded;
                     if (!rules.rules) {
                         // empty rules set
-                        $builder.queryBuilder('reset');
+                        $builderContent.queryBuilder('reset');
                         encoded = DataGridSearchHelper.encodeRulesForDataTable(DataGridSearchHelper.emptyRules)
-                    } else if ($builder.queryBuilder('validate')) {
+                    } else if ($builderContent.queryBuilder('validate')) {
                         encoded = DataGridSearchHelper.encodeRulesForDataTable(rules);
                     }
                     tableApi.search(encoded).draw();
                 }
             });
-            var $resetFilteringBtn = $('<button class="btn btn-danger" type="button"></button>')
+            var $resetFilteringBtnInToolbar = $('<button class="btn btn-danger" type="button"></button>')
                 .text(DataGridSearchHelper.locale.reset);
-            $resetFilteringBtn.on('click', function () {
-                $builder.queryBuilder('reset');
-                if (defaultRules) {
-                    $builder.queryBuilder('setRules', defaultRules);
-                }
-            });
+            $resetFilteringBtnInToolbar
+                .hide()
+                .on('click', function () {
+                    $builderContent.queryBuilder('reset');
+                    if (defaultRules) {
+                        $builderContent.queryBuilder('setRules', defaultRules);
+                    }
+                });
+            var $resetFilteringBtnInFilter = $resetFilteringBtnInToolbar.clone(true).show();
             var $toolbar = $builder
                 .closest('.dataTables_wrapper')
                 .find('.filter-toolbar');
-            if (!config.is_opened) {
+            if (config.is_opened) {
+                $resetFilteringBtnInToolbar.show();
+                $toolbar
+                    .append($runFilteringBtn)
+                    .append($resetFilteringBtnInToolbar);
+            } else {
                 var $counterBadge = $('<span class="counter label label-success ml10"></span>');
                 var $filterToggleButton = $('<button class="btn btn-default" type="button"></button>')
                     .text(DataGridSearchHelper.locale.toggle)
                     .append($counterBadge)
                     .attr('data-toggle','collapse')
-                    .attr('data-target', '#' + $builder[0].id);
+                    .attr('data-target', '#' + DataGridSearchHelper.id);
+                $builder.addClass('collapse');
                 var changeCountInBadge = function () {
-                    var rules = $builder.queryBuilder('getRules');
+                    var rules = $builderContent.queryBuilder('getRules');
                     var count = DataGridSearchHelper.countRules(rules);
                     if (count) {
                         $counterBadge.text(count).show();
+                        $resetFilteringBtnInToolbar.show();
                     } else {
                         $counterBadge.hide();
                     }
                 };
                 changeCountInBadge();
-                $runFilteringBtn.on('click', function () {
-                    changeCountInBadge();
-                });
-                $runFilteringBtn.hide();
-                $resetFilteringBtn.hide();
-                $filterToggleButton.on('click', function () {
-                    $filterToggleButton.toggleClass('active');
-                    if ($filterToggleButton.hasClass('active')) {
-                        $runFilteringBtn.show();
-                        $resetFilteringBtn.show();
-                    } else {
-                        $runFilteringBtn.hide();
-                        $resetFilteringBtn.hide();
-                    }
-                });
-                $builder.addClass('collapse');
+                $runFilteringBtn
+                    .on('click', function () {
+                        changeCountInBadge();
+                        $filterToggleButton.click();
+                    })
+                    .hide();
+                $filterToggleButton
+                    .on('click', function () {
+                        $filterToggleButton.toggleClass('active');
+                        if ($filterToggleButton.hasClass('active')) {
+                            $runFilteringBtn.show();
+                            if (DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules')) > 0) {
+                                $resetFilteringBtnInToolbar.show();
+                            }
+                        } else {
+                            $runFilteringBtn.hide();
+                            if (DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules')) === 0) {
+                                $resetFilteringBtnInToolbar.hide();
+                            }
+                        }
+                    });
                 $toolbar.append($filterToggleButton);
+                var $filterCloseButton = $('<button type="button" class="btn btn-default btn-sm">')
+                    .text(DataGridSearchHelper.locale.close)
+                    .on('click', function () {
+                        $filterToggleButton.click();
+                    });
+                $builder.append(
+                    $('<div id="query-builder-controls">')
+                        .append($filterCloseButton.addClass('pull-left'))
+                        .append($runFilteringBtn.addClass('btn-sm'))
+                        .append($resetFilteringBtnInFilter.addClass('btn-sm'))
+                );
+                $toolbar.append($resetFilteringBtnInToolbar);
             }
-            $toolbar
-                .append($runFilteringBtn)
-                .append($resetFilteringBtn);
         }
     },
     encodeRulesForDataTable: function (rules, asObject) {
