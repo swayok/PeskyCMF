@@ -99,11 +99,11 @@ function fixAdminLte() {
     // fix sidebar/content min-height fixer
     $.AdminLTE.layout.fix = function () {
         // Get heights
-        var headerHeight = $('.main-header').outerHeight() || 0;
-        var headerLogoHeight = $('.main-header .logo').outerHeight() || 0;
-        var footerHeight = $('.main-footer').outerHeight() || 0;
+        var headerHeight = $('.main-header').outerHeight(true) || 0;
+        var headerLogoHeight = $('.main-header .logo').outerHeight(true) || 0;
+        var footerHeight = $('.main-footer').outerHeight(true) || 0;
         var windowHeight = $(window).height();
-        var sidebarHeight = $(".sidebar").outerHeight() + headerLogoHeight;
+        var sidebarHeight = $(".sidebar").outerHeight(true) + headerLogoHeight;
         var $elements = $(".content-wrapper, .right-side");
         // Set the min-height of the content and sidebar based on the the height of the document.
         if ($("body").hasClass("fixed")) {

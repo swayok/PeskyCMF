@@ -1056,6 +1056,9 @@ aside.main-sidebar .sidebar-menu li .badge {
 .cke .cke_combo.cke_combo_full_width .cke_combo_button .cke_combo_text {
   width: auto !important;
 }
+.cke_screen_reader_only {
+  display: none !important;
+}
 .cke_dialog_ui_file {
   min-height: 65px !important;
 }
