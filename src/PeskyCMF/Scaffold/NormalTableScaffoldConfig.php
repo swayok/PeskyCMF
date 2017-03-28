@@ -81,7 +81,6 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if ($result->count()) {
             $records = $dataGridConfig->prepareRecords($result->toArrays(), $virtualColumns);
         }
-        $records = array_merge($records, $records, $records, $records);
         return cmfJsonResponse()->setData([
             'draw' => $request->query('draw'),
             'recordsTotal' => $result->countTotal(),

@@ -317,7 +317,11 @@ class ColumnFilter {
      */
     public function getColumnNameForTranslation() {
         if ($this->columnNameForTranslation === null) {
-            $this->columnNameForTranslation = str_slug($this->columnName, '_');
+            $this->columnNameForTranslation = strtolower(trim(preg_replace(
+                ['%([A-Z])%', '%[^a-zA-Z0-9.-]+%'],
+                ['_$1', '_'],
+                $this->columnName
+            ), '_-.'));
         }
         return $this->columnNameForTranslation;
     }

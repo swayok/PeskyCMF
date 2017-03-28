@@ -262,7 +262,7 @@ var ScaffoldDataGridHelper = {
                     var $table = $(settings.nTable);
                     var $tableWrapper = $(settings.nTableWrapper);
                     $table.data('configs', mergedConfigs);
-                    ScaffoldDataGridHelper.initToolbar($tableWrapper, configs.toolbarItems, configs.filterToolbarItems);
+                    ScaffoldDataGridHelper.initToolbar($tableWrapper, configs);
                     if (configs.queryBuilderConfig) {
                         DataGridSearchHelper.init(configs.queryBuilderConfig, configs.defaultSearchRules, $table);
                     }
@@ -280,7 +280,7 @@ var ScaffoldDataGridHelper = {
             throw 'Invalid data grid id: ' + $dataGrid
         }
     },
-    initToolbar: function ($tableWrapper, customToolbarItems, customFilterToolbarItems) {
+    initToolbar: function ($tableWrapper, configs) {
         var $toolbarEl = $tableWrapper.find('.toolbar');
         var $filterToolbar = $tableWrapper.find('.filter-toolbar');
         var $reloadBtn = $('<button class="btn btn-default" data-action="reload"></button>')
@@ -288,20 +288,39 @@ var ScaffoldDataGridHelper = {
         if ($filterToolbar.length) {
             $filterToolbar.prepend($reloadBtn);
         }
-        if ($.isArray(customFilterToolbarItems)) {
-            for (var i = 0; i < customFilterToolbarItems.length; i++) {
-                $filterToolbar.append(customFilterToolbarItems[i]);
+        if ($.isArray(configs.filterToolbarItems)) {
+            for (var i = 0; i < configs.filterToolbarItems.length; i++) {
+                $filterToolbar.append(configs.filterToolbarItems[i]);
             }
         }
         if ($toolbarEl.length) {
             if (!$filterToolbar.length) {
                 $toolbarEl.prepend($reloadBtn);
             }
-            if ($.isArray(customToolbarItems)) {
-                for (i = 0; i < customToolbarItems.length; i++) {
-                    $toolbarEl.append(customToolbarItems[i]);
+            if ($.isArray(configs.toolbarItems)) {
+                for (i = 0; i < configs.toolbarItems.length; i++) {
+                    $toolbarEl.append(configs.toolbarItems[i]);
                 }
             }
+        }
+        if (configs.stickyToolbar) {
+            // todo: test sticky data-grid toolbar
+            var $toolbarContainer = $toolbarEl.closest('.toolbar-container');
+            $toolbarContainer.affix({
+                offset: {
+                    top: function () {
+                        return (
+                            this.top = (
+                                $('header').filter('.main-header').outerHeight(true)
+                                + $('#section-content').find('> .section-content-wrapper > .content-header').outerHeight(true)
+                            )
+                        )
+                    },
+                    bottom: function () {
+                        return (this.bottom = $('footer').filter('.main-footer').outerHeight(true))
+                    }
+                }
+            })
         }
     },
     initClickEvents: function ($tableWrapper, $table, configs) {
@@ -708,8 +727,8 @@ var DataGridSearchHelper = {
                     config.filters[i].color = 'primary';
                 }
             }
-            var builderConfig = {};
-            if ($.isArray(defaultRules)) {
+            var builderConfig = {rules: []};
+            if ($.isArray(defaultRules) && defaultRules.length) {
                 builderConfig = {rules: defaultRules};
             } else if (defaultRules.rules) {
                 builderConfig = $.extend({}, defaultRules);
@@ -722,12 +741,14 @@ var DataGridSearchHelper = {
                     currentSearch,
                     DataGridSearchHelper.getFieldNameToFilterIdMap(config.filters)
                 );
-                if (decoded.rules && decoded.rules.length) {
+                if ($.isPlainObject(decoded) && $.isArray(decoded.rules)) {
                     $builderContent.queryBuilder('setRules', decoded);
                 } else {
-                    $builderContent.queryBuilder('reset');
+                    $builderContent.queryBuilder('setRules', builderConfig.rules);
                 }
-            } catch (ignore) {}
+            } catch (ignore) {
+                console.warn('invalid filter rules: ' + tableApi.search());
+            }
             var $runFilteringBtn = $('<button class="btn btn-success" type="button"></button>')
                 .text(DataGridSearchHelper.locale.submit);
             $runFilteringBtn.on('click', function () {
@@ -770,9 +791,7 @@ var DataGridSearchHelper = {
                 .hide()
                 .on('click', function () {
                     $builderContent.queryBuilder('reset');
-                    if (defaultRules) {
-                        $builderContent.queryBuilder('setRules', defaultRules);
-                    }
+                    $builderContent.queryBuilder('setRules', builderConfig.rules);
                 });
             var $resetFilteringBtnInFilter = $resetFilteringBtnInToolbar.clone(true).show();
             var $toolbar = $builder
@@ -840,6 +859,12 @@ var DataGridSearchHelper = {
         }
     },
     encodeRulesForDataTable: function (rules, asObject) {
+        if (!$.isPlainObject(rules)) {
+            return {
+                c: 'AND',
+                r: []
+            };
+        }
         var ret = {
             c: rules.condition || 'AND',
             r: []
@@ -868,6 +893,9 @@ var DataGridSearchHelper = {
         return map;
     },
     decodeRulesForDataTable: function (rules, fieldNameTofilterIdMap) {
+        if (!rules || !$.isArray(rules.r)) {
+            return null;
+        }
         var ret = {
             condition: rules.c,
             rules: []
@@ -875,7 +903,10 @@ var DataGridSearchHelper = {
         for (var i = 0; i < rules.r.length; i++) {
             var rule = rules.r[i];
             if (rule.c) {
-                ret.rules.push(DataGridSearchHelper.decodeRulesForDataTable(rule, fieldNameTofilterIdMap));
+                var subrules = DataGridSearchHelper.decodeRulesForDataTable(rule, fieldNameTofilterIdMap);
+                if (subrules !== null) {
+                    ret.rules.push(subrules);
+                }
             } else {
                 if (!fieldNameTofilterIdMap[rule.f]) {
                     continue;
@@ -890,6 +921,9 @@ var DataGridSearchHelper = {
         return ret;
     },
     countRules: function (rules) {
+        if (!rules) {
+            return 0;
+        }
         rules = DataGridSearchHelper.encodeRulesForDataTable(rules, true);
         var count = 0;
         for (var i = 0; i < rules.r.length; i++) {

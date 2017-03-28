@@ -937,21 +937,21 @@ aside.main-sidebar .sidebar-menu li .badge {
   text-align: center;
   line-height: 43px;
 }
-#query-builder.query-builder .rules-group-container {
+#query-builder .query-builder .rules-group-container {
   z-index: 1;
 }
-#query-builder.query-builder .rule-container input[type=text],
-#query-builder.query-builder .rule-container input[type=number] {
+#query-builder .query-builder .rule-container input[type=text],
+#query-builder .query-builder .rule-container input[type=number] {
   padding: 1px 1px 1px 6px;
   font-size: 13px;
   height: 26px;
 }
-#query-builder.query-builder .rule-container .bootstrap-select button,
-#query-builder.query-builder .rule-container select.form-control {
+#query-builder .query-builder .rule-container .bootstrap-select button,
+#query-builder .query-builder .rule-container select.form-control {
   font-size: 13px;
   height: 26px;
 }
-#query-builder.query-builder .rule-container .radio label {
+#query-builder .query-builder .rule-container .radio label {
   line-height: 17px;
 }
 #query-builder .rules-group-footer {
