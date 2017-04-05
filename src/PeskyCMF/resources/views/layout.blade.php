@@ -131,7 +131,7 @@
     <script src="/packages/cmf-vendors/db-query-builder/plugins/bt-selectpicker-values/plugin.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/db-query-builder/i18n/query-builder.{{ app()->getLocale() }}.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/jquery.plugins.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/jquery.form.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/jquery.form.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/toastr/toastr.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/base64.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/ckeditor/ckeditor.js" type="text/javascript"></script>
