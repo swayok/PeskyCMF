@@ -32,26 +32,26 @@ class CmsPagesTable extends CmsTable {
     }
 
     static public function registerUniquePageUrlValidator(ScaffoldConfig $scaffoldConfig) {
-        \Validator::extend('unique_page_url', function () use ($pagesTable) {
+        \Validator::extend('unique_page_url', function () {
             $urlAlias = request()->input('url_alias');
             $parentId = (int)request()->input('parent_id');
             if ($parentId > 0 && $urlAlias === '/') {
                 return false;
             } else {
-                return $pagesTable::count([
+                return static::count([
                     'url_alias' => $urlAlias,
                     'id !=' => (int)request()->input('id'),
                     'parent_id' => $parentId > 0 ? $parentId : null
                 ]) === 0;
             }
         });
-        \Validator::replacer('unique_page_url', function () use ($pagesTable, $scaffoldConfig) {
+        \Validator::replacer('unique_page_url', function () use ($scaffoldConfig) {
             $urlAlias = request()->input('url_alias');
             $parentId = (int)request()->input('parent_id');
             if ($parentId > 0 && $urlAlias === '/') {
                 $otherPageId = $parentId;
             } else {
-                $otherPageId = $pagesTable::selectValue(
+                $otherPageId = static::selectValue(
                     DbExpr::create('`id`'),
                     [
                         'url_alias' => $urlAlias,
