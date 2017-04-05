@@ -48,6 +48,7 @@
         "ckeditor/ckeditor": "dev-full/4.6.x",
         "twbs/bootstrap": "3.*",
         "bower-asset/jquery": "^3.1.1-dev",
+        "npm-asset/page": "^1.6.4",
         "components/jquery": "2.*",
         "bootstrap-select/bootstrap-select": "*",
         "mistic100/jquery-querybuilder": "*",
