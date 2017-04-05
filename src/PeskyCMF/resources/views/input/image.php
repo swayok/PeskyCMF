@@ -10,15 +10,16 @@ $attributes = array(
     'id' => $fieldConfig->getDefaultId(),
     'type' => 'file',
 );
-$attributesForCreate = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForCreate()));
+$attributesForCreate = array_merge($attributes, $rendererConfig->getAttributesForCreate());
+$attributesForCreateAsString = \Swayok\Html\Tag::buildAttributes($attributesForCreate);
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, $rendererConfig->getAttributesForEdit()));
 ?>
 <div class="form-group">
     <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
-    <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
-    {{? !it.isCreation && !!it.icon }}
-    <div class="image-preview" id="<?php echo $attributes['id']; ?>-image-preview">
-        <img src="{{= it.icon }}?_=<?php echo time() ?>">
+    <input {{? !!it.isCreation }}<?php echo $attributesForCreateAsString; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
+    {{? !it.isCreation && !!it.<?php echo $fieldConfig->getName(); ?> }}
+    <div class="image-preview mt10" id="<?php echo $attributesForCreate['id']; ?>-image-preview">
+        <img src="{{= it.<?php echo $fieldConfig->getName(); ?> }}?_=<?php echo time() ?>">
     </div>
     {{?}}
 </div>

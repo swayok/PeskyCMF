@@ -11,7 +11,7 @@
 <div class="image-previews-container">
     {{? $.isArray(it.<?php echo $fieldConfig->getName() ?>) }}
         {{~ it.<?php echo $fieldConfig->getName() ?> :imageInfo}}
-            <div class="img-thumbnail image-preview" style="vertical-align: top">
+            <div class="img-thumbnail image-preview mb5" style="vertical-align: top">
             {{? !!imageInfo.url }}
                 {{? imageInfo.label }}<p class="text-center">{{= imageInfo.label }}</p>{{?}}
                 <img src="{{= imageInfo.url || imageInfo }}?_=<?php echo time(); ?>">
