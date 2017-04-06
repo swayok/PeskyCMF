@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(function () {
 
     fixAdminLte();
 
@@ -12,9 +12,24 @@ $(document).ready(function () {
 
     Utils.configureAppLibs();
 
-    Pilot.pushState = true;
+    page.base(CmfConfig.rootUrl);
+    var logger = function (context, next) {
+        console.log(context);
+        next();
+    };
+    page('/login', logger, CmfRouteChange.authorisationPage);
+    page('/forgot_password', logger);
+    page('/replace_password', logger);
+    page('/logout', function (event, request) {
+        Utils.showPreloader(document.body);
+        Utils.getPageWrapper().fadeOut(500);
+        document.location = request.url;
+    });
+    page('/page/:uri*', logger);
+    page('/*', CmfRoutingHelpers.pageIntroTransition);
+    page.exit(CmfRoutingHelpers.pageExitTransition);
 
-    var app = window.adminApp = new Pilot({
+    /*var app = window.adminApp = new Pilot({
         el: $(document.body),
         selector:
             'a[href^="' + CmfConfig.rootUrl + '/"],' +
@@ -91,13 +106,16 @@ $(document).ready(function () {
 
     if (typeof CustomApp !== 'undefined' && typeof CustomApp.afterStart === 'function') {
         CustomApp.afterStart(app);
-    }
+    }*/
+
+    page();
 
 });
 
 function fixAdminLte() {
     // fix sidebar/content min-height fixer
     $.AdminLTE.layout.fix = function () {
+        $('body, html, .wrapper').css('height', '100vh');
         // Get heights
         var headerHeight = $('.main-header').outerHeight(true) || 0;
         var headerLogoHeight = $('.main-header .logo').outerHeight(true) || 0;
@@ -136,5 +154,7 @@ function fixAdminLte() {
             setTimeout($.AdminLTE.layout.fix, $.AdminLTE.options.animationSpeed + 10);
         });
     };
+
+    $.AdminLTE.layout.fix();
 
 }

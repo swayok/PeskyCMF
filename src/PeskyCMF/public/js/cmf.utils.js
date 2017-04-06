@@ -25,11 +25,10 @@ Utils.configureAjax = function () {
     });
     if (CmfConfig.isDebug) {
         $(document).ajaxComplete(function (event, xhr, settings) {
-            var request = Pilot.parseURL(settings.url);
-            console.group('Ajax: %s %s', settings.type || 'GET', request.path, xhr.status, xhr.statusText);
-            if (request.query.length) {
+            console.group('Ajax: %s %s', settings.type || 'GET', location.pathname, xhr.status, xhr.statusText);
+            if (location.search.length > 1) {
                 console.groupCollapsed('GET');
-                console.log(request.query);
+                console.log(qs.parse(location.search.slice(1)));
                 console.groupEnd();
             }
             if (settings.type === 'POST') {
@@ -175,13 +174,13 @@ Utils.handleAjaxSuccess = function (json) {
         if (json.redirect) {
             switch (json.redirect) {
                 case 'back':
-                    ScaffoldsManager.app.back(json.redirect_fallback);
+                    page.back(json.redirect_fallback);
                     break;
                 case 'reload':
-                    ScaffoldsManager.app.reload();
+                    page();
                     break;
                 default:
-                    ScaffoldsManager.app.nav(json.redirect);
+                    page.show(json.redirect);
             }
         }
     } catch (exc) {
@@ -207,6 +206,10 @@ Utils.showPreloader = function (el) {
 
 Utils.hidePreloader = function (el) {
     $(el).removeClass('loading');
+};
+
+Utils.hasActivePreloader = function (el) {
+    return $(el).hasClass('has-preloader loading');
 };
 
 Utils.fadeOut = function (el, callback) {

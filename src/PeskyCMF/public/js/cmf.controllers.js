@@ -15,32 +15,32 @@ var CmfControllerHelpers = {
     currentContentContainer: Utils.getPageWrapper(),
     currentContentEl: null,
     setCurrentContentContainer: function ($el) {
-        CmfControllerHelpers.currentContentContainer = $el;
+        CmfControllerHelpers.$currentContentContainer = $el;
     },
     setCurrentContentEl: function ($el) {
         var deferred = $.Deferred();
-        if (CmfControllerHelpers.currentContentEl) {
-            if (CmfControllerHelpers.currentContentEl.is($el)) {
-                Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+        if (CmfControllerHelpers.$currentContent) {
+            if (CmfControllerHelpers.$currentContent.is($el)) {
+                Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
                 deferred.resolve($el);
             } else {
-                Utils.fadeOut(CmfControllerHelpers.currentContentEl, function () {
-                    CmfControllerHelpers.currentContentEl.remove();
-                    CmfControllerHelpers.currentContentEl = $el;
-                    CmfControllerHelpers.currentContentEl.fadeOut();
-                    CmfControllerHelpers.currentContentContainer.append($el);
-                    Utils.fadeIn(CmfControllerHelpers.currentContentEl, function () {
-                        Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+                Utils.fadeOut(CmfControllerHelpers.$currentContent, function () {
+                    CmfControllerHelpers.$currentContent.remove();
+                    CmfControllerHelpers.$currentContent = $el;
+                    CmfControllerHelpers.$currentContent.fadeOut();
+                    CmfControllerHelpers.$currentContentContainer.append($el);
+                    Utils.fadeIn(CmfControllerHelpers.$currentContent, function () {
+                        Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
                         deferred.resolve($el);
                     });
                 });
             }
         } else {
-            CmfControllerHelpers.currentContentEl = $el;
-            CmfControllerHelpers.currentContentEl.fadeOut();
-            CmfControllerHelpers.currentContentContainer.append($el);
-            Utils.fadeIn(CmfControllerHelpers.currentContentEl, function () {
-                Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+            CmfControllerHelpers.$currentContent = $el;
+            CmfControllerHelpers.$currentContent.fadeOut();
+            CmfControllerHelpers.$currentContentContainer.append($el);
+            Utils.fadeIn(CmfControllerHelpers.$currentContent, function () {
+                Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
                 deferred.resolve($el);
             });
         }
@@ -88,7 +88,7 @@ var CmfView = Pilot.View.extend({
             CmfControllerHelpers.setCurrentContentContainer(container);
             this.$el.attr('data-detachable', this.detachable ? '1' : '0');
             var _this = this;
-            CmfControllerHelpers.setCurrentContentEl(this.$el)
+            CmfControllerHelpers.setCurrentContent(this.$el)
                 .done(function () {
                     _this.afterRender(event, _this.request);
                 });

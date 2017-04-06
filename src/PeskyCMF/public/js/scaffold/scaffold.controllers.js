@@ -1047,9 +1047,9 @@ var ScaffoldFormHelper = {
             toastr.error(exc);
         }
         $('.modal.in').modal('hide'); //< hide any opened modals
-        Utils.showPreloader(CmfControllerHelpers.currentContentContainer);
+        Utils.showPreloader(CmfControllerHelpers.$currentContentContainer);
         var timeout = setTimeout(function () {
-            Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+            Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
             toastr.info('Server response timed out');
         }, 20000);
         $.when(deferred, ScaffoldFormHelper.loadOptions(resourceName, 'bulk-edit'))
@@ -1160,7 +1160,7 @@ var ScaffoldFormHelper = {
             })
             .always(function () {
                 clearTimeout(timeout);
-                Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+                Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
             });
     },
     initWysiwyg: function (textareaSelector, config) {
