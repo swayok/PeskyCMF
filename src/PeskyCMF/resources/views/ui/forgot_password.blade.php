@@ -11,6 +11,9 @@
                 <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
             </div>
             <div class="login-submit text-right">
+                <a class="btn btn-default btn-flat pull-left" href="{{ route('cmf_login') }}">
+                    {{ cmfTransGeneral('.action.back') }}
+                </a>
                 <button type="submit" class="btn btn-primary btn-flat">
                     {{ cmfTransCustom('.forgot_password.button_label') }}
                 </button>

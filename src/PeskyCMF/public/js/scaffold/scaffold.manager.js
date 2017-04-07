@@ -1,23 +1,15 @@
 var ScaffoldsManager = {
-    app: null,
     cacheTemplates: true
 };
 
-ScaffoldsManager.init = function (app) {
-    ScaffoldsManager.app = app;
-
-    ScaffoldsManager.app
-        .route('resource_datagrid', '/resource/:resource', ScaffoldControllers.dataGrid)
-        .route('resource_details', '/resource/:resource/details/:id', ScaffoldControllers.itemDetails)
-        .route('/resource/:resource/list', function (event, request) {
-            setTimeout(function () {
-                // timeout required to make previous route change end before this one started
-                ScaffoldsManager.app.nav(CmfConfig.rootUrl + '/resource/' + request.params.resource);
-            }, 50);
-        })
-        .route('resource_create', '/resource/:resource/create', ScaffoldControllers.itemForm)
-        .route('resource_edit', '/resource/:resource/edit/:id', ScaffoldControllers.itemForm)
-        .route('resource_page', '/resource/:resource/:id/page/:page', ScaffoldControllers.itemCustomPage)
+ScaffoldsManager.init = function () {
+    // todo: restore this
+    // page('/resource/:resource', ScaffoldControllers.dataGrid);
+    // page('/resource/:resource/details/:id', ScaffoldControllers.itemDetails);
+    // page.redirect('/resource/:resource/list', '/resource/:resource'); //< todo: test this!
+    // page('/resource/:resource/create', ScaffoldControllers.itemForm);
+    // page('/resource/:resource/edit/:id', ScaffoldControllers.itemForm);
+    // page('/resource/:resource/:id/page/:page', ScaffoldControllers.itemCustomPage);
 };
 
 ScaffoldsManager.getResourceBaseUrl = function (resourceName, additionalParameter) {

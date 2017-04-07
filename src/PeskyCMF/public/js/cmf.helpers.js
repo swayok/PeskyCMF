@@ -453,18 +453,21 @@ var AdminUI = {
 
 AdminUI.destroyUI = function () {
     var deferred = $.Deferred();
-    var wrapper = Utils.getPageWrapper();
-    wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs, function () {
-        Utils.showPreloader(wrapper);
-        if (AdminUI.$el) {
-            AdminUI.$el.detach();
-        }
-        wrapper.removeClass('with-ui').empty();
-        wrapper.show();
-        AdminUI.visible = false;
+    if (AdminUI.visible) {
+        var wrapper = Utils.getPageWrapper();
+        wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs, function () {
+            if (AdminUI.$el) {
+                AdminUI.$el.detach();
+            }
+            wrapper.removeClass('with-ui').empty();
+            wrapper.show();
+            AdminUI.visible = false;
+            deferred.resolve();
+            $(document).trigger('appui:hidden');
+        });
+    } else {
         deferred.resolve();
-        $(document).trigger('appui:hidden');
-    });
+    }
     return deferred;
 };
 

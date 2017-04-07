@@ -129,14 +129,14 @@ var ScaffoldActionsHelper = {
                     });
                 break;
             case 'redirect':
-                ScaffoldsManager.app.nav($el.attr('data-url'));
+                page.show($el.attr('data-url'));
                 break;
             case 'reload':
-                ScaffoldsManager.app.reload();
+                page(); //< todo: test this
                 break;
             case 'back':
                 var defaultUrl = $el.attr('data-url') || CmfConfig.rootUrl;
-                ScaffoldsManager.app.back(defaultUrl);
+                page.back(defaultUrl);
                 break;
         }
     },
@@ -353,8 +353,9 @@ var ScaffoldDataGridHelper = {
                                 && (
                                     json.redirect === 'back'
                                     || json.redirect === 'reload'
-                                    || json.redirect === ScaffoldsManager.app.activeRequest.href
-                                    || json.redirect === ScaffoldsManager.app.activeRequest.path
+                                    // todo: restore this
+                                    // || json.redirect === ScaffoldsManager.app.activeRequest.href
+                                    // || json.redirect === ScaffoldsManager.app.activeRequest.path
                                 )
                             ) {
                                 api.ajax.reload();
@@ -386,7 +387,7 @@ var ScaffoldDataGridHelper = {
                 ) {
                     var data = api.row($(this)).data();
                     if (data) {
-                        ScaffoldsManager.app.nav(configs.doubleClickUrl(api.row($(this)).data()));
+                        page.show(configs.doubleClickUrl(api.row($(this)).data()));
                     }
                 }
                 return false;

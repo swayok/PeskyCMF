@@ -155,7 +155,6 @@
     <script src="/packages/cmf/js/cmf.helpers.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.utils.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.routing.js" type="text/javascript"></script>
-    {{--<script src="/packages/cmf/js/cmf.controllers.js" type="text/javascript"></script>--}}
     {{--<script src="/packages/cmf/js/scaffold/scaffold.controllers.js?_=20151008" type="text/javascript"></script>--}}
     <script src="/packages/cmf/js/scaffold/scaffold.manager.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.app.js" type="text/javascript"></script>

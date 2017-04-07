@@ -1,6 +1,6 @@
 $(function () {
 
-    fixAdminLte();
+    //fixAdminLte();
 
     if (CmfSettings) {
         $.extend(CmfConfig, CmfSettings);
@@ -17,35 +17,32 @@ $(function () {
         console.log(context);
         next();
     };
-    page('/login', logger, CmfRouteChange.authorisationPage);
-    page('/forgot_password', logger);
-    page('/replace_password', logger);
-    page('/logout', function (event, request) {
-        Utils.showPreloader(document.body);
-        Utils.getPageWrapper().fadeOut(500);
-        document.location = request.url;
-    });
-    page('/page/:uri*', logger);
-    page('/*', CmfRoutingHelpers.pageIntroTransition);
+
     page.exit(CmfRoutingHelpers.pageExitTransition);
 
-    /*var app = window.adminApp = new Pilot({
-        el: $(document.body),
-        selector:
-            'a[href^="' + CmfConfig.rootUrl + '/"],' +
-            'a[href^="' + document.location.origin + CmfConfig.rootUrl + '/"],' +
-            '[data-nav]',
-        production: !CmfConfig.isDebug,
-        basePath: CmfConfig.rootUrl,
-        useOnlyFirstMatchedRoute: true,
-        reloadable: true
-        //profile: true
-        //useHistory: true
-    });
-
     if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
-        CustomRoutes.init(app);
+        CustomRoutes.init();
     }
+
+    page('/login', CmfRouteChange.authorisationPage);
+    page('/forgot_password', CmfRouteChange.authorisationPage);
+    page('/replace_password', CmfRouteChange.authorisationPage);
+    page('/logout', CmfRouteChange.logout);
+    page('/page/:uri*', logger, CmfRoutingHelpers.routeHandled);
+
+    ScaffoldsManager.init();
+
+    if (typeof CustomApp !== 'undefined' && typeof CustomApp.beforeStart === 'function') {
+        CustomApp.beforeStart();
+    }
+
+    page.start();
+
+    if (typeof CustomApp !== 'undefined' && typeof CustomApp.afterStart === 'function') {
+        CustomApp.afterStart();
+    }
+
+    /*
 
     app
         .route('login', '/login', CmfControllers.loginController)
@@ -107,8 +104,6 @@ $(function () {
     if (typeof CustomApp !== 'undefined' && typeof CustomApp.afterStart === 'function') {
         CustomApp.afterStart(app);
     }*/
-
-    page();
 
 });
 

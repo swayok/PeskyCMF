@@ -2,7 +2,7 @@
 
 html,
 body {
-    height: 100%;
+    height: 100% !important;
 
     > .modal-backdrop {
         display: none !important;
@@ -25,6 +25,9 @@ pre.json-text {
 }
 
 body {
+    background-color: #FFFFFF;
+    .transition(background 0.2s linear);
+
     &.skin-red,
     &.skin-purple,
     &.skin-black,
@@ -32,6 +35,7 @@ body {
     &.skin-green,
     &.skin-blue {
         .wrapper {
+            .transition(background 0.2s linear);
             background-color: #FFFFFF;
 
             .main-sidebar {

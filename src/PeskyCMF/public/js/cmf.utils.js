@@ -235,7 +235,7 @@ Utils.fadeIn = function (el, callback) {
 Utils.switchBodyClass = function (className, section, itemPk) {
     Utils.removeBodyClass();
     if (!!className) {
-        className = className.replace(/[^a-zA-Z0-9]+/g, '-');
+        className = className.replace(/[^a-zA-Z0-9 ]+/g, '-');
         $(document.body).addClass(className);
         Utils.bodyClass = className;
     }
@@ -308,7 +308,7 @@ Utils.downloadHtml = function (url, cache, template) {
     var deferred = $.Deferred();
     url = (url[0] === '/' ? url : CmfConfig.rootUrl + '/' + url).replace(/\.html$/i, '') + '.html';
     if (!cache || !CmfCache.views[url]) {
-        return $.ajax({
+        $.ajax({
             url: url,
             cache: false,
             dataType: 'html',
@@ -324,8 +324,8 @@ Utils.downloadHtml = function (url, cache, template) {
         }).fail(Utils.handleAjaxError);
     } else {
         deferred.resolve(CmfCache.views[url]);
-        return deferred;
     }
+    return deferred;
 };
 
 Utils.getUser = function (reload) {
