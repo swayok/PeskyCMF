@@ -2,16 +2,6 @@ var ScaffoldsManager = {
     cacheTemplates: true
 };
 
-ScaffoldsManager.init = function () {
-    // todo: restore this
-    // page('/resource/:resource', ScaffoldControllers.dataGrid);
-    // page('/resource/:resource/details/:id', ScaffoldControllers.itemDetails);
-    // page.redirect('/resource/:resource/list', '/resource/:resource'); //< todo: test this!
-    // page('/resource/:resource/create', ScaffoldControllers.itemForm);
-    // page('/resource/:resource/edit/:id', ScaffoldControllers.itemForm);
-    // page('/resource/:resource/:id/page/:page', ScaffoldControllers.itemCustomPage);
-};
-
 ScaffoldsManager.getResourceBaseUrl = function (resourceName, additionalParameter) {
     return CmfConfig.rootUrl + '/' + CmfConfig.scaffoldApiUrlSection + '/' + ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)
 };

@@ -13,24 +13,29 @@ $(function () {
     Utils.configureAppLibs();
 
     page.base(CmfConfig.rootUrl);
-    var logger = function (context, next) {
-        console.log(context);
-        next();
-    };
-
     page.exit(CmfRoutingHelpers.pageExitTransition);
 
     if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
         CustomRoutes.init();
     }
 
+    page('*', function (request, next) {
+        window.request = request;
+        next();
+    });
     page('/login', CmfRouteChange.authorisationPage);
     page('/forgot_password', CmfRouteChange.authorisationPage);
     page('/replace_password', CmfRouteChange.authorisationPage);
-    page('/logout', CmfRouteChange.logout);
-    page('/page/:uri*', logger, CmfRoutingHelpers.routeHandled);
+    page('/logout', CmfRouteChange.logout, CmfRoutingHelpers.routeHandled);
+    page('/page/:uri*', CmfRouteChange.showPage);
 
-    ScaffoldsManager.init();
+    // todo: restore this
+    // page('/resource/:resource', CmfRoutingHelpers.scaffoldDataGrid);
+    // page('/resource/:resource/details/:id', ScaffoldControllers.itemDetails);
+    // page.redirect('/resource/:resource/list', '/resource/:resource'); //< todo: test this!
+    // page('/resource/:resource/create', ScaffoldControllers.itemForm);
+    // page('/resource/:resource/edit/:id', ScaffoldControllers.itemForm);
+    // page('/resource/:resource/:id/page/:page', ScaffoldControllers.itemCustomPage);
 
     if (typeof CustomApp !== 'undefined' && typeof CustomApp.beforeStart === 'function') {
         CustomApp.beforeStart();

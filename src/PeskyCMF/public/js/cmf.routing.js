@@ -19,12 +19,32 @@ var CmfRoutingHelpers = {
             CmfRoutingHelpers.$currentContentContainer = $el;
         }
     },
-    setCurrentContent: function ($el, $container) {
+    /**
+     * @param html - string or funciton (jquery element or function that renders html)
+     * @param $container - jquery element
+     * @return {Deferred}
+     */
+    setCurrentContent: function (html, $container) {
         var deferred = $.Deferred();
+        var $el;
+        if (typeof html === 'string') {
+            $el = $('<div>').addClass(CmfConfig.contentWrapperCssClass).html(html);
+        } else if (typeof html === 'function') {
+            if (html.jquery) {
+                $el = html;
+            } else {
+                $el = $('<div>').addClass(CmfConfig.contentWrapperCssClass).html(html());
+            }
+        } else {
+            console.error('CmfRoutingHelpers.setCurrentContent(): html argument is not a string, jquery element of function');
+            deferred.reject();
+            return deferred;
+        }
         $el.hide();
         if ($container) {
             CmfRoutingHelpers.setCurrentContentContainer($container);
         }
+        Utils.updatePageTitleFromH1($el);
         var switchContent = function ($el, deferred) {
             CmfRoutingHelpers.$currentContent = $el;
             CmfRoutingHelpers.$currentContentContainer.append($el);
@@ -60,19 +80,25 @@ CmfRouteChange.authorisationPage = function (request, next) {
             AdminUI.destroyUI()
         )
         .done(function (html) {
-            var $content = $(html);
-            CmfRoutingHelpers.setCurrentContent($content, Utils.getPageWrapper());
             Utils.switchBodyClass(
                 'login-page cmf-' + request.path.replace(/[^a-zA-Z0-9]+/, '-').toLowerCase() + '-page',
                 'authorisation'
             );
-            Utils.updatePageTitleFromH1($content);
-            var $form = $content.find('form');
-            if ($form.length) {
-                FormHelper.initForm($form, CmfRoutingHelpers.$currentContentContainer, function (json) {
-                    Utils.cleanCache();
-                    Utils.handleAjaxSuccess(json);
+            CmfRoutingHelpers.setCurrentContent(html, Utils.getPageWrapper())
+                .done(function ($content) {
+                    var $form = $content.find('form');
+                    if ($form.length) {
+                        FormHelper.initForm($form, CmfRoutingHelpers.$currentContentContainer, function (json) {
+                            Utils.cleanCache();
+                            Utils.handleAjaxSuccess(json);
+                        });
+                    }
                 });
+            CmfRoutingHelpers.routeHandled(request, next);
+        })
+        .fail(function () {
+            if (CmfRoutingHelpers.$currentContentContainer) {
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             }
             CmfRoutingHelpers.routeHandled(request, next);
         });
@@ -81,28 +107,25 @@ CmfRouteChange.authorisationPage = function (request, next) {
 CmfRouteChange.logout = function (request, next) {
     Utils.showPreloader(document.body);
     Utils.getPageWrapper().fadeOut(500);
-    document.location = request.url;
+    document.location = request.canonicalPath;
 };
 
 CmfRouteChange.showPage = function (request, next) {
     $.when(
-            Utils.downloadHtml(request.canonicalPath, true, false),
-            AdminUI.showUI()
+            Utils.downloadHtml(request.canonicalPath, false, false),
+            AdminUI.showUI(request.canonicalPath)
         )
         .done(function (html) {
-            var $content = $(html);
-            CmfRoutingHelpers.setCurrentContent($content, Utils.getPageWrapper());
             Utils.switchBodyClass(
-                'login-page cmf-' + request.path.replace(/[^a-zA-Z0-9]+/, '-').toLowerCase() + '-page',
-                'authorisation'
+                'page-' + request.params.uri.replace(/[^a-zA-Z0-9]+/, '-'),
+                'page'
             );
-            Utils.updatePageTitleFromH1($content);
-            var $form = $content.find('form');
-            if ($form.length) {
-                FormHelper.initForm($form, CmfRoutingHelpers.$currentContentContainer, function (json) {
-                    Utils.cleanCache();
-                    Utils.handleAjaxSuccess(json);
-                });
+            CmfRoutingHelpers.setCurrentContent(html, Utils.getContentContainer());
+            CmfRoutingHelpers.routeHandled(request, next);
+        })
+        .fail(function () {
+            if (CmfRoutingHelpers.$currentContentContainer) {
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             }
             CmfRoutingHelpers.routeHandled(request, next);
         });

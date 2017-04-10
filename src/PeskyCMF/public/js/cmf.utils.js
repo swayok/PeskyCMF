@@ -36,7 +36,7 @@ Utils.configureAjax = function () {
                 if ($.isPlainObject(settings.data) || $.isArray(settings.data)) {
                     console.log(settings.data);
                 } else {
-                    console.log(Pilot.parseURL('/?' + settings.data).query);
+                    console.log(qs.parse(settings.data));
                 }
                 console.groupEnd();
             }
@@ -321,7 +321,10 @@ Utils.downloadHtml = function (url, cache, template) {
                 CmfCache.views[url] = html;
             }
             deferred.resolve(html);
-        }).fail(Utils.handleAjaxError);
+        }).fail(function (xhr) {
+            Utils.handleAjaxError(xhr);
+            deferred.reject(xhr);
+        });
     } else {
         deferred.resolve(CmfCache.views[url]);
     }
@@ -358,6 +361,9 @@ Utils.setUser = function (userData) {
 };
 
 Utils.highlightLinks = function (url) {
+    if (typeof url !== 'string') {
+        return;
+    }
     $('li.current-page, a.current-page, li.treeview').removeClass('current-page active');
     var $links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
     if ($links.length) {
