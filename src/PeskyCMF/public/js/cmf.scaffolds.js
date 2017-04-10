@@ -1,106 +1,236 @@
-var ScaffoldControllers = {
-    dataGrid: CmfView.extend({
-        getContainer: Utils.getContentContainer,
-        sigleton: true,
-        switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:table');
-        },
-        loadTemplate: function (request) {
-            return ScaffoldsManager.getDataGridTpl(request.params.resource);
-        },
-        afterRender : function (event, request) {
+var ScaffoldsManager = {
+    cacheTemplates: true
+};
 
+ScaffoldsManager.getResourceBaseUrl = function (resourceName, additionalParameter) {
+    return CmfConfig.rootUrl + '/' + CmfConfig.scaffoldApiUrlSection + '/' + ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)
+};
+
+ScaffoldsManager.buildResourceUrlSuffix = function (resourceName, additionalParameter) {
+    return resourceName + (additionalParameter ? '/' + additionalParameter : '');
+};
+
+ScaffoldsManager.isValidResourceName = function (resourceName) {
+    return typeof resourceName == 'string' && String(resourceName).match(/^[a-zA-Z_][a-zA-Z_0-9]+$/);
+};
+
+ScaffoldsManager.validateResourceName = function (resourceName, additionalParameter) {
+    if (!ScaffoldsManager.isValidResourceName(resourceName)) {
+        console.trace();
+        throw 'Invalid REST resource name: ' + resourceName;
+    }
+    if (typeof additionalParameter !== 'undefined' && typeof additionalParameter !== 'string') {
+        console.trace();
+        throw 'Additional parameter must be a string: ' + (typeof additionalParameter) + ' received';
+    }
+};
+
+ScaffoldsManager.findResourceNameInUrl = function (url) {
+    var matches = url.match(/\/resource\/([^\/]+)/i);
+    return !matches ? false : matches[0];
+};
+
+/* ============ Templates ============ */
+
+$.extend(CmfCache, {
+    rawTemplates: {},
+    compiledTemplates: {
+        itemForm: {},
+        bulkEditForm: {},
+        itemDetails: {}
+    }
+});
+
+ScaffoldsManager.loadTemplates = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var deferred = $.Deferred();
+    if (!ScaffoldsManager.cacheTemplates || !ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)) {
+        var resourceUrl = ScaffoldsManager.getResourceBaseUrl(resourceName, additionalParameter);
+        $.ajax({
+            url: resourceUrl + '/service/templates',
+            method: 'GET',
+            cache: false,
+            type: 'html'
+        }).done(function (html) {
+            ScaffoldsManager.setResourceTemplates(resourceName, additionalParameter, html);
+            deferred.resolve(resourceName, additionalParameter);
+        }).fail(Utils.handleAjaxError);
+    } else {
+        deferred.resolve(resourceName, additionalParameter);
+    }
+    return deferred;
+};
+
+ScaffoldsManager.setResourceTemplates = function (resourceName, additionalParameter, html) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var templates = $('<div id="templates">' + html + '</div>');
+    var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+    CmfCache.rawTemplates[resourceId] = {
+        datagrid: false,
+        itemForm: false,
+        bulkEditForm: false,
+        itemdetails: false
+    };
+    var dataGridTpl = templates.find('#data-grid-tpl');
+    if (dataGridTpl.length) {
+        CmfCache.rawTemplates[resourceId].datagrid = dataGridTpl.html();
+    }
+    var itemFormTpl = templates.find('#item-form-tpl');
+    if (itemFormTpl.length) {
+        CmfCache.rawTemplates[resourceId].itemForm = itemFormTpl.html();
+    }
+    var bulkEditFormTpl = templates.find('#bulk-edit-form-tpl');
+    if (bulkEditFormTpl.length) {
+        CmfCache.rawTemplates[resourceId].bulkEditForm = bulkEditFormTpl.html();
+    }
+    var itemDetailsTpl = templates.find('#item-details-tpl');
+    if (itemDetailsTpl.length) {
+        CmfCache.rawTemplates[resourceId].itemDetails = itemDetailsTpl.html();
+    }
+};
+
+ScaffoldsManager.isTemplatesLoaded = function (resourceName, additionalParameter) {
+    return !!CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)];
+};
+
+ScaffoldsManager.hasDataGridTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+    )
+};
+
+ScaffoldsManager.hasItemFormTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemForm
+    );
+};
+
+ScaffoldsManager.hasBulkEditFormTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].bulkEditForm
+    );
+};
+
+ScaffoldsManager.hasItemDetailsTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemDetails
+    );
+};
+
+ScaffoldsManager.getDataGridTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        if (!ScaffoldsManager.hasDataGridTemplate(resourceName, additionalParameter)) {
+            throw 'There is no data grid template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
-    }),
-    itemForm: CmfView.extend({
-        getContainer: Utils.getContentContainer,
-        sigleton: true,
-        switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:form', request.params.id);
-        },
-        loadTemplate: function (request) {
-            return ScaffoldsManager.getItemFormTpl(request.params.resource);
-        },
-        loadData: function (request) {
-            var model = ScaffoldFormHelper.getModel(request.params.resource);
-            if (request.params.id && request.params.id !== 'create') {
-                model({id: request.params.id});
-            }
-            var deferred = $.Deferred();
-            $.when(model.fetch(), ScaffoldFormHelper.loadOptions(request.params.resource, model.get('id')))
-                .done(function (modelResponse, optionsResponse) {
-                    model.set('_options', optionsResponse);
-                    model.set('_is_creation', (!model.get('id') || String(model.get('id')).length === 0));
-                    deferred.resolve(model);
-                });
-            return deferred;
-        },
-        getData: function () {
-            return $.isObservable(this.data) ? this.data.toJSON() : this.data;
-        },
-        setData: function (data) {
-            this.data = $.isObservable(data) ? data : $.observable(data);
-            return this;
-        },
-        afterRender : function (event, request) {
-            ScaffoldActionsHelper.initActions(this.$el);
-            ScaffoldFormHelper.initForm(this.$el.find('form'), function (json, form, container) {
-                if (json._message) {
-                    toastr.success(json._message);
-                }
-                if (json.redirect) {
-                    if (json.redirect === 'reload') {
-                        window.adminApp.reload();
-                    } else {
-                        window.adminApp.nav(json.redirect);
-                    }
-                } else {
-                    window.adminApp.back(form.attr('data-back-url'));
-                }
-            });
+        deferred.resolve(
+            CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+        );
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getItemFormTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasItemFormTemplate(resourceName, additionalParameter)) {
+            throw 'There is no item form template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
-    }),
-    itemDetails: CmfView.extend({
-        getContainer: Utils.getContentContainer,
-        sigleton: true,
-        switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:details', request.params.id);
-        },
-        loadTemplate: function (request) {
-            return ScaffoldsManager.getItemDetailsTpl(request.params.resource);
-        },
-        loadData: function (request) {
-            var model = ScaffoldFormHelper.getModel(request.params.resource);
-            model({id: request.params.id, _is_details: true});
-            return model.fetch()
-        },
-        getData: function () {
-            return $.isObservable(this.data) ? this.data.toJSON() : this.data;
-        },
-        setData: function (data) {
-            this.data = $.isObservable(data) ? data : $.observable(data);
-            return this;
-        },
-        afterRender : function (event, request) {
-            ScaffoldActionsHelper.initActions(this.$el);
-            var customInitiator = this.$el.find('.item-details-tabsheet-container').attr('data-initiator');
-            if (customInitiator && customInitiator.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
-                eval('customInitiator = ' + customInitiator);
-                if (typeof customInitiator === 'function') {
-                    customInitiator.call(this.$el);
-                }
-            }
-        }
-    }),
-    itemCustomPage: CmfControllers.pageController.extend({
-        switchBodyClass: function (request) {
-            Utils.switchBodyClass(
-                this.bodyClass || 'resource-' + request.params.resource + '-' + request.params.page,
-                'resource:page',
-                request.params.id
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemForm[resourceId]) {
+            CmfCache.compiledTemplates.itemForm[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].itemForm,
+                'Item form template for ' + resourceId
             );
         }
-    })
+        deferred.resolve(CmfCache.compiledTemplates.itemForm[resourceId]);
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getBulkEditFormTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName ,additionalParameter);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasBulkEditFormTemplate(resourceName, additionalParameter)) {
+            throw 'There is no bulk edit form template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
+        }
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.bulkEditForm[resourceId]) {
+            CmfCache.compiledTemplates.bulkEditForm[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].bulkEditForm,
+                'Bulk edit form template for ' + resourceId
+            );
+        }
+        deferred.resolve(CmfCache.compiledTemplates.bulkEditForm[resourceId]);
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getItemDetailsTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasItemDetailsTemplate(resourceName, additionalParameter)) {
+            throw 'There is no item details template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
+        }
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemDetails[resourceId]) {
+            CmfCache.compiledTemplates.itemDetails[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].itemDetails,
+                'Item details template for ' + resourceId
+            );
+        }
+        deferred.resolve(CmfCache.compiledTemplates.itemDetails[resourceId]);
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetailsViewer) {
+    var deferred = $.Deferred();
+    if (!itemId) {
+        if (forDetailsViewer) {
+            console.error('ScaffoldsManager.getDataForItem(): itemId argument is requred when argument forDetailsViewer == true');
+            return deferred.reject();
+        } else if (!ScaffoldFormHelper.deafults[resourceName]) {
+            itemId = 'service/defaults';
+        } else {
+            return deferred.resolve(ScaffoldFormHelper.deafults[resourceName]);
+        }
+    }
+    $.ajax({
+        url: ScaffoldsManager.getResourceBaseUrl(resourceName) + '/' + itemId + '?details=' + (forDetailsViewer ? '1' : '0'),
+        method: 'GET',
+        cache: false
+    }).done(function (data) {
+        data.formUUID = Base64.encode(this.url + (new Date()).getTime());
+        if (itemId === 'service/defaults') {
+            data.isCreation = true;
+            ScaffoldFormHelper.deafults[resourceName] = data;
+        }
+        deferred.resolve(data);
+    }).fail(function (xhr) {
+        deferred.reject();
+        Utils.handleAjaxError(xhr);
+    });
+    return deferred;
 };
 
 var ScaffoldActionsHelper = {
@@ -132,7 +262,7 @@ var ScaffoldActionsHelper = {
                 page.show($el.attr('data-url'));
                 break;
             case 'reload':
-                page(); //< todo: test this
+                page.reload();
                 break;
             case 'back':
                 var defaultUrl = $el.attr('data-url') || CmfConfig.rootUrl;
@@ -202,24 +332,25 @@ var ScaffoldDataGridHelper = {
         dom: "<'row'<'col-sm-12'<'#query-builder'>>><'row'<'col-xs-12 col-md-5'<'filter-toolbar btn-toolbar text-left'>><'col-xs-12 col-md-7'<'toolbar btn-toolbar text-right'>>><'row'<'col-sm-12'tr>><'row'<'col-sm-3 hidden-xs hidden-sm'i><'col-xs-12 col-md-6'p><'col-sm-3 hidden-xs hidden-sm'l>>",
         stateSaveCallback: function (settings, state) {
             if (settings.iDraw > 1) {
-                var newUrl = window.adminApp.request.path + '?' + settings.sTableId + '=' + rison.encode_object(state);
-                window.history.pushState(null, document.title, newUrl);
-                window.adminApp.addToHistory(newUrl);
                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
+                if (state.search && state.search.search && state.search.search.length > 0) {
+                    var newUrl = window.request.canonicalPath + '?' + settings.sTableId + '=' + rison.encode_object(state);
+                    page.show(newUrl, null, false);
+                }
             }
         },
         stateLoadCallback: function (settings) {
-            if (window.adminApp.request.query[settings.sTableId]) {
+            if (window.request.query[settings.sTableId]) {
                 try {
-                    return rison.decode_object(window.adminApp.request.query[settings.sTableId]);
+                    return rison.decode_object(window.request.query[settings.sTableId]);
                 } catch (e) {
                     if (CmfConfig.isDebug) {
                         console.log('Invalid Rison object');
                     }
                 }
-            } else if (window.adminApp.request.query.filter) {
+            } else if (window.request.query.filter) {
                 try {
-                    var filters = JSON.parse(window.adminApp.request.query.filter);
+                    var filters = JSON.parse(window.request.query.filter);
                     if (filters) {
                         var search = DataGridSearchHelper.convertKeyValueFiltersToRules(filters);
                         if (search) {

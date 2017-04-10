@@ -1226,6 +1226,17 @@ aside.main-sidebar {
         word-wrap: break-word;
     }
 
+    td,
+    th {
+        &:first-child {
+            border-left-width: 0;
+        }
+
+        &:last-child {
+            border-right-width: 0;
+        }
+    }
+
     tbody {
         tr.table-group {
             background-color: #efefef;
@@ -1285,4 +1296,8 @@ aside.main-sidebar {
         }
     }
 
+}
+
+#scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
+    min-height: 600px !important;
 }

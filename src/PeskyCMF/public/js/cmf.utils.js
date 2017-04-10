@@ -177,7 +177,7 @@ Utils.handleAjaxSuccess = function (json) {
                     page.back(json.redirect_fallback);
                     break;
                 case 'reload':
-                    page();
+                    page.reload();
                     break;
                 default:
                     page.show(json.redirect);

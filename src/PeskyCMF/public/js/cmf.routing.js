@@ -130,3 +130,131 @@ CmfRouteChange.showPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         });
 };
+
+CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
+    $.when(
+            Utils.downloadHtml(request.canonicalPath, false, false),
+            AdminUI.showUI(request.canonicalPath)
+        )
+        .done(function (html) {
+            Utils.switchBodyClass(
+                'resource-' + request.params.resource + '-page-' + request.params.page,
+                'resource:page',
+                request.params.id
+            );
+            CmfRoutingHelpers.setCurrentContent(html, Utils.getContentContainer());
+            CmfRoutingHelpers.routeHandled(request, next);
+        })
+        .fail(function () {
+            if (CmfRoutingHelpers.$currentContentContainer) {
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
+            }
+            CmfRoutingHelpers.routeHandled(request, next);
+        });
+};
+
+CmfRouteChange.scaffoldDataGridPage = function (request, next) {
+    $.when(
+            ScaffoldsManager.getDataGridTpl(request.params.resource),
+            AdminUI.showUI(request.canonicalPath)
+        )
+        .done(function (html) {
+            Utils.switchBodyClass(
+                'resource-' + request.params.resource,
+                'resource:table'
+            );
+            CmfRoutingHelpers.setCurrentContent(html, Utils.getContentContainer());
+            CmfRoutingHelpers.routeHandled(request, next);
+        })
+        .fail(function () {
+            if (CmfRoutingHelpers.$currentContentContainer) {
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
+            }
+            CmfRoutingHelpers.routeHandled(request, next);
+        });
+};
+
+CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
+    $.when(
+            ScaffoldsManager.getItemDetailsTpl(request.params.resource),
+            ScaffoldsManager.getResourceItemData(request.params.resource, request.params.id, true),
+            AdminUI.showUI(request.canonicalPath)
+        )
+        .done(function (dotJsTpl, data) {
+            Utils.switchBodyClass(
+                'resource-' + request.params.resource + '-page-' + request.params.page,
+                'resource:page',
+                request.params.id
+            );
+            CmfRoutingHelpers.setCurrentContent(
+                    function () {
+                        return dotJsTpl(data);
+                    },
+                    Utils.getContentContainer()
+                ).done(function ($content) {
+                    ScaffoldActionsHelper.initActions($content);
+                    var customInitiator = $content.find('.item-details-tabsheet-container').attr('data-initiator');
+                    if (customInitiator && customInitiator.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
+                        eval('customInitiator = ' + customInitiator);
+                        if (typeof customInitiator === 'function') {
+                            customInitiator.call($content);
+                        }
+                    }
+                });
+            CmfRoutingHelpers.routeHandled(request, next);
+        })
+        .fail(function () {
+            if (CmfRoutingHelpers.$currentContentContainer) {
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
+            }
+            CmfRoutingHelpers.routeHandled(request, next);
+        });
+};
+
+CmfRouteChange.scaffoldItemFormPage = function (request, next) {
+    var itemId = !request.params.id || request.params.id === 'create' ? null : request.params.id;
+    $.when(
+            ScaffoldsManager.getItemFormTpl(request.params.resource),
+            ScaffoldsManager.getResourceItemData(request.params.resource, itemId, false),
+            ScaffoldFormHelper.loadOptions(request.params.resource, itemId),
+            AdminUI.showUI(request.canonicalPath)
+        )
+        .done(function (dotJsTpl, data, options) {
+            Utils.switchBodyClass(
+                'resource-' + request.params.resource,
+                'resource:form',
+                itemId
+            );
+            CmfRoutingHelpers.setCurrentContent(
+                    function () {
+                        data._options = options;
+                        data._is_creation = !itemId;
+                        return dotJsTpl(data);
+                    },
+                    Utils.getContentContainer()
+                ).done(function ($content) {
+                    ScaffoldActionsHelper.initActions($content);
+                    ScaffoldFormHelper.initForm($content.find('form'), function (json, $form) {
+                        if (json._message) {
+                            toastr.success(json._message);
+                        }
+                        if (json.redirect) {
+                            if (json.redirect === 'reload') {
+                                page.reload();
+                            } else {
+                                page.show(json.redirect);
+                            }
+                        } else {
+                            page.back($form.attr('data-back-url'));
+                        }
+                    });
+                });
+            CmfRoutingHelpers.routeHandled(request, next);
+        })
+        .fail(function () {
+            if (CmfRoutingHelpers.$currentContentContainer) {
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
+            }
+            CmfRoutingHelpers.routeHandled(request, next);
+        });
+};

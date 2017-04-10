@@ -34,11 +34,11 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
             <?php endif; ?>
         </div>
 
-        <div class="<?php echo $hasTabs ? 'tab-content' : 'box box-primary' ?>">
+        <div class="<?php echo $hasTabs ? 'tab-content' : 'box box-primary mn pn' ?>">
             <?php foreach ($tabs as $idx => $tabInfo) : ?>
-                <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
+                <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body mn pn'; ?>
                 <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $containerId . '-' . (string)($idx + 1) ?>">
-                    <table class="table table-striped table-bordered mn item-details-table">
+                    <table class="table table-striped table-bordered mn item-details-table br-l-n br-r-n">
                         <?php
                             $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body';
                             foreach ($tabInfo['groups'] as $groupIndex) {
@@ -185,7 +185,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
         <div class="content">
             <div class="row">
                 <div class="<?php echo $itemDetailsConfig->getCssClassesForContainer() ?>">
-                    <div class="box <?php if ($hasTabs) : ?>br-t-n<?php endif; ?>">
+                    <div class="box br-t-n">
                         <div class="box-body pn">
                             {{# def.tabsheet }}
                         </div>

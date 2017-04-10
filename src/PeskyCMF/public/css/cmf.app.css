@@ -1104,6 +1104,14 @@ aside.main-sidebar .sidebar-menu li .badge {
   word-break: break-all;
   word-wrap: break-word;
 }
+.item-details-table td:first-child,
+.item-details-table th:first-child {
+  border-left-width: 0;
+}
+.item-details-table td:last-child,
+.item-details-table th:last-child {
+  border-right-width: 0;
+}
 .item-details-table tbody tr.table-group {
   background-color: #efefef;
 }
@@ -1151,4 +1159,7 @@ aside.main-sidebar .sidebar-menu li .badge {
 .item-details-table div.wysiwyg-data-insert:before {
   margin: 10px 0 10px 0;
   padding: 10px;
+}
+#scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
+  min-height: 600px !important;
 }
