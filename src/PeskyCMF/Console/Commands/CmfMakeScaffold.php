@@ -112,6 +112,13 @@ class CmfMakeScaffold extends Command {
 
         $this->line('Done');
 
+        $columnsTranslations = [];
+        foreach ($table->getTableStructure()->getColumns() as $column) {
+            $columnsTranslations[] = "'{$column->getName()}' => ''";
+        }
+        $columnsTranslationsFilter = implode(",\n                ", $columnsTranslations) . ",";
+        $columnsTranslations = implode(",\n            ", $columnsTranslations) . ",";
+
         $this->comment(<<<INFO
 Menu item for CmfConfig:
 [
@@ -119,6 +126,36 @@ Menu item for CmfConfig:
     'url' => routeToCmfItemsTable('{$table->getTableStructure()->getTableName()}'),
     'icon' => ''
 ]
+
+Translations:
+'{$table->getTableStructure()->getTableName()}' => [
+    'menu_title' => '',
+    'datagrid' => [
+        'header' => '',
+        'column' => [
+            $columnsTranslations
+        ],
+        'filter' => [
+            '{$table->getTableStructure()->getTableName()}' => [
+                $columnsTranslationsFilter
+            ]
+        ]
+    ],
+    'form' => [
+        'header_create' => '',
+        'header_edit' => '',
+        'input' => [
+            $columnsTranslations
+        ],
+    ],
+    'item_details' => [
+        'header' => '',
+        'field' => [
+            $columnsTranslations
+        ]
+    ]
+]
+
 INFO
 );
     }

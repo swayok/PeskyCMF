@@ -13,7 +13,9 @@
 </div>
 
 <script type="text/html" id="user-panel-tpl">
-    <div class="user-name">@{{? it.name.length }}@{{= it.name }}@{{??}}@{{= it.role }}@{{?}}</div>
+    <div class="user-name">
+        @{{? it.name && it.name.length }}@{{= it.name }}@{{??}}<?php echo '{{= it.role || "' . cmfTransCustom('.admins.role.admin') . '" }}' ?>@{{?}}
+    </div>
     <div class="user-{{ \PeskyCMF\Config\CmfConfig::getPrimary()->user_login_column() }}">
         <?php echo '{{= it.' . \PeskyCMF\Config\CmfConfig::getPrimary()->user_login_column() . ' }}'; ?>
     </div>

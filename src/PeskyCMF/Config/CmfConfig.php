@@ -152,7 +152,7 @@ abstract class CmfConfig extends ConfigsContainer {
 
             'providers' => [
                 static::auth_guard_name() => [
-                    'driver' => 'peskyorm',
+                    'driver' => static::auth_user_provider_name(),
                     'table' => static::users_table_name(),
                     'model' => static::user_object_class()
                 ],
@@ -172,6 +172,14 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function auth_guard_name() {
         return 'cmf';
+    }
+
+    /**
+     * User provider name
+     * @return string
+     */
+    static public function auth_user_provider_name() {
+        return 'peskyorm';
     }
 
     /**
