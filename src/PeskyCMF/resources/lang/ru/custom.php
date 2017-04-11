@@ -221,6 +221,7 @@ $dictionary = [
                     'id' => 'ID',
                     'parent_id' => 'ID родительской страницы',
                     'type' => 'Тип',
+                    'title' => 'Название',
                     'comment' => 'Комментарий',
                     'url_alias' => 'Относительный URL',
                     'page_code' => 'Текстовый ID',

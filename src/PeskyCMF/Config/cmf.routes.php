@@ -70,11 +70,6 @@ Route::group(
     ],
     function () {
 
-        Route::get('ckeditor/config.js', [
-            'as' => 'cmf_ckeditor_config_js',
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getCkeditorConfigJs'
-        ]);
-
         Route::post('ckeditor/upload/image', [
             'as' => 'cmf_ckeditor_upload_image',
             'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@ckeditorUploadImage'
@@ -117,28 +112,22 @@ Route::group(
                     return view('cmf::page.about');
                 });
 
-                Route::get('page/{page}.html', [
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getPage'
-                ]);
+                Route::get('page/{page}.html', CmfConfig::getPrimary()->cmf_general_controller_class() . '@getPage')
+                    ->where('page', '^.*(?!\.html)$');
 
             }
         );
 
         // Custom Pages
-        Route::get('page/{page}', [
-            'as' => 'cmf_page',
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp'
-        ]);
+        Route::get('page/{page}',  CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp')
+            ->name('cmf_page')
+            ->where('page', '^.*(?!\.html)$');
 
         // Switch locales
-        Route::get('switch_locale/{locale}', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@switchLocale'
-        ]);
+        Route::get('switch_locale/{locale}', CmfConfig::getPrimary()->cmf_general_controller_class() . '@switchLocale');
 
         // Clean cache
-        Route::get('cache/clean', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@cleanCache'
-        ]);
+        Route::get('cache/clean', CmfConfig::getPrimary()->cmf_general_controller_class() . '@cleanCache');
     }
 );
 

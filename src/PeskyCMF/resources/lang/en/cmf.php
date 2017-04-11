@@ -51,7 +51,8 @@ return [
                 'header' => 'Filtering rules',
                 'reset' => 'Reset filter',
                 'submit' => 'Apply filter',
-                'toggle' => 'Filters'
+                'toggle' => 'Filters',
+                'close' => 'Close',
             ],
         ],
         'bulk_actions' => [
@@ -89,8 +90,8 @@ return [
     ],
     'form' => [
         'toolbar' => [
-            'cancel' => 'Cancel',
             'close' => 'Close',
+            'cancel' => 'Cancel',
             'submit' => 'Save',
             'create' => 'Add new',
             'delete' => 'Delete'
@@ -126,7 +127,8 @@ return [
             'cancel' => 'Back',
             'edit' => 'Edit',
             'create' => 'Add new',
-            'delete' => 'Delete'
+            'delete' => 'Delete',
+            'close' => 'Close',
         ],
         'field' => [
             'bool' => [

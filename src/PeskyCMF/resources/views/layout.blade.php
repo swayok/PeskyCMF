@@ -108,7 +108,7 @@
         var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
-    <script src="/packages/cmf-vendors/jquery/jquery.min.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/jquery3/jquery.min.js" type="text/javascript"></script>
 
     <script src="/packages/cmf-vendors/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/switches/js/bootstrap-switch.min.js" type="text/javascript"></script>
@@ -120,8 +120,8 @@
     <script src="/packages/adminlte/js/app.js" type="text/javascript"></script>
 
     <script src="/packages/cmf-vendors/modernizr.custom.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/pilot.router.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/jquery.observable.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/router/page.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/router/query-parser.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/rison.object.coder.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/dotjs/doT.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/moment/moment.js" type="text/javascript"></script>
@@ -131,7 +131,7 @@
     <script src="/packages/cmf-vendors/db-query-builder/plugins/bt-selectpicker-values/plugin.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/db-query-builder/i18n/query-builder.{{ app()->getLocale() }}.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/jquery.plugins.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/jquery.form.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/jquery-form/jquery.form.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/toastr/toastr.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/base64.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/ckeditor/ckeditor.js" type="text/javascript"></script>
@@ -154,9 +154,9 @@
     <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.helpers.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.utils.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.controllers.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/scaffold/scaffold.controllers.js?_=20151008" type="text/javascript"></script>
-    <script src="/packages/cmf/js/scaffold/scaffold.manager.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.routing.js" type="text/javascript"></script>
+    {{--<script src="/packages/cmf/js/scaffold/scaffold.controllers.js?_=20151008" type="text/javascript"></script>--}}
+    <script src="/packages/cmf/js/cmf.scaffolds.js" type="text/javascript"></script>
     <script src="/packages/cmf/js/cmf.app.js" type="text/javascript"></script>
 
     @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_js_includes() as $jsPath)

@@ -1,6 +1,8 @@
-$(document).ready(function () {
+$(function () {
 
     fixAdminLte();
+
+    extendRouter();
 
     if (CmfSettings) {
         $.extend(CmfConfig, CmfSettings);
@@ -12,98 +14,80 @@ $(document).ready(function () {
 
     Utils.configureAppLibs();
 
-    Pilot.pushState = true;
-
-    var app = window.adminApp = new Pilot({
-        el: $(document.body),
-        selector:
-            'a[href^="' + CmfConfig.rootUrl + '/"],' +
-            'a[href^="' + document.location.origin + CmfConfig.rootUrl + '/"],' +
-            '[data-nav]',
-        production: !CmfConfig.isDebug,
-        basePath: CmfConfig.rootUrl,
-        useOnlyFirstMatchedRoute: true,
-        reloadable: true
-        //profile: true
-        //useHistory: true
-    });
+    page.base(CmfConfig.rootUrl);
+    page.exit(CmfRoutingHelpers.pageExitTransition);
 
     if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
-        CustomRoutes.init(app);
+        CustomRoutes.init();
     }
 
-    app
-        .route('login', '/login', CmfControllers.loginController)
-        .route('forgot_password', '/forgot_password', CmfControllers.forgotPasswordController)
-        .route('replace_password', '/replace_password/:access_key', CmfControllers.replacePasswordController)
-        .route('page', '/page/:uri*', CmfControllers.pageController)
-        .route('logout', '/logout', function (event, request) {
-            app.disableUrlChangeOnce = true;
-            Utils.showPreloader(document.body);
-            Utils.getPageWrapper().fadeOut(500);
-            document.location = request.url;
-        });
-
-    ScaffoldsManager.init(app);
-
-    app.on('404', function (event, request) {
-        if (request.path === CmfConfig.rootUrl) {
-            // only CMF knows where to redirect from root url
-            document.location = CmfConfig.rootUrl;
-            return;
-        }
-        if (CmfConfig.isDebug) {
-            console.log('No route found for: ' + request.url);
-            toastr.error('Page not found')
-        }
-        app.back(CmfConfig.rootUrl + '/login');
-    }).on('routestart', function (event, request) {
-        if (request.routeDetected && !app.disableUrlChangeOnce && request.url !== document.location.href) {
-            Pilot.setLocation(request);
-        }
-        app.disableUrlChangeOnce = false;
-        $('.modal.in').not('[data-close-on-nav="false"]').modal('hide');
-    }).on('routerender', function (event, request) {
-        Utils.highlightLinks(request.path);
-        // call custom handler if exists
-        if (typeof CustomUtils !== 'undefined' && typeof CustomUtils.highlightLinks === 'function') {
-            CustomUtils.highlightLinks.call(app, request);
-        }
+    page('*', function (request, next) {
+        request.query = qs.parse(request.querystring);
+        window.request = request;
+        next();
     });
+    page.route('/login', CmfRouteChange.authorisationPage);
+    page.route('/forgot_password', CmfRouteChange.authorisationPage);
+    page.route('/replace_password', CmfRouteChange.authorisationPage);
+    page.route('/logout', CmfRouteChange.logout, CmfRoutingHelpers.routeHandled);
+    page.route('/page/:uri*', CmfRouteChange.showPage);
 
-    window.addEventListener('popstate', function(event) {
-        if (app.ignoreDocumentHistoryPopStateOnce) {
-            app.ignoreDocumentHistoryPopStateOnce = false;
-            return;
+    page.route('/resource/:resource', CmfRouteChange.scaffoldDataGridPage);
+    page.route('/resource/:resource/details/:id', CmfRouteChange.scaffoldItemDetailsPage);
+    page.route('/resource/:resource/create', CmfRouteChange.scaffoldItemFormPage);
+    page.route('/resource/:resource/edit/:id', CmfRouteChange.scaffoldItemFormPage);
+    page.route('/resource/:resource/:id/page/:page', CmfRouteChange.scaffoldItemCustomPage);
+
+    $(document).on('click', '[data-nav]', function (event) {
+        var $btn = $(this);
+        var navigateTo = $btn.attr('data-nav');
+        var fallbackUrl = $btn.attr('data-default-url');
+        switch (navigateTo.toLowerCase()) {
+            case 'back':
+                page.back(fallbackUrl);
+                break;
+            case 'reload':
+                page.reload();
+                break;
+            case 'page':
+            default:
+                page.show(fallbackUrl ? fallbackUrl : navigateTo);
+                break;
         }
-        if (document.location.pathname.match(new RegExp('^' + CmfConfig.rootUrl + '(/|$)'))) {
-            app.nav(Pilot.getLocation());
-        } else {
-            document.location.reload();
-        }
+        event.preventDefault();
+        return false;
     });
 
     if (typeof CustomApp !== 'undefined' && typeof CustomApp.beforeStart === 'function') {
-        CustomApp.beforeStart(app);
+        CustomApp.beforeStart();
     }
 
-    app.start();
+    page.start();
 
     if (typeof CustomApp !== 'undefined' && typeof CustomApp.afterStart === 'function') {
-        CustomApp.afterStart(app);
+        CustomApp.afterStart();
     }
+
+    page.route('*', function (request, next) {
+        // handle 404 requests
+        if (!request.handled && CmfConfig.isDebug) {
+            console.error('No route found for: ' + request.canonicalPath);
+        }
+        next(); //< use default behavior (use usual redirect to requested url)
+    });
 
 });
 
 function fixAdminLte() {
     // fix sidebar/content min-height fixer
-    $.AdminLTE.layout.fix = function () {
+    /*$.AdminLTE.layout.fix = function () {
+        $('body, html, .wrapper').css('height', '100vh');
         // Get heights
-        var headerHeight = $('.main-header').outerHeight() || 0;
-        var headerLogoHeight = $('.main-header .logo').outerHeight() || 0;
-        var footerHeight = $('.main-footer').outerHeight() || 0;
+        var headerHeight = $('.main-header').outerHeight(true) || 0;
+        var headerLogoHeight = $('.main-header .logo').outerHeight(true) || 0;
+        var footerHeight = $('.main-footer').outerHeight(true) || 0;
         var windowHeight = $(window).height();
-        var sidebarHeight = $(".sidebar").outerHeight() + headerLogoHeight;
+        var sidebarHeight = $(".sidebar").outerHeight(true) + headerLogoHeight;
         var $elements = $(".content-wrapper, .right-side");
         // Set the min-height of the content and sidebar based on the the height of the document.
         if ($("body").hasClass("fixed")) {
@@ -137,4 +121,28 @@ function fixAdminLte() {
         });
     };
 
+    $.AdminLTE.layout.fix();*/
+
+}
+
+function extendRouter() {
+    /**
+     * Failsafe way to declare routes. Note: You can pass many fn
+     * @param {string} path
+     * @param {Function=} fn
+     */
+    page.route = function (path, fn) {
+        if (typeof path !== 'string') {
+            console.error('1st argument passed to page.route() must be a string. Use \'*\' if you want to apply callbacks to all routes');
+            return;
+        }
+        if (typeof fn !== 'function') {
+            console.error('2nd argument passed to page.route() for route ' + path + ' is not a funciton');
+            return;
+        }
+        page.apply(window, arguments);
+    };
+    page.reload = function () {
+        page.show(document.location.pathname + document.location.search + document.location.hash, null, true, false);
+    };
 }

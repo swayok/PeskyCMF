@@ -446,6 +446,7 @@ FormHelper.inputsDisablers.onFormDataChanged = function (form) {
 var AdminUI = {
     $el: null,
     visible: false,
+    loaded: false,
     userInfoTplSelector: '#user-panel-tpl',
     userInfoTpl: null,
     userInfoContainer: '#user-panel .info'
@@ -453,54 +454,66 @@ var AdminUI = {
 
 AdminUI.destroyUI = function () {
     var deferred = $.Deferred();
-    var wrapper = Utils.getPageWrapper();
-    wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs, function () {
-        Utils.showPreloader(wrapper);
-        if (AdminUI.$el) {
-            AdminUI.$el.detach();
-        }
-        wrapper.removeClass('with-ui').empty();
-        wrapper.show();
-        AdminUI.visible = false;
+    if (AdminUI.visible) {
+        var wrapper = Utils.getPageWrapper();
+        wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs, function () {
+            if (AdminUI.$el) {
+                AdminUI.$el.detach();
+            }
+            wrapper.removeClass('with-ui').empty();
+            wrapper.show();
+            AdminUI.visible = false;
+            deferred.resolve();
+            $(document).trigger('appui:hidden');
+        });
+    } else {
         deferred.resolve();
-        $(document).trigger('appui:hidden');
-    });
+    }
     return deferred;
 };
 
-AdminUI.showUI = function () {
+AdminUI.showUI = function (currentUrl) {
     var deferred = $.Deferred();
     var wrapper = Utils.getPageWrapper();
     if (AdminUI.visible) {
+        Utils.highlightLinks(currentUrl);
         deferred.resolve();
+    } else if (AdminUI.loaded) {
+        AdminUI.visible = true;
+        Utils.highlightLinks(currentUrl);
+        AdminUI.updateUserInfo();
+        wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
+        deferred.resolve();
+        $(document).trigger('appui:shown');
     } else {
         Utils.showPreloader(wrapper);
         $.when(
             AdminUI.loadUI(),
             wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs)
-        ).done(function (uiEl) {
-            wrapper.addClass('with-ui').empty().append(uiEl[0]);
+        ).done(function ($ui) {
+            wrapper.addClass('with-ui').empty().append($ui);
             AdminUI.visible = true;
+            Utils.highlightLinks(currentUrl);
             AdminUI.updateUserInfo();
             wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
-            Utils.hidePreloader(wrapper);
-            Utils.highlightLinks(window.adminApp.request.path);
             deferred.resolve();
             $(document).trigger('appui:shown');
-        });
+        }).fail(deferred.reject);
     }
     return deferred;
 };
 
 AdminUI.loadUI = function () {
     var deferred = $.Deferred();
-    if (!AdminUI.$el) {
+    if (!AdminUI.loaded) {
         Utils.downloadHtml(CmfConfig.uiUrl, true, false)
             .done(function (html) {
-                AdminUI.$el = $('<div class="ui-container">' + html + '</div>');
+                AdminUI.loaded = true;
+                AdminUI.$el = $('<div class="ui-container"></div>').html(html);
                 deferred.resolve(AdminUI.$el);
                 $(document).trigger('appui:loaded');
-            });
+            })
+            .fail(deferred.reject);
     } else {
         deferred.resolve(AdminUI.$el);
     }

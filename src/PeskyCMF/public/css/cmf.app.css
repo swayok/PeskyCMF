@@ -1,6 +1,6 @@
 html,
 body {
-  height: 100%;
+  height: 100% !important;
 }
 html > .modal-backdrop,
 body > .modal-backdrop {
@@ -26,12 +26,23 @@ pre.json-text {
   -o-transition: opacity 0.2s linear;
   transition: opacity 0.2s linear;
 }
+body {
+  background-color: #FFFFFF;
+  -webkit-transition: background 0.2s linear;
+  -moz-transition: background 0.2s linear;
+  -o-transition: background 0.2s linear;
+  transition: background 0.2s linear;
+}
 body.skin-red .wrapper,
 body.skin-purple .wrapper,
 body.skin-black .wrapper,
 body.skin-yellow .wrapper,
 body.skin-green .wrapper,
 body.skin-blue .wrapper {
+  -webkit-transition: background 0.2s linear;
+  -moz-transition: background 0.2s linear;
+  -o-transition: background 0.2s linear;
+  transition: background 0.2s linear;
   background-color: #FFFFFF;
 }
 body.skin-red .wrapper .main-sidebar,
@@ -51,6 +62,12 @@ body #page-wrapper {
 }
 .content-wrapper {
   min-height: calc(100vh - 51px);
+}
+.content-wrapper .content {
+  -webkit-transition: padding 0.1s linear;
+  -moz-transition: padding 0.1s linear;
+  -o-transition: padding 0.1s linear;
+  transition: padding 0.1s linear;
 }
 /* => preloaders and overlays */
 @keyframes cssload-spin {
@@ -638,6 +655,40 @@ div.dataTables_wrapper .toolbar ul.dropdown-menu a.disabled .label,
 div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
   background-color: #999999 !important;
 }
+body[data-section="resource:table"] .content-wrapper {
+  background-color: #FFFFFF;
+}
+body[data-section="resource:table"] .section-content-wrapper .content-header {
+  height: 51px;
+  background-color: #ecf0f5;
+}
+body[data-section="resource:table"] .section-content-wrapper .content {
+  padding: 0;
+}
+body[data-section="resource:table"] .section-content-wrapper .content > .row > div > .box {
+  box-shadow: none;
+  margin-bottom: 0;
+}
+body[data-section="resource:table"] .section-content-wrapper .pagination-container {
+  position: fixed;
+  left: 230px;
+  bottom: 51px;
+  height: 54px;
+  right: 0;
+  background-color: #ffffff;
+  margin: 0;
+  border-top: 1px solid #d2d6de;
+}
+.table-bordered > tr > th,
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > th,
+.table-bordered > tfoot > tr > th,
+.table-bordered > tr > td,
+.table-bordered > thead > tr > td,
+.table-bordered > tbody > tr > td,
+.table-bordered > tfoot > tr > td {
+  border-color: #ebebeb !important;
+}
 .scaffold-data-grid-container .no-items {
   text-align: center;
   font-weight: bold;
@@ -660,14 +711,24 @@ div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell {
   position: relative;
+  border-top-color: #82afbb !important;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell td.children-data-grid-cell {
+  padding-bottom: 0 !important;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell td.children-data-grid-cell:before {
+  display: none;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell td.dataTables_empty {
+  background-color: #FFFFFF;
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell:before {
   content: '';
   position: absolute;
   left: -1px;
   width: 1px;
-  top: 0;
   bottom: 0;
+  height: 5px;
   background-color: #FFFFFF;
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination {
@@ -691,6 +752,21 @@ div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-pagination .pagination > li > a {
   padding: 4px 10px 4px 10px;
   text-decoration: none;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container {
+  border-left: 10px solid #82afbb;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table,
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination {
+  border-left-color: #82afbb;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination,
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table.empty {
+  border-bottom-color: #82afbb;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table .children-data-grid-pagination,
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table .children-data-grid-table.empty {
+  border-bottom-color: transparent;
 }
 .skin-blue .sidebar-menu > li.header {
   color: #678b97;
@@ -830,6 +906,39 @@ aside.main-sidebar .sidebar-menu li .badge {
   font-weight: normal;
   display: inline-block;
 }
+#query-builder-container {
+  position: relative;
+  height: 0 !important;
+  overflow: visible;
+  z-index: 15;
+}
+#query-builder-container #query-builder {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  background-color: #ffffff;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+}
+#query-builder-container #query-builder #query-builder-content > .rules-group-container {
+  margin: 0;
+  border-radius: 0 0 0 0;
+  -moz-border-radius: 0 0 0 0;
+  -webkit-border-radius: 0 0 0 0;
+  border-width: 0;
+  border-bottom-width: 1px;
+}
+#query-builder-container #query-builder #query-builder-controls {
+  background-color: rgba(250, 240, 210, 0.5);
+  text-align: right;
+  padding: 5px;
+}
+#query-builder-container #query-builder #query-builder-controls .btn {
+  margin: 0 5px 0 5px;
+  font-size: 12px;
+}
 #query-builder {
   position: relative;
   z-index: 4;
@@ -845,21 +954,21 @@ aside.main-sidebar .sidebar-menu li .badge {
   text-align: center;
   line-height: 43px;
 }
-#query-builder.query-builder .rules-group-container {
+#query-builder .query-builder .rules-group-container {
   z-index: 1;
 }
-#query-builder.query-builder .rule-container input[type=text],
-#query-builder.query-builder .rule-container input[type=number] {
+#query-builder .query-builder .rule-container input[type=text],
+#query-builder .query-builder .rule-container input[type=number] {
   padding: 1px 1px 1px 6px;
   font-size: 13px;
   height: 26px;
 }
-#query-builder.query-builder .rule-container .bootstrap-select button,
-#query-builder.query-builder .rule-container select.form-control {
+#query-builder .query-builder .rule-container .bootstrap-select button,
+#query-builder .query-builder .rule-container select.form-control {
   font-size: 13px;
   height: 26px;
 }
-#query-builder.query-builder .rule-container .radio label {
+#query-builder .query-builder .rule-container .radio label {
   line-height: 17px;
 }
 #query-builder .rules-group-footer {
@@ -964,6 +1073,9 @@ aside.main-sidebar .sidebar-menu li .badge {
 .cke .cke_combo.cke_combo_full_width .cke_combo_button .cke_combo_text {
   width: auto !important;
 }
+.cke_screen_reader_only {
+  display: none !important;
+}
 .cke_dialog_ui_file {
   min-height: 65px !important;
 }
@@ -997,6 +1109,14 @@ aside.main-sidebar .sidebar-menu li .badge {
 .item-details-table td {
   word-break: break-all;
   word-wrap: break-word;
+}
+.item-details-table td:first-child,
+.item-details-table th:first-child {
+  border-left-width: 0;
+}
+.item-details-table td:last-child,
+.item-details-table th:last-child {
+  border-right-width: 0;
 }
 .item-details-table tbody tr.table-group {
   background-color: #efefef;
@@ -1045,4 +1165,7 @@ aside.main-sidebar .sidebar-menu li .badge {
 .item-details-table div.wysiwyg-data-insert:before {
   margin: 10px 0 10px 0;
   padding: 10px;
+}
+#scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
+  min-height: 600px !important;
 }

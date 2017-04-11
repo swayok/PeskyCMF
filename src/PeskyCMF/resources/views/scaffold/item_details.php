@@ -34,11 +34,11 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
             <?php endif; ?>
         </div>
 
-        <div class="<?php echo $hasTabs ? 'tab-content' : 'box box-primary' ?>">
+        <div class="<?php echo $hasTabs ? 'tab-content' : 'box {{? it.__modal }} br-t-n {{??}} box-primary {{?}} mn pn' ?>">
             <?php foreach ($tabs as $idx => $tabInfo) : ?>
-                <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
+                <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body mn pn'; ?>
                 <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $containerId . '-' . (string)($idx + 1) ?>">
-                    <table class="table table-striped table-bordered mn item-details-table">
+                    <table class="table table-striped table-bordered mn item-details-table br-l-n br-r-n">
                         <?php
                             $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body';
                             foreach ($tabInfo['groups'] as $groupIndex) {
@@ -94,10 +94,10 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 
 <?php View::startSection('item-detials-footer') ;?>
     <div class="row">
-        <div class="col-xs-3 text-left">
-            {{? it._modal }}
+        <div class="{{? it.__modal }} col-xs-4 {{??}} col-xs-3 {{?}} text-left">
+            {{? it.__modal }}
                 <button type="button" class="btn btn-default" data-dismiss="modal">
-                    <?php echo cmfTransGeneral('.form.toolbar.close'); ?>
+                    <?php echo cmfTransGeneral('.item_details.toolbar.close'); ?>
                 </button>
             {{??}}
                 <button type="button" class="btn btn-default" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
@@ -105,12 +105,12 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 </button>
             {{?}}
             <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
-                <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
+                <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>" {{? it.__modal }}data-hide-modal="1"{{?}}>
                     <?php echo cmfTransGeneral('.item_details.toolbar.create'); ?>
                 </a>
             <?php endif; ?>
         </div>
-        <div class="col-xs-9 text-right">
+        <div class="{{? it.__modal }} col-xs-8 {{??}} col-xs-9 {{?}} text-right">
             <?php
                 foreach ($itemDetailsConfig->getToolbarItems() as $toolbarItem) {
                     echo ' ' . preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $toolbarItem) . ' ';
@@ -125,11 +125,12 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     );
                 ?>
                 {{? !!it.___delete_allowed }}
-                <a class="btn btn-danger" href="#"
-                data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
-                data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>">
-                    <?php echo cmfTransGeneral('.item_details.toolbar.delete'); ?>
-                </a>
+                    <a class="btn btn-danger" href="#" {{? it.__modal }}data-hide-modal="1" data-reload-datagrid="1"{{?}}
+                    data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
+                    data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
+                    >
+                        <?php echo cmfTransGeneral('.item_details.toolbar.delete'); ?>
+                    </a>
                 {{?}}
             <?php endif; ?>
             <?php if ($itemDetailsConfig->isEditAllowed()) : ?>
@@ -141,9 +142,9 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     );
                 ?>
                 {{? !!it.___edit_allowed }}
-                <a class="btn btn-success" href="<?php echo $editUrl; ?>">
-                    <?php echo cmfTransGeneral('.item_details.toolbar.edit'); ?>
-                </a>
+                    <a class="btn btn-success" href="<?php echo $editUrl; ?>" {{? it.__modal }}data-hide-modal="1"{{?}}>
+                        <?php echo cmfTransGeneral('.item_details.toolbar.edit'); ?>
+                    </a>
                 {{?}}
             <?php endif; ?>
         </div>
@@ -157,9 +158,9 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
     {{##def.footer:
         <?php echo View::yieldContent('item-detials-footer'); ?>
     #}}
-    {{? it._modal }}
+    {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog <?php echo $itemDetailsConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"
@@ -185,7 +186,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
         <div class="content">
             <div class="row">
                 <div class="<?php echo $itemDetailsConfig->getCssClassesForContainer() ?>">
-                    <div class="box <?php if ($hasTabs) : ?>br-t-n<?php endif; ?>">
+                    <div class="box br-t-n">
                         <div class="box-body pn">
                             {{# def.tabsheet }}
                         </div>

@@ -71,7 +71,8 @@ class CmsAdminsTableStructure extends CmsTableStructure {
 
     private function name() {
         return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues();
+            ->disallowsNullValues()
+            ->setDefaultValue('');
     }
 
     private function ip() {

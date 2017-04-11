@@ -117,6 +117,12 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
                     include $filePath;
                 }
             });
+            \Route::group(array_diff_key($groupConfig, ['middleware' => '']), function () {
+                \Route::get('ckeditor/config.js', [
+                    'as' => 'cmf_ckeditor_config_js',
+                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getCkeditorConfigJs'
+                ]);
+            });
         }
     }
 

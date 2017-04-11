@@ -25,11 +25,10 @@ Utils.configureAjax = function () {
     });
     if (CmfConfig.isDebug) {
         $(document).ajaxComplete(function (event, xhr, settings) {
-            var request = Pilot.parseURL(settings.url);
-            console.group('Ajax: %s %s', settings.type || 'GET', request.path, xhr.status, xhr.statusText);
-            if (request.query.length) {
+            console.group('Ajax: %s %s', settings.type || 'GET', location.pathname, xhr.status, xhr.statusText);
+            if (location.search.length > 1) {
                 console.groupCollapsed('GET');
-                console.log(request.query);
+                console.log(qs.parse(location.search.slice(1)));
                 console.groupEnd();
             }
             if (settings.type === 'POST') {
@@ -37,7 +36,7 @@ Utils.configureAjax = function () {
                 if ($.isPlainObject(settings.data) || $.isArray(settings.data)) {
                     console.log(settings.data);
                 } else {
-                    console.log(Pilot.parseURL('/?' + settings.data).query);
+                    console.log(qs.parse(settings.data));
                 }
                 console.groupEnd();
             }
@@ -175,13 +174,13 @@ Utils.handleAjaxSuccess = function (json) {
         if (json.redirect) {
             switch (json.redirect) {
                 case 'back':
-                    ScaffoldsManager.app.back(json.redirect_fallback);
+                    page.back(json.redirect_fallback);
                     break;
                 case 'reload':
-                    ScaffoldsManager.app.reload();
+                    page.reload();
                     break;
                 default:
-                    ScaffoldsManager.app.nav(json.redirect);
+                    page.show(json.redirect);
             }
         }
     } catch (exc) {
@@ -209,6 +208,10 @@ Utils.hidePreloader = function (el) {
     $(el).removeClass('loading');
 };
 
+Utils.hasActivePreloader = function (el) {
+    return $(el).hasClass('has-preloader loading');
+};
+
 Utils.fadeOut = function (el, callback) {
     $(document.body).queue(function (next) {
         el.fadeOut(CmfConfig.contentChangeAnimationDurationMs, function () {
@@ -232,7 +235,7 @@ Utils.fadeIn = function (el, callback) {
 Utils.switchBodyClass = function (className, section, itemPk) {
     Utils.removeBodyClass();
     if (!!className) {
-        className = className.replace(/[^a-zA-Z0-9]+/g, '-');
+        className = className.replace(/[^a-zA-Z0-9 ]+/g, '-');
         $(document.body).addClass(className);
         Utils.bodyClass = className;
     }
@@ -246,6 +249,10 @@ Utils.switchBodyClass = function (className, section, itemPk) {
 
 Utils.getBodyClass = function () {
     return Utils.bodyClass;
+};
+
+Utils.getCurrentSectionName = function () {
+    return $(document.body).attr('data-section');
 };
 
 Utils.removeBodyClass = function () {
@@ -305,7 +312,7 @@ Utils.downloadHtml = function (url, cache, template) {
     var deferred = $.Deferred();
     url = (url[0] === '/' ? url : CmfConfig.rootUrl + '/' + url).replace(/\.html$/i, '') + '.html';
     if (!cache || !CmfCache.views[url]) {
-        return $.ajax({
+        $.ajax({
             url: url,
             cache: false,
             dataType: 'html',
@@ -318,11 +325,14 @@ Utils.downloadHtml = function (url, cache, template) {
                 CmfCache.views[url] = html;
             }
             deferred.resolve(html);
-        }).fail(Utils.handleAjaxError);
+        }).fail(function (xhr) {
+            Utils.handleAjaxError(xhr);
+            deferred.reject(xhr);
+        });
     } else {
         deferred.resolve(CmfCache.views[url]);
-        return deferred;
     }
+    return deferred;
 };
 
 Utils.getUser = function (reload) {
@@ -355,6 +365,9 @@ Utils.setUser = function (userData) {
 };
 
 Utils.highlightLinks = function (url) {
+    if (typeof url !== 'string') {
+        return;
+    }
     $('li.current-page, a.current-page, li.treeview').removeClass('current-page active');
     var $links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
     if ($links.length) {
@@ -383,10 +396,10 @@ Utils.cleanCache = function () {
 };
 
 Utils.updatePageTitleFromH1 = function ($content) {
-    var $h1 = $content && $content.length ? $content.find('h1').first() : $('#section-content h1, h1').first();
+    var $h1 = $content && $content.length ? $content.find('h1, .modal-header').first() : $('#section-content h1, h1').first();
     var defaultPageTitle = $.trim(String(CmfConfig.defaultPageTitle));
     if ($h1.length) {
-        var $pageTitle = $h1.find('.page-title');
+        var $pageTitle = $h1.find('.page-title, .modal-title');
         document.title = ($pageTitle.length ? $pageTitle.text() : $h1.text()) + (defaultPageTitle.length ? ' - ' + defaultPageTitle : '');
     } else {
         document.title = defaultPageTitle;

@@ -216,9 +216,11 @@ $dictionary = [
                 'publish at' => 'Publishing date',
             ],
             'filter' => [
-                'pages' => [
+                'cms_pages' => [
                     'id' => 'ID',
+                    'parent_id' => 'Parent page',
                     'type' => 'Type',
+                    'title' => 'Title',
                     'comment' => 'Comment',
                     'url_alias' => 'Relative URL',
                     'page_code' => 'Text ID',
@@ -232,9 +234,7 @@ $dictionary = [
                     'created_at' => 'Created',
                     'updated_at' => 'Updated',
                     'text_id' => 'Text ID',
-                    'parent_id' => 'Parent page',
-                    'title' => 'Title',
-                    'publish at' => 'Publishing date',
+                    'publish_at' => 'Publishing date',
                 ],
                 'parent' => [
                     'id' => 'Parent\'s ID',

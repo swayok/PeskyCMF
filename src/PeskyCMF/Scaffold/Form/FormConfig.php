@@ -84,6 +84,8 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /** @var array|null */
     protected $tooltips;
+    /** @var bool */
+    protected $showInDialog = false;
 
     /**
      * @param string $laravelViewPath
@@ -970,6 +972,22 @@ class FormConfig extends ScaffoldSectionConfig {
         } else {
             return $this->getScaffoldConfig()->translate('form', $suffix, $parameters);
         }
+    }
+
+    /**
+     * @param bool $useDialog
+     * @return $this
+     */
+    public function setShowAsDialog($useDialog) {
+        $this->showInDialog = (bool)$useDialog;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUsingDialog() {
+        return $this->showInDialog;
     }
 
 }

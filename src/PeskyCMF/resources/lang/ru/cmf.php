@@ -51,7 +51,8 @@ return [
                 'header' => 'Правила поиска',
                 'reset' => 'Сбросить поиск',
                 'submit' => 'Искать',
-                'toggle' => 'Фильтры'
+                'toggle' => 'Фильтры',
+                'close' => 'Закрыть'
             ],
         ],
         'bulk_actions' => [
@@ -89,6 +90,7 @@ return [
     ],
     'form' => [
         'toolbar' => [
+            'close' => 'Закрыть',
             'cancel' => 'Отмена',
             'submit' => 'Сохранить',
             'create' => 'Добавить',

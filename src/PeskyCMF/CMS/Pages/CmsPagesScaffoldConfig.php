@@ -322,13 +322,15 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 .parent()
                     .addClass('pn');
             parentIdSelect.selectpicker();
+            console.log(parentIdSelectContainer.html(), parentIdSelectContainer.find('button.dropdown-toggle'));
             parentIdSelectContainer
                 .css('height', '32px')
                 .addClass('mn')
-                .find('.bootstrap-select.form-control')
-                    .css('height', '32px')
-                    .find('button.dropdown-toggle')
-                        .addClass('br-n');
+                .find('button.dropdown-toggle')
+                    .addClass('br-n')
+                    .end()
+                .find('.dropdown-menu')
+                    .css('margin', '0 0 0 -1px');
                 
 SCRIPT;
     }

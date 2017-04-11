@@ -51,7 +51,7 @@ class KeyValueSetFormInput extends FormInput {
      * @return string
      */
     public function getKeysLabel() {
-        return $this->keysLabel ?: $this->getScaffoldSectionConfig()->translate($this, '_key');
+        return $this->keysLabel ?: $this->getScaffoldSectionConfig()->translate(null, 'input.' . $this->getNameForTranslation() . '_key');
     }
 
     /**
@@ -67,7 +67,7 @@ class KeyValueSetFormInput extends FormInput {
      * @return string
      */
     public function getValuesLabel() {
-        return $this->valuesLabel ?: $this->getScaffoldSectionConfig()->translate($this, '_value');
+        return $this->valuesLabel ?: $this->getScaffoldSectionConfig()->translate(null, 'input.' . $this->getNameForTranslation() . '_value');
     }
 
     /**

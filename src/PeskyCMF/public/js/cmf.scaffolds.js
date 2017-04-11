@@ -1,106 +1,236 @@
-var ScaffoldControllers = {
-    dataGrid: CmfView.extend({
-        getContainer: Utils.getContentContainer,
-        sigleton: true,
-        switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:table');
-        },
-        loadTemplate: function (request) {
-            return ScaffoldsManager.getDataGridTpl(request.params.resource);
-        },
-        afterRender : function (event, request) {
+var ScaffoldsManager = {
+    cacheTemplates: true
+};
 
+ScaffoldsManager.getResourceBaseUrl = function (resourceName, additionalParameter) {
+    return CmfConfig.rootUrl + '/' + CmfConfig.scaffoldApiUrlSection + '/' + ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)
+};
+
+ScaffoldsManager.buildResourceUrlSuffix = function (resourceName, additionalParameter) {
+    return resourceName + (additionalParameter ? '/' + additionalParameter : '');
+};
+
+ScaffoldsManager.isValidResourceName = function (resourceName) {
+    return typeof resourceName == 'string' && String(resourceName).match(/^[a-zA-Z_][a-zA-Z_0-9]+$/);
+};
+
+ScaffoldsManager.validateResourceName = function (resourceName, additionalParameter) {
+    if (!ScaffoldsManager.isValidResourceName(resourceName)) {
+        console.trace();
+        throw 'Invalid REST resource name: ' + resourceName;
+    }
+    if (typeof additionalParameter !== 'undefined' && typeof additionalParameter !== 'string') {
+        console.trace();
+        throw 'Additional parameter must be a string: ' + (typeof additionalParameter) + ' received';
+    }
+};
+
+ScaffoldsManager.findResourceNameInUrl = function (url) {
+    var matches = url.match(/\/resource\/([^\/]+)/i);
+    return !matches ? false : matches[0];
+};
+
+/* ============ Templates ============ */
+
+$.extend(CmfCache, {
+    rawTemplates: {},
+    compiledTemplates: {
+        itemForm: {},
+        bulkEditForm: {},
+        itemDetails: {}
+    }
+});
+
+ScaffoldsManager.loadTemplates = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var deferred = $.Deferred();
+    if (!ScaffoldsManager.cacheTemplates || !ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)) {
+        var resourceUrl = ScaffoldsManager.getResourceBaseUrl(resourceName, additionalParameter);
+        $.ajax({
+            url: resourceUrl + '/service/templates',
+            method: 'GET',
+            cache: false,
+            type: 'html'
+        }).done(function (html) {
+            ScaffoldsManager.setResourceTemplates(resourceName, additionalParameter, html);
+            deferred.resolve(resourceName, additionalParameter);
+        }).fail(Utils.handleAjaxError);
+    } else {
+        deferred.resolve(resourceName, additionalParameter);
+    }
+    return deferred;
+};
+
+ScaffoldsManager.setResourceTemplates = function (resourceName, additionalParameter, html) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var templates = $('<div id="templates">' + html + '</div>');
+    var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+    CmfCache.rawTemplates[resourceId] = {
+        datagrid: false,
+        itemForm: false,
+        bulkEditForm: false,
+        itemdetails: false
+    };
+    var dataGridTpl = templates.find('#data-grid-tpl');
+    if (dataGridTpl.length) {
+        CmfCache.rawTemplates[resourceId].datagrid = dataGridTpl.html();
+    }
+    var itemFormTpl = templates.find('#item-form-tpl');
+    if (itemFormTpl.length) {
+        CmfCache.rawTemplates[resourceId].itemForm = itemFormTpl.html();
+    }
+    var bulkEditFormTpl = templates.find('#bulk-edit-form-tpl');
+    if (bulkEditFormTpl.length) {
+        CmfCache.rawTemplates[resourceId].bulkEditForm = bulkEditFormTpl.html();
+    }
+    var itemDetailsTpl = templates.find('#item-details-tpl');
+    if (itemDetailsTpl.length) {
+        CmfCache.rawTemplates[resourceId].itemDetails = itemDetailsTpl.html();
+    }
+};
+
+ScaffoldsManager.isTemplatesLoaded = function (resourceName, additionalParameter) {
+    return !!CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)];
+};
+
+ScaffoldsManager.hasDataGridTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+    )
+};
+
+ScaffoldsManager.hasItemFormTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemForm
+    );
+};
+
+ScaffoldsManager.hasBulkEditFormTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].bulkEditForm
+    );
+};
+
+ScaffoldsManager.hasItemDetailsTemplate = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    return (
+        ScaffoldsManager.isTemplatesLoaded(resourceName, additionalParameter)
+        && CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].itemDetails
+    );
+};
+
+ScaffoldsManager.getDataGridTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        if (!ScaffoldsManager.hasDataGridTemplate(resourceName, additionalParameter)) {
+            throw 'There is no data grid template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
-    }),
-    itemForm: CmfView.extend({
-        getContainer: Utils.getContentContainer,
-        sigleton: true,
-        switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:form', request.params.id);
-        },
-        loadTemplate: function (request) {
-            return ScaffoldsManager.getItemFormTpl(request.params.resource);
-        },
-        loadData: function (request) {
-            var model = ScaffoldFormHelper.getModel(request.params.resource);
-            if (request.params.id && request.params.id !== 'create') {
-                model({id: request.params.id});
-            }
-            var deferred = $.Deferred();
-            $.when(model.fetch(), ScaffoldFormHelper.loadOptions(request.params.resource, model.get('id')))
-                .done(function (modelResponse, optionsResponse) {
-                    model.set('_options', optionsResponse);
-                    model.set('_is_creation', (!model.get('id') || String(model.get('id')).length === 0));
-                    deferred.resolve(model);
-                });
-            return deferred;
-        },
-        getData: function () {
-            return $.isObservable(this.data) ? this.data.toJSON() : this.data;
-        },
-        setData: function (data) {
-            this.data = $.isObservable(data) ? data : $.observable(data);
-            return this;
-        },
-        afterRender : function (event, request) {
-            ScaffoldActionsHelper.initActions(this.$el);
-            ScaffoldFormHelper.initForm(this.$el.find('form'), function (json, form, container) {
-                if (json._message) {
-                    toastr.success(json._message);
-                }
-                if (json.redirect) {
-                    if (json.redirect === 'reload') {
-                        window.adminApp.reload();
-                    } else {
-                        window.adminApp.nav(json.redirect);
-                    }
-                } else {
-                    window.adminApp.back(form.attr('data-back-url'));
-                }
-            });
+        deferred.resolve(
+            CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+        );
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getItemFormTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasItemFormTemplate(resourceName, additionalParameter)) {
+            throw 'There is no item form template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
         }
-    }),
-    itemDetails: CmfView.extend({
-        getContainer: Utils.getContentContainer,
-        sigleton: true,
-        switchBodyClass: function (request) {
-            Utils.switchBodyClass('resource-' + request.params.resource, 'resource:details', request.params.id);
-        },
-        loadTemplate: function (request) {
-            return ScaffoldsManager.getItemDetailsTpl(request.params.resource);
-        },
-        loadData: function (request) {
-            var model = ScaffoldFormHelper.getModel(request.params.resource);
-            model({id: request.params.id, _is_details: true});
-            return model.fetch()
-        },
-        getData: function () {
-            return $.isObservable(this.data) ? this.data.toJSON() : this.data;
-        },
-        setData: function (data) {
-            this.data = $.isObservable(data) ? data : $.observable(data);
-            return this;
-        },
-        afterRender : function (event, request) {
-            ScaffoldActionsHelper.initActions(this.$el);
-            var customInitiator = this.$el.find('.item-details-tabsheet-container').attr('data-initiator');
-            if (customInitiator && customInitiator.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
-                eval('customInitiator = ' + customInitiator);
-                if (typeof customInitiator === 'function') {
-                    customInitiator.call(this.$el);
-                }
-            }
-        }
-    }),
-    itemCustomPage: CmfControllers.pageController.extend({
-        switchBodyClass: function (request) {
-            Utils.switchBodyClass(
-                this.bodyClass || 'resource-' + request.params.resource + '-' + request.params.page,
-                'resource:page',
-                request.params.id
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemForm[resourceId]) {
+            CmfCache.compiledTemplates.itemForm[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].itemForm,
+                'Item form template for ' + resourceId
             );
         }
-    })
+        deferred.resolve(CmfCache.compiledTemplates.itemForm[resourceId]);
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getBulkEditFormTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName ,additionalParameter);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasBulkEditFormTemplate(resourceName, additionalParameter)) {
+            throw 'There is no bulk edit form template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
+        }
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.bulkEditForm[resourceId]) {
+            CmfCache.compiledTemplates.bulkEditForm[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].bulkEditForm,
+                'Bulk edit form template for ' + resourceId
+            );
+        }
+        deferred.resolve(CmfCache.compiledTemplates.bulkEditForm[resourceId]);
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getItemDetailsTpl = function (resourceName, additionalParameter) {
+    ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+    var deferred = $.Deferred();
+    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
+        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+        if (!ScaffoldsManager.hasItemDetailsTemplate(resourceName, additionalParameter)) {
+            throw 'There is no item details template for resource [' + resourceName + ']'
+                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
+        }
+        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemDetails[resourceId]) {
+            CmfCache.compiledTemplates.itemDetails[resourceId] = Utils.makeTemplateFromText(
+                CmfCache.rawTemplates[resourceId].itemDetails,
+                'Item details template for ' + resourceId
+            );
+        }
+        deferred.resolve(CmfCache.compiledTemplates.itemDetails[resourceId]);
+    });
+    return deferred;
+};
+
+ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetailsViewer) {
+    var deferred = $.Deferred();
+    if (!itemId) {
+        if (forDetailsViewer) {
+            console.error('ScaffoldsManager.getDataForItem(): itemId argument is requred when argument forDetailsViewer == true');
+            return deferred.reject();
+        } else if (!ScaffoldFormHelper.deafults[resourceName]) {
+            itemId = 'service/defaults';
+        } else {
+            return deferred.resolve(ScaffoldFormHelper.deafults[resourceName]);
+        }
+    }
+    $.ajax({
+        url: ScaffoldsManager.getResourceBaseUrl(resourceName) + '/' + itemId + '?details=' + (forDetailsViewer ? '1' : '0'),
+        method: 'GET',
+        cache: false
+    }).done(function (data) {
+        data.formUUID = Base64.encode(this.url + (new Date()).getTime());
+        if (itemId === 'service/defaults') {
+            data.isCreation = true;
+            ScaffoldFormHelper.deafults[resourceName] = data;
+        }
+        deferred.resolve(data);
+    }).fail(function (xhr) {
+        deferred.reject();
+        Utils.handleAjaxError(xhr);
+    });
+    return deferred;
 };
 
 var ScaffoldActionsHelper = {
@@ -129,14 +259,14 @@ var ScaffoldActionsHelper = {
                     });
                 break;
             case 'redirect':
-                ScaffoldsManager.app.nav($el.attr('data-url'));
+                page.show($el.attr('data-url'));
                 break;
             case 'reload':
-                ScaffoldsManager.app.reload();
+                page.reload();
                 break;
             case 'back':
                 var defaultUrl = $el.attr('data-url') || CmfConfig.rootUrl;
-                ScaffoldsManager.app.back(defaultUrl);
+                page.back(defaultUrl);
                 break;
         }
     },
@@ -202,24 +332,25 @@ var ScaffoldDataGridHelper = {
         dom: "<'row'<'col-sm-12'<'#query-builder'>>><'row'<'col-xs-12 col-md-5'<'filter-toolbar btn-toolbar text-left'>><'col-xs-12 col-md-7'<'toolbar btn-toolbar text-right'>>><'row'<'col-sm-12'tr>><'row'<'col-sm-3 hidden-xs hidden-sm'i><'col-xs-12 col-md-6'p><'col-sm-3 hidden-xs hidden-sm'l>>",
         stateSaveCallback: function (settings, state) {
             if (settings.iDraw > 1) {
-                var newUrl = window.adminApp.request.path + '?' + settings.sTableId + '=' + rison.encode_object(state);
-                window.history.pushState(null, document.title, newUrl);
-                window.adminApp.addToHistory(newUrl);
                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
+                if (state.search && state.search.search && state.search.search.length > 0) {
+                    var newUrl = window.request.canonicalPath + '?' + settings.sTableId + '=' + rison.encode_object(state);
+                    page.show(newUrl, null, false);
+                }
             }
         },
         stateLoadCallback: function (settings) {
-            if (window.adminApp.request.query[settings.sTableId]) {
+            if (window.request.query[settings.sTableId]) {
                 try {
-                    return rison.decode_object(window.adminApp.request.query[settings.sTableId]);
+                    return rison.decode_object(window.request.query[settings.sTableId]);
                 } catch (e) {
                     if (CmfConfig.isDebug) {
                         console.log('Invalid Rison object');
                     }
                 }
-            } else if (window.adminApp.request.query.filter) {
+            } else if (window.request.query.filter) {
                 try {
-                    var filters = JSON.parse(window.adminApp.request.query.filter);
+                    var filters = JSON.parse(window.request.query.filter);
                     if (filters) {
                         var search = DataGridSearchHelper.convertKeyValueFiltersToRules(filters);
                         if (search) {
@@ -262,7 +393,10 @@ var ScaffoldDataGridHelper = {
                     var $table = $(settings.nTable);
                     var $tableWrapper = $(settings.nTableWrapper);
                     $table.data('configs', mergedConfigs);
-                    ScaffoldDataGridHelper.initToolbar($tableWrapper, configs.toolbarItems, configs.filterToolbarItems);
+                    ScaffoldDataGridHelper.initToolbar($tableWrapper, configs);
+                    if (configs.queryBuilderConfig) {
+                        DataGridSearchHelper.init(configs.queryBuilderConfig, configs.defaultSearchRules, $table);
+                    }
                     ScaffoldDataGridHelper.initClickEvents($tableWrapper, $table, configs);
                     ScaffoldDataGridHelper.initRowActions($table, configs);
                     ScaffoldDataGridHelper.initMultiselect($table, $tableWrapper, configs);
@@ -277,7 +411,7 @@ var ScaffoldDataGridHelper = {
             throw 'Invalid data grid id: ' + $dataGrid
         }
     },
-    initToolbar: function ($tableWrapper, customToolbarItems, customFilterToolbarItems) {
+    initToolbar: function ($tableWrapper, configs) {
         var $toolbarEl = $tableWrapper.find('.toolbar');
         var $filterToolbar = $tableWrapper.find('.filter-toolbar');
         var $reloadBtn = $('<button class="btn btn-default" data-action="reload"></button>')
@@ -285,20 +419,39 @@ var ScaffoldDataGridHelper = {
         if ($filterToolbar.length) {
             $filterToolbar.prepend($reloadBtn);
         }
-        if ($.isArray(customFilterToolbarItems)) {
-            for (var i = 0; i < customFilterToolbarItems.length; i++) {
-                $filterToolbar.append(customFilterToolbarItems[i]);
+        if ($.isArray(configs.filterToolbarItems)) {
+            for (var i = 0; i < configs.filterToolbarItems.length; i++) {
+                $filterToolbar.append(configs.filterToolbarItems[i]);
             }
         }
         if ($toolbarEl.length) {
             if (!$filterToolbar.length) {
                 $toolbarEl.prepend($reloadBtn);
             }
-            if ($.isArray(customToolbarItems)) {
-                for (i = 0; i < customToolbarItems.length; i++) {
-                    $toolbarEl.append(customToolbarItems[i]);
+            if ($.isArray(configs.toolbarItems)) {
+                for (i = 0; i < configs.toolbarItems.length; i++) {
+                    $toolbarEl.append(configs.toolbarItems[i]);
                 }
             }
+        }
+        if (configs.stickyToolbar) {
+            // todo: test sticky data-grid toolbar
+            var $toolbarContainer = $toolbarEl.closest('.toolbar-container');
+            $toolbarContainer.affix({
+                offset: {
+                    top: function () {
+                        return (
+                            this.top = (
+                                $('header').filter('.main-header').outerHeight(true)
+                                + $('#section-content').find('> .section-content-wrapper > .content-header').outerHeight(true)
+                            )
+                        )
+                    },
+                    bottom: function () {
+                        return (this.bottom = $('footer').filter('.main-footer').outerHeight(true))
+                    }
+                }
+            })
         }
     },
     initClickEvents: function ($tableWrapper, $table, configs) {
@@ -331,8 +484,9 @@ var ScaffoldDataGridHelper = {
                                 && (
                                     json.redirect === 'back'
                                     || json.redirect === 'reload'
-                                    || json.redirect === ScaffoldsManager.app.activeRequest.href
-                                    || json.redirect === ScaffoldsManager.app.activeRequest.path
+                                    // todo: restore this
+                                    // || json.redirect === ScaffoldsManager.app.activeRequest.href
+                                    // || json.redirect === ScaffoldsManager.app.activeRequest.path
                                 )
                             ) {
                                 api.ajax.reload();
@@ -364,7 +518,7 @@ var ScaffoldDataGridHelper = {
                 ) {
                     var data = api.row($(this)).data();
                     if (data) {
-                        ScaffoldsManager.app.nav(configs.doubleClickUrl(api.row($(this)).data()));
+                        page.show(configs.doubleClickUrl(api.row($(this)).data()));
                     }
                 }
                 return false;
@@ -623,12 +777,14 @@ var ScaffoldDataGridHelper = {
                                 var $subTable = $(settings.nTable);
                                 var $subTableWrapper = $(settings.nTableWrapper);
                                 $subTableWrapper
-                                    .addClass('pl10')
+                                    .addClass('children-data-grid-table-container')
                                     .parent()
                                         .addClass('pn pb5 children-data-grid-cell')
                                         .closest('tr')
                                             .addClass('children-data-grid-row');
-                                $subTable.data('configs', configs);
+                                $subTable
+                                    .data('configs', configs)
+                                    .addClass('children-data-grid-table');
                                 ScaffoldDataGridHelper.initClickEvents($subTableWrapper, $subTable, configs);
                                 ScaffoldDataGridHelper.initRowActions($subTable, configs);
                                 ScaffoldDataGridHelper.initNestedView($subTable, $subTableWrapper, subTableConfigs, tableOuterHtml);
@@ -639,9 +795,11 @@ var ScaffoldDataGridHelper = {
                                 if ($(settings.nTable).dataTable().api().page.info().recordsTotal === 0) {
                                     $subTableWrapper.find('thead').hide();
                                     $subTableWrapper.find('.children-data-grid-pagination').hide();
+                                    $subTable.addClass('empty');
                                 } else {
                                     $subTableWrapper.find('thead').show();
                                     $subTableWrapper.find('.children-data-grid-pagination').show();
+                                    $subTable.removeClass('empty');
                                 }
                             });
                     } else {
@@ -669,7 +827,8 @@ var ScaffoldDataGridHelper = {
 };
 
 var DataGridSearchHelper = {
-    container: '#query-builder',
+    id: 'query-builder',
+    containerId: 'query-builder-container',
     defaultConfig: {
         plugins: ['bt-tooltip-errors', 'bt-checkbox', 'bt-selectpicker', 'bt-selectpicker-values'],
         allow_empty: true
@@ -687,8 +846,10 @@ var DataGridSearchHelper = {
     },
     init: function (config, defaultRules, $dataGrid) {
         if (config && config.filters && config.filters.length > 0) {
-            var $builder = $(DataGridSearchHelper.container);
+            var $builder = $('#' + DataGridSearchHelper.id);
             $builder.prepend('<h4>' + DataGridSearchHelper.locale.header + '</h4>');
+            var $builderContent = $('<div></div>').attr('id' , DataGridSearchHelper.id + '-content');
+            $builder.append($builderContent);
             var tableApi = $dataGrid.dataTable().api();
             for (var i in config.filters) {
                 if (
@@ -698,39 +859,41 @@ var DataGridSearchHelper = {
                     config.filters[i].color = 'primary';
                 }
             }
-            var builderConfig = {};
-            if ($.isArray(defaultRules)) {
+            var builderConfig = {rules: []};
+            if ($.isArray(defaultRules) && defaultRules.length) {
                 builderConfig = {rules: defaultRules};
             } else if (defaultRules.rules) {
                 builderConfig = $.extend({}, defaultRules);
             }
             builderConfig = $.extend(builderConfig, DataGridSearchHelper.defaultConfig, config);
-            $builder.queryBuilder(builderConfig);
+            $builderContent.queryBuilder(builderConfig);
             try {
                 var currentSearch = JSON.parse(tableApi.search());
                 var decoded = DataGridSearchHelper.decodeRulesForDataTable(
                     currentSearch,
                     DataGridSearchHelper.getFieldNameToFilterIdMap(config.filters)
                 );
-                if (decoded.rules && decoded.rules.length) {
-                    $builder.queryBuilder('setRules', decoded);
+                if ($.isPlainObject(decoded) && $.isArray(decoded.rules)) {
+                    $builderContent.queryBuilder('setRules', decoded);
                 } else {
-                    $builder.queryBuilder('reset');
+                    $builderContent.queryBuilder('setRules', builderConfig.rules);
                 }
-            } catch (ignore) {}
+            } catch (ignore) {
+                console.warn('invalid filter rules: ' + tableApi.search());
+            }
             var $runFilteringBtn = $('<button class="btn btn-success" type="button"></button>')
                 .text(DataGridSearchHelper.locale.submit);
             $runFilteringBtn.on('click', function () {
                 // clean empty filters
-                $builder.find('.rule-container').each(function () {
-                    var model = $builder.queryBuilder('getModel', $(this));
+                $builderContent.find('.rule-container').each(function () {
+                    var model = $builderContent.queryBuilder('getModel', $(this));
                     if (model && !model.filter) {
                         model.drop();
                     }
                 });
                 // clean empty filter groups
-                $builder.find('.rules-group-container').each(function () {
-                    var group = $builder.queryBuilder('getModel', $(this));
+                $builderContent.find('.rules-group-container').each(function () {
+                    var group = $builderContent.queryBuilder('getModel', $(this));
                     if (group && group.length() <= 0 && !group.isRoot()) {
                         var parentGroup = group.parent;
                         group.drop();
@@ -741,71 +904,99 @@ var DataGridSearchHelper = {
                         }
                     }
                 });
-                if ($builder.queryBuilder('validate')) {
-                    var rules = $builder.queryBuilder('getRules');
+                if ($builderContent.queryBuilder('validate')) {
+                    var rules = $builderContent.queryBuilder('getRules');
                     var encoded;
                     if (!rules.rules) {
                         // empty rules set
-                        $builder.queryBuilder('reset');
+                        $builderContent.queryBuilder('reset');
                         encoded = DataGridSearchHelper.encodeRulesForDataTable(DataGridSearchHelper.emptyRules)
-                    } else if ($builder.queryBuilder('validate')) {
+                    } else if ($builderContent.queryBuilder('validate')) {
                         encoded = DataGridSearchHelper.encodeRulesForDataTable(rules);
                     }
                     tableApi.search(encoded).draw();
                 }
             });
-            var $resetFilteringBtn = $('<button class="btn btn-danger" type="button"></button>')
+            var $resetFilteringBtnInToolbar = $('<button class="btn btn-danger" type="button"></button>')
                 .text(DataGridSearchHelper.locale.reset);
-            $resetFilteringBtn.on('click', function () {
-                $builder.queryBuilder('reset');
-                if (defaultRules) {
-                    $builder.queryBuilder('setRules', defaultRules);
-                }
-            });
+            $resetFilteringBtnInToolbar
+                .hide()
+                .on('click', function () {
+                    $builderContent.queryBuilder('reset');
+                    $builderContent.queryBuilder('setRules', builderConfig.rules);
+                });
+            var $resetFilteringBtnInFilter = $resetFilteringBtnInToolbar.clone(true).show();
             var $toolbar = $builder
                 .closest('.dataTables_wrapper')
                 .find('.filter-toolbar');
-            if (!config.is_opened) {
+            if (config.is_opened) {
+                $resetFilteringBtnInToolbar.show();
+                $toolbar
+                    .append($runFilteringBtn)
+                    .append($resetFilteringBtnInToolbar);
+            } else {
                 var $counterBadge = $('<span class="counter label label-success ml10"></span>');
                 var $filterToggleButton = $('<button class="btn btn-default" type="button"></button>')
                     .text(DataGridSearchHelper.locale.toggle)
                     .append($counterBadge)
                     .attr('data-toggle','collapse')
-                    .attr('data-target', '#' + $builder[0].id);
+                    .attr('data-target', '#' + DataGridSearchHelper.id);
+                $builder.addClass('collapse');
                 var changeCountInBadge = function () {
-                    var rules = $builder.queryBuilder('getRules');
+                    var rules = $builderContent.queryBuilder('getRules');
                     var count = DataGridSearchHelper.countRules(rules);
                     if (count) {
                         $counterBadge.text(count).show();
+                        $resetFilteringBtnInToolbar.show();
                     } else {
                         $counterBadge.hide();
                     }
                 };
                 changeCountInBadge();
-                $runFilteringBtn.on('click', function () {
-                    changeCountInBadge();
-                });
-                $runFilteringBtn.hide();
-                $resetFilteringBtn.hide();
-                $filterToggleButton.on('click', function () {
-                    $filterToggleButton.toggleClass('active');
-                    if ($filterToggleButton.hasClass('active')) {
-                        $runFilteringBtn.show();
-                        $resetFilteringBtn.show();
-                    } else {
-                        $runFilteringBtn.hide();
-                        $resetFilteringBtn.hide();
-                    }
-                });
-                $builder.addClass('collapse');
+                $runFilteringBtn
+                    .on('click', function () {
+                        changeCountInBadge();
+                        $filterToggleButton.click();
+                    })
+                    .hide();
+                $filterToggleButton
+                    .on('click', function () {
+                        $filterToggleButton.toggleClass('active');
+                        if ($filterToggleButton.hasClass('active')) {
+                            $runFilteringBtn.show();
+                            if (DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules')) > 0) {
+                                $resetFilteringBtnInToolbar.show();
+                            }
+                        } else {
+                            $runFilteringBtn.hide();
+                            if (DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules')) === 0) {
+                                $resetFilteringBtnInToolbar.hide();
+                            }
+                        }
+                    });
                 $toolbar.append($filterToggleButton);
+                var $filterCloseButton = $('<button type="button" class="btn btn-default btn-sm">')
+                    .text(DataGridSearchHelper.locale.close)
+                    .on('click', function () {
+                        $filterToggleButton.click();
+                    });
+                $builder.append(
+                    $('<div id="query-builder-controls">')
+                        .append($filterCloseButton.addClass('pull-left'))
+                        .append($runFilteringBtn.addClass('btn-sm'))
+                        .append($resetFilteringBtnInFilter.addClass('btn-sm'))
+                );
+                $toolbar.append($resetFilteringBtnInToolbar);
             }
-            $toolbar
-                .append($runFilteringBtn)
-                .append($resetFilteringBtn);
         }
     },
     encodeRulesForDataTable: function (rules, asObject) {
+        if (!$.isPlainObject(rules)) {
+            return {
+                c: 'AND',
+                r: []
+            };
+        }
         var ret = {
             c: rules.condition || 'AND',
             r: []
@@ -834,6 +1025,9 @@ var DataGridSearchHelper = {
         return map;
     },
     decodeRulesForDataTable: function (rules, fieldNameTofilterIdMap) {
+        if (!rules || !$.isArray(rules.r)) {
+            return null;
+        }
         var ret = {
             condition: rules.c,
             rules: []
@@ -841,7 +1035,10 @@ var DataGridSearchHelper = {
         for (var i = 0; i < rules.r.length; i++) {
             var rule = rules.r[i];
             if (rule.c) {
-                ret.rules.push(DataGridSearchHelper.decodeRulesForDataTable(rule, fieldNameTofilterIdMap));
+                var subrules = DataGridSearchHelper.decodeRulesForDataTable(rule, fieldNameTofilterIdMap);
+                if (subrules !== null) {
+                    ret.rules.push(subrules);
+                }
             } else {
                 if (!fieldNameTofilterIdMap[rule.f]) {
                     continue;
@@ -856,6 +1053,9 @@ var DataGridSearchHelper = {
         return ret;
     },
     countRules: function (rules) {
+        if (!rules) {
+            return 0;
+        }
         rules = DataGridSearchHelper.encodeRulesForDataTable(rules, true);
         var count = 0;
         for (var i = 0; i < rules.r.length; i++) {
@@ -979,9 +1179,9 @@ var ScaffoldFormHelper = {
             toastr.error(exc);
         }
         $('.modal.in').modal('hide'); //< hide any opened modals
-        Utils.showPreloader(CmfControllerHelpers.currentContentContainer);
+        Utils.showPreloader(CmfControllerHelpers.$currentContentContainer);
         var timeout = setTimeout(function () {
-            Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+            Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
             toastr.info('Server response timed out');
         }, 20000);
         $.when(deferred, ScaffoldFormHelper.loadOptions(resourceName, 'bulk-edit'))
@@ -1092,7 +1292,7 @@ var ScaffoldFormHelper = {
             })
             .always(function () {
                 clearTimeout(timeout);
-                Utils.hidePreloader(CmfControllerHelpers.currentContentContainer);
+                Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
             });
     },
     initWysiwyg: function (textareaSelector, config) {

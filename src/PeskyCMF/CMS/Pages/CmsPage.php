@@ -40,7 +40,6 @@ use PeskyORM\ORM\RecordsSet;
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setParentId($value, $isFromDb = false)
  * @method $this    setAdminId($value, $isFromDb = false)
- * @method $this    setTextId($value, $isFromDb = false)
  * @method $this    setType($value, $isFromDb = false)
  * @method $this    setTitle($value, $isFromDb = false)
  * @method $this    setComment($value, $isFromDb = false)
