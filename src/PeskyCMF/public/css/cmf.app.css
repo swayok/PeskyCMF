@@ -63,6 +63,12 @@ body #page-wrapper {
 .content-wrapper {
   min-height: calc(100vh - 51px);
 }
+.content-wrapper .content {
+  -webkit-transition: padding 0.1s linear;
+  -moz-transition: padding 0.1s linear;
+  -o-transition: padding 0.1s linear;
+  transition: padding 0.1s linear;
+}
 /* => preloaders and overlays */
 @keyframes cssload-spin {
   100% {

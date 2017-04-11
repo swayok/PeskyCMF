@@ -73,7 +73,7 @@ $(function () {
         if (!request.handled && CmfConfig.isDebug) {
             console.error('No route found for: ' + request.canonicalPath);
         }
-        //next(); //< use default behavior (use usual redirect to requested url)
+        next(); //< use default behavior (use usual redirect to requested url)
     });
 
 });

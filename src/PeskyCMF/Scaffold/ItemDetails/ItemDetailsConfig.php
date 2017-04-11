@@ -4,7 +4,6 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyCMF\Scaffold\ValueRenderer;
 
 class ItemDetailsConfig extends ScaffoldSectionConfig {
 
@@ -20,6 +19,8 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     protected $rowsGroups = [];
     /** @var null|int */
     protected $currentRowsGroup;
+    /** @var bool */
+    protected $showInDialog = false;
 
     /**
      * @return ValueCell;
@@ -192,6 +193,22 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         } else {
             return $this->getScaffoldConfig()->translate('item_details', $suffix, $parameters);
         }
+    }
+
+    /**
+     * @param bool $useDialog
+     * @return $this
+     */
+    public function setShowAsDialog($useDialog) {
+        $this->showInDialog = (bool)$useDialog;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUsingDialog() {
+        return $this->showInDialog;
     }
 
 }

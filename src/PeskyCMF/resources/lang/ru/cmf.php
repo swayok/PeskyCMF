@@ -90,6 +90,7 @@ return [
     ],
     'form' => [
         'toolbar' => [
+            'close' => 'Закрыть',
             'cancel' => 'Отмена',
             'submit' => 'Сохранить',
             'create' => 'Добавить',

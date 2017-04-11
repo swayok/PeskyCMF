@@ -90,8 +90,8 @@ return [
     ],
     'form' => [
         'toolbar' => [
-            'cancel' => 'Cancel',
             'close' => 'Close',
+            'cancel' => 'Cancel',
             'submit' => 'Save',
             'create' => 'Add new',
             'delete' => 'Delete'

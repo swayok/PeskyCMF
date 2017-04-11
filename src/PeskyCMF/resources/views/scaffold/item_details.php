@@ -34,7 +34,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
             <?php endif; ?>
         </div>
 
-        <div class="<?php echo $hasTabs ? 'tab-content' : 'box box-primary mn pn' ?>">
+        <div class="<?php echo $hasTabs ? 'tab-content' : 'box {{? it.__modal }} br-t-n {{??}} box-primary {{?}} mn pn' ?>">
             <?php foreach ($tabs as $idx => $tabInfo) : ?>
                 <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body mn pn'; ?>
                 <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $containerId . '-' . (string)($idx + 1) ?>">
@@ -94,8 +94,8 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 
 <?php View::startSection('item-detials-footer') ;?>
     <div class="row">
-        <div class="col-xs-3 text-left">
-            {{? it._modal }}
+        <div class="{{? it.__modal }} col-xs-4 {{??}} col-xs-3 {{?}} text-left">
+            {{? it.__modal }}
                 <button type="button" class="btn btn-default" data-dismiss="modal">
                     <?php echo cmfTransGeneral('.form.toolbar.close'); ?>
                 </button>
@@ -110,7 +110,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 </a>
             <?php endif; ?>
         </div>
-        <div class="col-xs-9 text-right">
+        <div class="{{? it.__modal }} col-xs-8 {{??}} col-xs-9 {{?}} text-right">
             <?php
                 foreach ($itemDetailsConfig->getToolbarItems() as $toolbarItem) {
                     echo ' ' . preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $toolbarItem) . ' ';
@@ -157,7 +157,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
     {{##def.footer:
         <?php echo View::yieldContent('item-detials-footer'); ?>
     #}}
-    {{? it._modal }}
+    {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">

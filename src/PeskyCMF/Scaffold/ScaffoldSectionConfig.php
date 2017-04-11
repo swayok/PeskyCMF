@@ -378,7 +378,8 @@ abstract class ScaffoldSectionConfig {
             '___details_allowed' => (
                 $this->isDetailsViewerAllowed()
                 && $this->getScaffoldConfig()->isRecordDetailsAllowed($record)
-            )
+            ),
+            '__modal' => $this->isUsingDialog()
         ];
         if (!empty($virtualColumns)) {
             $recordObj = $this->getTable()->newRecord()->enableTrustModeForDbData()->fromDbData($record);
@@ -835,6 +836,13 @@ abstract class ScaffoldSectionConfig {
         }
         $this->jsInitiator = $jsFunctionName;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUsingDialog() {
+        return false;
     }
 
     /**

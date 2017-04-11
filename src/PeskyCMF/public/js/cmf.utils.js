@@ -251,6 +251,10 @@ Utils.getBodyClass = function () {
     return Utils.bodyClass;
 };
 
+Utils.getCurrentSectionName = function () {
+    return $(document.body).attr('data-section');
+};
+
 Utils.removeBodyClass = function () {
     if (Utils.bodyClass) {
         $(document.body).removeClass(Utils.bodyClass);
@@ -392,10 +396,10 @@ Utils.cleanCache = function () {
 };
 
 Utils.updatePageTitleFromH1 = function ($content) {
-    var $h1 = $content && $content.length ? $content.find('h1').first() : $('#section-content h1, h1').first();
+    var $h1 = $content && $content.length ? $content.find('h1, .modal-header').first() : $('#section-content h1, h1').first();
     var defaultPageTitle = $.trim(String(CmfConfig.defaultPageTitle));
     if ($h1.length) {
-        var $pageTitle = $h1.find('.page-title');
+        var $pageTitle = $h1.find('.page-title, .modal-title');
         document.title = ($pageTitle.length ? $pageTitle.text() : $h1.text()) + (defaultPageTitle.length ? ' - ' + defaultPageTitle : '');
     } else {
         document.title = defaultPageTitle;

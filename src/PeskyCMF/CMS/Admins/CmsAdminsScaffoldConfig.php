@@ -43,6 +43,7 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createItemDetailsConfig() {
         return parent::createItemDetailsConfig()
             ->readRelations(['ParentAdmin'])
+            ->setShowAsDialog(true)
             ->setValueCells([
                 'id',
                 'email',
