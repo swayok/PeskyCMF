@@ -25,11 +25,17 @@ Utils.configureAjax = function () {
     });
     if (CmfConfig.isDebug) {
         $(document).ajaxComplete(function (event, xhr, settings) {
-            console.group('Ajax: %s %s', settings.type || 'GET', location.pathname, xhr.status, xhr.statusText);
-            if (location.search.length > 1) {
-                console.groupCollapsed('GET');
-                console.log(qs.parse(location.search.slice(1)));
-                console.groupEnd();
+            var path = settings.url.replace(/\?.*$/, '');
+            var query = settings.url.replace(/^.*\?(.*)$/, '$1');
+            console.group('Ajax: %s %s', settings.type || 'GET', path, xhr.status, xhr.statusText);
+            if (query.length > 0) {
+                var queryData = $.extend(qs.parse(query), (settings.type !== 'GET' ? {} : (settings.data || {})));
+                delete queryData._; //< remove anticache argument
+                if (!$.isEmptyObject(queryData)) {
+                    console.groupCollapsed('GET');
+                    console.log();
+                    console.groupEnd();
+                }
             }
             if (settings.type === 'POST') {
                 console.groupCollapsed('POST');
