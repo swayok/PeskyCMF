@@ -335,6 +335,14 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     };
                 }
             <?php endif; ?>
+            <?php foreach ($gridColumnsConfigs as $columnConfig) : ?>
+                <?php if ($columnConfig->hasCustomWidth()) : ?>
+                    dataTablesConfig.columnDefs.push({
+                        targets: <?php echo (int)$columnConfig->getPosition(); ?>,
+                        width: <?php echo (int)$columnConfig->getWidth(); ?>
+                    });
+                <?php endif; ?>
+            <?php endforeach; ?>
             <?php if (!empty($dblClickUrl)): ?>
                 dataTablesConfig.doubleClickUrl = Utils.makeTemplateFromText(
                     '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%i', '{{= it.$2 }}', $dblClickUrl)); ?>',

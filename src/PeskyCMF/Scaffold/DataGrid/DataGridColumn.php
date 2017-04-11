@@ -18,6 +18,11 @@ class DataGridColumn extends RenderableValueViewer {
     protected $isVisible = true;
 
     /**
+     * @var null|int
+     */
+    protected $columnWidth = null;
+
+    /**
      * @return boolean
      */
     public function isSortable() {
@@ -71,6 +76,32 @@ class DataGridColumn extends RenderableValueViewer {
     public function invisible() {
         $this->isVisible = false;
         return $this;
+    }
+
+    /**
+     * @param string $width - 100, 100px, 25%. No units means that width is in pixels: 100 == 100px
+     * @return $this
+     */
+    public function setWidth($width) {
+        if (!preg_match('%^\d+\s*(px|\%|)$%i', $width)) {
+            throw new \InvalidArgumentException('$width argument must be in pixels (ex: 100px or 100) or percents (ex: 25%)');
+        }
+        $this->columnWidth = is_numeric($width) ? $width . 'px' : $width;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasCustomWidth() {
+        return !empty($this->columnWidth);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getWidth() {
+        return $this->columnWidth;
     }
 
     /**

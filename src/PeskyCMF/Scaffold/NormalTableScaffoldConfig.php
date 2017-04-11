@@ -44,7 +44,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
             if (!empty($config['column']) && !is_numeric($config['column'])) {
                 if ($config['column'] instanceof DbExpr) {
-                    $conditions['ORDER'][] = DbExpr::create($config['column']->get() . ' ' . $config['dir']);
+                    $conditions['ORDER'][] = DbExpr::create($config['column']->get() . ' ' . $config['dir'], false);
                 } else {
                     $conditions['ORDER'][$config['column']] = $config['dir'];
                 }

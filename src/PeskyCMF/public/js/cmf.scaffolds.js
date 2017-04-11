@@ -936,19 +936,21 @@ var DataGridSearchHelper = {
             }
             builderConfig = $.extend(builderConfig, DataGridSearchHelper.defaultConfig, config);
             $builderContent.queryBuilder(builderConfig);
-            try {
-                var currentSearch = JSON.parse(tableApi.search());
-                var decoded = DataGridSearchHelper.decodeRulesForDataTable(
-                    currentSearch,
-                    DataGridSearchHelper.getFieldNameToFilterIdMap(config.filters)
-                );
-                if ($.isPlainObject(decoded) && $.isArray(decoded.rules)) {
-                    $builderContent.queryBuilder('setRules', decoded);
-                } else {
-                    $builderContent.queryBuilder('setRules', builderConfig.rules);
+            if (tableApi.search().length) {
+                try {
+                    var currentSearch = JSON.parse(tableApi.search());
+                    var decoded = DataGridSearchHelper.decodeRulesForDataTable(
+                        currentSearch,
+                        DataGridSearchHelper.getFieldNameToFilterIdMap(config.filters)
+                    );
+                    if ($.isPlainObject(decoded) && $.isArray(decoded.rules)) {
+                        $builderContent.queryBuilder('setRules', decoded);
+                    } else {
+                        $builderContent.queryBuilder('setRules', builderConfig.rules);
+                    }
+                } catch (ignore) {
+                    console.warn('invalid filter rules: ' + tableApi.search());
                 }
-            } catch (ignore) {
-                console.warn('invalid filter rules: ' + tableApi.search());
             }
             var $runFilteringBtn = $('<button class="btn btn-success" type="button"></button>')
                 .text(DataGridSearchHelper.locale.submit);
