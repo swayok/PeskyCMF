@@ -67,7 +67,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             <div class="col-xs-6 text-center">
             <?php echo $ifEdit; ?>
                 <?php if ($formConfig->isCreateAllowed()) : ?>
-                    <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>" {{? it.__modal }}data-hide-modal="1"{{?}}>
+                    <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
                         <?php echo cmfTransGeneral('.form.toolbar.create'); ?>
                     </a>
                 <?php endif; ?>
@@ -80,9 +80,10 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                         );
                     ?>
                     {{? !!it.___delete_allowed }}
-                    <a class="btn btn-danger" href="#" {{? it.__modal }}data-hide-modal="1" data-reload-datagrid="1"{{?}}
+                    <a class="btn btn-danger" href="#"
                     data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
                     data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
+                    data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid"
                     >
                         <?php echo cmfTransGeneral('.form.toolbar.delete'); ?>
                     </a>

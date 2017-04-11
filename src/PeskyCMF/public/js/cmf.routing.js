@@ -1,16 +1,23 @@
 var CmfRoutingHelpers = {
+    lastNonModalPageInfo: null,
+    $currentContentContainer: Utils.getPageWrapper(),
+    $currentContent: null,
     pageExitTransition: function (request, next) {
         Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
+        if (!CmfRoutingHelpers.lastNonModalUrl || !CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+            CmfRoutingHelpers.lastNonModalPageInfo = {
+                url: location.pathname + location.search + location.hash,
+                page_title: document.title
+            };
+        }
         next();
     },
     routeHandled: function (request, next) {
         request.handled = true;
         next();
     },
-    $currentContentContainer: Utils.getPageWrapper(),
-    $currentContent: null,
     setCurrentContentContainer: function ($el) {
-        if (!CmfRoutingHelpers.$currentContentContainer.is($el)) {
+        if (!CmfRoutingHelpers.$currentContentContainer || !CmfRoutingHelpers.$currentContentContainer.is($el)) {
             if (Utils.hasActivePreloader(CmfRoutingHelpers.$currentContentContainer)) {
                 Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
                 Utils.showPreloader($el);
@@ -71,6 +78,19 @@ var CmfRoutingHelpers = {
         return deferred;
     },
     initModalAndContent: function ($modal) {
+        var deferred = $.Deferred();
+        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+            CmfRoutingHelpers.$currentContent.attr('data-ignore-back', '1');
+            CmfRoutingHelpers.$currentContent.on('hidden.bs.modal', function () {
+                CmfRoutingHelpers.initModalAndContent($modal).done(function () {
+                    deferred.resolve($modal);
+                });
+            });
+            CmfRoutingHelpers.$currentContent.modal('hide');
+            return deferred;
+        }
+        var $prevContentContainer = CmfRoutingHelpers.$currentContentContainer;
+        var $prevContent = CmfRoutingHelpers.$currentContent;
         $modal
             .modal({
                 backdrop: 'static',
@@ -78,10 +98,30 @@ var CmfRoutingHelpers = {
             })
             .on('hidden.bs.modal', function () {
                 $modal.remove();
-                page.back();
+                CmfRoutingHelpers.$currentContent = $prevContent;
+                CmfRoutingHelpers.setCurrentContentContainer($prevContentContainer);
+                if ($modal.attr('data-ignore-back') !== '1') {
+                    if (CmfRoutingHelpers.lastNonModalPageInfo) {
+                        page.show(CmfRoutingHelpers.lastNonModalPageInfo.url, null, false);
+                        document.title = CmfRoutingHelpers.lastNonModalPageInfo.page_title;
+                    } else {
+                        page.back();
+                    }
+                }
+            })
+            .on('show.bs.modal', function () {
+                CmfRoutingHelpers.$currentContent = $modal;
+                CmfRoutingHelpers.setCurrentContentContainer($modal.find('.modal-dialog'));
+                Utils.updatePageTitleFromH1($modal);
             });
-        Utils.updatePageTitleFromH1($modal);
         $(document.body).append($modal);
+        return deferred.resolve();
+    },
+    closeCurrentModalAndReloadDataGrid: function () {
+        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+            CmfRoutingHelpers.$currentContent.modal('hide');
+            ScaffoldDataGridHelper.reloadCurrentDataGrid();
+        }
     }
 };
 
@@ -112,9 +152,7 @@ CmfRouteChange.authorisationPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
-            if (CmfRoutingHelpers.$currentContentContainer) {
-                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-            }
+            Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             CmfRoutingHelpers.routeHandled(request, next);
         });
 };
@@ -142,9 +180,7 @@ CmfRouteChange.showPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
-            if (CmfRoutingHelpers.$currentContentContainer) {
-                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-            }
+            Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             CmfRoutingHelpers.routeHandled(request, next);
         });
 };
@@ -167,9 +203,7 @@ CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
-            if (CmfRoutingHelpers.$currentContentContainer) {
-                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-            }
+            Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             CmfRoutingHelpers.routeHandled(request, next);
         });
 };
@@ -201,9 +235,7 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
                 CmfRoutingHelpers.routeHandled(request, next);
             })
             .fail(function () {
-                if (CmfRoutingHelpers.$currentContentContainer) {
-                    Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-                }
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
                 CmfRoutingHelpers.routeHandled(request, next);
             });
     }
@@ -230,14 +262,15 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
                     var $modal = $content.find('.modal');
-                    CmfRoutingHelpers.initModalAndContent($modal);
-                    initContent($modal);
-                    $modal.modal('show');
-                    $(document.body).attr('data-modal-opened', '1');
+                    CmfRoutingHelpers
+                        .initModalAndContent($modal)
+                        .done(function () {
+                            initContent($modal);
+                            $modal.modal('show');
+                            $(document.body).attr('data-modal-opened', '1');
+                        });
                 }
-                if (CmfRoutingHelpers.$currentContentContainer) {
-                    Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-                }
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             } else {
                 data.__modal = false;
                 CmfRoutingHelpers
@@ -256,9 +289,7 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
-            if (CmfRoutingHelpers.$currentContentContainer) {
-                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-            }
+            Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             CmfRoutingHelpers.routeHandled(request, next);
         });
 };
@@ -297,9 +328,8 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
                         } else {
                             if (isModal) {
                                 $content
-                                    .off('hidden.bs.modal')
+                                    .attr('data-ignore-back', '1')
                                     .on('hidden.bs.modal', function () {
-                                        $modal.remove();
                                         page.show(json.redirect);
                                     })
                                     .modal('hide');
@@ -319,27 +349,26 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
                     }
                 });
             };
+            data._options = options;
+            data._is_creation = !itemId;
             if (data.__modal && Utils.getCurrentSectionName() === 'resource:table') {
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
                     var $modal = $content.find('.modal');
-                    CmfRoutingHelpers.initModalAndContent($modal);
-                    initContent($modal, true);
-                    $modal.modal('show');
-                    $(document.body).attr('data-modal-opened', '1');
+                    CmfRoutingHelpers
+                        .initModalAndContent($modal)
+                        .done(function () {
+                            initContent($modal, true);
+                            $modal.modal('show');
+                            $(document.body).attr('data-modal-opened', '1');
+                        });
                 }
-                if (CmfRoutingHelpers.$currentContentContainer) {
-                    Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-                }
+                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             } else {
                 data.__modal = false;
                 CmfRoutingHelpers
                     .setCurrentContent(
-                        function () {
-                            data._options = options;
-                            data._is_creation = !itemId;
-                            return dotJsTpl(data);
-                        },
+                        dotJsTpl(data),
                         Utils.getContentContainer()
                     ).done(function ($content) {
                         Utils.switchBodyClass(
@@ -353,9 +382,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
-            if (CmfRoutingHelpers.$currentContentContainer) {
-                Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-            }
+            Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
             CmfRoutingHelpers.routeHandled(request, next);
         });
 };

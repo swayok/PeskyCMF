@@ -207,15 +207,19 @@ Utils.handleMissingContainerError = function () {
 };
 
 Utils.showPreloader = function (el) {
-    $(el).addClass('has-preloader loading');
+    if (el) {
+        $(el).addClass('has-preloader loading');
+    }
 };
 
 Utils.hidePreloader = function (el) {
-    $(el).removeClass('loading');
+    if (el) {
+        $(el).removeClass('loading');
+    }
 };
 
 Utils.hasActivePreloader = function (el) {
-    return $(el).hasClass('has-preloader loading');
+    return el && $(el).hasClass('has-preloader loading');
 };
 
 Utils.fadeOut = function (el, callback) {

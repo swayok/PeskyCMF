@@ -105,7 +105,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 </button>
             {{?}}
             <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
-                <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>" {{? it.__modal }}data-hide-modal="1"{{?}}>
+                <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
                     <?php echo cmfTransGeneral('.item_details.toolbar.create'); ?>
                 </a>
             <?php endif; ?>
@@ -125,9 +125,10 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     );
                 ?>
                 {{? !!it.___delete_allowed }}
-                    <a class="btn btn-danger" href="#" {{? it.__modal }}data-hide-modal="1" data-reload-datagrid="1"{{?}}
+                    <a class="btn btn-danger" href="#"
                     data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
                     data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
+                    data-on-success="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid"
                     >
                         <?php echo cmfTransGeneral('.item_details.toolbar.delete'); ?>
                     </a>
@@ -142,7 +143,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     );
                 ?>
                 {{? !!it.___edit_allowed }}
-                    <a class="btn btn-success" href="<?php echo $editUrl; ?>" {{? it.__modal }}data-hide-modal="1"{{?}}>
+                    <a class="btn btn-success" href="<?php echo $editUrl; ?>">
                         <?php echo cmfTransGeneral('.item_details.toolbar.edit'); ?>
                     </a>
                 {{?}}

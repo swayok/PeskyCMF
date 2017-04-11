@@ -248,11 +248,11 @@ var ScaffoldActionsHelper = {
         } else {
             $container.find('[data-action]').on('click tap', clickHandler);
         }
-        if ($container.hasClass('modal')) {
+        /*if ($container.hasClass('modal')) {
             var closeModalHandler = function () {
                 $container.modal('hide');
             };
-            var reloadDataGridHandeler = function () {
+            var reloadDataGridHandler = function () {
                 ScaffoldDataGridHelper.reloadCurrentDataGrid();
             };
             if (useLiveEvents) {
@@ -264,7 +264,7 @@ var ScaffoldActionsHelper = {
                     })
                     .on('click', 'a[data-reload-datagrid="1"], button[data-reload-datagrid="1"]', function (event) {
                         if (!$(this).attr('data-action')) {
-                            reloadDataGridHandeler(event);
+                            reloadDataGridHandler(event);
                         }
                     });
             } else {
@@ -275,9 +275,9 @@ var ScaffoldActionsHelper = {
                 $container
                     .find('a[data-reload-datagrid="1"], button[data-reload-datagrid="1"]')
                         .not('[data-action]')
-                        .on('click', reloadDataGridHandeler);
+                        .on('click', reloadDataGridHandler);
             }
-        }
+        }*/
     },
     beforeDataActionHandling: function (el, container) {
         var callbackRet = null;
