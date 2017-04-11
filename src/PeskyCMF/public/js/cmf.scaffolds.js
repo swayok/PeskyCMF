@@ -279,7 +279,23 @@ var ScaffoldActionsHelper = {
             }
         }
     },
+    beforeDataActionHandling: function (el, container) {
+        var callbackRet = null;
+        var callback = $(el).attr('data-before-action');
+        if (callback) {
+            if (callback.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
+                eval('callback = ' + callback);
+                if (typeof callback === 'function') {
+                    callbackRet = callback($(el));
+                }
+            }
+        }
+        return callbackRet === false ? false : true;
+    },
     handleDataAction: function (el, container) {
+        if (ScaffoldActionsHelper.beforeDataActionHandling(el, container) === false) {
+            return;
+        }
         var $el = $(el);
         var $container = $(container);
         var action = String($el.attr('data-action')).toLowerCase();
@@ -526,9 +542,13 @@ var ScaffoldDataGridHelper = {
     initClickEvents: function ($tableWrapper, $table, configs) {
         var api = $table.dataTable().api();
         $tableWrapper.on('click tap', '[data-action]', function (event) {
+            event.preventDefault();
             var $el = $(this);
             if ($el.hasClass('disabled')) {
-                return;
+                return false;
+            }
+            if (ScaffoldActionsHelper.beforeDataActionHandling($el, $table) === false) {
+                return false;
             }
             var action = String($el.attr('data-action')).toLowerCase();
             switch (action) {
@@ -574,6 +594,7 @@ var ScaffoldDataGridHelper = {
         });
         if (configs && configs.doubleClickUrl) {
             $table.on('dblclick dbltap', 'tbody tr', function (event) {
+                event.preventDefault();
                 var targetTagName =  event.target.tagName;
                 if (targetTagName === 'I' || targetTagName === 'SPAN') {
                     // usually this is icon or text iside <a> or <button>

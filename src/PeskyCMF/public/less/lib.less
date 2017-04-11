@@ -78,6 +78,14 @@
     transform: @translate;
 }
 
+.transform-scale(@ratio) {
+  -webkit-transform: scale(@ratio);
+     -moz-transform: scale(@ratio);
+      -ms-transform: scale(@ratio);
+       -o-transform: scale(@ratio);
+          transform: scale(@ratio);
+}
+
 .transform-origin (@origins) {
     -webkit-transform-origin: @origins;
     -o-transform-origin: @origins;

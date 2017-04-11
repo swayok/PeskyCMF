@@ -134,18 +134,25 @@ body {
 
     &:after {
         content: '';
+        .preloader();
         position: absolute;
         z-index: 51;
         top: 50%;
         left: 50%;
-        margin: -25px 0 0 -25px;
+        margin: 0;
+        width: 0;
+        height: 0;
+        border-width: 0;
 
-        .preloader();
         ._fade-out;
 
         @transitions:
             opacity @transitionDuration linear,
-            left @transitionDuration linear;
+            left @transitionDuration linear,
+            margin @transitionDuration/2 linear,
+            width @transitionDuration/2 linear,
+            height @transitionDuration/2 linear,
+            border @transitionDuration/2 linear;
         .transition(@transitions);
 
         .preloader-pause;
@@ -170,8 +177,9 @@ body {
 
     &.loading {
         &:after {
+            .preloader();
+            margin: -25px 0 0 -25px;
             ._fade-in;
-            top: 50%;
 
             .preloader-play;
         }
@@ -393,6 +401,8 @@ div.dataTables_wrapper {
 
         &:after {
             ._fade-in;
+            .preloader;
+            margin: -25px 0 0 -25px;
             .preloader-play;
         }
     }

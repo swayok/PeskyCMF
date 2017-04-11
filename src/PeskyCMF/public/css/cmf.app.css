@@ -121,11 +121,6 @@ body #page-wrapper {
 }
 .has-preloader:after {
   content: '';
-  position: absolute;
-  z-index: 51;
-  top: 50%;
-  left: 50%;
-  margin: -25px 0 0 -25px;
   width: 50px;
   height: 50px;
   border: 3px solid #000000;
@@ -137,12 +132,20 @@ body #page-wrapper {
   -ms-animation: cssload-spin 725ms infinite linear;
   -webkit-animation: cssload-spin 725ms infinite linear;
   -moz-animation: cssload-spin 725ms infinite linear;
+  position: absolute;
+  z-index: 51;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  width: 0;
+  height: 0;
+  border-width: 0;
   opacity: 0;
   filter: alpha(opacity=0);
-  -webkit-transition: opacity 0.2s linear, left 0.2s linear;
-  -moz-transition: opacity 0.2s linear, left 0.2s linear;
-  -o-transition: opacity 0.2s linear, left 0.2s linear;
-  transition: opacity 0.2s linear, left 0.2s linear;
+  -webkit-transition: opacity 0.2s linear, left 0.2s linear, margin 0.1s linear, width 0.1s linear, height 0.1s linear, border 0.1s linear;
+  -moz-transition: opacity 0.2s linear, left 0.2s linear, margin 0.1s linear, width 0.1s linear, height 0.1s linear, border 0.1s linear;
+  -o-transition: opacity 0.2s linear, left 0.2s linear, margin 0.1s linear, width 0.1s linear, height 0.1s linear, border 0.1s linear;
+  transition: opacity 0.2s linear, left 0.2s linear, margin 0.1s linear, width 0.1s linear, height 0.1s linear, border 0.1s linear;
   -webkit-animation-play-state: paused;
   animation-play-state: paused;
 }
@@ -161,9 +164,20 @@ body #page-wrapper {
   height: 100vh;
 }
 .has-preloader.loading:after {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #000000;
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  animation: cssload-spin 725ms infinite linear;
+  -o-animation: cssload-spin 725ms infinite linear;
+  -ms-animation: cssload-spin 725ms infinite linear;
+  -webkit-animation: cssload-spin 725ms infinite linear;
+  -moz-animation: cssload-spin 725ms infinite linear;
+  margin: -25px 0 0 -25px;
   opacity: 1;
   filter: alpha(opacity=100);
-  top: 50%;
   -webkit-animation-play-state: running;
   animation-play-state: running;
 }
@@ -361,11 +375,6 @@ div.dataTables_wrapper div.dataTables_processing:before {
 }
 div.dataTables_wrapper div.dataTables_processing:after {
   content: '';
-  position: absolute;
-  z-index: 51;
-  top: 50%;
-  left: 50%;
-  margin: -25px 0 0 -25px;
   width: 50px;
   height: 50px;
   border: 3px solid #000000;
@@ -377,12 +386,20 @@ div.dataTables_wrapper div.dataTables_processing:after {
   -ms-animation: cssload-spin 725ms infinite linear;
   -webkit-animation: cssload-spin 725ms infinite linear;
   -moz-animation: cssload-spin 725ms infinite linear;
+  position: absolute;
+  z-index: 51;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  width: 0;
+  height: 0;
+  border-width: 0;
   opacity: 0;
   filter: alpha(opacity=0);
-  -webkit-transition: opacity 0.2s linear, left 0.2s linear;
-  -moz-transition: opacity 0.2s linear, left 0.2s linear;
-  -o-transition: opacity 0.2s linear, left 0.2s linear;
-  transition: opacity 0.2s linear, left 0.2s linear;
+  -webkit-transition: opacity 0.2s linear, left 0.2s linear, margin 0.1s linear, width 0.1s linear, height 0.1s linear, border 0.1s linear;
+  -moz-transition: opacity 0.2s linear, left 0.2s linear, margin 0.1s linear, width 0.1s linear, height 0.1s linear, border 0.1s linear;
+  -o-transition: opacity 0.2s linear, left 0.2s linear, margin 0.1s linear, width 0.1s linear, height 0.1s linear, border 0.1s linear;
+  transition: opacity 0.2s linear, left 0.2s linear, margin 0.1s linear, width 0.1s linear, height 0.1s linear, border 0.1s linear;
   -webkit-animation-play-state: paused;
   animation-play-state: paused;
 }
@@ -401,9 +418,20 @@ div.dataTables_wrapper div.dataTables_processing.overlay:before {
   height: 100vh;
 }
 div.dataTables_wrapper div.dataTables_processing.loading:after {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #000000;
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  animation: cssload-spin 725ms infinite linear;
+  -o-animation: cssload-spin 725ms infinite linear;
+  -ms-animation: cssload-spin 725ms infinite linear;
+  -webkit-animation: cssload-spin 725ms infinite linear;
+  -moz-animation: cssload-spin 725ms infinite linear;
+  margin: -25px 0 0 -25px;
   opacity: 1;
   filter: alpha(opacity=100);
-  top: 50%;
   -webkit-animation-play-state: running;
   animation-play-state: running;
 }
@@ -431,6 +459,18 @@ div.dataTables_wrapper div.dataTables_processing:before {
 div.dataTables_wrapper div.dataTables_processing:after {
   opacity: 1;
   filter: alpha(opacity=100);
+  width: 50px;
+  height: 50px;
+  border: 3px solid #000000;
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  animation: cssload-spin 725ms infinite linear;
+  -o-animation: cssload-spin 725ms infinite linear;
+  -ms-animation: cssload-spin 725ms infinite linear;
+  -webkit-animation: cssload-spin 725ms infinite linear;
+  -moz-animation: cssload-spin 725ms infinite linear;
+  margin: -25px 0 0 -25px;
   -webkit-animation-play-state: running;
   animation-play-state: running;
 }
