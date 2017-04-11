@@ -33,7 +33,7 @@ Utils.configureAjax = function () {
                 delete queryData._; //< remove anticache argument
                 if (!$.isEmptyObject(queryData)) {
                     console.groupCollapsed('GET');
-                    console.log();
+                    console.log(queryData);
                     console.groupEnd();
                 }
             }
