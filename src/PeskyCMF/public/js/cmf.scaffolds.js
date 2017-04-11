@@ -234,39 +234,90 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
 };
 
 var ScaffoldActionsHelper = {
+    makeResourceBodyClass: function (resourceName) {
+        return 'resource-' + resourceName;
+    },
     initActions: function (container, useLiveEvents) {
+        var $container = $(container);
+        var clickHandler = function (event) {
+            ScaffoldActionsHelper.handleDataAction(this, $container);
+            return false;
+        };
         if (useLiveEvents) {
-            $(container).on('click tap', '[data-action]', function (event) {
-                ScaffoldActionsHelper.handleDataAction(this, container);
-                return false;
-            });
+            $container.on('click tap', '[data-action]', clickHandler);
         } else {
-            $(container).find('[data-action]').on('click tap', function (event) {
-                ScaffoldActionsHelper.handleDataAction(this, container);
-                return false;
-            });
+            $container.find('[data-action]').on('click tap', clickHandler);
+        }
+        if ($container.hasClass('modal')) {
+            var closeModalHandler = function () {
+                $container.modal('hide');
+            };
+            var reloadDataGridHandeler = function () {
+                ScaffoldDataGridHelper.reloadCurrentDataGrid();
+            };
+            if (useLiveEvents) {
+                $container
+                    .on('click', 'a[data-close-modal="1"], button[data-close-modal="1"]', function (event) {
+                        if (!$(this).attr('data-action')) {
+                            closeModalHandler(event);
+                        }
+                    })
+                    .on('click', 'a[data-reload-datagrid="1"], button[data-reload-datagrid="1"]', function (event) {
+                        if (!$(this).attr('data-action')) {
+                            reloadDataGridHandeler(event);
+                        }
+                    });
+            } else {
+                $container
+                    .find('a[data-close-modal="1"], button[data-close-modal="1"]')
+                        .not('[data-action]')
+                        .on('click', closeModalHandler);
+                $container
+                    .find('a[data-reload-datagrid="1"], button[data-reload-datagrid="1"]')
+                        .not('[data-action]')
+                        .on('click', reloadDataGridHandeler);
+            }
         }
     },
     handleDataAction: function (el, container) {
         var $el = $(el);
+        var $container = $(container);
         var action = String($el.attr('data-action')).toLowerCase();
+        var isModal = $container.hasClass('modal');
         switch (action) {
             case 'request':
-                Utils.showPreloader(container);
+                Utils.showPreloader($container);
                 ScaffoldActionsHelper.handleRequestAction($el, ScaffoldActionsHelper.onSuccess)
+                    .done(function () {
+                        if (isModal) {
+                            if ($el.attr('data-close-modal') === '1') {
+                                $container.modal('hide');
+                            }
+                            if ($el.attr('data-reload-datagrid') === '1') {
+                                ScaffoldDataGridHelper.reloadCurrentDataGrid();
+                            }
+                        }
+                    })
                     .always(function () {
-                        Utils.hidePreloader(container);
+                        Utils.hidePreloader($container);
                     });
                 break;
             case 'redirect':
+                if (isModal) {
+                    $container.modal('hide');
+                }
                 page.show($el.attr('data-url'));
                 break;
             case 'reload':
                 page.reload();
                 break;
             case 'back':
-                var defaultUrl = $el.attr('data-url') || CmfConfig.rootUrl;
-                page.back(defaultUrl);
+                if (isModal) {
+                    $container.modal('hide');
+                } else {
+                    var defaultUrl = $el.attr('data-url') || CmfConfig.rootUrl;
+                    page.back(defaultUrl);
+                }
                 break;
         }
     },
@@ -366,6 +417,24 @@ var ScaffoldDataGridHelper = {
 
             }
             return {};
+        }
+    },
+    $currentDataGrid: null,
+    setCurrentDataGrid: function ($table) {
+        ScaffoldDataGridHelper.$currentDataGrid = $table;
+    },
+    getCurrentDataGrid: function () {
+        if (ScaffoldDataGridHelper.$currentDataGrid && !document.contains(ScaffoldDataGridHelper.$currentDataGrid[0])) {
+            ScaffoldDataGridHelper.$currentDataGrid = null;
+        }
+        return ScaffoldDataGridHelper.$currentDataGrid;
+    },
+    getCurrentDataGridApi: function () {
+        return ScaffoldDataGridHelper.getCurrentDataGrid() ? ScaffoldDataGridHelper.$currentDataGrid.dataTable().api() : null;
+    },
+    reloadCurrentDataGrid: function () {
+        if (ScaffoldDataGridHelper.getCurrentDataGrid()) {
+            ScaffoldDataGridHelper.getCurrentDataGridApi().ajax.reload();
         }
     },
     init: function (dataGrid, configs) {

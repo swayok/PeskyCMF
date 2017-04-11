@@ -1,6 +1,5 @@
 var CmfRoutingHelpers = {
     pageExitTransition: function (request, next) {
-        console.log('outro');
         Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
         next();
     },
@@ -70,6 +69,19 @@ var CmfRoutingHelpers = {
             switchContent($el, deferred);
         }
         return deferred;
+    },
+    initModalAndContent: function ($modal) {
+        $modal
+            .modal({
+                backdrop: 'static',
+                show: false
+            })
+            .on('hidden.bs.modal', function () {
+                $modal.remove();
+                page.back();
+            });
+        Utils.updatePageTitleFromH1($modal);
+        $(document.body).append($modal);
     }
 };
 
@@ -147,7 +159,7 @@ CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
                 .setCurrentContent(html, Utils.getContentContainer())
                 .done(function () {
                     Utils.switchBodyClass(
-                        'resource-' + request.params.resource + '-page-' + request.params.page,
+                        ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource) + ' resource-page-' + request.params.page,
                         'resource:page',
                         request.params.id
                     );
@@ -163,7 +175,7 @@ CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
 };
 
 CmfRouteChange.scaffoldDataGridPage = function (request, next) {
-    var bodyClass = 'resource-' + request.params.resource;
+    var bodyClass = ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource);
     var $body = $(document.body);
     if (
         $body.attr('data-modal-opened') === '1'
@@ -215,19 +227,11 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                 }
             };
             if (data.__modal && Utils.getCurrentSectionName() === 'resource:table') {
-                var $content = CmfRoutingHelpers.wrapContent(dotJsTpl(data));
+                var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
-                    var $modal = $content.find('.modal').modal({
-                        backdrop: 'static',
-                        show: false
-                    });
-                    $(document.body).append($modal);
-                    $modal.on('hidden.bs.modal', function () {
-                        $modal.remove();
-                        page.back();
-                    });
+                    var $modal = $content.find('.modal');
+                    CmfRoutingHelpers.initModalAndContent($modal);
                     initContent($modal);
-                    Utils.updatePageTitleFromH1($modal);
                     $modal.modal('show');
                     $(document.body).attr('data-modal-opened', '1');
                 }
@@ -242,7 +246,7 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                         Utils.getContentContainer()
                     ).done(function ($content) {
                         Utils.switchBodyClass(
-                            'resource-' + request.params.resource,
+                            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
                             'resource:page',
                             request.params.id
                         );
@@ -268,36 +272,84 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
             AdminUI.showUI(request.canonicalPath)
         )
         .done(function (dotJsTpl, data, options) {
-            CmfRoutingHelpers
-                .setCurrentContent(
-                    function () {
-                        data._options = options;
-                        data._is_creation = !itemId;
-                        return dotJsTpl(data);
-                    },
-                    Utils.getContentContainer()
-                ).done(function ($content) {
-                    Utils.switchBodyClass(
-                        'resource-' + request.params.resource,
-                        'resource:form',
-                        itemId
-                    );
-                    ScaffoldActionsHelper.initActions($content);
-                    ScaffoldFormHelper.initForm($content.find('form'), function (json, $form) {
-                        if (json._message) {
-                            toastr.success(json._message);
-                        }
-                        if (json.redirect) {
-                            if (json.redirect === 'reload') {
+            var initContent = function ($content, isModal) {
+                ScaffoldActionsHelper.initActions($content, false);
+                ScaffoldFormHelper.initForm($content.find('form'), function (json, $form) {
+                    if (json._message) {
+                        toastr.success(json._message);
+                    }
+                    if (json.redirect) {
+                        if (json.redirect === 'reload') {
+                            if (isModal) {
+                                Utils.showPreloader($content);
+                                ScaffoldsManager.getResourceItemData(request.params.resource, itemId, false)
+                                    .done(function (data) {
+                                        var $newContent = $('<div></div>').html(dotJsTpl(data));
+                                        $content.html('').append($newContent.find('.modal-content'));
+                                        initContent($content, true);
+                                    })
+                                    .always(function () {
+                                        Utils.hidePreloader($content);
+                                    })
+                            } else {
                                 page.reload();
+                            }
+                        } else {
+                            if (isModal) {
+                                $content
+                                    .off('hidden.bs.modal')
+                                    .on('hidden.bs.modal', function () {
+                                        $modal.remove();
+                                        page.show(json.redirect);
+                                    })
+                                    .modal('hide');
                             } else {
                                 page.show(json.redirect);
                             }
+                        }
+                    } else {
+                        if (isModal) {
+                            $content.modal('hide');
                         } else {
                             page.back($form.attr('data-back-url'));
                         }
-                    });
+                    }
+                    if (isModal) {
+                        ScaffoldDataGridHelper.reloadCurrentDataGrid();
+                    }
                 });
+            };
+            if (data.__modal && Utils.getCurrentSectionName() === 'resource:table') {
+                var $content = $('<div></div>').html(dotJsTpl(data));
+                if ($content !== false) {
+                    var $modal = $content.find('.modal');
+                    CmfRoutingHelpers.initModalAndContent($modal);
+                    initContent($modal, true);
+                    $modal.modal('show');
+                    $(document.body).attr('data-modal-opened', '1');
+                }
+                if (CmfRoutingHelpers.$currentContentContainer) {
+                    Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
+                }
+            } else {
+                data.__modal = false;
+                CmfRoutingHelpers
+                    .setCurrentContent(
+                        function () {
+                            data._options = options;
+                            data._is_creation = !itemId;
+                            return dotJsTpl(data);
+                        },
+                        Utils.getContentContainer()
+                    ).done(function ($content) {
+                        Utils.switchBodyClass(
+                            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
+                            'resource:form',
+                            itemId
+                        );
+                        initContent($content, false);
+                    });
+            }
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
