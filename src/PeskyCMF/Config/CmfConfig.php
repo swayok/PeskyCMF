@@ -132,7 +132,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @throws \BadMethodCallException
      */
     static public function session_connection() {
-        throw new \BadMethodCallException('You must overwrite session_connection() in subclass');
+        throw new \BadMethodCallException('You must overwrite session_connection() in ' . get_called_class());
     }
 
     /**
