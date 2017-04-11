@@ -374,6 +374,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             <?php else: ?>
                 var dataGrid = <?php echo $dataTablesInitializer; ?>('#<?php echo $dataGridId; ?>', dataTablesConfig, ScaffoldDataGridHelper.init);
             <?php endif; ?>
+            ScaffoldDataGridHelper.setCurrentDataGrid(dataGrid);
         })();
     </script>
 <?php View::stopSection(); ?>

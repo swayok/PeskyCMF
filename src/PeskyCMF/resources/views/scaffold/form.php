@@ -54,14 +54,20 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
     <div class="box-footer">
         <div class="row">
             <div class="col-xs-3">
-                <a class="btn btn-default" href="#" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
-                    <?php echo cmfTransGeneral('.form.toolbar.cancel'); ?>
-                </a>
+                {{? it.__modal }}
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <?php echo cmfTransGeneral('.form.toolbar.close'); ?>
+                    </button>
+                {{??}}
+                    <button type="button" class="btn btn-default" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
+                        <?php echo cmfTransGeneral('.form.toolbar.cancel'); ?>
+                    </button>
+                {{?}}
             </div>
             <div class="col-xs-6 text-center">
             <?php echo $ifEdit; ?>
                 <?php if ($formConfig->isCreateAllowed()) : ?>
-                    <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
+                    <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>" {{? it.__modal }}data-hide-modal="1"{{?}}>
                         <?php echo cmfTransGeneral('.form.toolbar.create'); ?>
                     </a>
                 <?php endif; ?>
@@ -74,9 +80,10 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                         );
                     ?>
                     {{? !!it.___delete_allowed }}
-                    <a class="btn btn-danger" href="#"
+                    <a class="btn btn-danger" href="#" {{? it.__modal }}data-hide-modal="1" data-reload-datagrid="1"{{?}}
                     data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
-                    data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>">
+                    data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
+                    >
                         <?php echo cmfTransGeneral('.form.toolbar.delete'); ?>
                     </a>
                     {{?}}
@@ -120,79 +127,109 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
     <?php endif ?>
 <?php View::stopSection(); ?>
 
-<script type="text/html" id="item-form-tpl">
-    <?php echo view('cmf::ui.default_page_header', [
-        'header' => $ifEdit . $formConfig->translate(null, 'header_edit')
-                    . $else . $formConfig->translate(null, 'header_create')
-                    . $endIf,
-        'defaultBackUrl' => $backUrl,
-    ])->render(); ?>
-    <div class="content">
-        <div class="row">
-            <div class="<?php echo $formConfig->getCssClassesForContainer() ?>">
-                <?php
-                    $formAttributes = [
-                        'id' => $formId,
-                        'data-id-field' => $pkColName,
-                        'data-back-url' => $backUrl
-                    ];
-                    if ($formConfig->hasFiles()) {
-                        $formAttributes['enctype'] = 'multipart/form-data';
-                    }
-                    if ($formConfig->hasOptionsLoader()) {
-                        $formAttributes['data-load-options'] = '1';
-                    }
-                    if ($formConfig->hasJsInitiator()) {
-                        $formAttributes['data-initiator'] = addslashes($formConfig->getJsInitiator());
-                    }
-                    $editUrl = route('cmf_api_update_item', ['table_name' => $tableNameForRoutes, 'id' => ''], false) . '/' . $printPk;
-                    $createUrl = route('cmf_api_create_item', ['table_name' => $tableNameForRoutes], false);
-                    $formAction = $ifEdit . $editUrl . $else . $createUrl . $endIf;
-                ?>
-                <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
-                data-uuid="{{= it.formUUID }}">
-                    <?php echo $ifEdit; ?>
-                        <input type="hidden" name="_method" value="PUT">
-                        <input type="hidden" name="<?php echo $pkColName; ?>" value="<?php echo $printPk; ?>">
-                    <?php echo $endIf ?>
-                    <!-- disable chrome email & password autofill -->
-                    <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>
-                    <!-- end of autofill disabler -->
-                    <div class="nav-tabs-custom">
-                        <?php if ($hasTabs): ?>
-                            <ul class="nav nav-tabs">
-                                <?php foreach ($tabs as $idx => $tabInfo): ?>
-                                    <li class="<?php echo $idx === 0 ? 'active' : '' ?>">
-                                        <a href="#<?php echo $formId . '-' . (string)($idx + 1) ?>" data-toggle="tab" role="tab">
-                                            <?php echo empty($tabInfo['label']) ? '*' : $tabInfo['label']; ?>
-                                        </a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php endif; ?>
+<?php View::startSection('scaffold-form'); ?>
+    <?php
+        $formAttributes = [
+            'id' => $formId,
+            'data-id-field' => $pkColName,
+            'data-back-url' => $backUrl
+        ];
+        if ($formConfig->hasFiles()) {
+            $formAttributes['enctype'] = 'multipart/form-data';
+        }
+        if ($formConfig->hasOptionsLoader()) {
+            $formAttributes['data-load-options'] = '1';
+        }
+        if ($formConfig->hasJsInitiator()) {
+            $formAttributes['data-initiator'] = addslashes($formConfig->getJsInitiator());
+        }
+        $editUrl = route('cmf_api_update_item', ['table_name' => $tableNameForRoutes, 'id' => ''], false) . '/' . $printPk;
+        $createUrl = route('cmf_api_create_item', ['table_name' => $tableNameForRoutes], false);
+        $formAction = $ifEdit . $editUrl . $else . $createUrl . $endIf;
+    ?>
+    <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
+    data-uuid="{{= it.formUUID }}">
+        <?php echo $ifEdit; ?>
+            <input type="hidden" name="_method" value="PUT">
+            <input type="hidden" name="<?php echo $pkColName; ?>" value="<?php echo $printPk; ?>">
+        <?php echo $endIf ?>
+        <!-- disable chrome email & password autofill -->
+        <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>
+        <!-- end of autofill disabler -->
+        <div class="nav-tabs-custom">
+            <?php if ($hasTabs): ?>
+                <ul class="nav nav-tabs">
+                    <?php foreach ($tabs as $idx => $tabInfo): ?>
+                        <li class="<?php echo $idx === 0 ? 'active' : '' ?>">
+                            <a href="#<?php echo $formId . '-' . (string)($idx + 1) ?>" data-toggle="tab" role="tab">
+                                <?php echo empty($tabInfo['label']) ? '*' : $tabInfo['label']; ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
 
-                        <div class="<?php echo $hasTabs ? 'tab-content' : 'box box-primary' ?>">
-                            <?php foreach ($tabs as $idx => $tabInfo): ?>
-                                <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
-                                <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $formId . '-' . (string)($idx + 1) ?>">
-                                    <?php $buildInputs($tabInfo); ?>
-                                </div>
-                            <?php endforeach; ?>
-                            <?php
-                                if (!$hasTabs) {
-                                    echo View::yieldContent('scaffold-form-footer');
-                                }
-                            ?>
-                        </div>
-                        <?php
-                            if ($hasTabs) {
-                                echo View::yieldContent('scaffold-form-footer');
-                            }
-                        ?>
+            <div class="<?php echo $hasTabs ? 'tab-content' : 'box {{? it.__modal }} br-t-n {{??}} box-primary {{?}}' ?>">
+                <?php foreach ($tabs as $idx => $tabInfo): ?>
+                    <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
+                    <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $formId . '-' . (string)($idx + 1) ?>">
+                        <?php $buildInputs($tabInfo); ?>
                     </div>
-                </form>
-                <?php echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates(View::yieldContent('scaffold-form-enablers-script')); ?>
+                <?php endforeach; ?>
+                <?php if (!$hasTabs) : ?>
+                    {{# def.footer }}
+                <?php endif ?>
+            </div>
+            <?php if ($hasTabs) : ?>
+                {{# def.footer }}
+            <?php endif ?>
+        </div>
+    </form>
+    <?php echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates(View::yieldContent('scaffold-form-enablers-script')); ?>
+<?php View::stopSection(); ?>
+
+<script type="text/html" id="item-form-tpl">
+    {{##def.form:
+        <?php echo View::yieldContent('scaffold-form'); ?>
+    #}}
+    {{##def.footer:
+        <?php echo View::yieldContent('scaffold-form-footer'); ?>
+    #}}
+    {{##def.title:
+        <?php
+            echo $ifEdit . $formConfig->translate(null, 'header_edit')
+                . $else . $formConfig->translate(null, 'header_create')
+                . $endIf
+        ?>
+    #}}
+    {{? it.__modal }}
+        <div class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog <?php echo $formConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-label="<?php echo cmfTransGeneral('.form.toolbar.close'); ?>">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title">{{# def.title }}</h4>
+                    </div>
+                    <div class="modal-body pn">
+                        {{# def.form }}
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    {{??}}
+        <?php echo view('cmf::ui.default_page_header', [
+            'header' => '{{# def.title }}',
+            'defaultBackUrl' => $backUrl,
+        ])->render(); ?>
+        <div class="content">
+            <div class="row">
+                <div class="<?php echo $formConfig->getCssClassesForContainer() ?>">
+                    {{# def.form }}
+                </div>
+            </div>
+        </div>
+    {{?}}
 </script>

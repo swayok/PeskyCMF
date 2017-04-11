@@ -127,7 +127,8 @@ return [
             'cancel' => 'Back',
             'edit' => 'Edit',
             'create' => 'Add new',
-            'delete' => 'Delete'
+            'delete' => 'Delete',
+            'close' => 'Close',
         ],
         'field' => [
             'bool' => [

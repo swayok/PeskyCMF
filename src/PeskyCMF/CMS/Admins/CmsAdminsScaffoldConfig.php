@@ -68,7 +68,8 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected function createFormConfig() {
         return parent::createFormConfig()
-            ->setWidth(50)
+            ->setWidth(60)
+            ->setShowAsDialog(true)
             ->setFormInputs([
                 'email',
                 'login',

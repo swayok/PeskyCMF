@@ -97,7 +97,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
         <div class="{{? it.__modal }} col-xs-4 {{??}} col-xs-3 {{?}} text-left">
             {{? it.__modal }}
                 <button type="button" class="btn btn-default" data-dismiss="modal">
-                    <?php echo cmfTransGeneral('.form.toolbar.close'); ?>
+                    <?php echo cmfTransGeneral('.item_details.toolbar.close'); ?>
                 </button>
             {{??}}
                 <button type="button" class="btn btn-default" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
@@ -105,7 +105,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 </button>
             {{?}}
             <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
-                <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
+                <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>" {{? it.__modal }}data-hide-modal="1"{{?}}>
                     <?php echo cmfTransGeneral('.item_details.toolbar.create'); ?>
                 </a>
             <?php endif; ?>
@@ -125,11 +125,12 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     );
                 ?>
                 {{? !!it.___delete_allowed }}
-                <a class="btn btn-danger" href="#"
-                data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
-                data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>">
-                    <?php echo cmfTransGeneral('.item_details.toolbar.delete'); ?>
-                </a>
+                    <a class="btn btn-danger" href="#" {{? it.__modal }}data-hide-modal="1" data-reload-datagrid="1"{{?}}
+                    data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
+                    data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
+                    >
+                        <?php echo cmfTransGeneral('.item_details.toolbar.delete'); ?>
+                    </a>
                 {{?}}
             <?php endif; ?>
             <?php if ($itemDetailsConfig->isEditAllowed()) : ?>
@@ -141,9 +142,9 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     );
                 ?>
                 {{? !!it.___edit_allowed }}
-                <a class="btn btn-success" href="<?php echo $editUrl; ?>">
-                    <?php echo cmfTransGeneral('.item_details.toolbar.edit'); ?>
-                </a>
+                    <a class="btn btn-success" href="<?php echo $editUrl; ?>" {{? it.__modal }}data-hide-modal="1"{{?}}>
+                        <?php echo cmfTransGeneral('.item_details.toolbar.edit'); ?>
+                    </a>
                 {{?}}
             <?php endif; ?>
         </div>
@@ -159,7 +160,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
     #}}
     {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog <?php echo $itemDetailsConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"
