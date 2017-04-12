@@ -123,6 +123,11 @@ var CmfRoutingHelpers = {
             CmfRoutingHelpers.$currentContent.modal('hide');
             ScaffoldDataGridHelper.reloadCurrentDataGrid();
         }
+    },
+    closeCurrentModal: function () {
+        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+            CmfRoutingHelpers.$currentContent.modal('hide');
+        }
     }
 };
 
@@ -217,11 +222,24 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
         && Utils.getCurrentSectionName() === 'resource:table'
         && Utils.getBodyClass() === bodyClass
     ) {
-        // modal was closed
-        $body.attr('data-modal-opened', '0');
-        Utils.updatePageTitleFromH1(CmfRoutingHelpers.$currentContent);
-        Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
-        CmfRoutingHelpers.routeHandled(request, next);
+        var restoreDataGridPage = function () {
+            $body.attr('data-modal-opened', '0');
+            Utils.updatePageTitleFromH1(CmfRoutingHelpers.$currentContent);
+            Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
+            CmfRoutingHelpers.routeHandled(request, next);
+        };
+        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+            // modal was not closed (happens when "back" browser button pressed)
+            CmfRoutingHelpers.$currentContent
+                .attr('data-ignore-back', '1')
+                .on('hidden.bs.modal', function () {
+                    restoreDataGridPage();
+                })
+                .modal('hide');
+        } else {
+            // modal already closed
+            restoreDataGridPage();
+        }
     } else {
         $.when(
                 ScaffoldsManager.getDataGridTpl(request.params.resource),
