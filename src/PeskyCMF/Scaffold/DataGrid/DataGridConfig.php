@@ -452,6 +452,12 @@ class DataGridConfig extends ScaffoldSectionConfig {
     public function prepareRecords(array $records, array $virtualColumns = []) {
         foreach ($records as $idx => &$record) {
             $record = $this->prepareRecord($record, $virtualColumns);
+            if (array_get($record, '___details_allowed', false)) {
+                $record['___details_url'] = routeToCmfItemDetails(
+                    $this->getScaffoldConfig()->getTableNameForRoutes(),
+                    $record['___pk_value']
+                );
+            }
         }
         return $records;
     }

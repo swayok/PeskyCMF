@@ -209,14 +209,13 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->build();
         }
         if ($dataGridConfig->isDetailsViewerAllowed()) {
-            $url = $dblClickUrl = routeToCmfItemDetails($tableNameForRoutes, ":{$pkName}:");
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue item-details')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
                 ->setTitle(cmfTransGeneral('.datagrid.actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setDataAttr('container', '#section-content .content')
-                ->setHref($url)
+                ->setHref(':___details_url:')
                 ->build();
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
         }

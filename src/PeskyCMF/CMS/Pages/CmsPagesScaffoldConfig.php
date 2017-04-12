@@ -69,6 +69,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createItemDetailsConfig() {
         $itemDetailsConfig = parent::createItemDetailsConfig();
         $itemDetailsConfig
+            ->setShowAsDialog(true)
             ->readRelations([
                 'Parent', 'Admin', 'Texts'
             ])

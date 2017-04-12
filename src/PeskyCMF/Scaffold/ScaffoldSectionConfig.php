@@ -366,7 +366,8 @@ abstract class ScaffoldSectionConfig {
      */
     public function prepareRecord(array $record, array $virtualColumns = []) {
         /** @noinspection UnnecessaryParenthesesInspection */
-        $permissions = [
+        $pkKey = $this->getTable()->getPkColumnName();
+        $permissionsAndServiceData = [
             '___delete_allowed' => (
                 $this->isDeleteAllowed()
                 && $this->getScaffoldConfig()->isRecordDeleteAllowed($record)
@@ -379,7 +380,9 @@ abstract class ScaffoldSectionConfig {
                 $this->isDetailsViewerAllowed()
                 && $this->getScaffoldConfig()->isRecordDetailsAllowed($record)
             ),
-            '__modal' => $this->isUsingDialog()
+            '__modal' => $this->isUsingDialog(),
+            'DT_RowId' => 'item-' . preg_replace('%[^a-zA-Z0-9_-]+%', '-', $record[$pkKey]),
+            '___pk_value' => $record[$pkKey]
         ];
         if (!empty($virtualColumns)) {
             $recordObj = $this->getTable()->newRecord()->enableTrustModeForDbData()->fromDbData($record);
@@ -390,7 +393,6 @@ abstract class ScaffoldSectionConfig {
         $record = $this->modifyRawRecordData($record);
         $customData = $this->getCustomDataForRecord($record);
         $valueViewers = $this->getValueViewers();
-        $pkKey = $this->getTable()->getPkColumnName();
         // backup values
         $recordWithBackup = [];
         foreach ($record as $key => $value) {
@@ -430,7 +432,7 @@ abstract class ScaffoldSectionConfig {
         if (!empty($customData) && is_array($customData)) {
             $recordWithBackup = array_merge($recordWithBackup, $customData);
         }
-        $recordWithBackup = array_merge($recordWithBackup, $permissions);
+        $recordWithBackup = array_merge($recordWithBackup, $permissionsAndServiceData);
         return $recordWithBackup;
     }
 

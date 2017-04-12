@@ -1230,8 +1230,7 @@ aside.main-sidebar .sidebar-menu li .badge {
 .modal .item-details-modal-content button.next-item[disabled],
 .modal .item-details-modal-content button.prev-item.disabled,
 .modal .item-details-modal-content button.next-item.disabled {
-  opacity: 0;
-  filter: alpha(opacity=0);
+  display: none;
 }
 .modal .item-details-modal-content .prev-item {
   left: -50px;

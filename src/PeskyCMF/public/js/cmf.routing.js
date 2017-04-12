@@ -269,13 +269,51 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                             initContent($modal);
                             $modal.modal('show');
                             $(document.body).attr('data-modal-opened', '1');
-                            // todo: enable prev/next buttons depending on data grid row used
-                            $modal.find('button.prev-item').on('click', function () {
-                                // todo: handle "prev" button click to scroll across datagrid items
-                            });
-                            $modal.find('button.next-item').on('click', function () {
-                                // todo: handle "next" button click to scroll across datagrid items
-                            });
+                            var $datagrid = ScaffoldDataGridHelper.getCurrentDataGrid();
+                            if ($datagrid && data.DT_RowId) {
+                                var api = ScaffoldDataGridHelper.getCurrentDataGridApi();
+                                var rowIndex = api.row('#' + data.DT_RowId).index();
+                                var $prevItemBtn = $modal.find('button.prev-item');
+                                var $nextItemBtn = $modal.find('button.next-item');
+                                // enable next item button
+                                var shiftNext = 1;
+                                do {
+                                    var nextRow = api.row(rowIndex + shiftNext);
+                                    if (!nextRow.length || (nextRow.data().___details_allowed && nextRow.data().___details_url)) {
+                                        break;
+                                    }
+                                    shiftNext++;
+                                } while (nextRow.length);
+                                if (nextRow.length) {
+                                    $nextItemBtn
+                                        .prop('disabled', false)
+                                        .on('click', function () {
+                                            event.preventDefault();
+                                            $prevItemBtn.prop('disabled', true);
+                                            $nextItemBtn.prop('disabled', true);
+                                            page.show(nextRow.data().___details_url);
+                                        });
+                                }
+                                // enable prev item button
+                                var shiftPrev = 1;
+                                do {
+                                    var prevRow = api.row(rowIndex - shiftPrev);
+                                    if (!prevRow.length || (prevRow.data().___details_allowed && prevRow.data().___details_url)) {
+                                        break;
+                                    }
+                                    shiftNext++;
+                                } while (prevRow.length);
+                                if (prevRow.length) {
+                                    $prevItemBtn
+                                        .prop('disabled', false)
+                                        .on('click', function (event) {
+                                            event.preventDefault();
+                                            $prevItemBtn.prop('disabled', true);
+                                            $nextItemBtn.prop('disabled', true);
+                                            page.show(prevRow.data().___details_url);
+                                        });
+                                }
+                            }
                         });
                 }
                 Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
