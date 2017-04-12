@@ -1206,6 +1206,39 @@ aside.main-sidebar .sidebar-menu li .badge {
   margin: 10px 0 10px 0;
   padding: 10px;
 }
+.modal .item-details-modal-content button.prev-item,
+.modal .item-details-modal-content button.next-item {
+  position: absolute;
+  top: 50%;
+  color: #FFFFFF;
+  background-color: transparent;
+  border-width: 0;
+  font-size: 30px;
+  opacity: 0.4;
+  filter: alpha(opacity=40);
+  -webkit-transition: opacity 0.2s linear;
+  -moz-transition: opacity 0.2s linear;
+  -o-transition: opacity 0.2s linear;
+  transition: opacity 0.2s linear;
+}
+.modal .item-details-modal-content button.prev-item:hover,
+.modal .item-details-modal-content button.next-item:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+.modal .item-details-modal-content button.prev-item[disabled],
+.modal .item-details-modal-content button.next-item[disabled],
+.modal .item-details-modal-content button.prev-item.disabled,
+.modal .item-details-modal-content button.next-item.disabled {
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+.modal .item-details-modal-content .prev-item {
+  left: -50px;
+}
+.modal .item-details-modal-content .next-item {
+  right: -50px;
+}
 #scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
   min-height: 600px !important;
 }

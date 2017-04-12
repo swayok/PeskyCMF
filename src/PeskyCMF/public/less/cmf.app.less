@@ -1312,6 +1312,39 @@ aside.main-sidebar {
 
 }
 
+.modal .item-details-modal-content {
+
+    button.prev-item,
+    button.next-item {
+        position: absolute;
+        top: 50%;
+        color: #FFFFFF;
+        background-color: transparent;
+        border-width: 0;
+        font-size: 30px;
+        ._fade-to(0.4);
+
+        .transition(opacity 0.2s linear);
+
+        &:hover {
+            ._fade-in;
+        }
+
+        &[disabled],
+        &.disabled {
+            ._fade-out;
+        }
+    }
+
+    .prev-item {
+        left: -50px;
+    }
+
+    .next-item {
+        right: -50px;
+    }
+}
+
 #scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
     min-height: 600px !important;
 }

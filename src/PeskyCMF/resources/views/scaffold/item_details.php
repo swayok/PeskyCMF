@@ -162,7 +162,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
     {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog <?php echo $itemDetailsConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
-                <div class="modal-content">
+                <div class="modal-content item-details-modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"
                         aria-label="<?php echo cmfTransGeneral('.form.toolbar.close'); ?>">
@@ -171,7 +171,15 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                         <h4 class="modal-title"><?php echo $itemDetailsConfig->translate(null, 'header'); ?></h4>
                     </div>
                     <div class="modal-body pn">
+                        <button type="button" class="prev-item" disabled
+                        data-toggle="tooltip" title="<?php echo cmfTransGeneral('.item_details.previous_item') ?>">
+                            <i class="glyphicon glyphicon-arrow-left"></i>
+                        </button>
                         {{# def.tabsheet }}
+                        <button type="button" class="next-item" disabled
+                        data-toggle="tooltip" title="<?php echo cmfTransGeneral('.item_details.next_item') ?>">
+                            <i class="glyphicon glyphicon-arrow-right"></i>
+                        </button>
                     </div>
                     <div class="modal-footer">
                         {{# def.footer }}

@@ -206,7 +206,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
     {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog <?php echo $formConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
-                <div class="modal-content">
+                <div class="modal-content item-form-modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"
                         aria-label="<?php echo cmfTransGeneral('.form.toolbar.close'); ?>">

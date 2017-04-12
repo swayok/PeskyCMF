@@ -4,7 +4,7 @@ var CmfRoutingHelpers = {
     $currentContent: null,
     pageExitTransition: function (request, next) {
         Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
-        if (!CmfRoutingHelpers.lastNonModalUrl || !CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+        if (!CmfRoutingHelpers.lastNonModalPageInfo || !CmfRoutingHelpers.$currentContent.hasClass('modal')) {
             CmfRoutingHelpers.lastNonModalPageInfo = {
                 url: location.pathname + location.search + location.hash,
                 page_title: document.title
@@ -80,13 +80,14 @@ var CmfRoutingHelpers = {
     initModalAndContent: function ($modal) {
         var deferred = $.Deferred();
         if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
-            CmfRoutingHelpers.$currentContent.attr('data-ignore-back', '1');
-            CmfRoutingHelpers.$currentContent.on('hidden.bs.modal', function () {
-                CmfRoutingHelpers.initModalAndContent($modal).done(function () {
-                    deferred.resolve($modal);
-                });
-            });
-            CmfRoutingHelpers.$currentContent.modal('hide');
+            CmfRoutingHelpers.$currentContent
+                .attr('data-ignore-back', '1')
+                .on('hidden.bs.modal', function () {
+                    CmfRoutingHelpers.initModalAndContent($modal).done(function () {
+                        deferred.resolve($modal);
+                    });
+                })
+                .modal('hide');
             return deferred;
         }
         var $prevContentContainer = CmfRoutingHelpers.$currentContentContainer;
@@ -115,7 +116,7 @@ var CmfRoutingHelpers = {
                 Utils.updatePageTitleFromH1($modal);
             });
         $(document.body).append($modal);
-        return deferred.resolve();
+        return deferred.resolve($modal);
     },
     closeCurrentModalAndReloadDataGrid: function () {
         if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
@@ -268,6 +269,13 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                             initContent($modal);
                             $modal.modal('show');
                             $(document.body).attr('data-modal-opened', '1');
+                            // todo: enable prev/next buttons depending on data grid row used
+                            $modal.find('button.prev-item').on('click', function () {
+                                // todo: handle "prev" button click to scroll across datagrid items
+                            });
+                            $modal.find('button.next-item').on('click', function () {
+                                // todo: handle "next" button click to scroll across datagrid items
+                            });
                         });
                 }
                 Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);

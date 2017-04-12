@@ -573,9 +573,8 @@ var ScaffoldDataGridHelper = {
                                 && (
                                     json.redirect === 'back'
                                     || json.redirect === 'reload'
-                                    // todo: restore this
-                                    // || json.redirect === ScaffoldsManager.app.activeRequest.href
-                                    // || json.redirect === ScaffoldsManager.app.activeRequest.path
+                                    || json.redirect === window.request.path
+                                    || json.redirect === window.request.canonicalPath
                                 )
                             ) {
                                 api.ajax.reload();

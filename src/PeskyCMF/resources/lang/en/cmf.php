@@ -130,6 +130,8 @@ return [
             'delete' => 'Delete',
             'close' => 'Close',
         ],
+        'previous_item' => 'Previous item',
+        'next_item' => 'Next item',
         'field' => [
             'bool' => [
                 'yes' => 'Yes',
