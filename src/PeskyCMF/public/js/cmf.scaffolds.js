@@ -420,7 +420,7 @@ var ScaffoldDataGridHelper = {
                     return state;
                 } catch (e) {
                     if (CmfConfig.isDebug) {
-                        console.log('Invalid Rison object');
+                        console.warn('Invalid Rison object');
                     }
                 }
             } else if (window.request.query.filter) {
@@ -435,7 +435,7 @@ var ScaffoldDataGridHelper = {
                     }
                 } catch (e) {
                     if (CmfConfig.isDebug) {
-                        console.log('Invalid json for "filter" query arg');
+                        console.warn('Invalid json for "filter" query arg');
                     }
                 }
 
@@ -885,6 +885,7 @@ var ScaffoldDataGridHelper = {
                                 ScaffoldDataGridHelper.initClickEvents($subTableWrapper, $subTable, configs);
                                 ScaffoldDataGridHelper.initRowActions($subTable, configs);
                                 ScaffoldDataGridHelper.initNestedView($subTable, $subTableWrapper, subTableConfigs, tableOuterHtml);
+                                return false;
                             }).on('preXhr', function (event, settings) {
                                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                             }).on('draw', function (event, settings) {

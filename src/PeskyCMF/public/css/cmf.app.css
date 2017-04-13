@@ -798,11 +798,19 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table,
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination {
+  border-left-width: 1px;
+  border-right-width: 1px;
   border-left-color: #82afbb;
+  border-right-color: #82afbb;
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination,
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table.empty {
+  border-bottom-width: 1px;
   border-bottom-color: #82afbb;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table {
+  margin: 0 !important;
+  border-top-width: 0;
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table .children-data-grid-pagination,
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table .children-data-grid-table.empty {
@@ -1230,8 +1238,7 @@ aside.main-sidebar .sidebar-menu li .badge {
 .modal .item-details-modal-content button.next-item[disabled],
 .modal .item-details-modal-content button.prev-item.disabled,
 .modal .item-details-modal-content button.next-item.disabled {
-  opacity: 0;
-  filter: alpha(opacity=0);
+  display: none;
 }
 .modal .item-details-modal-content .prev-item {
   left: -50px;

@@ -160,7 +160,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
         <?php echo View::yieldContent('item-detials-footer'); ?>
     #}}
     {{? it.__modal }}
-        <div class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal fade" tabindex="-1" role="dialog" data-pk-name="<?php echo $table::getPkColumnName() ?>">
             <div class="modal-dialog <?php echo $itemDetailsConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
                 <div class="modal-content item-details-modal-content">
                     <div class="modal-header">

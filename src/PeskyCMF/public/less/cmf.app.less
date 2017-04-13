@@ -819,16 +819,22 @@ body[data-section="resource:table"] {
 
                         .children-data-grid-table,
                         .children-data-grid-pagination {
+                            border-left-width: 1px;
+                            border-right-width: 1px;
                             border-left-color: @subtable-indication-color;
+                            border-right-color: @subtable-indication-color;
                         }
 
                         .children-data-grid-pagination,
                         .children-data-grid-table.empty {
+                            border-bottom-width: 1px;
                             border-bottom-color: @subtable-indication-color;
                         }
 
 
                         .children-data-grid-table {
+                            margin: 0 !important;
+                            border-top-width: 0;
                             .children-data-grid-pagination,
                             .children-data-grid-table.empty {
                                 border-bottom-color: transparent;
@@ -1332,7 +1338,7 @@ aside.main-sidebar {
 
         &[disabled],
         &.disabled {
-            ._fade-out;
+            display: none;
         }
     }
 
