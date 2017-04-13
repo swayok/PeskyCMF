@@ -398,18 +398,26 @@ var ScaffoldDataGridHelper = {
         stateSave: true,
         dom: "<'row'<'col-sm-12'<'#query-builder'>>><'row'<'col-xs-12 col-md-5'<'filter-toolbar btn-toolbar text-left'>><'col-xs-12 col-md-7'<'toolbar btn-toolbar text-right'>>><'row'<'col-sm-12'tr>><'row'<'col-sm-3 hidden-xs hidden-sm'i><'col-xs-12 col-md-6'p><'col-sm-3 hidden-xs hidden-sm'l>>",
         stateSaveCallback: function (settings, state) {
+            var cleanedState = $.extend(true, {}, state);
+            delete cleanedState.time;
+            var encodedState = rison.encode_object(cleanedState);
+            // todo: refactor state encoder and decoder to be more compact
             if (settings.iDraw > 1) {
                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
-                if (state.search && state.search.search && state.search.search.length > 0) {
-                    var newUrl = window.request.canonicalPath + '?' + settings.sTableId + '=' + rison.encode_object(state);
+                if (encodedState !== settings.initialState) {
+                    var newUrl = window.request.canonicalPath + '?' + settings.sTableId + '=' + encodedState;
                     page.show(newUrl, null, false);
                 }
+            } else {
+                settings.initialState = encodedState;
             }
         },
         stateLoadCallback: function (settings) {
             if (window.request.query[settings.sTableId]) {
                 try {
-                    return rison.decode_object(window.request.query[settings.sTableId]);
+                    var state = rison.decode_object(window.request.query[settings.sTableId]);
+                    state.time = (new Date()).getTime();
+                    return state;
                 } catch (e) {
                     if (CmfConfig.isDebug) {
                         console.log('Invalid Rison object');
@@ -450,7 +458,7 @@ var ScaffoldDataGridHelper = {
     },
     reloadCurrentDataGrid: function () {
         if (ScaffoldDataGridHelper.getCurrentDataGrid()) {
-            ScaffoldDataGridHelper.getCurrentDataGridApi().ajax.reload();
+            ScaffoldDataGridHelper.getCurrentDataGridApi().ajax.reload(null, false);
         }
     },
     init: function (dataGrid, configs) {
@@ -553,7 +561,7 @@ var ScaffoldDataGridHelper = {
             var action = String($el.attr('data-action')).toLowerCase();
             switch (action) {
                 case 'reload':
-                    api.ajax.reload();
+                    api.ajax.reload(null, false);
                     break;
                 case 'bulk-filtered':
                     $el.data('data', {conditions: api.search()});
@@ -577,7 +585,7 @@ var ScaffoldDataGridHelper = {
                                     || json.redirect === window.request.canonicalPath
                                 )
                             ) {
-                                api.ajax.reload();
+                                api.ajax.reload(null, false);
                                 delete json.redirect;
                             }
                             ScaffoldActionsHelper.onSuccess(json);

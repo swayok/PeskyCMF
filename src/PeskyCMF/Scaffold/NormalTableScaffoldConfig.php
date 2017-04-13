@@ -15,7 +15,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $dataGridConfig = $this->getDataGridConfig();
         $dataGridFilterConfig = $this->getDataGridFilterConfig();
         $conditions = [
-            'LIMIT' => $request->query('length', $dataGridConfig->getRecordsPerPage()),
+            'LIMIT' => (int)$request->query('length', $dataGridConfig->getRecordsPerPage()),
             'OFFSET' => (int)$request->query('start', 0),
             'ORDER' => []
         ];
