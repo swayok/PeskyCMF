@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Providers;
 
+use LaravelSiteLoader\DummySiteLoader;
 use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
@@ -12,12 +13,12 @@ use PeskyCMF\Console\Commands\CmfMakeScaffold;
 class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
     /**
-     * @param \Illuminate\Contracts\Foundation\Application $app
+     * @param \Illuminate\Foundation\Application $app
      */
     public function __construct($app) {
-        $this->defaultSectionLoaderClass = config('cmf.default_site_loader');
-        $this->consoleSectionLoaderClass = config('cmf.console_site_loader');
-        $this->additionalSectionLoaderClasses = (array)config('cmf.additional_site_loaders');
+        $this->defaultSiteLoaderClass = config('cmf.default_site_loader');
+        $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
+        $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders', []);
 
         parent::__construct($app);
     }
@@ -43,8 +44,8 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
                 $this->app->register('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider');
             }
-            if (class_exists('\Barryvdh\Debugbar\ServiceProvider::class')) {
-                $this->app->register('\Barryvdh\Debugbar\ServiceProvider::class');
+            if (class_exists('\Barryvdh\Debugbar\ServiceProvider')) {
+                $this->app->register('\Barryvdh\Debugbar\ServiceProvider');
             }
         }
 
