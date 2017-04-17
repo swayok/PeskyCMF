@@ -25,6 +25,12 @@ class {{ $sectionName }}Config extends CmfConfig {
         return '{{ $urlPrefix }}';
     }
 
+    static public function routes_config_files() {
+        return [
+            base_path('routes/{{ $urlPrefix }}.php')
+        ];
+    }
+
     /**
      * Prefix to load custom views from.
      * For example

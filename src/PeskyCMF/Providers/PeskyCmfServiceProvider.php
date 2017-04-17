@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Providers;
 
-use LaravelSiteLoader\DummySiteLoader;
 use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
