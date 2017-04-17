@@ -12,7 +12,7 @@ class CmsAdminsMigration extends Migration {
             \Schema::create(CmsAdminsTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('parent_id')->nullable()->unsigned();
-                $table->string('name');
+                $table->string('name')->default('');
                 $table->string('email')->nullable();
                 $table->string('login')->nullable();
                 $table->string('password');
