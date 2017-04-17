@@ -57,7 +57,11 @@ class CmfInstall extends Command {
             File::load($abstractRecordFilePath, true, 0755, 0644)
                 ->write(\View::file($viewsPath . 'db/base_db_record.php', $dataForViews)->render());
         }
-
+        // create js, less and css files
+        $pathToPublicFiles = public_path('packages/' . $dataForViews['urlPrefix']) . '/';
+        File::save($pathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js', '');
+        File::save($pathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css', '');
+        File::save($pathToPublicFiles . 'less/' . $dataForViews['urlPrefix'] . '.custom.less', '');
         $this->line('Done');
     }
 }
