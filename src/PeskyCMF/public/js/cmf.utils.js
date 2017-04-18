@@ -419,7 +419,6 @@ Utils.updatePageTitleFromH1 = function ($content) {
 Utils.initDebuggingTools = function () {
     if (CmfConfig.isDebug) {
         var $opener = $('<button type="button" class="btn btn-xs btn-default">&nbsp;</button>')
-            .fadeOut()
             .css({
                 width: '14px',
                 cursor: 'default',
@@ -428,7 +427,9 @@ Utils.initDebuggingTools = function () {
                 margin: '0',
                 position: 'absolute',
                 top: '0',
-                right: '0'
+                right: '0',
+                opacity: '0',
+                'z-index': 50
             })
             .on('click', function () {
                 $buttons.toggle();

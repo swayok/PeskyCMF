@@ -45,13 +45,13 @@ class CmfInstall extends Command {
             ->write(\View::file($viewsPath . 'pages_controller.blade.php', $dataForViews)->render());
         // copy base db classes
         $dbFolder = Folder::load(app_path('/' . $dataForViews['dbClassesAppSubfolder']), true, 0755);
-        $abstractModelFilePath = $dbFolder->pwd() . 'AbstractTable.php';
+        $abstractModelFilePath = $dbFolder->pwd() . '/AbstractTable.php';
         $writeAbstractModelFile = !File::exist($abstractModelFilePath) || $this->confirm('AbstractTable file ' . $abstractModelFilePath . ' already exist. Overwrite?');
         if ($writeAbstractModelFile) {
             File::load($abstractModelFilePath, true, 0755, 0644)
                 ->write(\View::file($viewsPath . 'db/base_db_model.php', $dataForViews)->render());
         }
-        $abstractRecordFilePath = $dbFolder->pwd() . 'AbstractRecord.php';
+        $abstractRecordFilePath = $dbFolder->pwd() . '/AbstractRecord.php';
         $writeAbstractRecordFile = !File::exist($abstractRecordFilePath) || $this->confirm('AbstractRecord file ' . $abstractRecordFilePath . ' already exist. Overwrite?');
         if ($writeAbstractRecordFile) {
             File::load($abstractRecordFilePath, true, 0755, 0644)
@@ -59,9 +59,9 @@ class CmfInstall extends Command {
         }
         // create js, less and css files
         $pathToPublicFiles = public_path('packages/' . $dataForViews['urlPrefix']) . '/';
-        File::save($pathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js', '');
-        File::save($pathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css', '');
-        File::save($pathToPublicFiles . 'less/' . $dataForViews['urlPrefix'] . '.custom.less', '');
+        File::save($pathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js', '', 0664, 0755);
+        File::save($pathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css', '', 0664, 0755);
+        File::save($pathToPublicFiles . 'less/' . $dataForViews['urlPrefix'] . '.custom.less', '', 0664, 0755);
         $this->line('Done');
     }
 }

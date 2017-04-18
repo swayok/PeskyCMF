@@ -4,7 +4,10 @@ var CmfRoutingHelpers = {
     $currentContent: null,
     pageExitTransition: function (request, next) {
         Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
-        if (!CmfRoutingHelpers.lastNonModalPageInfo || !CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+        if (
+            !CmfRoutingHelpers.lastNonModalPageInfo
+            || (CmfRoutingHelpers.$currentContent && !CmfRoutingHelpers.$currentContent.hasClass('modal'))
+        ) {
             CmfRoutingHelpers.lastNonModalPageInfo = {
                 url: location.pathname + location.search + location.hash,
                 page_title: document.title

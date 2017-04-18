@@ -9,71 +9,95 @@ use PeskyCMF\CMS\Pages\CmsPagesScaffoldConfig;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
 use PeskyCMF\CMS\Settings\CmsSettingsScaffoldConfig;
 use PeskyCMF\CMS\Settings\CmsSettingsTable;
-use PeskyCMF\CMS\Texts\CmsCommonTextsScaffoldConfig;
-use PeskyCMF\CMS\Texts\CmsTextsForCategoriesScaffoldConfig;
-use PeskyCMF\CMS\Texts\CmsTextsForItemsScaffoldConfig;
-use PeskyCMF\CMS\Texts\CmsTextsForNewsScaffoldConfig;
-use PeskyCMF\CMS\Texts\CmsTextsForPagesScaffoldConfig;
-use PeskyCMF\CMS\Texts\CmsTextsTable;
 use PeskyCMF\Http\PeskyCmfSiteLoader;
 
 abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
 
+    protected $registerSections = [
+        'admins',
+        'pages',
+        'news',
+        'shop_categories',
+        'shop_items',
+        'text_elements',
+        'settings'
+    ];
+
     public function register() {
         parent::register();
         // register default scaffolds
-        // admins
-        $this->registerAdminsTables();
-        $this->registerAdminsScaffolds();
-        // pages
-        $this->registerPagesTables();
-        $this->registerPagesScaffolds();
-        // texts
-        $this->registerTextsElementsTables();
-        $this->registerTextElementsScaffolds();
-        // settings
-        $this->registerSettingsTables();
-        $this->registerSettingsScaffolds();
+        if (in_array('admins', $this->registerSections, true)) {
+            // admins
+            $this->registerAdminsTables();
+            $this->registerAdminsScaffolds();
+        }
+        if (count(array_intersect(['pages', 'news', 'shop_categories', 'shop_items', 'text_elements'], $this->registerSections))) {
+            // pages
+            $this->registerPagesTables();
+            $this->registerPagesScaffolds();
+            // texts
+            $this->registerTextsElementsTables();
+            $this->registerTextElementsScaffolds();
+        }
+        if (in_array('settings', $this->registerSections, true)) {
+            // settings
+            $this->registerSettingsTables();
+            $this->registerSettingsScaffolds();
+        }
     }
 
     public function boot() {
         parent::boot();
         $cmfConfig = static::getCmfConfig();
-        $cmfConfig::addMenuItem('admins', [
-            'label' => $cmfConfig::transCustom('.admins.menu_title'),
-            'url' => routeToCmfItemsTable('admins'),
-            'icon' => 'fa fa-group'
-        ]);
-        $cmfConfig::addMenuItem('pages', [
-            'label' => $cmfConfig::transCustom('.pages.menu_title'),
-            'url' => routeToCmfItemsTable('pages'),
-            'icon' => 'fa fa-file-text-o'
-        ]);
-        $cmfConfig::addMenuItem('news', [
-            'label' => $cmfConfig::transCustom('.news.menu_title'),
-            'url' => routeToCmfItemsTable('news'),
-            'icon' => 'fa fa-newspaper-o'
-        ]);
-        $cmfConfig::addMenuItem('shop_categories', [
-            'label' => $cmfConfig::transCustom('.shop_categories.menu_title'),
-            'url' => routeToCmfItemsTable('shop_categories'),
-            'icon' => 'fa fa-folder-open-o'
-        ]);
-        $cmfConfig::addMenuItem('shop_items', [
-            'label' => $cmfConfig::transCustom('.shop_items.menu_title'),
-            'url' => routeToCmfItemsTable('shop_items'),
-            'icon' => 'fa fa-files-o'
-        ]);
-        $cmfConfig::addMenuItem('text_elements', [
-            'label' => $cmfConfig::transCustom('.text_elements.menu_title'),
-            'url' => routeToCmfItemsTable('text_elements'),
-            'icon' => 'fa fa-file-code-o'
-        ]);
-        $cmfConfig::addMenuItem('settings', [
-            'label' => $cmfConfig::transCustom('.settings.menu_title'),
-            'url' => routeToCmfItemEditForm('settings', 'all'),
-            'icon' => 'glyphicon glyphicon-cog'
-        ]);
+        if (in_array('admins', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('admins', [
+                'label' => $cmfConfig::transCustom('.admins.menu_title'),
+                'url' => routeToCmfItemsTable('admins'),
+                'icon' => 'fa fa-group'
+            ]);
+        }
+        if (in_array('pages', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('pages', [
+                'label' => $cmfConfig::transCustom('.pages.menu_title'),
+                'url' => routeToCmfItemsTable('pages'),
+                'icon' => 'fa fa-file-text-o'
+            ]);
+        }
+        if (in_array('news', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('news', [
+                'label' => $cmfConfig::transCustom('.news.menu_title'),
+                'url' => routeToCmfItemsTable('news'),
+                'icon' => 'fa fa-newspaper-o'
+            ]);
+        }
+        if (in_array('shop_categories', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('shop_categories', [
+                'label' => $cmfConfig::transCustom('.shop_categories.menu_title'),
+                'url' => routeToCmfItemsTable('shop_categories'),
+                'icon' => 'fa fa-folder-open-o'
+            ]);
+        }
+        if (in_array('shop_items', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('shop_items', [
+                'label' => $cmfConfig::transCustom('.shop_items.menu_title'),
+                'url' => routeToCmfItemsTable('shop_items'),
+                'icon' => 'fa fa-files-o'
+            ]);
+        }
+        if (in_array('text_elements', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('text_elements', [
+                'label' => $cmfConfig::transCustom('.text_elements.menu_title'),
+                'url' => routeToCmfItemsTable('text_elements'),
+                'icon' => 'fa fa-file-code-o'
+            ]);
+        }
+        if (in_array('settings', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('settings', [
+                'label' => $cmfConfig::transCustom('.settings.menu_title'),
+                'url' => routeToCmfItemEditForm('settings', 'all'),
+                'icon' => 'glyphicon glyphicon-cog'
+            ]);
+        }
     }
 
     public function registerAdminsTables() {

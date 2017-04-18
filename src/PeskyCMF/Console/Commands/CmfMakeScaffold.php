@@ -94,7 +94,7 @@ class CmfMakeScaffold extends Command {
     public function handle() {
         $table = $this->getCmfConfigClass()->getTableByUnderscoredName($this->argument('table_name'));
 
-        $namespace = (new \ReflectionClass($table))->getNamespaceName();
+        $namespace = $this->getNamespaceByTable($table);
         $className = $this->getScaffoldClassName($table);
 
         $filePath = $this->getFolder($namespace) . $className . '.php';
@@ -161,6 +161,11 @@ INFO
     }
 
     protected function getBaseNamespace() {
+    }
+
+    protected function getNamespaceByTable($table) {
+        $namespace = (new \ReflectionClass($table))->getNamespaceName();
+        return preg_replace('%^PeskyCMF\\\CMS\\\%', 'App\\Db\\', $namespace);
     }
 
     protected function getFolder($namespace) {
@@ -236,7 +241,7 @@ class {$className} extends {$parentClassShort} {
     }
 }
 VIEW;
-        File::save($filePath, $contents, 0664);
+        File::save($filePath, $contents, 0664, 0755);
     }
 
     protected function makeContainsForDataGrid(TableInterface $table) {

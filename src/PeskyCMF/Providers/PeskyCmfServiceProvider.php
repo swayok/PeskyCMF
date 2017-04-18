@@ -119,7 +119,8 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         ], 'public');
 
         $this->publishes([
-            $cmfPublicDir . '/Config/cmf.config.php' => config_path('cmf.php')
+            $cmfPublicDir . '/Config/cmf.config.php' => config_path('cmf.php'),
+            $cmfPublicDir . '/Config/ru_validation_translations.php' => resource_path('lang/ru/validation.php'),
         ], 'config');
     }
 

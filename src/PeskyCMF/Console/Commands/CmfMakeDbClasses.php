@@ -197,7 +197,7 @@ class CmfMakeDbClasses extends Command {
             }
         }
         $fileContents = $builder->buildTableClass($info['namespace'], $this->getTableParentClass());
-        File::save($filePath, $fileContents, 0664);
+        File::save($filePath, $fileContents, 0664, 0755);
         $this->line("Table class created ({$filePath})");
     }
 
@@ -217,7 +217,7 @@ class CmfMakeDbClasses extends Command {
             }
         }
         $fileContents = $builder->buildRecordClass($info['namespace'], $this->getRecordParentClass());
-        File::save($filePath, $fileContents, 0664);
+        File::save($filePath, $fileContents, 0664, 0755);
         $this->line("Record class created ($filePath)");
     }
 
@@ -241,7 +241,7 @@ class CmfMakeDbClasses extends Command {
             $this->getTableStructureParentClass(),
             $this->getTraitsForTableConfig()
         );
-        File::save($filePath, $fileContents, 0664);
+        File::save($filePath, $fileContents, 0664, 0755);
         $this->line("TableStructure class created ($filePath)");
     }
 

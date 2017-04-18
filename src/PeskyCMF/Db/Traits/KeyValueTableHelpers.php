@@ -12,7 +12,7 @@ use PeskyORM\ORM\TableStructureInterface;
 use Swayok\Utils\NormalizeValue;
 
 /**
- * @method static KeyValueTableInterface|TableInterface getInstance()
+ * @method static KeyValueTableInterface|TableInterface|$this getInstance()
  * @method static TableStructureInterface getTableStructure()
  */
 trait KeyValueTableHelpers {

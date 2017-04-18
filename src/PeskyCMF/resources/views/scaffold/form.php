@@ -34,16 +34,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         $isFirstGroup = false;
         foreach ($groupInfo['inputs_names'] as $inputName) {
             $inputConfig = $formConfig->getFormInput($inputName);
-            try {
-                echo $inputConfig->render();
-            } catch (Exception $exc) {
-                echo '<div class="text-danger">' . htmlspecialchars($exc->getMessage()) . '</div>';
-                echo '<pre style="max-height: 600px; overflow: scroll; border-color: #FF0000">'
-                    . 'In file ' . $exc->getFile() . ' on line ' . $exc->getLine() . '<br>'
-                    //. print_r($exc->getTrace()[0], true)
-                    . nl2br(htmlspecialchars($exc->getTraceAsString()))
-                    . '</pre>';
-            }
+            echo $inputConfig->render();
         }
     }
     echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());
@@ -153,7 +144,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         <?php echo $ifEdit; ?>
             <input type="hidden" name="_method" value="PUT">
             <input type="hidden" name="<?php echo $pkColName; ?>" value="<?php echo $printPk; ?>">
-        <?php echo $endIf ?>
+        <?php echo $endIf; ?>
         <!-- disable chrome email & password autofill -->
         <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>
         <!-- end of autofill disabler -->
