@@ -13,9 +13,9 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
      * @param \Illuminate\Contracts\Foundation\Application $app
      */
     public function __construct($app) {
-        $this->defaultSectionLoaderClass = config('cmf.default_site_loader');
-        $this->consoleSectionLoaderClass = config('cmf.console_site_loader');
-        $this->additionalSectionLoaderClasses = (array)config('cmf.additional_site_loaders');
+        $this->defaultSiteLoaderClass = config('cmf.default_site_loader');
+        $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
+        $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders');
 
         parent::__construct($app);
     }
