@@ -86,13 +86,21 @@ class CmfMakeDbClasses extends Command {
         } else {
             $connection = DbConnectionsManager::getConnection('default');
         }
+        $tableName = $this->argument('table_name');
+        $schemaName = $this->argument('schema');
+        if (
+            !$connection->hasTable($tableName, $schemaName)
+            && !$this->confirm("Table {$schemaName}.{$tableName} does not exist. Continue?", true)
+        ) {
+            return;
+        }
         /** @var ClassBuilder $builder */
         $builderClass = $this->getClassBuilderClass();
         $builder = new $builderClass(
-            $this->argument('table_name'),
+            $tableName,
             $connection
         );
-        $builder->setDbSchemaName($this->argument('schema'));
+        $builder->setDbSchemaName($schemaName);
 
         $only = $this->option('only');
         $overwrite = null;
