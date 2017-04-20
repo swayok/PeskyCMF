@@ -60,12 +60,14 @@ class CmsPage extends CmsRecord {
     const TYPE_CATEGORY = 'category';
     const TYPE_ITEM = 'item';
     const TYPE_NEWS = 'news';
+    const TYPE_TEXT_ELEMENT = 'text_element';
 
     static protected $types = [
         self::TYPE_PAGE,
         self::TYPE_NEWS,
         self::TYPE_CATEGORY,
         self::TYPE_ITEM,
+        self::TYPE_TEXT_ELEMENT,
     ];
 
     /**

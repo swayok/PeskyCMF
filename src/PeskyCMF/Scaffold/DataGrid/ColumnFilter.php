@@ -816,15 +816,6 @@ class ColumnFilter {
             foreach ($value as &$val) {
                 $val = trim($this->convertRuleValueToConditionValue($val, null));
             }
-            unset($val);
-            if (
-                $this->getDataType() === static::TYPE_STRING
-                && in_array($operator, [static::OPERATOR_IN_ARRAY, static::OPERATOR_NOT_IN_ARRAY], true)
-            ) {
-                $value = '^(' . implode('|', array_map(function ($item) {
-                    return preg_quote($item, null);
-                }, $value)) . ')$';
-            }
             return array_values($value);
         }
         switch ($this->getDataType()) {
@@ -862,7 +853,7 @@ class ColumnFilter {
                 break;
             case static::OPERATOR_EQUAL:
             case static::OPERATOR_NOT_EQUAL:
-                if ($this->getDataType() === static::TYPE_STRING) {
+                if ($this->getDataType() === static::TYPE_STRING && $this->getInputType() !== static::INPUT_TYPE_SELECT) {
                     return '^' . preg_quote($value, null) . '$';
                 }
                 break;

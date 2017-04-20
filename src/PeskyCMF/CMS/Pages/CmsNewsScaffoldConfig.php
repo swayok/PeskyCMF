@@ -4,6 +4,7 @@ namespace PeskyCMF\CMS\Pages;
 
 use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Texts\CmsTextsTable;
+use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\ImagesFormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;
@@ -33,10 +34,10 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
             ->readRelations([
                 'Parent' => ['id', 'url_alias', 'parent_id']
             ])
-            ->setOrderBy('id', 'asc')
             ->setInvisibleColumns('url_alias')
             ->setColumns([
-                'id',
+                'id' => DataGridColumn::create()
+                    ->setWidth(40),
                 'title',
                 'relative_url',
                 'is_published',
@@ -62,7 +63,8 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createItemDetailsConfig() {
         $itemDetailsConfig = parent::createItemDetailsConfig();
         $itemDetailsConfig
-             ->readRelations([
+            ->setShowAsDialog(true)
+            ->readRelations([
                 'Parent', 'Admin', 'Texts'
             ])
             ->addTab($this->translate('item_details.tab', 'general'), [
@@ -87,12 +89,12 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                 return $record;
             });
         /** @var CmsPagesTable $pagesTable */
-        $pagesTable = app(CmsPagesTable::class);
-        if ($pagesTable->getTableStructure()->images->hasImagesConfigurations()) {
-            $itemDetailsConfig->addTab($this->translate('item_details.tab', 'images'), [
-                'images',
-            ]);
-        }
+//        $pagesTable = app(CmsPagesTable::class);
+//        if ($pagesTable->getTableStructure()->images->hasImagesConfigurations()) {
+//            $itemDetailsConfig->addTab($this->translate('item_details.tab', 'images'), [
+//                'images',
+//            ]);
+//        }
         /** @var CmsSetting $cmsSetting */
         $cmsSetting = app(CmsSetting::class);
         foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
@@ -127,6 +129,7 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
         $pageClass = app(CmsPage::class);
         $formConfig
             ->setWidth(80)
+            ->setShowAsDialog(true)
             ->addTab($this->translate('form.tab', 'general'), [
                 'title',
                 'parent_id' => FormInput::create()
@@ -142,6 +145,7 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                         $rendererConfig
                             ->setIsRequired(true)
                             ->setPrefixText('<span id="parent-id-url-alias"></span>')
+                            ->addAttribute('data-regexp', '^[a-z0-9_/-]+$')
                             ->addAttribute('placeholder', $this->translate('form.input', 'url_alias_placeholder'));
                     })
                     ->setSubmittedValueModifier(function ($value) {
@@ -161,21 +165,14 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                         ]);
                     }),
                 'type' => FormInput::create()
-                    ->setType(FormInput::TYPE_HIDDEN)
-                    ->setValueConverter(function () use ($pageClass) {
-                        return $pageClass::TYPE_NEWS;
-                    }),
+                    ->setType(FormInput::TYPE_HIDDEN),
                 'admin_id' => FormInput::create()
-                    ->setType(FormInput::TYPE_HIDDEN)
-                    ->setValueConverter(function () {
-                        return \Auth::guard()->user()->getAuthIdentifier();
-                    }),
+                    ->setType(FormInput::TYPE_HIDDEN),
             ])
             ->setValidators(function () use ($cmsSetting, $pagesTable, $pageClass) {
                 $pagesTable::registerUniquePageUrlValidator($this);
                 $validators = [
-                    'type' => 'required|in:' . implode(',', $pageClass::getTypes()),
-                    'is_published' => 'required|bool',
+                    'is_published' => 'required|boolean',
                     'publish_at' => 'required|date',
                     'title' => 'string|max:500',
                     'comment' => 'string|max:1000',
@@ -188,13 +185,13 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
             ->addValidatorsForCreate(function () {
                 return [
                     'url_alias' => 'required|regex:%^/[a-z0-9_/-]*$%|unique_page_url',
-                    'page_code' => 'regex:%^[a-z0-9_-]*$%|unique:pages,page_code',
+                    'page_code' => 'regex:%^[a-zA-Z0-9_:-]*$%|unique:pages,page_code',
                 ];
             })
             ->addValidatorsForEdit(function () {
                 return [
                     'url_alias' => 'required|regex:%^/[a-z0-9_/-]*$%|unique_page_url',
-                    'page_code' => 'regex:%^[a-z0-9_-]*$%|unique:pages,page_code,{{id}},id',
+                    'page_code' => 'regex:%^[a-zA-Z0-9_:-]*$%|unique:pages,page_code,{{id}},id',
                 ];
             })
             ->setRawRecordDataModifier(function (array $record) {
@@ -203,7 +200,7 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                 }
                 return $record;
             })
-            ->setIncomingDataModifier(function (array $data) {
+            ->setIncomingDataModifier(function (array $data) use ($pageClass) {
                 if (!empty($data['Texts']) && is_array($data['Texts'])) {
                     foreach ($data['Texts'] as $i => &$textData) {
                         if (empty($textData['id'])) {
@@ -211,14 +208,17 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                         }
                     }
                 }
+                unset($textData);
+                $data['type'] = $pageClass::TYPE_NEWS;
+                $data['admin_id'] = \Auth::guard()->user()->getAuthIdentifier();
                 return $data;
             });
 
-        if ($pagesTable->getTableStructure()->images->hasImagesConfigurations()) {
-            $formConfig->addTab($this->translate('form.tab', 'images'), [
-                'images' => ImagesFormInput::create(),
-            ]);
-        }
+//        if ($pagesTable->getTableStructure()->images->hasImagesConfigurations()) {
+//            $formConfig->addTab($this->translate('form.tab', 'images'), [
+//                'images' => ImagesFormInput::create(),
+//            ]);
+//        }
         foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
             $formConfig->addTab($this->translate('form.tab', 'texts', ['language' => $langLabel]), [
                 "Texts.$langId.id" => FormInput::create()->setType(FormInput::TYPE_HIDDEN),
@@ -329,44 +329,35 @@ SCRIPT;
                 $this->translate('form.input.content_inserts', 'insert_link_to_page_widget_title_template')
             ),
             WysiwygFormInput::createDataInsertConfigWithArguments(
-                'insertTextData(":text_id", ":text_field")',
-                $this->translate('form.input.content_inserts', 'part_of_text'),
+                'insertPageData(":page_id", "content")',
+                $this->translate('form.input.content_inserts', 'text_block'),
                 false,
                 [
-                    'text_id' => [
-                        'label' => $this->translate('form.input.content_inserts', 'text_id_arg_label'),
+                    'page_id' => [
+                        'label' => $this->translate('form.input.content_inserts', 'text_block_id_arg_label'),
                         'type' => 'select',
-                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'texts_for_inserts', true),
-                    ],
-                    'text_field' => [
-                        'label' => $this->translate('form.input.content_inserts', 'text_field_arg_label'),
-                        'type' => 'select',
-                        'options' => [
-                            'title' => $this->translate('form.input', 'Texts.title'),
-                            'menu_title' => $this->translate('form.input', 'Texts.menu_title'),
-                            'content' => $this->translate('form.input', 'Texts.content'),
-                        ],
-                        'value' => 'content'
+                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'text_blocks_for_inserts', true),
                     ]
                 ],
-                $this->translate('form.input.content_inserts', 'text_insert_widget_title_template')
+                $this->translate('form.input.content_inserts', 'text_block_insert_widget_title_template')
             ),
         ];
     }
 
     public function getCustomData($dataId) {
+        /** @var CmsPage $pageClass */
+        $pageClass = app(CmsPage::class);
+        /** @var CmsPagesTable $pagesTable */
+        $pagesTable = app(CmsPagesTable::class);
         switch ($dataId) {
-            case 'texts_for_inserts':
-                /** @var CmsTextsTable $textsTable */
-                $textsTable = app(CmsTextsTable::class);
-                return $textsTable::selectAssoc('id', 'title', [
-                    'type' => null,
-                    'page_id !=' => (int)request()->query('pk', 0) ?: 0,
+            case 'text_blocks_for_inserts':
+                return $pagesTable::selectAssoc('id', 'title', [
+                    'type' => $pageClass::TYPE_TEXT_ELEMENT,
+                    'id !=' => (int)request()->query('pk', 0) ?: 0,
                 ]);
             case 'pages_for_inserts':
-                /** @var CmsPagesTable $pagesTable */
-                $pagesTable = app(CmsPagesTable::class);
                 $pages = $pagesTable::select(['id', 'url_alias', 'type', 'Parent' => ['id', 'url_alias']], [
+                    'type !=' => $pageClass::TYPE_TEXT_ELEMENT,
                     'id !=' => (int)request()->query('pk', 0) ?: 0,
                 ]);
                 $options = [];

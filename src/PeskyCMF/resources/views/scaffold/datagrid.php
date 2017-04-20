@@ -190,6 +190,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         // row actions
         $actionsTpl = '';
+        $actionsCount = 0;
         if ($dataGridConfig->isNestedViewEnabled()) {
             $actionsTpl .= \Swayok\Html\Tag::a()
                 ->setClass('row-action link-muted show-children')
@@ -207,6 +208,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setDataAttr('container', '#section-content .content')
                 ->setHref('javascript: void(0)')
                 ->build();
+            $actionsCount++;
         }
         if ($dataGridConfig->isDetailsViewerAllowed()) {
             $btn = \Swayok\Html\Tag::a()
@@ -218,6 +220,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setHref(':___details_url:')
                 ->build();
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
+            $actionsCount++;
         }
         if ($dataGridConfig->isEditAllowed()) {
             $url = $dblClickUrl = routeToCmfItemEditForm($tableNameForRoutes, ":{$pkName}:");
@@ -230,6 +233,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setHref($url)
                 ->build();
             $actionsTpl .= '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
+            $actionsCount++;
         }
         if ($dataGridConfig->isDeleteAllowed()) {
             $btn = \Swayok\Html\Tag::a()
@@ -246,11 +250,13 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setHref('javascript: void(0)')
                 ->build();
             $actionsTpl .= '{{? !!it.___delete_allowed }}' . $btn . '{{?}}';
+            $actionsCount++;
         }
         $customRowActions = $dataGridConfig->getRowActions();
         if (!empty($customRowActions)) {
             foreach ($customRowActions as $rowAction) {
                 $actionsTpl .= $rowAction;
+                $actionsCount++;
             }
         }
         $actionsTpl = '<div class="row-actions text-nowrap">' . preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $actionsTpl) . '</div>'
@@ -305,7 +311,8 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         targets: <?php echo $actionsValueViewer->getPosition(); ?>,
                         render: function (data, type, row) {
                             return rowActionsTpl(row);
-                        }
+                        },
+                        width: <?php echo max($actionsCount * 27, 80); ?>
                     }
                 ];
             <?php endif; ?>

@@ -4,6 +4,7 @@ namespace PeskyCMF\CMS;
 
 use PeskyCMF\CMS\Admins\CmsAdminsScaffoldConfig;
 use PeskyCMF\CMS\Admins\CmsAdminsTable;
+use PeskyCMF\CMS\Pages\CmsTextElementsScaffoldConfig;
 use PeskyCMF\CMS\Pages\CmsNewsScaffoldConfig;
 use PeskyCMF\CMS\Pages\CmsPagesScaffoldConfig;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
@@ -17,8 +18,8 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
         'admins',
         'pages',
         'news',
-        'shop_categories',
-        'shop_items',
+//        'shop_categories',
+//        'shop_items',
         'text_elements',
         'settings'
     ];
@@ -35,9 +36,6 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
             // pages
             $this->registerPagesTables();
             $this->registerPagesScaffolds();
-            // texts
-            $this->registerTextsElementsTables();
-            $this->registerTextElementsScaffolds();
         }
         if (in_array('settings', $this->registerSections, true)) {
             // settings
@@ -123,6 +121,7 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
     public function registerPagesTables() {
         $this->app->alias(CmsPagesTable::class, 'cms.section.pages.table');
         $this->app->alias(CmsPagesTable::class, 'cms.section.news.table');
+        $this->app->alias(CmsPagesTable::class, 'cms.section.text_elements.table');
         $this->app->alias(CmsPagesTable::class, 'cms.section.shop_categories.table');
         $this->app->alias(CmsPagesTable::class, 'cms.section.shop_items.table');
     }
@@ -134,21 +133,14 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
         $this->app->singleton('cms.section.news.scaffold', function () {
             return new CmsNewsScaffoldConfig($this->app->make('cms.section.news.table'), 'news');
         });
+        $this->app->singleton('cms.section.text_elements.scaffold', function () {
+            return new CmsTextElementsScaffoldConfig($this->app->make('cms.section.text_elements.table'), 'text_elements');
+        });
 //        $this->app->singleton('cms.section.shop_categories.scaffold', function () {
 //            return new CmsShopCategoriesScaffoldConfig($this->app->make('cms.section.shop_categories.table'), 'shop_categories');
 //        });
 //        $this->app->singleton('cms.section.shop_items.scaffold', function () {
 //            return new CmsShopItemsScaffoldConfig($this->app->make('cms.section.shop_items.table'), 'shop_items');
-//        });
-    }
-
-    public function registerTextsElementsTables() {
-//        $this->app->alias(CmsTextsTable::class, 'cms.section.common_texts.table');
-    }
-
-    public function registerTextElementsScaffolds() {
-//        $this->app->singleton('cms.section.common_texts.scaffold', function () {
-//            return new CmsCommonTextsScaffoldConfig($this->app->make('cms.section.common_texts.table'), 'common_texts');
 //        });
     }
 

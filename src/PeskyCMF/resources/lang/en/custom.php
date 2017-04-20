@@ -60,7 +60,28 @@ $dictionary = [
                 'ip' => 'IP',
                 'created_at' => 'Created',
                 'timezone' => 'Timezone',
-            ]
+            ],
+            'filter' => [
+                'cms_admins' => [
+                    'id' => 'ID',
+                    'parent_id' => 'Creator\'s ID',
+                    'email' => 'E-mail',
+                    'login' => 'Login',
+                    'name' => 'Name',
+                    'is_active' => 'Active?',
+                    'is_superadmin' => 'Superadmin?',
+                    'role' => 'Role',
+                    'language' => 'Language',
+                    'ip' => 'IP',
+                    'created_at' => 'Created',
+                    'timezone' => 'Timezone',
+                ],
+                'parent_admin' => [
+                    'email' => 'Creator\'s E-mail',
+                    'login' => 'Creator\'s Login',
+                    'name' => 'Creator\'s Name',
+                ]
+            ],
         ],
         'form' => [
             'header_create' => 'Adding administrator',
@@ -191,7 +212,8 @@ $dictionary = [
             'page' => 'Page',
             'news' => 'News item',
             'category' => 'Category',
-            'item' => 'Item'
+            'item' => 'Item',
+            'text_element' => 'Text block'
         ],
         'datagrid' => [
             'header' => 'Pages',
@@ -201,7 +223,7 @@ $dictionary = [
                 'comment' => 'Comment',
                 'url_alias' => 'Relative URL',
                 'relative_url' => 'URL',
-                'page_code' => 'Text ID',
+                'page_code' => 'Readable ID',
                 'meta_description' => 'Meta-description',
                 'meta_keywords' => 'Meta-keywords',
                 'order' => 'Position',
@@ -223,7 +245,7 @@ $dictionary = [
                     'title' => 'Title',
                     'comment' => 'Comment',
                     'url_alias' => 'Relative URL',
-                    'page_code' => 'Text ID',
+                    'page_code' => 'Readable ID',
                     'meta_description' => 'Meta-description',
                     'meta_keywords' => 'Meta-keywords',
                     'order' => 'Position',
@@ -264,7 +286,7 @@ $dictionary = [
                 'comment' => 'Comment',
                 'url_alias' => 'URL',
                 'url_alias_placeholder' => 'Examples: /page-title, /category/item',
-                'page_code' => 'Text ID (used by programmer when required)',
+                'page_code' => 'Readable ID (used by programmer when required)',
                 'meta_description' => 'Meta-description',
                 'meta_keywords' => 'Meta-keywords',
                 'order' => 'Position',
@@ -276,7 +298,7 @@ $dictionary = [
                 'updated_at' => 'Updated',
                 'text_id' => 'Texts for the page',
                 'images' => 'Images',
-                'title' => 'Title (used only as text identfier of the page)',
+                'title' => 'Title (used only in administration panel)',
                 'publish at' => 'Publishing date',
                 'Texts' => [
                     'title' => 'Full title',
@@ -293,10 +315,9 @@ $dictionary = [
                     'page_id_arg_label' => 'Select page',
                     'page_field_arg_label' => 'Select page\'s field',
                     'page_insert_widget_title_template' => 'Insert field ":page_field.label" from texts ":page_id.label"',
-                    'part_of_text' => 'Text element',
-                    'text_id_arg_label' => 'Select text element',
-                    'text_field_arg_label' => 'Select element\'s field',
-                    'text_insert_widget_title_template' => 'Insert field ":text_field.label" from texts ":text_id.label"',
+                    'text_block' => 'Text block',
+                    'text_block_id_arg_label' => 'Select text block',
+                    'text_block_insert_widget_title_template' => 'Insert text block ":page_id.label"',
                     'link_to_other_page' => 'Link to page',
                     'page_link_title_arg_label' => 'Link label (by default: "Short title" field value of selected page)',
                     'insert_link_to_page_widget_title_template' => 'Link to ":page_id.label" (Label: :title)',
@@ -324,7 +345,7 @@ $dictionary = [
                 'comment' => 'Comment',
                 'url_alias' => 'Relative URL',
                 'relative_url' => 'URL',
-                'page_code' => 'Text ID',
+                'page_code' => 'Readable ID',
                 'meta_description' => 'Meta-description',
                 'meta_keywords' => 'Meta-keywords',
                 'order' => 'Position',
@@ -417,7 +438,6 @@ $dictionary = [
                 'admin_id' => 'Last modifier',
                 'created_at' => 'Created',
                 'updated_at' => 'Updated',
-                'insert_other_text_widget_title_template' => 'Insert field ":text_field.label" from texts ":text_id.label"',
             ],
             'validation' => [
                 'unique_language_within_parent_id' => 'Translation for ":parent_title" texts already <a href=":url" data-toggle="tooltip" title="Загрузить перевод">exists</a> for selected language',
@@ -500,5 +520,6 @@ $dictionary = [
 $dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);
 $dictionary['shop_categories'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_categories']);
 $dictionary['shop_items'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_items']);
+$dictionary['text_elements'] = array_replace_recursive($dictionary['pages'], $dictionary['text_elements']);
 
 return $dictionary;

@@ -3,7 +3,9 @@
 namespace PeskyCMF\CMS\Admins;
 
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
+use PeskyCMF\Scaffold\DataGrid\FilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;
@@ -37,6 +39,31 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                 'parent_id' => DataGridColumn::create()
                     ->setType(ValueCell::TYPE_LINK),
                 'created_at'
+            ]);
+    }
+
+    protected function createDataGridFilterConfig() {
+        return parent::createDataGridFilterConfig()
+            ->setFilters([
+                'id',
+                'email',
+                'login',
+                'role' => ColumnFilter::create()
+                    ->setInputType(ColumnFilter::INPUT_TYPE_SELECT)
+                    ->setAllowedValues(function () {
+                        $options = array();
+                        foreach (CmfConfig::getPrimary()->roles_list() as $roleId) {
+                            $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
+                        }
+                        return $options;
+                    }),
+                'name',
+                'is_active',
+                'is_superadmin',
+                'parent_id',
+                'ParentAdmin.email',
+                'ParentAdmin.login',
+                'ParentAdmin.name',
             ]);
     }
 

@@ -64,7 +64,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /** @var bool */
     protected $isRowActionsColumnFixed = true;
     /** @var bool */
-    protected $isFilterOpened = true;
+    protected $isFilterOpened = false;
     /** @var string|null */
     protected $enableNestedViewBasedOnColumn;
 

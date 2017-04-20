@@ -60,7 +60,28 @@ $dictionary = [
                 'ip' => 'IP',
                 'created_at' => 'Создан',
                 'timezone' => 'Временная зона',
-            ]
+            ],
+            'filter' => [
+                'cms_admins' => [
+                    'id' => 'ID',
+                    'parent_id' => 'ID Создателя',
+                    'email' => 'E-mail',
+                    'login' => 'Логин',
+                    'name' => 'Имя',
+                    'is_active' => 'Действующий?',
+                    'is_superadmin' => 'Суперадмин?',
+                    'role' => 'Роль',
+                    'language' => 'Язык',
+                    'ip' => 'IP',
+                    'created_at' => 'Создан',
+                    'timezone' => 'Временная зона',
+                ],
+                'parent_admin' => [
+                    'email' => 'E-mail Создателя',
+                    'login' => 'Логин Создателя',
+                    'name' => 'Имя Создателя',
+                ]
+            ],
         ],
         'form' => [
             'header_create' => 'Добавление администратора',
@@ -192,7 +213,8 @@ $dictionary = [
             'page' => 'Страница',
             'news' => 'Новость',
             'category' => 'Категория',
-            'item' => 'Товар'
+            'item' => 'Товар',
+            'text_element' => 'Текстовый блок'
         ],
         'datagrid' => [
             'header' => 'Страницы',
@@ -265,7 +287,7 @@ $dictionary = [
                 'comment' => 'Комментарий',
                 'url_alias' => 'URL страницы',
                 'url_alias_placeholder' => 'Примеры: /nazvanie-stranici, /ketegoriya/tovar',
-                'page_code' => 'Текстовый идентификатор страницы (используется программистом по необходимости)',
+                'page_code' => 'Текстовый ID (используется программистом по необходимости)',
                 'images' => 'Картинки',
                 'meta_description' => 'Meta-description',
                 'meta_keywords' => 'Meta-keywords',
@@ -278,7 +300,7 @@ $dictionary = [
                 'updated_at' => 'Изменена',
                 'text_id' => 'Тексты для страницы',
                 'publish_at' => 'Дата публикации',
-                'title' => 'Название (используется только в качестве текстового идентификатора страницы)',
+                'title' => 'Название (используется только в административной панели)',
                 'Texts' => [
                     'title' => 'Полное название',
                     'menu_title' => 'Короткое название (для меню)',
@@ -293,10 +315,9 @@ $dictionary = [
                     'page_id_arg_label' => 'Выберите страницу',
                     'page_field_arg_label' => 'Выберите какую часть выбранной страницы вставить',
                     'page_insert_widget_title_template' => 'Вставка поля ":page_field.label" со страницы ":page_id.label"',
-                    'part_of_text' => 'Текстовый элемент',
-                    'text_id_arg_label' => 'Выберите текстовый элемент',
-                    'text_field_arg_label' => 'Выберите какую часть выбранного текстового элемента вставить',
-                    'text_insert_widget_title_template' => 'Вставка поля ":text_field.label" из текстового элемента ":text_id.label"',
+                    'text_block' => 'Текстовый блок',
+                    'text_block_id_arg_label' => 'Выберите текстовый блок',
+                    'text_block_insert_widget_title_template' => 'Вставка текстового блока ":page_id.label"',
                     'link_to_other_page' => 'Ссылка на страницу',
                     'page_link_title_arg_label' => 'Текст ссылки (по умолчанию берется из поля "Короткое название" страницы)',
                     'insert_link_to_page_widget_title_template' => 'Ссылка на страницу ":page_id.label" (Текст: :title)',
@@ -325,7 +346,7 @@ $dictionary = [
                 'comment' => 'Комментарий',
                 'relative_url' => 'URL',
                 'url_alias' => 'Относительный URL',
-                'page_code' => 'Текстовый идентификатор страницы',
+                'page_code' => 'Текстовый ID',
                 'images' => 'Картинки',
                 'meta_description' => 'Meta-description',
                 'meta_keywords' => 'Meta-keywords',
@@ -415,7 +436,6 @@ $dictionary = [
                 'custom_info' => 'Доп. информация',
                 'created_at' => 'Создана',
                 'updated_at' => 'Изменена',
-                'insert_other_text_widget_title_template' => 'Вставка поля ":text_field.label" из текстов ":text_id.label"'
             ],
             'validation' => [
                 'unique_language_within_parent_id' => 'Перевод для текста ":parent_title" на указанный язык уже <a href=":url" data-toggle="tooltip" title="Загрузить перевод">существует</a>'
@@ -498,5 +518,6 @@ $dictionary = [
 $dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);
 $dictionary['shop_categories'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_categories']);
 $dictionary['shop_items'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_items']);
+$dictionary['text_elements'] = array_replace_recursive($dictionary['pages'], $dictionary['text_elements']);
 
 return $dictionary;
