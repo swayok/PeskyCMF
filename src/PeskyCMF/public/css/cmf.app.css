@@ -743,6 +743,10 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
 .scaffold-data-grid-container table.table-condensed .row-actions > a:first-child {
   margin-left: 0;
 }
+.scaffold-data-grid-container table tbody a.row-action.show-children,
+.scaffold-data-grid-container table tbody a.row-action.hide-children {
+  color: #82afbb;
+}
 .scaffold-data-grid-container table tbody tr.children-data-grid-row {
   border-left-width: 0;
   background-color: #FFFFFF;
@@ -796,6 +800,18 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container {
   border-left: 10px solid #82afbb;
+  position: relative;
+}
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container:before {
+  content: '';
+  position: absolute;
+  top: -23px;
+  left: -6px;
+  width: 10px;
+  height: 30px;
+  border: 2px solid #82afbb;
+  border-right-width: 0;
+  border-bottom-width: 0;
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table,
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination {
