@@ -170,6 +170,4 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
         });
     }
 
-
-
 }

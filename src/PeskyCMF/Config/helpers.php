@@ -261,3 +261,31 @@ if (!function_exists('pickLocalization')) {
     }
 
 }
+
+if (!function_exists('insertPageData')) {
+
+    /**
+     * @param int $pageId - ID of the page
+     * @param string $columnName - page's column name
+     * @return mixed
+     */
+    function insertPageData($pageId, $columnName = 'content') {
+        return \PeskyCMF\CMS\CmsFrontendUtils::getPageDataForInsert($pageId, $columnName);
+    }
+}
+
+if (!function_exists('insertLinkToPage')) {
+
+    function insertLinkToPage($pageId, $text = null) {
+        return \PeskyCMF\CMS\CmsFrontendUtils::makeHtmlLinkToPageForInsert($pageId, $text);
+    }
+}
+
+if (!function_exists('setting')) {
+
+    function setting($name, $default = null) {
+        /** @var \PeskyCMF\CMS\Settings\CmsSetting $class */
+        $class = app(\PeskyCMF\CMS\Settings\CmsSetting::class);
+        return $class::get($name, null, $default);
+    }
+}

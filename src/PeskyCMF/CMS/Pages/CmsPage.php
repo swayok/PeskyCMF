@@ -3,7 +3,9 @@
 namespace PeskyCMF\CMS\Pages;
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\CmsRecord;
+use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Texts\CmsText;
+use PeskyCMF\CMS\Texts\CmsTextWrapper;
 use PeskyORM\ORM\RecordsSet;
 
 /**
@@ -71,6 +73,8 @@ class CmsPage extends CmsRecord {
         self::TYPE_ITEM,
         self::TYPE_TEXT_ELEMENT,
     ];
+    /** @var CmsTextWrapper */
+    protected $textsWrapper;
 
     /**
      * @return CmsPagesTable
@@ -83,6 +87,29 @@ class CmsPage extends CmsRecord {
         return static::toOptions(static::$types, $asOptions, function ($value) {
             return cmfTransCustom('.pages.types.' . $value);
         }, true);
+    }
+
+    /**
+     * @param bool $ignoreCache - remake CmsTextWrapper
+     * @return CmsTextWrapper
+     * @throws \InvalidArgumentException
+     */
+    public function getLocalizedText($ignoreCache = false) {
+        if ($ignoreCache || $this->textsWrapper === null) {
+            $locale = app()->getLocale();
+            $localeRedirects = setting(CmsSetting::FALLBACK_LANGUAGES, []);
+            if (is_array($localeRedirects) && !empty($localeRedirects[$locale])) {
+                // replace current locale by supported one. For example - replace 'ua' locale by 'ru'
+                $locale = $localeRedirects[$locale];
+            }
+            $this->textsWrapper = new CmsTextWrapper($this, $locale, setting(CmsSetting::DEFAULT_LANGUAGE));
+        }
+        return $this->textsWrapper;
+    }
+
+    public function reset() {
+        $this->textsWrapper = null;
+        return parent::reset();
     }
 
 }
