@@ -155,9 +155,9 @@ Utils.handleAjaxError = function (xhr) {
             document.location = json.redirect_with_reload;
         } else if (json.redirect) {
             if (json.redirect === 'back') {
-                window.adminApp.back(json.redirect_fallback);
+                page.back(json.redirect_fallback);
             } else if (json.redirect[0] === '/') {
-                window.adminApp.nav(json.redirect);
+                page.show(json.redirect);
             } else {
                 document.location = json.redirect;
             }

@@ -1,6 +1,7 @@
 <?php
 
 namespace PeskyCMF\CMS\Pages;
+use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\CmsRecord;
 use PeskyCMF\CMS\Texts\CmsText;
 use PeskyORM\ORM\RecordsSet;
@@ -35,6 +36,7 @@ use PeskyORM\ORM\RecordsSet;
  * @property-read int         $updated_at_as_unix_ts
  * @property-read string      $custom_info
  * @property-read CmsPage     $Parent
+ * @property-read CmsAdmin    $Admin
  * @property-read CmsText[]|RecordsSet   $Texts
  *
  * @method $this    setId($value, $isFromDb = false)

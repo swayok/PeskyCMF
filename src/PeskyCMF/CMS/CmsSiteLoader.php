@@ -8,6 +8,8 @@ use PeskyCMF\CMS\Pages\CmsTextElementsScaffoldConfig;
 use PeskyCMF\CMS\Pages\CmsNewsScaffoldConfig;
 use PeskyCMF\CMS\Pages\CmsPagesScaffoldConfig;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
+use PeskyCMF\CMS\Redirects\CmsRedirectsScaffoldConfig;
+use PeskyCMF\CMS\Redirects\CmsRedirectsTable;
 use PeskyCMF\CMS\Settings\CmsSettingsScaffoldConfig;
 use PeskyCMF\CMS\Settings\CmsSettingsTable;
 use PeskyCMF\Http\PeskyCmfSiteLoader;
@@ -21,10 +23,12 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
 //        'shop_categories',
 //        'shop_items',
         'text_elements',
-        'settings'
+        'redirects',
+        'settings',
     ];
 
     public function register() {
+        // note: CMS DB classes bindings are declared in PeskyCmsServiceProvider
         parent::register();
         // register default scaffolds
         if (in_array('admins', $this->registerSections, true)) {
@@ -32,10 +36,12 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
             $this->registerAdminsTables();
             $this->registerAdminsScaffolds();
         }
-        if (count(array_intersect(['pages', 'news', 'shop_categories', 'shop_items', 'text_elements'], $this->registerSections))) {
+        if (count(array_intersect(['pages', 'news', 'shop_categories', 'shop_items', 'text_elements', 'redirects'], $this->registerSections))) {
             // pages
             $this->registerPagesTables();
             $this->registerPagesScaffolds();
+            $this->registerRedirectsTables();
+            $this->registerRedirectsScaffolds();
         }
         if (in_array('settings', $this->registerSections, true)) {
             // settings
@@ -87,6 +93,13 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
                 'label' => $cmfConfig::transCustom('.text_elements.menu_title'),
                 'url' => routeToCmfItemsTable('text_elements'),
                 'icon' => 'fa fa-file-code-o'
+            ]);
+        }
+        if (in_array('redirects', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('redirects', [
+                'label' => $cmfConfig::transCustom('.redirects.menu_title'),
+                'url' => routeToCmfItemsTable('redirects'),
+                'icon' => 'glyphicon glyphicon-fast-forward'
             ]);
         }
         if (in_array('settings', $this->registerSections, true)) {
@@ -143,5 +156,16 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
 //            return new CmsShopItemsScaffoldConfig($this->app->make('cms.section.shop_items.table'), 'shop_items');
 //        });
     }
+
+    public function registerRedirectsTables() {
+        $this->app->alias(CmsRedirectsTable::class, 'cms.section.redirects.table');
+    }
+
+    public function registerRedirectsScaffolds() {
+        $this->app->singleton('cms.section.redirects.scaffold', function () {
+            return new CmsRedirectsScaffoldConfig($this->app->make('cms.section.redirects.table'), 'redirects');
+        });
+    }
+
 
 }

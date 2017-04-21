@@ -8,6 +8,9 @@ use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
 use PeskyCMF\CMS\Pages\CmsPage;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
 use PeskyCMF\CMS\Pages\CmsPagesTableStructure;
+use PeskyCMF\CMS\Redirects\CmsRedirect;
+use PeskyCMF\CMS\Redirects\CmsRedirectsTable;
+use PeskyCMF\CMS\Redirects\CmsRedirectsTableStructure;
 use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Settings\CmsSettingsTable;
 use PeskyCMF\CMS\Settings\CmsSettingsTableStructure;
@@ -23,6 +26,7 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
         $this->registerSettingsDbClasses();
         $this->registerPagesDbClasses();
         $this->registerTextsDbClasses();
+        $this->registerRedirectsDbClasses();
         // note: scaffolds declared in CmsSiteLoader
     }
 
@@ -137,5 +141,35 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
             return CmsTextsTableStructure::getInstance();
         });
     }
+
+    // redirects
+
+    public function registerRedirectsDbClasses() {
+        $this->registerRedirectsDbRecordClassName();
+        $this->registerRedirectsDbTable();
+        $this->registerRedirectsDbTableStructure();
+    }
+
+    public function registerRedirectsDbRecordClassName() {
+        $this->app->singleton(CmsRedirect::class, function () {
+            // note: do not create record here or you will possibly encounter infinite loop because this class may be
+            // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
+            return CmsRedirect::class;
+        });
+    }
+
+    public function registerRedirectsDbTable() {
+        $this->app->singleton(CmsRedirectsTable::class, function () {
+            return CmsRedirectsTable::getInstance();
+        });
+    }
+
+    public function registerRedirectsDbTableStructure() {
+        $this->app->singleton(CmsRedirectsTableStructure::class, function () {
+            return CmsRedirectsTableStructure::getInstance();
+        });
+    }
+
+
 
 }

@@ -38,7 +38,10 @@ $.extend(CmfCache, {
         itemForm: {},
         bulkEditForm: {},
         itemDetails: {}
-    }
+    },
+    selectOptions: {},
+    selectOptionsTs: {},
+    itemDeafults: {}
 });
 
 ScaffoldsManager.loadTemplates = function (resourceName, additionalParameter) {
@@ -209,10 +212,10 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
         if (forDetailsViewer) {
             console.error('ScaffoldsManager.getDataForItem(): itemId argument is requred when argument forDetailsViewer == true');
             return deferred.reject();
-        } else if (!ScaffoldFormHelper.deafults[resourceName]) {
+        } else if (!CmfCache.itemDeafults[resourceName]) {
             itemId = 'service/defaults';
         } else {
-            return deferred.resolve(ScaffoldFormHelper.deafults[resourceName]);
+            return deferred.resolve(CmfCache.itemDeafults[resourceName]);
         }
     }
     $.ajax({
@@ -223,7 +226,7 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
         data.formUUID = Base64.encode(this.url + (new Date()).getTime());
         if (itemId === 'service/defaults') {
             data.isCreation = true;
-            ScaffoldFormHelper.deafults[resourceName] = data;
+            CmfCache.itemDeafults[resourceName] = data;
         }
         deferred.resolve(data);
     }).fail(function (xhr) {
@@ -1194,66 +1197,26 @@ var DataGridSearchHelper = {
 };
 
 var ScaffoldFormHelper = {
-    models: {},
-    options: {},
-    optionsTs: {},
-    deafults: {},
-    getModel: function (resourceName) {
-        if (!ScaffoldFormHelper.models[resourceName]) {
-            var model = $.observable({});
-            model.fetch = function () {
-                var deferred = $.Deferred();
-                var itemId = model.get('id');
-                if (!itemId) {
-                    if (!ScaffoldFormHelper.deafults[resourceName]) {
-                        itemId = 'service/defaults';
-                    } else {
-                        model(ScaffoldFormHelper.deafults[resourceName]);
-                        model.trigger('fetch', [model]);
-                        return deferred.resolve(model);
-                    }
-                }
-                var isDetails = model.get('_is_details');
-                $.ajax({
-                    url: ScaffoldsManager.getResourceBaseUrl(resourceName) + '/' + itemId + '?details=' + (isDetails ? '1' : '0'),
-                    method: 'GET',
-                    cache: false
-                }).done(function (data) {
-                    if (itemId === 'service/defaults') {
-                        data.isCreation = true;
-                        ScaffoldFormHelper.deafults[resourceName] = data;
-                    }
-                    data.formUUID = Base64.encode(this.url + (new Date()).getTime());
-                    model(data);
-                    model.trigger('fetch', [model]);
-                    deferred.resolve(model);
-                }).fail(Utils.handleAjaxError);
-                return deferred;
-            };
-            ScaffoldFormHelper.models[resourceName] = model;
-        }
-        ScaffoldFormHelper.models[resourceName]({});
-        return ScaffoldFormHelper.models[resourceName];
-    },
     loadOptions: function (resourceName, itemId) {
         var deferred = $.Deferred();
         var query = itemId ? '?id=' + itemId : '';
         var cacheKey = resourceName + (itemId ? '' : String(itemId));
         if (
-            !ScaffoldFormHelper.options[cacheKey]
-            || ScaffoldFormHelper.optionsTs[cacheKey] + 30000 < Date.now()
+            ScaffoldsManager.cacheTemplates
+            || !CmfCache.selectOptions[cacheKey]
+            || CmfCache.selectOptionsTs[cacheKey] + 30000 < Date.now()
         ) {
             $.ajax({
                 url: ScaffoldsManager.getResourceBaseUrl(resourceName) + '/service/options' + query,
                 method: 'GET',
                 cache: false
             }).done(function (data) {
-                ScaffoldFormHelper.optionsTs[cacheKey] = Date.now();
-                ScaffoldFormHelper.options[cacheKey] = data;
-                deferred.resolve(ScaffoldFormHelper.options[cacheKey]);
+                CmfCache.selectOptionsTs[cacheKey] = Date.now();
+                CmfCache.selectOptions[cacheKey] = data;
+                deferred.resolve(CmfCache.selectOptions[cacheKey]);
             }).fail(Utils.handleAjaxError);
         } else {
-            deferred.resolve(ScaffoldFormHelper.options[cacheKey]);
+            deferred.resolve(CmfCache.selectOptions[cacheKey]);
         }
         return deferred;
     },
@@ -1279,9 +1242,9 @@ var ScaffoldFormHelper = {
             toastr.error(exc);
         }
         $('.modal.in').modal('hide'); //< hide any opened modals
-        Utils.showPreloader(CmfControllerHelpers.$currentContentContainer);
+        CmfRoutingHelpers.hideContentContainerPreloader();
         var timeout = setTimeout(function () {
-            Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
+            CmfRoutingHelpers.hideContentContainerPreloader();
             toastr.info('Server response timed out');
         }, 20000);
         $.when(deferred, ScaffoldFormHelper.loadOptions(resourceName, 'bulk-edit'))
@@ -1392,7 +1355,7 @@ var ScaffoldFormHelper = {
             })
             .always(function () {
                 clearTimeout(timeout);
-                Utils.hidePreloader(CmfControllerHelpers.$currentContentContainer);
+                CmfRoutingHelpers.hideContentContainerPreloader();
             });
     },
     initWysiwyg: function (textareaSelector, config) {

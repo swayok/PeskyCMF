@@ -16,7 +16,7 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
 
 <div id="data-grid-tpl">
     <script type="application/javascript">
-        window.adminApp.nav('<?php echo routeToCmfItemAddForm($tableNameForRoutes) ?>');
+        page.show('<?php echo routeToCmfItemAddForm($tableNameForRoutes) ?>');
     </script>
 </div>
 

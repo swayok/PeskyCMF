@@ -14,12 +14,7 @@ trait AdminIdColumn {
     }
 
     private function Admin() {
-        return Relation::create(
-                'admin_id',
-                Relation::BELONGS_TO,
-                app(CmsAdminsTable::class),
-                'id'
-            )
+        return Relation::create('admin_id', Relation::BELONGS_TO, app(CmsAdminsTable::class), 'id')
             ->setDisplayColumnName('email');
     }
 

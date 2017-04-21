@@ -513,6 +513,67 @@ $dictionary = [
             'header' => 'Просмотр текстового блока',
         ]
     ],
+    'redirects' => [
+        'menu_title' => 'Перенаправления',
+        'datagrid' => [
+            'header' => 'Перенаправления',
+            'column' => [
+                'page_id' => 'Конечная страница',
+                'relative_url' => 'Исходный URL',
+                'is_permanent' => 'Постоянное?',
+                'id' => 'ID',
+                'admin_id' => 'Создатель',
+                'created_at' => 'Создано',
+                'updated_at' => 'Изменено',
+            ],
+            'filter' => [
+                'redirects' => [
+                    'page_id' => 'Конечная страница',
+                    'relative_url' => 'Исходный URL',
+                    'is_permanent' => 'Постоянное?',
+                    'id' => 'ID',
+                    'admin_id' => 'Создатель',
+                    'created_at' => 'Создано',
+                    'updated_at' => 'Изменено',
+                ],
+                'page' => [
+                    'title' => 'Название конечной страницы',
+                    'url_alias' => 'URL конечной страницы (без URL ее родительской страницы)'
+                ]
+            ]
+        ],
+        'form' => [
+            'header_create' => 'Создание перенаправления',
+            'header_edit' => 'Редактирование перенаправления',
+            'input' => [
+                'page_id' => 'Конечная страница',
+                'relative_url' => 'Исходный URL',
+                'is_permanent' => 'Постоянное?',
+                'id' => 'ID',
+                'admin_id' => 'Создатель',
+                'created_at' => 'Создано',
+                'updated_at' => 'Изменено',
+                'page_types' => [
+                    'page' => 'Страницы',
+                    'news' => 'Новости',
+                    'category' => 'Категории',
+                    'item' => 'Товары'
+                ]
+            ],
+        ],
+        'item_details' => [
+            'header' => 'Информация о перенаправлении',
+            'field' => [
+                'page_id' => 'Конечная страница',
+                'relative_url' => 'Исходный URL',
+                'is_permanent' => 'Постоянное?',
+                'id' => 'ID',
+                'admin_id' => 'Создатель',
+                'created_at' => 'Создано',
+                'updated_at' => 'Изменено',
+            ]
+        ]
+    ]
 ];
 
 $dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);

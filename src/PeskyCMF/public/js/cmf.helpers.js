@@ -33,8 +33,16 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
         .find('.selectpicker')
         .each(function () {
             // somehow it is loosing value that was set by $('select').val('val');
-            var val = $(this).val();
-            $(this).selectpicker().selectpicker('val', val);
+            var $select = $(this);
+            var val = $select.val();
+            var pluginOptions = {};
+            if ($select.find('option').length > 10) {
+                pluginOptions.liveSearch = true;
+                pluginOptions.liveSearchNormalize = true;
+            }
+            $select
+                .selectpicker(pluginOptions)
+                .selectpicker('val', val);
         });
     $form
         .find('input.switch[type="checkbox"]')

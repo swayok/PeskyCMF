@@ -310,11 +310,11 @@ class FormInput extends RenderableValueViewer {
 
     /**
      * Closure may modify incoming value before it is validated.
-     * @param \Closure $normalizer - function ($value, array $data) { return $value; }
+     * @param \Closure $modifier - function ($value, array $data) { return $value; }
      * @return $this
      */
-    public function setSubmittedValueModifier(\Closure $normalizer) {
-        $this->submittedValueModifier = $normalizer;
+    public function setSubmittedValueModifier(\Closure $modifier) {
+        $this->submittedValueModifier = $modifier;
         return $this;
     }
 

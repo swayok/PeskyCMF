@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\CMS\Texts;
 
+use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\CmsRecord;
 use PeskyCMF\CMS\Pages\CmsPage;
 
@@ -27,6 +28,7 @@ use PeskyCMF\CMS\Pages\CmsPage;
  * @property-read int         $updated_at_as_unix_ts
  * @property-read string      $custom_info
  * @property-read CmsPage     $Page
+ * @property-read CmsAdmin    $Admin
  *
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setPageId($value, $isFromDb = false)

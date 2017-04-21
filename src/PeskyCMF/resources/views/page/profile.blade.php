@@ -120,8 +120,8 @@
             $(this).val($(this).attr('data-value'));
         })
         .filter('#timezone-input')
-        .selectpicker({
-            liveSearch: true,
-            liveSearchPlaceholder: "{{ cmfTransCustom('.page.profile.input.timezone_search') }}"
-        });
+            .selectpicker({
+                liveSearch: true,
+                liveSearchPlaceholder: "{{ cmfTransCustom('.page.profile.input.timezone_search') }}"
+            });
 </script>

@@ -181,7 +181,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'type' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN),
                 'admin_id' => FormInput::create()
-                    ->setType(FormInput::TYPE_HIDDEN),
+                    ->setType(FormInput::TYPE_HIDDEN)
             ])
             ->setValidators(function () use ($cmsSetting, $pagesTable, $pageClass) {
                 $pagesTable::registerUniquePageUrlValidator($this);

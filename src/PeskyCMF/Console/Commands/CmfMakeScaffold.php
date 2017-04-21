@@ -317,10 +317,9 @@ VIEW;
                 if ($column->getName() === 'admin_id') {
                     $valueViewers[] = <<<VIEW
 '{$column->getName()}' => FormInput::create()
-                    ->setRenderer(function () {
-                        return InputRenderer::create('cmf::input/hidden');
-                    })->setValueConverter(function () {
-                        return \Auth::guard()->user()->id;
+                    ->setType(FormInput::TYPE_HIDDEN)
+                    ->setSubmittedValueModifier(function () {
+                        return \Auth::guard()->user()->getAuthIdentifier();
                     })
 VIEW;
 
