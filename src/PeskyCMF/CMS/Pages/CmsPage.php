@@ -107,6 +107,14 @@ class CmsPage extends CmsRecord {
         return $this->textsWrapper;
     }
 
+    /**
+     * Check if page is allowed to be displayed to user
+     * @return bool
+     */
+    public function isValid() {
+        return $this->existsInDb() && $this->is_published;
+    }
+
     public function reset() {
         $this->textsWrapper = null;
         return parent::reset();

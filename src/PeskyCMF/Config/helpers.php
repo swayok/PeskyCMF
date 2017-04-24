@@ -276,13 +276,24 @@ if (!function_exists('insertPageData')) {
 
 if (!function_exists('insertLinkToPage')) {
 
-    function insertLinkToPage($pageId, $text = null) {
-        return \PeskyCMF\CMS\CmsFrontendUtils::makeHtmlLinkToPageForInsert($pageId, $text);
+    /**
+     * @param int $pageId - ID of the page
+     * @param null|string $linkLabel - content of the <a> tag
+     * @return string
+     */
+    function insertLinkToPage($pageId, $linkLabel = null) {
+        return \PeskyCMF\CMS\CmsFrontendUtils::makeHtmlLinkToPageForInsert($pageId, $linkLabel)->build();
     }
 }
 
 if (!function_exists('setting')) {
 
+    /**
+     * Get value for CmsSetting called $name (CmsSetting->key === $name)
+     * @param string $name - setting name
+     * @param mixed $default - default value
+     * @return mixed
+     */
     function setting($name, $default = null) {
         /** @var \PeskyCMF\CMS\Settings\CmsSetting $class */
         $class = app(\PeskyCMF\CMS\Settings\CmsSetting::class);

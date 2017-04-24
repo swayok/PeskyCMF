@@ -40,4 +40,9 @@ class CmsRedirect extends CmsRecord {
         return app(CmsRedirectsTable::class);
     }
 
+    /*protected function afterSave($isCreated) {
+        // todo: if page has children - added all child pages to redirects
+        parent::afterSave($isCreated);
+    }*/
+
 }

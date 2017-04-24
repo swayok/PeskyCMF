@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\CMS\Pages;
 
+use PeskyCMF\CMS\Texts\CmsTextWrapper;
 use PeskyORM\ORM\RecordInterface;
 use Swayok\Utils\StringUtils;
 
@@ -13,13 +14,14 @@ use Swayok\Utils\StringUtils;
  * @property-read string      $title
  * @property-read string      $comment
  * @property-read string      $content
+ * @property-read string      $menu_title
+ * @property-read string      $browser_title
+ * @property-read string      $meta_description
+ * @property-read string      $meta_keywords
  * @property-read string      $url_alias
  * @property-read string      $relative_url
  * @property-read null|string $page_code
  * @property-read null|string $images
- * @property-read string      $meta_description
- * @property-read string      $meta_keywords
- * @property-read null|int    $order
  * @property-read string      $with_contact_form
  * @property-read string      $is_published
  * @property-read string      $publish_at
@@ -58,15 +60,77 @@ class CmsPageWrapper {
         return $this->page;
     }
 
-    public function getContent() {
-        // todo: get best fitting Text record using current app language and default app language
+    /**
+     * @return CmsTextWrapper
+     */
+    public function getTexts() {
+        return $this->getPage()->getLocalizedText();
     }
 
+    /**
+     * @return string
+     */
+    protected function getContent() {
+        return $this->getTexts()->content(true);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getMenuTitle() {
+        return $this->getTexts()->menu_title();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getTitle() {
+        return $this->getTexts()->title();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getBrowserTitle() {
+        return $this->getTexts()->browser_title();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getMetaDescription() {
+        return $this->getTexts()->meta_description();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getMetaKeywords() {
+        return $this->getTexts()->meta_keywords();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValid() {
+        return $this->getPage()->isValid();
+    }
+
+    public function sendMetaTagsAndPageTitleSectionToLayout() {
+        \View::startSection('meta-description', $this->getMetaDescription());
+        \View::startSection('meta-keywords', $this->getMetaKeywords());
+        \View::startSection('browser-title', $this->getBrowserTitle());
+    }
+
+    /**
+     * @param string $property
+     * @return mixed
+     */
     public function __get($property) {
         $method = 'get' . StringUtils::classify($property);
         if (method_exists($this, $method)) {
             return $this->$method();
         }
-        return $this->page->$property;
+        return $this->getPage()->$property;
     }
 }

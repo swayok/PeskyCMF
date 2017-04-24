@@ -51,9 +51,9 @@ class CmsTextWrapper {
             throw new \InvalidArgumentException('$fallbackLanguage argument must contain a string with 2 letters (for example: "en") or null');
         }
         $this->page = $page;
-        $this->mainLanguage = $mainLanguage;
-        if (!empty($fallbackLanguage)) {
-            $this->fallbackLanguage = $fallbackLanguage;
+        $this->mainLanguage = strtolower($mainLanguage);
+        if (!empty($fallbackLanguage) && strtolower($fallbackLanguage) !== $this->mainLanguage) {
+            $this->fallbackLanguage = strtolower($fallbackLanguage);
         }
     }
 
@@ -112,6 +112,7 @@ class CmsTextWrapper {
 
     /**
      * @param string $columnName
+     * @param string|null $fallbackColumnName - column name to use if $columnName is empty
      * @return mixed
      * @throws \PeskyORM\Exception\InvalidDataException
      * @throws \UnexpectedValueException
@@ -120,17 +121,33 @@ class CmsTextWrapper {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    protected function getDataFromTextRecords($columnName) {
-        if ($this->getMainTextRecord()->existsInDb() && !empty($this->getMainTextRecord()->$columnName)) {
-            $value = $this->getFallbackTextRecord()->$columnName;
-            if (!is_string($value) || trim((string)$value) !== '') {
-                return $value;
+    protected function getDataFromTextRecords($columnName, $fallbackColumnName = null) {
+        if ($this->getMainTextRecord()->existsInDb()) {
+            if (!empty($this->getMainTextRecord()->$columnName)) {
+                $value = $this->getMainTextRecord()->$columnName;
+                if (!is_string($value) || trim((string)$value) !== '') {
+                    return $value;
+                }
+            } else if (!empty($fallbackColumnName) && !empty($this->getMainTextRecord()->$fallbackColumnName)) {
+                $value = $this->getMainTextRecord()->$fallbackColumnName;
+                /** @noinspection NotOptimalIfConditionsInspection */
+                if (!is_string($value) || trim((string)$value) !== '') {
+                    return $value;
+                }
             }
         }
-        if ($this->getFallbackTextRecord()->existsInDb() && !empty($this->getFallbackTextRecord()->$columnName)) {
-            $value = $this->getFallbackTextRecord()->$columnName;
-            if (!is_string($value) || trim((string)$value) !== '') {
-                return $value;
+        if ($this->getFallbackTextRecord()->existsInDb()) {
+            if (!empty($this->getFallbackTextRecord()->$columnName)) {
+                $value = $this->getFallbackTextRecord()->$columnName;
+                if (!is_string($value) || trim((string)$value) !== '') {
+                    return $value;
+                }
+            } else if (!empty($fallbackColumnName) && !empty($this->getFallbackTextRecord()->$fallbackColumnName)) {
+                $value = $this->getFallbackTextRecord()->$fallbackColumnName;
+                /** @noinspection NotOptimalIfConditionsInspection */
+                if (!is_string($value) || trim((string)$value) !== '') {
+                    return $value;
+                }
             }
         }
         return '';
@@ -141,7 +158,7 @@ class CmsTextWrapper {
      */
     public function browser_title() {
         if ($this->browser_title === null) {
-            $this->browser_title = $this->getDataFromTextRecords('browser_title');
+            $this->browser_title = trim((string)$this->getDataFromTextRecords('browser_title', 'title'));
         }
         return $this->browser_title;
     }
@@ -151,7 +168,7 @@ class CmsTextWrapper {
      */
     public function title() {
         if ($this->title === null) {
-            $this->title = $this->getDataFromTextRecords('title');
+            $this->title = trim((string)$this->getDataFromTextRecords('title'));
         }
         return $this->title;
     }
@@ -161,7 +178,7 @@ class CmsTextWrapper {
      */
     public function menu_title() {
         if ($this->menu_title === null) {
-            $this->menu_title = $this->getDataFromTextRecords('menu_title');
+            $this->menu_title = trim((string)$this->getDataFromTextRecords('menu_title', 'title'));
         }
         return $this->menu_title;
     }
@@ -186,7 +203,7 @@ class CmsTextWrapper {
      */
     public function meta_description() {
         if ($this->meta_description === null) {
-            $this->meta_description = $this->getDataFromTextRecords('meta_description');
+            $this->meta_description = trim((string)$this->getDataFromTextRecords('meta_description'));
         }
         return $this->meta_description;
     }
@@ -196,7 +213,7 @@ class CmsTextWrapper {
      */
     public function meta_keywords() {
         if ($this->meta_keywords === null) {
-            $this->meta_keywords = $this->getDataFromTextRecords('meta_keywords');
+            $this->meta_keywords = trim((string)$this->getDataFromTextRecords('meta_keywords'));
         }
         return $this->meta_keywords;
     }
