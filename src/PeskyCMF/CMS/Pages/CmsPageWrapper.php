@@ -20,6 +20,7 @@ use Swayok\Utils\StringUtils;
  * @property-read string      $meta_keywords
  * @property-read string      $url_alias
  * @property-read string      $relative_url
+ * @property-read string      $page_html_id
  * @property-read null|string $page_code
  * @property-read null|string $images
  * @property-read string      $with_contact_form
@@ -107,6 +108,13 @@ class CmsPageWrapper {
      */
     protected function getMetaKeywords() {
         return $this->getTexts()->meta_keywords();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getPageHtmlId() {
+        return strtolower(preg_replace('%[^a-zA-Z0-9_]+%', '-', $this->getPage()->page_code ?: $this->getPage()->relative_url));
     }
 
     /**

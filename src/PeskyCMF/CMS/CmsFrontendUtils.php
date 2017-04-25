@@ -164,9 +164,12 @@ abstract class CmsFrontendUtils {
      * @param string $textWithInserts
      * @return string
      */
-    public static function processDataInsertsForText($textWithInserts) {
-        // todo: should I use \Blade::compileString($textWithInserts); ??
-        return \View::yieldContent(Uuid::uuid4(), $textWithInserts);
+    public static function processDataInsertsForText($textWithInserts, $uuid) {
+        return view([
+            'template' => $textWithInserts,
+            'cache_key' => $uuid,
+            'secondsTemplateCacheExpires' => config('app.debug') ? 0 : 3600
+        ]);
     }
 
     /**

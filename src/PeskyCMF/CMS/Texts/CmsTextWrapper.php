@@ -193,7 +193,10 @@ class CmsTextWrapper {
         }
 
         if ($processInserts && $this->contentProcessed === null) {
-            $this->contentProcessed = CmsFrontendUtils::processDataInsertsForText($this->content);
+            $this->contentProcessed = CmsFrontendUtils::processDataInsertsForText(
+                $this->content,
+                'page-' . $this->getPage()->id . '-lang-' . $this->mainLanguage . '-updated-at-' . $this->getPage()->updated_at_as_unix_ts
+            );
         }
         return $processInserts ? $this->contentProcessed : $this->content;
     }
