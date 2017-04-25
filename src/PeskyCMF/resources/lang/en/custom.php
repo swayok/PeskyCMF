@@ -213,7 +213,8 @@ $dictionary = [
             'news' => 'News item',
             'category' => 'Category',
             'item' => 'Item',
-            'text_element' => 'Text block'
+            'text_element' => 'Text block',
+            'menu' => 'Menu',
         ],
         'datagrid' => [
             'header' => 'Pages',
@@ -515,11 +516,86 @@ $dictionary = [
             'header' => 'Text block details',
         ]
     ],
+    'menus' => [
+        'menu_title' => 'Menus',
+        'datagrid' => [
+            'header' => 'Menus',
+        ],
+        'form' => [
+            'header_create' => 'Menu creation',
+            'header_edit' => 'Menu editing',
+        ],
+        'item_details' => [
+            'header' => 'Menu details',
+        ]
+    ],
+    'redirects' => [
+        'menu_title' => 'Redirects',
+        'datagrid' => [
+            'header' => 'Redirects',
+            'column' => [
+                'relative_url' => 'Redirect from',
+                'page_id' => 'Redirect to page',
+                'is_permanent' => 'Is permanent?',
+                'id' => 'ID',
+                'admin_id' => 'Last modifier',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+            ],
+            'filter' => [
+                'redirects' => [
+                    'page_id' => 'Target page ID',
+                    'relative_url' => 'Redirect from URL',
+                    'is_permanent' => 'Is permanent?',
+                    'id' => 'ID',
+                    'admin_id' => 'Last modifier',
+                    'created_at' => 'Created',
+                    'updated_at' => 'Updated',
+                ],
+                'page' => [
+                    'title' => 'Target page title',
+                    'url_alias' => 'Target page URL (without its parent\'s URL)'
+                ]
+            ]
+        ],
+        'form' => [
+            'header_create' => 'Redirect creation',
+            'header_edit' => 'Redirect editing',
+            'input' => [
+                'relative_url' => 'Redirect from URL',
+                'page_id' => 'Redirect to page',
+                'is_permanent' => 'Is permanent?',
+                'id' => 'ID',
+                'admin_id' => 'Last modifier',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+                'page_types' => [
+                    'page' => 'Pages',
+                    'news' => 'News',
+                    'category' => 'Shop categories',
+                    'item' => 'Shop items'
+                ]
+            ],
+        ],
+        'item_details' => [
+            'header' => 'Информация о перенаправлении',
+            'field' => [
+                'relative_url' => 'Redirect from URL',
+                'page_id' => 'Redirect to page',
+                'is_permanent' => 'Is permanent?',
+                'id' => 'ID',
+                'admin_id' => 'Last modifier',
+                'created_at' => 'Created',
+                'updated_at' => 'Updated',
+            ]
+        ]
+    ]
 ];
 
 $dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);
 $dictionary['shop_categories'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_categories']);
 $dictionary['shop_items'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_items']);
 $dictionary['text_elements'] = array_replace_recursive($dictionary['pages'], $dictionary['text_elements']);
+$dictionary['menus'] = array_replace_recursive($dictionary['pages'], $dictionary['menus']);
 
 return $dictionary;

@@ -11,7 +11,7 @@ use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use Swayok\Utils\Set;
 
-class CmsTextElementsScaffoldConfig extends NormalTableScaffoldConfig {
+class CmsMenusScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
@@ -67,13 +67,6 @@ class CmsTextElementsScaffoldConfig extends NormalTableScaffoldConfig {
                 }
                 return $record;
             });
-        /** @var CmsPagesTable $pagesTable */
-//        $pagesTable = app(CmsPagesTable::class);
-//        if ($pagesTable->getTableStructure()->images->hasImagesConfigurations()) {
-//            $itemDetailsConfig->addTab($this->translate('item_details.tab', 'images'), [
-//                'images',
-//            ]);
-//        }
         /** @var CmsSetting $cmsSetting */
         $cmsSetting = app(CmsSetting::class);
         foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
@@ -84,11 +77,11 @@ class CmsTextElementsScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setValueConverter(function () use ($langLabel) {
                         return $langLabel;
                     }),
+                "Texts.$langId.menu_title" => ValueCell::create()->setNameForTranslation('Texts.menu_title'),
 //                "Texts.$langId.comment" => ValueCell::create()->setNameForTranslation('Texts.comment'),
                 "Texts.$langId.content" => ValueCell::create()
                     ->setType(ValueCell::TYPE_HTML)
                     ->setNameForTranslation('Texts.content'),
-
             ]);
         }
         return $itemDetailsConfig;
@@ -117,8 +110,7 @@ class CmsTextElementsScaffoldConfig extends NormalTableScaffoldConfig {
                 'comment',
                 'type' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN),
-                'is_published' => FormInput::create()
-                    ->setType(FormInput::TYPE_HIDDEN),
+                'is_published' => FormInput::create(),
                 'admin_id' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
             ])
@@ -146,8 +138,7 @@ class CmsTextElementsScaffoldConfig extends NormalTableScaffoldConfig {
             })
             ->setIncomingDataModifier(function (array $data) use ($pageClass) {
                 $data['admin_id'] = \Auth::guard()->user()->getAuthIdentifier();
-                $data['type'] = $pageClass::TYPE_TEXT_ELEMENT;
-                $data['is_published'] = false;
+                $data['type'] = $pageClass::TYPE_MENU;
                 if (!empty($data['Texts']) && is_array($data['Texts'])) {
                     foreach ($data['Texts'] as $i => &$textData) {
                         if (empty($textData['id'])) {

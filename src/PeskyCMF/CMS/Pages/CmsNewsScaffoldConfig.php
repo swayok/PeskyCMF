@@ -288,93 +288,11 @@ SCRIPT;
     }
 
     protected function getDataInsertsForContentEditor() {
-        return [
-            WysiwygFormInput::createDataInsertConfigWithArguments(
-                'insertPageData(":page_id", ":page_field")',
-                $this->translate('form.input.content_inserts', 'part_of_other_page'),
-                false,
-                [
-                    'page_id' => [
-                        'label' => $this->translate('form.input.content_inserts', 'page_id_arg_label'),
-                        'type' => 'select',
-                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'pages_for_inserts', true),
-                    ],
-                    'page_field' => [
-                        'label' => $this->translate('form.input.content_inserts', 'page_field_arg_label'),
-                        'type' => 'select',
-                        'options' => [
-                            'menu_title' => $this->translate('form.input', 'Texts.menu_title'),
-                            'content' => $this->translate('form.input', 'Texts.content'),
-                        ],
-                        'value' => 'content'
-                    ]
-                ],
-                $this->translate('form.input.content_inserts', 'page_insert_widget_title_template')
-            ),
-            WysiwygFormInput::createDataInsertConfigWithArguments(
-                'insertLinkToPage(":page_id", ":title")',
-                $this->translate('form.input.content_inserts', 'link_to_other_page'),
-                false,
-                [
-                    'page_id' => [
-                        'label' => $this->translate('form.input.content_inserts', 'page_id_arg_label'),
-                        'type' => 'select',
-                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'pages_for_inserts', true),
-                    ],
-                    'title' => [
-                        'label' => $this->translate('form.input.content_inserts', 'page_link_title_arg_label'),
-                        'type' => 'text',
-                    ]
-                ],
-                $this->translate('form.input.content_inserts', 'insert_link_to_page_widget_title_template')
-            ),
-            WysiwygFormInput::createDataInsertConfigWithArguments(
-                'insertPageData(":page_id", "content")',
-                $this->translate('form.input.content_inserts', 'text_block'),
-                false,
-                [
-                    'page_id' => [
-                        'label' => $this->translate('form.input.content_inserts', 'text_block_id_arg_label'),
-                        'type' => 'select',
-                        'options' => routeToCmfTableCustomData($this->getTableNameForRoutes(), 'text_blocks_for_inserts', true),
-                    ]
-                ],
-                $this->translate('form.input.content_inserts', 'text_block_insert_widget_title_template')
-            ),
-        ];
+        return CmsPagesScaffoldsHelper::getConfigsForWysiwygDataInserts($this);
     }
 
     public function getCustomData($dataId) {
-        /** @var CmsPage $pageClass */
-        $pageClass = app(CmsPage::class);
-        /** @var CmsPagesTable $pagesTable */
-        $pagesTable = app(CmsPagesTable::class);
-        switch ($dataId) {
-            case 'text_blocks_for_inserts':
-                return $pagesTable::selectAssoc('id', 'title', [
-                    'type' => $pageClass::TYPE_TEXT_ELEMENT,
-                    'id !=' => (int)request()->query('pk', 0) ?: 0,
-                ]);
-            case 'pages_for_inserts':
-                $pages = $pagesTable::select(['id', 'url_alias', 'type', 'Parent' => ['id', 'url_alias']], [
-                    'type !=' => $pageClass::TYPE_TEXT_ELEMENT,
-                    'id !=' => (int)request()->query('pk', 0) ?: 0,
-                ]);
-                $options = [];
-                $typesTrans = [];
-                /** @var CmsPage $pageData */
-                foreach ($pages as $pageData) {
-                    if (!array_key_exists($pageData->type, $typesTrans)) {
-                        $typesTrans[$pageData->type] = $this->translate('types', $pageData->type);
-                    }
-                    if (!array_key_exists($typesTrans[$pageData->type], $options)) {
-                        $options[$typesTrans[$pageData->type]] = [];
-                    }
-                    $options[$typesTrans[$pageData->type]][$pageData->id] = $pageData->relative_url;
-                }
-                return $options;
-            default:
-                return parent::getCustomData($dataId);
-        }
+         $data = CmsPagesScaffoldsHelper::getDataForWysiwygInserts($this, $dataId, (int)request()->query('pk', 0));
+         return ($data === null) ? parent::getCustomData($dataId) : $data;
     }
 }

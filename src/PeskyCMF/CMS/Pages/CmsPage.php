@@ -65,13 +65,24 @@ class CmsPage extends CmsRecord {
     const TYPE_ITEM = 'item';
     const TYPE_NEWS = 'news';
     const TYPE_TEXT_ELEMENT = 'text_element';
+    const TYPE_MENU = 'menu';
 
     static protected $types = [
         self::TYPE_PAGE,
         self::TYPE_NEWS,
         self::TYPE_CATEGORY,
         self::TYPE_ITEM,
+        self::TYPE_MENU,
         self::TYPE_TEXT_ELEMENT,
+    ];
+
+    /**
+     * Page types that cannot be inserted as link
+     * @var array
+     */
+    static protected $typesWithoutUrls = [
+        self::TYPE_TEXT_ELEMENT,
+        self::TYPE_MENU
     ];
     /** @var CmsTextWrapper */
     protected $textsWrapper;
@@ -85,6 +96,12 @@ class CmsPage extends CmsRecord {
 
     static public function getTypes($asOptions = false) {
         return static::toOptions(static::$types, $asOptions, function ($value) {
+            return cmfTransCustom('.pages.types.' . $value);
+        }, true);
+    }
+
+    static public function getTypesWithoutUrls($asOptions = false) {
+        return static::toOptions(static::$typesWithoutUrls, $asOptions, function ($value) {
             return cmfTransCustom('.pages.types.' . $value);
         }, true);
     }

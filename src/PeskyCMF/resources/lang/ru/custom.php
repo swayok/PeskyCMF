@@ -214,7 +214,8 @@ $dictionary = [
             'news' => 'Новость',
             'category' => 'Категория',
             'item' => 'Товар',
-            'text_element' => 'Текстовый блок'
+            'text_element' => 'Текстовый блок',
+            'menu' => 'Меню',
         ],
         'datagrid' => [
             'header' => 'Страницы',
@@ -513,6 +514,19 @@ $dictionary = [
             'header' => 'Просмотр текстового блока',
         ]
     ],
+    'menus' => [
+        'menu_title' => 'Меню',
+        'datagrid' => [
+            'header' => 'Меню',
+        ],
+        'form' => [
+            'header_create' => 'Добавление меню',
+            'header_edit' => 'Редактирование меню',
+        ],
+        'item_details' => [
+            'header' => 'Просмотр меню',
+        ]
+    ],
     'redirects' => [
         'menu_title' => 'Перенаправления',
         'datagrid' => [
@@ -580,5 +594,6 @@ $dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary[
 $dictionary['shop_categories'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_categories']);
 $dictionary['shop_items'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_items']);
 $dictionary['text_elements'] = array_replace_recursive($dictionary['pages'], $dictionary['text_elements']);
+$dictionary['menus'] = array_replace_recursive($dictionary['pages'], $dictionary['menus']);
 
 return $dictionary;
