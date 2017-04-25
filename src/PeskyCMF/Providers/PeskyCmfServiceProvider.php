@@ -8,6 +8,7 @@ use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
+use Wpb\String_Blade_Compiler\ViewServiceProvider;
 
 class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
@@ -23,6 +24,9 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
     }
 
     public function boot() {
+        \StringBlade::directive('wysiwygInsert', function ($param) {
+            return '<?php echo ' . html_entity_decode($param) . '; ?>';
+        });
         $this->configurePublishes();
         /** @var CmfConfig|string $defaultCmfConfig */
         $defaultCmfConfig = config('cmf.default_scaffold_config');
@@ -38,6 +42,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         $this->app->register(PeskyOrmServiceProvider::class);
         $this->app->register(PeskyValidationServiceProvider::class);
         $this->app->register(SuppressLaravelDatabaseServiceProvider::class);
+        $this->app->register(ViewServiceProvider::class);
 
         if ($this->app->environment() === 'local') {
             if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {

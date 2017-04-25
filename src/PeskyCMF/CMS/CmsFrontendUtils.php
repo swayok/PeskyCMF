@@ -9,7 +9,6 @@ use PeskyCMF\CMS\Pages\CmsPageWrapper;
 use PeskyCMF\CMS\Redirects\CmsRedirect;
 use PeskyCMF\HttpCode;
 use PeskyORM\ORM\RecordInterface;
-use Ramsey\Uuid\Uuid;
 use Swayok\Html\EmptyTag;
 use Swayok\Html\Tag;
 
@@ -28,9 +27,9 @@ abstract class CmsFrontendUtils {
      * @return Route
      */
     static public function addRouteForPages($routeAction, array $excludeUrlPrefixes = []) {
-        $route = \Route::get('{url}', $routeAction);
+        $route = \Route::get('{page_url}', $routeAction);
         if (count($excludeUrlPrefixes) > 0) {
-            $route->where('url', '/?(?!' . implode('|', $excludeUrlPrefixes) . ').*');
+            $route->where('page_url', '/?(?!' . implode('|', $excludeUrlPrefixes) . ').*');
         }
         return $route;
     }
@@ -47,9 +46,9 @@ abstract class CmsFrontendUtils {
      * @return Route
      */
     static public function addRouteForPagesWithDefaultAction($view, \Closure $viewData = null, array $excludeUrlPrefixes = []) {
-        return static::addRouteForPages(function ($url) use ($view, $viewData) {
+        return static::addRouteForPages(function ($pageUrl = '/') use ($view, $viewData) {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return static::renderPage($url, $view, $viewData);
+            return static::renderPage('/' . ltrim($pageUrl, '/'), $view, $viewData);
         }, $excludeUrlPrefixes);
     }
 
@@ -155,7 +154,7 @@ abstract class CmsFrontendUtils {
             }
         }
         return Tag::a()
-            ->setContent($linkText)
+            ->setContent(trim(stripslashes($linkText)))
             ->setHref(rtrim($page->relative_url, '/'))
             ->setAttribute('target', $openInNewTab ? '_blank' : null);
     }

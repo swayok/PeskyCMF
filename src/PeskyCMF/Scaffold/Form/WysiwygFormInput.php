@@ -210,7 +210,7 @@ class WysiwygFormInput extends FormInput {
                         'InsertsLoader returned invalid data insert config. Confirm that config is array and has keys "code" and "title"'
                     );
                 }
-                $config['code'] = "{!! {$config['code']} !!}";
+                $config['code'] = "@wysiwygInsert({$config['code']})";
                 $config['is_block'] = (bool)array_get($config, 'is_block', false);
                 $inserts[] = $config;
             }

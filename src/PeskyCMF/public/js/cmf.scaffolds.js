@@ -1384,9 +1384,17 @@ var ScaffoldFormHelper = {
         if (!CKEDITOR.plugins.get(pluginName)) {
             var comboboxPanelCss = 'body{font-family:Arial,sans-serif;font-size:14px;}';
             var locale = CmfConfig.getLocalizationStringsForComponent('ckeditor');
-            var insertTpl = doT.template(
-                '<{{= it.__tag }} title="{{! it.title }}" class="wysiwyg-data-insert">{{= it.code }}</{{= it.__tag }}>'
-            );
+            var renderInsert = function (tplData) {
+                var tag = tplData.__tag || 'div';
+                return $('<insert></insert>')
+                    .append(
+                        $('<' + tag + '></' + tag + '>')
+                        .addClass('wysiwyg-data-insert')
+                        .attr('title', (tplData.title || '').replace(/"/g, '\''))
+                        .text(tplData.code || '')
+                    )
+                    .html();
+            };
             CKEDITOR.plugins.add(pluginName, {
                 requires: 'widget',
                 allowedContent: allowedContent,
@@ -1406,6 +1414,7 @@ var ScaffoldFormHelper = {
                             for (var i = 0; i < editor.config.data_inserts.length; i++) {
                                 var optionValue;
                                 var insertInfo = editor.config.data_inserts[i];
+                                insertInfo.title = $.trim(insertInfo.title);
                                 if (insertInfo.args_options && $.isPlainObject(insertInfo.args_options)) {
                                     insertInfo.args_options.__tag = {
                                         type: 'select',
@@ -1428,7 +1437,7 @@ var ScaffoldFormHelper = {
                                                 tplData.__tag = data.__tag || 'span';
                                                 delete data.__tag;
                                                 for (var argName in data) {
-                                                    tplData.code = tplData.code.replace(':' + argName, data[argName]);
+                                                    tplData.code = tplData.code.replace(':' + argName, data[argName].replace(/(['"])/g, '\\$1'));
                                                 }
                                                 if (insertInfo.widget_title_tpl) {
                                                     tplData.title = tplData.widget_title_tpl;
@@ -1437,26 +1446,24 @@ var ScaffoldFormHelper = {
                                                             // select
                                                             tplData.title = tplData.title.replace(
                                                                 ':' + argName + '.value',
-                                                                data[argName]
+                                                                $.trim(data[argName])
                                                             );
                                                             if (optionsOfAllSelects[argName]) {
                                                                 tplData.title = tplData.title.replace(
                                                                     ':' + argName + '.label',
-                                                                    optionsOfAllSelects[argName][data[argName]] || ''
+                                                                    $.trim(optionsOfAllSelects[argName][data[argName]]) || ''
                                                                 );
                                                             }
                                                         } else {
                                                             // text or checkbox
-                                                            tplData.title = tplData.title.replace(':' + argName, data[argName]);
+                                                            tplData.title = tplData.title.replace(':' + argName, $.trim(data[argName]));
                                                         }
                                                     }
                                                 }
-                                                /*if (data.__title) {
-                                                    insertInfo.title = data
-                                                }*/
+                                                tplData.title = $.trim(tplData.title);
                                                 editor.focus();
                                                 editor.fire('saveSnapshot');
-                                                editor.insertHtml(insertTpl(tplData));
+                                                editor.insertHtml(renderInsert(tplData), 'unfiltered_html');
                                                 editor.fire('saveSnapshot');
                                             }
                                         )
@@ -1467,7 +1474,7 @@ var ScaffoldFormHelper = {
                                     optionValue = 'dialog:' + dialogName;
                                 } else {
                                     insertInfo.__tag = insertInfo.is_block ? 'div' : 'span';
-                                    optionValue = insertTpl(insertInfo);
+                                    optionValue = renderInsert(insertInfo);
                                 }
                                 combobox.add(optionValue, insertInfo.title, insertInfo.title);
                                 // combobox._.committed = 0;
@@ -1521,24 +1528,30 @@ var ScaffoldFormHelper = {
             if (!inputConfig.type) {
                 inputConfig.type = inputConfig.options ? 'select' : 'text';
             }
-            var tmpConfig;
             switch (inputConfig.type) {
                 case 'select':
                     if (!inputConfig.options) {
                         console.error(dialogHeader + ': options are required for input "' + inputName + '"');
                         argsAreValid = false;
                     }
-                    tmpConfig = {
+                    var tmpConfig = {
                         type: 'select',
                         label: inputConfig.label,
-                        id: inputName,
+                        id: inputName, //< note: also used to collect optionsOfAllSelects
                         items: [],
                         'default': typeof inputConfig.value !== 'undefined' ? inputConfig.value : null
                     };
                     if ($.isPlainObject(inputConfig.options)) {
-                        optionsOfAllSelects[inputName] = inputConfig.options;
                         for (var optionValue in inputConfig.options) {
                             tmpConfig.items.push([inputConfig.options[optionValue], optionValue]);
+                        }
+                        tmpConfig.onLoad = function () {
+                            var select = this;
+                            var $select = $(select._.select.getElement().$);
+                            optionsOfAllSelects[select.id] = {};
+                            $select.find('option').each(function () {
+                                optionsOfAllSelects[select.id][this.value] = $(this).text();
+                            });
                         }
                     } else {
                         // url
@@ -1583,7 +1596,10 @@ var ScaffoldFormHelper = {
                                                 select.add(json[value], value);
                                             }
                                         }
-                                        optionsOfAllSelects[inputName] = json;
+                                        optionsOfAllSelects[select.id] = {};
+                                        $select.find('option').each(function () {
+                                            optionsOfAllSelects[select.id][this.value] = $(this).text();
+                                        });
                                     })
                                     .fail(Utils.handleAjaxError)
                             };

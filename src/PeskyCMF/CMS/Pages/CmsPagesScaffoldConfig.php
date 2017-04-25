@@ -325,7 +325,6 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 .parent()
                     .addClass('pn');
             parentIdSelect.selectpicker();
-            console.log(parentIdSelectContainer.html(), parentIdSelectContainer.find('button.dropdown-toggle'));
             parentIdSelectContainer
                 .css('height', '32px')
                 .addClass('mn')
