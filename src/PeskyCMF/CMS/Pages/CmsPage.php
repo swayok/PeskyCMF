@@ -3,7 +3,6 @@
 namespace PeskyCMF\CMS\Pages;
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\CmsRecord;
-use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Texts\CmsText;
 use PeskyCMF\CMS\Texts\CmsTextWrapper;
 use PeskyORM\ORM\RecordsSet;
@@ -114,12 +113,12 @@ class CmsPage extends CmsRecord {
     public function getLocalizedText($ignoreCache = false) {
         if ($ignoreCache || $this->textsWrapper === null) {
             $locale = app()->getLocale();
-            $localeRedirects = setting(CmsSetting::FALLBACK_LANGUAGES, []);
+            $localeRedirects = setting()->fallback_languages();
             if (is_array($localeRedirects) && !empty($localeRedirects[$locale])) {
                 // replace current locale by supported one. For example - replace 'ua' locale by 'ru'
                 $locale = $localeRedirects[$locale];
             }
-            $this->textsWrapper = new CmsTextWrapper($this, $locale, setting(CmsSetting::DEFAULT_LANGUAGE));
+            $this->textsWrapper = new CmsTextWrapper($this, $locale, setting()->default_language());
         }
         return $this->textsWrapper;
     }

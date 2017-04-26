@@ -3,6 +3,7 @@
 namespace PeskyCMF\Providers;
 
 use LaravelSiteLoader\Providers\AppSitesServiceProvider;
+use PeskyCMF\CMS\CmsFrontendUtils;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
@@ -24,9 +25,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
     }
 
     public function boot() {
-        \StringBlade::directive('wysiwygInsert', function ($param) {
-            return '<?php echo ' . html_entity_decode($param) . '; ?>';
-        });
+        CmsFrontendUtils::registerBladeDirectiveForStringTemplateRendering();
         $this->configurePublishes();
         /** @var CmfConfig|string $defaultCmfConfig */
         $defaultCmfConfig = config('cmf.default_scaffold_config');

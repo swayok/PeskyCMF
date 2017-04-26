@@ -3,11 +3,8 @@
 namespace PeskyCMF\CMS\Texts;
 
 use PeskyCMF\CMS\CmsTableStructure;
-use PeskyCMF\CMS\Pages\CmsPage;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
-use PeskyCMF\CMS\Settings\CmsSetting;
 use PeskyCMF\CMS\Traits\AdminIdColumn;
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyCMF\Db\Traits\TimestampColumns;
 use PeskyORM\ORM\Column;
@@ -48,11 +45,9 @@ class CmsTextsTableStructure extends CmsTableStructure {
     }
 
     private function language() {
-        /** @var CmsSetting $cmsSettings */
-        $cmsSettings = app(CmsSetting::class);
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
-            ->setDefaultValue($cmsSettings::default_language(null, CmfConfig::getDefault()->default_locale()));
+            ->setDefaultValue(setting()->default_language());
     }
 
     private function title() {

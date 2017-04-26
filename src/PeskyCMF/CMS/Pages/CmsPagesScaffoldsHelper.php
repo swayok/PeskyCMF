@@ -2,13 +2,14 @@
 
 namespace PeskyCMF\CMS\Pages;
 
+use PeskyCMF\CMS\CmsAppSettings;
 use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 
 abstract class CmsPagesScaffoldsHelper {
 
     static public function getConfigsForWysiwygDataInserts(ScaffoldConfig $scaffold) {
-        return [
+        $ret = [
             WysiwygFormInput::createDataInsertConfigWithArguments(
                 'insertPageData(":page_id", ":page_field")',
                 $scaffold->translate('form.input.content_inserts', 'part_of_other_page'),
@@ -62,6 +63,15 @@ abstract class CmsPagesScaffoldsHelper {
                 $scaffold->translate('form.input.content_inserts', 'text_block_insert_widget_title_template')
             ),
         ];
+        /** @var CmsAppSettings $appSettings */
+        $appSettings = app(CmsAppSettings::class);
+        foreach ($appSettings::getSettingsForWysiwygDataIsnserts() as $settingName) {
+            $ret[] = WysiwygFormInput::createDataInsertConfig(
+                "setting('$settingName')",
+                cmfTransCustom('.settings.content_inserts.' . $settingName)
+            );
+        }
+        return $ret;
     }
 
     /**

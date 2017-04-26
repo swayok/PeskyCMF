@@ -292,11 +292,15 @@ if (!function_exists('setting')) {
      * Get value for CmsSetting called $name (CmsSetting->key === $name)
      * @param string $name - setting name
      * @param mixed $default - default value
-     * @return mixed
+     * @return mixed|\PeskyCMF\CMS\CmsAppSettings|\App\AppSettings
      */
-    function setting($name, $default = null) {
-        /** @var \PeskyCMF\CMS\Settings\CmsSetting $class */
-        $class = app(\PeskyCMF\CMS\Settings\CmsSetting::class);
-        return $class::get($name, null, $default);
+    function setting($name = null, $default = null) {
+        /** @var \PeskyCMF\CMS\CmsAppSettings $class */
+        $class = app(\PeskyCMF\CMS\CmsAppSettings::class);
+        if ($name === null) {
+            return $class::getInstance();
+        } else {
+            return $class::$name($default);
+        }
     }
 }

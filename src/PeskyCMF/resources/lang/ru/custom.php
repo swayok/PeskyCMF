@@ -522,9 +522,19 @@ $dictionary = [
         'form' => [
             'header_create' => 'Добавление меню',
             'header_edit' => 'Редактирование меню',
+            'input' => [
+                'Texts' => [
+                    'menu_title' => 'Заголовок меню',
+                ]
+            ]
         ],
         'item_details' => [
             'header' => 'Просмотр меню',
+            'field' => [
+                'Texts' => [
+                    'menu_title' => 'Заголовок меню',
+                ]
+            ]
         ]
     ],
     'redirects' => [

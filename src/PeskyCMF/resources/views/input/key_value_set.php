@@ -33,6 +33,10 @@ $inputName = $valueViewer->getName(true);
             </td>
         </tr>
     </script>
+    <div class="form-group">
+        <input type="hidden" name="<?php echo $inputName; ?>[]" id="<?php echo $defaultId; ?>" value="">
+        <input type="hidden" disabled name="<?php echo $inputName; ?>" id="<?php echo $defaultId; ?>">
+    </div>
     <table class="table table-condensed table-bordered table-striped mbn">
         <?php if (!empty($keysLabel) || !empty($valuesLabel)): ?>
         <thead>
@@ -47,9 +51,6 @@ $inputName = $valueViewer->getName(true);
 
         </tbody>
     </table>
-    <div class="form-group">
-        <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $defaultId; ?>">
-    </div>
     <div class="mv15 text-center">
         <button type="button" class="btn btn-default btn-sm" id="<?php echo $defaultId; ?>-add-row">
             <?php echo $valueViewer->getAddRowButtonLabel() ?>
@@ -63,7 +64,7 @@ $inputName = $valueViewer->getName(true);
     $(function () {
         var $rowsContainer = $('#<?php echo $defaultId ?>-rows-container');
         var rowTpl = doT.template($('#<?php echo $defaultId ?>-row-tpl').html());
-        var values = <?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode') ?>;
+        var values = <?php echo $valueViewer->getDotJsInsertForValue([], 'array_encode') ?>;
         var maxRows = <?php echo $valueViewer->getMaxValuesCount(); ?>;
         var minRows = <?php echo $valueViewer->getMinValuesCount(); ?>;
         var rowIndex = 0;

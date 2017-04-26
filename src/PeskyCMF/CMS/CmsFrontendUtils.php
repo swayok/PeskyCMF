@@ -17,6 +17,12 @@ abstract class CmsFrontendUtils {
     /** @var CmsPageWrapper[] */
     static protected $loadedPages = [];
 
+    static public function registerBladeDirectiveForStringTemplateRendering() {
+        \StringBlade::directive('wysiwygInsert', function ($param) {
+            return '<?php echo ' . html_entity_decode($param, ENT_QUOTES | ENT_HTML401) . '; ?>';
+        });
+    }
+
     /**
      * Declare route that will handle HTTP GET requests to CmsPagesTable
      * @param string|\Closure $routeAction - Closure, 'Controller@action' string, array.
@@ -74,7 +80,6 @@ abstract class CmsFrontendUtils {
     static public function renderPage($url, $view, \Closure $viewData = null) {
         $url = strtolower(rtrim($url, '/'));
         // search for url in redirects
-        // todo: implement group redirect when redirect registered on page that has children
         /** @var CmsRedirect $redirectClass */
         $redirectClass = app(CmsRedirect::class);
         $redirect = $redirectClass::find([
@@ -110,6 +115,7 @@ abstract class CmsFrontendUtils {
     }
 
     /**
+     * Get value of $columnName from page identified by $pageIdOrPageCode
      * @param int $pageIdOrPageCode
      * @param string $columnName
      * @return string
@@ -120,7 +126,7 @@ abstract class CmsFrontendUtils {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public static function getPageDataForInsert($pageIdOrPageCode, $columnName = 'content') {
+    static public function getPageDataForInsert($pageIdOrPageCode, $columnName = 'content') {
         $page = static::getPage($pageIdOrPageCode);
         if (!$page->isValid()) {
             return '';
@@ -141,7 +147,7 @@ abstract class CmsFrontendUtils {
      * @throws \BadMethodCallException
      * @throws \Swayok\Html\HtmlTagException
      */
-    public static function makeHtmlLinkToPageForInsert($pageIdOrPageCode, $linkText = null, $openInNewTab = false) {
+    static public function makeHtmlLinkToPageForInsert($pageIdOrPageCode, $linkText = null, $openInNewTab = false) {
         $page = static::getPage($pageIdOrPageCode);
         if (!$page->isValid()) {
             return EmptyTag::create();
@@ -161,14 +167,113 @@ abstract class CmsFrontendUtils {
 
     /**
      * @param string $textWithInserts
+     * @param string $cacheKey
      * @return string
      */
-    public static function processDataInsertsForText($textWithInserts, $uuid) {
+    static public function processDataInsertsForText($textWithInserts, $cacheKey) {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return view([
-            'template' => $textWithInserts,
-            'cache_key' => $uuid,
+            'template' => preg_replace(
+                ['%<span[^>]+class="wysiwyg-data-insert"[^>]*>(.*?)</span>%is', '%<div[^>]+class="wysiwyg-data-insert"[^>]*>(.*?)</div>%is'],
+                ['$1', '<div>$1</div>'],
+                $textWithInserts
+            ),
+            'cache_key' => $cacheKey,
             'secondsTemplateCacheExpires' => config('app.debug') ? 0 : 3600
-        ]);
+        ])->render();
+    }
+
+    /**
+     * Get rendered text block contents
+     * @param string $pageCode
+     * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    static public function getTextBlock($pageCode) {
+        $page = static::getPage($pageCode);
+        return static::processDataInsertsForText(
+            $page->content,
+            static::makeCacheKeyForPageContentView($page, $page->getTexts()->getMainLanguage())
+        );
+    }
+
+    /**
+     * Get rendered menu contents
+     * @param string $pageCode
+     * @param null|string $language - 2-letter code of language
+     * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    static public function getMenu($pageCode) {
+        $page = static::getPage($pageCode);
+        return static::processDataInsertsForText(
+            $page->content,
+            static::makeCacheKeyForPageContentView($page, $page->getTexts()->getMainLanguage())
+        );
+    }
+
+    /**
+     * Extract links from menu's content
+     * @param string $pageCode
+     * @param bool $parseLinks
+     *  - false: return list of strings like '<a href="/link/url">link content</a>'
+     *  - true: return list of arrays in format: ['url' => '/link/url', 'text' => 'link content']
+     * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    static public function getLinksForMenu($pageCode, $parseLinks = false) {
+        $links = [];
+        if (preg_match_all('%<a[^>]+href=([\'"])(.*?)\1[^>]+>(.*?)</a>%is', static::getMenu($pageCode), $matches)) {
+            if ($parseLinks) {
+                foreach ($matches[2] as $index => $url) {
+                    $links[] = [
+                        'url' => $url,
+                        'text' => $matches[3][$index]
+                    ];
+                }
+            } else {
+                $links = $matches[0];
+            }
+        }
+        return $links;
+    }
+
+    /**
+     * @param CmsPage|CmsPageWrapper $page
+     * @param $language
+     * @return string
+     */
+    static public function makeCacheKeyForPageContentView($page, $language) {
+        return 'page-' . $page->id . '-lang-' . $language . '-updated-at-' . $page->updated_at_as_unix_ts;
+    }
+
+    /**
+     * @param string $pageCode
+     * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    static public function getMenuHeader($pageCode) {
+        return static::getPageDataForInsert($pageCode, 'menu_title');
     }
 
     /**
@@ -181,7 +286,7 @@ abstract class CmsFrontendUtils {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static protected function getPage($pageIdOrPageCode) {
+    static public function getPage($pageIdOrPageCode) {
         return static::getPageFromCache($pageIdOrPageCode, function ($pageIdOrPageCode) {
             /** @var CmsPage $pageClass */
             $pageClass = app(CmsPage::class);
@@ -277,4 +382,5 @@ abstract class CmsFrontendUtils {
     static protected function normalizePageUrl($url) {
         return strtolower(rtrim((string)$url, '/'));
     }
+
 }

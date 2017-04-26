@@ -179,6 +179,37 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * Add inputs to existing tab. If tab not exists - new one will be created
+     * @param $tabLabel
+     * @param array $formInputs
+     * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function updateTab($tabLabel, array $formInputs) {
+        $tabExists = false;
+        foreach ($this->getTabs() as $tabIndex => $tabInfo) {
+            if (array_get($tabInfo, 'label') === $tabLabel) {
+                $this->currentTab = $tabIndex;
+                $this->currentInputsGroup = null;
+                if (count((array)array_get($tabInfo, 'groups', [])) === 1 && is_int(array_keys($tabInfo['groups'])[0])) {
+                    $this->currentInputsGroup = array_keys($tabInfo['groups'])[0];
+                }
+                $tabExists = true;
+                break;
+            }
+        }
+        if (!$tabExists) {
+            $this->newTab($tabLabel);
+        }
+        $this->setFormInputs($formInputs);
+        $this->currentTab = null;
+        $this->currentInputsGroup = null;
+        return $this;
+    }
+
+    /**
      * @param $label
      */
     protected function newInputsGroup($label) {

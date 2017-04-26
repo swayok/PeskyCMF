@@ -2,11 +2,8 @@
 
 namespace PeskyCMF\CMS\Pages;
 
-use PeskyCMF\CMS\Settings\CmsSetting;
-use PeskyCMF\CMS\Texts\CmsTextsTable;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
-use PeskyCMF\Scaffold\Form\ImagesFormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;
 use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
@@ -95,9 +92,7 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
 //                'images',
 //            ]);
 //        }
-        /** @var CmsSetting $cmsSetting */
-        $cmsSetting = app(CmsSetting::class);
-        foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
+        foreach (setting()->languages() as $langId => $langLabel) {
             $itemDetailsConfig->addTab($this->translate('item_details.tab', 'texts', ['language' => $langLabel]), [
                 "Texts.$langId.id" => ValueCell::create()->setNameForTranslation('Texts.id'),
                 "Texts.$langId.language" => ValueCell::create()
@@ -121,8 +116,6 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
     
     protected function createFormConfig() {
         $formConfig = parent::createFormConfig();
-        /** @var CmsSetting $cmsSetting */
-        $cmsSetting = app(CmsSetting::class);
         /** @var CmsPagesTable $pagesTable */
         $pagesTable = app(CmsPagesTable::class);
         /** @var CmsPage $pageClass */
@@ -169,7 +162,7 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                 'admin_id' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN),
             ])
-            ->setValidators(function () use ($cmsSetting, $pagesTable, $pageClass) {
+            ->setValidators(function () use ($pagesTable) {
                 $pagesTable::registerUniquePageUrlValidator($this);
                 $validators = [
                     'is_published' => 'required|boolean',
@@ -177,7 +170,7 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                     'title' => 'string|max:500',
                     'comment' => 'string|max:1000',
                 ];
-                foreach ($cmsSetting::languages() as $lang => $lebel) {
+                foreach (setting()->languages() as $lang => $lebel) {
                     $validators["Texts.$lang.browser_title"] = "required_with:Texts.$lang.content";
                 }
                 return $validators;
@@ -219,7 +212,7 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
 //                'images' => ImagesFormInput::create(),
 //            ]);
 //        }
-        foreach ($cmsSetting::languages(null, []) as $langId => $langLabel) {
+        foreach (setting()->languages() as $langId => $langLabel) {
             $formConfig->addTab($this->translate('form.tab', 'texts', ['language' => $langLabel]), [
                 "Texts.$langId.id" => FormInput::create()->setType(FormInput::TYPE_HIDDEN),
                 "Texts.$langId.browser_title" => FormInput::create()->setNameForTranslation('Texts.browser_title'),

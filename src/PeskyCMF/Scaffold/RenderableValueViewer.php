@@ -62,7 +62,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
         $chain = 'it';
         for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
             $chain .= '.' . $parts[$i];
-            $conditions[] = "(typeof $chain != 'undefined')";
+            $conditions[] = "(typeof $chain !== 'undefined')";
         }
         $conditions[] = "$fullName !== null";
         switch ($type) {
@@ -77,7 +77,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
                 }
                 break;
             case 'json':
-                $conditions[] = "$.isPlainObject($fullName)";
+                $conditions[] = "$.isPlainObject($fullName) || $.isArray($fullName)";
                 $value = "($fullName || {})";
                 if ($default === null) {
                     $default = '{}';

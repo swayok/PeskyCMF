@@ -505,15 +505,19 @@ abstract class CmfConfig extends ConfigsContainer {
      * Translate from custom dictionary. Uses CmfConfig::getPrimary()
      * @param $path - must strat with '.'
      * @param array $parameters
-     * @param string $domain
      * @param null|string $locale
      * @return string
      */
-    static public function transCustom($path, array $parameters = [], $domain = 'messages', $locale = null) {
+    static public function transCustom($path, array $parameters = [], $locale = null) {
         $dict = CmfConfig::getPrimary()->custom_dictionary_name();
-        $trans = trans($dict . $path, $parameters, $domain, $locale);
-        if ($trans === $dict . $path && $dict !== 'cmf::custom') {
-            $trans = trans('cmf::custom' . $path, $parameters, $domain, $locale);
+        $primaryPath = $dict . $path;
+        $trans = trans($primaryPath, $parameters, $locale);
+        if ($trans === $primaryPath && $dict !== 'cmf::custom') {
+            $fallbackPath = 'cmf::custom' . $path;
+            $trans = trans($fallbackPath, $parameters, $locale);
+            if ($trans === $fallbackPath) {
+                return $primaryPath;
+            }
         }
         return $trans;
     }
@@ -529,15 +533,19 @@ abstract class CmfConfig extends ConfigsContainer {
     /**
      * @param $path - must strat with '.'
      * @param array $parameters
-     * @param string $domain
      * @param null|string $locale
      * @return string
      */
-    static public function transGeneral($path, array $parameters = [], $domain = 'messages', $locale = null) {
+    static public function transGeneral($path, array $parameters = [], $locale = null) {
         $dict = CmfConfig::getPrimary()->cmf_general_dictionary_name();
-        $trans = trans($dict . $path, $parameters, $domain, $locale);
-        if ($trans === $dict . $path && $dict !== 'cmf::cmf') {
-            $trans = trans('cmf::cmf' . $path, $parameters, $domain, $locale);
+        $primaryPath = $dict . $path;
+        $trans = trans($primaryPath, $parameters, $locale);
+        if ($trans === $primaryPath && $dict !== 'cmf::cmf') {
+            $fallbackPath = 'cmf::cmf' . $path;
+            $trans = trans($fallbackPath, $parameters, $locale);
+            if ($trans === $fallbackPath) {
+                return $primaryPath;
+            }
         }
         return $trans;
     }

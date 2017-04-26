@@ -524,9 +524,19 @@ $dictionary = [
         'form' => [
             'header_create' => 'Menu creation',
             'header_edit' => 'Menu editing',
+            'input' => [
+                'Texts' => [
+                    'menu_title' => 'Menu header',
+                ]
+            ]
         ],
         'item_details' => [
             'header' => 'Menu details',
+            'field' => [
+                'Texts' => [
+                    'menu_title' => 'Menu header',
+                ]
+            ]
         ]
     ],
     'redirects' => [

@@ -5,6 +5,7 @@ namespace PeskyCMF\Providers;
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\Admins\CmsAdminsTable;
 use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
+use PeskyCMF\CMS\CmsAppSettings;
 use PeskyCMF\CMS\Pages\CmsPage;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
 use PeskyCMF\CMS\Pages\CmsPagesTableStructure;
@@ -20,8 +21,11 @@ use PeskyCMF\CMS\Texts\CmsTextsTableStructure;
 
 class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
 
+    protected $appSettingsClass;
+
     public function register() {
         parent::register();
+        $this->appSettingsClass = config('cmf.app_settings_class') ?: CmsAppSettings::class;
         $this->registerAdminsDbClasses();
         $this->registerSettingsDbClasses();
         $this->registerPagesDbClasses();
@@ -64,6 +68,7 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
         $this->registerSettingsDbRecordClassName();
         $this->registerSettingsDbTable();
         $this->registerSettingsDbTableStructure();
+        $this->registerAppSettingsClass();
     }
 
     public function registerSettingsDbRecordClassName() {
@@ -83,6 +88,12 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
     public function registerSettingsDbTableStructure() {
         $this->app->singleton(CmsSettingsTableStructure::class, function () {
             return CmsSettingsTableStructure::getInstance();
+        });
+    }
+
+    public function registerAppSettingsClass() {
+        $this->app->singleton(CmsAppSettings::class, function () {
+            return $this->appSettingsClass;
         });
     }
 

@@ -58,6 +58,20 @@ class CmsTextWrapper {
     }
 
     /**
+     * @return string
+     */
+    public function getMainLanguage() {
+        return $this->mainLanguage;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFallbackLanguage() {
+        return $this->fallbackLanguage;
+    }
+
+    /**
      * @return CmsText
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
@@ -195,7 +209,7 @@ class CmsTextWrapper {
         if ($processInserts && $this->contentProcessed === null) {
             $this->contentProcessed = CmsFrontendUtils::processDataInsertsForText(
                 $this->content,
-                'page-' . $this->getPage()->id . '-lang-' . $this->mainLanguage . '-updated-at-' . $this->getPage()->updated_at_as_unix_ts
+                CmsFrontendUtils::makeCacheKeyForPageContentView($this->getPage(), $this->mainLanguage)
             );
         }
         return $processInserts ? $this->contentProcessed : $this->content;

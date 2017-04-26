@@ -1412,8 +1412,8 @@ var ScaffoldFormHelper = {
                         init: function () {
                             var combobox = this;
                             for (var i = 0; i < editor.config.data_inserts.length; i++) {
-                                var optionValue;
                                 var insertInfo = editor.config.data_inserts[i];
+                                var optionValue;
                                 insertInfo.title = $.trim(insertInfo.title);
                                 if (insertInfo.args_options && $.isPlainObject(insertInfo.args_options)) {
                                     insertInfo.args_options.__tag = {
@@ -1474,7 +1474,7 @@ var ScaffoldFormHelper = {
                                     optionValue = 'dialog:' + dialogName;
                                 } else {
                                     insertInfo.__tag = insertInfo.is_block ? 'div' : 'span';
-                                    optionValue = renderInsert(insertInfo);
+                                    optionValue = 'insert:' + i;
                                 }
                                 combobox.add(optionValue, insertInfo.title, insertInfo.title);
                                 // combobox._.committed = 0;
@@ -1482,9 +1482,24 @@ var ScaffoldFormHelper = {
                             }
                         },
                         onClick: function (value) {
-                            var matches = value.match(/^dialog:(.*)$/);
+                            var matches = value.match(/^(dialog|insert):(.*)$/);
                             if (matches !== null) {
-                                editor.openDialog(matches[1]);
+                                switch (matches[1]) {
+                                    case 'dialog':
+                                        editor.openDialog(matches[2]);
+                                        break;
+                                    case 'insert':
+                                        var insertInfo = editor.config.data_inserts[parseInt(matches[2])];
+                                        if (insertInfo) {
+                                            editor.focus();
+                                            editor.fire('saveSnapshot');
+                                            editor.insertHtml(renderInsert(insertInfo));
+                                            editor.fire('saveSnapshot');
+                                        } else {
+                                            console.error('Insert with index ' + matches[2] + ' not found');
+                                        }
+                                        break;
+                                }
                             } else {
                                 editor.focus();
                                 editor.fire('saveSnapshot');

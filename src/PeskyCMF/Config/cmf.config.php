@@ -26,4 +26,10 @@ return [
      * Must be an instance of a class that extends \PeskyCMF\Config\CmfConfig
      */
     'default_scaffold_config' => null,
+
+    /**
+     * Class that helps to get application settings from CmsSettingsTable
+     * Used by setting($name, $default) helper function
+     */
+    'app_settings_class' => \PeskyCMF\CMS\CmsAppSettings::class,
 ];
