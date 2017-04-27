@@ -138,7 +138,7 @@ class CmsTextElementsScaffoldConfig extends NormalTableScaffoldConfig {
             ->setIncomingDataModifier(function (array $data) use ($pageClass) {
                 $data['admin_id'] = \Auth::guard()->user()->getAuthIdentifier();
                 $data['type'] = $pageClass::TYPE_TEXT_ELEMENT;
-                $data['is_published'] = false;
+                $data['is_published'] = true;
                 if (!empty($data['Texts']) && is_array($data['Texts'])) {
                     foreach ($data['Texts'] as $i => &$textData) {
                         if (empty($textData['id'])) {
