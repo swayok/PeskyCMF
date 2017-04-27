@@ -270,7 +270,7 @@ if (!function_exists('insertPageData')) {
      * @return mixed
      */
     function insertPageData($pageId, $columnName = 'content') {
-        return \PeskyCMF\CMS\CmsFrontendUtils::getPageDataForInsert($pageId, $columnName);
+        return \PeskyCMF\CMS\CmsFrontendUtils::getPageData($pageId, $columnName);
     }
 }
 

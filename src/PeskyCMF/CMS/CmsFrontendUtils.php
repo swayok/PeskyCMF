@@ -126,7 +126,7 @@ abstract class CmsFrontendUtils {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    static public function getPageDataForInsert($pageIdOrPageCode, $columnName = 'content') {
+    static public function getPageData($pageIdOrPageCode, $columnName = 'content') {
         $page = static::getPageWrapper($pageIdOrPageCode);
         if (!$page->isValid()) {
             return '';
@@ -211,7 +211,7 @@ abstract class CmsFrontendUtils {
      * @throws \BadMethodCallException
      */
     static public function getTextBlock($pageCode) {
-        return static::getPageDataForInsert($pageCode, 'content');
+        return static::getPageData($pageCode, 'content');
     }
 
     /**
@@ -227,7 +227,7 @@ abstract class CmsFrontendUtils {
      * @throws \BadMethodCallException
      */
     static public function getMenu($pageCode) {
-        return static::getPageDataForInsert($pageCode, 'content');
+        return static::getPageData($pageCode, 'content');
     }
 
     /**
@@ -241,7 +241,7 @@ abstract class CmsFrontendUtils {
      * @throws \BadMethodCallException
      */
     static public function getMenuHeader($pageCode) {
-        return static::getPageDataForInsert($pageCode, 'menu_title');
+        return static::getPageData($pageCode, 'menu_title');
     }
 
     /**
