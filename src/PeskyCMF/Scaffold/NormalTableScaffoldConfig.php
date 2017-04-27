@@ -440,8 +440,6 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 return cmfJsonResponseForValidationErrors([$conditionsField => 'JSON expected']);
             }
             if (!empty($encodedConditions)) {
-                //$dataGridConfig = $this->getDataGridConfig();
-                // todo: take $dataGridConfig->contains in account
                 $filterConditions = $this
                     ->getDataGridFilterConfig()
                     ->buildConditionsFromSearchRules($encodedConditions);
