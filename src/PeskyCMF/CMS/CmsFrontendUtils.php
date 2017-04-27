@@ -18,7 +18,7 @@ abstract class CmsFrontendUtils {
     static protected $loadedPages = [];
 
     static public function registerBladeDirectiveForStringTemplateRendering() {
-        \StringBlade::directive('wysiwygInsert', function ($param) {
+        \Blade::directive('wysiwygInsert', function ($param) {
             return '<?php echo ' . html_entity_decode($param, ENT_QUOTES | ENT_HTML401) . '; ?>';
         });
     }
@@ -111,7 +111,7 @@ abstract class CmsFrontendUtils {
                 '$view argument must be a not empty string or closure that returns not empty string'
             );
         }
-        return view($view, array_merge($data, ['page' => $page]));
+        return view($view, array_merge($data, ['page' => $page]))->render();
     }
 
     /**
@@ -127,7 +127,7 @@ abstract class CmsFrontendUtils {
      * @throws \InvalidArgumentException
      */
     static public function getPageDataForInsert($pageIdOrPageCode, $columnName = 'content') {
-        $page = static::getPage($pageIdOrPageCode);
+        $page = static::getPageWrapper($pageIdOrPageCode);
         if (!$page->isValid()) {
             return '';
         }
@@ -148,7 +148,7 @@ abstract class CmsFrontendUtils {
      * @throws \Swayok\Html\HtmlTagException
      */
     static public function makeHtmlLinkToPageForInsert($pageIdOrPageCode, $linkText = null, $openInNewTab = false) {
-        $page = static::getPage($pageIdOrPageCode);
+        $page = static::getPageWrapper($pageIdOrPageCode);
         if (!$page->isValid()) {
             return EmptyTag::create();
         }
@@ -171,16 +171,32 @@ abstract class CmsFrontendUtils {
      * @return string
      */
     static public function processDataInsertsForText($textWithInserts, $cacheKey) {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return view([
-            'template' => preg_replace(
+        static $compiled;
+        if ($compiled === null) {
+            $compiled = [];
+        }
+        $compiledViewsPath = config('view.compiled', function () {
+            return realpath(storage_path('framework/views'));
+        });
+        $filePath = $compiledViewsPath . DIRECTORY_SEPARATOR . strtolower(preg_replace('%[^a-zA-Z0-9]+%', '_', $cacheKey)) . '.php';
+        if (
+            !in_array($filePath, $compiled, true)
+            && (
+                config('app.debug')
+                || !\File::exists($filePath)
+                || filemtime($filePath) + 3600 < time()
+            )
+        ) {
+            \File::put($filePath, \Blade::compileString(preg_replace(
                 ['%<span[^>]+class="wysiwyg-data-insert"[^>]*>(.*?)</span>%is', '%<div[^>]+class="wysiwyg-data-insert"[^>]*>(.*?)</div>%is'],
                 ['$1', '<div>$1</div>'],
                 $textWithInserts
-            ),
-            'cache_key' => $cacheKey,
-            'secondsTemplateCacheExpires' => config('app.debug') ? 0 : 3600
-        ])->render();
+            )));
+            $compiled[] = $filePath;
+        }
+        \View::startSection($filePath);
+        include $filePath;
+        return \View::yieldSection();
     }
 
     /**
@@ -195,11 +211,7 @@ abstract class CmsFrontendUtils {
      * @throws \BadMethodCallException
      */
     static public function getTextBlock($pageCode) {
-        $page = static::getPage($pageCode);
-        return static::processDataInsertsForText(
-            $page->content,
-            static::makeCacheKeyForPageContentView($page, $page->getTexts()->getMainLanguage())
-        );
+        return static::getPageDataForInsert($pageCode, 'content');
     }
 
     /**
@@ -215,11 +227,21 @@ abstract class CmsFrontendUtils {
      * @throws \BadMethodCallException
      */
     static public function getMenu($pageCode) {
-        $page = static::getPage($pageCode);
-        return static::processDataInsertsForText(
-            $page->content,
-            static::makeCacheKeyForPageContentView($page, $page->getTexts()->getMainLanguage())
-        );
+        return static::getPageDataForInsert($pageCode, 'content');
+    }
+
+    /**
+     * @param string $pageCode
+     * @return string
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    static public function getMenuHeader($pageCode) {
+        return static::getPageDataForInsert($pageCode, 'menu_title');
     }
 
     /**
@@ -254,29 +276,6 @@ abstract class CmsFrontendUtils {
     }
 
     /**
-     * @param CmsPage|CmsPageWrapper $page
-     * @param $language
-     * @return string
-     */
-    static public function makeCacheKeyForPageContentView($page, $language) {
-        return 'page-' . $page->id . '-lang-' . $language . '-updated-at-' . $page->updated_at_as_unix_ts;
-    }
-
-    /**
-     * @param string $pageCode
-     * @return string
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PDOException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    static public function getMenuHeader($pageCode) {
-        return static::getPageDataForInsert($pageCode, 'menu_title');
-    }
-
-    /**
      * @param int $pageIdOrPageCode
      * @return CmsPageWrapper
      * @throws \PeskyORM\Exception\InvalidDataException
@@ -286,7 +285,7 @@ abstract class CmsFrontendUtils {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static public function getPage($pageIdOrPageCode) {
+    static public function getPageWrapper($pageIdOrPageCode) {
         return static::getPageFromCache($pageIdOrPageCode, function ($pageIdOrPageCode) {
             /** @var CmsPage $pageClass */
             $pageClass = app(CmsPage::class);
@@ -381,6 +380,15 @@ abstract class CmsFrontendUtils {
      */
     static protected function normalizePageUrl($url) {
         return strtolower(rtrim((string)$url, '/'));
+    }
+
+    /**
+     * @param CmsPage|CmsPageWrapper $page
+     * @param $language
+     * @return string
+     */
+    static public function makeCacheKeyForPageContentView($page, $language) {
+        return 'page-' . $page->id . '-lang-' . $language . '-updated-at-' . $page->updated_at_as_unix_ts;
     }
 
 }

@@ -60,8 +60,7 @@
         "robinherbots/jquery.inputmask": "^3.3",
         "bower-asset/cropper": "^2.3-dev",
         "vitalets/x-editable": "dev-master",
-        "kartik-v/bootstrap-fileinput": "^4.3.5",
-        "wpb/string-blade-compiler": "^3.3"
+        "kartik-v/bootstrap-fileinput": "^4.3.5"
     },
     "require-global": {
         "fxp/composer-asset-plugin": "~1.2"
