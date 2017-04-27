@@ -350,10 +350,14 @@ abstract class AbstractValueViewer {
             return cmfTransGeneral('.item_details.field.no_relation');
         } else {
             if (empty($linkLabel)) {
-                if (empty($relationData[$relationColumn])) {
-                    $relationColumn = $relationPkColumn;
+                if ($relationColumn instanceof \Closure) {
+                    $linkLabel = $relationColumn($relationData);
+                } else {
+                    if (empty($relationData[$relationColumn])) {
+                        $relationColumn = $relationPkColumn;
+                    }
+                    $linkLabel = $relationData[$relationColumn];
                 }
-                $linkLabel = $relationData[$relationColumn];
             }
             return Tag::a($linkLabel)
                 ->setHref(routeToCmfItemDetails(

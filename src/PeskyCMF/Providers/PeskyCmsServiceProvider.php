@@ -23,9 +23,16 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
 
     protected $appSettingsClass;
 
+    /**
+     * @param \Illuminate\Foundation\Application $app
+     */
+    public function __construct($app) {
+        $this->appSettingsClass = config('cmf.app_settings_class') ?: CmsAppSettings::class;
+        parent::__construct($app);
+    }
+
     public function register() {
         parent::register();
-        $this->appSettingsClass = config('cmf.app_settings_class') ?: CmsAppSettings::class;
         $this->registerAdminsDbClasses();
         $this->registerSettingsDbClasses();
         $this->registerPagesDbClasses();
