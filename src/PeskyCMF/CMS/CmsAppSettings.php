@@ -84,16 +84,20 @@ class CmsAppSettings {
                 static::FALLBACK_LANGUAGES => KeyValueSetFormInput::create()
                     ->setAddRowButtonLabel($scaffold->translate(null, 'input.fallback_languages_add'))
                     ->setDeleteRowButtonLabel($scaffold->translate(null, 'input.fallback_languages_delete')),
-            ])
-            ->setValidators(function () {
-                return [
-                    static::DEFAULT_LANGUAGE => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%|in:' . implode(',', array_keys(static::languages())),
-                    static::LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
-                    static::LANGUAGES . '.*.value' => 'required|string|max:88',
-                    static::FALLBACK_LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
-                    static::FALLBACK_LANGUAGES . '.*.value' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%'
-                ];
-            });
+            ]);
+    }
+
+    /**
+     * @return array
+     */
+    static public function getValidatorsForScaffoldFormConfig() {
+        return [
+            static::DEFAULT_LANGUAGE => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%|in:' . implode(',', array_keys(static::languages())),
+            static::LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
+            static::LANGUAGES . '.*.value' => 'required|string|max:88',
+            static::FALLBACK_LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
+            static::FALLBACK_LANGUAGES . '.*.value' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%'
+        ];
     }
 
     /**
