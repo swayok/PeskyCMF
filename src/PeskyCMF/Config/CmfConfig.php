@@ -862,4 +862,11 @@ abstract class CmfConfig extends ConfigsContainer {
         return $tableNameForRoutes;
     }
 
+    /**
+     * @return array
+     */
+    static public function getAdditionalWysywygDataInsertsForCmsPages() {
+        return [];
+    }
+
 }

@@ -367,16 +367,18 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
 
 CmfRouteChange.scaffoldItemFormPage = function (request, next) {
     var itemId = !request.params.id || request.params.id === 'create' ? null : request.params.id;
+    var resource = request.params.resource;
     $.when(
-            ScaffoldsManager.getItemFormTpl(request.params.resource),
-            ScaffoldsManager.getResourceItemData(request.params.resource, itemId, false),
-            ScaffoldFormHelper.loadOptions(request.params.resource, itemId),
+            ScaffoldsManager.getItemFormTpl(resource),
+            ScaffoldsManager.getResourceItemData(resource, itemId, false),
+            ScaffoldFormHelper.loadOptions(resource, itemId),
             AdminUI.showUI(request.canonicalPath)
         )
         .done(function (dotJsTpl, data, options) {
             var initContent = function ($content, isModal) {
                 ScaffoldActionsHelper.initActions($content, false);
                 ScaffoldFormHelper.initForm($content.find('form'), function (json, $form) {
+                    ScaffoldFormHelper.cleanOptions(resource, itemId);
                     if (json._message) {
                         toastr.success(json._message);
                     }
@@ -384,7 +386,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
                         if (json.redirect === 'reload') {
                             if (isModal) {
                                 Utils.showPreloader($content);
-                                ScaffoldsManager.getResourceItemData(request.params.resource, itemId, false)
+                                ScaffoldsManager.getResourceItemData(resource, itemId, false)
                                     .done(function (data) {
                                         var $newContent = $('<div></div>').html(dotJsTpl(data));
                                         $content.html('').append($newContent.find('.modal-content'));
@@ -443,7 +445,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
                         Utils.getContentContainer()
                     ).done(function ($content) {
                         Utils.switchBodyClass(
-                            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
+                            ScaffoldActionsHelper.makeResourceBodyClass(resource),
                             'resource:form',
                             itemId
                         );

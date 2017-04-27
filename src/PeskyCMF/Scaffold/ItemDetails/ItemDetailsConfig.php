@@ -20,7 +20,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     /** @var null|int */
     protected $currentRowsGroup;
     /** @var bool */
-    protected $showInDialog = false;
+    protected $showInDialog = true;
 
     /**
      * @return ValueCell;

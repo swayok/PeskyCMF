@@ -60,7 +60,6 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createItemDetailsConfig() {
         $itemDetailsConfig = parent::createItemDetailsConfig();
         $itemDetailsConfig
-            ->setShowAsDialog(true)
             ->readRelations([
                 'Parent', 'Admin', 'Texts'
             ])
@@ -122,13 +121,12 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
         $pageClass = app(CmsPage::class);
         $formConfig
             ->setWidth(80)
-            ->setShowAsDialog(true)
             ->addTab($this->translate('form.tab', 'general'), [
                 'title',
                 'parent_id' => FormInput::create()
                     ->setType(FormInput::TYPE_SELECT)
-                    ->setOptionsLoader(function () use ($pagesTable, $pageClass) {
-                        return $this->getPagesOptions($pagesTable, $pageClass::TYPE_NEWS);
+                    ->setOptionsLoader(function ($pkValue) use ($pagesTable, $pageClass) {
+                        return CmsPagesScaffoldsHelper::getPagesUrlsOptions($pageClass::TYPE_NEWS, (int)$pkValue);
                     })
                     ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {
                         $renderer->addData('isHidden', true);
@@ -145,7 +143,7 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                         return $value === '/' ? $value : preg_replace('%//+%', '/', rtrim($value, '/'));
                     })
                     ->addJavaScriptBlock(function (FormInput $formInput) {
-                        return $this->getJsCodeForUrlAliasInput($formInput);
+                        return CmsPagesScaffoldsHelper::getJsCodeForUrlAliasInput($formInput);
                     }),
                 'comment',
                 'is_published',
@@ -239,45 +237,6 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
             ]);
         }
         return $formConfig;
-    }
-
-    /**
-     * @param TableInterface|CmsPagesTable $pagesTable
-     * @param string $type
-     * @return array
-     */
-    protected function getPagesOptions(TableInterface $pagesTable, $type) {
-        $options = $pagesTable::selectAssoc('id', 'url_alias', [
-            'parent_id' => null,
-            'type' => $type,
-            'url_alias !=' => '/'
-        ]);
-        $baseUrl = request()->getSchemeAndHttpHost();
-        foreach ($options as $pageId => &$urlAlias) {
-            $urlAlias = $baseUrl . $urlAlias;
-        }
-        return array_merge(['' => $baseUrl], $options);
-    }
-
-    protected function getJsCodeForUrlAliasInput(FormInput $formInput) {
-        $parentIdInput = $formInput->getScaffoldSectionConfig()->getFormInput('parent_id');
-        return <<<SCRIPT
-            var parentIdSelect = $('#{$parentIdInput->getDefaultId()}');
-            var parentIdSelectContainer = parentIdSelect.parent().removeClass('hidden');
-            $('#parent-id-url-alias')
-                .append(parentIdSelectContainer)
-                .parent()
-                    .addClass('pn');
-            parentIdSelect.selectpicker();
-            parentIdSelectContainer
-                .css('height', '32px')
-                .addClass('mn')
-                .find('.bootstrap-select.form-control')
-                    .css('height', '32px')
-                    .find('button.dropdown-toggle')
-                        .addClass('br-n');
-                
-SCRIPT;
     }
 
     protected function getDataInsertsForContentEditor() {

@@ -359,8 +359,12 @@ abstract class CmsFrontendUtils {
         $wrapper = new CmsPageWrapper($page);
         if ($page->existsInDb()) {
             static::$loadedPages[$page->getPrimaryKeyValue()] = $wrapper;
-            static::$loadedPages[$page->page_code] = $wrapper;
-            static::$loadedPages[static::normalizePageUrl($page->relative_url)] = $wrapper;
+            if (!empty($page->page_code)) {
+                static::$loadedPages[$page->page_code] = $wrapper;
+            }
+            if (!empty($page->url_alias)) {
+                static::$loadedPages[static::normalizePageUrl($page->relative_url)] = $wrapper;
+            }
         } else if (!empty($cacheKeyForNotExistingPage)) {
             static::$loadedPages[static::normalizePageUrl($cacheKeyForNotExistingPage)] = $wrapper;
         }

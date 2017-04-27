@@ -5,6 +5,7 @@ namespace PeskyCMF\CMS\Redirects;
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\CmsRecord;
 use PeskyCMF\CMS\Pages\CmsPage;
+use PeskyCMF\CMS\Pages\CmsPagesTable;
 
 /**
  * @property-read int         $id
@@ -40,9 +41,25 @@ class CmsRedirect extends CmsRecord {
         return app(CmsRedirectsTable::class);
     }
 
-    /*protected function afterSave($isCreated) {
-        // todo: if page has children - added all child pages to redirects
+    protected function afterSave($isCreated) {
         parent::afterSave($isCreated);
-    }*/
+        /** @var CmsPagesTable $pagesTable */
+        $pagesTable = app(CmsPagesTable::class);
+        $childPages = $pagesTable::select('*', ['parent_id' => $this->page_id]);
+        $childPages->enableDbRecordInstanceReuseDuringIteration();
+        $redirect = static::newEmptyRecord();
+        /** @var CmsPage $page */
+        foreach ($childPages as $page) {
+            if (!empty($page->url_alias)) {
+                $redirect
+                    ->reset()
+                    ->setAdminId($this->admin_id)
+                    ->setIsPermanent($this->is_permanent)
+                    ->setRelativeUrl(rtrim($this->relative_url, '/') . '/' . trim($page->url_alias, '/'))
+                    ->setPageId($page->id)
+                    ->save();
+            }
+        }
+    }
 
 }

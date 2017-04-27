@@ -53,7 +53,7 @@ class CmsRedirectsTableStructure extends CmsTableStructure {
 
     private function Page() {
         return Relation::create('page_id', Relation::BELONGS_TO, app(CmsPagesTable::class), 'id')
-            ->setDisplayColumnName('url_alias');
+            ->setDisplayColumnName('relative_url');
     }
 
 }

@@ -87,14 +87,17 @@ class CmsRedirectsScaffoldConfig extends NormalTableScaffoldConfig {
     protected function getPagesOptions() {
         /** @var CmsPagesTable $pagesTable */
         $pagesTable = app(CmsPagesTable::class);
+        /** @var CmsPage $pageClass */
+        $pageClass = app(CmsPage::class);
         $pages = $pagesTable::select(
             ['id', 'url_alias', 'type', 'parent_id', 'Parent' => ['id', 'url_alias', 'parent_id']],
             [
+                'type !=' => $pageClass::getTypesWithoutUrls(),
                 'url_alias IS NOT' => null,
                 'url_alias !=' => ''
             ]
         );
-        $pages->enableDbRecordInstanceReuseDuringIteration();
+        $pages->enableDbRecordInstanceReuseDuringIteration(true);
         $optionsByType = [];
         /** @var CmsPage $page */
         foreach ($pages as $page) {

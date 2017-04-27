@@ -1220,6 +1220,11 @@ var ScaffoldFormHelper = {
         }
         return deferred;
     },
+    cleanOptions: function (resourceName, itemId) {
+        var cacheKey = resourceName + (itemId ? '' : String(itemId));
+        delete CmfCache.selectOptions[cacheKey];
+        delete CmfCache.selectOptionsTs[cacheKey];
+    },
     initForm: function ($form, successCallback) {
         $form.find('select[data-value!=""]').each(function () {
             if (this.multiple) {

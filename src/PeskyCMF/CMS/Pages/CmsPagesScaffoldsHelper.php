@@ -3,6 +3,8 @@
 namespace PeskyCMF\CMS\Pages;
 
 use PeskyCMF\CMS\CmsAppSettings;
+use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 
@@ -71,7 +73,7 @@ abstract class CmsPagesScaffoldsHelper {
                 cmfTransCustom('.settings.content_inserts.' . $settingName)
             );
         }
-        return $ret;
+        return array_merge($ret, CmfConfig::getInstance()->getAdditionalWysywygDataInsertsForCmsPages());
     }
 
     /**
@@ -120,5 +122,65 @@ abstract class CmsPagesScaffoldsHelper {
             default:
                 return null;
         }
+    }
+
+    /**
+     * @param string $pageType
+     * @param null|int $currentPageId
+     * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \PDOException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    static public function getPagesUrlsOptions($pageType, $currentPageId = null) {
+        /** @var CmsPagesTable $pagesTable */
+        $pagesTable = app(CmsPagesTable::class);
+        $pages = $pagesTable::select(['*', 'Parent' => ['*']], [
+            'id !=' => (int)$currentPageId,
+            'type' => $pageType,
+            'url_alias !=' => '/'
+        ]);
+        $pages->enableDbRecordInstanceReuseDuringIteration(true);
+        $baseUrl = request()->getSchemeAndHttpHost();
+        $options = ['' => $baseUrl];
+        /** @var CmsPage $page */
+        foreach ($pages as $page) {
+            $options[$page->id] = $baseUrl . $page->relative_url;
+        }
+        asort($options);
+        return [] + $options;
+    }
+
+    /**
+     * @param FormInput $formInput
+     * @return string
+     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    static public function getJsCodeForUrlAliasInput(FormInput $formInput) {
+        $parentIdInput = $formInput->getScaffoldSectionConfig()->getFormInput('parent_id');
+        return <<<SCRIPT
+            var parentIdSelect = $('#{$parentIdInput->getDefaultId()}');
+            var parentIdSelectContainer = parentIdSelect.parent().removeClass('hidden');
+            $('#parent-id-url-alias')
+                .append(parentIdSelectContainer)
+                .parent()
+                    .addClass('pn');
+            parentIdSelect.selectpicker();
+            parentIdSelectContainer
+                .css('height', '32px')
+                .addClass('mn')
+                .find('button.dropdown-toggle')
+                    .addClass('br-n')
+                    .end()
+                .find('.dropdown-menu')
+                    .css('margin', '0 0 0 -1px');
+                
+SCRIPT;
     }
 }

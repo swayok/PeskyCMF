@@ -68,7 +68,6 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createItemDetailsConfig() {
         $itemDetailsConfig = parent::createItemDetailsConfig();
         $itemDetailsConfig
-            ->setShowAsDialog(true)
             ->readRelations([
                 'Parent', 'Admin', 'Texts'
             ])
@@ -140,13 +139,12 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
         $pageClass = app(CmsPage::class);
         $formConfig
             ->setWidth(80)
-            ->setShowAsDialog(true)
             ->addTab($this->translate('form.tab', 'general'), [
                 'title',
                 'parent_id' => FormInput::create()
                     ->setType(FormInput::TYPE_SELECT)
-                    ->setOptionsLoader(function () use ($pagesTable, $pageClass) {
-                        return $this->getPagesOptions($pagesTable, $pageClass::TYPE_PAGE);
+                    ->setOptionsLoader(function ($pkValue) use ($pageClass) {
+                        return CmsPagesScaffoldsHelper::getPagesUrlsOptions($pageClass::TYPE_PAGE, (int)$pkValue);
                     })
                     ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {
                         $renderer->addData('isHidden', true);
@@ -163,7 +161,7 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                         return $value === '/' ? $value : preg_replace('%//+%', '/', rtrim($value, '/'));
                     })
                     ->addJavaScriptBlock(function (FormInput $valueViewer) {
-                        return $this->getJsCodeForUrlAliasInput($valueViewer);
+                        return CmsPagesScaffoldsHelper::getJsCodeForUrlAliasInput($valueViewer);
                     }),
                 'page_code' => FormInput::create()
                     ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {
@@ -289,46 +287,6 @@ class CmsPagesScaffoldConfig extends NormalTableScaffoldConfig {
                 'url' => routeToCmfItemEditForm($this->getTableNameForRoutes(), $otherPageId)
             ]);
         });
-    }
-
-    /**
-     * @param TableInterface|CmsPagesTable $pagesTable
-     * @param string $type
-     * @return array
-     */
-    protected function getPagesOptions(TableInterface $pagesTable, $type) {
-        $options = $pagesTable::selectAssoc('id', 'url_alias', [
-            'parent_id' => null,
-            'type' => $type,
-            'url_alias !=' => '/'
-        ]);
-        $baseUrl = request()->getSchemeAndHttpHost();
-        foreach ($options as $pageId => &$urlAlias) {
-            $urlAlias = $baseUrl . $urlAlias;
-        }
-        return array_merge(['' => $baseUrl], $options);
-    }
-
-    protected function getJsCodeForUrlAliasInput(FormInput $formInput) {
-        $parentIdInput = $formInput->getScaffoldSectionConfig()->getFormInput('parent_id');
-        return <<<SCRIPT
-            var parentIdSelect = $('#{$parentIdInput->getDefaultId()}');
-            var parentIdSelectContainer = parentIdSelect.parent().removeClass('hidden');
-            $('#parent-id-url-alias')
-                .append(parentIdSelectContainer)
-                .parent()
-                    .addClass('pn');
-            parentIdSelect.selectpicker();
-            parentIdSelectContainer
-                .css('height', '32px')
-                .addClass('mn')
-                .find('button.dropdown-toggle')
-                    .addClass('br-n')
-                    .end()
-                .find('.dropdown-menu')
-                    .css('margin', '0 0 0 -1px');
-                
-SCRIPT;
     }
 
     protected function getDataInsertsForContentEditor() {

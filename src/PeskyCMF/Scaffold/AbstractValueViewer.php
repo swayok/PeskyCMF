@@ -354,9 +354,21 @@ abstract class AbstractValueViewer {
                     $linkLabel = $relationColumn($relationData);
                 } else {
                     if (empty($relationData[$relationColumn])) {
-                        $relationColumn = $relationPkColumn;
+                        if ($relationConfig->getForeignTable()->getTableStructure()->hasColumn($relationColumn)) {
+                            $linkLabel = $relationConfig
+                                ->getForeignTable()
+                                ->newRecord()
+                                    ->enableTrustModeForDbData()
+                                    ->fromData($relationData, true, false)
+                                    ->getValue($relationColumn);
+                        } else {
+                            $relationColumn = $relationPkColumn;
+                        }
                     }
-                    $linkLabel = $relationData[$relationColumn];
+                    /** @noinspection NotOptimalIfConditionsInspection */
+                    if (empty($linkLabel)) {
+                        $linkLabel = $relationData[$relationColumn];
+                    }
                 }
             }
             return Tag::a($linkLabel)

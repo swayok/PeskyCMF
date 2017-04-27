@@ -47,7 +47,6 @@ class CmsMenusScaffoldConfig extends NormalTableScaffoldConfig {
     protected function createItemDetailsConfig() {
         $itemDetailsConfig = parent::createItemDetailsConfig();
         $itemDetailsConfig
-            ->setShowAsDialog(true)
             ->readRelations([
                 'Admin', 'Texts'
             ])
@@ -90,7 +89,6 @@ class CmsMenusScaffoldConfig extends NormalTableScaffoldConfig {
         $pageClass = app(CmsPage::class);
         $formConfig
             ->setWidth(80)
-            ->setShowAsDialog(true)
             ->addTab($this->translate('form.tab', 'general'), [
                 'title' => FormInput::create()
                     ->setDefaultRendererConfigurator(function (InputRenderer $renderer) {

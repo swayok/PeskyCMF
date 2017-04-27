@@ -85,7 +85,7 @@ class FormConfig extends ScaffoldSectionConfig {
     /** @var array|null */
     protected $tooltips;
     /** @var bool */
-    protected $showInDialog = false;
+    protected $showInDialog = true;
 
     /**
      * @param string $laravelViewPath
