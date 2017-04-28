@@ -37,13 +37,17 @@ if (!function_exists('routeToCmfPage')) {
 if (!function_exists('routeToCmfItemsTable')) {
     /**
      * @param string $tableName
-     * @param array $filters
+     * @param array $filters - key-value array where key is column name to add to filter and value is column's value.
+     * Note: Operator is 'equals' (col1 = val1). Multiple filters joined by 'AND' (col1 = val1 AND col2 = val2)
      * @param bool $absolute
      * @return mixed
      */
     function routeToCmfItemsTable($tableName, array $filters = [], $absolute = false) {
-        // todo: implement filters processing for route
-        return route('cmf_items_table', array_merge(['table_name' => $tableName], $filters), $absolute);
+        $params = ['table_name' => $tableName];
+        if (!empty($filters)) {
+            $params['filter'] = json_encode($filters, JSON_UNESCAPED_UNICODE);
+        }
+        return route('cmf_items_table', $params, $absolute);
     }
 }
 
