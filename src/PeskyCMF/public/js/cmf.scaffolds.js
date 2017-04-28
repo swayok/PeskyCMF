@@ -403,12 +403,45 @@ var ScaffoldDataGridHelper = {
         stateSaveCallback: function (settings, state) {
             var cleanedState = $.extend(true, {}, state);
             delete cleanedState.time;
-            var encodedState = rison.encode_object(cleanedState);
-            // todo: refactor state encoder and decoder to be more compact
+            // compress sorting - using column index is not really readable idea and actually makes it less reliable on server side
+            if (typeof cleanedState.order !== 'undefined' && $.isArray(cleanedState.order)) {
+                var sorting = cleanedState.order;
+                delete cleanedState.order;
+                var api = new $.fn.dataTable.Api(settings);
+                cleanedState.sort = {};
+                for (var k = 0; k < sorting.length; k++) {
+                    cleanedState.sort[api.column(sorting[k][0]).dataSrc()] = sorting[k][1];
+                }
+            }
+            // compress cleanedState.search - we only use cleanedState.search.search, other keys are not used
+            if (
+                typeof cleanedState.search !== 'undefined'
+                && $.isPlainObject(cleanedState.search)
+                && typeof cleanedState.search.search !== 'undefined'
+            ) {
+                if (cleanedState.search.search.length >= 2) {
+                    try {
+                        cleanedState.filter = JSON.parse(cleanedState.search.search);
+                    } catch (e) {
+                        console.warn('Failed to parse encoded filtering rules', cleanedState.search.search, e);
+                    }
+                }
+                delete cleanedState.search;
+            }
+            // compress columns (we only need visibility value and only for possible future usage to add columns show/hide plugin)
+            if (typeof cleanedState.columns !== 'undefined' && $.isArray(cleanedState.columns)) {
+                var columns = cleanedState.columns;
+                delete cleanedState.columns;
+                cleanedState.cv = [];
+                for (var i = 0; i < columns.length; i++) {
+                    cleanedState.cv.push(columns[i].visible ? 1 : 0);
+                }
+            }
+            var encodedState = JSON.stringify(cleanedState);
             if (settings.iDraw > 1) {
                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                 if (encodedState !== settings.initialState) {
-                    var newUrl = window.request.canonicalPath + '?' + settings.sTableId + '=' + encodedState;
+                    var newUrl = window.request.pathname + '?' + settings.sTableId + '=' + encodedState;
                     page.show(newUrl, null, false);
                 }
             } else {
@@ -418,12 +451,66 @@ var ScaffoldDataGridHelper = {
         stateLoadCallback: function (settings) {
             if (window.request.query[settings.sTableId]) {
                 try {
-                    var state = rison.decode_object(window.request.query[settings.sTableId]);
+                    var state = JSON.parse(window.request.query[settings.sTableId]);
+                } catch (e) {
+                    if (CmfConfig.isDebug) {
+                        console.warn('Invalid JSON', window.request.query[settings.sTableId], e);
+                    }
+                }
+                try {
                     state.time = (new Date()).getTime();
+                    // restore compressed state.columns
+                    if (typeof state.cv !== 'undefined' && $.isArray(state.cv)) {
+                        var columnsEncoded = state.cv;
+                        state.columns = [];
+                        for (var i = 0; i < columnsEncoded.length; i++) {
+                            state.columns.push({
+                                visible: !!columnsEncoded[i],
+                                search: {
+                                    caseInsensitive: true,
+                                    regex: false,
+                                    search: '',
+                                    smart: true
+                                }
+                            })
+                        }
+                        delete state.cv;
+                    }
+                    // restore compressed state.search
+                    if (typeof state.filter !== 'undefined' && state.filter) {
+                        state.search = {
+                            caseInsensitive: true,
+                            regex: false,
+                            search: state.filter ? JSON.stringify(state.filter) : '',
+                            smart: true
+                        };
+                        delete state.filter;
+                    } else if (typeof state.search === 'undefined' || !state.search) {
+                        state.search = {
+                            caseInsensitive: true,
+                            regex: false,
+                            search: '',
+                            smart: true
+                        };
+                    }
+                    // restore compressed state.order
+                    if (typeof state.sort !== 'undefined' && $.isPlainObject(state.sort)) {
+                        state.order = [];
+                        var columns = new $.fn.dataTable.Api(settings).columns().dataSrc();
+                        for (var columnName in state.sort) {
+                            var index = $.inArray(columnName, columns);
+                            if (index >= 0) {
+                                state.order.push([index, state.sort[columnName]]);
+                            }
+                        }
+                        delete state.sort;
+                    } else if (typeof state.order === 'undefined' || !state.order || !$.isArray(state.order)) {
+                        state.order = [];
+                    }
                     return state;
                 } catch (e) {
                     if (CmfConfig.isDebug) {
-                        console.warn('Invalid Rison object');
+                        console.warn('Failed to parse DataTable state: ', state, e);
                     }
                 }
             } else if (window.request.query.filter) {
@@ -585,7 +672,7 @@ var ScaffoldDataGridHelper = {
                                     json.redirect === 'back'
                                     || json.redirect === 'reload'
                                     || json.redirect === window.request.path
-                                    || json.redirect === window.request.canonicalPath
+                                    || json.redirect === window.request.pathname
                                 )
                             ) {
                                 api.ajax.reload(null, false);
@@ -1118,7 +1205,7 @@ var DataGridSearchHelper = {
                 }
             }
         }
-        return !asObject ? JSON.stringify(ret) : ret;
+        return asObject ? ret : JSON.stringify(ret);
     },
     getFieldNameToFilterIdMap: function (filters) {
         var map = {};

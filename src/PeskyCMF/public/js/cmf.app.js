@@ -71,7 +71,7 @@ $(function () {
     page.route('*', function (request, next) {
         // handle 404 requests
         if (!request.handled && CmfConfig.isDebug) {
-            console.error('No route found for: ' + request.canonicalPath);
+            console.error('No route found for: ' + request.pathname);
         }
         next(); //< use default behavior (use usual redirect to requested url)
     });
