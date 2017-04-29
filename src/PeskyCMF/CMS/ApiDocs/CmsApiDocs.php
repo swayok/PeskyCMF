@@ -42,7 +42,7 @@ HTML;
                 'code' => HttpCode::NOT_FOUND,
                 'title' => 'Not found',
                 'response' => [
-                    '_clarification' => 'item_not_found'
+                    'error' => 'item_not_found'
                 ]
             ],
         */

@@ -73,7 +73,7 @@ abstract class CmsPagesScaffoldsHelper {
                 cmfTransCustom('.settings.content_inserts.' . $settingName)
             );
         }
-        return array_merge($ret, CmfConfig::getInstance()->getAdditionalWysywygDataInsertsForCmsPages());
+        return array_merge($ret, CmfConfig::getPrimary()->getAdditionalWysywygDataInsertsForCmsPages());
     }
 
     /**

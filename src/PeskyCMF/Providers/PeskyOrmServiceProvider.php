@@ -51,8 +51,8 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      * @return void
      */
     public function register() {
-        Auth::provider('peskyorm', function() {
-            return new PeskyOrmUserProvider(CmfConfig::getPrimary()->user_object_class());
+        Auth::provider('peskyorm', function($app, $config) {
+            return new PeskyOrmUserProvider(array_get($config, 'model', CmfConfig::getPrimary()->user_object_class()));
         });
     }
 }

@@ -153,16 +153,9 @@ abstract class CmfConfig extends ConfigsContainer {
             'providers' => [
                 static::auth_guard_name() => [
                     'driver' => static::auth_user_provider_name(),
-                    'table' => static::users_table_name(),
                     'model' => static::user_object_class()
                 ],
             ],
-
-            'passwords' => [
-                static::auth_guard_name() => [
-                    'expire' => 60,
-                ]
-            ]
         ];
     }
 
