@@ -481,7 +481,12 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     static protected $menuItems = [];
-    static public function addMenuItem($itemKey, array $menuItem) {
+
+    /**
+     * @param string $itemKey
+     * @param array|\Closure $menuItem - format: see menu()
+     */
+    static public function addMenuItem($itemKey, $menuItem) {
         static::$menuItems[$itemKey] = $menuItem;
     }
 
@@ -866,6 +871,13 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function getAdditionalWysywygDataInsertsForCmsPages() {
+        return [];
+    }
+
+    /**
+     * @return array - key - section name, value - array that contains objects of class CmsApiDocs
+     */
+    public static function getApiDocsSections() {
         return [];
     }
 

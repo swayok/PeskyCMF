@@ -206,6 +206,14 @@ $dictionary = [
             ]
         ],
     ],
+    'api_docs' => [
+        'menu_title' => 'API Documentation',
+        'header' => 'API Documentation',
+        'url_query_params' => 'HTTP GET parameters (URL query)',
+        'post_params' => 'HTTP POST parameters',
+        'response' => 'Server response on success',
+        'errors' => 'Possible errors',
+    ],
     'pages' => [
         'menu_title' => 'Pages',
         'types' => [

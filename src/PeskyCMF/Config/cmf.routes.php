@@ -112,6 +112,10 @@ Route::group(
                     return view('cmf::page.about');
                 });
 
+                Route::get('/page/api_docs.html', function () {
+                    return view('cmf::page.api_docs');
+                });
+
                 Route::get('page/{page}.html', CmfConfig::getPrimary()->cmf_general_controller_class() . '@getPage')
                     ->where('page', '^.*(?!\.html)$');
 

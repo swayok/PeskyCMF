@@ -27,6 +27,7 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
         'text_elements',
         'redirects',
         'settings',
+        'api_docs'
     ];
 
     public function register() {
@@ -57,67 +58,94 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
         parent::boot();
         $cmfConfig = static::getCmfConfig();
         if (in_array('admins', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('admins', [
-                'label' => $cmfConfig::transCustom('.admins.menu_title'),
-                'url' => routeToCmfItemsTable('admins'),
-                'icon' => 'fa fa-group'
-            ]);
+            $cmfConfig::addMenuItem('admins', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.admins.menu_title'),
+                    'url' => routeToCmfItemsTable('admins'),
+                    'icon' => 'fa fa-group'
+                ];
+            });
         }
         if (in_array('pages', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('pages', [
-                'label' => $cmfConfig::transCustom('.pages.menu_title'),
-                'url' => routeToCmfItemsTable('pages'),
-                'icon' => 'fa fa-file-text-o'
-            ]);
+            $cmfConfig::addMenuItem('pages', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.pages.menu_title'),
+                    'url' => routeToCmfItemsTable('pages'),
+                    'icon' => 'fa fa-file-text-o'
+                ];
+            });
         }
         if (in_array('news', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('news', [
-                'label' => $cmfConfig::transCustom('.news.menu_title'),
-                'url' => routeToCmfItemsTable('news'),
-                'icon' => 'fa fa-newspaper-o'
-            ]);
+            $cmfConfig::addMenuItem('news', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.news.menu_title'),
+                    'url' => routeToCmfItemsTable('news'),
+                    'icon' => 'fa fa-newspaper-o'
+                ];
+            });
         }
         if (in_array('shop_categories', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('shop_categories', [
-                'label' => $cmfConfig::transCustom('.shop_categories.menu_title'),
-                'url' => routeToCmfItemsTable('shop_categories'),
-                'icon' => 'fa fa-folder-open-o'
-            ]);
+            $cmfConfig::addMenuItem('shop_categories', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.shop_categories.menu_title'),
+                    'url' => routeToCmfItemsTable('shop_categories'),
+                    'icon' => 'fa fa-folder-open-o'
+                ];
+            });
         }
         if (in_array('shop_items', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('shop_items', [
-                'label' => $cmfConfig::transCustom('.shop_items.menu_title'),
-                'url' => routeToCmfItemsTable('shop_items'),
-                'icon' => 'fa fa-files-o'
-            ]);
+            $cmfConfig::addMenuItem('shop_items', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.shop_items.menu_title'),
+                    'url' => routeToCmfItemsTable('shop_items'),
+                    'icon' => 'fa fa-files-o'
+                ];
+            });
         }
         if (in_array('menus', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('menus', [
-                'label' => $cmfConfig::transCustom('.menus.menu_title'),
-                'url' => routeToCmfItemsTable('menus'),
-                'icon' => 'fa fa-list-ul'
-            ]);
+            $cmfConfig::addMenuItem('menus', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.menus.menu_title'),
+                    'url' => routeToCmfItemsTable('menus'),
+                    'icon' => 'fa fa-list-ul'
+                ];
+            });
         }
         if (in_array('text_elements', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('text_elements', [
-                'label' => $cmfConfig::transCustom('.text_elements.menu_title'),
-                'url' => routeToCmfItemsTable('text_elements'),
-                'icon' => 'fa fa-file-code-o'
-            ]);
+            $cmfConfig::addMenuItem('text_elements', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.text_elements.menu_title'),
+                    'url' => routeToCmfItemsTable('text_elements'),
+                    'icon' => 'fa fa-file-code-o'
+                ];
+            });
         }
         if (in_array('redirects', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('redirects', [
-                'label' => $cmfConfig::transCustom('.redirects.menu_title'),
-                'url' => routeToCmfItemsTable('redirects'),
-                'icon' => 'glyphicon glyphicon-fast-forward'
-            ]);
+            $cmfConfig::addMenuItem('redirects', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.redirects.menu_title'),
+                    'url' => routeToCmfItemsTable('redirects'),
+                    'icon' => 'glyphicon glyphicon-fast-forward'
+                ];
+            });
         }
         if (in_array('settings', $this->registerSections, true)) {
-            $cmfConfig::addMenuItem('settings', [
-                'label' => $cmfConfig::transCustom('.settings.menu_title'),
-                'url' => routeToCmfItemEditForm('settings', 'all'),
-                'icon' => 'glyphicon glyphicon-cog'
-            ]);
+            $cmfConfig::addMenuItem('settings', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.settings.menu_title'),
+                    'url' => routeToCmfItemEditForm('settings', 'all'),
+                    'icon' => 'glyphicon glyphicon-cog'
+                ];
+            });
+        }
+        if (in_array('api_docs', $this->registerSections, true)) {
+            $cmfConfig::addMenuItem('api_docs', function () use ($cmfConfig) {
+                return [
+                    'label' => $cmfConfig::transCustom('.api_docs.menu_title'),
+                    'url' => routeToCmfPage('api_docs'),
+                    'icon' => 'glyphicon glyphicon-book'
+                ];
+            });
         }
     }
 

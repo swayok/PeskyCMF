@@ -207,6 +207,14 @@ $dictionary = [
             ]
         ],
     ],
+    'api_docs' => [
+        'menu_title' => 'Документация к API',
+        'header' => 'Документация к API',
+        'url_query_params' => 'HTTP GET параметры (URL query params)',
+        'post_params' => 'HTTP POST параметры',
+        'response' => 'Ответ сервера при успешном выполнении запроса',
+        'errors' => 'Ошибки, которые могут возникнуть',
+    ],
     'pages' => [
         'menu_title' => 'Страницы',
         'types' => [
