@@ -17,6 +17,10 @@ HTML;
     public $url = '/api/';
     public $httpMethod = 'GET';
 
+    public $headers = [
+        'Accept' => 'application/json',
+        'Authorisation' => 'Bearer {token}'
+    ];
     public $urlQueryParams = [
         '_method' => 'PUT',
         'token' => 'string',
@@ -24,9 +28,9 @@ HTML;
     public $postParams = [
         'id' => 'int',
     ];
-    public $validators = [
-        'token' => 'required|string',
-        'id' => 'required|integer|min:1,'
+    public $validationErrors = [
+        'token' => ['required', 'string'],
+        'id' => ['required', 'integer', 'min:1']
     ];
 
     public $onSuccess = [
@@ -58,10 +62,11 @@ HTML;
         $errors = [
             static::$authFailError,
             static::$accessDeniedError,
+            static::$serverError,
         ];
-        if (count($this->validators)) {
+        if (count($this->validationErrors)) {
             $errors[] = array_merge(static::$dataValidationError, [
-                'response' => $this->validators
+                'response' => $this->validationErrors
             ]);
         }
         return $errors;
@@ -72,7 +77,9 @@ HTML;
     static protected $authFailError = [
         'code' => HttpCode::UNAUTHORISED,
         'title' => 'Не удалось авторизовать пользователя',
-        'response' => []
+        'response' => [
+            'error' => 'Unauthenticated.'
+        ]
     ];
 
     static protected $accessDeniedError = [
@@ -84,6 +91,12 @@ HTML;
     static protected $dataValidationError = [
         'code' => HttpCode::CANNOT_PROCESS,
         'title' => 'Ошибки валидации данных',
+        'response' => []
+    ];
+
+    static protected $serverError = [
+        'code' => HttpCode::SERVER_ERROR,
+        'title' => 'Критическая ошибка на стороне сервера',
         'response' => []
     ];
 

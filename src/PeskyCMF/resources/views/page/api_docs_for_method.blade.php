@@ -11,12 +11,41 @@
     </div>
     <div id="{{ $method->getUuid() }}" class="panel-collapse collapse">
         <div class="box-body">
-            <div class="well">
-                {!! $method->description !!}
+            <div class="row">
+                @if(trim($method->description) !== '')
+                <div class="col-xs-12 col-xl-6">
+                    <div class="box box-solid box-default">
+                        <div class="box-header">
+                            <div class="box-title">
+                                {{ cmfTransCustom('.api_docs.description') }}
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            {!! $method->description !!}
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if (!empty($method->headers))
+                <div class="col-xs-12 col-xl-6">
+                    <div class="box box-solid box-default">
+                        <div class="box-header">
+                            <div class="box-title">
+                                {{ cmfTransCustom('.api_docs.headers') }}
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            @foreach($method->headers as $header => $value)
+                                {{ $header }}: {{ $value }}
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
             <div class="row">
                 @if (!empty($method->urlQueryParams))
-                <div class="col-xs-12">
+                <div class="col-xs-12 col-xl-6">
                     <div class="box box-solid box-warning">
                         <div class="box-header">
                             <div class="box-title">
@@ -30,7 +59,7 @@
                 </div>
                 @endif
                 @if (!empty($method->postParams))
-                <div class="col-xs-12">
+                <div class="col-xs-12 col-xl-6">
                     <div class="box box-solid box-info">
                         <div class="box-header">
                             <div class="box-title">
@@ -43,6 +72,8 @@
                     </div>
                 </div>
                 @endif
+            </div>
+            <div class="row">
                 <div class="col-xs-6">
                     <div class="box box-solid box-success">
                         <div class="box-header">
