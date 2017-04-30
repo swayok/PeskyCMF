@@ -239,12 +239,17 @@ class FormInput extends RenderableValueViewer {
      * @throws \BadMethodCallException
      */
     public function getLabel(InputRenderer $renderer = null) {
+        $isRequired = '';
         if ($renderer === null) {
-            $isRequired = $this->getTableColumn()->isValueRequiredToBeNotEmpty();
-        } else {
-            $isRequired = $renderer->isRequiredForCreate() || $renderer->isRequiredForEdit();
+            $isRequired = $this->getTableColumn()->isValueRequiredToBeNotEmpty() ? '*' : '';
+        } else if ($renderer->isRequired()) {
+            $isRequired = '*';
+        } else if ($renderer->isRequiredForCreate()) {
+            $isRequired = '{{? !!it.isCreation }}*{{?}}';
+        } else if ($renderer->isRequiredForEdit()) {
+            $isRequired = '{{? !it.isCreation }}*{{?}}';
         }
-        return parent::getLabel() . ($isRequired ? '*' : '');
+        return parent::getLabel() . $isRequired;
     }
 
     /**

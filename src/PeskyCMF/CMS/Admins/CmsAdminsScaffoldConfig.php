@@ -183,7 +183,7 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
     protected function getValidatorsForEdit() {
         $validators = [
             'id' => FormConfig::VALIDATOR_FOR_ID,
-            'password' => 'min:6',
+            'password' => 'nullable|min:6',
             'email' => 'email|min:4|max:100|unique:' . CmsAdminsTableStructure::getTableName() . ',email,{{id}},id',
         ];
         $loginColumn = CmfConfig::getPrimary()->user_login_column();
