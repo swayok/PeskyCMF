@@ -16,10 +16,7 @@ class CmsSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
 
     protected function createFormConfig() {
         $formConfig = parent::createFormConfig()
-            ->setWidth(50)
-            ->setDataToAddToRecord(function () {
-                return ['admin_id' => \Auth::guard()->user()->getAuthIdentifier()];
-            });
+            ->setWidth(50);
         /** @var CmsAppSettings $cmsAppSettings */
         $cmsAppSettings = app(CmsAppSettings::class);
         $cmsAppSettings::configureScaffoldFormConfig($formConfig);

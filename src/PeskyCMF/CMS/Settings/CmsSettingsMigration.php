@@ -4,7 +4,6 @@ namespace PeskyCMF\CMS\Settings;
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
 
 class CmsSettingsMigration extends Migration {
 
@@ -13,7 +12,7 @@ class CmsSettingsMigration extends Migration {
             \Schema::create('settings', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('key');
-                $table->integer('admin_id')->nullable()->unsigned();
+
                 if (config('database.connections.' . config('database.default') . '.driver') === 'pgsql') {
                     $table->jsonb('value');
                 } else {
@@ -21,12 +20,6 @@ class CmsSettingsMigration extends Migration {
                 }
 
                 $table->unique('key');
-
-                $table->foreign('admin_id')
-                    ->references('id')
-                    ->on(CmsAdminsTableStructure::getTableName())
-                    ->onDelete('set null')
-                    ->onUpdate('cascade');
             });
         }
     }

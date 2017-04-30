@@ -3,7 +3,6 @@
 namespace PeskyCMF\CMS\Settings;
 
 use PeskyCMF\CMS\CmsTableStructure;
-use PeskyCMF\CMS\Traits\AdminIdColumn;
 use PeskyCMF\Db\Traits\IdColumn;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\DefaultColumnClosures;
@@ -11,13 +10,11 @@ use PeskyORM\ORM\DefaultColumnClosures;
 /**
  * @property-read Column    $id
  * @property-read Column    $key
- * @property-read Column    $admin_id
  * @property-read Column    $value
  */
 class CmsSettingsTableStructure extends CmsTableStructure {
 
-    use IdColumn,
-        AdminIdColumn;
+    use IdColumn;
 
     /**
      * @return string
