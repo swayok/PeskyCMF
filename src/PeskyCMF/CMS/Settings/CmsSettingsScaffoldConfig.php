@@ -16,7 +16,8 @@ class CmsSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
 
     protected function createFormConfig() {
         $formConfig = parent::createFormConfig()
-            ->setWidth(50);
+            ->setWidth(50)
+            ->setShowAsDialog(false);
         /** @var CmsAppSettings $cmsAppSettings */
         $cmsAppSettings = app(CmsAppSettings::class);
         $cmsAppSettings::configureScaffoldFormConfig($formConfig);
