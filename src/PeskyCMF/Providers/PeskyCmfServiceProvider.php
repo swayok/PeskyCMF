@@ -28,7 +28,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         CmsFrontendUtils::registerBladeDirectiveForStringTemplateRendering();
         $this->configurePublishes();
         /** @var CmfConfig|string $defaultCmfConfig */
-        $defaultCmfConfig = config('cmf.default_scaffold_config');
+        $defaultCmfConfig = config('cmf.default_cmf_config');
         if (!empty($defaultCmfConfig)) {
             $defaultCmfConfig::getInstance()->useAsDefault();
         }

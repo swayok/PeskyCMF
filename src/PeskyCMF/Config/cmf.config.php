@@ -25,7 +25,7 @@ return [
      * Default config class to be used in CMS DB classes
      * Must be an instance of a class that extends \PeskyCMF\Config\CmfConfig
      */
-    'default_scaffold_config' => null,
+    'default_cmf_config' => null,
 
     /**
      * Class that helps to get application settings from CmsSettingsTable
