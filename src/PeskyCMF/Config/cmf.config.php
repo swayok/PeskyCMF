@@ -3,7 +3,7 @@
 return [
 
     /**
-     * Class name for default site loader. You do not need to add this class to 'site_loaders'
+     * Class name for default site loader. You do not need to add this class to 'additional_site_loaders'
      */
     'default_site_loader' => null,
 
