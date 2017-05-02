@@ -9,6 +9,7 @@ use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
+use PeskyCMF\Console\Commands\CmsInstall;
 use Wpb\String_Blade_Compiler\ViewServiceProvider;
 
 class PeskyCmfServiceProvider extends AppSitesServiceProvider {
@@ -132,6 +133,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         $this->registerAddAdminCommand();
         $this->registerMakeDbClassesCommand();
         $this->registerMakeScaffoldCommand();
+        $this->registerCmsInstallCommand();
     }
 
     protected function registerInstallCommand() {
@@ -160,6 +162,13 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             return new CmfMakeScaffold();
         });
         $this->commands('command.cmf.make-scaffold');
+    }
+
+    protected function registerCmsInstallCommand() {
+        $this->app->singleton('command.cms.install', function() {
+            return new CmsInstall();
+        });
+        $this->commands('command.cms.install');
     }
 
 

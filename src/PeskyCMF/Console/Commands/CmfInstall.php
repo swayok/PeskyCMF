@@ -8,7 +8,7 @@ use Swayok\Utils\Folder;
 
 class CmfInstall extends Command {
 
-    protected $description = 'Install CMF';
+    protected $description = 'Install PeskyCMF';
     protected $signature = 'cmf:install {app_subfolder=Admin} {url_prefix=admin} {database_classes_app_subfolder=Db}';
 
     public function fire() {

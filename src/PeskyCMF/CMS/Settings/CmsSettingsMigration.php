@@ -9,7 +9,7 @@ class CmsSettingsMigration extends Migration {
 
     public function up() {
         if (!\Schema::hasTable(CmsSettingsTableStructure::getTableName())) {
-            \Schema::create('settings', function (Blueprint $table) {
+            \Schema::create(CmsSettingsTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('key');
 

@@ -14,7 +14,7 @@ class CmsPagesMigration extends Migration {
                 $table->increments('id');
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->integer('admin_id')->nullable()->unsigned();
-                $table->string('type', 50)->default(CmsPagesTableStructure::getColumn('type')->getDefaultValueAsIs());
+                $table->string('type', 50)->default(CmsPage::TYPE_PAGE);
                 $table->string('title', 500)->default('');
                 $table->string('comment', 1000)->default('');
                 $table->string('url_alias')->nullable();
