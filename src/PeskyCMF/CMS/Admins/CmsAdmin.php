@@ -5,6 +5,7 @@ namespace PeskyCMF\CMS\Admins;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use PeskyCMF\CMS\CmsRecord;
 use PeskyCMF\Db\Traits\Authenticatable;
+use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 
 /**
  * @property-read string      $id
@@ -46,7 +47,8 @@ use PeskyCMF\Db\Traits\Authenticatable;
  */
 class CmsAdmin extends CmsRecord implements AuthenticatableContract {
 
-    use Authenticatable;
+    use Authenticatable,
+        ResetsPasswordsViaAccessKey;
 
     /**
      * @return CmsAdminsTable

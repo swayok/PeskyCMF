@@ -2,8 +2,6 @@
 
 namespace PeskyCMF\Http\Controllers;
 
-use App\Db\Admins\Admin;
-use Auth;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -56,11 +54,11 @@ class CmfGeneralController extends Controller {
     }
 
     public function getAdminProfile() {
-        return view(CmfConfig::getPrimary()->user_profile_view(), ['admin' => $this->getAdmin()]);
+        return view(CmfConfig::getPrimary()->user_profile_view(), ['admin' => CmfConfig::getPrimary()->getUser()]);
     }
 
     public function updateAdminProfile(Request $request) {
-        $admin = $this->getAdmin();
+        $admin = CmfConfig::getPrimary()->getUser();
         $updates = $this->validateAndGetAdminProfileUpdates($request, $admin);
         if (!is_array($updates)) {
             return $updates;
@@ -95,19 +93,19 @@ class CmfGeneralController extends Controller {
     protected function validateAndGetAdminProfileUpdates(Request $request, Record $admin) {
         $validationRules = [
             'old_password' => 'required',
-            'new_password' => 'min:6',
+            'new_password' => 'nullable|min:6',
         ];
         $columnsToUpdate = [];
         if ($admin::hasColumn('language')) {
-            $validationRules['language'] = 'required|in:' . implode(CmfConfig::getPrimary()->locales());
+            $validationRules['language'] = 'required|in:' . implode(',', CmfConfig::getPrimary()->locales());
             $columnsToUpdate[] = 'language';
         }
         if ($admin::hasColumn('name')) {
-            $validationRules['name'] = 'max:200';
+            $validationRules['name'] = 'nullable|max:200';
             $columnsToUpdate[] = 'name';
         }
         if ($admin::hasColumn('timezone')) {
-            $validationRules['timezone'] = 'required|exists2:pg_timezone_names,name';
+            $validationRules['timezone'] = 'nullable|exists2:pg_timezone_names,name';
             $columnsToUpdate[] = 'timezone';
         }
         $usersTable = CmfConfig::getPrimary()->users_table_name();
@@ -116,7 +114,7 @@ class CmfGeneralController extends Controller {
             if ($userLoginCol === 'email') {
                 $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->getAuthIdentifier()},id";
             } else {
-                $validationRules['email'] = 'email';
+                $validationRules['email'] = 'nullable|email';
             }
             $columnsToUpdate[] = 'email';
         }
@@ -165,23 +163,14 @@ class CmfGeneralController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function switchLocale($locale = null) {
-        if (is_string($locale) && $locale !== '' && in_array($locale, CmfConfig::getPrimary()->locales(), true)) {
-            \Session::set(CmfConfig::getPrimary()->locale_session_key(), strtolower($locale));
-        }
+        CmfConfig::getPrimary()->setLocale($locale);
         return \Redirect::back();
-    }
-
-    static public function getLocale() {
-        return \Session::get(
-            CmfConfig::getPrimary()->locale_session_key(),
-            CmfConfig::getPrimary()->default_locale()
-        );
     }
 
     public function getLogin(Request $request) {
         if ($request->ajax()) {
             return response()->json([], 404);
-        } else if (!Auth::guard()->check()) {
+        } else if (!CmfConfig::getPrimary()->getAuth()->check()) {
             return view(CmfConfig::getPrimary()->layout_view())->render();
         } else {
             return Redirect::to($this->getIntendedUrl());
@@ -273,7 +262,7 @@ class CmfGeneralController extends Controller {
             DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($request->input($userLoginColumn)) . '``)'),
             'password' => $request->input('password')
         ];
-        if (!Auth::guard()->attempt($credentials)) {
+        if (!CmfConfig::getPrimary()->getAuth()->attempt($credentials)) {
             return cmfJsonResponse(HttpCode::INVALID)
                 ->setMessage(cmfTransCustom('.login_form.login_failed'));
         } else {
@@ -286,9 +275,15 @@ class CmfGeneralController extends Controller {
             'email' => 'required|email',
         ]);
         $email = strtolower(trim($request->input('email')));
-        if (Auth::guard()->attempt(['email' => $email], false, false)) {
+        if (CmfConfig::getPrimary()->getAuth()->once(['email' => $email])) {
             /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $user */
-            $user = Auth::guard()->getLastAttempted();
+            $user = CmfConfig::getPrimary()->getAuth()->getLastAttempted();
+            if (!method_exists($user, 'getPasswordRecoveryAccessKey')) {
+                throw new \BadMethodCallException(
+                    'Class ' . get_class($user) . ' does not support password recovery. You should add '.
+                    ResetsPasswordsViaAccessKey::class . ' trait to specified class to enable this functionality'
+                );
+            }
             $data = [
                 'url' => route('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
                 'user' => $user->toArrayWithoutFiles()
@@ -334,14 +329,15 @@ class CmfGeneralController extends Controller {
     }
 
     public function logout() {
-        Auth::guard()->logout();
+        CmfConfig::getPrimary()->getAuth()->logout();
         \Session::flush();
         \Session::regenerate(true);
+        CmfConfig::getPrimary()->resetLocale();
         return Redirect::route(CmfConfig::getPrimary()->login_route());
     }
 
     public function getAdminInfo() {
-        $admin = $this->getAdmin();
+        $admin = CmfConfig::getPrimary()->getUser();
         $adminData = $admin->toArray();
         if (!empty($adminData['role'])) {
             $adminData['_role'] = $admin->role;
@@ -349,13 +345,6 @@ class CmfGeneralController extends Controller {
             $adminData['role'] = cmfTransCustom('.admins.role.' . $role);
         }
         return response()->json($adminData);
-    }
-
-    /**
-     * @return Admin
-     */
-    protected function getAdmin() {
-        return Auth::guard()->user();
     }
 
     public function cleanCache() {
@@ -487,8 +476,7 @@ class CmfGeneralController extends Controller {
                 return ['', cmfTransGeneral('.ckeditor.fileupload.failed_to_resize_image')];
             }
         }
-        $success = $imageProcessor->writeImage($file->getRealPath());
-        if (!$success) {
+        if (!$imageProcessor->writeImage($file->getRealPath())) {
             return ['', cmfTransGeneral('.ckeditor.fileupload.failed_to_save_image_to_fs')];
         }
         $url = $formInput->getRelativeImageUploadsUrl() . $newFileName;

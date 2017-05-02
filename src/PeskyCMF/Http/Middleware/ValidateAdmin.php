@@ -25,13 +25,13 @@ class ValidateAdmin {
         //if this is a simple false value, send the user to the login redirect
         $response = false;
         if (\Auth::guard()->check()) {
-            $response = $configs->isAuthorised($request);
+            $response = $configs::isAuthorised($request);
         }
         if (!$response) {
-            $loginUrl = route($configs->login_route());
+            $loginUrl = route($configs::login_route());
             $currentsUrl = $request->url();
             if ($request->ajax()) {
-                \Session::set(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
+                \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
                 return response()->json(['redirect_with_reload' => $loginUrl], HttpCode::UNAUTHORISED);
             } else {
                 return redirect()->guest($loginUrl)->with(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
@@ -42,7 +42,7 @@ class ValidateAdmin {
             $currentsUrl = $request->url();
             /** @var RedirectResponse $response */
             if ($request->ajax()) {
-                \Session::set(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
+                \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
                 return response()->json(['redirect' => $response->getTargetUrl()], HttpCode::UNAUTHORISED);
             } else {
                 return $response->with(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);

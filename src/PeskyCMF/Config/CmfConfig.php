@@ -25,6 +25,12 @@ abstract class CmfConfig extends ConfigsContainer {
         }
     }
 
+    private static function _protect() {
+        if (static::class === CmfConfig::class) {
+            throw new \BadMethodCallException('Attempt to call method of CmfConfig class instead of its child class');
+        }
+    }
+
     /**
      * Use this object as default config
      * Note: this is used in *Record, *Table, and *TableStructure DB classes of CMS
@@ -165,6 +171,20 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function auth_guard_name() {
         return 'cmf';
+    }
+
+    /**
+     * @return \Illuminate\Contracts\Auth\Guard|\Illuminate\Contracts\Auth\StatefulGuard|\Illuminate\Auth\SessionGuard
+     */
+    static public function getAuth() {
+        return \Auth::guard(static::auth_guard_name());
+    }
+
+    /**
+     * @return CmsAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
+     */
+    static public function getUser() {
+        return static::getAuth()->user();
     }
 
     /**
@@ -566,16 +586,54 @@ abstract class CmfConfig extends ConfigsContainer {
         ];
     }
 
+    /**
+     * @return string
+     */
     static public function locale_session_key() {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_locale';
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_locale';
     }
 
+    /**
+     * Change locale inside CMF/CMS area
+     * @param null|string $locale
+     */
+    static public function setLocale($locale = null) {
+        static::_protect();
+        if (is_string($locale) && $locale !== '' && in_array(strtolower($locale), static::locales(), true)) {
+            \Session::put(static::locale_session_key(), strtolower($locale));
+            app()->setLocale($locale);
+        }
+    }
+
+    /**
+     * Get locale stored in session or default locale
+     * @return string
+     */
+    static public function getLocale() {
+        static::_protect();
+        return \Session::get(static::locale_session_key(), static::default_locale());
+    }
+
+    /**
+     * Reset locale to default
+     */
+    static public function resetLocale() {
+        static::_protect();
+        static::setLocale(static::default_locale());
+    }
+
+    /**
+     * @return string
+     */
     static public function session_redirect_key() {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_redirect';
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_redirect';
     }
 
+    /**
+     * @return string
+     */
     static public function session_message_key() {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_message';
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_message';
     }
 
     /**

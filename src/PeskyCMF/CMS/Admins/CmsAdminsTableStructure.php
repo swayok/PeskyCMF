@@ -88,16 +88,14 @@ class CmsAdminsTableStructure extends CmsTableStructure {
     }
 
     private function role() {
-        return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues(CmfConfig::getDefault()->roles_list())
+        return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
             ->setDefaultValue(CmfConfig::getDefault()->default_role());
     }
 
     private function language() {
-        return Column::create(Column::TYPE_ENUM)
-            ->setAllowedValues(CmfConfig::getDefault()->locales())
+        return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
             ->setDefaultValue(CmfConfig::getDefault()->default_locale());

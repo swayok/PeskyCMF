@@ -62,7 +62,7 @@
                     @if ($admin::hasColumn('language'))
                         <div class="form-group">
                             <label for="language-input">{{ cmfTransCustom('.page.profile.input.language') }}</label>
-                            <select class="form-control" data-value=" {{ $admin->language }}" name="language" id="language-input" required="required">
+                            <select class="form-control" data-value="{{ $admin->language }}" name="language" id="language-input" required="required">
                                 @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->locales() as $lang)
                                     <option value="{{ $lang }}">{{ cmfTransCustom('.language.' . $lang) }}</option>
                                 @endforeach

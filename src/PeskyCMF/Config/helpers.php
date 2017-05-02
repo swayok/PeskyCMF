@@ -134,12 +134,11 @@ if (!function_exists('cmfTransGeneral')) {
     /**
      * @param $path - must strat with '.'
      * @param array $parameters
-     * @param string $domain
      * @param null|string $locale
      * @return string|array
      */
-    function cmfTransGeneral($path, array $parameters = [], $domain = 'messages', $locale = null) {
-        return \PeskyCMF\Config\CmfConfig::transGeneral($path, $parameters, $domain, $locale);
+    function cmfTransGeneral($path, array $parameters = [], $locale = null) {
+        return \PeskyCMF\Config\CmfConfig::transGeneral($path, $parameters, $locale);
     }
 }
 
@@ -148,12 +147,11 @@ if (!function_exists('cmfTransCustom')) {
     /**
      * @param $path - must strat with '.'
      * @param array $parameters
-     * @param string $domain
      * @param null|string $locale
      * @return string|array
      */
-    function cmfTransCustom($path, array $parameters = [], $domain = 'messages', $locale = null) {
-        return \PeskyCMF\Config\CmfConfig::transCustom($path, $parameters, $domain, $locale);
+    function cmfTransCustom($path, array $parameters = [], $locale = null) {
+        return \PeskyCMF\Config\CmfConfig::transCustom($path, $parameters, $locale);
     }
 }
 

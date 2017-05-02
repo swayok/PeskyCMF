@@ -43,6 +43,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         // alter session config
         $this->configureSession();
 
+        $this->configureDefaultLocale();
         $this->configureLocale();
         $this->includeFiles();
 
@@ -157,8 +158,8 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         return static::getCmfConfig()->locales();
     }
 
-    static public function getLocaleSessionKey() {
-        return static::getCmfConfig()->locale_session_key();
+    public function configureLocale() {
+        static::getCmfConfig()->setLocale(static::getCmfConfig()->getLocale());
     }
 
 }
