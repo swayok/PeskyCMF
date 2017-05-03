@@ -8,11 +8,11 @@ use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\KeyValueSetFormInput;
 
 /**
- * @method static string default_browser_title($default = null)
- * @method static string browser_title_addition($default = null)
- * @method static array languages($default = null)
- * @method static string default_language($default = null)
- * @method static array fallback_languages($default = null)
+ * @method static string default_browser_title($default = null, $ignoreEmptyString = true)
+ * @method static string browser_title_addition($default = null, $ignoreEmptyString = true)
+ * @method static array languages($default = null, $ignoreEmptyString = true)
+ * @method static string default_language($default = null, $ignoreEmptyString = true)
+ * @method static array fallback_languages($default = null, $ignoreEmptyString = true)
  */
 class CmsAppSettings {
 
@@ -137,7 +137,7 @@ class CmsAppSettings {
     static public function getAllValues($ignoreCache = false) {
         /** @var CmsSettingsTable $settingsTable */
         $settingsTable = app(CmsSettingsTable::class);
-        $settings = $settingsTable::getValuesForForeignKey(null, $ignoreCache);
+        $settings = $settingsTable::getValuesForForeignKey(null, $ignoreCache, true);
         foreach (static::getAllDefaultValues() as $name => $defaultValue) {
             if (!array_key_exists($name, $settings) || $settings[$name] === null) {
                 $settings[$name] = value($defaultValue);
@@ -146,7 +146,7 @@ class CmsAppSettings {
         return $settings;
     }
 
-    /** @noinspection AccessModifierPresentedInspection */
+    /** @noinspection MagicMethodsValidityInspection */
     public function __get($name) {
         static::$name();
     }
@@ -154,7 +154,9 @@ class CmsAppSettings {
     static public function __callStatic($name, $arguments) {
         /** @var CmsSettingsTable $settingsTable */
         $settingsTable = app(CmsSettingsTable::class);
-        return $settingsTable::getValue($name, null, array_get($arguments, 0, static::getDefaultValue($name)));
+        $default = array_get($arguments, 0, static::getDefaultValue($name));
+        $ignoreEmptyValue = (bool)array_get($arguments, 1, true);
+        return $settingsTable::getValue($name, null, $default, $ignoreEmptyValue);
     }
 
     public function __call($name, $arguments) {

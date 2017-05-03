@@ -226,7 +226,7 @@ trait KeyValueTableHelpers {
             }
             return true;
         } catch (\Exception $exc) {
-            if (!$alreadyInTransaction && $table->inTransaction()) {
+            if (!$alreadyInTransaction && $table::inTransaction()) {
                 $table::rollBackTransaction();
             }
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
@@ -239,6 +239,9 @@ trait KeyValueTableHelpers {
      * @param mixed $foreignKeyValue - use null if there is no main foreign key column and
      *      getMainForeignKeyColumnName() method returns null
      * @param mixed $default
+     * @param bool $ignoreEmptyValue
+     *      - true: if value recorded to DB is empty - returns $default
+     *      - false: returns any value from DB if it exists
      * @return array
      * @throws \PeskyORM\Exception\InvalidDataException
      * @throws \UnexpectedValueException
@@ -247,7 +250,7 @@ trait KeyValueTableHelpers {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static public function getValue($key, $foreignKeyValue = null, $default = null) {
+    static public function getValue($key, $foreignKeyValue = null, $default = null, $ignoreEmptyValue = false) {
         $cacheKey = static::getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue);
         if (!empty($cacheKey)) {
             return array_get(self::getValuesForForeignKey($foreignKeyValue), $key, $default);
@@ -277,19 +280,34 @@ trait KeyValueTableHelpers {
                 if (empty($record)) {
                     return $recordObj->hasValue($column, true) ? $recordObj->getValue($column) : $default;
                 } else {
-                    return $recordObj
+                    $value = $recordObj
                         ->updateValue($column, static::decodeValue($record[static::getValuesColumnName()]), false)
                         ->getValue($column);
+                    return ($ignoreEmptyValue && static::isEmptyValue($value)) ? $default : $value;
                 }
             }
         }
-        return empty($record) ? $default : static::decodeValue($record[static::getValuesColumnName()]);
+        if (empty($record)) {
+            return $default;
+        }
+        $value = static::decodeValue($record[static::getValuesColumnName()]);
+        return ($ignoreEmptyValue && static::isEmptyValue($value)) ? $default : $value;
+    }
 
+    static private function isEmptyValue($value) {
+        return (
+            $value === null
+            || (is_string($value) && ($value === '' || $value === '[]' || $value === '{}' || $value === '""'))
+            || (is_array($value) && count($value) === 0)
+        );
     }
 
     /**
      * @param mixed $foreignKeyValue
      * @param bool $ignoreCache
+     * @param bool $ignoreEmptyValues
+     *      - true: return only not empty values stored in DB
+     *      - false: return all values strored in db
      * @return array
      * @throws \PeskyORM\Exception\InvalidDataException
      * @throws \PDOException
@@ -298,7 +316,7 @@ trait KeyValueTableHelpers {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static public function getValuesForForeignKey($foreignKeyValue = null, $ignoreCache = false) {
+    static public function getValuesForForeignKey($foreignKeyValue = null, $ignoreCache = false, $ignoreEmptyValues = false) {
         if (!$ignoreCache) {
             $cacheKey = static::getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue);
             if (!empty($cacheKey)) {
@@ -330,12 +348,18 @@ trait KeyValueTableHelpers {
             foreach ($columns as $columnName => $column) {
                 if (!$column->isItExistsInDb()) {
                     $isJson = in_array($column->getType(), [$column::TYPE_JSON, $column::TYPE_JSONB], true);
-                    if (array_key_exists($columnName, $data) && $record->hasValue($column)) {
-                        // processed value
+                    if (
+                        (
+                            array_key_exists($columnName, $data)
+                            && $record->hasValue($column)
+                        )
+                        || $record->hasValue($column, true)
+                    ) {
+                        // has processed value or default value
                         $data[$columnName] = $record->getValue($column, $isJson ? 'array' : null);
-                    } else if ($record->hasValue($column, true)) {
-                        // default value
-                        $data[$columnName] = $record->getValue($column, $isJson ? 'array' : null);
+                    }
+                    if ($ignoreEmptyValues && static::isEmptyValue($data[$columnName])) {
+                        unset($data[$columnName]);
                     }
                 }
             }
