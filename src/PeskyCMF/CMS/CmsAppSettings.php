@@ -8,11 +8,11 @@ use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\KeyValueSetFormInput;
 
 /**
- * @method static string default_browser_title($default = null, $ignoreEmptyString = true)
- * @method static string browser_title_addition($default = null, $ignoreEmptyString = true)
- * @method static array languages($default = null, $ignoreEmptyString = true)
- * @method static string default_language($default = null, $ignoreEmptyString = true)
- * @method static array fallback_languages($default = null, $ignoreEmptyString = true)
+ * @method static string default_browser_title($default = null, $ignoreEmptyValue = true)
+ * @method static string browser_title_addition($default = null, $ignoreEmptyValue = true)
+ * @method static array languages($default = null, $ignoreEmptyValue = true)
+ * @method static string default_language($default = null, $ignoreEmptyValue = true)
+ * @method static array fallback_languages($default = null, $ignoreEmptyValue = true)
  */
 class CmsAppSettings {
 
