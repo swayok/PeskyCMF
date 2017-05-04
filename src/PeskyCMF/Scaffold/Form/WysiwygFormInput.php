@@ -23,15 +23,25 @@ class WysiwygFormInput extends FormInput {
     /**
      * @var null|\Closure
      */
+    protected $htmlInserts;
+    /**
+     * @var null|\Closure
+     */
     protected $wysiwygConfig;
     /**
      * @var string
      */
     protected $customJsCode = '';
     /**
-     * @var
+     * @var string
      */
     protected $wysiwygInitializerFunctionName = 'ScaffoldFormHelper.initWysiwyg';
+    /**
+     * @var array
+    */
+    protected $customCssFiles = [];
+
+
 
     public function getType() {
         return static::TYPE_WYSIWYG;
@@ -100,7 +110,7 @@ class WysiwygFormInput extends FormInput {
     }
 
     /**
-     * @param \Closure $loader - must return array of associative arrays with keys:
+     * @param \Closure $provider - must return array of associative arrays with keys:
      *  - 'code' - php code that returns some text content. Code is inserted using Blade's command '{!! your_code_here !!}'
      *  - 'title' - insert's label to display inside wysiwyg editor
      *  - 'is_block' (optional)
@@ -113,8 +123,8 @@ class WysiwygFormInput extends FormInput {
      *  ]
      * @return $this
      */
-    public function setDataInserts(\Closure $loader) {
-        $this->dataInserts = $loader;
+    public function setDataInserts(\Closure $provider) {
+        $this->dataInserts = $provider;
         return $this;
     }
 
@@ -201,13 +211,13 @@ class WysiwygFormInput extends FormInput {
             /** @var array $insertsRaw */
             $insertsRaw = call_user_func($this->dataInserts);
             if (!is_array($insertsRaw)) {
-                throw new \UnexpectedValueException('InsertsLoader closure must return an array');
+                throw new \UnexpectedValueException('InsertsProvider closure must return an array');
             }
             $inserts = [];
             foreach ($insertsRaw as $config) {
                 if (!is_array($config) || empty($config['code']) || empty($config['title'])) {
                     throw new \UnexpectedValueException(
-                        'InsertsLoader returned invalid data insert config. Confirm that config is array and has keys "code" and "title"'
+                        'InsertsProvider returned invalid data insert config. Confirm that config is array and has keys "code" and "title"'
                     );
                 }
                 $config['code'] = "@wysiwygInsert({$config['code']})";
@@ -217,6 +227,70 @@ class WysiwygFormInput extends FormInput {
             return $inserts;
         }
         return [];
+    }
+
+    /**
+     * @param string $htmlTemplate - HTML code to insert into editor
+     * @param string $title - option title
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    static public function createHtmlTemplateInsert($htmlTemplate, $title) {
+        if (!is_string($htmlTemplate) || empty(trim($htmlTemplate))) {
+            throw new \InvalidArgumentException('$htmlTemplate argument must be a not empty string');
+        }
+        if (!is_string($title) || empty(trim($title))) {
+            throw new \InvalidArgumentException('$title argument must be a not empty string');
+        }
+        return [
+            'html' => $htmlTemplate,
+            'title' => $title,
+        ];
+    }
+
+    /**
+     * @param \Closure $provider
+     * @return $this
+     */
+    public function setHtmlInserts(\Closure $provider) {
+        $this->htmlInserts = $provider;
+        return $this;
+    }
+
+    /**
+     * @return array
+     * @throws \UnexpectedValueException
+     */
+    public function getHtmlInserts() {
+        if (!empty($this->htmlInserts)) {
+            /** @var array $insertsRaw */
+            $insertsRaw = call_user_func($this->htmlInserts);
+            if (!is_array($insertsRaw)) {
+                throw new \UnexpectedValueException('InsertsProvider closure must return an array');
+            }
+            $inserts = [];
+            foreach ($insertsRaw as $config) {
+                if (!is_array($config) || empty($config['html']) || empty($config['title'])) {
+                    throw new \UnexpectedValueException(
+                        'InsertsProvider returned invalid data insert config. Confirm that config is array and has keys "html" and "title"'
+                    );
+                }
+                $inserts[] = $config;
+            }
+            return $inserts;
+        }
+        return [];
+    }
+
+    /**
+     * This file will be added into wysiwyg editor to allow custom styling inside editor
+     * It also allows to display HtmlInserts the same way as on frontend
+     * @param array $cssFiles
+     * @return $this
+     */
+    public function addCssFilesToWysiwygEditor(...$cssFiles) {
+        $this->customCssFiles = $cssFiles;
+        return $this;
     }
 
     /**
@@ -241,6 +315,14 @@ class WysiwygFormInput extends FormInput {
             }
         }
         $config['data_inserts'] = $this->getDataInserts();
+        $config['html_inserts'] = $this->getHtmlInserts();
+        if (!empty($this->customCssFiles)) {
+            if (array_key_exists('contentsCss', $config)) {
+                $config['contentsCss'] = array_unique(array_merge((array)$config['contentsCss'], $this->customCssFiles));
+            } else {
+                $config['contentsCss'] = $this->customCssFiles;
+            }
+        }
         return $config;
     }
 
