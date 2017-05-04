@@ -32,7 +32,10 @@ CmfFileUploads.initImageUploaders = function (data) {
             maxFileSize: imageConfig.max_file_size
         });
         imageConfig.inputsAdded = 0;
-        imageConfig.inputTpl = doT.template($('#' + imageConfig.id + '-tpl').html());
+        imageConfig.inputTpl = Utils.makeTemplateFromText(
+            $('#' + imageConfig.id + '-tpl').html(),
+            'initImageUploaders for image ' + imageName
+        );
         imageConfig.addInput = function (pluginOptions, existingFileData) {
             var imageConfig = this;
             if (imageConfig.inputsAdded >= imageConfig.max_files_count) {

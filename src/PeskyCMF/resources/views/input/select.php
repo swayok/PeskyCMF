@@ -56,8 +56,8 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
             <?php endforeach; ?>
         <?php endif; ?>
     <?php else: ?>
-        {{? it._options && it._options.<?php echo $valueViewer->getName(); ?> }}
-            {{= it._options.<?php echo $valueViewer->getName(); ?> }}
+        {{? typeof it._options !== undefined && $.isPlainObject(it._options) && typeof it._options['<?php echo $valueViewer->getName(); ?>'] !== undefined }}
+            {{= it._options['<?php echo $valueViewer->getName(); ?>'] }}
         {{?}}
     <?php endif; ?>
     </select>

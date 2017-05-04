@@ -309,7 +309,19 @@ Utils.getAvailableContentContainer = function () {
 
 Utils.makeTemplateFromText = function (text, clarification) {
     try {
-        return doT.template(text);
+        var template = doT.template(text);
+        return function (data) {
+            try {
+                return template(data);
+            } catch (exc) {
+                var title = 'Failed to render doT.js template' + (!clarification ? '' : ' (' + clarification + ')');
+                var content = '<h1>' + exc.name + ': ' + exc.message + '</h1><pre>' + exc.stack + '</pre>'
+                    + '<h2>Template:</h2><pre>' + $('<div/>').text(text).html() + '</pre>'
+                    + '<h2>Data:</h2><pre>' + JSON.stringify(data, null, '   ') + '</pre>';
+                CmfConfig.getDebugDialog().showDebug(title, content);
+                return '';
+            }
+        }
     } catch (exc) {
         var title = 'Failed to convert text into doT.js template' + (!clarification ? '' : ' (' + clarification + ')');
         var content = '<h1>' + exc.name + ': ' + exc.message + '</h1><pre>' + exc.stack + '</pre><h2>Template:</h2>';
