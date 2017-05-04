@@ -783,8 +783,17 @@ abstract class CmfConfig extends ConfigsContainer {
             'removeDialogTabs' => 'image:advanced',
             'extraPlugins' => 'uploadimage',
             'filebrowserImageUploadUrl' => route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
-            'uploadUrl' => route('cmf_ckeditor_upload_image', ['_token' => csrf_token()])
+            'uploadUrl' => route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
+            'contentsCss' => static::css_files_for_wysiwyg_editor()
         ];
+    }
+
+    /**
+     * Add some css files inside wysuwyg editor to allow custom styling while editing wysiwyg contents
+     * @return array
+     */
+    static public function css_files_for_wysiwyg_editor() {
+        return [];
     }
 
     /**
@@ -919,9 +928,18 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * @param ScaffoldConfig $scaffold
      * @return array
      */
-    static public function getAdditionalWysywygDataInsertsForCmsPages() {
+    static public function getAdditionalWysywygDataInsertsForCmsPages(ScaffoldConfig $scaffold) {
+        return [];
+    }
+
+    /**
+     * @param ScaffoldConfig $scaffold
+     * @return array
+     */
+    static public function getWysywygHtmlInsertsForCmsPages(ScaffoldConfig $scaffold) {
         return [];
     }
 

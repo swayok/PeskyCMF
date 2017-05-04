@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\CMS\Pages;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;
@@ -222,6 +223,9 @@ class CmsNewsScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setRelativeImageUploadsFolder('/assets/wysiwyg/pages')
                     ->setDataInserts(function () {
                         return $this->getDataInsertsForContentEditor();
+                    })
+                    ->setHtmlInserts(function () {
+                        return CmfConfig::getPrimary()->getWysywygHtmlInsertsForCmsPages($this);
                     })
                     ->setNameForTranslation('Texts.content'),
                 "Texts.$langId.language" => FormInput::create()
