@@ -1835,7 +1835,7 @@ var ScaffoldFormHelper = {
                                         if (insertInfo) {
                                             editor.focus();
                                             editor.fire('saveSnapshot');
-                                            editor.insertHtml(renderInsert(insertInfo));
+                                            editor.insertHtml(renderInsert(insertInfo), 'unfiltered_html');
                                             editor.fire('saveSnapshot');
                                         } else {
                                             console.error('HTML Insert with index ' + matches[2] + ' not found');
