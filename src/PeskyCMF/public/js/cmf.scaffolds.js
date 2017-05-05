@@ -943,14 +943,12 @@ var ScaffoldDataGridHelper = {
             delete subTableConfigs.fixedColumns;
             $tableWrapper
                 .on('click', 'a.show-children', function () {
-                    // console.log(subTableConfigs);
                     var $tr = $(this).closest('tr');
                     var row = api.row($tr);
                     $(this).addClass('hidden');
                     if (!$tr.hasClass('has-children-table')) {
                         $tr.addClass('has-children-table');
                         var parentId = row.data()[subTableConfigs.nested_data_grid.value_column];
-                        //console.log(parentId, tableOuterHtml);
                         var $subTable = $(tableOuterHtml);
                         $subTable
                             .attr('id', $subTable.attr('id') + '-children-for-' + parentId)
@@ -1479,7 +1477,6 @@ var ScaffoldFormHelper = {
         if (!CKEDITOR.plugins.get(pluginName)) {
             var comboboxPanelCss = 'body{font-family:Arial,sans-serif;font-size:14px;}';
             var locale = CmfConfig.getLocalizationStringsForComponent('ckeditor');
-            console.log(locale);
             var renderInsert = function (tplData) {
                 var tag = tplData.__tag || 'div';
                 return $('<insert></insert>')
@@ -1514,7 +1511,7 @@ var ScaffoldFormHelper = {
                                 if (insertInfo.args_options && $.isPlainObject(insertInfo.args_options)) {
                                     insertInfo.args_options.__tag = {
                                         type: 'select',
-                                        label: locale.cmf_scaffold_inserts_dialog_insert_tag_name,
+                                        label: locale.cmf_scaffold_data_inserts_dialog_insert_tag_name,
                                         options: {
                                             span: locale.cmf_scaffold_inserts_dialog_insert_tag_is_span,
                                             div: locale.cmf_scaffold_inserts_dialog_insert_tag_is_div
@@ -1629,7 +1626,6 @@ var ScaffoldFormHelper = {
         var argsCount = 0;
         var dialogElements = [];
         var optionsOfAllSelects = {};
-        console.log(inputsConfigs);
         for (var inputName in inputsConfigs) {
             var inputConfig = inputsConfigs[inputName];
             if (!inputConfig.label) {
@@ -1785,7 +1781,6 @@ var ScaffoldFormHelper = {
         return false;
     },
     addHtmlInsertsPluginToWysiwyg: function (curentWysiwygConfig) {
-        return curentWysiwygConfig;
         // var allowedContent = '*';
         var pluginName = 'cmf_scaffold_html_inserter';
         // if (curentWysiwygConfig.extraAllowedContent) {
@@ -1793,7 +1788,6 @@ var ScaffoldFormHelper = {
         // } else {
         //     curentWysiwygConfig.extraAllowedContent = allowedContent;
         // }
-        console.log(curentWysiwygConfig);
         if (curentWysiwygConfig.extraPlugins) {
             curentWysiwygConfig.extraPlugins += ',' + pluginName;
         } else {
@@ -1809,7 +1803,8 @@ var ScaffoldFormHelper = {
                     .html();
             };
             CKEDITOR.plugins.add(pluginName, {
-                allowedContent: 'span p div[!class]; span p div[!id]; a[!href]',
+                allowedContent: '*[!class]; *[!id]; a[!href]',
+                disallowedContent: 'script style',
                 init: function (editor) {
                     editor.ui.addRichCombo('cmfScaffoldHtmlInserter', {
                         label: locale.cmf_scaffold_html_inserts_plugin_title,
@@ -1838,7 +1833,6 @@ var ScaffoldFormHelper = {
                                     case 'html':
                                         var insertInfo = editor.config.html_inserts[parseInt(matches[2])];
                                         if (insertInfo) {
-                                            console.log(renderInsert(insertInfo));
                                             editor.focus();
                                             editor.fire('saveSnapshot');
                                             editor.insertHtml(renderInsert(insertInfo));
