@@ -928,6 +928,9 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Data inserts for CmsPage-related scaffold configs to be added to ckeditor's plugin
+     * Use WysiwygFormInput::createDataInsertConfig() and WysiwygFormInput::createDataInsertConfigWithArguments()
+     * to create valid config
      * @param ScaffoldConfig $scaffold
      * @return array
      */
@@ -936,6 +939,8 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Html inserts for CmsPage-related scaffold configs to be added to ckeditor's plugin
+     * Use WysiwygFormInput::createHtmlInsertConfig('<html>', 'menu title') to create valid config
      * @param ScaffoldConfig $scaffold
      * @return array
      */
@@ -944,6 +949,7 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Provides sections with list of objects of classes that extend CmsApiDocs class to be displayed in api docs section
      * @return array - key - section name, value - array that contains objects of class CmsApiDocs
      */
     public static function getApiDocsSections() {

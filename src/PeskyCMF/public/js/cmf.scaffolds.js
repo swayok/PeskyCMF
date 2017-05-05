@@ -1454,8 +1454,11 @@ var ScaffoldFormHelper = {
         if (!$.isPlainObject(config)) {
             config = {}
         }
-        if (config.data_inserts && $.isArray(config.data_inserts)) {
+        if (typeof config.data_inserts !== 'undefined' && $.isArray(config.data_inserts)) {
             config = ScaffoldFormHelper.addDataInsertsPluginToWysiwyg(config);
+        }
+        if (typeof config.html_inserts !== 'undefined' && $.isArray(config.html_inserts)) {
+            config = ScaffoldFormHelper.addHtmlInsertsPluginToWysiwyg(config);
         }
         $(textareaSelector).ckeditor(config || {});
     },
@@ -1476,6 +1479,7 @@ var ScaffoldFormHelper = {
         if (!CKEDITOR.plugins.get(pluginName)) {
             var comboboxPanelCss = 'body{font-family:Arial,sans-serif;font-size:14px;}';
             var locale = CmfConfig.getLocalizationStringsForComponent('ckeditor');
+            console.log(locale);
             var renderInsert = function (tplData) {
                 var tag = tplData.__tag || 'div';
                 return $('<insert></insert>')
@@ -1492,8 +1496,8 @@ var ScaffoldFormHelper = {
                 allowedContent: allowedContent,
                 init: function (editor) {
                     editor.ui.addRichCombo('cmfScaffoldDataInserter', {
-                        label: locale.cmf_scaffold_inserts_plugin_title,
-                        title: locale.cmf_scaffold_inserts_plugin_title,
+                        label: locale.cmf_scaffold_data_inserts_plugin_title,
+                        title: locale.cmf_scaffold_data_inserts_plugin_title,
                         toolbar: 'insert',
                         className: 'cke_combo_full_width',
                         multiSelect: false,
@@ -1625,6 +1629,7 @@ var ScaffoldFormHelper = {
         var argsCount = 0;
         var dialogElements = [];
         var optionsOfAllSelects = {};
+        console.log(inputsConfigs);
         for (var inputName in inputsConfigs) {
             var inputConfig = inputsConfigs[inputName];
             if (!inputConfig.label) {
@@ -1778,5 +1783,82 @@ var ScaffoldFormHelper = {
             return true;
         }
         return false;
+    },
+    addHtmlInsertsPluginToWysiwyg: function (curentWysiwygConfig) {
+        return curentWysiwygConfig;
+        // var allowedContent = '*';
+        var pluginName = 'cmf_scaffold_html_inserter';
+        // if (curentWysiwygConfig.extraAllowedContent) {
+        //     curentWysiwygConfig.extraAllowedContent += '; ' + allowedContent;
+        // } else {
+        //     curentWysiwygConfig.extraAllowedContent = allowedContent;
+        // }
+        console.log(curentWysiwygConfig);
+        if (curentWysiwygConfig.extraPlugins) {
+            curentWysiwygConfig.extraPlugins += ',' + pluginName;
+        } else {
+            curentWysiwygConfig.extraPlugins = pluginName;
+        }
+        // curentWysiwygConfig.on.instanceReady
+        if (!CKEDITOR.plugins.get(pluginName)) {
+            var comboboxPanelCss = 'body{font-family:Arial,sans-serif;font-size:14px;}';
+            var locale = CmfConfig.getLocalizationStringsForComponent('ckeditor');
+            var renderInsert = function (tplData) {
+                return $('<insert></insert>')
+                    .append(tplData.html)
+                    .html();
+            };
+            CKEDITOR.plugins.add(pluginName, {
+                allowedContent: 'span p div[!class]; span p div[!id]; a[!href]',
+                init: function (editor) {
+                    editor.ui.addRichCombo('cmfScaffoldHtmlInserter', {
+                        label: locale.cmf_scaffold_html_inserts_plugin_title,
+                        title: locale.cmf_scaffold_html_inserts_plugin_title,
+                        toolbar: 'insert',
+                        className: 'cke_combo_full_width',
+                        multiSelect: false,
+                        panel: {
+                            css: [CKEDITOR.skin.getPath("editor")].concat(comboboxPanelCss + (editor.contentsCss || '')),
+                            multiSelect: false
+                        },
+                        init: function () {
+                            var combobox = this;
+                            for (var i = 0; i < editor.config.html_inserts.length; i++) {
+                                var insertInfo = editor.config.html_inserts[i];
+                                var optionValue;
+                                insertInfo.title = $.trim(insertInfo.title);
+                                optionValue = 'html:' + i;
+                                combobox.add(optionValue, insertInfo.title, insertInfo.title);
+                            }
+                        },
+                        onClick: function (value) {
+                            var matches = value.match(/^(html):(.*)$/);
+                            if (matches !== null) {
+                                switch (matches[1]) {
+                                    case 'html':
+                                        var insertInfo = editor.config.html_inserts[parseInt(matches[2])];
+                                        if (insertInfo) {
+                                            console.log(renderInsert(insertInfo));
+                                            editor.focus();
+                                            editor.fire('saveSnapshot');
+                                            editor.insertHtml(renderInsert(insertInfo));
+                                            editor.fire('saveSnapshot');
+                                        } else {
+                                            console.error('HTML Insert with index ' + matches[2] + ' not found');
+                                        }
+                                        break;
+                                }
+                            } else {
+                                editor.focus();
+                                editor.fire('saveSnapshot');
+                                editor.insertHtml(value);
+                                editor.fire('saveSnapshot');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        return curentWysiwygConfig;
     }
 };

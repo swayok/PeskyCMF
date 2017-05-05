@@ -27,7 +27,7 @@ abstract class CmsSiteLoader extends PeskyCmfSiteLoader {
         'text_elements',
         'redirects',
         'settings',
-        'api_docs'
+//        'api_docs'
     ];
 
     public function register() {

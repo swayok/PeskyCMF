@@ -30,10 +30,11 @@ return [
                 ]
             ],
             'ckeditor' => [
-                'cmf_scaffold_inserts_plugin_title' => 'Insert data into text',
-                'cmf_scaffold_inserts_dialog_insert_tag_name' => 'Insert\'s type:',
-                'cmf_scaffold_inserts_dialog_insert_tag_is_span' => 'Insert iside existing text (span)',
-                'cmf_scaffold_inserts_dialog_insert_tag_is_div' => 'Insert as separate text block (div, p)',
+                'cmf_scaffold_data_inserts_plugin_title' => 'Insert data',
+                'cmf_scaffold_data_inserts_dialog_insert_tag_name' => 'Display:',
+                'cmf_scaffold_html_inserts_plugin_title' => 'Insert HTML widget',
+                'cmf_scaffold_inserts_dialog_insert_tag_is_span' => 'Inside existing text (span)',
+                'cmf_scaffold_inserts_dialog_insert_tag_is_div' => 'As separate text block (div, p)',
             ],
         ]
     ],

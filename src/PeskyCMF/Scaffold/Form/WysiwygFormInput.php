@@ -230,20 +230,20 @@ class WysiwygFormInput extends FormInput {
     }
 
     /**
-     * @param string $htmlTemplate - HTML code to insert into editor
+     * @param string $html - HTML code to insert into editor
      * @param string $title - option title
      * @return array
      * @throws \InvalidArgumentException
      */
-    static public function createHtmlTemplateInsert($htmlTemplate, $title) {
-        if (!is_string($htmlTemplate) || empty(trim($htmlTemplate))) {
-            throw new \InvalidArgumentException('$htmlTemplate argument must be a not empty string');
+    static public function createHtmlInsertConfig($html, $title) {
+        if (!is_string($html) || empty(trim($html))) {
+            throw new \InvalidArgumentException('$html argument must be a not empty string');
         }
         if (!is_string($title) || empty(trim($title))) {
             throw new \InvalidArgumentException('$title argument must be a not empty string');
         }
         return [
-            'html' => $htmlTemplate,
+            'html' => $html,
             'title' => $title,
         ];
     }
