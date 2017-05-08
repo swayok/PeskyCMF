@@ -36,7 +36,7 @@
                         </div>
                         <div class="box-body">
                             @foreach($method->headers as $header => $value)
-                                {{ $header }}: {{ $value }}
+                                <div>{{ $header }}: {{ $value }}</div>
                             @endforeach
                         </div>
                     </div>
