@@ -524,6 +524,19 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * @return FormInput[]
+     */
+    public function getInputsWithOwnValueSavingMethods() {
+        $ret = [];
+        foreach ($this->getFormInputs() as $key => $viewer) {
+            if ($viewer->hasOwnValueSavingMethod()) {
+                $ret[$key] = $viewer;
+            }
+        }
+        return $ret;
+    }
+
+    /**
      * @return array
      */
     public function getValidatorsForEdit() {

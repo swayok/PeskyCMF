@@ -189,7 +189,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $dataToSave = array_diff_key($data, $formConfig->getStandaloneViewers());
+                $viewersWithOwnValueSavingMethods = $formConfig->getInputsWithOwnValueSavingMethods();
+                $dataToSave = array_diff_key($data, $formConfig->getStandaloneViewers(), $viewersWithOwnValueSavingMethods);
                 $object = $table->newRecord()->fromData($dataToSave, false);
                 $object->save(['*']);
                 if ($formConfig->hasAfterSaveCallback()) {
@@ -206,6 +207,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                         throw new ScaffoldException(
                             'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
                         );
+                    }
+                }
+                if (!empty($viewersWithOwnValueSavingMethods)) {
+                    foreach ($viewersWithOwnValueSavingMethods as $formInput) {
+                        call_user_func($formInput->getValueSaver(), array_get($data, $formInput->getName()), $object, true);
                     }
                 }
                 $table::commitTransaction();
@@ -273,7 +279,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $dbData = array_diff_key($data, $formConfig->getStandaloneViewers());
+                $viewersWithOwnValueSavingMethods = $formConfig->getInputsWithOwnValueSavingMethods();
+                $dbData = array_diff_key($data, $formConfig->getStandaloneViewers(), $viewersWithOwnValueSavingMethods);
                 $object->begin()->updateValues($dbData)->commit(['*']);
                 if ($formConfig->hasAfterSaveCallback()) {
                     $success = call_user_func($formConfig->getAfterSaveCallback(), false, $data, $object, $formConfig);
@@ -289,6 +296,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                         throw new ScaffoldException(
                             'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
                         );
+                    }
+                }
+                if (!empty($viewersWithOwnValueSavingMethods)) {
+                    foreach ($viewersWithOwnValueSavingMethods as $formInput) {
+                        call_user_func($formInput->getValueSaver(), array_get($data, $formInput->getName()), $object, false);
                     }
                 }
                 $table::commitTransaction();

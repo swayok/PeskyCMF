@@ -113,8 +113,13 @@ return [
             'key_value_set' => [
                 'add_row' => 'Add row',
                 'delete_row' => 'Remove row',
-                'row_delete_action_forbidden' => 'Row delete is forbidden. You need to maintain minimal required row count.'
+                'row_delete_action_forbidden' => 'Row removal is forbidden. You need to maintain minimal required row count.'
             ],
+            'has_many_related_records' => [
+                'add_row' => 'Add element',
+                'delete_row' => 'Remove element',
+                'row_delete_action_forbidden' => 'Element removal is forbidden. You need to maintain minimal required elements count.'
+            ]
         ],
         'bulk_edit' => [
             'enabler' => [

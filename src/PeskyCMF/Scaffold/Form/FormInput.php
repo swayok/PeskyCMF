@@ -299,6 +299,27 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
+     * This indicates if value of this input should be saved normally (false) or it will be saved manually (true)
+     * Manual saving is useful to create/update related records for HAS MANY relations
+     * @return bool
+     */
+    public function hasOwnValueSavingMethod() {
+        return false;
+    }
+
+    /**
+     * Provides special value saver used only when isValueWillBeSavedManually() returns true;
+     * This is used in complex situations like saving relations of type HAS MANY
+     * Closure must throw PeskyORM\Exception\InvalidDataException if something is wring with incoming data.
+     * @return \Closure - funciton ($value, RecordInterface $record, $created) {  }
+     */
+    public function getValueSaver() {
+        return function () {
+            return true;
+        };
+    }
+
+    /**
      * Modify incoming value before validating it. May be useful for situations when you need to clean
      * incoming value from unnecessary data
      * @param mixed $value

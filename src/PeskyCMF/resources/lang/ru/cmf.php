@@ -115,6 +115,11 @@ return [
                 'delete_row' => 'Удалить строку',
                 'row_delete_action_forbidden' => 'Нельзя удалить эту строку т.к. достигнуто минимальное количество строк'
             ],
+            'has_many_related_records' => [
+                'add_row' => 'Добавить',
+                'delete_row' => 'Удалить',
+                'row_delete_action_forbidden' => 'Нельзя удалить этот элемент т.к. достигнуто минимальное количество элементов'
+            ]
         ],
         'bulk_edit' => [
             'enabler' => [
