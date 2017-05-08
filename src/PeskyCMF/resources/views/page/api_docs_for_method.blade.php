@@ -7,7 +7,7 @@
     <div class="box-header with-border" style="cursor:pointer" data-toggle="collapse" data-target="#{{ $method->getUuid() }}">
         <div class="col-xs-6 text-bold">{{ $method->title }}</div>
         <div class="col-xs-2">{{ $method->httpMethod }}</div>
-        <div class="col-xs-4">/api/v1{{ $method->url }}</div>
+        <div class="col-xs-4">{{ $method->url }}</div>
     </div>
     <div id="{{ $method->getUuid() }}" class="panel-collapse collapse">
         <div class="box-body">
