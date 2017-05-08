@@ -132,6 +132,13 @@ Route::group(
 
         // Clean cache
         Route::get('cache/clean', CmfConfig::getPrimary()->cmf_general_controller_class() . '@cleanCache');
+
+        // Api docs
+        Route::get(
+                '/utils/api_docs/requests_collection_for_postman.json',
+                CmfConfig::getPrimary()->cmf_general_controller_class() . '@downloadApiRequestsCollectionForPostman'
+            )
+            ->name('cmf_api_docs_download_postman_collection');
     }
 );
 

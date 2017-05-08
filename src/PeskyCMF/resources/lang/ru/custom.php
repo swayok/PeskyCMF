@@ -216,6 +216,8 @@ $dictionary = [
         'post_params' => 'HTTP POST параметры',
         'response' => 'Ответ сервера при успешном выполнении запроса',
         'errors' => 'Ошибки, которые могут возникнуть',
+        'download_postman_collection' => 'Скачать коллекцию запросов для Postman',
+        'postman_collection_file_name' => 'postman_collection_for_api_on_:http_host'
     ],
     'pages' => [
         'menu_title' => 'Страницы',

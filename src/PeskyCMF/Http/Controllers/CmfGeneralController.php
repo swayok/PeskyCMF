@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
+use PeskyCMF\CMS\ApiDocs\CmsApiDocs;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
@@ -33,6 +34,7 @@ class CmfGeneralController extends Controller {
         if ($request->ajax()) {
             return response()->json([], 404);
         }
+
         return view(CmfConfig::getPrimary()->layout_view());
     }
 
@@ -50,6 +52,7 @@ class CmfGeneralController extends Controller {
         if (!method_exists($configs, $configName)) {
             abort(HttpCode::NOT_FOUND, "Config [$configName] not defined");
         }
+
         return view(CmfConfig::getPrimary()->$configName)->render();
     }
 
@@ -123,12 +126,12 @@ class CmfGeneralController extends Controller {
             $columnsToUpdate[] = $userLoginCol;
         }
         foreach (CmfConfig::getPrimary()->additional_user_profile_fields() as $columnName => $rules) {
-             if (is_int($columnName)) {
+            if (is_int($columnName)) {
                 $columnName = $rules;
-             } else {
+            } else {
                 $validationRules[$columnName] = $rules;
-             }
-             $columnsToUpdate[] = $columnName;
+            }
+            $columnsToUpdate[] = $columnName;
         }
         $validator = \Validator::make(
             $request->all(),
@@ -144,6 +147,7 @@ class CmfGeneralController extends Controller {
         if (count($errors) > 0) {
             return cmfJsonResponseForValidationErrors($errors);
         }
+
         return $request->only($columnsToUpdate);
     }
 
@@ -155,6 +159,7 @@ class CmfGeneralController extends Controller {
 
     public function getBasicUiView() {
         $viewData = $this->getDataForBasicUiView();
+
         return view(CmfConfig::getPrimary()->ui_view(), $viewData)->render();
     }
 
@@ -164,6 +169,7 @@ class CmfGeneralController extends Controller {
      */
     public function switchLocale($locale = null) {
         CmfConfig::getPrimary()->setLocale($locale);
+
         return \Redirect::back();
     }
 
@@ -186,6 +192,7 @@ class CmfGeneralController extends Controller {
                 'error'
             );
         }
+
         return $this->loadJsApp($request);
     }
 
@@ -202,6 +209,7 @@ class CmfGeneralController extends Controller {
     protected function getUserFromPasswordRecoveryAccessKey($accessKey) {
         /** @var ResetsPasswordsViaAccessKey $userClass */
         $userClass = CmfConfig::getPrimary()->user_object_class();
+
         return $userClass::loadFromPasswordRecoveryAccessKey($accessKey);
     }
 
@@ -218,7 +226,7 @@ class CmfGeneralController extends Controller {
         if (!empty($user)) {
             return view(CmfConfig::getPrimary()->replace_password_view(), [
                 'accessKey' => $accessKey,
-                'userId' => $user->getPrimaryKeyValue()
+                'userId' => $user->getPrimaryKeyValue(),
             ])->render();
         } else {
             return cmfJsonResponse(HttpCode::FORBIDDEN)
@@ -247,7 +255,7 @@ class CmfGeneralController extends Controller {
             } else if (preg_match('%/page/([^/]+)\.html$%i', $intendedUrl, $matches)) {
                 return routeToCmfPage($matches[1]);
             } else {
-               return $intendedUrl;
+                return $intendedUrl;
             }
         }
     }
@@ -256,11 +264,11 @@ class CmfGeneralController extends Controller {
         $userLoginColumn = CmfConfig::getPrimary()->user_login_column();
         $this->validate($request->input(), [
             $userLoginColumn => 'required' . ($userLoginColumn === 'email' ? '|email' : ''),
-            'password' => 'required'
+            'password' => 'required',
         ]);
         $credentials = [
             DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($request->input($userLoginColumn)) . '``)'),
-            'password' => $request->input('password')
+            'password' => $request->input('password'),
         ];
         if (!CmfConfig::getPrimary()->getAuth()->attempt($credentials)) {
             return cmfJsonResponse(HttpCode::INVALID)
@@ -280,13 +288,13 @@ class CmfGeneralController extends Controller {
             $user = CmfConfig::getPrimary()->getAuth()->getLastAttempted();
             if (!method_exists($user, 'getPasswordRecoveryAccessKey')) {
                 throw new \BadMethodCallException(
-                    'Class ' . get_class($user) . ' does not support password recovery. You should add '.
+                    'Class ' . get_class($user) . ' does not support password recovery. You should add ' .
                     ResetsPasswordsViaAccessKey::class . ' trait to specified class to enable this functionality'
                 );
             }
             $data = [
                 'url' => route('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
-                'user' => $user->toArrayWithoutFiles()
+                'user' => $user->toArrayWithoutFiles(),
             ];
             $subject = cmfTransCustom('.forgot_password.email_subject');
             $from = CmfConfig::getPrimary()->system_email_address();
@@ -298,6 +306,7 @@ class CmfGeneralController extends Controller {
                     ->subject($subject);
             });
         }
+
         return cmfJsonResponse()
             ->setMessage(cmfTransCustom('.forgot_password.instructions_sent'))
             ->setRedirect(route(CmfConfig::getPrimary()->login_route()));
@@ -307,7 +316,7 @@ class CmfGeneralController extends Controller {
         $this->validate($request->input(), [
             'id' => 'required|integer|min:1',
             'password' => 'required|min:6',
-            'password_confirm' => 'required|min:6|same:password'
+            'password_confirm' => 'required|min:6|same:password',
         ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (!empty($user) && $user->getPrimaryKeyValue() !== $request->input('id')) {
@@ -333,6 +342,7 @@ class CmfGeneralController extends Controller {
         \Session::flush();
         \Session::regenerate(true);
         CmfConfig::getPrimary()->resetLocale();
+
         return Redirect::route(CmfConfig::getPrimary()->login_route());
     }
 
@@ -344,6 +354,7 @@ class CmfGeneralController extends Controller {
             $role = ($admin->is_superadmin ? 'superadmin' : $admin->role);
             $adminData['role'] = cmfTransCustom('.admins.role.' . $role);
         }
+
         return response()->json($adminData);
     }
 
@@ -368,6 +379,7 @@ class CmfGeneralController extends Controller {
         }
         $editorNum = (int)$request->input('CKEditorFuncNum');
         $message = addslashes($message);
+
         return "<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction({$editorNum}, '{$url}', '{$message}');</script>";
     }
 
@@ -383,6 +395,7 @@ class CmfGeneralController extends Controller {
             foreach ($errors as $param => $errorsForParam) {
                 $ret[] = $param . ': ' . (is_array($errorsForParam) ? implode(', ', $errorsForParam) : (string)$errorsForParam);
             }
+
             return implode('<br>', $ret);
         }
 
@@ -390,7 +403,7 @@ class CmfGeneralController extends Controller {
 
         if (preg_match('%^([^:]+):(.+)$%', $editorId, $matches)) {
             list(, $tableName, $columnName) = $matches;
-        } elseif (preg_match('%^t-(.+?)-c-(.+?)-input$%', $matches)) {
+        } else if (preg_match('%^t-(.+?)-c-(.+?)-input$%', $matches)) {
             list(, $tableName, $columnName) = $matches;
         } else {
             return cmfTransGeneral('.ckeditor.fileupload.cannot_detect_table_and_field', ['editor_name' => $editorId]);
@@ -413,7 +426,7 @@ class CmfGeneralController extends Controller {
                 [
                     'editor_name' => $editorId,
                     'field_name' => $columnName,
-                    'scaffold_class' => get_class($scaffoldConfig)
+                    'scaffold_class' => get_class($scaffoldConfig),
                 ]
             );
         } else if (!($column instanceof WysiwygFormInput)) {
@@ -422,7 +435,7 @@ class CmfGeneralController extends Controller {
                 [
                     'wysywig_class' => WysiwygFormInput::class,
                     'field_name' => $columnName,
-                    'scaffold_class' => get_class($scaffoldConfig)
+                    'scaffold_class' => get_class($scaffoldConfig),
                 ]
             );
         }
@@ -432,10 +445,11 @@ class CmfGeneralController extends Controller {
                 '.ckeditor.fileupload.image_uploading_folder_not_set',
                 [
                     'field_name' => $columnName,
-                    'scaffold_class' => get_class($scaffoldConfig)
+                    'scaffold_class' => get_class($scaffoldConfig),
                 ]
             );
         }
+
         return $column;
     }
 
@@ -480,7 +494,66 @@ class CmfGeneralController extends Controller {
             return ['', cmfTransGeneral('.ckeditor.fileupload.failed_to_save_image_to_fs')];
         }
         $url = $formInput->getRelativeImageUploadsUrl() . $newFileName;
+
         return [$url, ''];
+    }
+
+    public function downloadApiRequestsCollectionForPostman() {
+        $host = \request()->getHttpHost();
+        $fileName = cmfTransCustom('.api_docs.postman_collection_file_name', [
+            'http_host' => $host,
+        ]);
+        $data = [
+            'variables' => [],
+            'info' => [
+                'name' => $host . ' (' . config('app.env') . ')',
+                '_postman_id' => sha1($host),
+                'description' => '',
+                'schema' => 'https://schema.getpostman.com/json/collection/v2.0.0/collection.json',
+            ],
+            'item' => [],
+        ];
+        foreach (CmfConfig::getPrimary()->getApiDocsSections() as $methodsList) {
+            /** @var CmsApiDocs $apiMethodDocs */
+            foreach ($methodsList as $apiMethodDocs) {
+                $item = [
+                    'name' => $apiMethodDocs->url,
+                    'request' => [
+                        'url' => url($apiMethodDocs->url, $apiMethodDocs->urlQueryParams),
+                        'method' => strtoupper($apiMethodDocs->httpMethod),
+                        'description' => strip_tags($apiMethodDocs->description),
+                        'header' => [],
+                        'body' => [
+                            'mode' => 'formdata',
+                            'formdata' => [
+                            ]
+                        ],
+
+                    ],
+                    'response' => []
+                ];
+                foreach ($apiMethodDocs->headers as $key => $value) {
+                    $item['request']['header'][] = [
+                        'key' => $key,
+                        'value' => $value,
+                        'description' => ''
+                    ];
+                }
+                foreach ($apiMethodDocs->postParams as $key => $value) {
+                    $item['request']['body']['formdata'][] = [
+                        'key' => $key,
+                        'value' => $value,
+                        'type' => 'text',
+                        'enabled' => true
+                    ];
+                }
+                $data['item'][] = $item;
+            }
+        }
+        return response(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), HttpCode::OK, [
+            'Content-type' => 'application/json',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}.json\""
+        ]);
     }
 
 }

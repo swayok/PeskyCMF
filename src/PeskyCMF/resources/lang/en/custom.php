@@ -215,6 +215,8 @@ $dictionary = [
         'post_params' => 'HTTP POST parameters',
         'response' => 'Server response on success',
         'errors' => 'Possible errors',
+        'download_postman_collection' => 'Download requests collection for Postman',
+        'postman_collection_file_name' => 'postman_collection_for_api_on_:http_host'
     ],
     'pages' => [
         'menu_title' => 'Pages',
