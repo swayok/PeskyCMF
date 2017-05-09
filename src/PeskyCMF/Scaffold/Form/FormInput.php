@@ -54,6 +54,8 @@ class FormInput extends RenderableValueViewer {
     protected $disablersConfigs = [];
     /** @var null|\Closure */
     protected $submittedValueModifier;
+    /** @var string */
+    protected $additionalHtml = '';
 
     /**
      * Default input id
@@ -230,7 +232,6 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
-     * @param string $default
      * @param null|InputRenderer $renderer
      * @return string
      * @throws \UnexpectedValueException
@@ -253,6 +254,23 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
+     * Add some html after input
+     * @param string $html
+     * @return $this
+     */
+    public function setAdditionalHtml($html) {
+        $this->additionalHtml = $html;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAdditionalHtml() {
+        return $this->additionalHtml;
+    }
+
+    /**
      * @return null|string|array
      */
     public function getTooltip() {
@@ -264,14 +282,21 @@ class FormInput extends RenderableValueViewer {
      */
     public function getFormattedTooltip() {
         if ($this->hasTooltip()) {
-            $tooltip = $this->getTooltip();
-            return '<span class="help-block"><p class="mn">'
-                    . '<i class="glyphicon glyphicon-info-sign text-blue fs16 va-t mr5 lh20" style="top: 0;"></i>'
-                    . (is_array($tooltip) ? implode('</p><p class="mn pl20">', $tooltip) : (string)$tooltip)
-                . '</p></span>';
+            return $this->buildTooltip($this->getTooltip());
         } else {
             return '';
         }
+    }
+
+    /**
+     * @param string|array $tooltip
+     * @return string
+     */
+    protected function buildTooltip($tooltip) {
+        return '<span class="help-block"><p class="mn">'
+            . '<i class="glyphicon glyphicon-info-sign text-blue fs16 va-t mr5 lh20" style="top: 0;"></i>'
+            . (is_array($tooltip) ? implode('</p><p class="mn pl20">', $tooltip) : (string)$tooltip)
+            . '</p></span>';
     }
 
     /**

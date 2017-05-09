@@ -169,7 +169,7 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
      * @throws \UnexpectedValueException
      */
     public function getFileConfiguration($name) {
-        if (!array_key_exists($name, $this->configs)) {
+        if (!$this->hasFileConfiguration($name)) {
             throw new \UnexpectedValueException("There is no configuration for file called '$name'");
         } else if (!is_object($this->configs[$name]) || get_class($this->configs[$name]) !== $this->fileConfigClass) {
             $class = $this->fileConfigClass;
@@ -188,6 +188,14 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
             $this->configs[$name] = $fileConfig;
         }
         return $this->configs[$name];
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasFileConfiguration($name) {
+        return array_key_exists($name, $this->configs);
     }
 
     /**

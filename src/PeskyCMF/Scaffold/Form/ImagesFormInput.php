@@ -2,16 +2,42 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
+use Doctrine\Instantiator\Exception\UnexpectedValueException;
+use PeskyCMF\Db\Column\FilesColumn;
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyCMF\Db\Column\Utils\FileInfo;
 
+/**
+ * @method ImagesColumn|FilesColumn getTableColumn()
+ */
 class ImagesFormInput extends FormInput {
+
+    /** @var null|array */
+    protected $fileConfigsToUse;
 
     /**
      * @return string
      */
     public function getType() {
         return static::TYPE_HIDDEN;
+    }
+
+    /**
+     * List of image names to accept.
+     * Only provided images will be shown in form. Other images will be ignored (and won't be changed in any way)
+     * @param array $imageNames
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
+    public function setImagesToAccept(...$imageNames) {
+        if (empty($imageNames)) {
+            throw new \InvalidArgumentException('$imageNames argument cannot be empty');
+        }
+        if (count($imageNames) === 1 && isset($imageNames[0]) && is_array($imageNames[0])) {
+            $imageNames = $imageNames[0];
+        }
+        $this->fileConfigsToUse = $imageNames;
+        return $this;
     }
 
     /**
@@ -47,7 +73,7 @@ class ImagesFormInput extends FormInput {
                 "Linked column for form field '{$this->getName()}' must be an instance of " . ImagesColumn::class
             );
         }
-        $configs = $column->getImagesConfigurations();
+        $configs = $this->getAcceptedFileConfigurations();
         if (empty($configs)) {
             throw new \BadMethodCallException(
                 "There is no configurations for images in column '{$column->getName()}'"
@@ -60,11 +86,28 @@ class ImagesFormInput extends FormInput {
         return $renderer;
     }
 
+    /**
+     * @return \PeskyCMF\Db\Column\Utils\ImageConfig[]|\PeskyCMF\Db\Column\Utils\FileConfig[]
+     * @throws \UnexpectedValueException
+     */
+    protected function getAcceptedFileConfigurations() {
+        $column = $this->getTableColumn();
+        if (empty($this->fileConfigsToUse)) {
+            return $column->getImagesConfigurations();
+        } else {
+            $ret = [];
+            foreach ($this->fileConfigsToUse as $name) {
+                $ret[$name] = $column->getFileConfiguration($name);
+            }
+            return $ret;
+        }
+    }
+
     public function hasLabel() {
         return true;
     }
 
-    public function getLabel($default = '', InputRenderer $renderer = null) {
+    public function getLabel(InputRenderer $renderer = null) {
         return '';
     }
 
@@ -111,10 +154,9 @@ class ImagesFormInput extends FormInput {
     }
 
     public function getValidators() {
-        /** @var ImagesColumn $column */
-        $column = $this->getTableColumn();
         $validators = [];
-        foreach ($column as $imageConfig) {
+        $configs = $this->getAcceptedFileConfigurations();
+        foreach ($configs as $imageConfig) {
             $baseName = $this->getName() . '.' . $imageConfig->getName();
             $isRequired = $imageConfig->getMinFilesCount() > 0 ? 'required|' : '';
             $validators[$baseName] = $isRequired . 'array|max:' . $imageConfig->getMaxFilesCount();
@@ -129,6 +171,29 @@ class ImagesFormInput extends FormInput {
             $validators["{$baseName}.*.file"] = $commonValidators;
         }
         return $validators;
+    }
+
+
+    public function hasTooltip() {
+        return false; //< there can't be own tooltip for input. only image/file configs can have tooltips
+    }
+
+    public function getFormattedTooltip() {
+        throw new \BadMethodCallException(
+            'Tooltip for ' . get_class($this) .  ' is not allowed. There can only be tooltips for file/image configs.'
+        );
+    }
+
+    /**
+     * @param string $configName
+     * @return string
+     */
+    public function getFormattedTooltipForImageConfig($configName) {
+        $tooltips = $this->getTooltip();
+        if (!is_array($tooltips) || empty($tooltips[$configName])) {
+            return '';
+        }
+        return $this->buildTooltip($tooltips[$configName]);
     }
 
 

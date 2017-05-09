@@ -34,7 +34,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         $isFirstGroup = false;
         foreach ($groupInfo['inputs_names'] as $inputName) {
             $inputConfig = $formConfig->getFormInput($inputName);
-            echo $inputConfig->render();
+            echo $inputConfig->render() . $inputConfig->getAdditionalHtml();
         }
     }
     echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());

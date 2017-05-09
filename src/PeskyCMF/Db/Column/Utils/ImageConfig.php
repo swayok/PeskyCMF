@@ -69,14 +69,15 @@ class ImageConfig extends FileConfig {
      * @return $this
      * @throws \InvalidArgumentException
      */
-    public function setAllowedFileTypes(array $allowedFileTypes = []) {
-        $unknownTypes = array_diff($allowedFileTypes, [static::PNG, static::JPEG, static::GIF, static::SVG]);
+    public function setAllowedFileTypes(...$allowedFileTypes) {
+        parent::setAllowedFileTypes($allowedFileTypes);
+        $unknownTypes = array_diff($this->allowedFileTypes, [static::PNG, static::JPEG, static::GIF, static::SVG]);
         if (count($unknownTypes) > 0) {
             throw new \InvalidArgumentException(
                 '$allowedFileTypes argument contains not supported image types: ' . implode(', ', $unknownTypes)
             );
         }
-        return parent::setAllowedFileTypes($allowedFileTypes);
+        return $this;
     }
 
     public function getConfigsArrayForJs() {

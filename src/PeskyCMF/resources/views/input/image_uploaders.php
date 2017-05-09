@@ -19,7 +19,7 @@ $configNameToInputId = [];
             $inputName = $valueViewer->getName(true) . '[' . $configName . ']';
         ?>
         <div class="section-divider">
-            <span><?php echo $sectionConfig->translate($valueViewer, '.' . $configName); ?></span>
+            <span><?php echo $sectionConfig->translate($valueViewer, $configName); ?></span>
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
             <div class="image-upload-input-container form-group mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
@@ -40,7 +40,7 @@ $configNameToInputId = [];
         </div>
         <div class="form-group">
             <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>">
-            <?php //todo: echo $imageConfig->getTooltip(); ?>
+            <?php echo $valueViewer->getFormattedTooltipForImageConfig($configName); ?>
         </div>
         <?php if ($imageConfig->getMaxFilesCount() > 1): ?>
             <div class="mv15 text-center">
