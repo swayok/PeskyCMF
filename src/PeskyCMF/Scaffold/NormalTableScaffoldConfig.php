@@ -2,11 +2,15 @@
 
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
+use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Exception\InvalidDataException;
+use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\TableInterface;
 
 abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
@@ -189,32 +193,10 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $viewersWithOwnValueSavingMethods = $formConfig->getInputsWithOwnValueSavingMethods();
-                $dataToSave = array_diff_key($data, $formConfig->getStandaloneViewers(), $viewersWithOwnValueSavingMethods);
+                $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
                 $object = $table->newRecord()->fromData($dataToSave, false);
                 $object->save(['*']);
-                if ($formConfig->hasAfterSaveCallback()) {
-                    $success = call_user_func($formConfig->getAfterSaveCallback(), true, $data, $object, $formConfig);
-                    if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
-                        if ($success->getStatusCode() < 400) {
-                            $table::commitTransaction();
-                        } else {
-                            $table::rollBackTransaction();
-                        }
-                        return $success;
-                    } else if ($success !== true) {
-                        $table::rollBackTransaction();
-                        throw new ScaffoldException(
-                            'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
-                        );
-                    }
-                }
-                if (!empty($viewersWithOwnValueSavingMethods)) {
-                    foreach ($viewersWithOwnValueSavingMethods as $formInput) {
-                        call_user_func($formInput->getValueSaver(), array_get($data, $formInput->getName()), $object, true);
-                    }
-                }
-                $table::commitTransaction();
+                return $this->afterDataSaved($data, $object, true, $table, $formConfig);
             } catch (InvalidDataException $exc) {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
@@ -227,7 +209,6 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 throw $exc;
             }
         }
-        return cmfJsonResponse()->setMessage(cmfTransGeneral('.form.resource_created_successfully'));
     }
 
     public function updateRecord() {
@@ -279,31 +260,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $viewersWithOwnValueSavingMethods = $formConfig->getInputsWithOwnValueSavingMethods();
-                $dbData = array_diff_key($data, $formConfig->getStandaloneViewers(), $viewersWithOwnValueSavingMethods);
-                $object->begin()->updateValues($dbData)->commit(['*']);
-                if ($formConfig->hasAfterSaveCallback()) {
-                    $success = call_user_func($formConfig->getAfterSaveCallback(), false, $data, $object, $formConfig);
-                    if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
-                        if ($success->getStatusCode() < 400) {
-                            $table::commitTransaction();
-                        } else {
-                            $table::rollBackTransaction();
-                        }
-                        return $success;
-                    } else if ($success !== true) {
-                        $table::rollBackTransaction();
-                        throw new ScaffoldException(
-                            'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
-                        );
-                    }
-                }
-                if (!empty($viewersWithOwnValueSavingMethods)) {
-                    foreach ($viewersWithOwnValueSavingMethods as $formInput) {
-                        call_user_func($formInput->getValueSaver(), array_get($data, $formInput->getName()), $object, false);
-                    }
-                }
-                $table::commitTransaction();
+                $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
+                $object->begin()->updateValues($dataToSave)->commit(['*']);
+                return $this->afterDataSaved($data, $object, false, $table, $formConfig);
             } catch (InvalidDataException $exc) {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
@@ -316,8 +275,65 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 throw $exc;
             }
         }
-        return cmfJsonResponse()
-            ->setMessage(cmfTransGeneral('.form.resource_updated_successfully'));
+    }
+
+    /**
+     * @param array $data
+     * @param FormConfig $formConfig
+     * @return array
+     */
+    protected function getDataToSaveIntoMainRecord(array $data, FormConfig $formConfig) {
+        $viewersWithOwnValueSavingMethods = $formConfig->getInputsWithOwnValueSavingMethods();
+        /** @var FormInput $viewer */
+        foreach ($formConfig->getStandaloneViewers() as $key => $viewer) {
+            array_forget($data, $key);
+            if ($viewer->hasRelation() && empty($data[$viewer->getRelation()->getName()])) {
+                unset($data[$viewer->getRelation()->getName()]);
+            }
+        }
+        /** @var FormInput $viewer */
+        foreach ($viewersWithOwnValueSavingMethods as $key => $viewer) {
+            array_forget($data, $key);
+            if ($viewer->hasRelation() && empty($data[$viewer->getRelation()->getName()])) {
+                unset($data[$viewer->getRelation()->getName()]);
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @param RecordInterface $object
+     * @param bool $created
+     * @param TableInterface $table
+     * @param FormConfig $formConfig
+     * @return JsonResponse
+     * @throws ScaffoldException
+     */
+    protected function afterDataSaved(array $data, RecordInterface $object, $created, TableInterface $table, FormConfig $formConfig) {
+        foreach ($formConfig->getInputsWithOwnValueSavingMethods() as $formInput) {
+            call_user_func($formInput->getValueSaver(), array_get($data, $formInput->getName()), $object, $created);
+        }
+        if ($formConfig->hasAfterSaveCallback()) {
+            $success = call_user_func($formConfig->getAfterSaveCallback(), $created, $data, $object, $formConfig);
+            if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
+                if ($success->getStatusCode() < 400) {
+                    $table::commitTransaction();
+                } else {
+                    $table::rollBackTransaction();
+                }
+                return $success;
+            } else if ($success !== true) {
+                $table::rollBackTransaction();
+                throw new ScaffoldException(
+                    'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
+                );
+            }
+        }
+        $table::commitTransaction();
+        return cmfJsonResponse()->setMessage(
+            cmfTransGeneral($created ? '.form.resource_created_successfully' : '.form.resource_updated_successfully')
+        );
     }
 
     public function updateBulkOfRecords() {

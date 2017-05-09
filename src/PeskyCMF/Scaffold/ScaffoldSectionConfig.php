@@ -279,17 +279,22 @@ abstract class ScaffoldSectionConfig {
      */
     protected function validateRelationValueViewerName($name) {
         $nameParts = explode('.', $name);
-        if (count($nameParts) === 1) {
+        $hasRelation = $this->getTable()->getTableStructure()->hasRelation($nameParts[0]);
+        if (!$hasRelation && count($nameParts) === 1) {
             throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
-        } else if (!$this->getTable()->getTableStructure()->hasRelation($nameParts[0])) {
+        } else if (!$hasRelation) {
             throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no relation '{$nameParts[0]}'");
         }
         $relation = $this->getTable()->getTableStructure()->getRelation($nameParts[0]);
-        $columnName = end($nameParts); //< allows something like RelationName.i.column_name
-        if (!$relation->getForeignTable()->getTableStructure()->hasColumn($columnName)) {
-            throw new \InvalidArgumentException(
-                "Relation {$nameParts[0]} of table {$this->getTable()->getName()} has no column '{$columnName}'"
-            );
+        if (count($nameParts) === 1) {
+            $columnName = $relation->getForeignColumnName();
+        } else {
+            $columnName = end($nameParts); //< allows something like RelationName.i.column_name
+            if (!$relation->getForeignTable()->getTableStructure()->hasColumn($columnName)) {
+                throw new \InvalidArgumentException(
+                    "Relation {$nameParts[0]} of table {$this->getTable()->getName()} has no column '{$columnName}'"
+                );
+            }
         }
         return [$relation, $columnName];
     }
@@ -398,8 +403,8 @@ abstract class ScaffoldSectionConfig {
         foreach ($record as $key => $value) {
             $recordWithBackup[$key] = $recordWithBackup['__' . $key] = $value;
         }
-        foreach ($record as $key => $notUsed) {
-            if ($this->getTable()->getTableStructure()->hasRelation($key)) {
+        foreach ($record as $key => $value) {
+            if (!$this->hasValueViewer($key) && $this->getTable()->getTableStructure()->hasRelation($key)) {
                 unset($recordWithBackup['__' . $key]);
                 if ($this->getTable()->getTableStructure()->getRelation($key)->getType() === Relation::HAS_MANY) {
                     $recordWithBackup[$key] = [];

@@ -7,8 +7,9 @@ use PeskyORM\Core\DbExpr;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
+use Psr\Log\InvalidArgumentException;
 
-class HasManyRelatedRecordsFormInput extends FormInput {
+class ManyToManyRelationRecordsFormInput extends FormInput {
 
     /**
      * @var array
@@ -18,6 +19,20 @@ class HasManyRelatedRecordsFormInput extends FormInput {
      * @var null|string|DbExpr
      */
     protected $optionLabelColumnForDefaultOptionsLoader;
+
+    /**
+     * Name of the column in 'linker table' that contains primary key values of the foreign table
+     * For example you have 3 tables: items (main table), categories (foreing table), item_categories (linker table);
+     * Here you have many-to-many relation between items and categories that resolved via 'linker table'
+     * item_categories that contains only 3 columns: id, item_id (link to items.id), category_id (link to categoris.id);
+     * You need to pass 'category_id' via $columnName argument
+     * @param $columnName
+     * @return $this
+     */
+    public function setRelationsLinkingColumn($columnName) {
+        $this->relationColumn = $columnName;
+        return $this;
+    }
 
     /**
      * @return string
@@ -36,25 +51,43 @@ class HasManyRelatedRecordsFormInput extends FormInput {
         return true;
     }
 
+    public function setRelation(Relation $relation, $columnName) {
+        $this->relation = $relation;
+        if ($columnName !== $relation->getForeignColumnName()) {
+            $this->relationColumn = $columnName;
+        }
+        return $this;
+    }
+
+    public function getRelationColumn() {
+        if (empty($this->relationColumn)) {
+            throw new UnexpectedValueException(
+                "Relations linking column was not provided for '{$this->getName()}' input. "
+                . 'Use setRelationsLinkingColumn(\'column_name\') method to provide it'
+            );
+        }
+        return parent::getRelationColumn();
+    }
+
     public function getValueSaver() {
         return function ($value, RecordInterface $record, $created = false) {
             if (empty($value)) {
                 if (!$created) {
                     // delete all related records
                     $this->getRelation()->getForeignTable()->delete([
-                        $this->getRelation()->getForeignColumnName() => $record->getValue($this->getRelation()->getLocalColumnName())
+                        $this->getRelation()->getForeignColumnName() => $record->getValue($this->getRelation()->getLocalColumnName()),
                     ]);
                 }
                 return;
             }
             if (!is_array($value)) {
                 throw new InvalidDataException([
-                    $this->getName() => 'Value must be an array'
+                    $this->getName() => 'Value must be an array',
                 ]);
             }
             $newFkValues = array_values($value);
-            array_walk($newFkValues, function ($value) {
-                return (int)$value;
+            array_walk($newFkValues, function (&$value) {
+                $value = (int)$value;
             });
             if (!$created) {
                 $existingRelatedRecords = $this->getRelation()->getForeignTable()->selectAssoc(
@@ -76,7 +109,7 @@ class HasManyRelatedRecordsFormInput extends FormInput {
                 if (!empty($itemsToDelete)) {
                     // delete unlinked records
                     $this->getRelation()->getForeignTable()->delete([
-                        $this->getRelation()->getForeignTable()->getPkColumnName() => $itemsToDelete
+                        $this->getRelation()->getForeignTable()->getPkColumnName() => $itemsToDelete,
                     ]);
                 }
             }
@@ -84,7 +117,7 @@ class HasManyRelatedRecordsFormInput extends FormInput {
                 return;
             }
             $recordConstantData = [
-                $this->getRelation()->getForeignColumnName() => $record->getValue($this->getRelation()->getLocalColumnName())
+                $this->getRelation()->getForeignColumnName() => $record->getValue($this->getRelation()->getLocalColumnName()),
             ];
             $foreignRecord = $this->getRelation()->getForeignTable()->newRecord();
             foreach ($newFkValues as $fkValue) {
@@ -92,7 +125,7 @@ class HasManyRelatedRecordsFormInput extends FormInput {
                     ->fromData(array_merge(
                         $recordConstantData,
                         [
-                            $this->getRelationColumn() => $fkValue
+                            $this->getRelationColumn() => $fkValue,
                         ]
                     ))
                     ->save();
@@ -102,15 +135,20 @@ class HasManyRelatedRecordsFormInput extends FormInput {
 
     public function doDefaultValueConversionByType($value, $type, array $record) {
         if (!is_array($value)) {
-            if (!is_string($value)) {
-                throw new \InvalidArgumentException('$value argument must be a string or array');
-            }
-            $value = json_decode($value, true);
-            if (!is_array($value)) {
-                $value = [];
-            }
+            throw new InvalidArgumentException("Invalid data received for relation '{$this->getRelation()->getName()}'. Array expected.");
         }
-        return array_values($value);
+        $ret = [];
+        $column = $this->getRelationColumn();
+        /** @var array $value */
+        foreach ($value as $foreignRecord) {
+            if (!array_key_exists($column, $foreignRecord)) {
+                throw new InvalidArgumentException(
+                    "Invalid data received for relation '{$this->getRelation()->getName()}'. Value for column {$column} not found."
+                );
+            }
+            $ret[] = $foreignRecord[$column];
+        }
+        return $ret;
     }
 
     public function hasOptionsLoader() {
@@ -119,14 +157,14 @@ class HasManyRelatedRecordsFormInput extends FormInput {
 
     public function setOptions($options) {
         throw new \BadMethodCallException(
-            "Plain options is forbidden for HasManyRelatedRecordsFormInput '{$this->getName()}'. Use options loader."
+            "Plain options is forbidden for ManyToManyRelationRecordsFormInput '{$this->getName()}'. Use options loader."
         );
     }
 
     public function getOptionsLoader() {
         if (!$this->hasRelation()) {
             throw new \BadMethodCallException(
-                "HasManyRelatedRecordsFormInput '{$this->getName()}' must be linked to Relation in order to funciton properly"
+                "ManyToManyRelationRecordsFormInput '{$this->getName()}' must be linked to Relation in order to funciton properly"
             );
         }
         if (!$this->optionsLoader) {
@@ -146,7 +184,7 @@ class HasManyRelatedRecordsFormInput extends FormInput {
             }
             if (!$dataSourceRelation) {
                 throw new \UnexpectedValueException(
-                    "Failed to detect data source Relation for HasManyRelatedRecordsFormInput '{$this->getName()}'. "
+                    "Failed to detect data source Relation for ManyToManyRelationRecordsFormInput '{$this->getName()}'. "
                     . "Column '{$this->getRelation()->getForeignTable()->getName()}.{$this->getRelationColumn()}'"
                     . ' has no Relation with type HAS ONE'
                 );

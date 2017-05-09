@@ -208,6 +208,11 @@ abstract class AbstractValueViewer {
     public function getLabel() {
         if (empty($this->label)) {
             $this->label = $this->getScaffoldSectionConfig()->translate($this);
+            if (!is_string($this->label)) {
+                throw new \UnexpectedValueException(
+                    "Label for value viewer '{$this->getName()}' must be a string. " . ucfirst(gettype($this->label)) . 'received'
+                );
+            }
         }
         return $this->label;
     }

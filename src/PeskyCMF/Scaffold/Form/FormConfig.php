@@ -10,6 +10,7 @@ use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfigException;
 use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\Relation;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
 
@@ -361,7 +362,13 @@ class FormConfig extends ScaffoldSectionConfig {
 
     protected function configureDefaultValueRenderer(ValueRenderer $renderer, RenderableValueViewer $formInput) {
         parent::configureDefaultValueRenderer($renderer, $formInput);
-        if ($formInput->isLinkedToDbColumn()) {
+        if (
+            $formInput->isLinkedToDbColumn()
+            && (
+                !$formInput->hasRelation()
+                || $formInput->getRelation()->getType() !== Relation::HAS_MANY
+            )
+        ) {
             $this->configureRendererByColumnConfig($renderer, $formInput->getTableColumn());
         }
         if ($formInput->hasDefaultRendererConfigurator()) {
