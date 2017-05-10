@@ -162,8 +162,8 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
             return [RecordValueHelpers::getErrorMessage($localizations, $column::VALUE_MUST_BE_ARRAY)];
         }
         $value = static::valueNormalizer($value, $isFromDb, $column);
-        /** @var ImagesColumn $column */
         $errors = [];
+        /** @noinspection ForeachSourceInspection */
         foreach ($column as $imageName => $imageConfig) {
             if (!array_key_exists($imageName, $value)) {
                 continue;
@@ -384,6 +384,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 function () use ($valueContainer, $column) {
                     $ret = [];
                     foreach ($column as $imageConfig) {
+                        /** @noinspection AmbiguousMethodsCallsInArrayMappingInspection */
                         $ret[$imageConfig->getName()] = static::valueFormatter($valueContainer, $imageConfig->getName());
                     }
                     return $ret;

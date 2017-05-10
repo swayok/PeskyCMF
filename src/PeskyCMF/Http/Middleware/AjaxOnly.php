@@ -5,12 +5,13 @@ use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use PeskyCMF\HttpCode;
+use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\Exception\InvalidDataException;
 use Swayok\Utils\StringUtils;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AjaxOnly {
+
+    use DataValidationHelper;
 
     /**
      * Request must be done via ajax
@@ -63,23 +64,12 @@ class AjaxOnly {
         try {
             return $next($request);
         } catch (InvalidDataException $exc) {
-            return new JsonResponse([
+            return $this->sendValidationErrorsResponse($exc->getErrors(true));
+            /*return new JsonResponse([
                 '_message' => trans(cmfTransGeneral('.error.invalid_data_received')),
                 'errors' => $exc->getErrors()
-            ], HttpCode::INVALID);
-        } catch (HttpException $exc) {
-            if ($exc->getStatusCode() === HttpCode::INVALID) {
-                $data = json_decode($exc->getMessage(), true);
-                if (!empty($data) && !empty($data['_message'])) {
-                    return new JsonResponse([
-                        '_message' => $data['_message'],
-                        'errors' => empty($data['errors']) ? [] : $data['errors']
-                    ], HttpCode::INVALID);
-                }
-            }
-            throw $exc;
+            ], HttpCode::INVALID);*/
         }
-
     }
 
 }

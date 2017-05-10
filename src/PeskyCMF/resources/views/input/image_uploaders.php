@@ -40,6 +40,9 @@ $configNameToInputId = [];
         </div>
         <div class="form-group">
             <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>">
+            <?php for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++): ?>
+                <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>]" id="<?php echo $inputId; ?>">
+            <?php endfor; ?>
             <?php echo $valueViewer->getFormattedTooltipForImageConfig($configName); ?>
         </div>
         <?php if ($imageConfig->getMaxFilesCount() > 1): ?>

@@ -14,6 +14,8 @@ class FileInfo {
     protected $record;
     /** @var string */
     protected $fileName;
+    /** @var string */
+    protected $originalFileName;
     /** @var null|int|string */
     protected $fileSuffix;
     /** @var string */
@@ -32,6 +34,7 @@ class FileInfo {
         $obj = new static($fileConfig, $record, array_get($fileInfo, 'suffix', null));
         $obj
             ->setFileName(array_get($fileInfo, 'name', null))
+            ->setOriginalFileName(array_get($fileInfo, 'original_name', null))
             ->setFileExtension(array_get($fileInfo, 'extension', null))
             ->setCustomInfo(array_get($fileInfo, 'info', null));
         return $obj;
@@ -46,9 +49,15 @@ class FileInfo {
      */
     static public function fromSplFileInfo(\SplFileInfo $fileInfo, FileConfig $fileConfig, RecordInterface $record, $fileSuffix = null) {
         $obj = new static($fileConfig, $record, $fileSuffix);
-        $obj->setFileExtension(
-            $fileInfo instanceof UploadedFile ? $fileInfo->getClientOriginalExtension() : $fileInfo->getExtension()
-        );
+        if ($fileInfo instanceof UploadedFile) {
+            $extension = $fileInfo->getClientOriginalExtension();
+            $fileName = $fileInfo->getClientOriginalName();
+        } else {
+            $extension = $fileInfo->getExtension();
+            $fileName = $fileInfo->getFilename();
+        }
+        $obj->setFileExtension($extension);
+        $obj->setOriginalFileName(preg_replace("%\.{$extension}$%", '', $fileName));
         return $obj;
     }
 
@@ -82,6 +91,14 @@ class FileInfo {
     }
 
     /**
+     * @return string
+     * @throws \UnexpectedValueException
+     */
+    public function getFileNameWithExtension() {
+        return rtrim($this->getFileName() . '.' . $this->getFileExtension(), '.');
+    }
+
+    /**
      * @param string $fileName
      * @return $this
      */
@@ -89,6 +106,34 @@ class FileInfo {
         if (!empty($fileName)) {
             $this->fileName = $fileName;
         }
+        return $this;
+    }
+
+    /**
+     * @return string
+     * @throws \UnexpectedValueException
+     */
+    public function getOriginalFileName() {
+        if (!$this->originalFileName) {
+            $this->originalFileName = $this->getFileName();
+        }
+        return $this->originalFileName;
+    }
+
+    /**
+     * @return string
+     * @throws \UnexpectedValueException
+     */
+    public function getOriginalFileNameWithExtension() {
+        return rtrim($this->getOriginalFileName() . '.' . $this->getFileExtension(), '.');
+    }
+
+    /**
+     * @param string $fileNameWithoutExtension
+     * @return $this
+     */
+    protected function setOriginalFileName($fileNameWithoutExtension) {
+        $this->originalFileName = $fileNameWithoutExtension;
         return $this;
     }
 
@@ -106,14 +151,6 @@ class FileInfo {
     protected function setFileExtension($fileExtension) {
         $this->fileExtension = empty($fileExtension) ? null : $fileExtension;
         return $this;
-    }
-
-    /**
-     * @return string
-     * @throws \UnexpectedValueException
-     */
-    public function getFileNameWithExtension() {
-        return $this->getFileName() . ($this->getFileExtension() ? '.' . $this->getFileExtension() : '');
     }
 
     /**
@@ -214,6 +251,7 @@ class FileInfo {
     public function collectImageInfoForDb() {
         return [
             'config_name' => $this->fileConfig->getName(),
+            'original_name' => $this->getOriginalFileName(), //< original file name without extension
             'name' => $this->getFileName(), //< file name with suffix but without extension
             'extension' => $this->getFileExtension(),
             'suffix' => $this->getFileSuffix(),

@@ -32,6 +32,17 @@ class ImageConfig extends FileConfig {
     ];
 
     /**
+     * List of aliases for file types
+     * For example: image/jpeg has alias image/x-jpeg
+     * @var array
+     */
+    protected $fileTypeAliases = [
+        self::JPEG => [
+            'image/x-jpeg'
+        ]
+    ];
+
+    /**
      * @return int
      */
     public function getMaxWidth() {
@@ -71,7 +82,11 @@ class ImageConfig extends FileConfig {
      */
     public function setAllowedFileTypes(...$allowedFileTypes) {
         parent::setAllowedFileTypes($allowedFileTypes);
-        $unknownTypes = array_diff($this->allowedFileTypes, [static::PNG, static::JPEG, static::GIF, static::SVG]);
+        $unknownTypes = array_diff(
+            $this->allowedFileTypes,
+            [static::PNG, static::JPEG, static::GIF, static::SVG],
+            $this->allowedFileTypesAliases
+        );
         if (count($unknownTypes) > 0) {
             throw new \InvalidArgumentException(
                 '$allowedFileTypes argument contains not supported image types: ' . implode(', ', $unknownTypes)

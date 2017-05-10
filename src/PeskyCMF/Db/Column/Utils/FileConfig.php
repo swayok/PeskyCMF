@@ -43,6 +43,21 @@ class FileConfig {
     /**
      * @var array
      */
+    protected $allowedFileTypesAliases = [];
+
+    /**
+     * List of aliases for file types.
+     * Format: 'common/filetype' => ['alias/filetype1', 'alias/filetype2']
+     * For example: image/jpeg file type has alias image/x-jpeg
+     * @var array
+     */
+    protected $fileTypeAliases = [
+
+    ];
+
+    /**
+     * @var array
+     */
     protected $typeToExt = [
         self::TXT => 'txt',
         self::PDF => 'pdf',
@@ -128,10 +143,11 @@ class FileConfig {
     }
 
     /**
+     * @param bool $withoutAliases
      * @return array
      */
-    public function getAllowedFileTypes() {
-        return $this->allowedFileTypes;
+    public function getAllowedFileTypes($withoutAliases = false) {
+        return $withoutAliases ? array_diff($this->allowedFileTypes, $this->allowedFileTypesAliases) : $this->allowedFileTypes;
     }
 
     /**
@@ -150,7 +166,13 @@ class FileConfig {
         if (count($allowedFileTypes) === 1 && isset($allowedFileTypes[0]) && is_array($allowedFileTypes[0])) {
             $allowedFileTypes = $allowedFileTypes[0];
         }
-        $this->allowedFileTypes = $allowedFileTypes;
+        /** @var array $allowedFileTypes */
+        foreach ($allowedFileTypes as $fileType) {
+            if (!empty($this->fileTypeAliases[$fileType])) {
+                $this->allowedFileTypesAliases = array_merge($this->allowedFileTypesAliases, (array)$this->fileTypeAliases[$fileType]);
+            }
+        }
+        $this->allowedFileTypes = array_merge($allowedFileTypes, $this->allowedFileTypesAliases);
         return $this;
     }
 
@@ -233,7 +255,7 @@ class FileConfig {
             'max_files_count' => $this->getMaxFilesCount(),
             'max_file_size' => $this->getMaxFileSize(),
             'allowed_extensions' => $this->getAllowedFileExtensions(),
-            'allowed_mime_types' => $this->getAllowedFileTypes(),
+            'allowed_mime_types' => $this->getAllowedFileTypes(true),
         ];
     }
 }
