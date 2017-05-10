@@ -232,10 +232,11 @@ class WysiwygFormInput extends FormInput {
     /**
      * @param string $html - HTML code to insert into editor
      * @param string $title - option title
+     * @param bool $isBlock
      * @return array
      * @throws \InvalidArgumentException
      */
-    static public function createHtmlInsertConfig($html, $title) {
+    static public function createHtmlInsertConfig($html, $title, $isBlock = true) {
         if (!is_string($html) || empty(trim($html))) {
             throw new \InvalidArgumentException('$html argument must be a not empty string');
         }
@@ -245,6 +246,7 @@ class WysiwygFormInput extends FormInput {
         return [
             'html' => $html,
             'title' => $title,
+            'is_block' => (bool)$isBlock
         ];
     }
 

@@ -780,6 +780,8 @@ abstract class CmfConfig extends ConfigsContainer {
                 . 'Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,Maximize,Save,NewPage,Preview,Print,'
                 . 'Templates,Strike,Subscript,BidiLtr,BidiRtl,Language,Styles',
             'format_tags' => 'p;h1;h2;h3;pre',
+            'enterMode' => 1, //< insert <p> on pressing ENTER
+            'forceEnterMode' => true,
             'removeDialogTabs' => 'image:advanced',
             'extraPlugins' => 'uploadimage',
             'filebrowserImageUploadUrl' => route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
