@@ -1556,7 +1556,25 @@ var ScaffoldFormHelper = {
                                                 tplData.title = $.trim(tplData.title);
                                                 editor.focus();
                                                 editor.fire('saveSnapshot');
-                                                editor.insertHtml(renderInsert(tplData), 'unfiltered_html');
+                                                if (tplData.__tag === 'div') {
+                                                    var currentSelectedElement;
+                                                    if (editor.getSelection().getRanges().length > 0) {
+                                                        currentSelectedElement = editor.getSelection().getRanges()[0].getCommonAncestor(true, true);
+                                                    } else {
+                                                        currentSelectedElement = editor.createRange().root;
+                                                    }
+                                                    var range = editor.createRange();
+                                                    range.moveToPosition(currentSelectedElement, CKEDITOR.POSITION_AFTER_END);
+                                                    editor.getSelection().selectRanges([range]);
+                                                    editor.insertHtml(renderInsert(tplData), 'unfiltered_html');
+                                                    var $selectedElement = $(currentSelectedElement.$);
+                                                    if ($selectedElement.filter('p').length && $.trim($selectedElement.text().replace(/&nbsp;/ig, '')) === '') {
+                                                        // replace empty <p> element
+                                                        $selectedElement.remove();
+                                                    }
+                                                } else {
+                                                    editor.insertHtml(renderInsert(tplData), 'unfiltered_html');
+                                                }
                                                 editor.fire('saveSnapshot');
                                             }
                                         )
@@ -1586,7 +1604,25 @@ var ScaffoldFormHelper = {
                                         if (insertInfo) {
                                             editor.focus();
                                             editor.fire('saveSnapshot');
-                                            editor.insertHtml(renderInsert(insertInfo));
+                                            if (insertInfo.is_block) {
+                                                var currentSelectedElement;
+                                                if (editor.getSelection().getRanges().length > 0) {
+                                                    currentSelectedElement = editor.getSelection().getRanges()[0].getCommonAncestor(true, true);
+                                                } else {
+                                                    currentSelectedElement = editor.createRange().root;
+                                                }
+                                                var range = editor.createRange();
+                                                range.moveToPosition(currentSelectedElement, CKEDITOR.POSITION_AFTER_END);
+                                                editor.getSelection().selectRanges([range]);
+                                                editor.insertHtml(renderInsert(insertInfo), 'unfiltered_html');
+                                                var $selectedElement = $(currentSelectedElement.$);
+                                                if ($selectedElement.filter('p').length && $.trim($selectedElement.text().replace(/&nbsp;/ig, '')) === '') {
+                                                    // replace empty <p> element
+                                                    $selectedElement.remove();
+                                                }
+                                            } else {
+                                                editor.insertHtml(renderInsert(insertInfo), 'unfiltered_html');
+                                            }
                                             editor.fire('saveSnapshot');
                                         } else {
                                             console.error('Insert with index ' + matches[2] + ' not found');
@@ -1613,6 +1649,7 @@ var ScaffoldFormHelper = {
                     CKEDITOR.addCss(
                         '.wysiwyg-data-insert{font-size:0}'
                         + 'span.wysiwyg-data-insert{display:inline-block;}'
+                        + 'div.wysiwyg-data-insert{margin: 10px 0 10px 0}'
                         + '.wysiwyg-data-insert:before{content:attr(title);position:static;display:block;font-size:12px;padding:0 5px;background:#DDD;border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;border:1px solid #555;white-space:nowrap;cursor:pointer;text-align:center;}'
                         + 'span.wysiwyg-data-insert:before{display: inline-block}'
                     );
@@ -1781,19 +1818,12 @@ var ScaffoldFormHelper = {
         return false;
     },
     addHtmlInsertsPluginToWysiwyg: function (curentWysiwygConfig) {
-        // var allowedContent = '*';
         var pluginName = 'cmf_scaffold_html_inserter';
-        // if (curentWysiwygConfig.extraAllowedContent) {
-        //     curentWysiwygConfig.extraAllowedContent += '; ' + allowedContent;
-        // } else {
-        //     curentWysiwygConfig.extraAllowedContent = allowedContent;
-        // }
         if (curentWysiwygConfig.extraPlugins) {
             curentWysiwygConfig.extraPlugins += ',' + pluginName;
         } else {
             curentWysiwygConfig.extraPlugins = pluginName;
         }
-        // curentWysiwygConfig.on.instanceReady
         if (!CKEDITOR.plugins.get(pluginName)) {
             var comboboxPanelCss = 'body{font-family:Arial,sans-serif;font-size:14px;}';
             var locale = CmfConfig.getLocalizationStringsForComponent('ckeditor');
@@ -1835,7 +1865,25 @@ var ScaffoldFormHelper = {
                                         if (insertInfo) {
                                             editor.focus();
                                             editor.fire('saveSnapshot');
-                                            editor.insertHtml(renderInsert(insertInfo), 'unfiltered_html');
+                                            if (insertInfo.is_block) {
+                                                var currentSelectedElement;
+                                                if (editor.getSelection().getRanges().length > 0) {
+                                                    currentSelectedElement = editor.getSelection().getRanges()[0].getCommonAncestor(true, true);
+                                                } else {
+                                                    currentSelectedElement = editor.createRange().root;
+                                                }
+                                                var range = editor.createRange();
+                                                range.moveToPosition(currentSelectedElement, CKEDITOR.POSITION_AFTER_END);
+                                                editor.getSelection().selectRanges([range]);
+                                                editor.insertHtml(renderInsert(insertInfo), 'unfiltered_html');
+                                                var $selectedElement = $(currentSelectedElement.$);
+                                                if ($selectedElement.filter('p').length && $.trim($selectedElement.text().replace(/&nbsp;/ig, '')) === '') {
+                                                    // replace empty <p> element
+                                                    $selectedElement.remove();
+                                                }
+                                            } else {
+                                                editor.insertHtml(renderInsert(insertInfo), 'unfiltered_html');
+                                            }
                                             editor.fire('saveSnapshot');
                                         } else {
                                             console.error('HTML Insert with index ' + matches[2] + ' not found');

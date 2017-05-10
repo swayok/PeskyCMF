@@ -32,7 +32,7 @@ return [
             'ckeditor' => [
                 'cmf_scaffold_data_inserts_plugin_title' => 'Вставить данные',
                 'cmf_scaffold_data_inserts_dialog_insert_tag_name' => 'Тип вставки',
-                'cmf_scaffold_html_inserts_plugin_title' => 'Вставить HTML-виджет',
+                'cmf_scaffold_html_inserts_plugin_title' => 'Вставить заготовку',
                 'cmf_scaffold_inserts_dialog_insert_tag_is_span' => 'Вставить в строку другого текста (span)',
                 'cmf_scaffold_inserts_dialog_insert_tag_is_div' => 'Вставить как отдельный блок (div, p)',
             ],

@@ -32,7 +32,7 @@ return [
             'ckeditor' => [
                 'cmf_scaffold_data_inserts_plugin_title' => 'Insert data',
                 'cmf_scaffold_data_inserts_dialog_insert_tag_name' => 'Display:',
-                'cmf_scaffold_html_inserts_plugin_title' => 'Insert HTML widget',
+                'cmf_scaffold_html_inserts_plugin_title' => 'Insert template',
                 'cmf_scaffold_inserts_dialog_insert_tag_is_span' => 'Inside existing text (span)',
                 'cmf_scaffold_inserts_dialog_insert_tag_is_div' => 'As separate text block (div, p)',
             ],
