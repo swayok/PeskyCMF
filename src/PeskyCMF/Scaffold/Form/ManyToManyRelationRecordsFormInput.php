@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use Doctrine\Instantiator\Exception\UnexpectedValueException;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\RecordInterface;
@@ -61,7 +60,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
 
     public function getRelationColumn() {
         if (empty($this->relationColumn)) {
-            throw new UnexpectedValueException(
+            throw new \UnexpectedValueException(
                 "Relations linking column was not provided for '{$this->getName()}' input. "
                 . 'Use setRelationsLinkingColumn(\'column_name\') method to provide it'
             );

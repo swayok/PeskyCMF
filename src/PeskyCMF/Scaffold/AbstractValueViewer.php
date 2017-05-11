@@ -55,6 +55,8 @@ abstract class AbstractValueViewer {
     protected $relationColumn;
     /** @var string|null */
     protected $nameForTranslation;
+    /** @var string|null */
+    protected $tableNameForRouteToRelatedRecord;
 
     /**
      * @return $this
@@ -125,6 +127,23 @@ abstract class AbstractValueViewer {
      */
     public function getRelationColumn() {
         return $this->relationColumn;
+    }
+
+    /**
+     * Used only for value cells that make <a> tags to generate valid urls to related records
+     * @param string $tableName
+     * @return $this
+     */
+    public function setTableNameForRouteToRelatedRecord($tableName) {
+        $this->tableNameForRouteToRelatedRecord = $tableName;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getTableNameForRouteToRelatedRecord() {
+        return $this->tableNameForRouteToRelatedRecord;
     }
 
     /**
@@ -378,7 +397,7 @@ abstract class AbstractValueViewer {
             }
             return Tag::a($linkLabel)
                 ->setHref(routeToCmfItemDetails(
-                    $relationConfig->getForeignTable()->getName(),
+                    $this->getTableNameForRouteToRelatedRecord() ?: $relationConfig->getForeignTable()->getName(),
                     $relationData[$relationPkColumn]
                 ))
                 ->build();

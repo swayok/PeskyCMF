@@ -22,6 +22,28 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     /** @var bool */
     protected $showInDialog = true;
 
+    public function getRelationsToRead() {
+        $relations = parent::getRelationsToRead();
+        foreach ($this->getValueCells() as $valueCell) {
+            $addRelations = $valueCell->getAdditionalRelationsToRead();
+            foreach ($addRelations as $relationName => $relationColumns) {
+                if (is_int($relationName)) {
+                    $relationName = $relationColumns;
+                    $relationColumns = ['*'];
+                }
+                if (!array_key_exists($relationName, $relations)) {
+                    $relations[$relationName] = $relationColumns;
+                }
+                $index = array_search($relationName, $relations, true);
+                if ($index >= 0) {
+                    // remove duplicate
+                    unset($relations[$index]);
+                }
+            }
+        }
+        return $relations;
+    }
+
     /**
      * @return ValueCell;
      */

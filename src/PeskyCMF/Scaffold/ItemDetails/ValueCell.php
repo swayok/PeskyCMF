@@ -12,6 +12,15 @@ class ValueCell extends RenderableValueViewer {
     const TYPE_HTML = 'html';
 
     /**
+     * Returns list of additional relations to read
+     * Designed to be used in custom ValueCells
+     * @return array
+     */
+    public function getAdditionalRelationsToRead() {
+        return [];
+    }
+
+    /**
      * @return \Closure|null
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
