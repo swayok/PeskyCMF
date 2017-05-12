@@ -10,7 +10,6 @@ use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 use PeskyCMF\Console\Commands\CmsInstall;
-use Wpb\String_Blade_Compiler\ViewServiceProvider;
 
 class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
@@ -26,6 +25,9 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
     }
 
     public function boot() {
+        if (config('cmf.file_access_mask') !== null) {
+            umask(config('cmf.file_access_mask'));
+        }
         CmsFrontendUtils::registerBladeDirectiveForStringTemplateRendering();
         $this->configurePublishes();
         /** @var CmfConfig|string $defaultCmfConfig */

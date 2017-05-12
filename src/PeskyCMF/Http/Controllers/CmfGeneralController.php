@@ -339,8 +339,7 @@ class CmfGeneralController extends Controller {
 
     public function logout() {
         CmfConfig::getPrimary()->getAuth()->logout();
-        \Session::flush();
-        \Session::regenerate(true);
+        \Session::invalidate();
         CmfConfig::getPrimary()->resetLocale();
 
         return Redirect::route(CmfConfig::getPrimary()->login_route());

@@ -32,4 +32,10 @@ return [
      * Used by setting($name, $default) helper function
      */
     'app_settings_class' => \PeskyCMF\CMS\CmsAppSettings::class,
+
+    /**
+     * Alter umask()
+     * Use 0000 to disable umask (allows to set any access rights to any file/folder created by app)
+     */
+    'file_access_mask' => null
 ];
