@@ -223,9 +223,10 @@ abstract class AbstractValueViewer {
 
     /**
      * @return string
+     * @throws \UnexpectedValueException
      */
     public function getLabel() {
-        if (empty($this->label)) {
+        if ($this->label === null) {
             $this->label = $this->getScaffoldSectionConfig()->translate($this);
             if (!is_string($this->label)) {
                 throw new \UnexpectedValueException(

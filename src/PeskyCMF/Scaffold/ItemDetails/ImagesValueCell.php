@@ -6,7 +6,6 @@ use PeskyCMF\Db\Column\FilesColumn;
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyCMF\Db\Column\Utils\FileConfig;
 use PeskyCMF\Db\Column\Utils\FileInfo;
-use PeskyCMF\Db\Column\Utils\ImageConfig;
 use PeskyCMF\Db\Column\Utils\ImagesUploadingColumnClosures;
 
 /**
@@ -41,8 +40,7 @@ class ImagesValueCell extends ValueCell {
         if (empty($value) || !is_array($value)) {
             return [];
         }
-        $filesToShow = $this->fileConfigsToShow ?: array_keys($this->getTableColumn()->getFilesConfigurations());
-        $filesByName = array_intersect_key($value, array_flip($filesToShow));
+        $column = $this->getTableColumn();
         $object = $this
             ->getScaffoldSectionConfig()
             ->getTable()
@@ -50,11 +48,12 @@ class ImagesValueCell extends ValueCell {
             ->enableTrustModeForDbData()
             ->fromData($record, true, false);
         $ret = [];
-        foreach ($filesByName as $name => $filesList) {
+        foreach ($this->fileConfigsToShow as $configName) {
             $preparedInfo = [];
-            foreach ($filesList as $index => $fileInfo) {
-                if (ImagesUploadingColumnClosures::isFileInfoArray($fileInfo)) {
-                    $fileInfo = FileInfo::fromArray($fileInfo, $this->getTableColumn()->getFileConfiguration($name), $object);
+            /** @var FileInfo[] $filesForCofing */
+            $filesForCofing = $object->getValue($column, $configName);
+            foreach ($filesForCofing as $fileInfo) {
+                if ($fileInfo->exists()) {
                     $preparedInfo[] = [
                         'name' => $fileInfo->getFileNameWithExtension(),
                         'original_name' => $fileInfo->getOriginalFileNameWithExtension(),
@@ -64,8 +63,8 @@ class ImagesValueCell extends ValueCell {
             }
             if (!empty($preparedInfo)) {
                 $ret[] = [
-                    'config_name' => $name,
-                    'label' => $this->getScaffoldSectionConfig()->translate($this, $name),
+                    'config_name' => $configName,
+                    'label' => $this->getScaffoldSectionConfig()->translate($this, $configName),
                     'files' => $preparedInfo
                 ];
             }

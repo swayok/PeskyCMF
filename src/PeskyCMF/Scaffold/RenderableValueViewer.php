@@ -89,7 +89,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
         if ($default === null) {
             $default = "''";
         }
-        return implode(' && ', $conditions) . " ? $value : $default";
+        return '(' . implode(' && ', $conditions) . " ? $value : $default" . ')';
     }
 
     /**

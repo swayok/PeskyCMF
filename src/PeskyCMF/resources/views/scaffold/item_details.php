@@ -63,18 +63,22 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                                 foreach ($groupInfo['keys_for_values'] as $keyForValue) {
                                     try {
                                         $viewer = $itemDetailsConfig->getValueCell($keyForValue);
-                                        echo Swayok\Html\Tag::tr(['id' => 'item-details-' . $viewer->getName()])
-                                            ->append(
+                                        $label = $viewer->getLabel();
+                                        $tr = Swayok\Html\Tag::tr(['id' => 'item-details-' . $viewer->getName()]);
+                                        $contentTd = \Swayok\Html\Tag::td(['width' => '80%'])->setContent($viewer->render());
+                                        if (trim($label) === '') {
+                                            // do not display label column
+                                            $contentTd
+                                                ->setAttribute('colspan', '2')
+                                                ->setAttribute('width', '100%');
+                                        } else {
+                                            $tr->append(
                                                 Swayok\Html\Tag::th(['class' => 'text-nowrap'])
                                                     ->setContent($viewer->getLabel())
                                                     ->build()
-                                            )
-                                            ->append(
-                                                \Swayok\Html\Tag::td(['width' => '80%'])
-                                                    ->setContent($viewer->render())
-                                                    ->build()
-                                            )
-                                            ->build() . "\n";
+                                            );
+                                        }
+                                        echo $tr->append($contentTd->build())->build() . "\n";
                                     } catch (Exception $exc) {
                                         echo '<tr><td colspan="2">';
                                         echo '<div>Key: <b>' . $keyForValue . '</b></div>';
@@ -153,11 +157,14 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 <?php View::stopSection(); ?>
 
 <script type="text/html" id="item-details-tpl">
-    {{##def.tabsheet:
-        <?php echo View::yieldContent('item-detials-tabsheet'); ?>
+    {{##def.tabsheet = function () {
+        return Base64.decode('<?php echo base64_encode(View::yieldContent('item-detials-tabsheet')); ?>');
+    }
     #}}
-    {{##def.footer:
-        <?php echo View::yieldContent('item-detials-footer'); ?>
+
+    {{##def.footer = function () {
+        return Base64.decode('<?php echo base64_encode(View::yieldContent('item-detials-footer')); ?>');
+    }
     #}}
     {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog" data-pk-name="<?php echo $table::getPkColumnName() ?>">
@@ -175,14 +182,14 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                         data-toggle="tooltip" title="<?php echo cmfTransGeneral('.item_details.previous_item') ?>">
                             <i class="glyphicon glyphicon-arrow-left"></i>
                         </button>
-                        {{# def.tabsheet }}
+                        {{# def.tabsheet() }}
                         <button type="button" class="next-item" disabled
                         data-toggle="tooltip" title="<?php echo cmfTransGeneral('.item_details.next_item') ?>">
                             <i class="glyphicon glyphicon-arrow-right"></i>
                         </button>
                     </div>
                     <div class="modal-footer">
-                        {{# def.footer }}
+                        {{# def.footer() }}
                     </div>
                 </div>
             </div>
@@ -197,10 +204,10 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 <div class="<?php echo $itemDetailsConfig->getCssClassesForContainer() ?>">
                     <div class="box br-t-n">
                         <div class="box-body pn">
-                            {{# def.tabsheet }}
+                            {{# def.tabsheet() }}
                         </div>
                         <div class="box-footer">
-                            {{# def.footer }}
+                            {{# def.footer() }}
                         </div>
                     </div>
                 </div>

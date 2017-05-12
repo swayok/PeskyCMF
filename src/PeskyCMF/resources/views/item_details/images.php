@@ -8,8 +8,8 @@
  */
 ?>
 
-{{? !!it.<?php echo $valueViewer->getName() ?> && it.<?php echo $valueViewer->getName() ?>.length > 0 }}
-    {{~ it.<?php echo $valueViewer->getName() ?> :configFiles }}
+{{? <?php echo $valueViewer->getFailsafeValueForDotJs([], 'array', '[]') ?>.length }}
+    {{~ <?php echo $valueViewer->getVarNameForDotJs() ?> :configFiles }}
         {{? $.isPlainObject(configFiles) && $.isArray(configFiles.files) && configFiles.files.length > 0 }}
         <div class="image-previews-container">
             {{? configFiles.label }}<p class="text-center">{{= configFiles.label }}</p>{{?}}

@@ -169,11 +169,11 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     </div>
                 <?php endforeach; ?>
                 <?php if (!$hasTabs) : ?>
-                    {{# def.footer }}
+                    {{# def.footer() }}
                 <?php endif ?>
             </div>
             <?php if ($hasTabs) : ?>
-                {{# def.footer }}
+                {{# def.footer() }}
             <?php endif ?>
         </div>
     </form>
@@ -181,11 +181,13 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
 <?php View::stopSection(); ?>
 
 <script type="text/html" id="item-form-tpl">
-    {{##def.form:
-        <?php echo View::yieldContent('scaffold-form'); ?>
+    {{##def.footer = function () {
+        return Base64.decode('<?php echo base64_encode(View::yieldContent('scaffold-form-footer')); ?>');
+    }
     #}}
-    {{##def.footer:
-        <?php echo View::yieldContent('scaffold-form-footer'); ?>
+    {{##def.form = function () {
+        return Base64.decode('<?php echo base64_encode(View::yieldContent('scaffold-form')); ?>');
+    }
     #}}
     {{##def.title:
         <?php
@@ -206,7 +208,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                         <h4 class="modal-title">{{# def.title }}</h4>
                     </div>
                     <div class="modal-body pn">
-                        {{# def.form }}
+                        {{# def.form() }}
                     </div>
                 </div>
             </div>
@@ -219,7 +221,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         <div class="content">
             <div class="row">
                 <div class="<?php echo $formConfig->getCssClassesForContainer() ?>">
-                    {{# def.form }}
+                    {{# def.form() }}
                 </div>
             </div>
         </div>
