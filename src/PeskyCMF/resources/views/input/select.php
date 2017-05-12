@@ -28,29 +28,39 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
         <?php endif; ?>
     >
     <?php if (!$valueViewer->hasOptionsLoader()) : ?>
+        <?php
+            $emptyOption = '<option value="">'. $valueViewer->getEmptyOptionLabel() . '</option>';
+            $isEmptyoptionAllowed = !$isMultiple && !array_key_exists('', $options);
+        ?>
         <?php if ($rendererConfig->areOptionsDifferent()) : ?>
             {{? !!it.isCreation }}
-                <?php $options = $rendererConfig->getOptionsForCreate(); ?>
-                <?php if (!$rendererConfig->isRequiredForCreate() && !array_key_exists('', $options)) : ?>
-                    <option value=""><?php echo $valueViewer->getEmptyOptionLabel() ?></option>
-                <?php endif; ?>
+                <?php
+                    $options = $rendererConfig->getOptionsForCreate();
+                    if ($isEmptyoptionAllowed && !$rendererConfig->isRequiredForCreate()) {
+                        echo $emptyOption;
+                    }
+                ?>
                 <?php foreach ($options as $value => $label): ?>
                     <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
                 <?php endforeach; ?>
             {{??}}
-                <?php $options = $rendererConfig->getOptionsForEdit(); ?>
-                <?php if (!$rendererConfig->isRequiredForEdit() && !array_key_exists('', $options)) : ?>
-                    <option value=""><?php echo $valueViewer->getEmptyOptionLabel() ?></option>
-                <?php endif; ?>
+                <?php
+                    $options = $rendererConfig->getOptionsForEdit();
+                    if ($isEmptyoptionAllowed && !$rendererConfig->isRequiredForEdit()) {
+                        echo $emptyOption;
+                    }
+                ?>
                 <?php foreach ($options as $value => $label): ?>
                     <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
                 <?php endforeach; ?>
             {{?}}
         <?php else : ?>
-            <?php $options = $rendererConfig->getOptions(); ?>
-            <?php if (!$rendererConfig->isRequired() && !array_key_exists('', $options)) : ?>
-                <option value=""><?php echo $valueViewer->getEmptyOptionLabel() ?></option>
-            <?php endif; ?>
+            <?php
+                $options = $rendererConfig->getOptions();
+                if ($isEmptyoptionAllowed && !$rendererConfig->isRequired()) {
+                    echo $emptyOption;
+                }
+            ?>
             <?php foreach ($options as $value => $label): ?>
                 <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
             <?php endforeach; ?>
@@ -61,7 +71,7 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
         {{?}}
     <?php endif; ?>
     </select>
-    <?php if ($rendererConfig->isRequired() && $valueViewer->hasOptionsLoader()) : ?>
+    <?php if ($isMultiple || ($rendererConfig->isRequired() && $valueViewer->hasOptionsLoader())) : ?>
         <script type="application/javascript">
             $('#<?php echo $rendererConfig->getAttribute('id') ?>').find('option[value=""]').remove();
         </script>
