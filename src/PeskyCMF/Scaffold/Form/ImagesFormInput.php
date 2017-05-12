@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use Doctrine\Instantiator\Exception\UnexpectedValueException;
 use PeskyCMF\Db\Column\FilesColumn;
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyCMF\Db\Column\Utils\FileInfo;
