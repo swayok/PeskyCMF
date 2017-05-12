@@ -229,7 +229,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
      * @param array $value
      * @return bool
      */
-    static protected function isFileInfoArray(array $value) {
+    static public function isFileInfoArray(array $value) {
         return !empty($value['name']) && !empty($value['extension']);
     }
 

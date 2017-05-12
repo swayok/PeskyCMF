@@ -254,7 +254,7 @@ abstract class ScaffoldConfig {
      * @return string
      */
     public function translateForViewer($section, AbstractValueViewer $viewer, $suffix = '', array $parameters = []) {
-        return $this->translate($section, "{$viewer->getNameForTranslation()}.{$suffix}", $parameters);
+        return $this->translate($section, rtrim("{$viewer->getNameForTranslation()}_{$suffix}", '_'), $parameters);
     }
 
     /**

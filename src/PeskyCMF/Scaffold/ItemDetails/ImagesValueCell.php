@@ -5,7 +5,9 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 use PeskyCMF\Db\Column\FilesColumn;
 use PeskyCMF\Db\Column\ImagesColumn;
 use PeskyCMF\Db\Column\Utils\FileConfig;
-use PeskyCMF\Scaffold\ValueRenderer;
+use PeskyCMF\Db\Column\Utils\FileInfo;
+use PeskyCMF\Db\Column\Utils\ImageConfig;
+use PeskyCMF\Db\Column\Utils\ImagesUploadingColumnClosures;
 
 /**
  * @method ImagesColumn|FilesColumn getTableColumn()
@@ -36,14 +38,39 @@ class ImagesValueCell extends ValueCell {
     }
 
     public function doDefaultValueConversionByType($value, $type, array $record) {
-        if (!empty($value) && is_array($value)) {
-            $filesToShow = $this->fileConfigsToShow ?: array_keys($this->getTableColumn()->getFilesConfigurations());
-            $files = array_intersect_key($value, array_flip($filesToShow));
-            foreach ($files as $name => $fileInfo) {
-                //< todo: make urls to files and return + update view to use this
+        if (empty($value) || !is_array($value)) {
+            return [];
+        }
+        $filesToShow = $this->fileConfigsToShow ?: array_keys($this->getTableColumn()->getFilesConfigurations());
+        $filesByName = array_intersect_key($value, array_flip($filesToShow));
+        $object = $this
+            ->getScaffoldSectionConfig()
+            ->getTable()
+            ->newRecord()
+            ->enableTrustModeForDbData()
+            ->fromData($record, true, false);
+        $ret = [];
+        foreach ($filesByName as $name => $filesList) {
+            $preparedInfo = [];
+            foreach ($filesList as $index => $fileInfo) {
+                if (ImagesUploadingColumnClosures::isFileInfoArray($fileInfo)) {
+                    $fileInfo = FileInfo::fromArray($fileInfo, $this->getTableColumn()->getFileConfiguration($name), $object);
+                    $preparedInfo[] = [
+                        'name' => $fileInfo->getFileNameWithExtension(),
+                        'original_name' => $fileInfo->getOriginalFileNameWithExtension(),
+                        'url' => $fileInfo->getAbsoluteUrl()
+                    ];
+                }
+            }
+            if (!empty($preparedInfo)) {
+                $ret[] = [
+                    'config_name' => $name,
+                    'label' => $this->getScaffoldSectionConfig()->translate($this, $name),
+                    'files' => $preparedInfo
+                ];
             }
         }
-        return [];
+        return $ret;
     }
 
 }
