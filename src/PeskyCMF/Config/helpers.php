@@ -120,8 +120,18 @@ if (!function_exists('routeToCmfItemCustomPage')) {
 }
 
 if (!function_exists('transChoiceRu')) {
-    function transChoiceRu($id, $number, array $parameters = [], $domain = 'messages', $locale = null) {
-        $trans = \Swayok\Utils\StringUtils::pluralizeRu($number, trans($id, [], $domain, $locale));
+    /**
+     * @param string|array $idOrTranslations - array: translations for items count 1,4,5
+     * @param int $itemsCount
+     * @param array $parameters
+     * @param string $locale
+     * @return string
+     */
+    function transChoiceRu($idOrTranslations, $itemsCount, array $parameters = [], $locale = 'ru') {
+        $trans = \Swayok\Utils\StringUtils::pluralizeRu(
+            $itemsCount,
+            is_array($idOrTranslations) ? $idOrTranslations : trans($idOrTranslations, [], $locale)
+        );
         if (!empty($parameters)) {
             $trans = \Swayok\Utils\StringUtils::insert($trans, $parameters, ['before' => ':']);
         }
@@ -241,8 +251,79 @@ if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
     }
 }
 
+if (!function_exists('formatDate')) {
+    /**
+     * @param string $date
+     * @param bool $addTime
+     * @return string
+     */
+    function formatDate($date, $addTime = false) {
+        if (!is_numeric($date)) {
+            $date = strtotime($date);
+        }
+        if ($date <= 0) {
+            return cmfTransGeneral('.error.invalid_date_received');
+        }
+        $month = cmfTransGeneral('.month.when.' . date('m', $date));
+        return date('j ', $date) . $month . date(' Y', $date) . ($addTime ? date(' H:i', $date) : '');
+    }
+}
+
+if (!function_exists('formatMoney')) {
+    /**
+     * @param float $number
+     * @param string $thousandsSeparator
+     * @return string
+     */
+    function formatMoney($number, $thousandsSeparator = ' ') {
+        return number_format($number, 2, '.', $thousandsSeparator);
+    }
+}
+
+if (!function_exists('formatSeconds')) {
+    /**
+     * @param int $seconds
+     * @param bool $displaySeconds - true: display "days hours minutes seconds"; false: display "days hours minutes"
+     * @param bool $shortLabels - true: use shortened labels (min, sec, hr, d) | false: user full lables (days, hours, minutes, seconds)
+     * @return bool|string
+     */
+    function formatSeconds($seconds, $displaySeconds = true, $shortLabels = true) {
+        $ret = '';
+        if ($seconds >= 86400) {
+            $days = floor($seconds / 86400);
+            $seconds -= 86400 * $days;
+            $ret .= $shortLabels
+                ? cmfTransGeneral('.format_seconds.days_short', ['days' => $days])
+                : transChoiceRu(cmfTransGeneral('.format_seconds.days'), $days, ['days' => $days]);
+        }
+        if ($seconds >= 3600 || !empty($days)) {
+            $hours = floor($seconds / 3600);
+            $seconds -= 3600 * $hours;
+            $ret .= $shortLabels
+                ? cmfTransGeneral('.format_seconds.hours_short', ['hours' => $hours])
+                : transChoiceRu(cmfTransGeneral('.format_seconds.hours'), $hours, ['hours' => $hours]);
+        }
+        if ($seconds >= 60 || !empty($days) || !empty($hours)) {
+            $minutes = floor($seconds / 60);
+            $seconds -= 60 * $minutes;
+            $ret .= $shortLabels
+                ? cmfTransGeneral('.format_seconds.minutes_short', ['minutes' => $minutes])
+                : transChoiceRu(cmfTransGeneral('.format_seconds.minutes'), $minutes, ['minutes' => $minutes]);
+        }
+        if ($displaySeconds) {
+            $ret .= $shortLabels
+                ? cmfTransGeneral('.format_seconds.seconds_short', ['seconds' => $seconds])
+                : transChoiceRu(cmfTransGeneral('.format_seconds.seconds'), $seconds, ['seconds' => $seconds]);
+        } else if (empty($days) && empty($hours) && empty($minutes)) {
+            $ret = cmfTransGeneral('.format_seconds.less_then_a_minute');
+        }
+        return $ret;
+    }
+}
+
 if (!function_exists('pickLocalization')) {
     /**
+     * Pick correct localization strings from specially formatted array. Useful for localizations stored in DB
      * @param array $translations - format: ['lang1_code' => 'translation1', 'lang2_code' => 'translation2', ...]
      * @param null|string $default - default value to return when there is no translation for app()->getLocale()
      *      language and for CmfConfig::getPrimary()->default_locale()
