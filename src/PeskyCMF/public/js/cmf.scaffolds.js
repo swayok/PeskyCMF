@@ -1360,7 +1360,7 @@ var ScaffoldFormHelper = {
                 $bulkEditForm
                     .find('input, select, textarea')
                     .not('[type="hidden"]')
-                    .not('.bulk-edit-form-input-enabler-switch')
+                    .not('.bulk-edit-form-input-enabler-switch, .bulk-edit-form-input-enabler-input')
                         .prop('disabled', true)
                         .filter('[type="checkbox"]')
                             .not('.switch')
@@ -1393,30 +1393,38 @@ var ScaffoldFormHelper = {
                         var $inputOrLabel = $(this);
                         $inputOrLabel
                             .closest('.bulk-edit-form-input-container')
-                                .find('.bulk-edit-form-input-enabler-switch')
+                                .find('.bulk-edit-form-input-enabler-switch, .bulk-edit-form-input-enabler-input')
                                     .prop('checked', true)
                                     .change();
                     });
                 // switch editing on/off by changing enabler input
+                var isFormSubmitAllowed = function () {
+                    return $bulkEditForm.find(
+                        '.bulk-edit-form-input-enabler-switch:checked, .bulk-edit-form-input-enabler-input:checked'
+                    ).length > 0;
+                }
+                var enablerValueChangeHandler = function () {
+                    var $inputs = $(this)
+                        .closest('.bulk-edit-form-input-container')
+                        .find('.bulk-edit-form-input')
+                        .find('input, textarea, select');
+                    $inputs.prop('disabled', !this.checked);
+                    setTimeout(function () {
+                        $inputs.not('[type="hidden"], .switch').focus();
+                    }, 50);
+                    $inputs.filter('.switch').bootstrapSwitch('disabled', !this.checked);
+                    $inputs.filter('select.selectpicker').selectpicker('refresh');
+                    $inputs.trigger('toggle.bulkEditEnabler', !this.checked);
+                    console.log(isFormSubmitAllowed());
+                    $bulkEditForm.find('[type="submit"]').prop('disabled', !isFormSubmitAllowed());
+                };
                 $bulkEditForm
                     .find('.bulk-edit-form-input-enabler-switch')
-                    .on('change switchChange.bootstrapSwitch', function () {
-                        var $inputs = $(this)
-                            .closest('.bulk-edit-form-input-container')
-                            .find('.bulk-edit-form-input')
-                            .find('input, textarea, select');
-                        $inputs.prop('disabled', !this.checked);
-                        setTimeout(function () {
-                            $inputs.not('[type="hidden"], .switch').focus();
-                        }, 50);
-                        $inputs.filter('.switch').bootstrapSwitch('disabled', !this.checked);
-                        $inputs.filter('select.selectpicker').selectpicker('refresh');
-                        $inputs.trigger('toggle.bulkEditEnabler', !this.checked);
-                        $bulkEditForm.find('[type="submit"]').prop(
-                            'disabled',
-                            $bulkEditForm.find('.bulk-edit-form-input-enabler-switch:checked').length === 0
-                        );
-                    })
+                    .on('change switchChange.bootstrapSwitch', enablerValueChangeHandler)
+                    .change();
+                $bulkEditForm
+                    .find('.bulk-edit-form-input-enabler-input')
+                    .on('change click', enablerValueChangeHandler)
                     .change();
 
                 // add resulting html to page and open modal
@@ -1427,7 +1435,7 @@ var ScaffoldFormHelper = {
                     })
                     .on('show.bs.modal', function () {
                         $bulkEditForm.on('submit', function () {
-                            return $bulkEditForm.find('.bulk-edit-form-input-enabler-switch:checked').length > 0;
+                            return isFormSubmitAllowed();
                         });
                         ScaffoldFormHelper.initForm($bulkEditForm, function (json, $form, $container) {
                             if (json._message) {
