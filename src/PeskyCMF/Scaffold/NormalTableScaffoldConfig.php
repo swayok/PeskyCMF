@@ -423,7 +423,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isDeleteAllowed()) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden'));
         }
-        $conditions = $this->getSelectConditionsForBulkActions($this->getRequest());
+        $conditions = $this->getSelectConditionsForBulkActions();
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
