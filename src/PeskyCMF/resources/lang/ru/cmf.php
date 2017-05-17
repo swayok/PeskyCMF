@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'test' => 'ok', //< used in PeskyCmfServiceProvider to load cmf dictionaries
     'ui' => [
         'close' => 'Закрыть',
         'js_component' => [

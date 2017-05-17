@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Providers;
 
+use LaravelSiteLoader\DummySiteLoader;
 use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\CMS\CmsFrontendUtils;
 use PeskyCMF\Config\CmfConfig;
@@ -10,6 +11,7 @@ use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 use PeskyCMF\Console\Commands\CmsInstall;
+use PeskyCMF\Http\PeskyCmfSiteLoader;
 
 class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
@@ -37,6 +39,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         }
         require_once __DIR__ . '/../Config/helpers.php';
         parent::boot();
+        $this->configureDefaultCmfTranslations();
     }
 
     public function register() {
@@ -171,6 +174,12 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             return new CmsInstall();
         });
         $this->commands('command.cms.install');
+    }
+
+    protected function configureDefaultCmfTranslations() {
+        if (!\Lang::has('cmf::test', 'en')) {
+            $this->loadTranslationsFrom(CmfConfig::cmf_dictionaries_path(), 'cmf');
+        }
     }
 
 
