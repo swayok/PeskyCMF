@@ -294,6 +294,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * Bulk editable columns provided via FormConfig->setBulkEditableColumns() or FormConfig->addBulkEditableColumns()
      * @param bool $isAllowed - default: false
      * @return $this
      */

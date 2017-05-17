@@ -54,19 +54,18 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                     <!-- end of autofill disabler -->
                     <div class="modal-body">
                     <?php
-                        $enablerTextOn = cmfTransGeneral('.form.bulk_edit.enabler.edit_input');
-                        $enablerTextOff = cmfTransGeneral('.form.bulk_edit.enabler.skip_input');
+                        $enablerTooltip = cmfTransGeneral('.form.bulk_edit.enabler.tooltip');
                         $baseEnablerId = str_random() . '-enabler-for-';
                         foreach ($formConfig->getBulkEditableColumns() as $inputConfig) {
                             try {
                                 $renderedInput = $inputConfig->render();
                                 $enablerSwitchId = $baseEnablerId . str_slug($inputConfig->getName());
-                                $enablerSwitch = "
-                                    <div class=\"bulk-edit-form-input-enabler pull-left va-t mr15\">
-                                        <input class=\"bulk-edit-form-input-enabler-switch switch\" type=\"checkbox\" 
-                                            id=\"{$enablerSwitchId}\" data-size=\"mini\"
-                                            data-on-text=\"{$enablerTextOn}\" data-off-text=\"{$enablerTextOff}\">
-                                    </div>";
+                                $enablerSwitch = <<<INPUT
+                                    <div class="bulk-edit-form-input-enabler pull-left va-t mr15">
+                                        <input class="bulk-edit-form-input-enabler-input" type="checkbox" 
+                                            id="{$enablerSwitchId}" data-toggle="tooltip" data-title="{$enablerTooltip}">
+                                    </div>
+INPUT;
                                 $renderedInput = '<div class="bulk-edit-form-input va-t">' . $renderedInput . '</div>';
                                 echo '<div class="bulk-edit-form-input-container">' . $enablerSwitch . $renderedInput . '</div>';
                             } catch (Exception $exc) {

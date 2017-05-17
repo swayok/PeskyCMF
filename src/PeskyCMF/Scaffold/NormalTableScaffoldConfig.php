@@ -342,7 +342,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $table = $this->getTable();
         $formConfig = $this->getFormConfig();
-        $data = $this->getRequest()->only($formConfig->getBulkEditableColumns());
+        $data = $formConfig->modifyIncomingDataBeforeValidation(
+            $this->getRequest()->only(array_keys($formConfig->getBulkEditableColumns())),
+            false,
+            true
+        );
         if (empty($data)) {
             return cmfJsonResponse(HttpCode::INVALID)
                 ->setMessage(cmfTransGeneral('.action.bulk_edit.no_data_to_save'));

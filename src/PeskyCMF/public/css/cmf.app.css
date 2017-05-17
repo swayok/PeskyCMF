@@ -306,8 +306,14 @@ form .nav-tabs li.active.has-error a,
 form .nav-tabs li a.has-error {
   background-color: #f2dede !important;
 }
+form .bulk-edit-form-input-container input.bulk-edit-form-input-enabler-input {
+  margin-top: 2px !important;
+}
 form .bulk-edit-form-input-container.checkbox-switch .bulk-edit-form-input-enabler {
   padding-top: 6px;
+}
+form .bulk-edit-form-input-container.checkbox-switch input.bulk-edit-form-input-enabler-input {
+  margin-top: 4px !important;
 }
 .checkbox.icheck label .icheckbox_square-blue {
   margin-right: 4px;

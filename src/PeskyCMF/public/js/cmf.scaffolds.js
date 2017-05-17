@@ -1332,7 +1332,7 @@ var ScaffoldFormHelper = {
             toastr.error(exc);
         }
         $('.modal.in').modal('hide'); //< hide any opened modals
-        CmfRoutingHelpers.hideContentContainerPreloader();
+        Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
         var timeout = setTimeout(function () {
             CmfRoutingHelpers.hideContentContainerPreloader();
             toastr.info('Server response timed out');

@@ -131,10 +131,10 @@ return [
             'dropdown_label' => 'Массовые действия',
             'delete_selected' => '<span class="label label-danger">:count</span> Удалить выбранные',
             'delete_selected_confirm' => 'Подтвердите удаление выбранных объектов',
-            'edit_selected' => '<span class="label label-primary"> Редактировать выбранные',
+            'edit_selected' => '<span class="label label-primary">:count</span> Редактировать выбранные',
             'delete_filtered' => '<span class="label label-danger">:count</span> Удалить отфильтрованные',
             'delete_filtered_confirm' => 'Подтвердите удаление отфильтрованных объектов',
-            'edit_filtered' => '<span class="label label-primary"> Редактировать отфильтрованные',
+            'edit_filtered' => '<span class="label label-primary">:count</span> Редактировать отфильтрованные',
         ],
         'field' => [
             'bool' => [
@@ -195,7 +195,8 @@ return [
         'bulk_edit' => [
             'enabler' => [
                 'edit_input' => 'Изменить',
-                'skip_input' => 'Пропустить'
+                'skip_input' => 'Пропустить',
+                'tooltip' => 'Вкл./выкл. Редактирование. Если редакрирование выключено - значение не будет сохранено'
             ]
         ]
     ],

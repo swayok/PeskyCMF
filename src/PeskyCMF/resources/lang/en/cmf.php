@@ -195,7 +195,8 @@ return [
         'bulk_edit' => [
             'enabler' => [
                 'edit_input' => 'Change',
-                'skip_input' => 'Skip'
+                'skip_input' => 'Skip',
+                'tooltip' => 'Enable/disable editing. If editing is disabled - value will not be saved on form submit'
             ]
         ]
     ],

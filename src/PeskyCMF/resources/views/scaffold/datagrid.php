@@ -172,7 +172,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->build();
 
             $dropdownMenu = \Swayok\Html\Tag::ul()
-                ->setClass('dropdown-menu')
+                ->setClass('dropdown-menu dropdown-menu-right')
                 ->setContent('<li>' . implode('</li><li>', $bulkActions) . '</li>')
                 ->build();
 

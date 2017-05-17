@@ -58,6 +58,8 @@ class FormConfig extends ScaffoldSectionConfig {
     /** @var \Closure|null */
     protected $incomingDataModifier;
     /** @var \Closure|null */
+    protected $incomingDataModifierForBulkEdit;
+    /** @var \Closure|null */
     protected $beforeSaveCallback;
      /** @var \Closure|null */
     protected $afterSaveCallback;
@@ -404,7 +406,7 @@ class FormConfig extends ScaffoldSectionConfig {
                 $name = $config;
                 $config = null;
             }
-            $this->addBulkEditableColumns($name, $config);
+            $this->addBulkEditableColumn($name, $config);
         }
         return $this;
     }
@@ -419,7 +421,7 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \InvalidArgumentException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
-    public function addBulkEditableColumns($name, FormInput $formInput = null) {
+    public function addBulkEditableColumn($name, FormInput $formInput = null) {
         if ((!$formInput || $formInput->isLinkedToDbColumn()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
             throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$name]");
         } else if ($this->getTable()->getTableStructure()->getColumn($name)->isItAFile()) {
@@ -679,14 +681,25 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      */
-    public function modifyIncomingDataBeforeValidation(array $data, $isCreation) {
-        foreach ($this->getFormInputs() as $inputName => $formInput) {
+    public function modifyIncomingDataBeforeValidation(array $data, $isCreation, $isBulkEdit = false) {
+        /** @var FormInput[] $inputs */
+        $inputs = $isBulkEdit ? $this->getBulkEditableColumns() : $this->getFormInputs();
+        foreach ($inputs as $inputName => $formInput) {
             array_set($data, $inputName, $formInput->modifySubmitedValueBeforeValidation(array_get($data, $inputName, ''), $data));
         }
-        if ($this->incomingDataModifier) {
-            $data = call_user_func($this->incomingDataModifier, $data, $isCreation, $this);
-            if (!is_array($data)) {
-                throw new \UnexpectedValueException('incomingDataModifier closure must return an array');
+        if ($isBulkEdit) {
+            if ($this->incomingDataModifierForBulkEdit) {
+                $data = call_user_func($this->incomingDataModifierForBulkEdit, $data, $isCreation, $this);
+                if (!is_array($data)) {
+                    throw new \UnexpectedValueException('incomingDataModifierForBulkEdit closure must return an array');
+                }
+            }
+        } else {
+            if ($this->incomingDataModifier) {
+                $data = call_user_func($this->incomingDataModifier, $data, $isCreation, $this);
+                if (!is_array($data)) {
+                    throw new \UnexpectedValueException('incomingDataModifier closure must return an array');
+                }
             }
         }
         return $data;
@@ -698,6 +711,15 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function setIncomingDataModifier(\Closure $modifier) {
         $this->incomingDataModifier = $modifier;
+        return $this;
+    }
+
+    /**
+     * @param \Closure $modifier - function (array $data, FormConfig $formConfig) { return $data; }
+     * @return $this
+     */
+    public function setIncomingDataModifierForBulkEdit(\Closure $modifier) {
+        $this->incomingDataModifierForBulkEdit = $modifier;
         return $this;
     }
 
