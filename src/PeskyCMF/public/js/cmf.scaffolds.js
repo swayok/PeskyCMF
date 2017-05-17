@@ -1105,13 +1105,15 @@ var DataGridSearchHelper = {
                     tableApi.search(encoded).draw();
                 }
             });
-            var $resetFilteringBtnInToolbar = $('<button class="btn btn-danger" type="button"></button>')
+            var $resetFilteringBtnInToolbar = $('<button class="btn btn-danger reset-filter" type="button"></button>')
                 .text(DataGridSearchHelper.locale.reset);
             $resetFilteringBtnInToolbar
                 .hide()
                 .on('click', function () {
                     $builderContent.queryBuilder('reset');
                     $builderContent.queryBuilder('setRules', builderConfig.rules);
+                    $runFilteringBtn.click();
+                    $resetFilteringBtnInToolbar.hide();
                 });
             var $resetFilteringBtnInFilter = $resetFilteringBtnInToolbar.clone(true).show();
             var $toolbar = $builder
@@ -1126,9 +1128,7 @@ var DataGridSearchHelper = {
                 var $counterBadge = $('<span class="counter label label-success ml10"></span>');
                 var $filterToggleButton = $('<button class="btn btn-default" type="button"></button>')
                     .text(DataGridSearchHelper.locale.toggle)
-                    .append($counterBadge)
-                    .attr('data-toggle','collapse')
-                    .attr('data-target', '#' + DataGridSearchHelper.id);
+                    .append($counterBadge);
                 $builder.addClass('collapse');
                 var changeCountInBadge = function () {
                     var rules = $builderContent.queryBuilder('getRules');
@@ -1141,32 +1141,46 @@ var DataGridSearchHelper = {
                     }
                 };
                 changeCountInBadge();
-                $runFilteringBtn
-                    .on('click', function () {
-                        changeCountInBadge();
-                        $filterToggleButton.click();
-                    })
-                    .hide();
+                var toggleFilterPanel = function (hideFilterPanel, filterToggleButtonClicked) {
+                    if (hideFilterPanel && !$builderContent.queryBuilder('validate', {skip_empty: true})) {
+                        // do not hide filter until there are invalid rules
+                        return false;
+                    }
+                    var $filterPanel = $('#' + DataGridSearchHelper.id);
+                    var rulesCount = DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules'))
+                    if (hideFilterPanel) {
+                        $filterPanel.collapse('hide');
+                        $filterToggleButton.removeClass('active');
+                        $runFilteringBtn.hide();
+                        if (rulesCount === 0) {
+                            $resetFilteringBtnInToolbar.hide();
+                        }
+                    } else {
+                        $filterPanel.collapse('show');
+                        $filterToggleButton.addClass('active');
+                        $runFilteringBtn.show();
+                        if (rulesCount > 0) {
+                            $resetFilteringBtnInToolbar.show();
+                        }
+                    }
+                    return true;
+                }
                 $filterToggleButton
                     .on('click', function () {
-                        $filterToggleButton.toggleClass('active');
-                        if ($filterToggleButton.hasClass('active')) {
-                            $runFilteringBtn.show();
-                            if (DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules')) > 0) {
-                                $resetFilteringBtnInToolbar.show();
-                            }
-                        } else {
-                            $runFilteringBtn.hide();
-                            if (DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules')) === 0) {
-                                $resetFilteringBtnInToolbar.hide();
-                            }
-                        }
+                        toggleFilterPanel($filterToggleButton.hasClass('active'));
                     });
                 $toolbar.append($filterToggleButton);
+                $runFilteringBtn
+                    .on('click', function () {
+                        if (toggleFilterPanel(true)) {
+                            changeCountInBadge();
+                        };
+                    })
+                    .hide();
                 var $filterCloseButton = $('<button type="button" class="btn btn-default btn-sm">')
                     .text(DataGridSearchHelper.locale.close)
                     .on('click', function () {
-                        $filterToggleButton.click();
+                        toggleFilterPanel(true);
                     });
                 $builder.append(
                     $('<div id="query-builder-controls">')
@@ -1415,7 +1429,6 @@ var ScaffoldFormHelper = {
                     $inputs.filter('.switch').bootstrapSwitch('disabled', !this.checked);
                     $inputs.filter('select.selectpicker').selectpicker('refresh');
                     $inputs.trigger('toggle.bulkEditEnabler', !this.checked);
-                    console.log(isFormSubmitAllowed());
                     $bulkEditForm.find('[type="submit"]').prop('disabled', !isFormSubmitAllowed());
                 };
                 $bulkEditForm
