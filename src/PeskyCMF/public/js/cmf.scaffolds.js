@@ -1455,7 +1455,15 @@ var ScaffoldFormHelper = {
                                 toastr.success(json._message);
                             }
                             $bulkEditModal.modal('hide');
-                            api.draw();
+                            var resetDataGridPagination = true;
+                            var pkColumn = $(api.table().node()).data('configs').pkColumnName;
+                            if (pkColumn) {
+                                var orders = api.order();
+                                if (orders.length && api.column(orders[0]).dataSrc() === pkColumn) {
+                                    resetDataGridPagination = false;
+                                }
+                            }
+                            api.draw(resetDataGridPagination);
                         });
                     })
                     .modal({
