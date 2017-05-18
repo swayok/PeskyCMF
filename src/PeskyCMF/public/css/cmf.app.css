@@ -709,11 +709,19 @@ body[data-section="resource:table"] .section-content-wrapper .content-header {
   background-color: #ecf0f5;
 }
 body[data-section="resource:table"] .section-content-wrapper .content {
-  padding: 0;
+  padding: 0 1px 0 1px;
+  margin: 0 -1px 0 -1px;
 }
 body[data-section="resource:table"] .section-content-wrapper .content > .row > div > .box {
   box-shadow: none;
   margin-bottom: 0;
+}
+body[data-section="resource:table"] .section-content-wrapper .data-grid-container {
+  margin-left: -10px;
+  margin-right: -10px;
+}
+body[data-section="resource:table"] .section-content-wrapper .data-grid-container > .col-sm-12 {
+  padding: 0;
 }
 body[data-section="resource:table"] .section-content-wrapper .pagination-container {
   position: fixed;

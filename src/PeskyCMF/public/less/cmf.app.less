@@ -702,11 +702,20 @@ body[data-section="resource:table"] {
         }
 
         .content {
-            padding: 0;
+            padding: 0 1px 0 1px;
+            margin: 0 -1px 0 -1px;
 
             > .row > div > .box {
                 box-shadow: none;
                 margin-bottom: 0;
+            }
+        }
+
+        .data-grid-container {
+            margin-left: -10px;
+            margin-right: -10px;
+            > .col-sm-12 {
+                padding: 0;
             }
         }
 
