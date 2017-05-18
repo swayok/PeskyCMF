@@ -1463,7 +1463,7 @@ var ScaffoldFormHelper = {
                                     resetDataGridPagination = false;
                                 }
                             }
-                            api.draw(resetDataGridPagination);
+                            api.ajax.reload(null, resetDataGridPagination);
                         });
                     })
                     .modal({
