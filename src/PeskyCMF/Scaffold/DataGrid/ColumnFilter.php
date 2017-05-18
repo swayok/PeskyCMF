@@ -194,16 +194,17 @@ class ColumnFilter {
     ];
     protected $plugin = null;
     protected $pluginConfig = [];
-    // details: http://mistic100.github.io/jQuery-QueryBuilder/index.html#usage Filters
+    // details: http://querybuilder.js.org/index.html#filters
     protected $otherSettings = [
 
     ];
-    // details: http://mistic100.github.io/jQuery-QueryBuilder/index.html#usage Validation
+    // details: http://querybuilder.js.org/index.html#validation
     protected $validators = [
         //'min' => 0,       //< numbers - min value, strings - min length, timestamps - min date/time/datetime in correct 'format'
         //'max' => 0,       //< numbers - max value, strings - max length, timestamps - max date/time/datetime in correct 'format'
         //'step' => 1,      //< for numbers
         //'format' => '',   //< regexp for strings or datetime format for timestamps (http://momentjs.com/docs/#/parsing/string-format/)
+        //'allow_empty_value' => true,
     ];
     /** @var null|string|DbExpr */
     protected $columnNameReplacementForCondition = null;
@@ -363,12 +364,12 @@ class ColumnFilter {
                 $pluginConfig = [
                     'locale' => app()->getLocale(),
                     'sideBySide' => false,
-                    'useCurrent' => true,
+                    'useCurrent' => false,
                     'toolbarPlacement' => 'bottom',
                     'showTodayButton' => true,
                     'showClear' => false,
                     'showClose' => true,
-                    'keepOpen' => false
+                    'keepOpen' => false,
                 ];
                 if ($type === static::TYPE_DATE) {
                     $this->setFormat('YYYY-MM-DD');
@@ -378,7 +379,8 @@ class ColumnFilter {
                 }
                 $pluginConfig['format'] = $this->getFormat();
                 $this->setPlugin('datetimepicker')
-                    ->setPluginConfig($pluginConfig);
+                    ->setPluginConfig($pluginConfig)
+                    ->setOtherSettings(['input_event' => 'dp.change']);
                 break;
         }
         return $this;
@@ -494,6 +496,8 @@ class ColumnFilter {
     }
 
     /**
+     * Other filter rule settings
+     * Details: http://querybuilder.js.org/index.html#filters
      * @param array $otherSettings
      * @return $this
      */

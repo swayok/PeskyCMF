@@ -15,7 +15,8 @@
     <link href="/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/bootstrap/fileinput/css/fileinput.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf-vendors/bootstrap/x-editale/css/bootstrap-editable.css" rel="stylesheet" type="text/css"/>
+    {{-- DO NOT USE THIS CSS AS IT IS!!! it declares css classes globally overwriting normal behavior globally. datepicker will not work anymore for example --}}
+    {{--<link href="/packages/cmf-vendors/bootstrap/x-editale/css/bootstrap-editable.css" rel="stylesheet" type="text/css"/>--}}
 
     <link href="/packages/cmf-vendors/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/datatables/extensions/FixedColumns/css/fixedColumns.bootstrap.min.css" rel="stylesheet" type="text/css"/>
