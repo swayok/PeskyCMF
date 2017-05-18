@@ -685,7 +685,9 @@ class FormConfig extends ScaffoldSectionConfig {
         /** @var FormInput[] $inputs */
         $inputs = $isBulkEdit ? $this->getBulkEditableColumns() : $this->getFormInputs();
         foreach ($inputs as $inputName => $formInput) {
-            array_set($data, $inputName, $formInput->modifySubmitedValueBeforeValidation(array_get($data, $inputName, ''), $data));
+            if (!$isBulkEdit || array_has($data, $inputName)) {
+                array_set($data, $inputName, $formInput->modifySubmitedValueBeforeValidation(array_get($data, $inputName, ''), $data));
+            }
         }
         if ($isBulkEdit) {
             if ($this->incomingDataModifierForBulkEdit) {

@@ -343,7 +343,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $table = $this->getTable();
         $formConfig = $this->getFormConfig();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            $this->getRequest()->only(array_keys($formConfig->getBulkEditableColumns())),
+            array_intersect_key($this->getRequest()->input(), $formConfig->getBulkEditableColumns()), //< do not use request->only() !!!
             false,
             true
         );

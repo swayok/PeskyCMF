@@ -212,6 +212,8 @@ class ColumnFilter {
     protected $nullable = false;
     /** @var null|FilterConfig */
     protected $filterConfig;
+    /** @var null|\Closure */
+    protected $incomingValueModifier;
 
     /**
      * @param string $dataType
@@ -511,7 +513,7 @@ class ColumnFilter {
      * @throws ScaffoldException
      */
     public function getAllowedValues() {
-        if (empty($this->allowedValues) && $this->isItRequireAllowedValues()) {
+        if (empty($this->allowedValues) && $this->isItRequiresAllowedValues()) {
             throw new ScaffoldException('List of allowed values is empty');
         }
         return $this->allowedValues instanceof \Closure ? call_user_func($this->allowedValues) : $this->allowedValues;
@@ -521,7 +523,7 @@ class ColumnFilter {
      * This filter has one of selection types (select, radio, checkbox) and require $this->allowedValues to be set
      * @return bool
      */
-    protected function isItRequireAllowedValues() {
+    protected function isItRequiresAllowedValues() {
         return in_array(
             $this->inputType,
             [static::INPUT_TYPE_SELECT, static::INPUT_TYPE_RADIO, static::INPUT_TYPE_CHECKBOX],
@@ -535,7 +537,7 @@ class ColumnFilter {
      * @throws ScaffoldException
      */
     public function setAllowedValues($allowedValues) {
-        if (!$this->isItRequireAllowedValues()) {
+        if (!$this->isItRequiresAllowedValues()) {
             throw new ScaffoldException("Cannot set allowed values list to a filter input type: {$this->inputType}");
         } else if (empty($allowedValues)) {
             throw new ScaffoldException('List of allowed values is empty');
@@ -638,26 +640,48 @@ class ColumnFilter {
     }
 
     /**
-     * @return string
+     * @return string|null|DbExpr
      */
     public function getColumnNameReplacementForCondition() {
         return $this->columnNameReplacementForCondition;
     }
 
     /**
-     * @return string
+     * @return bool
      */
     public function hasColumnNameReplacementForCondition() {
         return !empty($this->columnNameReplacementForCondition);
     }
 
     /**
-     * @param null $columnNameReplacementForCondition
+     * Replace column's name when building a condition for DB
+     * @param string|DbExpr $columnNameReplacementForCondition
      * @return $this
      */
     public function setColumnNameReplacementForCondition($columnNameReplacementForCondition) {
         $this->columnNameReplacementForCondition = $columnNameReplacementForCondition;
         return $this;
+    }
+
+    /**
+     * @param \Closure $modifier - function ($value, $operator, ColumnFilter $columnFilter) { return $value; }
+     * @return $this
+     */
+    public function setIncomingValueModifier(\Closure $modifier) {
+        $this->incomingValueModifier = $modifier;
+        return $this;
+    }
+
+    /**
+     * @param mixed $value
+     * @param string $operator
+     * @return mixed
+     */
+    protected function modifyIncomingValue($value, $operator) {
+        if ($this->incomingValueModifier) {
+            return call_user_func($this->incomingValueModifier, $value, $operator, $this);
+        }
+        return $value;
     }
 
     /**
@@ -708,6 +732,7 @@ class ColumnFilter {
                 $value = preg_split('%\s*,\s*%', $value);
                 break;
         }
+        $value = $this->modifyIncomingValue($value, $operator);
         $this->validateValue($value, $operator);
         $value = $this->convertRuleValueToConditionValue($value, $operator);
         $dbOperator = $this->convertRuleOperatorToDbOperator($operator);
