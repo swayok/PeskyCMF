@@ -269,6 +269,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     \PeskyCMF\Config\CmfConfig::getPrimary()->data_tables_config(),
                     $dataGridConfig->getAdditionalDataTablesConfig(),
                     [
+                        'pkColumnName' => $table::getPkColumnName(),
                         'processing' => true,
                         'serverSide' => true,
                         'ajax' => route('cmf_api_get_items', ['table_name' => $tableNameForRoutes], false),

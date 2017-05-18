@@ -647,6 +647,41 @@ div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.ac
   border-left-color: #ddd;
   border-right-color: #ddd;
 }
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.previous a,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.next a,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.previous span,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.next span {
+  font-size: 0;
+  color: transparent;
+  display: inline-block;
+}
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.previous a:after,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.next a:after,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.previous span:after,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.next span:after {
+  font-size: 14px !important;
+  line-height: 20px;
+  color: #666;
+}
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.previous a:hover:after,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.next a:hover:after,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.previous span:hover:after,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.next span:hover:after {
+  color: #23527c;
+}
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.previous a:after,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.previous span:after {
+  content: '\2190';
+}
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.next a:after,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination .paginate_button.next span:after {
+  content: '\2192';
+}
+div.dataTables_wrapper div.dataTables_paginate ul.pagination li[id$="_ellipsis"] a,
+div.dataTables_wrapper div.dataTables_paginate ul.pagination li[id$="_ellipsis"] span {
+  padding-left: 6px;
+  padding-right: 6px;
+}
 div.dataTables_wrapper .dataTables_info {
   margin-top: 9px;
 }

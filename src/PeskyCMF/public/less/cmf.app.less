@@ -606,6 +606,50 @@ div.dataTables_wrapper {
                         border-right-color: #ddd;
                     }
                 }
+
+                &.previous,
+                &.next {
+                    a, span {
+                        font-size: 0;
+                        color: transparent;
+                        display: inline-block;
+
+                        &:after {
+                            font-size: 14px !important;
+                            line-height: 20px;
+                            color: #666;
+                        }
+
+                        &:hover:after {
+                            color: #23527c;
+                        }
+                    }
+                }
+
+                &.previous {
+                    a, span {
+                        &:after {
+                            content: '\2190';
+                        }
+                    }
+                }
+
+                &.next {
+                    a, span {
+                        &:after {
+                            content: '\2192';
+                        }
+                    }
+                }
+
+            }
+
+            li[id$="_ellipsis"] {
+                a,
+                span {
+                    padding-left: 6px;
+                    padding-right: 6px;
+                }
             }
         }
     }
