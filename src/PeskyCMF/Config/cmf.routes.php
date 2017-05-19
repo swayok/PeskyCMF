@@ -66,7 +66,7 @@ Route::get('replace_password/{access_key}', [
 
 Route::group(
     [
-        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authorisation()
+        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authorization()
     ],
     function () {
 
@@ -147,7 +147,7 @@ Route::pattern('table_name', '[a-z]+([_a-z0-9]*[a-z0-9])?');
 Route::group(
     [
         'prefix' => 'resource',
-        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authorisation()
+        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authorization()
     ],
     function () {
         Route::get('{table_name}', [
@@ -196,7 +196,7 @@ Route::group(
         'prefix' => 'api',
         'middleware' => array_unique(array_merge(
             [AjaxOnly::class],
-            CmfConfig::getPrimary()->middleware_for_routes_that_require_authorisation(),
+            CmfConfig::getPrimary()->middleware_for_routes_that_require_authorization(),
             CmfConfig::getPrimary()->middleware_for_cmf_scaffold_api_controller()
         ))
     ],

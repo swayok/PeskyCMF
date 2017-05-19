@@ -142,7 +142,7 @@ var CmfRouteChange = {
 
 };
 
-CmfRouteChange.authorisationPage = function (request, next) {
+CmfRouteChange.authorizationPage = function (request, next) {
     $.when(
             Utils.downloadHtml(request.pathname, true, false),
             AdminUI.destroyUI()
@@ -152,7 +152,7 @@ CmfRouteChange.authorisationPage = function (request, next) {
                 .done(function ($content) {
                     Utils.switchBodyClass(
                         'login-page cmf-' + request.path.replace(/[^a-zA-Z0-9]+/, '-').toLowerCase() + '-page',
-                        'authorisation'
+                        'authorization'
                     );
                     var $form = $content.find('form');
                     if ($form.length) {

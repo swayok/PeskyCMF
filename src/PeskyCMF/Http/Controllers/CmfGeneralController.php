@@ -515,38 +515,7 @@ class CmfGeneralController extends Controller {
         foreach (CmfConfig::getPrimary()->getApiDocsSections() as $methodsList) {
             /** @var CmsApiDocs $apiMethodDocs */
             foreach ($methodsList as $apiMethodDocs) {
-                $item = [
-                    'name' => $apiMethodDocs->url,
-                    'request' => [
-                        'url' => url($apiMethodDocs->url, $apiMethodDocs->urlQueryParams),
-                        'method' => strtoupper($apiMethodDocs->httpMethod),
-                        'description' => strip_tags($apiMethodDocs->description),
-                        'header' => [],
-                        'body' => [
-                            'mode' => 'formdata',
-                            'formdata' => [
-                            ]
-                        ],
-
-                    ],
-                    'response' => []
-                ];
-                foreach ($apiMethodDocs->headers as $key => $value) {
-                    $item['request']['header'][] = [
-                        'key' => $key,
-                        'value' => $value,
-                        'description' => ''
-                    ];
-                }
-                foreach ($apiMethodDocs->postParams as $key => $value) {
-                    $item['request']['body']['formdata'][] = [
-                        'key' => $key,
-                        'value' => $value,
-                        'type' => 'text',
-                        'enabled' => true
-                    ];
-                }
-                $data['item'][] = $item;
+                $data['item'][] = $apiMethodDocs->getConfigForPostman();
             }
         }
         return response(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), HttpCode::OK, [

@@ -162,10 +162,10 @@ Utils.handleAjaxError = function (xhr) {
                 document.location = json.redirect;
             }
         }
-        if (json._message) {
-            toastr.error(json._message);
+        if (json._message || json.error) {
+            toastr.error(json._message || json.error);
         }
-        if (json.redirect || json.redirect_with_reload || json._message) {
+        if (json.redirect || json.redirect_with_reload || json._message || json.error) {
             return;
         }
     }

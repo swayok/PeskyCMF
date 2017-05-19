@@ -10,6 +10,10 @@ class ImagesColumn extends FilesColumn {
     protected $defaultClosuresClass = ImagesUploadingColumnClosures::class;
     protected $fileConfigClass = ImageConfig::class;
 
+    public function isItAnImage() {
+        return true;
+    }
+
     /**
      * @param string $name - image field name
      * @param \Closure $configurator = function (ImageConfig $imageConfig) { //modify $imageConfig }

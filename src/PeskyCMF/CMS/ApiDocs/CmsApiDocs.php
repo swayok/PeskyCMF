@@ -14,27 +14,41 @@ abstract class CmsApiDocs {
 
 HTML;
 
-    public $url = '/api/';
+    /**
+     * You can use '{url_parameter}' or ':url_parameter' to insert parameters into url and be able to
+     * export it to postman properly (postman uses ':url_parameter' format but it is not expressive
+     * enough unlike '{url_parameter}' variant)
+     * @var string
+     */
+    public $url = '/api/example/{url_parameter}/list';
     public $httpMethod = 'GET';
 
     public $headers = [
         'Accept' => 'application/json',
-        'Authorisation' => 'Bearer {token}'
+        'Authorization' => 'Bearer {{token}}'
     ];
-    public $urlQueryParams = [
-        '_method' => 'PUT',
-        'token' => 'string',
+    /**
+     * List of parameters used inside URL
+     * For url: '/api/items/{id}/list' 'id' is url parameter (brackets needed only to highlight url parameter)
+     * @var array
+     */
+    public $urlParameters = [
+//        'url_parameter' => 'int'
     ];
-    public $postParams = [
-        'id' => 'int',
+    public $urlQueryParameters = [
+//        '_method' => 'PUT',
+//        'token' => 'string',
+    ];
+    public $postParameters = [
+//        'id' => 'int',
     ];
     public $validationErrors = [
-        'token' => ['required', 'string'],
-        'id' => ['required', 'integer', 'min:1']
+//        'token' => ['required', 'string'],
+//        'id' => ['required', 'integer', 'min:1']
     ];
 
     public $onSuccess = [
-        'name' => 'string',
+//        'name' => 'string',
     ];
 
     /**
@@ -110,6 +124,54 @@ HTML;
 
     public function getUuid() {
         return $this->uuid;
+    }
+
+    public function getConfigForPostman() {
+        $queryParams = [];
+        foreach ($this->urlQueryParameters as $name => $info) {
+            $queryParams[] = urlencode($name) . '={{' . $name . '}}';
+        }
+        $queryParams = empty($queryParams) ? '' : '?' . implode('&', $queryParams);
+        $item = [
+            'name' => $this->url,
+            'request' => [
+                'url' => url(
+                    preg_replace('%\{([^/]+?)\}%', ':$1', $this->url) . $queryParams
+                ),
+                'method' => strtoupper($this->httpMethod),
+                'description' => preg_replace(
+                    ['% +%', "%\n\s+%s"],
+                    [' ', "\n"],
+                    trim(strip_tags(
+                        preg_replace(["%\n+%m", '%</(p|div|li|ul)>|<br>%'], [' ', "\n"], $this->description)
+                    ))
+                ),
+                'header' => [],
+                'body' => [
+                    'mode' => 'formdata',
+                    'formdata' => [
+                    ]
+                ],
+
+            ],
+            'response' => []
+        ];
+        foreach ($this->headers as $key => $value) {
+            $item['request']['header'][] = [
+                'key' => $key,
+                'value' => $value,
+                'description' => ''
+            ];
+        }
+        foreach ($this->postParameters as $key => $value) {
+            $item['request']['body']['formdata'][] = [
+                'key' => $key,
+                'value' => '{{' . $key . '}}',
+                'type' => 'text',
+                'enabled' => true
+            ];
+        }
+        return $item;
     }
 
 }

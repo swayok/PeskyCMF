@@ -44,7 +44,21 @@
                 @endif
             </div>
             <div class="row">
-                @if (!empty($method->urlQueryParams))
+                @if (!empty($method->urlParameters))
+                    <div class="col-xs-12 col-xl-6">
+                        <div class="box box-solid box-warning">
+                            <div class="box-header">
+                                <div class="box-title">
+                                    {{ cmfTransCustom('.api_docs.url_params') }}
+                                </div>
+                            </div>
+                            <div class="box-body">
+                                <pre>{{ json_encode($method->urlParameters, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                @if (!empty($method->urlQueryParameters))
                 <div class="col-xs-12 col-xl-6">
                     <div class="box box-solid box-warning">
                         <div class="box-header">
@@ -53,12 +67,12 @@
                             </div>
                         </div>
                         <div class="box-body">
-                            <pre>{{ json_encode($method->urlQueryParams, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <pre>{{ json_encode($method->urlQueryParameters, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </div>
                     </div>
                 </div>
                 @endif
-                @if (!empty($method->postParams))
+                @if (!empty($method->postParameters))
                 <div class="col-xs-12 col-xl-6">
                     <div class="box box-solid box-info">
                         <div class="box-header">
@@ -67,7 +81,7 @@
                             </div>
                         </div>
                         <div class="box-body">
-                            <pre>{{ json_encode($method->postParams, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <pre>{{ json_encode($method->postParameters, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </div>
                     </div>
                 </div>

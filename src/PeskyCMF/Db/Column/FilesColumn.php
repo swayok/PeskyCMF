@@ -65,6 +65,10 @@ class FilesColumn extends Column implements \Iterator, \ArrayAccess {
             ->setDefaultValue('{}');
     }
 
+    public function isItAFile() {
+        return true;
+    }
+
     /**
      * Path to folder is relative to public_path()
      * @param string|\Closure $folder - function (RecordInterface $record, FileConfig $fileConfig) { return 'path/to/folder'; }

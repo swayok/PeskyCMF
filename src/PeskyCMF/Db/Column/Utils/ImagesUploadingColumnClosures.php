@@ -355,7 +355,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
     static public function valueFormatter(RecordValue $valueContainer, $format) {
         /** @var ImagesColumn $column */
         $column = $valueContainer->getColumn();
-        if (isset($column[$format])) {
+        if ($column->hasFileConfiguration($format)) {
             return $valueContainer->getCustomInfo(
                 'file_info:' . $format,
                 function () use ($valueContainer, $format, $column) {
@@ -372,6 +372,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                                     $ret[] = $imageInfo;
                                 }
                             }
+                        }
+                        for ($i = count($ret); $i < $imageConfig->getMaxFilesCount(); $i++) {
+                            $ret[] = NoFileInfo::create();
                         }
                     }
                     return $ret;
@@ -408,12 +411,13 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                                         continue;
                                     }
                                     if ($format === 'paths') {
-                                        $ret[$imageName][$fileInfo->getFileSuffix()] = $fileInfo->getAbsoluteFilePath();
+                                        $ret[$imageName][] = $fileInfo->getAbsoluteFilePath();
                                     } else {
-                                        $ret[$imageName][$fileInfo->getFileSuffix()] = $fileInfo->getAbsoluteUrl();
+                                        $url = $fileInfo->getAbsoluteUrl();
                                         if ($format === 'urls_with_timestamp') {
-                                            $ret[$imageName] .= '?_' . time();
+                                            $url .= '?_' . time();
                                         }
+                                        $ret[$imageName][] = $url;
                                     }
                                 }
                             }

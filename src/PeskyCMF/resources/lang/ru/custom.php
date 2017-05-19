@@ -212,6 +212,7 @@ $dictionary = [
         'header' => 'Документация к API',
         'description' => 'Описание',
         'headers' => 'HTTP headers',
+        'url_params' => 'URL параметры (параметры внутри самого URL-адреса)',
         'url_query_params' => 'HTTP GET параметры (URL query params)',
         'post_params' => 'HTTP POST параметры',
         'response' => 'Ответ сервера при успешном выполнении запроса',

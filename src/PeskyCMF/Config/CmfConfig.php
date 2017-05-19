@@ -339,10 +339,10 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Middleware to be added to routes that require user authorisation
+     * Middleware to be added to routes that require user authorization
      * @return array
      */
-    static public function middleware_for_routes_that_require_authorisation() {
+    static public function middleware_for_routes_that_require_authorization() {
         return [
             ValidateAdmin::class,
         ];

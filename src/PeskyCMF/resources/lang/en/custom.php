@@ -10,7 +10,7 @@ $dictionary = [
         'header' => 'Navigation',
     ],
     'login_form' => [
-        'header' => 'Authorisation',
+        'header' => 'Authorization',
         'email_label' => 'E-mail',
         'password_label' => 'Password',
         'button_label' => 'Log in',
@@ -211,6 +211,7 @@ $dictionary = [
         'header' => 'API Documentation',
         'description' => 'Description',
         'headers' => 'HTTP headers',
+        'url_params' => 'URL parameters (parameters inside the URL)',
         'url_query_params' => 'HTTP GET parameters (URL query)',
         'post_params' => 'HTTP POST parameters',
         'response' => 'Server response on success',

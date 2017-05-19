@@ -3,11 +3,14 @@
 namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Routing\Route;
-use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\HttpCode;
 use PeskyORM\ORM\RecordInterface;
 
 trait InjectsDbObjects {
+
+    protected function injectOnlyActiveNotSoftdeletedObjects() {
+        return true;
+    }
 
     public function callAction($method, $parameters) {
         $this->readDbObjectForInjection($parameters);
@@ -28,7 +31,7 @@ trait InjectsDbObjects {
         $route = \Request::route();
         $object = null;
         foreach ($parameters as $key => $value) {
-            if ($value instanceof CmfDbRecord) {
+            if ($value instanceof RecordInterface) {
                 // get only last object in params
                 $object = $value;
             }
@@ -42,11 +45,14 @@ trait InjectsDbObjects {
                 $this->sendRecordNotFoundResponse();
             }
             $conditions = [
-                'id' => $id,
+                $object::getTable()->getPkColumnName() => $id,
             ];
             $this->addConditionsForDbObjectInjection($route, $object, $conditions);
+            if ($this->injectOnlyActiveNotSoftdeletedObjects()) {
+                $this->addIsActiveAndIsDeletedConditionsForDbObjectInjection($route, $object, $conditions);
+            }
             $this->addParentIdsConditionsForDbObjectInjection($route, $object, $conditions);
-            $object->fromPrimaryKey($conditions);
+            $object->fromDb($conditions);
             if (!$object->existsInDb()) {
                 $this->sendRecordNotFoundResponse();
             }
@@ -62,7 +68,7 @@ trait InjectsDbObjects {
 
     /**
      * @param Route $route
-     * @param CmfDbRecord $object
+     * @param RecordInterface $object
      * @param array $conditions
      */
     protected function addConditionsForDbObjectInjection(Route $route, RecordInterface $object, array &$conditions) {
@@ -71,7 +77,21 @@ trait InjectsDbObjects {
 
     /**
      * @param Route $route
-     * @param CmfDbRecord $object
+     * @param RecordInterface $object
+     * @param array $conditions
+     */
+    protected function addIsActiveAndIsDeletedConditionsForDbObjectInjection(Route $route, RecordInterface $object, array &$conditions) {
+        if ($object::getTable()->getTableStructure()->hasColumn('is_active')) {
+            $conditions['is_active'] = (bool)$route->parameter('is_active', true);
+        }
+        if ($object::getTable()->getTableStructure()->hasColumn('is_deleted')) {
+            $conditions['is_deleted'] = (bool)$route->parameter('is_deleted', false);
+        }
+    }
+
+    /**
+     * @param Route $route
+     * @param RecordInterface $object
      * @param array $conditions
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException

@@ -26,9 +26,9 @@ $(function () {
         window.request = request;
         next();
     });
-    page.route('/login', CmfRouteChange.authorisationPage);
-    page.route('/forgot_password', CmfRouteChange.authorisationPage);
-    page.route('/replace_password', CmfRouteChange.authorisationPage);
+    page.route('/login', CmfRouteChange.authorizationPage);
+    page.route('/forgot_password', CmfRouteChange.authorizationPage);
+    page.route('/replace_password', CmfRouteChange.authorizationPage);
     page.route('/logout', CmfRouteChange.logout, CmfRoutingHelpers.routeHandled);
     page.route('/page/:uri*', CmfRouteChange.showPage);
 
