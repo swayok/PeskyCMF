@@ -159,15 +159,17 @@ class ImagesFormInput extends FormInput {
             $baseName = $this->getName() . '.' . $imageConfig->getName();
             $isRequired = $imageConfig->getMinFilesCount() > 0 ? 'required|' : '';
             $validators[$baseName] = $isRequired . 'array|max:' . $imageConfig->getMaxFilesCount();
-            $commonValidators = 'image|max:' . $imageConfig->getMaxFileSize()
+            $commonValidators = 'nullable|image|max:' . $imageConfig->getMaxFileSize()
                 . '|mimetypes:' . implode(',', $imageConfig->getAllowedFileTypes(true));
             for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++) {
                 if ($imageConfig->getMinFilesCount() > $i) {
                     $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.old_file|{$commonValidators}";
-                    $validators["{$baseName}.{$i}.old_file"] = "required_without:{$baseName}.{$i}.file|string";
+                    $validators["{$baseName}.{$i}.old_file"] = "required_without:{$baseName}.{$i}.file|nullable|string";
+                } else {
+                    $validators["{$baseName}.{$i}.file"] = "nullable|{$commonValidators}";
+                    $validators["{$baseName}.{$i}.old_file"] = 'nullable|string';
                 }
             }
-            $validators["{$baseName}.*.file"] = $commonValidators;
         }
         return $validators;
     }
