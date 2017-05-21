@@ -6,7 +6,7 @@ if (!function_exists('routeTpl')) {
      * @param array $parameters
      * @param array $tplParams
      * @param bool $absolute
-     * @return mixed
+     * @return string
      */
     function routeTpl($routeName, array $parameters = [], array $tplParams = [], $absolute = false) {
         $replacements = [];
@@ -27,7 +27,7 @@ if (!function_exists('routeToCmfPage')) {
      * @param string $pageId
      * @param array $queryArgs
      * @param bool $absolute
-     * @return mixed
+     * @return string
      */
     function routeToCmfPage($pageId, array $queryArgs = [], $absolute = false) {
         return route('cmf_page', array_merge(['page' => $pageId], $queryArgs), $absolute);
@@ -40,7 +40,7 @@ if (!function_exists('routeToCmfItemsTable')) {
      * @param array $filters - key-value array where key is column name to add to filter and value is column's value.
      * Note: Operator is 'equals' (col1 = val1). Multiple filters joined by 'AND' (col1 = val1 AND col2 = val2)
      * @param bool $absolute
-     * @return mixed
+     * @return string
      */
     function routeToCmfItemsTable($tableName, array $filters = [], $absolute = false) {
         $params = ['table_name' => $tableName];
@@ -56,7 +56,7 @@ if (!function_exists('routeToCmfTableCustomData')) {
      * @param string $tableName
      * @param string $dataId - identifier of data to be returned. For example: 'special_options'
      * @param bool $absolute
-     * @return mixed
+     * @return string
      */
     function routeToCmfTableCustomData($tableName, $dataId, $absolute = false) {
         return route('cmf_api_get_custom_data', array_merge(['table_name' => $tableName, 'data_id' => $dataId]), $absolute);
@@ -67,7 +67,7 @@ if (!function_exists('routeToCmfItemAddForm')) {
     /**
      * @param string $tableName
      * @param bool $absolute
-     * @return mixed
+     * @return string
      */
     function routeToCmfItemAddForm($tableName, $absolute = false) {
         return route('cmf_item_add_form', ['table_name' => $tableName], $absolute);
@@ -79,7 +79,7 @@ if (!function_exists('routeToCmfItemEditForm')) {
      * @param string $tableName
      * @param int|string $itemId
      * @param bool $absolute
-     * @return mixed
+     * @return string
      */
     function routeToCmfItemEditForm($tableName, $itemId, $absolute = false) {
         return route('cmf_item_edit_form', ['table_name' => $tableName, 'id' => $itemId], $absolute);
@@ -91,7 +91,7 @@ if (!function_exists('routeToCmfItemDetails')) {
      * @param string $tableName
      * @param int|string $itemId
      * @param bool $absolute
-     * @return mixed
+     * @return string
      */
     function routeToCmfItemDetails($tableName, $itemId, $absolute = false) {
         return route('cmf_item_details', ['table_name' => $tableName, 'id' => $itemId], $absolute);
@@ -105,7 +105,7 @@ if (!function_exists('routeToCmfItemCustomPage')) {
      * @param string $pageId
      * @param array $queryArgs
      * @param bool $absolute
-     * @return mixed
+     * @return string
      */
     function routeToCmfItemCustomPage($tableName, $itemId, $pageId, array $queryArgs = [], $absolute = false) {
         return route(
