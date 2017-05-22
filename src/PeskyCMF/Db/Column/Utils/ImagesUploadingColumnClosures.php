@@ -56,15 +56,28 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 }
             }
             $valueContainer->setIsFromDb(false);
-            if (!empty($infoArrays)) {
-                if ($valueContainer->hasValue()) {
-                    $oldValue = $valueContainer->getValue();
-                    if (!is_array($oldValue)) {
-                        $oldValue = json_decode($oldValue, true);
+            if ($valueContainer->hasValue()) {
+                // merge configs
+                $oldValue = $valueContainer->getValue();
+                if (!is_array($oldValue)) {
+                    $oldValue = json_decode($oldValue, true);
+                }
+                if (is_array($oldValue)) {
+                    $oldValue = static::valueNormalizer($oldValue, false, $column);
+                    foreach ($infoArrays as $imageName => $images) {
+                        if (empty($oldValue[$imageName])) {
+                            $oldValue[$imageName] = $images;
+                        } else {
+                            foreach ($images as $index => $image) {
+                                $oldValue[$imageName][$index] = $image;
+                            }
+                            if (empty($newFiles)) {
+                                // normalize indexes safely
+                                $oldValue[$imageName] = array_values($oldValue[$imageName]);
+                            }
+                        }
                     }
-                    if (is_array($oldValue)) {
-                        $infoArrays = array_merge(static::valueNormalizer($oldValue, false, $column), $infoArrays);
-                    }
+                    $infoArrays = $oldValue;
                 }
             }
             $json = json_encode($infoArrays, JSON_UNESCAPED_UNICODE);
@@ -94,7 +107,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
         $imagesNames = [];
         /** @var ImagesColumn $column */
         /** @var ImageConfig $imageConfig */
-        foreach ($column as $imageName => $imageConfig) {
+        foreach ($column->getImagesConfigurations() as $imageName => $imageConfig) {
             $imagesNames[] = $imageName;
             if (empty($value[$imageName])) {
                 unset($value[$imageName]);
@@ -118,6 +131,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 $normailzedData = [];
                 foreach ($value[$imageName] as $idx => $fileUploadInfo) {
                     if (static::isFileInfoArray($fileUploadInfo)) {
+                        unset($fileUploadInfo['deleted']);
                         $normailzedData[$idx] = $fileUploadInfo;
                     } else if (
                         !is_int($idx)
@@ -127,8 +141,9 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                         )
                     ) {
                         continue;
+                    } else {
+                        $fileUploadInfo['deleted'] = (bool)array_get($fileUploadInfo, 'deleted', false);
                     }
-                    $fileUploadInfo['deleted'] = (bool)array_get($fileUploadInfo, 'deleted', false);
                     $normailzedData[$idx] = $fileUploadInfo;
                 }
                 $value[$imageName] = $normailzedData;
@@ -178,6 +193,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 if (
                     !$isUploadedImage
                     && !array_get($fileUploadOrFileInfo, 'deleted', false)
+                    && empty($fileUploadOrFileInfo['old_file'])
                 ) {
                     if (!array_key_exists($imageName . '.' . $idx, $errors)) {
                         $errors[$imageName . '.' . $idx] = [];
@@ -188,7 +204,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     );
                 }
                 if (!$isUploadedImage) {
-                    // only file deletion requested
+                    // old file present or only file deletion requested
                     continue;
                 }
                 $image = new \Imagick($file->getRealPath());
@@ -258,6 +274,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
         $baseSuffix = time();
         if (!empty($newFiles)) {
             $value = $valueContainer->getRecord()->getValue($valueContainer->getColumn()->getName(), 'array');
+            /** @var array $fileUploads */
             foreach ($newFiles as $imageName => $fileUploads) {
                 $imageConfig = $column->getImageConfiguration($imageName);
                 $dir = $imageConfig->getAbsolutePathToFileFolder($valueContainer->getRecord());
@@ -267,8 +284,7 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                 $filesSaved = 0;
                 foreach ($fileUploads as $idx => $uploadInfo) {
                     if (
-                        $imageConfig->getMaxFilesCount() > 1
-                        && array_has($uploadInfo, 'old_file')
+                        array_has($uploadInfo, 'old_file')
                         && is_array($oldFile = json_decode($uploadInfo['old_file'], true))
                         && static::isFileInfoArray($oldFile)
                     ) {
@@ -308,8 +324,6 @@ class ImagesUploadingColumnClosures extends DefaultColumnClosures{
                     unset($value[$imageName]);
                 }
             }
-            //throw new \Exception('terminate');
-            $valueContainer->removeCustomInfo('new_files');
             $valueContainer->getRecord()
                 ->unsetValue($valueContainer->getColumn()) //< to avoid merging
                 ->begin()
