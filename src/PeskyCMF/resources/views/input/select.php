@@ -30,13 +30,13 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
     <?php if (!$valueViewer->hasOptionsLoader()) : ?>
         <?php
             $emptyOption = '<option value="">'. $valueViewer->getEmptyOptionLabel() . '</option>';
-            $isEmptyoptionAllowed = !$isMultiple && !array_key_exists('', $options);
+            $isEmptyoptionAllowed = !$isMultiple;
         ?>
         <?php if ($rendererConfig->areOptionsDifferent()) : ?>
             {{? !!it.isCreation }}
                 <?php
                     $options = $rendererConfig->getOptionsForCreate();
-                    if ($isEmptyoptionAllowed && !$rendererConfig->isRequiredForCreate()) {
+                    if ($isEmptyoptionAllowed && !array_key_exists('', $options) && !$rendererConfig->isRequiredForCreate()) {
                         echo $emptyOption;
                     }
                 ?>
@@ -46,7 +46,7 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
             {{??}}
                 <?php
                     $options = $rendererConfig->getOptionsForEdit();
-                    if ($isEmptyoptionAllowed && !$rendererConfig->isRequiredForEdit()) {
+                    if ($isEmptyoptionAllowed && !array_key_exists('', $options) && !$rendererConfig->isRequiredForEdit()) {
                         echo $emptyOption;
                     }
                 ?>
@@ -57,7 +57,7 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
         <?php else : ?>
             <?php
                 $options = $rendererConfig->getOptions();
-                if ($isEmptyoptionAllowed && !$rendererConfig->isRequired()) {
+                if ($isEmptyoptionAllowed && !array_key_exists('', $options) && !$rendererConfig->isRequired()) {
                     echo $emptyOption;
                 }
             ?>
