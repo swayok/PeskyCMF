@@ -10,6 +10,8 @@ use PeskyORM\Core\DbAdapterInterface;
 use PeskyORM\Core\DbConnectionsManager;
 
 class PeskyOrmServiceProvider extends ServiceProvider {
+
+
     /**
      * Bootstrap any application services.
      *
@@ -54,5 +56,13 @@ class PeskyOrmServiceProvider extends ServiceProvider {
         Auth::provider('peskyorm', function($app, $config) {
             return new PeskyOrmUserProvider(array_get($config, 'model', CmfConfig::getPrimary()->user_object_class()));
         });
+
+        \App::singleton('peskyorm.connection', function () {
+            DbConnectionsManager::getConnection('default');
+        });
+    }
+
+    public function provides() {
+        return ['peskyorm.connection'];
     }
 }
