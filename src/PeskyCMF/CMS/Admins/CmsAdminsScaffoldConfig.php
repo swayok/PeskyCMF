@@ -5,7 +5,6 @@ namespace PeskyCMF\CMS\Admins;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
-use PeskyCMF\Scaffold\DataGrid\FilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;

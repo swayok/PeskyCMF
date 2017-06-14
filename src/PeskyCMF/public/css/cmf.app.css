@@ -295,6 +295,13 @@ form .error-text {
   padding: 1px 5px 1px 5px;
   text-align: center;
 }
+form.form-horizontal .error-text {
+  padding-left: 0;
+  padding-right: 0;
+  float: left;
+  width: calc(100% - 31px);
+  margin-left: 15px;
+}
 form .nav-tabs li {
   -webkit-transition: background-color 0.2s linear;
   -moz-transition: background-color 0.2s linear;

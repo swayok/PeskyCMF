@@ -104,7 +104,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
         },
         error: function (xhr) {
             Utils.hidePreloader($container);
-            if (xhr.status === 400 && typeof options.onValidationErrors === 'function') {
+            if ((xhr.status === 400 || xhr.status === 422) && typeof options.onValidationErrors === 'function') {
                 options.onValidationErrors(xhr, $form, $container);
             } else {
                 FormHelper.handleAjaxErrors($form, xhr);
@@ -145,6 +145,13 @@ FormHelper.setFormMessage = function ($form, message, type) {
     });*/
 };
 
+FormHelper.addFormMessage = function ($form, message, type) {
+    if (!type) {
+        type = 'error';
+    }
+    toastr[type](message);
+};
+
 FormHelper.removeFormMessage = function ($form) {
     /*var errorDiv = $form.find('.form-error');
     return errorDiv.slideUp(100, function () {
@@ -162,18 +169,29 @@ FormHelper.removeFormValidationMessages = function ($form) {
 FormHelper.handleAjaxErrors = function ($form, xhr) {
     FormHelper.removeAllFormMessagesAndErrors($form)
         .done(function () {
-            if (xhr.status === 400) {
+            if (xhr.status === 400 || xhr.status === 422) {
                 var response = Utils.convertXhrResponseToJsonIfPossible(xhr);
                 if (!response) {
                     Utils.handleAjaxError(xhr);
                     return;
                 }
-                if (response._message) {
-                    FormHelper.setFormMessage($form, response._message);
-                }
-                if (response.errors && $.isPlainObject(response.errors)) {
-                    for (var inputName in response.errors) {
-                        FormHelper.showErrorForInput($form, inputName, response.errors[inputName]);
+                var inputName;
+                if (xhr.status === 422 && !response.errors) {
+                    var strings = CmfConfig.getLocalizationStringsForComponent('form');
+                    if (strings && strings.invalid_data_received) {
+                        FormHelper.setFormMessage($form, strings.invalid_data_received);
+                    }
+                    for (inputName in response) {
+                        FormHelper.showErrorForInput($form, inputName, response[inputName]);
+                    }
+                } else {
+                    if (response._message) {
+                        FormHelper.setFormMessage($form, response._message);
+                    }
+                    if (response.errors && $.isPlainObject(response.errors)) {
+                        for (inputName in response.errors) {
+                            FormHelper.showErrorForInput($form, inputName, response.errors[inputName]);
+                        }
                     }
                 }
                 return;
@@ -195,6 +213,9 @@ FormHelper.showErrorForInput = function ($form, inputName, message) {
                 $container.append($errorEl);
             }
         }
+        if ($.isArray(message)) {
+            message = message.join('; ');
+        }
         $errorEl.html(message).slideDown(FormHelper.messageAnimDurationMs);
         // mark current tab that it has an error inside
         var $tabs = $form.find('.nav-tabs');
@@ -204,6 +225,8 @@ FormHelper.showErrorForInput = function ($form, inputName, message) {
                 $tabs.find('a[href="#' + tabId + '"]').parent('li').addClass('has-error');
             }
         }
+    } else {
+        FormHelper.addFormMessage($form, inputName + ': ' + message, 'error');
     }
 };
 

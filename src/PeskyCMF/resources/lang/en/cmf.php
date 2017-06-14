@@ -37,6 +37,9 @@ return [
                 'cmf_scaffold_inserts_dialog_insert_tag_is_span' => 'Inside existing text (span)',
                 'cmf_scaffold_inserts_dialog_insert_tag_is_div' => 'As separate text block (div, p)',
             ],
+            'form' => [
+                'invalid_data_received' => 'Invalid data received'
+            ]
         ]
     ],
     'error' => [

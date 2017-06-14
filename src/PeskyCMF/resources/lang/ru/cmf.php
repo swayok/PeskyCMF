@@ -37,6 +37,9 @@ return [
                 'cmf_scaffold_inserts_dialog_insert_tag_is_span' => 'Вставить в строку другого текста (span)',
                 'cmf_scaffold_inserts_dialog_insert_tag_is_div' => 'Вставить как отдельный блок (div, p)',
             ],
+            'form' => [
+                'invalid_data_received' => 'Получены недопустимые данные'
+            ]
         ]
     ],
     'error' => [

@@ -6,7 +6,6 @@ use PeskyORM\Core\DbExpr;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
-use Psr\Log\InvalidArgumentException;
 
 class ManyToManyRelationRecordsFormInput extends FormInput {
 
@@ -134,14 +133,14 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
 
     public function doDefaultValueConversionByType($value, $type, array $record) {
         if (!is_array($value)) {
-            throw new InvalidArgumentException("Invalid data received for relation '{$this->getRelation()->getName()}'. Array expected.");
+            throw new \InvalidArgumentException("Invalid data received for relation '{$this->getRelation()->getName()}'. Array expected.");
         }
         $ret = [];
         $column = $this->getRelationColumn();
         /** @var array $value */
         foreach ($value as $foreignRecord) {
             if (!array_key_exists($column, $foreignRecord)) {
-                throw new InvalidArgumentException(
+                throw new \InvalidArgumentException(
                     "Invalid data received for relation '{$this->getRelation()->getName()}'. Value for column {$column} not found."
                 );
             }
