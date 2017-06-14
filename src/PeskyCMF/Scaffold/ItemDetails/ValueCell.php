@@ -30,11 +30,6 @@ class ValueCell extends RenderableValueViewer {
     public function getValueConverter() {
         if (empty(parent::getValueConverter())) {
             switch ($this->getType()) {
-                case static::TYPE_BOOL:
-                    $this->setValueConverter(function ($value) {
-                        return cmfTransGeneral('.item_details.field.bool.' . ($value ? 'yes' : 'no'));
-                    });
-                    break;
                 case static::TYPE_IMAGE:
                     $this->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         if (!empty($value) && is_array($value) && !empty($value['url']) && is_array($value['url'])) {
@@ -63,6 +58,8 @@ class ValueCell extends RenderableValueViewer {
 
     public function doDefaultValueConversionByType($value, $type, array $record) {
         switch ($type) {
+            case static::TYPE_TEXT:
+                return '<div class="multiline-text">' . parent::doDefaultValueConversionByType($value, $type, $record) .  '</div>';
             case static::TYPE_JSON_TREE:
                 if (!is_array($value) && $value !== null) {
                     if (is_string($value) || is_numeric($value) || is_bool($value)) {

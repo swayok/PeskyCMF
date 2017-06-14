@@ -223,15 +223,6 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
-     * @param string $type
-     * @return $this
-     */
-    public function setType($type) {
-        parent::setType($type);
-        return $this;
-    }
-
-    /**
      * @param null|InputRenderer $renderer
      * @return string
      * @throws \UnexpectedValueException

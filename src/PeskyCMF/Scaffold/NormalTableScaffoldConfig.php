@@ -8,6 +8,7 @@ use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyORM\Core\DbExpr;
+use PeskyORM\Exception\DbException;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
@@ -207,6 +208,12 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $table::rollBackTransaction();
                 }
                 throw $exc;
+            } finally {
+                if ($table::inTransaction()) {
+                    $table::rollBackTransaction();
+                    /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+                    throw new DbException('Transaction was not closed');
+                }
             }
         }
     }
@@ -273,6 +280,12 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $table::rollBackTransaction();
                 }
                 throw $exc;
+            } finally {
+                if ($table::inTransaction()) {
+                    $table::rollBackTransaction();
+                    /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+                    throw new DbException('Transaction was not closed');
+                }
             }
         }
     }

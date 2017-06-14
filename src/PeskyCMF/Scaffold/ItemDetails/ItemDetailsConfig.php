@@ -136,9 +136,6 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
      */
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
         parent::addValueViewer($name, $viewer);
-        if (!$viewer) {
-            $viewer = $this->getValueViewer($name);
-        }
         if ($this->currentRowsGroup === null) {
             $this->newRowsGroup('');
         }
