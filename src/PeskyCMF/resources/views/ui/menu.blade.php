@@ -1,6 +1,9 @@
 <ul class="sidebar-menu" id="common-menu">
     <li class="header">{{ cmfTransCustom('.main_menu.header') }}</li>
     @foreach (\PeskyCMF\Config\CmfConfig::getPrimary()->menu() as $info)
+        @if (empty($info))
+            @continue
+        @endif
         @php($info = value($info))
         @if (!empty($info['submenu']))
             <li class="treeview">

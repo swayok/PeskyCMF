@@ -16,6 +16,7 @@ $(function () {
 
     page.base(CmfConfig.rootUrl);
     page.exit(CmfRoutingHelpers.pageExitTransition);
+    page.exit(CmfRoutingHelpers.cleanupHangedElementsInBody);
 
     if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
         CustomRoutes.init();

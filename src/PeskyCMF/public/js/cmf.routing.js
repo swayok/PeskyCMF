@@ -15,6 +15,10 @@ var CmfRoutingHelpers = {
         }
         next();
     },
+    cleanupHangedElementsInBody: function (request, next) {
+        $('body > .tooltip, body > .bootstrap-select').remove();
+        next();
+    },
     routeHandled: function (request, next) {
         request.handled = true;
         next();
