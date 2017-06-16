@@ -264,7 +264,7 @@ abstract class ScaffoldConfig {
      * @return array|string
      */
     public function translate($section, $suffix = '', array $parameters = []) {
-        return cmfTransCustom(rtrim(".{$this->viewsBaseTranslationKey}.{$section}.$suffix", '.'), $parameters);
+        return cmfTransCustom(rtrim(".{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'), $parameters);
     }
 
     public function renderTemplates() {
