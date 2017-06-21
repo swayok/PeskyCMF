@@ -88,11 +88,14 @@ class FilterConfig {
      * @throws ScaffoldException
      */
     public function addFilter($columnName, $config = null) {
-        $this->findColumnConfig($columnName); //< needed to validate column existense
         if (empty($config)) {
+            $this->findColumnConfig($columnName); //< needed to validate column existense
             $config = $this->createColumnFilterConfig($columnName);
         } else if (!($config instanceof ColumnFilter)) {
             throw new ScaffoldException("Filter column config for column [$columnName] should an object of class [ColumnFilter]");
+        } else if (!$config->hasColumnNameReplacementForCondition()) {
+            // needed to validate column existense
+            $this->findColumnConfig($config->hasColumnName() ? $config->getColumnName() : $columnName);
         }
         if (!$config->hasColumnName()) {
             $config->setColumnName($this->getColumnNameWithAlias($columnName));

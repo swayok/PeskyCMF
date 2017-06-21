@@ -152,12 +152,12 @@ class ColumnFilter {
         self::OPERATOR_GREATER_OR_EQUAL => '>=',
         self::OPERATOR_BETWEEN => 'BETWEEN',
         self::OPERATOR_NOT_BETWEEN => 'NOT BETWEEN',
-        self::OPERATOR_CONTAINS => '~*',
-        self::OPERATOR_NOT_CONTAINS => '!~*',
-        self::OPERATOR_BEGINS_WITH => '~*',
-        self::OPERATOR_NOT_BEGINS_WITH => '!~*',
-        self::OPERATOR_ENDS_WITH => '~*',
-        self::OPERATOR_NOT_ENDS_WITH => '!~*',
+        self::OPERATOR_CONTAINS => '::text ~*',
+        self::OPERATOR_NOT_CONTAINS => '::text !~*',
+        self::OPERATOR_BEGINS_WITH => '::text ~*',
+        self::OPERATOR_NOT_BEGINS_WITH => '::text !~*',
+        self::OPERATOR_ENDS_WITH => '::text ~*',
+        self::OPERATOR_NOT_ENDS_WITH => '::text !~*',
         self::OPERATOR_IS_EMPTY => '=',
         self::OPERATOR_IS_NOT_EMPTY => '!=',
         self::OPERATOR_IS_NULL => 'IS',
@@ -656,6 +656,9 @@ class ColumnFilter {
     /**
      * Replace column's name when building a condition for DB
      * @param string|DbExpr $columnNameReplacementForCondition
+     * Example:
+     *  without replacement: for column_name = 'count', operation = "equals", value = "1" conditon will be: "count" = '1'
+     *  with replacement: expression = DbExpr('COALESCE(`count`, ``0``)') condition will be COALESCE("count", 0) = '1'
      * @return $this
      */
     public function setColumnNameReplacementForCondition($columnNameReplacementForCondition) {
