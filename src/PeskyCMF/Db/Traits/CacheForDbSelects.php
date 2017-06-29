@@ -642,7 +642,14 @@ trait CacheForDbSelects {
     }
 
     /**
-     * @inheritdoc
+     * Insert many records at once
+     * @param array $fieldNames - field names use
+     * @param array[] $rows - arrays of values for $fieldNames
+     * @param bool|string $returning - string: something compatible with RETURNING for postgresql query | false: do not return
+     * @return int|array - int: amount of rows created | array: records (when $returning !== false)
+     * @throws \PeskyORM\Exception\DbModelException
+     * @throws \PeskyORM\Exception\DbTableConfigException
+     * @throws \PeskyORM\Exception\DbException
      * @throws \BadMethodCallException
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \PeskyORM\Exception\DbModelException
