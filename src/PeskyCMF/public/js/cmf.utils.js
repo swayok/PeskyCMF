@@ -1,6 +1,7 @@
 var Utils = {
     bodyClass: false,
     loadedJsFiles: [],
+    loadedCssFiles: [],
     cacheLoadedJsFiles: true
 };
 
@@ -129,10 +130,10 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
         }
         if (cssFiles && $.isArray(cssFiles)) {
             for (i = 0; i < cssFiles.length; i++) {
-                if (typeof jsFiles[i] !== 'string') {
+                if (typeof cssFiles[i] !== 'string') {
                     alert('cssFiles argument in Utils.requireFiles() must contain only strings. Not a string detected in index ' + i);
                 }
-                if ($('link[href="' + jsFiles[i] + '"]').length) {
+                if ($.inArray(cssFiles[i], Utils.loadedCssFiles) >= 0 || $('link[href="' + cssFiles[i] + '"]').length) {
                     continue;
                 }
                 if (document.createStyleSheet) {
@@ -141,6 +142,7 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
                     $('body').before(
                         $('<link rel="stylesheet" href="' + cssFiles[i] + '" type="text/css" />')
                     );
+                    Utils.loadedCssFiles.push(cssFiles[i].replace(/(\?|&)_=[0-9]+/, ''));
                 }
             }
         }
