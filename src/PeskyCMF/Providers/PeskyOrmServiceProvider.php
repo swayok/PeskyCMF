@@ -19,11 +19,20 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      * @throws \InvalidArgumentException
      */
     public function boot() {
-        $driver = config('database.default');
-        $connectionConfig = config("database.connections.$driver");
-        if (!empty($connectionConfig['password'])) {
-            DbConnectionsManager::createConnectionFromArray($driver, $connectionConfig);
-            DbConnectionsManager::addAlternativeNameForConnection($driver, 'default');
+        $connections = config('database.connections');
+        $default = config('database.default');
+        if (is_array($connections)) {
+            foreach ($connections as $name => $connectionConfig) {
+                if (
+                    in_array(strtolower(array_get($connectionConfig, 'driver', '')), ['mysql', 'pgsql'])
+                    && !empty($connectionConfig['password'])
+                ) {
+                    DbConnectionsManager::createConnectionFromArray($name, $connectionConfig);
+                    if ($name === $default) {
+                        DbConnectionsManager::addAlternativeNameForConnection($name, 'default');
+                    }
+                }
+            }
         }
         $this->addPdoCollectorForDebugbar();
     }
