@@ -88,8 +88,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         return cmfJsonResponse()->setData([
             'draw' => $request->query('draw'),
-            'recordsTotal' => $result->countTotal(),
-            'recordsFiltered' => $result->countTotal(),
+            'recordsTotal' => $result->totalCount(),
+            'recordsFiltered' => $result->totalCount(),
             'data' => $records,
         ]);
     }
