@@ -52,8 +52,10 @@
                                     {{ cmfTransCustom('.api_docs.url_params') }}
                                 </div>
                             </div>
-                            <div class="box-body">
-                                <pre>{{ json_encode($method->urlParameters, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <div class="box-body pv5">
+                                @foreach($method->urlParameters as $name => $comment)
+                                    <div class="mv5"><span class="label label-default fs14">{{ $name }}</span> - {{ $comment }}</div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -66,8 +68,10 @@
                                 {{ cmfTransCustom('.api_docs.url_query_params') }}
                             </div>
                         </div>
-                        <div class="box-body">
-                            <pre>{{ json_encode($method->urlQueryParameters, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                        <div class="box-body pv5">
+                            @foreach($method->urlQueryParameters as $name => $comment)
+                                <div class="mv5"><span class="label label-default fs14">{{ $name }}</span> - {{ $comment }}</div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -80,8 +84,10 @@
                                 {{ cmfTransCustom('.api_docs.post_params') }}
                             </div>
                         </div>
-                        <div class="box-body">
-                            <pre>{{ json_encode($method->postParameters, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                        <div class="box-body pv5">
+                            @foreach($method->postParameters as $name => $comment)
+                                <div class="mv5"><span class="label label-default fs14">{{ $name }}</span> - {{ $comment }}</div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
