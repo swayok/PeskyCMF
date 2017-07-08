@@ -129,7 +129,11 @@ HTML;
     public function getConfigForPostman() {
         $queryParams = [];
         foreach ($this->urlQueryParameters as $name => $info) {
-            $queryParams[] = urlencode($name) . '={{' . $name . '}}';
+            if ($name === '_method') {
+                $queryParams[] = urlencode($name) . '=' . $info;
+            } else {
+                $queryParams[] = urlencode($name) . '={{' . $name . '}}';
+            }
         }
         $queryParams = empty($queryParams) ? '' : '?' . implode('&', $queryParams);
         $item = [
@@ -166,7 +170,7 @@ HTML;
         foreach ($this->postParameters as $key => $value) {
             $item['request']['body']['formdata'][] = [
                 'key' => $key,
-                'value' => '{{' . $key . '}}',
+                'value' => ($key === '_method') ? $value : '{{' . $key . '}}',
                 'type' => 'text',
                 'enabled' => true
             ];
