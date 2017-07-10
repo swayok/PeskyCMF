@@ -192,7 +192,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
                 $labelColumn = $this->getOptionLabelColumnForDefaultOptionsLoader($dataSourceRelation->getDisplayColumnName());
                 if ($labelColumn instanceof \Closure) {
                     $records = $table::select('*', value($this->getDbQueryConditionsForDefaultOptionsLoader()));
-                    $records->enableDbRecordInstanceReuseDuringIteration(true);
+                    $records->optimizeIteration();
                     $options = [];
                     /** @var RecordInterface $record */
                     foreach ($records as $record) {
