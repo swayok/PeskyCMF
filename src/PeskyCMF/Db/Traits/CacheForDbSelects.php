@@ -203,9 +203,9 @@ trait CacheForDbSelects {
         /** @var CmfDbTable|CacheForDbSelects $this */
         $structure = $this::getStructure();
         $parts = [
-            $structure::getConnectionName(),
+            $structure::getConnectionName(false),
             $structure::getSchema(),
-            $this::getConnection()->getConnectionConfig()->getDbName(),
+            $this::getConnection(false)->getConnectionConfig()->getDbName(),
             $this::getAlias()
         ];
         return implode('.', $parts) . '.';
