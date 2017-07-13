@@ -141,6 +141,10 @@ class CmfGeneralController extends Controller {
         $errors = [];
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
+        } else if (method_exists($admin, 'checkPassword')) {
+            if (!$admin->checkPassword($request->input('old_password'))) {
+                $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
+            }
         } else if (!\Hash::check($request->input('old_password'), $admin->getAuthPassword())) {
             $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
         }
