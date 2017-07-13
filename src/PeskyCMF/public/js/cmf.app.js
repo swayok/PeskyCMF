@@ -74,7 +74,9 @@ $(function () {
         if (!request.handled && CmfConfig.isDebug) {
             console.error('No route found for: ' + request.pathname);
         }
-        next(); //< use default behavior (use usual redirect to requested url)
+        if (!request.error) {
+            next(); //< use default behavior (use usual redirect to requested url)
+        }
     });
 
 });
@@ -144,6 +146,18 @@ function extendRouter() {
         page.apply(window, arguments);
     };
     page.reload = function () {
-        page.show(document.location.pathname + document.location.search + document.location.hash, null, true, false);
+        page.show(page.current, null, true, false);
     };
+    page.restoreRequest = function (request) {
+        if (request && request.path && request.title && request.pushState) {
+            page.current = request.path;
+            request.is_restore = true;
+            page.dispatch(request);
+            if (false !== request.handled) {
+                document.title = request.title;
+                request.pushState();
+            }
+            request.is_restore = false;
+        }
+    }
 }

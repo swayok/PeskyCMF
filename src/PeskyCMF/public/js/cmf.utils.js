@@ -247,7 +247,7 @@ Utils.fadeIn = function (el, callback) {
 Utils.switchBodyClass = function (className, section, itemPk) {
     Utils.removeBodyClass();
     if (!!className) {
-        className = className.replace(/[^a-zA-Z0-9 ]+/g, '-');
+        className = Utils.normalizeBodyClass(className);
         $(document.body).addClass(className);
         Utils.bodyClass = className;
     }
@@ -258,6 +258,10 @@ Utils.switchBodyClass = function (className, section, itemPk) {
         $(document.body).attr('data-item-pk', itemPk);
     }
 };
+
+Utils.normalizeBodyClass = function (className) {
+    return className.replace(/[^a-zA-Z0-9 ]+/g, '-');
+}
 
 Utils.getBodyClass = function () {
     return Utils.bodyClass;
