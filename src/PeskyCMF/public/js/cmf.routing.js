@@ -16,10 +16,8 @@ var CmfRoutingHelpers = {
         request.handled = true;
         request.title = document.title;
         if (!isModal && !request.is_restore) {
-            request.sectionId = Utils.getBodyClass();
             CmfRoutingHelpers.lastNonModalPageRequest = request;
         }
-        delete request.is_restore;
         next();
     },
     routeHandlingFailed: function (request, next) {
@@ -230,10 +228,7 @@ CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
 CmfRouteChange.scaffoldDataGridPage = function (request, next) {
     var bodyClass = ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource);
     var $body = $(document.body);
-    if (
-        request.is_restore
-        && request.sectionId === bodyClass
-    ) {
+    if (request.is_restore) {
         var restoreDataGridPage = function () {
             $body.attr('data-modal-opened', '0');
             Utils.updatePageTitleFromH1(CmfRoutingHelpers.$currentContent);
