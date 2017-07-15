@@ -97,7 +97,7 @@ class CmsRedirectsScaffoldConfig extends NormalTableScaffoldConfig {
                 'url_alias !=' => ''
             ]
         );
-        $pages->enableDbRecordInstanceReuseDuringIteration(true);
+        $pages->optimizeIteration();
         $optionsByType = [];
         /** @var CmsPage $page */
         foreach ($pages as $page) {

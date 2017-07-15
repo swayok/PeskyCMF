@@ -141,6 +141,16 @@ abstract class CmfConfig extends ConfigsContainer {
         throw new \BadMethodCallException('You must overwrite session_connection() in ' . get_called_class());
     }
 
+    static public function language_detector_configs() {
+        return [
+            'autodetect' => true,
+            'driver' => 'browser',
+            'cookie' => true,
+            'cookie_name' => preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_locale',
+            'languages' => static::locales()
+        ];
+    }
+
     /**
      * Auth configs for cmf
      * For examples - look for /config/auth.php
@@ -578,11 +588,14 @@ abstract class CmfConfig extends ConfigsContainer {
 
     /**
      * Supported locales for CMF
+     * Note: you can redirect locales using key as locale to redirect from and value as locale to redirect to
+     * For details see: https://github.com/vluzrmos/laravel-language-detector
      * @return array
      */
     static public function locales() {
         return [
-            'en'
+            'en',
+            //'fr' => 'en'
         ];
     }
 
@@ -590,28 +603,18 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function locale_session_key() {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_locale';
+        return ;
     }
 
     /**
      * Change locale inside CMF/CMS area
-     * @param null|string $locale
+     * @param string $locale
+     * @param bool $useDefaultLocaleWhenProvidedOneIs - true: when $locale is not supported
      */
-    static public function setLocale($locale = null) {
+    static public function setLocale($locale) {
         static::_protect();
-        if (is_string($locale) && $locale !== '' && in_array(strtolower($locale), static::locales(), true)) {
-            \Session::put(static::locale_session_key(), strtolower($locale));
-            app()->setLocale($locale);
-        }
-    }
-
-    /**
-     * Get locale stored in session or default locale
-     * @return string
-     */
-    static public function getLocale() {
-        static::_protect();
-        return \Session::get(static::locale_session_key(), static::default_locale());
+        \LanguageDetector::apply($locale);
+        \LanguageDetector::addCookieToQueue(\App::getLocale());
     }
 
     /**
@@ -619,7 +622,7 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function resetLocale() {
         static::_protect();
-        static::setLocale(static::default_locale());
+        static::setLocale(\LanguageDetector::getDriver()->detect());
     }
 
     /**

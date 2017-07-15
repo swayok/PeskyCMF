@@ -1,17 +1,10 @@
 var CmfRoutingHelpers = {
-    lastNonModalPageInfo: null,
+    lastNonModalPageRequest: null,
     $currentContentContainer: Utils.getPageWrapper(),
     $currentContent: null,
     pageExitTransition: function (request, next) {
-        Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
-        if (
-            !CmfRoutingHelpers.lastNonModalPageInfo
-            || (CmfRoutingHelpers.$currentContent && !CmfRoutingHelpers.$currentContent.hasClass('modal'))
-        ) {
-            CmfRoutingHelpers.lastNonModalPageInfo = {
-                url: location.pathname + location.search + location.hash,
-                page_title: document.title
-            };
+        if (!request.is_restore) {
+            Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
         }
         next();
     },
@@ -19,9 +12,20 @@ var CmfRoutingHelpers = {
         $('body > .tooltip, body > .bootstrap-select').remove();
         next();
     },
-    routeHandled: function (request, next) {
+    routeHandled: function (request, next, isModal) {
         request.handled = true;
+        request.title = document.title;
+        if (!isModal && !request.is_restore) {
+            CmfRoutingHelpers.lastNonModalPageRequest = request;
+        }
         next();
+    },
+    routeHandlingFailed: function (request, next) {
+        CmfRoutingHelpers.hideContentContainerPreloader();
+        request.handled = true;
+        request.error = true;
+        next();
+        page.back('/');
     },
     setCurrentContentContainer: function ($el) {
         if (!CmfRoutingHelpers.$currentContentContainer || !CmfRoutingHelpers.$currentContentContainer.is($el)) {
@@ -113,11 +117,10 @@ var CmfRoutingHelpers = {
                 CmfRoutingHelpers.$currentContent = $prevContent;
                 CmfRoutingHelpers.setCurrentContentContainer($prevContentContainer);
                 if ($modal.attr('data-ignore-back') !== '1') {
-                    if (CmfRoutingHelpers.lastNonModalPageInfo) {
-                        page.show(CmfRoutingHelpers.lastNonModalPageInfo.url, null, false);
-                        document.title = CmfRoutingHelpers.lastNonModalPageInfo.page_title;
+                    if (CmfRoutingHelpers.lastNonModalPageRequest) {
+                        page.restoreRequest(CmfRoutingHelpers.lastNonModalPageRequest);
                     } else {
-                        page.back();
+                        page.back('/');
                     }
                 }
             })
@@ -169,8 +172,7 @@ CmfRouteChange.authorizationPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
-            CmfRoutingHelpers.hideContentContainerPreloader();
-            CmfRoutingHelpers.routeHandled(request, next);
+            CmfRoutingHelpers.routeHandlingFailed(request, next);
         });
 };
 
@@ -197,8 +199,7 @@ CmfRouteChange.showPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
-            CmfRoutingHelpers.hideContentContainerPreloader();
-            CmfRoutingHelpers.routeHandled(request, next);
+            CmfRoutingHelpers.routeHandlingFailed(request, next);
         });
 };
 
@@ -220,19 +221,14 @@ CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
             CmfRoutingHelpers.routeHandled(request, next);
         })
         .fail(function () {
-            CmfRoutingHelpers.hideContentContainerPreloader();
-            CmfRoutingHelpers.routeHandled(request, next);
+            CmfRoutingHelpers.routeHandlingFailed(request, next);
         });
 };
 
 CmfRouteChange.scaffoldDataGridPage = function (request, next) {
     var bodyClass = ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource);
     var $body = $(document.body);
-    if (
-        $body.attr('data-modal-opened') === '1'
-        && Utils.getCurrentSectionName() === 'resource:table'
-        && Utils.getBodyClass() === bodyClass
-    ) {
+    if (request.is_restore) {
         var restoreDataGridPage = function () {
             $body.attr('data-modal-opened', '0');
             Utils.updatePageTitleFromH1(CmfRoutingHelpers.$currentContent);
@@ -265,8 +261,7 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
                 CmfRoutingHelpers.routeHandled(request, next);
             })
             .fail(function () {
-                CmfRoutingHelpers.hideContentContainerPreloader();
-                CmfRoutingHelpers.routeHandled(request, next);
+                CmfRoutingHelpers.routeHandlingFailed(request, next);
             });
     }
 };
@@ -361,11 +356,10 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                         initContent($content);
                     });
             }
-            CmfRoutingHelpers.routeHandled(request, next);
+            CmfRoutingHelpers.routeHandled(request, next, data.__modal);
         })
         .fail(function () {
-            CmfRoutingHelpers.hideContentContainerPreloader();
-            CmfRoutingHelpers.routeHandled(request, next);
+            CmfRoutingHelpers.routeHandlingFailed(request, next);
         });
 };
 
@@ -456,10 +450,9 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
                         initContent($content, false);
                     });
             }
-            CmfRoutingHelpers.routeHandled(request, next);
+            CmfRoutingHelpers.routeHandled(request, next, data.__modal);
         })
         .fail(function () {
-            CmfRoutingHelpers.hideContentContainerPreloader();
-            CmfRoutingHelpers.routeHandled(request, next);
+            CmfRoutingHelpers.routeHandlingFailed(request, next);
         });
 };

@@ -155,11 +155,12 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     }
 
     static public function getAllowedLocales() {
-        return static::getCmfConfig()->locales();
+        throw new \BadMethodCallException('This method should not be used. Use relevant CmfConfig::locales');
     }
 
     public function configureLocale() {
-        static::getCmfConfig()->setLocale(static::getCmfConfig()->getLocale());
+        $config = $this->getAppConfig()->get('lang-detector', []);
+        $this->getAppConfig()->set('lang-detector', array_replace_recursive($config, static::getCmfConfig()->language_detector_configs()));
     }
 
 }

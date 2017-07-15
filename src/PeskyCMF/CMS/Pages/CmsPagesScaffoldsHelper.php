@@ -142,7 +142,7 @@ abstract class CmsPagesScaffoldsHelper {
             'type' => $pageType,
             'url_alias !=' => '/'
         ]);
-        $pages->enableDbRecordInstanceReuseDuringIteration(true);
+        $pages->optimizeIteration();
         $baseUrl = request()->getSchemeAndHttpHost();
         $options = ['' => $baseUrl];
         /** @var CmsPage $page */

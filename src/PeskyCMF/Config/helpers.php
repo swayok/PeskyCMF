@@ -124,10 +124,23 @@ if (!function_exists('transChoiceRu')) {
      * @param string|array $idOrTranslations - array: translations for items count 1,4,5
      * @param int $itemsCount
      * @param array $parameters
-     * @param string $locale
+     * @param string|null $locale
      * @return string
      */
     function transChoiceRu($idOrTranslations, $itemsCount, array $parameters = [], $locale = 'ru') {
+        return transChoiceAlt($idOrTranslations, $itemsCount, $parameters, $locale);
+    }
+}
+
+if (!function_exists('transChoiceAlt')) {
+    /**
+     * @param string|array $idOrTranslations - array: translations for items count 1,4,5
+     * @param int $itemsCount
+     * @param array $parameters
+     * @param string|null $locale
+     * @return string
+     */
+    function transChoiceAlt($idOrTranslations, $itemsCount, array $parameters = [], $locale = null) {
         $trans = \Swayok\Utils\StringUtils::pluralizeRu(
             $itemsCount,
             is_array($idOrTranslations) ? $idOrTranslations : trans($idOrTranslations, [], $locale)
@@ -294,26 +307,26 @@ if (!function_exists('formatSeconds')) {
             $seconds -= 86400 * $days;
             $ret .= $shortLabels
                 ? cmfTransGeneral('.format_seconds.days_short', ['days' => $days])
-                : transChoiceRu(cmfTransGeneral('.format_seconds.days'), $days, ['days' => $days]);
+                : transChoiceAlt(cmfTransGeneral('.format_seconds.days'), $days, ['days' => $days]);
         }
         if ($seconds >= 3600 || !empty($days)) {
             $hours = floor($seconds / 3600);
             $seconds -= 3600 * $hours;
             $ret .= $shortLabels
                 ? cmfTransGeneral('.format_seconds.hours_short', ['hours' => $hours])
-                : transChoiceRu(cmfTransGeneral('.format_seconds.hours'), $hours, ['hours' => $hours]);
+                : transChoiceAlt(cmfTransGeneral('.format_seconds.hours'), $hours, ['hours' => $hours]);
         }
         if ($seconds >= 60 || !empty($days) || !empty($hours)) {
             $minutes = floor($seconds / 60);
             $seconds -= 60 * $minutes;
             $ret .= $shortLabels
                 ? cmfTransGeneral('.format_seconds.minutes_short', ['minutes' => $minutes])
-                : transChoiceRu(cmfTransGeneral('.format_seconds.minutes'), $minutes, ['minutes' => $minutes]);
+                : transChoiceAlt(cmfTransGeneral('.format_seconds.minutes'), $minutes, ['minutes' => $minutes]);
         }
         if ($displaySeconds) {
             $ret .= $shortLabels
                 ? cmfTransGeneral('.format_seconds.seconds_short', ['seconds' => $seconds])
-                : transChoiceRu(cmfTransGeneral('.format_seconds.seconds'), $seconds, ['seconds' => $seconds]);
+                : transChoiceAlt(cmfTransGeneral('.format_seconds.seconds'), $seconds, ['seconds' => $seconds]);
         } else if (empty($days) && empty($hours) && empty($minutes)) {
             $ret = cmfTransGeneral('.format_seconds.less_then_a_minute');
         }

@@ -46,7 +46,7 @@ class CmsRedirect extends CmsRecord {
         /** @var CmsPagesTable $pagesTable */
         $pagesTable = app(CmsPagesTable::class);
         $childPages = $pagesTable::select('*', ['parent_id' => $this->page_id]);
-        $childPages->enableDbRecordInstanceReuseDuringIteration();
+        $childPages->optimizeIteration();
         $redirect = static::newEmptyRecord();
         /** @var CmsPage $page */
         foreach ($childPages as $page) {

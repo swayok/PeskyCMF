@@ -170,12 +170,18 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
         <div class="modal fade" tabindex="-1" role="dialog" data-pk-name="<?php echo $table::getPkColumnName() ?>">
             <div class="modal-dialog <?php echo $itemDetailsConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
                 <div class="modal-content item-details-modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"
-                        aria-label="<?php echo cmfTransGeneral('.form.toolbar.close'); ?>">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <h4 class="modal-title"><?php echo $itemDetailsConfig->translate(null, 'header'); ?></h4>
+                    <div class="modal-header pv10">
+                        <div class="box-tools pull-right">
+                            <a href="" class="btn btn-box-tool fs13 va-t ptn mt5" target="_blank" data-toggle="tooltip"
+                            title="<?php echo cmfTransGeneral('.modal.open_in_new_tab'); ?>">
+                                <i class="glyphicon glyphicon-share"></i>
+                            </a>
+                            <button type="button" data-dismiss="modal" class="btn btn-box-tool va-t pbn ptn mt5"
+                            data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.close'); ?>">
+                                <span class="fs24 lh15">&times;</span>
+                            </button>
+                        </div>
+                        <h4 class="modal-title lh30"><?php echo $itemDetailsConfig->translate(null, 'header'); ?></h4>
                     </div>
                     <div class="modal-body pn">
                         <button type="button" class="prev-item" disabled

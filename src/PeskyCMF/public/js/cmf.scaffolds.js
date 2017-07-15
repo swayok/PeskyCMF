@@ -238,7 +238,7 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
 
 var ScaffoldActionsHelper = {
     makeResourceBodyClass: function (resourceName) {
-        return 'resource-' + resourceName;
+        return Utils.normalizeBodyClass('resource-' + resourceName);
     },
     initActions: function (container, useLiveEvents) {
         var $container = $(container);

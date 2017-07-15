@@ -54,7 +54,7 @@ abstract class CmfDbTable extends Table {
 
     static public function _getCurrentTime() {
         if (empty(self::$currentTime)) {
-            $ds = self::getConnection();
+            $ds = self::getConnection(false);
             $query = 'SELECT ' . $ds->quoteDbExpr(static::getCurrentTimeDbExpr());
             self::$currentTime = strtotime($ds->query($query, Utils::FETCH_VALUE));
         }

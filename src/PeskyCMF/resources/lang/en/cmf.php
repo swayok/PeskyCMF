@@ -221,6 +221,10 @@ return [
             'no_relation' => 'Relation not exists'
         ],
     ],
+    'modal' => [
+        'open_in_new_tab' => 'Open in new tab',
+        'close' => 'Close'
+    ],
     'action' => [
         'delete' => [
             'forbidden' => 'It is forbidden to delete Items from this section',

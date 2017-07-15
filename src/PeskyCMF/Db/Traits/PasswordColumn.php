@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Db\Traits;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\DefaultColumnClosures;
 use PeskyORM\ORM\RecordValue;
@@ -18,7 +19,7 @@ trait PasswordColumn {
                     return $value;
                 } else {
                     if (!empty($value)) {
-                        return \Hash::make($value);
+                        return static::hashPassword($value);
                     }
                     return $value;
                 }
@@ -30,6 +31,14 @@ trait PasswordColumn {
                 DefaultColumnClosures::valueSetter($newValue, $isFromDb, $valueContainer, $trustDataReceivedFromDb);
             })
             ->privateValue();
+    }
+
+    /**
+     * @param string $plainPassword
+     * @return string
+     */
+    static protected function hashPassword($plainPassword) {
+        return \Hash::make($plainPassword);
     }
 
 }

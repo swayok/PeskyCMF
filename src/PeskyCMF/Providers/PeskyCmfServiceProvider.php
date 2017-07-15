@@ -12,6 +12,8 @@ use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 use PeskyCMF\Console\Commands\CmsInstall;
 use PeskyCMF\Http\PeskyCmfSiteLoader;
+use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
+use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
@@ -47,6 +49,9 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         $this->app->register(PeskyOrmServiceProvider::class);
         $this->app->register(PeskyValidationServiceProvider::class);
         $this->app->register(SuppressLaravelDatabaseServiceProvider::class);
+        $this->app->register(LanguageDetectorServiceProvider::class);
+        $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+        $loader->alias('LanguageDetector', LanguageDetector::class);
 
         if ($this->app->environment() === 'local') {
             if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
@@ -181,6 +186,5 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             $this->loadTranslationsFrom(CmfConfig::cmf_dictionaries_path(), 'cmf');
         }
     }
-
 
 }
