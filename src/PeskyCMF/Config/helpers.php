@@ -11,11 +11,13 @@ if (!function_exists('routeTpl')) {
     function routeTpl($routeName, array $parameters = [], array $tplParams = [], $absolute = false) {
         $replacements = [];
         foreach ($tplParams as $name => $tplName) {
+            $dotJsVarPrefix = '';
             if (is_numeric($name)) {
-                $name = 'it.' . $tplName;
+                $name = $tplName;
+                $dotJsVarPrefix = 'it.';
             }
             $parameters[$name] = '__' . $name . '__';
-            $replacements['%' . preg_quote($parameters[$name], '%') . '%'] = "{{= {$tplName} }}";
+            $replacements['%' . preg_quote($parameters[$name], '%') . '%'] = "{{= {$dotJsVarPrefix}{$tplName} }}";
         }
         $url = route($routeName, $parameters, $absolute);
         return preg_replace(array_keys($replacements), array_values($replacements), $url);
