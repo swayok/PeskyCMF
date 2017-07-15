@@ -12,10 +12,10 @@ if (!function_exists('routeTpl')) {
         $replacements = [];
         foreach ($tplParams as $name => $tplName) {
             if (is_numeric($name)) {
-                $name = $tplName;
+                $name = 'it.' . $tplName;
             }
             $parameters[$name] = '__' . $name . '__';
-            $replacements['%' . preg_quote($parameters[$name], '%') . '%'] = '{{= it.' . $tplName . ' }}';
+            $replacements['%' . preg_quote($parameters[$name], '%') . '%'] = "{{= {$tplName} }}";
         }
         $url = route($routeName, $parameters, $absolute);
         return preg_replace(array_keys($replacements), array_values($replacements), $url);
