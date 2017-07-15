@@ -5,6 +5,14 @@ namespace PeskyCMF\CMS\ApiDocs;
 use PeskyCMF\HttpCode;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * @method headers()
+ * @method urlParameters()
+ * @method urlQueryParameters()
+ * @method postParameters()
+ * @method onSuccess()
+ * @method validationErrors()
+ */
 abstract class CmsApiDocs {
 
     // override next properties and methods
