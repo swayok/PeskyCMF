@@ -122,14 +122,10 @@ HTML;
         $this->uuid = Uuid::uuid4()->toString();
         // load data from class methods
         foreach (['headers', 'onSuccess', 'validationErrors', 'postParameters', 'urlQueryParameters', 'urlParameters'] as $field) {
-            if ($this->$field === null) {
-                if (method_exists($this, $field)) {
-                    $this->$field = $this->$field();
-                    if (!is_array($this->$field)) {
-                        throw new \UnexpectedValueException(get_class($this) . '->' . $field . '() method must return an array');
-                    }
-                } else {
-                    throw new \UnexpectedValueException(get_class($this) . '->' . $field . ' can be null only when ' . $field . '() method is defined');
+            if (method_exists($this, $field)) {
+                $this->$field = $this->$field();
+                if (!is_array($this->$field)) {
+                    throw new \UnexpectedValueException(get_class($this) . '->' . $field . '() method must return an array');
                 }
             }
         }
