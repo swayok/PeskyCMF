@@ -57,11 +57,11 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             </div>
             <div class="col-xs-6 text-center">
             <?php echo $ifEdit; ?>
-                <?php if ($formConfig->isCreateAllowed()) : ?>
+                <?php /*if ($formConfig->isCreateAllowed()) : ?>
                     <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
                         <?php echo cmfTransGeneral('.form.toolbar.create'); ?>
                     </a>
-                <?php endif; ?>
+                <?php endif;*/ ?>
                 <?php if ($formConfig->isDeleteAllowed()) : ?>
                     <?php
                         $deleteUrl = str_ireplace(
@@ -202,6 +202,10 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                 <div class="modal-content item-form-modal-content">
                     <div class="modal-header pv10">
                         <div class="box-tools pull-right">
+                            <button type="button" data-action="reload" class="btn btn-box-tool fs13 va-t ptn mt5"
+                            data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.reload'); ?>">
+                                <i class="glyphicon glyphicon-refresh"></i>
+                            </button>
                             <a href="" class="btn btn-box-tool fs13 va-t ptn mt5" target="_blank" data-toggle="tooltip"
                             title="<?php echo cmfTransGeneral('.modal.open_in_new_tab'); ?>">
                                 <i class="glyphicon glyphicon-share"></i>

@@ -223,7 +223,8 @@ return [
     ],
     'modal' => [
         'open_in_new_tab' => 'Open in new tab',
-        'close' => 'Close'
+        'close' => 'Close',
+        'reload' => 'Reload data'
     ],
     'action' => [
         'delete' => [
