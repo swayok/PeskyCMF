@@ -3,6 +3,76 @@ var FormHelper = {
     messageAnimDurationMs: 200
 };
 
+FormHelper.initInputPlugins = function (container) {
+    var $container = (container);
+    $container
+        .find('.selectpicker')
+        .each(function () {
+            // somehow it is loosing value that was set by $('select').val('val');
+            var $select = $(this);
+            var val = $select.val();
+            var pluginOptions = {};
+            if ($select.find('option').length > 10) {
+                pluginOptions.liveSearch = true;
+                pluginOptions.liveSearchNormalize = true;
+            }
+            if (!$select.attr('data-style')) {
+                if ($select.hasClass('input-sm')) {
+                    pluginOptions.style = 'input-sm';
+                }
+                if ($select.hasClass('input-lg')) {
+                    pluginOptions.style = 'input-lg';
+                }
+            }
+            $select
+                .selectpicker(pluginOptions)
+                .selectpicker('val', val);
+        });
+    $container
+        .find('input.switch[type="checkbox"]')
+        .bootstrapSwitch();
+    // input masks
+    $container
+        .find('input[data-type], textarea[data-type]')
+        .each(function () {
+            $(this)
+                .attr({
+                    'data-inputmask-alias': $(this).attr('data-type'),
+                    'data-inputmask-rightAlign': 'false'
+                })
+                .removeAttr('data-type')
+                .inputmask();
+            $(this).val($(this).val());
+        });
+    $container
+        .find('input[data-mask], textarea[data-mask]')
+        .each(function () {
+            $(this)
+                .attr('data-inputmask-mask', $(this).attr('data-mask'))
+                .removeAttr('data-mask')
+                .inputmask();
+            $(this).val($(this).val());
+        });
+    $container
+        .find('input[data-regexp], textarea[data-regexp]')
+        .each(function () {
+            $(this)
+                .attr({
+                    'data-inputmask-alias': 'Regex',
+                    'data-inputmask-regex': $(this).attr('data-regexp')
+                })
+                .removeAttr('data-regexp')
+                .inputmask();
+            $(this).val($(this).val());
+        });
+    $container
+        .find('input[data-inputmask], textarea[data-inputmask]')
+        .each(function () {
+            $(this).inputmask();
+            $(this).val($(this).val());
+        });
+};
+
 FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
     var $form = $(form);
     var $container = $(container);
@@ -29,64 +99,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
         }
     }
     // init plugins
-    $form
-        .find('.selectpicker')
-        .each(function () {
-            // somehow it is loosing value that was set by $('select').val('val');
-            var $select = $(this);
-            var val = $select.val();
-            var pluginOptions = {};
-            if ($select.find('option').length > 10) {
-                pluginOptions.liveSearch = true;
-                pluginOptions.liveSearchNormalize = true;
-            }
-            $select
-                .selectpicker(pluginOptions)
-                .selectpicker('val', val);
-        });
-    $form
-        .find('input.switch[type="checkbox"]')
-        .bootstrapSwitch();
-    // input masks
-    $form
-        .find('input[data-type], textarea[data-type]')
-        .each(function () {
-            $(this)
-                .attr({
-                    'data-inputmask-alias': $(this).attr('data-type'),
-                    'data-inputmask-rightAlign': 'false'
-                })
-                .removeAttr('data-type')
-                .inputmask();
-            $(this).val($(this).val());
-        });
-    $form
-        .find('input[data-mask], textarea[data-mask]')
-        .each(function () {
-            $(this)
-                .attr('data-inputmask-mask', $(this).attr('data-mask'))
-                .removeAttr('data-mask')
-                .inputmask();
-            $(this).val($(this).val());
-        });
-    $form
-        .find('input[data-regexp], textarea[data-regexp]')
-        .each(function () {
-            $(this)
-                .attr({
-                    'data-inputmask-alias': 'Regex',
-                    'data-inputmask-regex': $(this).attr('data-regexp')
-                })
-                .removeAttr('data-regexp')
-                .inputmask();
-            $(this).val($(this).val());
-        });
-    $form
-        .find('input[data-inputmask], textarea[data-inputmask]')
-        .each(function () {
-            $(this).inputmask();
-            $(this).val($(this).val());
-        });
+    FormHelper.initInputPlugins($form);
     // init submit
     $form.ajaxForm({
         clearForm: !!options.clearForm,
