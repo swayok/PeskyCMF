@@ -76,7 +76,8 @@ FormHelper.initInputPlugins = function (container) {
 FormHelper.setValuesFromDataAttributes = function (container) {
     var $container = (container);
     $container
-        .find('select[data-value!=""]').each(function () {
+        .find('select[data-value!=""]')
+        .each(function () {
             if (this.multiple) {
                 try {
                     var json = JSON.parse(this.getAttribute('data-value'));
@@ -87,6 +88,7 @@ FormHelper.setValuesFromDataAttributes = function (container) {
             } else {
                 $(this).val(this.getAttribute('data-value'));
             }
+            $(this).change();
         });
 };
 
