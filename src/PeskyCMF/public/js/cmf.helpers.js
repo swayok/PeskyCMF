@@ -120,7 +120,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             if ((xhr.status === 400 || xhr.status === 422) && typeof options.onValidationErrors === 'function') {
                 options.onValidationErrors(xhr, $form, $container);
             } else {
-                FormHelper.handleAjaxErrors($form, xhr);
+                FormHelper.handleAjaxErrors($form, xhr, this);
             }
         },
         success: function (data) {
@@ -179,13 +179,13 @@ FormHelper.removeFormValidationMessages = function ($form) {
     });
 };
 
-FormHelper.handleAjaxErrors = function ($form, xhr) {
+FormHelper.handleAjaxErrors = function ($form, xhr, request) {
     FormHelper.removeAllFormMessagesAndErrors($form)
         .done(function () {
             if (xhr.status === 400 || xhr.status === 422) {
                 var response = Utils.convertXhrResponseToJsonIfPossible(xhr);
                 if (!response) {
-                    Utils.handleAjaxError(xhr);
+                    Utils.handleAjaxError.call(request, xhr);
                     return;
                 }
                 var inputName;
@@ -209,7 +209,7 @@ FormHelper.handleAjaxErrors = function ($form, xhr) {
                 }
                 return;
             }
-            Utils.handleAjaxError(xhr);
+            Utils.handleAjaxError.call(request, xhr);
         });
 };
 

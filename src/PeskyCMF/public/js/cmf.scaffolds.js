@@ -231,7 +231,7 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
         deferred.resolve(data);
     }).fail(function (xhr) {
         deferred.reject();
-        Utils.handleAjaxError(xhr);
+        Utils.handleAjaxError.call(this, xhr);
     });
     return deferred;
 };

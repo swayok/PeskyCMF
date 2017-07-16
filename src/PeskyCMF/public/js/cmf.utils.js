@@ -171,6 +171,14 @@ Utils.handleAjaxError = function (xhr) {
             return;
         }
     }
+    var url = this.url || null;
+    if (xhr.status === 0) {
+        toastr.error('Request to ' + url + ' failed. Reason: no internet connection');
+        return;
+    } else if (xhr.status === 200 && xhr.responseText === '') {
+        toastr.info('Empty response from ' + url + '. Possibly debug session was stopped.');
+        return;
+    }
     CmfConfig.getDebugDialog().showDebug(
         'HTTP Error ' + xhr.status + ' ' + xhr.statusText,
         xhr.responseText
@@ -354,7 +362,7 @@ Utils.downloadHtml = function (url, cache, template) {
             }
             deferred.resolve(html);
         }).fail(function (xhr) {
-            Utils.handleAjaxError(xhr);
+            Utils.handleAjaxError.call(this, xhr);
             deferred.reject(xhr);
         });
     } else {
