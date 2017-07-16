@@ -196,7 +196,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             try {
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
                 $object = $table->newRecord()->fromData($dataToSave, false);
-                $object->save(['*']);
+                $object->save(['*'], true);
                 return $this->afterDataSaved($data, $object, true, $table, $formConfig);
             } catch (InvalidDataException $exc) {
                 if ($table->inTransaction()) {
@@ -268,7 +268,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             $table::beginTransaction();
             try {
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
-                $object->begin()->updateValues($dataToSave)->commit(['*']);
+                $object->begin()->updateValues($dataToSave)->commit(['*'], true);
                 return $this->afterDataSaved($data, $object, false, $table, $formConfig);
             } catch (InvalidDataException $exc) {
                 if ($table->inTransaction()) {

@@ -65,7 +65,12 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                                         $viewer = $itemDetailsConfig->getValueCell($keyForValue);
                                         $label = $viewer->getLabel();
                                         $tr = Swayok\Html\Tag::tr(['id' => 'item-details-' . $viewer->getName()]);
-                                        $contentTd = \Swayok\Html\Tag::td(['width' => '80%'])->setContent($viewer->render());
+                                        $contentTd = \Swayok\Html\Tag::td()
+                                            ->setContent($viewer->render())
+                                            ->setAttributes(
+                                                array_merge($viewer->getValueContainerAttributes(), ['width' => '80%'])
+                                            );
+
                                         if (trim($label) === '') {
                                             // do not display label column
                                             $contentTd
