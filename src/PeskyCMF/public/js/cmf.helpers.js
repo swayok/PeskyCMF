@@ -73,6 +73,23 @@ FormHelper.initInputPlugins = function (container) {
         });
 };
 
+FormHelper.setValuesFromDataAttributes = function (container) {
+    var $container = (container);
+    $container
+        .find('select[data-value!=""]').each(function () {
+            if (this.multiple) {
+                try {
+                    var json = JSON.parse(this.getAttribute('data-value'));
+                    $(this).val(json);
+                } catch (exc) {
+                    $(this).val(this.getAttribute('data-value'));
+                }
+            } else {
+                $(this).val(this.getAttribute('data-value'));
+            }
+        });
+};
+
 FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
     var $form = $(form);
     var $container = $(container);
@@ -98,6 +115,8 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             return;
         }
     }
+    // set values
+    FormHelper.setValuesFromDataAttributes($form);
     // init plugins
     FormHelper.initInputPlugins($form);
     // init submit

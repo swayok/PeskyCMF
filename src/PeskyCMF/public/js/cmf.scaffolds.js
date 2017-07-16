@@ -1295,18 +1295,6 @@ var ScaffoldFormHelper = {
         delete CmfCache.selectOptionsTs[cacheKey];
     },
     initForm: function ($form, successCallback) {
-        $form.find('select[data-value!=""]').each(function () {
-            if (this.multiple) {
-                try {
-                    var json = JSON.parse(this.getAttribute('data-value'));
-                    $(this).val(json);
-                } catch (exc) {
-                    $(this).val(this.getAttribute('data-value'));
-                }
-            } else {
-                $(this).val(this.getAttribute('data-value'));
-            }
-        });
         FormHelper.initForm($form, $form, successCallback);
     },
     handleBulkEditForm: function ($link, resourceName, api) {

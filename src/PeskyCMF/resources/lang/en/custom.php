@@ -135,7 +135,7 @@ $dictionary = [
                 'name' => 'Name',
                 'timezone' => 'Time zone',
                 'no_timezone' => '[Not selected]',
-                'timezone_search' => 'Search time zone by name or offset',
+                'timezone_search' => 'Search by time zone name',
             ],
             'saved' => 'Administrator profile updated',
             'errors' => [
