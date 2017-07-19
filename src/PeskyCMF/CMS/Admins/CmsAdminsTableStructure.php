@@ -51,6 +51,7 @@ class CmsAdminsTableStructure extends CmsTableStructure {
         $column = Column::create(Column::TYPE_EMAIL)
             ->convertsEmptyStringToNull()
             ->trimsValue()
+            ->lowercasesValue()
             ->uniqueValues();
         if (CmfConfig::getDefault()->user_login_column() === 'email') {
             $column->disallowsNullValues();
@@ -59,9 +60,10 @@ class CmsAdminsTableStructure extends CmsTableStructure {
     }
 
     private function login() {
-        $column = Column::create(Column::TYPE_EMAIL)
+        $column = Column::create(Column::TYPE_STRING)
             ->convertsEmptyStringToNull()
             ->trimsValue()
+            ->lowercasesValue()
             ->uniqueValues();
         if (CmfConfig::getDefault()->user_login_column() === 'login') {
             $column->disallowsNullValues();
