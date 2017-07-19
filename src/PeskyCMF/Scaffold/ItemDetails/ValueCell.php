@@ -10,6 +10,8 @@ class ValueCell extends RenderableValueViewer {
 
     const TYPE_JSON_TREE = 'json_collapsed';
     const TYPE_HTML = 'html';
+    /** @var array  */
+    protected $valueContainerAttributes = [];
 
     /**
      * Returns list of additional relations to read
@@ -98,6 +100,31 @@ class ValueCell extends RenderableValueViewer {
             }
         }
         return $this;
+    }
+
+    /**
+     * Add custom attributes to HTML element where record's value will be displayed
+     * @param array $attributes
+     * @return $this
+     */
+    public function addAttributesToValueContainer(array $attributes) {
+        $this->valueContainerAttributes = $attributes;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getValueContainerAttributes() {
+        return $this->valueContainerAttributes;
+    }
+
+    /**
+     * Hide value's label with its container
+     * @return $this
+     */
+    public function hideLabel() {
+        return $this->setLabel('');
     }
 
 }

@@ -231,7 +231,7 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
         deferred.resolve(data);
     }).fail(function (xhr) {
         deferred.reject();
-        Utils.handleAjaxError(xhr);
+        Utils.handleAjaxError.call(this, xhr);
     });
     return deferred;
 };
@@ -242,7 +242,7 @@ var ScaffoldActionsHelper = {
     },
     initActions: function (container, useLiveEvents) {
         var $container = $(container);
-        var clickHandler = function (event) {
+        var clickHandler = function () {
             ScaffoldActionsHelper.handleDataAction(this, $container);
             return false;
         };
@@ -251,36 +251,6 @@ var ScaffoldActionsHelper = {
         } else {
             $container.find('[data-action]').on('click tap', clickHandler);
         }
-        /*if ($container.hasClass('modal')) {
-            var closeModalHandler = function () {
-                $container.modal('hide');
-            };
-            var reloadDataGridHandler = function () {
-                ScaffoldDataGridHelper.reloadCurrentDataGrid();
-            };
-            if (useLiveEvents) {
-                $container
-                    .on('click', 'a[data-close-modal="1"], button[data-close-modal="1"]', function (event) {
-                        if (!$(this).attr('data-action')) {
-                            closeModalHandler(event);
-                        }
-                    })
-                    .on('click', 'a[data-reload-datagrid="1"], button[data-reload-datagrid="1"]', function (event) {
-                        if (!$(this).attr('data-action')) {
-                            reloadDataGridHandler(event);
-                        }
-                    });
-            } else {
-                $container
-                    .find('a[data-close-modal="1"], button[data-close-modal="1"]')
-                        .not('[data-action]')
-                        .on('click', closeModalHandler);
-                $container
-                    .find('a[data-reload-datagrid="1"], button[data-reload-datagrid="1"]')
-                        .not('[data-action]')
-                        .on('click', reloadDataGridHandler);
-            }
-        }*/
     },
     beforeDataActionHandling: function (el, container) {
         var callbackRet = null;
@@ -293,7 +263,7 @@ var ScaffoldActionsHelper = {
                 }
             }
         }
-        return callbackRet === false ? false : true;
+        return callbackRet !== false;
     },
     handleDataAction: function (el, container) {
         if (ScaffoldActionsHelper.beforeDataActionHandling(el, container) === false) {
@@ -1325,18 +1295,6 @@ var ScaffoldFormHelper = {
         delete CmfCache.selectOptionsTs[cacheKey];
     },
     initForm: function ($form, successCallback) {
-        $form.find('select[data-value!=""]').each(function () {
-            if (this.multiple) {
-                try {
-                    var json = JSON.parse(this.getAttribute('data-value'));
-                    $(this).val(json);
-                } catch (exc) {
-                    $(this).val(this.getAttribute('data-value'));
-                }
-            } else {
-                $(this).val(this.getAttribute('data-value'));
-            }
-        });
         FormHelper.initForm($form, $form, successCallback);
     },
     handleBulkEditForm: function ($link, resourceName, api) {

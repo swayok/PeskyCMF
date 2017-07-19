@@ -73,8 +73,9 @@
                         <div class="form-group">
                             <label for="timezone-input">{{ cmfTransCustom('.page.profile.input.timezone') }}</label>
                             <?php $isRequired = !$admin::getColumn('timezone')->allowsNullValues(); ?>
-                            <select class="form-control" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input"
-                            @if ($isRequired) required="required" @endif>
+                            <select class="form-control selectpicker" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input"
+                            @if ($isRequired) required="required" @endif
+                            data-live-search-placeholder="{{ cmfTransCustom('.page.profile.input.timezone_search') }}">
                                 <?php
                                     $usersTable = \PeskyCMF\Config\CmfConfig::getPrimary()->getTableByUnderscoredName(
                                         \PeskyCMF\Config\CmfConfig::getPrimary()->users_table_name()
@@ -114,14 +115,4 @@
 
 <script type="application/javascript">
     FormHelper.initForm('#admin-profile-form', '#admin-profile-form');
-    $('#admin-profile-form')
-        .find('#timezone-input, #language-input')
-        .each(function () {
-            $(this).val($(this).attr('data-value'));
-        })
-        .filter('#timezone-input')
-            .selectpicker({
-                liveSearch: true,
-                liveSearchPlaceholder: "{{ cmfTransCustom('.page.profile.input.timezone_search') }}"
-            });
 </script>

@@ -228,7 +228,13 @@ CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
 CmfRouteChange.scaffoldDataGridPage = function (request, next) {
     var bodyClass = ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource);
     var $body = $(document.body);
-    if (request.is_restore) {
+    if (
+        request.is_restore
+        || (
+            CmfRoutingHelpers.lastNonModalPageRequest
+            && CmfRoutingHelpers.lastNonModalPageRequest.canonicalPath === request.canonicalPath
+        )
+    ) {
         var restoreDataGridPage = function () {
             $body.attr('data-modal-opened', '0');
             Utils.updatePageTitleFromH1(CmfRoutingHelpers.$currentContent);
@@ -420,8 +426,19 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
                     }
                 });
             };
-            data._options = options;
             data._is_creation = !itemId;
+            if (data._is_creation) {
+                // add alowed query args to data so that parogrammer can pass default values for inputs through query args
+                for (var argName in request.query) {
+                    if (argName.match(/^_/)) {
+                        continue;
+                    }
+                    if (data.hasOwnProperty(argName)) {
+                        data[argName] = request.query[argName];
+                    }
+                }
+            }
+            data._options = options;
             if (data.__modal && Utils.getCurrentSectionName() === 'resource:table') {
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {

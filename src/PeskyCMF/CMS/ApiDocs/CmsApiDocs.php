@@ -5,6 +5,14 @@ namespace PeskyCMF\CMS\ApiDocs;
 use PeskyCMF\HttpCode;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * @method headers()
+ * @method urlParameters()
+ * @method urlQueryParameters()
+ * @method postParameters()
+ * @method onSuccess()
+ * @method validationErrors()
+ */
 abstract class CmsApiDocs {
 
     // override next properties and methods
@@ -120,6 +128,15 @@ HTML;
 
     public function __construct() {
         $this->uuid = Uuid::uuid4()->toString();
+        // load data from class methods
+        foreach (['headers', 'onSuccess', 'validationErrors', 'postParameters', 'urlQueryParameters', 'urlParameters'] as $field) {
+            if (method_exists($this, $field)) {
+                $this->$field = $this->$field();
+                if (!is_array($this->$field)) {
+                    throw new \UnexpectedValueException(get_class($this) . '->' . $field . '() method must return an array');
+                }
+            }
+        }
     }
 
     public function getUuid() {

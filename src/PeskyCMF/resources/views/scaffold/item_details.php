@@ -65,7 +65,12 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                                         $viewer = $itemDetailsConfig->getValueCell($keyForValue);
                                         $label = $viewer->getLabel();
                                         $tr = Swayok\Html\Tag::tr(['id' => 'item-details-' . $viewer->getName()]);
-                                        $contentTd = \Swayok\Html\Tag::td(['width' => '80%'])->setContent($viewer->render());
+                                        $contentTd = \Swayok\Html\Tag::td()
+                                            ->setContent($viewer->render())
+                                            ->setAttributes(
+                                                array_merge($viewer->getValueContainerAttributes(), ['width' => '80%'])
+                                            );
+
                                         if (trim($label) === '') {
                                             // do not display label column
                                             $contentTd
@@ -172,6 +177,10 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 <div class="modal-content item-details-modal-content">
                     <div class="modal-header pv10">
                         <div class="box-tools pull-right">
+                            <button type="button" data-action="reload" class="btn btn-box-tool fs13 va-t ptn mt5"
+                            data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.reload'); ?>">
+                                <i class="glyphicon glyphicon-refresh"></i>
+                            </button>
                             <a href="" class="btn btn-box-tool fs13 va-t ptn mt5" target="_blank" data-toggle="tooltip"
                             title="<?php echo cmfTransGeneral('.modal.open_in_new_tab'); ?>">
                                 <i class="glyphicon glyphicon-share"></i>
