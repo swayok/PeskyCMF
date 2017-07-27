@@ -21,6 +21,7 @@ class FilterConfig {
         Column::TYPE_BOOL => ColumnFilter::TYPE_BOOL,
         // it is rarely needed to use date-time filter, so it is better to use date filter instead
         Column::TYPE_TIMESTAMP => ColumnFilter::TYPE_DATE,
+        Column::TYPE_TIMESTAMP_WITH_TZ => ColumnFilter::TYPE_DATE,
         Column::TYPE_DATE => ColumnFilter::TYPE_DATE,
         Column::TYPE_TIME => ColumnFilter::TYPE_TIME,
     ];
@@ -338,7 +339,7 @@ class FilterConfig {
 
     /**
      * @param array $searchRule
-     * @return string
+     * @return array
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException

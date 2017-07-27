@@ -40,6 +40,7 @@ $(function () {
     page.route('/resource/:resource/:id/page/:page', CmfRouteChange.scaffoldItemCustomPage);
 
     $(document).on('click', '[data-nav]', function (event) {
+        event.preventDefault();
         var $btn = $(this);
         var navigateTo = $btn.attr('data-nav');
         var fallbackUrl = $btn.attr('data-default-url');
@@ -55,7 +56,6 @@ $(function () {
                 page.show(fallbackUrl ? fallbackUrl : navigateTo);
                 break;
         }
-        event.preventDefault();
         return false;
     });
 
@@ -146,7 +146,10 @@ function extendRouter() {
         page.apply(window, arguments);
     };
     page.reload = function () {
-        page.show(page.current, null, true, false);
+        var request = page.show(page.current, null, false, false);
+        request.is_reload = true;
+        page.dispatch(request);
+        return request;
     };
     page.restoreRequest = function (request) {
         if (request && request.path && request.title && request.pushState) {

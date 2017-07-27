@@ -211,8 +211,7 @@ class {$className} extends {$parentClassShort} {
             ->setOrderBy('{$table::getPkColumnName()}', 'asc')
             ->setColumns([
                 {$this->makeFieldsListForDataGrid($table)}
-            ])
-            ->closeFilterByDefault();
+            ]);
     }
     
     protected function createDataGridFilterConfig() {

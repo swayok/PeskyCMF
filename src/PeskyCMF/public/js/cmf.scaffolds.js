@@ -1090,11 +1090,12 @@ var DataGridSearchHelper = {
                 .closest('.dataTables_wrapper')
                 .find('.filter-toolbar');
             if (config.is_opened) {
-                $resetFilteringBtnInToolbar.show();
-                $toolbar
-                    .append($runFilteringBtn)
-                    .append($resetFilteringBtnInToolbar);
-            } else {
+                console.warn('Filter: is_opened option is not working currently and may never work in future');
+                // $resetFilteringBtnInToolbar.show();
+                // $toolbar
+                //     .append($runFilteringBtn)
+                //     .append($resetFilteringBtnInToolbar);
+            } /*else {*/
                 var $counterBadge = $('<span class="counter label label-success ml10"></span>');
                 var $filterToggleButton = $('<button class="btn btn-default" type="button"></button>')
                     .text(DataGridSearchHelper.locale.toggle)
@@ -1117,7 +1118,7 @@ var DataGridSearchHelper = {
                         return false;
                     }
                     var $filterPanel = $('#' + DataGridSearchHelper.id);
-                    var rulesCount = DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules'))
+                    var rulesCount = DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules'));
                     if (hideFilterPanel) {
                         $filterPanel.collapse('hide');
                         $filterToggleButton.removeClass('active');
@@ -1134,7 +1135,7 @@ var DataGridSearchHelper = {
                         }
                     }
                     return true;
-                }
+                };
                 $filterToggleButton
                     .on('click', function () {
                         toggleFilterPanel($filterToggleButton.hasClass('active'));
@@ -1144,7 +1145,7 @@ var DataGridSearchHelper = {
                     .on('click', function () {
                         if (toggleFilterPanel(true)) {
                             changeCountInBadge();
-                        };
+                        }
                     })
                     .hide();
                 var $filterCloseButton = $('<button type="button" class="btn btn-default btn-sm">')
@@ -1159,7 +1160,7 @@ var DataGridSearchHelper = {
                         .append($resetFilteringBtnInFilter.addClass('btn-sm'))
                 );
                 $toolbar.append($resetFilteringBtnInToolbar);
-            }
+            //}
         }
     },
     encodeRulesForDataTable: function (rules, asObject) {

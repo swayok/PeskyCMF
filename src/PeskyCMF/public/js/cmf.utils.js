@@ -269,7 +269,7 @@ Utils.switchBodyClass = function (className, section, itemPk) {
 
 Utils.normalizeBodyClass = function (className) {
     return className.replace(/[^a-zA-Z0-9 ]+/g, '-');
-}
+};
 
 Utils.getBodyClass = function () {
     return Utils.bodyClass;
@@ -400,10 +400,11 @@ Utils.setUser = function (userData) {
     return CmfCache.user;
 };
 
-Utils.highlightLinks = function (url) {
-    if (typeof url !== 'string') {
+Utils.highlightLinks = function (request) {
+    if (!request || !request.pathname || request.is_dialog) {
         return;
     }
+    var url = request.pathname;
     $('li.current-page, a.current-page, li.treeview').removeClass('current-page active');
     var $links = $('a[href="' + url + '"], a[href="' + document.location.origin + url + '"]');
     if ($links.length) {
@@ -412,9 +413,9 @@ Utils.highlightLinks = function (url) {
             .parent().filter('li.treeview').addClass('active');
         $links.not('li').find('> a').addClass('current-page active');
     }
-    // in case when there is no active link in sidemenus - try to shorten url by 1 section and search for matches again
+    // in case when there is no active link in sidemenus - try to shorten url to resource/page name
     if (!$('.sidebar-menu li.current-page.active').length) {
-        var parentUrl = url.replace(/\/[^\/]+$/, '');
+        var parentUrl = url.replace(/(\/page|resource\/[^\/]+)(\/.+)$/, '$1');
         if (parentUrl.match(/(page|resource)$/) === null) {
             $links = $('.sidebar-menu a[href="' + parentUrl + '"], a[href="' + document.location.origin + parentUrl + '"]');
             if ($links.length) {

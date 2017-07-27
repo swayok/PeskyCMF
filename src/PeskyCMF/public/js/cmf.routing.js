@@ -17,6 +17,7 @@ var CmfRoutingHelpers = {
         request.title = document.title;
         if (!isModal && !request.is_restore) {
             CmfRoutingHelpers.lastNonModalPageRequest = request;
+            Utils.highlightLinks(request);
         }
         next();
     },
@@ -185,7 +186,7 @@ CmfRouteChange.logout = function (request, next) {
 CmfRouteChange.showPage = function (request, next) {
     $.when(
             Utils.downloadHtml(request.pathname, false, false),
-            AdminUI.showUI(request.pathname)
+            AdminUI.showUI()
         )
         .done(function (html) {
             CmfRoutingHelpers
@@ -206,7 +207,7 @@ CmfRouteChange.showPage = function (request, next) {
 CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
     $.when(
             Utils.downloadHtml(request.pathname, false, false),
-            AdminUI.showUI(request.pathname)
+            AdminUI.showUI()
         )
         .done(function (html) {
             CmfRoutingHelpers
@@ -231,7 +232,8 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
     if (
         request.is_restore
         || (
-            CmfRoutingHelpers.lastNonModalPageRequest
+            !request.is_reload
+            && CmfRoutingHelpers.lastNonModalPageRequest
             && CmfRoutingHelpers.lastNonModalPageRequest.canonicalPath === request.canonicalPath
         )
     ) {
@@ -256,7 +258,7 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
     } else {
         $.when(
                 ScaffoldsManager.getDataGridTpl(request.params.resource),
-                AdminUI.showUI(request.pathname)
+                AdminUI.showUI()
             )
             .done(function (html) {
                 CmfRoutingHelpers
@@ -276,7 +278,7 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
     $.when(
             ScaffoldsManager.getItemDetailsTpl(request.params.resource),
             ScaffoldsManager.getResourceItemData(request.params.resource, request.params.id, true),
-            AdminUI.showUI(request.pathname)
+            AdminUI.showUI()
         )
         .done(function (dotJsTpl, data) {
             var initContent = function ($content) {
@@ -376,7 +378,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
             ScaffoldsManager.getItemFormTpl(resource),
             ScaffoldsManager.getResourceItemData(resource, itemId, false),
             ScaffoldFormHelper.loadOptions(resource, itemId),
-            AdminUI.showUI(request.pathname)
+            AdminUI.showUI()
         )
         .done(function (dotJsTpl, data, options) {
             var initContent = function ($content, isModal) {

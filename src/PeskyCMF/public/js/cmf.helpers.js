@@ -537,15 +537,13 @@ AdminUI.destroyUI = function () {
     return deferred;
 };
 
-AdminUI.showUI = function (currentUrl) {
+AdminUI.showUI = function () {
     var deferred = $.Deferred();
     var wrapper = Utils.getPageWrapper();
     if (AdminUI.visible) {
-        Utils.highlightLinks(currentUrl);
         deferred.resolve();
     } else if (AdminUI.loaded) {
         AdminUI.visible = true;
-        Utils.highlightLinks(currentUrl);
         AdminUI.updateUserInfo();
         wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
         deferred.resolve();
@@ -558,7 +556,6 @@ AdminUI.showUI = function (currentUrl) {
         ).done(function ($ui) {
             wrapper.addClass('with-ui').empty().append($ui);
             AdminUI.visible = true;
-            Utils.highlightLinks(currentUrl);
             AdminUI.updateUserInfo();
             wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
             deferred.resolve();
