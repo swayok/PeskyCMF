@@ -232,7 +232,9 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
     if (
         request.is_restore
         || (
-            !request.is_reload
+            !request.customData.is_click
+            && !request.customData.is_history
+            && !request.customData.is_reload
             && CmfRoutingHelpers.lastNonModalPageRequest
             && CmfRoutingHelpers.lastNonModalPageRequest.canonicalPath === request.canonicalPath
         )

@@ -129,28 +129,6 @@ function fixAdminLte() {
 }
 
 function extendRouter() {
-    /**
-     * Failsafe way to declare routes. Note: You can pass many fn
-     * @param {string} path
-     * @param {Function=} fn
-     */
-    page.route = function (path, fn) {
-        if (typeof path !== 'string') {
-            console.error('1st argument passed to page.route() must be a string. Use \'*\' if you want to apply callbacks to all routes');
-            return;
-        }
-        if (typeof fn !== 'function') {
-            console.error('2nd argument passed to page.route() for route ' + path + ' is not a funciton');
-            return;
-        }
-        page.apply(window, arguments);
-    };
-    page.reload = function () {
-        var request = page.show(page.current, null, false, false);
-        request.is_reload = true;
-        page.dispatch(request);
-        return request;
-    };
     page.restoreRequest = function (request) {
         if (request && request.path && request.title && request.pushState) {
             page.current = request.path;
