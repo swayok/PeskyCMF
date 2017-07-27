@@ -114,7 +114,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 //            base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
 //            base_path('vendor/ckeditor/ckeditor/skins') => public_path('packages/cmf-vendors/ckeditor/skins'),
             // libs
-            base_path('vendor/npm-asset/page/page.js') => public_path('packages/cmf-vendors/router/page.js'),
+            base_path('vendor/swayok/page.js') => public_path('packages/cmf-vendors/router/page.js'),
             base_path('vendor/datatables/datatables/media') => public_path('packages/cmf-vendors/datatables'),
             base_path('vendor/grimmlink/toastr/build') => public_path('packages/cmf-vendors/toastr'),
             base_path('vendor/moment/moment/moment.js') => public_path('packages/cmf-vendors/moment/moment.js'),
