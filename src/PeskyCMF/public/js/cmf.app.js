@@ -133,6 +133,10 @@ function extendRouter() {
         if (request && request.path && request.title && request.pushState) {
             page.current = request.path;
             request.is_restore = true;
+            delete request.customData.is_history;
+            delete request.customData.is_reload;
+            delete request.customData.is_click;
+            delete request.customData.is_state_save;
             page.dispatch(request);
             if (false !== request.handled) {
                 document.title = request.title;

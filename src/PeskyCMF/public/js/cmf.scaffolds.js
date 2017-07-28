@@ -411,11 +411,23 @@ var ScaffoldDataGridHelper = {
             if (settings.iDraw > 1) {
                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                 if (encodedState !== settings.initialState) {
-                    var newUrl = window.request.pathname + '?' + settings.sTableId + '=' + encodedState;
-                    page.show(newUrl, null, false);
+                    if (!window.request.customData.is_history) {
+                        var newUrl = window.request.pathname + '?' + settings.sTableId + '=' + encodedState;
+                        page.show(newUrl, null, true, true, {
+                            is_state_save: true,
+                            is_datagrid: true,
+                            api: $.fn.dataTable.Api(settings)
+                        });
+                    } else {
+                        window.request.customData.is_datagrid = true;
+                        window.request.customData.api = $.fn.dataTable.Api(settings);
+                    }
+                    settings.initialState = encodedState;
                 }
             } else {
                 settings.initialState = encodedState;
+                window.request.customData.is_datagrid = true;
+                window.request.customData.api = $.fn.dataTable.Api(settings);
             }
         },
         stateLoadCallback: function (settings) {
@@ -521,6 +533,17 @@ var ScaffoldDataGridHelper = {
             ScaffoldDataGridHelper.getCurrentDataGridApi().ajax.reload(null, false);
         }
     },
+    reloadStateOfCurrentDataGrid: function (callback) {
+        if (ScaffoldDataGridHelper.getCurrentDataGrid()) {
+            var api = ScaffoldDataGridHelper.getCurrentDataGridApi();
+            ScaffoldDataGridHelper.getCurrentDataGrid()._fnLoadState(api.settings()[0].oInit, function () {
+                api.ajax.reload(null, false);
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            });
+        }
+    },
     init: function (dataGrid, configs) {
         var $dataGrid = $(dataGrid);
         if ($dataGrid.length) {
@@ -546,6 +569,8 @@ var ScaffoldDataGridHelper = {
                     var $table = $(settings.nTable);
                     var $tableWrapper = $(settings.nTableWrapper);
                     $table.data('configs', mergedConfigs);
+                    $table.data('resourceName', mergedConfigs.resourceName);
+                    $table.dataTable().api().resourceName = mergedConfigs.resourceName;
                     ScaffoldDataGridHelper.initToolbar($tableWrapper, configs);
                     if (configs.queryBuilderConfig) {
                         DataGridSearchHelper.init(configs.queryBuilderConfig, configs.defaultSearchRules, $table);

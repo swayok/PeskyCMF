@@ -294,6 +294,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 }
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig + ['resource_name' => $tableNameForRoutes], JSON_UNESCAPED_UNICODE); ?>;
+            dataTablesConfig.resourceName = '<?php echo $tableNameForRoutes; ?>';
             var rowActionsTpl = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
             dataTablesConfig.columnDefs = [];
             var fixedColumns = 0;

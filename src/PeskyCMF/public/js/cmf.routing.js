@@ -227,23 +227,29 @@ CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
 };
 
 CmfRouteChange.scaffoldDataGridPage = function (request, next) {
-    var bodyClass = ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource);
-    var $body = $(document.body);
+    if (request.customData.is_state_save) {
+        Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
+        CmfRoutingHelpers.routeHandled(request, next);
+        return;
+    }
     if (
-        request.is_restore
-        || (
-            !request.customData.is_click
-            && !request.customData.is_history
-            && !request.customData.is_reload
-            && CmfRoutingHelpers.lastNonModalPageRequest
-            && CmfRoutingHelpers.lastNonModalPageRequest.canonicalPath === request.canonicalPath
-        )
+        !request.customData.is_click
+        && !request.customData.is_reload
+        && CmfRoutingHelpers.lastNonModalPageRequest
+        && CmfRoutingHelpers.lastNonModalPageRequest.pathname === request.pathname
     ) {
         var restoreDataGridPage = function () {
-            $body.attr('data-modal-opened', '0');
+            $(document.body).attr('data-modal-opened', '0');
             Utils.updatePageTitleFromH1(CmfRoutingHelpers.$currentContent);
             CmfRoutingHelpers.hideContentContainerPreloader();
-            CmfRoutingHelpers.routeHandled(request, next);
+            if (CmfRoutingHelpers.lastNonModalPageRequest.querystring !== request.querystring) {
+                // different state of data grid - needs data grid state replace and data reload
+                ScaffoldDataGridHelper.reloadStateOfCurrentDataGrid(function () {
+                    CmfRoutingHelpers.routeHandled(request, next);
+                });
+            } else {
+                CmfRoutingHelpers.routeHandled(request, next);
+            }
         };
         if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
             // modal was not closed (happens when "back" browser button pressed)
@@ -266,7 +272,10 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
                 CmfRoutingHelpers
                     .setCurrentContent(html, Utils.getContentContainer())
                     .done(function () {
-                        Utils.switchBodyClass(bodyClass, 'resource:table');
+                        Utils.switchBodyClass(
+                            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
+                            'resource:table'
+                        );
                     });
                 CmfRoutingHelpers.routeHandled(request, next);
             })
