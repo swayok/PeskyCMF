@@ -12,6 +12,7 @@ use PeskyCMF\Scaffold\DataGrid\FilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Traits\DataValidationHelper;
+use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
 
 abstract class ScaffoldConfig {
@@ -48,6 +49,11 @@ abstract class ScaffoldConfig {
     protected $viewsBaseTranslationKey = null;
 
     /**
+     * @var null|ScaffoldLoggerInterface
+     */
+    protected $logger;
+
+    /**
      * ScaffoldConfig constructor.
      * @param TableInterface $table
      * @param string $tableNameForRoutes - table name to be used to build routes to resources of the $table
@@ -58,6 +64,7 @@ abstract class ScaffoldConfig {
         if ($this->viewsBaseTranslationKey === null) {
             $this->viewsBaseTranslationKey = $tableNameForRoutes;
         }
+        $this->setLogger(CmfConfig::getInstance()->scaffold_requests_logger());
     }
 
     /**
@@ -347,6 +354,62 @@ abstract class ScaffoldConfig {
         return cmfJsonResponse(HttpCode::FORBIDDEN)
             ->setMessage($message)
             ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
+    }
+
+    /**
+     * @param ScaffoldLoggerInterface $logger
+     * @return $this
+     */
+    public function setLogger(ScaffoldLoggerInterface $logger) {
+        $this->logger = $logger;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasLogger() {
+        return $this->logger !== null;
+    }
+
+    /**
+     * @return null|ScaffoldLoggerInterface
+     */
+    public function getLogger() {
+        return $this->logger;
+    }
+
+    /**
+     * @param RecordInterface $record
+     * @return $this
+     */
+    public function logDbRecordBeforeChange(RecordInterface $record) {
+        if ($this->hasLogger()) {
+            $this->getLogger()->logDbRecordBeforeChange($record);
+        }
+        return $this;
+    }
+
+    /**
+     * @param RecordInterface $record
+     * @return $this
+     */
+    public function logDbRecordAfterChange(RecordInterface $record) {
+        if ($this->hasLogger()) {
+            $this->getLogger()->logDbRecordAfterChange($record);
+        }
+        return $this;
+    }
+
+    /**
+     * @param RecordInterface $record
+     * @return $this
+     */
+    public function logDbRecordLoad(RecordInterface $record) {
+        if ($this->hasLogger()) {
+            $this->getLogger()->logDbRecordUsage($record);
+        }
+        return $this;
     }
 
     abstract public function getRecordsForDataGrid();

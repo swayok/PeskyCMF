@@ -133,6 +133,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$object->fromDb($conditions, [], array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
+        $this->logDbRecordLoad($object);
         $data = $object->toArray([], $relationsToRead, true);
         if (
             (
@@ -196,8 +197,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             try {
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
                 $object = $table->newRecord()->fromData($dataToSave, false);
+                $this->logDbRecordBeforeChange($object);
                 $object->save(['*'], true);
-                return $this->afterDataSaved($data, $object, true, $table, $formConfig);
+                $ret = $this->afterDataSaved($data, $object, true, $table, $formConfig);
+                $this->logDbRecordAfterChange($object);
+                return $ret;
             } catch (InvalidDataException $exc) {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
@@ -216,6 +220,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
+        throw new \BadMethodCallException('There is no data to save');
     }
 
     public function updateRecord() {
@@ -267,9 +272,12 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
+                $this->logDbRecordBeforeChange($object);
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
                 $object->begin()->updateValues($dataToSave)->commit(['*'], true);
-                return $this->afterDataSaved($data, $object, false, $table, $formConfig);
+                $ret = $this->afterDataSaved($data, $object, false, $table, $formConfig);
+                $this->logDbRecordAfterChange($object);
+                return $ret;
             } catch (InvalidDataException $exc) {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
@@ -288,6 +296,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
+        throw new \BadMethodCallException('There is no data to save');
     }
 
     /**

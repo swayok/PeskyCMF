@@ -9,6 +9,7 @@ use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldConfig;
+use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
@@ -957,8 +958,28 @@ abstract class CmfConfig extends ConfigsContainer {
      * Provides sections with list of objects of classes that extend CmsApiDocs class to be displayed in api docs section
      * @return array - key - section name, value - array that contains objects of class CmsApiDocs
      */
-    public static function getApiDocsSections() {
+    static public function getApiDocsSections() {
         return [];
+    }
+
+    static protected $httpRequestsLogger;
+
+    /**
+     * @return null|ScaffoldLoggerInterface;
+     */
+    static public function getHttpRequestsLogger() {
+        if (!static::$httpRequestsLogger && app()->bound(ScaffoldLoggerInterface::class)) {
+            static::setHttpRequestsLogger(app(ScaffoldLoggerInterface::class));
+        }
+        return static::$httpRequestsLogger;
+    }
+
+    /**
+     * Logger will be used to logs requested records pk and changes
+     * @param ScaffoldLoggerInterface $httpRequestsLogger
+     */
+    static public function setHttpRequestsLogger(ScaffoldLoggerInterface $httpRequestsLogger) {
+        static::$httpRequestsLogger = $httpRequestsLogger;
     }
 
 }
