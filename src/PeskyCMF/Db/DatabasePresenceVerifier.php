@@ -4,9 +4,14 @@ namespace PeskyCMF\Db;
 
 use Illuminate\Validation\PresenceVerifierInterface;
 use PeskyCMF\Config\CmfConfig;
+use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\ORM\FakeTable;
 use PeskyORM\ORM\TableInterface;
+use Symfony\Component\Debug\Exception\ClassNotFoundException;
 
 class DatabasePresenceVerifier implements PresenceVerifierInterface {
+
+    protected $tables = [];
 
     /**
      * Count the number of objects in a collection having the given value.
@@ -32,7 +37,7 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
         foreach ($extra as $key => $extraValue) {
             $this->addWhere($conditions, $key, $extraValue);
         }
-        return $this->getModel($tableName)->count($conditions);
+        return $this->getTable($tableName)->count($conditions);
     }
 
     /**
@@ -56,19 +61,31 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
             $this->addWhere($conditions, $key, $extraValue);
         }
 
-        return $this->getModel($tableName)->count($conditions);
+        return $this->getTable($tableName)->count($conditions);
     }
 
     /**
      * @param $tableName
      * @return TableInterface|CmfDbTable
+     * @throws \ReflectionException
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    private function getModel($tableName) {
-        return CmfConfig::getPrimary()->getTableByUnderscoredName($tableName);
+    private function getTable($tableName) {
+        if (!array_key_exists($tableName, $this->tables)) {
+            try {
+                $this->tables[$tableName] = CmfConfig::getPrimary()->getTableByUnderscoredName($tableName);
+            } catch (ClassNotFoundException $exc) {
+                $this->tables[$tableName] = FakeTable::makeNewFakeTable(
+                    $tableName,
+                    null,
+                    DbConnectionsManager::getConnection('default')
+                );
+            }
+        }
+        return $this->tables[$tableName];
     }
 
     /**

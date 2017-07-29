@@ -64,7 +64,7 @@ abstract class ScaffoldConfig {
         if ($this->viewsBaseTranslationKey === null) {
             $this->viewsBaseTranslationKey = $tableNameForRoutes;
         }
-        $this->setLogger(CmfConfig::getInstance()->scaffold_requests_logger());
+        $this->setLogger(CmfConfig::getInstance()->getHttpRequestsLogger());
     }
 
     /**

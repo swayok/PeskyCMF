@@ -14,6 +14,7 @@ use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\StringUtils;
+use Symfony\Component\Debug\Exception\ClassNotFoundException;
 
 abstract class CmfConfig extends ConfigsContainer {
 
@@ -157,6 +158,10 @@ abstract class CmfConfig extends ConfigsContainer {
      * For examples - look for /config/auth.php
      * This configs will be recursively merged over configs from /config/auth.php
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     static public function auth_configs() {
         return [
@@ -834,6 +839,7 @@ abstract class CmfConfig extends ConfigsContainer {
      *      and added here to be used in child configs when you need to use scaffolds with fake table names.
      *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
      * @return ScaffoldConfig
+     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
@@ -853,6 +859,9 @@ abstract class CmfConfig extends ConfigsContainer {
                 get_class($table)
             );
         }
+        if (!class_exists($className)) {
+            throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
+        }
         return new $className($table, $tableNameInRoute);
     }
 
@@ -862,6 +871,8 @@ abstract class CmfConfig extends ConfigsContainer {
      * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
      * @param string $tableName
      * @return TableInterface
+     * @throws \ReflectionException
+     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
@@ -875,15 +886,19 @@ abstract class CmfConfig extends ConfigsContainer {
         } else {
             /** @var ClassBuilder $builderClass */
             $builderClass = static::getDbClassesBuilderClass();
-            /** @var Table $class */
-            $class = static::getDbClassesNamespaceForTable($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
-            return $class::getInstance();
+            /** @var Table $className */
+            $className = static::getDbClassesNamespaceForTable($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
+            if (!class_exists($className)) {
+                throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
+            }
+            return $className::getInstance();
         }
     }
 
     /**
      * @param string $tableName
      * @return string
+     * @throws \ReflectionException
      */
     static public function getDbClassesNamespaceForTable($tableName) {
         static $namespace = null;
@@ -897,6 +912,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * Shortcut to static::getScaffoldConfig()
      * @param string $tableName
      * @return ScaffoldConfig
+     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException

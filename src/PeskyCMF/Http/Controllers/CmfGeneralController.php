@@ -108,7 +108,7 @@ class CmfGeneralController extends Controller {
             $columnsToUpdate[] = 'name';
         }
         if ($admin::hasColumn('timezone')) {
-            $validationRules['timezone'] = 'nullable|exists2:pg_timezone_names,name';
+            $validationRules['timezone'] = 'nullable|exists:pg_timezone_names,name';
             $columnsToUpdate[] = 'timezone';
         }
         $usersTable = CmfConfig::getPrimary()->users_table_name();
