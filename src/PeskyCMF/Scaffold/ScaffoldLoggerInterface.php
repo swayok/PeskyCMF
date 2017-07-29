@@ -8,9 +8,10 @@ interface ScaffoldLoggerInterface {
 
     /**
      * @param RecordInterface $record
+     * @param null|string $tableName - for cases when table name differs from record's table name (so-called table name for routes)
      * @return $this
      */
-    public function logDbRecordBeforeChange(RecordInterface $record);
+    public function logDbRecordBeforeChange(RecordInterface $record, $tableName = null);
 
     /**
      * @param RecordInterface $record
@@ -20,7 +21,8 @@ interface ScaffoldLoggerInterface {
 
     /**
      * @param RecordInterface $record
+     * @param null|string $tableName - for cases when table name differs from record's table name (so-called table name for routes)
      * @return $this
      */
-    public function logDbRecordUsage(RecordInterface $record);
+    public function logDbRecordUsage(RecordInterface $record, $tableName = null);
 }

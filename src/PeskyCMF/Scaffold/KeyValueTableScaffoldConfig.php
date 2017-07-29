@@ -10,6 +10,8 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\Exception\InvalidDataException;
+use PeskyORM\ORM\FakeRecord;
+use PeskyORM\ORM\TempRecord;
 
 /**
  * @method KeyValueTableInterface getTable()
@@ -130,6 +132,10 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
+                if ($this->hasLogger()) {
+                    $tempRecord = TempRecord::newTempRecord($table::getValuesForForeignKey($fkValue, true), true);
+                    $this->logDbRecordBeforeChange($tempRecord, $this->getTableNameForRoutes());
+                }
                 KeyValueDataSaver::saveKeyValuePairs(
                     $table,
                     $data,
@@ -151,6 +157,10 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
                             'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
                         );
                     }
+                }
+                if ($this->hasLogger()) {
+                    $tempRecord = TempRecord::newTempRecord($table::getValuesForForeignKey($fkValue, true), true);
+                    $this->logDbRecordAfterChange($tempRecord);
                 }
                 $table::commitTransaction();
             } catch (InvalidDataException $exc) {

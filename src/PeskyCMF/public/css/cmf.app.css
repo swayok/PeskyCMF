@@ -1232,10 +1232,9 @@ aside.main-sidebar .sidebar-menu li .badge {
   word-wrap: break-word;
 }
 .item-details-table td .multiline-text {
-  word-break: normal;
-  word-wrap: normal;
   white-space: pre-wrap;
   overflow-y: auto;
+  overflow-x: auto;
 }
 .item-details-table td:first-child,
 .item-details-table th:first-child {

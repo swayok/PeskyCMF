@@ -383,9 +383,9 @@ abstract class ScaffoldConfig {
      * @param RecordInterface $record
      * @return $this
      */
-    public function logDbRecordBeforeChange(RecordInterface $record) {
+    public function logDbRecordBeforeChange(RecordInterface $record, $tableName = null) {
         if ($this->hasLogger()) {
-            $this->getLogger()->logDbRecordBeforeChange($record);
+            $this->getLogger()->logDbRecordBeforeChange($record, $tableName);
         }
         return $this;
     }
@@ -405,9 +405,9 @@ abstract class ScaffoldConfig {
      * @param RecordInterface $record
      * @return $this
      */
-    public function logDbRecordLoad(RecordInterface $record) {
+    public function logDbRecordLoad(RecordInterface $record, $tableName = null) {
         if ($this->hasLogger()) {
-            $this->getLogger()->logDbRecordUsage($record);
+            $this->getLogger()->logDbRecordUsage($record, $tableName);
         }
         return $this;
     }

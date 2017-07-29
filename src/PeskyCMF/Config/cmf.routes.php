@@ -10,11 +10,13 @@ Route::group(
     ],
     function () {
         Route::get('login.html', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getLoginTpl'
+            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getLoginTpl',
+            'log' => 'cmf.login'
         ]);
 
         Route::post('login', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@doLogin'
+            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@doLogin',
+            'log' => 'cmf.login'
         ]);
     }
 );
@@ -26,7 +28,8 @@ Route::get('login', [
 
 Route::get('logout', [
     'as' => 'cmf_logout',
-    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@logout'
+    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@logout',
+    'log' => 'cmf.logout'
 ]);
 
 Route::group(
@@ -37,19 +40,23 @@ Route::group(
     function () {
 
         Route::get('forgot_password.html', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getForgotPasswordTpl'
+            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getForgotPasswordTpl',
+            'log' => 'cmf.forgot_password'
         ]);
 
         Route::post('forgot_password', [
             'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@sendPasswordReplacingInstructions',
+            'log' => 'cmf.forgot_password'
         ]);
 
         Route::get('replace_password/{access_key}.html', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getReplacePasswordTpl'
+            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getReplacePasswordTpl',
+            'log' => 'cmf.replace_password'
         ]);
 
         Route::put('replace_password/{access_key}', [
             'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@replacePassword',
+            'log' => 'cmf.replace_password'
         ]);
     }
 );
@@ -99,12 +106,14 @@ Route::group(
                 ]);
 
                 Route::get('page/profile.html', [
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getAdminProfile'
+                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getAdminProfile',
+                    'log' => 'cmf.profile'
                 ]);
 
                 Route::put('page/profile', [
                     'as' => 'cmf_profile',
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@updateAdminProfile'
+                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@updateAdminProfile',
+                    'log' => 'cmf.profile'
                 ]);
 
                 // Custom Pages
