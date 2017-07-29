@@ -3,6 +3,7 @@
 namespace PeskyCMF\Http\Controllers;
 
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
@@ -24,7 +25,8 @@ use Swayok\Utils\ValidateValue;
 
 class CmfGeneralController extends Controller {
 
-    use DataValidationHelper;
+    use DataValidationHelper,
+        AuthorizesRequests;
 
     public function __construct() {
 
@@ -40,7 +42,14 @@ class CmfGeneralController extends Controller {
 
     public function getPage(Request $request, $name) {
         if ($request->ajax()) {
-            return view(CmfConfig::getPrimary()->custom_views_prefix() . 'page/' . $name)->render();
+            $this->authorize('cmf_page', [$name]);
+            if (
+                !\View::exists(CmfConfig::getPrimary()->custom_views_prefix() . 'page.' . $name)
+                && \View::exists('cmf::page.' . $name)
+            ) {
+                return view('cmf::page.' . $name)->render();
+            }
+            return view(CmfConfig::getPrimary()->custom_views_prefix() . 'page.' . $name)->render();
         } else {
             return view(CmfConfig::getPrimary()->layout_view())->render();
         }
@@ -61,6 +70,7 @@ class CmfGeneralController extends Controller {
     }
 
     public function updateAdminProfile(Request $request) {
+        $this->authorize('profile.update');
         $admin = CmfConfig::getPrimary()->getUser();
         $updates = $this->validateAndGetAdminProfileUpdates($request, $admin);
         if (!is_array($updates)) {

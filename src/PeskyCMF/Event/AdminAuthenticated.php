@@ -4,7 +4,7 @@ namespace PeskyCMF\Event;
 
 use PeskyORM\ORM\RecordInterface;
 
-class AdminAuthorised {
+class AdminAuthenticated {
 
     /** @var RecordInterface */
     public $user;

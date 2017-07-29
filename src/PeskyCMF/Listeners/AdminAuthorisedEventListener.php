@@ -3,7 +3,7 @@
 namespace PeskyCMF\Listeners;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Event\AdminAuthorised;
+use PeskyCMF\Event\AdminAuthenticated;
 use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyORM\Core\DbAdapterInterface;
 use PeskyORM\Core\DbConnectionsManager;
@@ -11,7 +11,7 @@ use PeskyORM\ORM\Record;
 
 class AdminAuthorisedEventListener {
 
-    public function handle(AdminAuthorised $event) {
+    public function handle(AdminAuthenticated $event) {
         /** @var Record $user */
         $user = $event->user;
         if ($user::hasColumn('language') && $user->hasValue('language')) {

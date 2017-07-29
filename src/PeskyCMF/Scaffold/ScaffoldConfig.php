@@ -3,6 +3,7 @@
 
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
@@ -17,7 +18,8 @@ use PeskyORM\ORM\TableInterface;
 
 abstract class ScaffoldConfig {
 
-    use DataValidationHelper;
+    use DataValidationHelper,
+        AuthorizesRequests;
 
     /** @var TableInterface */
     protected $table;

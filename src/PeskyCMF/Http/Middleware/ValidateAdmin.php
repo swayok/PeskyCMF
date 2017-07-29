@@ -2,11 +2,13 @@
 namespace PeskyCMF\Http\Middleware;
 
 use Closure;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbRecord;
-use PeskyCMF\Event\AdminAuthorised;
+use PeskyCMF\Event\AdminAuthenticated;
+use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
 
 class ValidateAdmin {
@@ -23,10 +25,7 @@ class ValidateAdmin {
         /** @var CmfConfig $configs */
         $configs = CmfConfig::getPrimary();
         //if this is a simple false value, send the user to the login redirect
-        $response = false;
-        if (\Auth::guard()->check()) {
-            $response = $configs::isAuthorised($request);
-        }
+        $response = \Auth::guard()->check();
         if (!$response) {
             $loginUrl = route($configs::login_route());
             $currentsUrl = $request->url();
@@ -50,9 +49,19 @@ class ValidateAdmin {
         }
         /** @var CmfDbRecord $user */
         $user = \Auth::guard()->user();
-        \Event::fire(new AdminAuthorised($user));
+        \Event::fire(new AdminAuthenticated($user));
 
-        return $next($request);
+        $response = $next($request);
+        if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
+            $fallbackUrl = $configs::login_route();
+            $message = cmfTransGeneral('.error.access_denied');
+            $response = $request->ajax()
+                ? CmfJsonResponse::create([], HttpCode::FORBIDDEN)
+                    ->setMessage($message)
+                    ->goBack($fallbackUrl)
+                : cmfRedirectResponseWithMessage($fallbackUrl, $message);
+        }
+        return $response;
     }
 
 }

@@ -2,12 +2,15 @@
 
 namespace PeskyCMF\Http\Controllers;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\ORM\TableInterface;
 
 class CmfScaffoldApiController extends Controller {
+
+    use AuthorizesRequests;
 
     protected $tableNameForRoutes;
     protected $table;
@@ -72,47 +75,64 @@ class CmfScaffoldApiController extends Controller {
 
     }
 
-    public function getTemplates() {
+    public function getTemplates($tableName) {
+        $this->authorize('resource.view', [$tableName]);
         return $this->getScaffoldConfig()->renderTemplates();
     }
 
-    public function getItemsList() {
+    public function getItemsList($tableName) {
+        $this->authorize('resource.view', [$tableName]);
         return $this->getScaffoldConfig()->getRecordsForDataGrid();
     }
 
     public function getItem($tableName, $id = null) {
+        $this->authorize('resource.view', [$tableName]);
+        $this->authorize('resource.details', [$tableName, $id]);
         return $this->getScaffoldConfig()->getRecordValues($id);
     }
 
-    public function getItemDefaults() {
+    public function getItemDefaults($tableName) {
+        $this->authorize('resource.view', [$tableName]);
         return $this->getScaffoldConfig()->getDefaultValuesForFormInputs();
     }
 
-    public function getOptions() {
+    public function getOptions($tableName) {
+        $this->authorize('resource.view', [$tableName]);
         return $this->getScaffoldConfig()->getHtmlOptionsForFormInputs();
     }
 
-    public function addItem() {
+    public function addItem($tableName) {
+        $this->authorize('resource.view', [$tableName]);
+        $this->authorize('resource.create', [$tableName]);
         return $this->getScaffoldConfig()->addRecord();
     }
 
-    public function updateItem() {
+    public function updateItem($tableName, $id = null) {
+        $this->authorize('resource.view', [$tableName]);
+        $this->authorize('resource.details', [$tableName, $id]);
+        $this->authorize('resource.update', [$tableName, $id]);
         return $this->getScaffoldConfig()->updateRecord();
     }
 
-    public function updateBulk() {
+    public function updateBulk($tableName) {
+        $this->authorize('resource.view', [$tableName]);
         return $this->getScaffoldConfig()->updateBulkOfRecords();
     }
 
     public function deleteItem($tableName, $id) {
+        $this->authorize('resource.view', [$tableName]);
+        $this->authorize('resource.details', [$tableName, $id]);
+        $this->authorize('resource.delete', [$tableName, $id]);
         return $this->getScaffoldConfig()->deleteRecord($id);
     }
 
-    public function deleteBulk() {
+    public function deleteBulk($tableName) {
+        $this->authorize('resource.view', [$tableName]);
         return $this->getScaffoldConfig()->deleteBulkOfRecords();
     }
 
     public function getCustomData($tableName, $dataId) {
+        $this->authorize('resource.view', [$tableName]);
         return $this->getScaffoldConfig()->getCustomData($dataId);
     }
 

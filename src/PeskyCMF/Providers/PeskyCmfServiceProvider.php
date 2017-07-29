@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Providers;
 
-use LaravelSiteLoader\DummySiteLoader;
 use LaravelSiteLoader\Providers\AppSitesServiceProvider;
 use PeskyCMF\CMS\CmsFrontendUtils;
 use PeskyCMF\Config\CmfConfig;
@@ -11,7 +10,6 @@ use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 use PeskyCMF\Console\Commands\CmsInstall;
-use PeskyCMF\Http\PeskyCmfSiteLoader;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 

@@ -73,7 +73,7 @@ Route::get('replace_password/{access_key}', [
 
 Route::group(
     [
-        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authorization()
+        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authentication()
     ],
     function () {
 
@@ -117,16 +117,7 @@ Route::group(
                 ]);
 
                 // Custom Pages
-                Route::get('page/about.html', function () {
-                    return view('cmf::page.about');
-                });
-
-                Route::get('/page/api_docs.html', function () {
-                    return view('cmf::page.api_docs');
-                });
-
-                Route::get('page/{page}.html', CmfConfig::getPrimary()->cmf_general_controller_class() . '@getPage')
-                    ->where('page', '^.*(?!\.html)$');
+                Route::get('page/{page}.html', CmfConfig::getPrimary()->cmf_general_controller_class() . '@getPage');
 
             }
         );
@@ -156,7 +147,7 @@ Route::pattern('table_name', '[a-z]+([_a-z0-9]*[a-z0-9])?');
 Route::group(
     [
         'prefix' => 'resource',
-        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authorization()
+        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authentication()
     ],
     function () {
         Route::get('{table_name}', [
@@ -205,7 +196,7 @@ Route::group(
         'prefix' => 'api',
         'middleware' => array_unique(array_merge(
             [AjaxOnly::class],
-            CmfConfig::getPrimary()->middleware_for_routes_that_require_authorization(),
+            CmfConfig::getPrimary()->middleware_for_routes_that_require_authentication(),
             CmfConfig::getPrimary()->middleware_for_cmf_scaffold_api_controller()
         ))
     ],
@@ -238,17 +229,8 @@ Route::group(
             ]
         ]);
 
-        Route::post('{table_name}', [
-            'as' => 'cmf_api_create_item',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@addItem',
-            'fallback' => [
-                'route' => 'cmf_item_add_form',
-                'params' => true
-            ]
-        ]);
-
         Route::get('{table_name}/service/defaults', [
-            'as' => 'cmf_api_get_item',
+            'as' => 'cmf_api_get_defaults',
             'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@getItemDefaults',
             'fallback' => [
                 'route' => 'cmf_item_add_form',
@@ -306,6 +288,15 @@ Route::group(
             'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@deleteItem',
             'fallback' => [
                 'route' => 'cmf_items_table',
+                'params' => true
+            ]
+        ]);
+
+        Route::post('{table_name}', [
+            'as' => 'cmf_api_create_item',
+            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@addItem',
+            'fallback' => [
+                'route' => 'cmf_item_add_form',
                 'params' => true
             ]
         ]);

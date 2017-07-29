@@ -355,10 +355,10 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Middleware to be added to routes that require user authorization
+     * Middleware to be added to routes that require user authentication
      * @return array
      */
-    static public function middleware_for_routes_that_require_authorization() {
+    static public function middleware_for_routes_that_require_authentication() {
         return [
             ValidateAdmin::class,
         ];
@@ -615,7 +615,6 @@ abstract class CmfConfig extends ConfigsContainer {
     /**
      * Change locale inside CMF/CMS area
      * @param string $locale
-     * @param bool $useDefaultLocaleWhenProvidedOneIs - true: when $locale is not supported
      */
     static public function setLocale($locale) {
         static::_protect();
@@ -643,17 +642,6 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function session_message_key() {
         return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_message';
-    }
-
-    /**
-     * The permission option is the highest-level authentication check that lets you define a closure that should return true if the current user
-     * is allowed to view the admin section. Any "falsey" response will send the user back to the 'login_path' defined below.
-     *
-     * @param Request $request
-     * @return bool
-     */
-    static public function isAuthorised(Request $request) {
-        return PeskyCmfAccessManager::isAuthorised($request);
     }
 
     /**

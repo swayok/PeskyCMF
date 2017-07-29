@@ -394,6 +394,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
+        $this->authorize('resource.delete_bulk', [$this->getTableNameForRoutes(), $conditions]);
         $table::beginTransaction();
         $updatedCount = $table->update($data, $conditions);
         if ($formConfig->hasAfterBulkEditDataAfterSaveCallback()) {
@@ -455,6 +456,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
+        $this->authorize('resource.delete_bulk', [$this->getTableNameForRoutes(), $conditions]);
         $deletedCount = $this->getTable()->delete($conditions);
         $message = $deletedCount
             ? cmfTransGeneral('.action.delete_bulk.success', ['count' => $deletedCount])
