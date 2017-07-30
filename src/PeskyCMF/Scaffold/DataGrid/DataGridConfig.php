@@ -484,7 +484,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
         * Tag::a()
             ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
             ->setClass('row-action text-success')
-            ->setTitle(trans('path.to.translation'))
+            ->setTitle(cmfTransCustom('.path.to.translation'))
             ->setDataAttr('toggle', 'tooltip')
             ->setDataAttr('container', '#section-content .content') //< tooltip container
             ->setDataAttr('block-datagrid', '1')
@@ -492,19 +492,22 @@ class DataGridConfig extends ScaffoldSectionConfig {
             ->setDataAttr('method', 'put')
             ->setDataAttr('url', route('route', [], false))
             ->setDataAttr('data', 'id=:id:')
+            //->setDataAttr('url', routeTpl('route', [], ['id'], false))
             ->setDataAttr('on-success', 'callbackFuncitonName')
             //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
             //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
             ->setHref('javascript: void(0)')
+            ->build()
      * - redirect
         * Tag::a()
             ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
             ->setClass('row-action text-primary')
-            ->setTitle(trans('path.to.translation'))
+            ->setTitle(cmfTransCustom('.path.to.translation'))
             ->setDataAttr('toggle', 'tooltip')
             ->setDataAttr('container', '#section-content .content') //< tooltip container
             ->setHref(route('route', [], false))
             ->setTarget('_blank')
+            ->build()
      *
      * @return $this
      * @throws \Swayok\Html\HtmlTagException
