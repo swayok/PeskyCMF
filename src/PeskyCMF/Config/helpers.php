@@ -32,6 +32,9 @@ if (!function_exists('routeToCmfPage')) {
      * @return string
      */
     function routeToCmfPage($pageId, array $queryArgs = [], $absolute = false) {
+        if (Gate::denies('cmf_page', [$pageId])) {
+            return null;
+        }
         return route('cmf_page', array_merge(['page' => $pageId], $queryArgs), $absolute);
     }
 }
@@ -45,6 +48,9 @@ if (!function_exists('routeToCmfItemsTable')) {
      * @return string
      */
     function routeToCmfItemsTable($tableName, array $filters = [], $absolute = false) {
+        if (Gate::denies('resource.view', [$tableName])) {
+            return null;
+        }
         $params = ['table_name' => $tableName];
         if (!empty($filters)) {
             $params['filter'] = json_encode($filters, JSON_UNESCAPED_UNICODE);
@@ -61,6 +67,9 @@ if (!function_exists('routeToCmfTableCustomData')) {
      * @return string
      */
     function routeToCmfTableCustomData($tableName, $dataId, $absolute = false) {
+        if (Gate::denies('resource.view', [$tableName])) {
+            return null;
+        }
         return route('cmf_api_get_custom_data', array_merge(['table_name' => $tableName, 'data_id' => $dataId]), $absolute);
     }
 }
@@ -72,6 +81,9 @@ if (!function_exists('routeToCmfItemAddForm')) {
      * @return string
      */
     function routeToCmfItemAddForm($tableName, $absolute = false) {
+        if (Gate::denies('resource.create', [$tableName])) {
+            return null;
+        }
         return route('cmf_item_add_form', ['table_name' => $tableName], $absolute);
     }
 }
@@ -84,6 +96,9 @@ if (!function_exists('routeToCmfItemEditForm')) {
      * @return string
      */
     function routeToCmfItemEditForm($tableName, $itemId, $absolute = false) {
+        if (Gate::denies('resource.update', [$tableName, $itemId])) {
+            return null;
+        }
         return route('cmf_item_edit_form', ['table_name' => $tableName, 'id' => $itemId], $absolute);
     }
 }
@@ -96,6 +111,9 @@ if (!function_exists('routeToCmfItemDetails')) {
      * @return string
      */
     function routeToCmfItemDetails($tableName, $itemId, $absolute = false) {
+        if (Gate::denies('resource.details', [$tableName, $itemId])) {
+            return null;
+        }
         return route('cmf_item_details', ['table_name' => $tableName, 'id' => $itemId], $absolute);
     }
 }

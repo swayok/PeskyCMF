@@ -16,6 +16,9 @@
                 </a>
                 <ul class="treeview-menu">
                     @foreach ($info['submenu'] as $subItem)
+                        @if (empty($subItem['url']))
+                            @continue
+                        @endif
                     <li>
                         <a href="{{ $subItem['url'] }}"
                         @if (!empty($subItem['id'])) id="{{ $subItem['id'] }}" @endif
@@ -27,9 +30,9 @@
                     @endforeach
                 </ul>
             </li>
-        @else
+        @elseif(!empty($info['url']))
             <li>
-                <a href="@if (empty($info['url']))javascript: void(0)@else{{ $info['url'] }}@endif"
+                <a href="{{ $info['url'] }}"
                 @if (!empty($info['id'])) id="{{ $info['id'] }}" @endif
                 @if (!empty($info['class'])) class="{{ $info['class'] }}" @endif>
                     @if (!empty($info['icon']))<i class="{{ $info['icon'] }}"></i>@endif
