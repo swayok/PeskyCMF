@@ -482,29 +482,29 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * Examples:
      * - call some url via ajax blocking data grid while waiting for response and then run "callback(json)"
         * Tag::a()
-            * ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
-            * ->setClass('row-action text-success')
-            * ->setTitle(trans('path.to.translation'))
-            * ->setDataAttr('toggle', 'tooltip')
-            * ->setDataAttr('container', '#section-content .content') //< tooltip container
-            * ->setDataAttr('block-datagrid', '1')
-            * ->setDataAttr('action', 'request')
-            * ->setDataAttr('method', 'put')
-            * ->setDataAttr('url', route('route', [], false))
-            * ->setDataAttr('data', 'id=:id:')
-            * ->setDataAttr('on-success', 'callbackFuncitonName')
-            * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-            * ->setHref('javascript: void(0)')
+            ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
+            ->setClass('row-action text-success')
+            ->setTitle(trans('path.to.translation'))
+            ->setDataAttr('toggle', 'tooltip')
+            ->setDataAttr('container', '#section-content .content') //< tooltip container
+            ->setDataAttr('block-datagrid', '1')
+            ->setDataAttr('action', 'request')
+            ->setDataAttr('method', 'put')
+            ->setDataAttr('url', route('route', [], false))
+            ->setDataAttr('data', 'id=:id:')
+            ->setDataAttr('on-success', 'callbackFuncitonName')
+            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+            ->setHref('javascript: void(0)')
      * - redirect
         * Tag::a()
-            * ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
-            * ->setClass('row-action text-primary')
-            * ->setTitle(trans('path.to.translation'))
-            * ->setDataAttr('toggle', 'tooltip')
-            * ->setDataAttr('container', '#section-content .content') //< tooltip container
-            * ->setHref(route('route', [], false))
-            * ->setTarget('_blank')
+            ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
+            ->setClass('row-action text-primary')
+            ->setTitle(trans('path.to.translation'))
+            ->setDataAttr('toggle', 'tooltip')
+            ->setDataAttr('container', '#section-content .content') //< tooltip container
+            ->setHref(route('route', [], false))
+            ->setTarget('_blank')
      *
      * @return $this
      * @throws \Swayok\Html\HtmlTagException
