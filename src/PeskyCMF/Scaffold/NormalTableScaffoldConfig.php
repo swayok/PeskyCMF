@@ -16,6 +16,9 @@ use PeskyORM\ORM\TableInterface;
 abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
     public function getRecordsForDataGrid() {
+        if (!$this->isSectionAllowed()) {
+            return $this->makeAccessDeniedReponse(cmfTransGeneral('.error.access_denied_to_scaffold'));
+        }
         $request = $this->getRequest();
         $dataGridConfig = $this->getDataGridConfig();
         $dataGridFilterConfig = $this->getDataGridFilterConfig();
@@ -394,7 +397,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
-        $this->authorize('resource.delete_bulk', [$this->getTableNameForRoutes(), $conditions]);
+        if (\Gate::denies('resource.update_bulk', [$this->getTableNameForRoutes(), $conditions])) {
+            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
+        }
         $table::beginTransaction();
         $updatedCount = $table->update($data, $conditions);
         if ($formConfig->hasAfterBulkEditDataAfterSaveCallback()) {
@@ -456,7 +461,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
-        $this->authorize('resource.delete_bulk', [$this->getTableNameForRoutes(), $conditions]);
+        if (\Gate::denies('resource.delete_bulk', [$this->getTableNameForRoutes(), $conditions])) {
+            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden'));
+        }
         $deletedCount = $this->getTable()->delete($conditions);
         $message = $deletedCount
             ? cmfTransGeneral('.action.delete_bulk.success', ['count' => $deletedCount])

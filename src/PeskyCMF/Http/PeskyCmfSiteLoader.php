@@ -110,8 +110,10 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
      *      - 'update_bulk' => 'cmf_api_edit_bulk'
      *      - 'delete' => 'cmf_api_delete_item'
      *      - 'delete_bulk' => 'cmf_api_delete_bulk'
-     *      For all abilities you will receive $tableName argument and $itemId argument for 'details', 'update'
-     *      and 'delete' abilities. For 'update_bulk' and 'delete_bulk' you will receive $conditions array.
+     *      For all abilities you will receive $tableName argument and RecordInterface $record or int $itemId argument
+     *      for 'details', 'update' and 'delete' abilities.
+     *      For KeyValueScaffoldConfig for 'update' ability you will receive $fkValue instead of $itemId/$record.
+     *      For 'update_bulk' and 'delete_bulk' you will receive $conditions array.
      *      Note that $tableName passed to abilities is the name of the DB table used in routes and may differ from
      *      the real name of the table provided in TableStructure.
      *      For example: you have 2 resources named 'pages' and 'elements'. Both refer to PagesTable class but

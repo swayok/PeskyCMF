@@ -75,59 +75,43 @@ class CmfScaffoldApiController extends Controller {
 
     }
 
-    public function getTemplates($tableName) {
-        $this->authorize('resource.view', [$tableName]);
+    public function getTemplates() {
         return $this->getScaffoldConfig()->renderTemplates();
     }
 
-    public function getItemsList($tableName) {
-        $this->authorize('resource.view', [$tableName]);
+    public function getItemsList() {
         return $this->getScaffoldConfig()->getRecordsForDataGrid();
     }
 
     public function getItem($tableName, $id = null) {
-        $this->authorize('resource.view', [$tableName]);
-        $this->authorize('resource.details', [$tableName, $id]);
         return $this->getScaffoldConfig()->getRecordValues($id);
     }
 
-    public function getItemDefaults($tableName) {
-        $this->authorize('resource.view', [$tableName]);
+    public function getItemDefaults() {
         return $this->getScaffoldConfig()->getDefaultValuesForFormInputs();
     }
 
-    public function getOptions($tableName) {
-        $this->authorize('resource.view', [$tableName]);
+    public function getOptions() {
         return $this->getScaffoldConfig()->getHtmlOptionsForFormInputs();
     }
 
-    public function addItem($tableName) {
-        $this->authorize('resource.view', [$tableName]);
-        $this->authorize('resource.create', [$tableName]);
+    public function addItem() {
         return $this->getScaffoldConfig()->addRecord();
     }
 
-    public function updateItem($tableName, $id = null) {
-        $this->authorize('resource.view', [$tableName]);
-        $this->authorize('resource.details', [$tableName, $id]);
-        $this->authorize('resource.update', [$tableName, $id]);
+    public function updateItem() {
         return $this->getScaffoldConfig()->updateRecord();
     }
 
-    public function updateBulk($tableName) {
-        $this->authorize('resource.view', [$tableName]);
+    public function updateBulk() {
         return $this->getScaffoldConfig()->updateBulkOfRecords();
     }
 
-    public function deleteItem($tableName, $id) {
-        $this->authorize('resource.view', [$tableName]);
-        $this->authorize('resource.details', [$tableName, $id]);
-        $this->authorize('resource.delete', [$tableName, $id]);
+    public function deleteItem($id) {
         return $this->getScaffoldConfig()->deleteRecord($id);
     }
 
-    public function deleteBulk($tableName) {
-        $this->authorize('resource.view', [$tableName]);
+    public function deleteBulk() {
         return $this->getScaffoldConfig()->deleteBulkOfRecords();
     }
 

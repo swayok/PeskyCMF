@@ -107,6 +107,9 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             );
         }
         $fkValue = empty($fkColumn) ? null : $request->input($fkColumn);
+        if (\Gate::denies('resource.edit', [$this->getTableNameForRoutes(), $fkValue])) {
+            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
+        }
         $inputConfigs = $formConfig->getValueViewers();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
             array_intersect_key($this->getRequest()->all(), $inputConfigs),

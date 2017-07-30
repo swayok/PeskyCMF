@@ -18,8 +18,7 @@ use PeskyORM\ORM\TableInterface;
 
 abstract class ScaffoldConfig {
 
-    use DataValidationHelper,
-        AuthorizesRequests;
+    use DataValidationHelper;
 
     /** @var TableInterface */
     protected $table;
@@ -198,31 +197,42 @@ abstract class ScaffoldConfig {
     }
 
     /**
+     * @return bool
+     */
+    public function isSectionAllowed() {
+        return \Gate::allows('resource.view', [$this->getTableNameForRoutes()]);
+    }
+
+    /**
      * @return boolean
      */
     public function isCreateAllowed() {
-        return $this->isCreateAllowed;
+        return (
+            $this->isCreateAllowed
+            && $this->isSectionAllowed()
+            && \Gate::allows('resource.create', [$this->getTableNameForRoutes()])
+        );
     }
 
     /**
      * @return boolean
      */
     public function isEditAllowed() {
-        return $this->isEditAllowed;
+        return $this->isEditAllowed && $this->isSectionAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isDetailsViewerAllowed() {
-        return $this->isDetailsViewerAllowed;
+        return $this->isDetailsViewerAllowed && $this->isSectionAllowed();
     }
 
     /**
      * @return boolean
      */
     public function isDeleteAllowed() {
-        return $this->isDeleteAllowed;
+        return $this->isDeleteAllowed && $this->isSectionAllowed();
     }
 
     /**
@@ -232,7 +242,7 @@ abstract class ScaffoldConfig {
      * @return bool
      */
     public function isRecordDeleteAllowed(array $record) {
-        return $this->isDeleteAllowed();
+        return $this->isDeleteAllowed() && \Gate::allows('resource.delete', [$this->getTableNameForRoutes(), $record]);
     }
 
     /**
@@ -242,7 +252,7 @@ abstract class ScaffoldConfig {
      * @return bool
      */
     public function isRecordEditAllowed(array $record) {
-        return $this->isEditAllowed();
+        return $this->isEditAllowed() && \Gate::allows('resource.update', [$this->getTableNameForRoutes(), $record]);
     }
 
     /**
@@ -252,7 +262,10 @@ abstract class ScaffoldConfig {
      * @return bool
      */
     public function isRecordDetailsAllowed(array $record) {
-        return $this->isDetailsViewerAllowed();
+        return (
+            $this->isDetailsViewerAllowed()
+            && \Gate::allows('resource.details', [$this->getTableNameForRoutes(), $record])
+        );
     }
 
     /**
@@ -277,6 +290,9 @@ abstract class ScaffoldConfig {
     }
 
     public function renderTemplates() {
+        if (!$this->isSectionAllowed()) {
+            return $this->makeAccessDeniedReponse(cmfTransGeneral('.error.access_denied_to_scaffold'));
+        }
         return view(
             CmfConfig::getPrimary()->scaffold_templates_view_for_normal_table(),
             array_merge(
@@ -287,6 +303,9 @@ abstract class ScaffoldConfig {
     }
 
     public function getHtmlOptionsForFormInputs() {
+        if (!$this->isSectionAllowed()) {
+            return $this->makeAccessDeniedReponse(cmfTransGeneral('.error.access_denied_to_scaffold'));
+        }
         if (!$this->isEditAllowed() && !$this->isCreateAllowed()) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
         }

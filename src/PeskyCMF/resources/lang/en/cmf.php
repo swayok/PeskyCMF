@@ -49,7 +49,8 @@ return [
         'csrf_token_missmatch' => 'Current session is outdated or invalid. Page reloading is required.',
         'http404' => 'Requested page not found',
         'invalid_date_received' => 'Invalid date',
-        'access_denied' => 'You do not have enough rights to access requested page'
+        'access_denied' => 'You do not have enough rights to access requested page',
+        'access_denied_to_scaffold' => 'You do not have enough rights to access requested section',
     ],
     'month' => [
         '01' => 'January',
