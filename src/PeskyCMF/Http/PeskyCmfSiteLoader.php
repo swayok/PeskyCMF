@@ -92,7 +92,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
      * https://laravel.com/docs/5.4/authorization
      * Predefined authorisation tests are available for:
      * 1. Resources (scaffolds) - use
-     *      Gate::resource('resource', 'CmfAccessPolicy', [
+     *      Gate::resource('resource', 'AdminAccessPolicy', [
                 'view' => 'view',
                 'details' => 'details',
                 'create' => 'create',
@@ -122,7 +122,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
      *      Note: If you forbid 'view' ability - you will forbid everything else
      *      Note: there is no predefined authorization for routes based on 'cmf_item_custom_page'. You need to add it
      *      manually to controller's action that handles that custom page
-     * 2. CMF Pages - use Gate::define('cmf_page', 'CmfAccessPolicy@cmf_page')
+     * 2. CMF Pages - use Gate::define('cmf_page', 'AdminAccessPolicy@cmf_page')
      *      Abilities will receive $pageName argument - it will contain the value of the {page} property in route
      *      called 'cmf_page' (url is '/{prefix}/page/{page}' by default)
      * 3. Admin profile update - Gate::define('profile.update', \Closure);
@@ -130,7 +130,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
      * For any other routes where you resolve authorisation by yourself - feel free to use any naming you want
      */
     protected function configureAuthorizationGatesAndPolicies() {
-
+        static::getCmfConfig()->configureAuthorization();
     }
 
     public function configureSession($connection = null, $lifetime = null) {

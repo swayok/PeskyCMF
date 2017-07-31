@@ -10,7 +10,6 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\Exception\InvalidDataException;
-use PeskyORM\ORM\FakeRecord;
 use PeskyORM\ORM\TempRecord;
 
 /**
@@ -107,7 +106,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             );
         }
         $fkValue = empty($fkColumn) ? null : $request->input($fkColumn);
-        if (\Gate::denies('resource.edit', [$this->getTableNameForRoutes(), $fkValue])) {
+        if (\Gate::denies('resource.update', [$this->getTableNameForRoutes(), $fkValue])) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
         }
         $inputConfigs = $formConfig->getValueViewers();

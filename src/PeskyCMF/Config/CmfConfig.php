@@ -2,12 +2,11 @@
 
 namespace PeskyCMF\Config;
 
-use Illuminate\Http\Request;
+use CmfAccessPolicy;
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
-use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\ClassBuilder;
@@ -270,6 +269,34 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function system_email_address() {
         return 'noreply@' . static::domain();
+    }
+
+    /**
+     * Used to configure User authorization rules (Gates and Policies)
+     * By default uses Laravel's \Gate helper (https://laravel.com/docs/5.4/authorization)
+     */
+    static public function configureAuthorization() {
+        app()->singleton('CmfAccessPolicy', static::cmf_user_acceess_policy_class());
+        \Gate::resource('resource', 'CmfAccessPolicy', [
+            'view' => 'view',
+            'details' => 'details',
+            'create' => 'create',
+            'update' => 'update',
+            'edit' => 'edit',
+            'delete' => 'delete',
+            'update_bulk' => 'update_bulk',
+            'delete_bulk' => 'delete_bulk',
+            'others' => 'others',
+        ]);
+        \Gate::define('cmf_page', 'AdminAccessPolicy@cmf_page');
+    }
+
+    /**
+     * Usera access policy class to use in CMF
+     * @return string
+     */
+    static public function cmf_user_acceess_policy_class() {
+        return CmfAccessPolicy::class;
     }
 
     /**
