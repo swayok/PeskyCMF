@@ -39,7 +39,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         // custom configurations
         $this->configure();
         // alter auth config
-        $this->configureAuth();
+        $this->configureAuthentication();
         // alter session config
         $this->configureSession();
 
@@ -64,6 +64,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         $this->app->singleton(CmfConfig::class, function () {
             return static::getCmfConfig();
         });
+        $this->configureAuthorizationGatesAndPolicies();
     }
 
     public function provides() {
@@ -80,11 +81,10 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
 
     }
 
-    protected function configureAuth() {
+    protected function configureAuthentication() {
         $config = $this->getAppConfig()->get('auth', []);
         $this->getAppConfig()->set('auth', array_replace_recursive($config, static::getCmfConfig()->auth_configs()));
         \Auth::shouldUse(static::getCmfConfig()->auth_guard_name());
-        $this->configureAuthorizationGatesAndPolicies();
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Config;
 
-use CmfAccessPolicy;
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
 use PeskyCMF\Db\CmfDbTable;
@@ -288,7 +287,7 @@ abstract class CmfConfig extends ConfigsContainer {
             'delete_bulk' => 'delete_bulk',
             'others' => 'others',
         ]);
-        \Gate::define('cmf_page', 'AdminAccessPolicy@cmf_page');
+        \Gate::define('cmf_page', 'CmfAccessPolicy@cmf_page');
     }
 
     /**
