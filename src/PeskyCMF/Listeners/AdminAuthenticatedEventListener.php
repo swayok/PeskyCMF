@@ -4,12 +4,11 @@ namespace PeskyCMF\Listeners;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Event\AdminAuthenticated;
-use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyORM\Core\DbAdapterInterface;
 use PeskyORM\Core\DbConnectionsManager;
 use PeskyORM\ORM\Record;
 
-class AdminAuthorisedEventListener {
+class AdminAuthenticatedEventListener {
 
     public function handle(AdminAuthenticated $event) {
         /** @var Record $user */

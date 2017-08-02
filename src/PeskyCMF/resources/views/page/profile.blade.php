@@ -26,6 +26,7 @@
 <div class="content">
     <div class="row"><div class="col-xs-6 col-xs-offset-3">
         <div class="box box-primary">
+            <?php $canSubmit = \Gate::allows('resource.update', ['cmf_profile', \PeskyCMF\Config\CmfConfig::getPrimary()->getUser()]) ?>
             <form role="form" method="post" action="{{ route('cmf_profile', [], false) }}" id="admin-profile-form">
                 <input type="hidden" name="_method" value="PUT">
                 <!-- disable chrome email & password autofill -->
@@ -39,30 +40,35 @@
                     @if ($loginColumn !== 'email')
                         <div class="form-group">
                             <label for="{{ $loginColumn }}-input">{{ cmfTransCustom('.page.profile.input.' . $loginColumn) }}*</label>
-                            <input class="form-control" value="{{ $admin->$loginColumn }}" name="{{ $loginColumn }}" id="{{ $loginColumn }}-input" type="text" required="required">
+                            <input class="form-control" value="{{ $admin->$loginColumn }}" name="{{ $loginColumn }}" id="{{ $loginColumn }}-input"
+                                   type="text" required="required" @if(!$canSubmit) disabled @endif>
                         </div>
                     @endif
                     @if ($admin::hasColumn('email'))
                         <?php $emailRequired = !$admin::getColumn('email')->isValueCanBeNull(); ?>
                         <div class="form-group">
                             <label for="email-input">{{ cmfTransCustom('.page.profile.input.email') . ($emailRequired ? '*' : '') }}</label>
-                            <input class="form-control" value="{{ $admin->email }}" name="email" id="email-input" type="email" @if($emailRequired) required="required" @endif>
+                            <input class="form-control" value="{{ $admin->email }}" name="email" id="email-input"
+                                   type="email" @if($emailRequired) required="required" @endif @if(!$canSubmit) disabled @endif>
                         </div>
                     @endif
                     <div class="form-group">
                         <label for="new-password-input">{{ cmfTransCustom('.page.profile.input.new_password') }}</label>
-                        <input class="form-control" value="" name="new_password" id="new-password-input" type="password" autocomplete="off">
+                        <input class="form-control" value="" name="new_password" id="new-password-input"
+                               type="password" autocomplete="off" @if(!$canSubmit) disabled @endif>
                     </div>
                     @if ($admin::hasColumn('name'))
                         <div class="form-group">
                             <label for="name-input">{{ cmfTransCustom('.page.profile.input.name') }}</label>
-                            <input class="form-control" value="{{ $admin->name }}" name="name" id="name-input" type="text">
+                            <input class="form-control" value="{{ $admin->name }}" name="name" id="name-input"
+                                   type="text" @if(!$canSubmit) disabled @endif>
                         </div>
                     @endif
                     @if ($admin::hasColumn('language'))
                         <div class="form-group">
                             <label for="language-input">{{ cmfTransCustom('.page.profile.input.language') }}</label>
-                            <select class="form-control" data-value="{{ $admin->language }}" name="language" id="language-input" required="required">
+                            <select class="form-control" data-value="{{ $admin->language }}" name="language" id="language-input"
+                                    required="required" @if(!$canSubmit) disabled @endif>
                                 @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->locales() as $lang)
                                     <option value="{{ $lang }}">{{ cmfTransCustom('.language.' . $lang) }}</option>
                                 @endforeach
@@ -74,8 +80,9 @@
                             <label for="timezone-input">{{ cmfTransCustom('.page.profile.input.timezone') }}</label>
                             <?php $isRequired = !$admin::getColumn('timezone')->allowsNullValues(); ?>
                             <select class="form-control selectpicker" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input"
-                            @if ($isRequired) required="required" @endif
-                            data-live-search-placeholder="{{ cmfTransCustom('.page.profile.input.timezone_search') }}">
+                                    @if ($isRequired) required="required" @endif
+                                    @if(!$canSubmit) disabled @endif
+                                    data-live-search-placeholder="{{ cmfTransCustom('.page.profile.input.timezone_search') }}">
                                 <?php
                                     $usersTable = \PeskyCMF\Config\CmfConfig::getPrimary()->getTableByUnderscoredName(
                                         \PeskyCMF\Config\CmfConfig::getPrimary()->users_table_name()
@@ -91,7 +98,8 @@
                     @endif
                     <div class="form-group">
                         <label for="old-password-input">{{ cmfTransCustom('.page.profile.input.old_password') }}*</label>
-                        <input class="form-control" value="" name="old_password" id="old-password-input" type="password" autocomplete="off" required="required">
+                        <input class="form-control" value="" name="old_password" id="old-password-input"
+                               type="password" autocomplete="off" required="required" @if(!$canSubmit) disabled @endif>
                     </div>
                 </div>
                 <div class="box-footer">
@@ -102,7 +110,7 @@
                             </a>
                         </div>
                         <div class="col-xs-6">
-                            <button type="submit" class="btn btn-success pull-right">
+                            <button type="submit" class="btn btn-success pull-right" @if(!$canSubmit) disabled @endif>
                                 {{ cmfTransGeneral('.form.toolbar.submit') }}
                             </button>
                         </div>

@@ -27,7 +27,9 @@ class CmfAccessPolicy {
      * @var array
      */
     static protected $resources = [
-
+        'cmf_profile' => [
+            'others' => true
+        ],
     ];
 
     /**
@@ -206,7 +208,7 @@ class CmfAccessPolicy {
         return $this->resource($user, 'view', $table);
     }
 
-    public function details($user, $table, $recordOrItemIdOrFkValue) {
+    public function details($user, $table, $recordOrItemIdOrFkValue = null) {
         return $this->resource($user, 'details', $table, $recordOrItemIdOrFkValue);
     }
 
@@ -214,23 +216,23 @@ class CmfAccessPolicy {
         return $this->resource($user, 'create', $table);
     }
 
-    public function update($user, $table, $recordOrItemIdOrFkValue) {
+    public function update($user, $table, $recordOrItemIdOrFkValue = null) {
         return $this->resource($user, 'update', $table, $recordOrItemIdOrFkValue);
     }
 
-    public function edit($user, $table, $recordOrItemIdOrFkValue) {
+    public function edit($user, $table, $recordOrItemIdOrFkValue = null) {
         return $this->resource($user, 'update', $table, $recordOrItemIdOrFkValue);
     }
 
-    public function delete($user, $table, $recordOrItemIdOrFkValue) {
+    public function delete($user, $table, $recordOrItemIdOrFkValue = null) {
         return $this->resource($user, 'delete', $table, $recordOrItemIdOrFkValue);
     }
 
-    public function update_bulk($user, $table, array $conditions) {
+    public function update_bulk($user, $table, array $conditions = []) {
         return $this->resource($user, 'update_bulk', $table, null, $conditions);
     }
 
-    public function delete_bulk($user, $table, array $conditions) {
+    public function delete_bulk($user, $table, array $conditions = []) {
         return $this->resource($user, 'delete_bulk', $table, null, $conditions);
     }
 

@@ -66,12 +66,14 @@ class CmfGeneralController extends Controller {
     }
 
     public function getAdminProfile() {
-        return view(CmfConfig::getPrimary()->user_profile_view(), ['admin' => CmfConfig::getPrimary()->getUser()]);
+        $admin = CmfConfig::getPrimary()->getUser();
+        $this->authorize('resource.details', ['cmf_profile', $admin]);
+        return view(CmfConfig::getPrimary()->user_profile_view(), ['admin' => $admin]);
     }
 
     public function updateAdminProfile(Request $request) {
-        $this->authorize('profile.update');
         $admin = CmfConfig::getPrimary()->getUser();
+        $this->authorize('resource.update', ['cmf_profile', $admin]);
         $updates = $this->validateAndGetAdminProfileUpdates($request, $admin);
         if (!is_array($updates)) {
             return $updates;
@@ -361,6 +363,7 @@ class CmfGeneralController extends Controller {
 
     public function getAdminInfo() {
         $admin = CmfConfig::getPrimary()->getUser();
+        $this->authorize('resource.details', ['cmf_profile', $admin]);
         $adminData = $admin->toArray();
         if (!empty($adminData['role'])) {
             $adminData['_role'] = $admin->role;

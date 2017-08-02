@@ -3,9 +3,11 @@
 
     </div>
     <div class="actions">
-        <a href="{{ route('cmf_profile', [], false) }}">
-            <i class="fa fa-fw fa-user"></i>{{ cmfTransCustom('.user.profile_label') }}
-        </a>
+        <?php if (\Gate::allows('resource.details', ['cmf_profile', \PeskyCMF\Config\CmfConfig::getPrimary()->getUser()])): ?>
+            <a href="{{ route('cmf_profile', [], false) }}">
+                <i class="fa fa-fw fa-user"></i>{{ cmfTransCustom('.user.profile_label') }}
+            </a>
+        <?php endif; ?>
         <a href="{{ route(\PeskyCMF\Config\CmfConfig::getPrimary()->logout_route(), [], false) }}">
             <i class="fa fa-fw fa-sign-out"></i>{{ cmfTransCustom('.user.logout_label') }}
         </a>

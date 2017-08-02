@@ -5,7 +5,7 @@ namespace PeskyCMF\Http;
 use LaravelSiteLoader\AppSiteLoader;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Event\AdminAuthenticated;
-use PeskyCMF\Listeners\AdminAuthorisedEventListener;
+use PeskyCMF\Listeners\AdminAuthenticatedEventListener;
 use Swayok\Utils\File;
 
 abstract class PeskyCmfSiteLoader extends AppSiteLoader {
@@ -183,7 +183,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     }
 
     protected function configureEventListeners() {
-        \Event::listen(AdminAuthenticated::class, AdminAuthorisedEventListener::class);
+        \Event::listen(AdminAuthenticated::class, AdminAuthenticatedEventListener::class);
     }
 
     static public function configurePublicFilesRoutes() {
