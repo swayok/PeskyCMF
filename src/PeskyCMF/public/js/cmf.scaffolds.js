@@ -583,6 +583,7 @@ var ScaffoldDataGridHelper = {
                     ScaffoldDataGridHelper.initNestedView($table, $tableWrapper, configsBackup, tableOuterHtml);
                 }).on('preXhr', function (event, settings) {
                     ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
+                    CmfRoutingHelpers.cleanupHangedElementsInBody();
                 });
             return $dataGrid;
         } else {

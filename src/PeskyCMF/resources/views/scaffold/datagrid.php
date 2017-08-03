@@ -211,6 +211,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $actionsCount++;
         }
         if ($dataGridConfig->isDetailsViewerAllowed()) {
+            $url = $dblClickUrl = ':___details_url:';
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue item-details')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
