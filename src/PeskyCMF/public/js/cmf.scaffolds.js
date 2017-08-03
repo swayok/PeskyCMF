@@ -570,7 +570,7 @@ var ScaffoldDataGridHelper = {
                     var $tableWrapper = $(settings.nTableWrapper);
                     $table.data('configs', mergedConfigs);
                     $table.data('resourceName', mergedConfigs.resourceName);
-                    $table.dataTable().api().resourceName = mergedConfigs.resourceName;
+                    $table.dataTable().api().settings()[0].resourceName = mergedConfigs.resourceName;
                     ScaffoldDataGridHelper.initToolbar($tableWrapper, configs);
                     if (configs.queryBuilderConfig) {
                         DataGridSearchHelper.init(configs.queryBuilderConfig, configs.defaultSearchRules, $table);
@@ -918,7 +918,7 @@ var ScaffoldDataGridHelper = {
             if ($link.hasClass('disabled')) {
                 return false;
             }
-            ScaffoldFormHelper.handleBulkEditForm($link, configs.resource_name, api);
+            ScaffoldFormHelper.handleBulkEditForm($link, configs.resourceName, api);
             return false;
         })
     },

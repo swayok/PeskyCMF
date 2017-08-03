@@ -312,8 +312,8 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                             initContent($modal);
                             $modal.modal('show');
                             $(document.body).attr('data-modal-opened', '1');
-                            var $datagrid = ScaffoldDataGridHelper.getCurrentDataGrid();
-                            if ($datagrid && data.DT_RowId) {
+                            var datagridApi = ScaffoldDataGridHelper.getCurrentDataGridApi();
+                            if (datagridApi && data.DT_RowId && datagridApi.settings()[0].resourceName === request.params.resource) {
                                 var api = ScaffoldDataGridHelper.getCurrentDataGridApi();
                                 var rowIndex = api.row('#' + data.DT_RowId).index();
                                 var $prevItemBtn = $modal.find('button.prev-item');
