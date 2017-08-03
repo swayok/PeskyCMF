@@ -76,7 +76,7 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
         $valueCells = [
             'id',
             $loginColumn,
-            'email' => ValueCell::create(),
+            'email',
             'name',
             'language' => ValueCell::create()
                 ->setValueConverter(function ($value) {
@@ -87,7 +87,7 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                 ->setValueConverter(function ($value) {
                     return cmfTransCustom(".admins.role.$value");
                 }),
-            'is_superadmin' => ValueCell::create(),
+            'is_superadmin',
             'parent_id' => ValueCell::create()
                 ->setType(ValueCell::TYPE_LINK),
             'created_at',
@@ -127,7 +127,8 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                         ->setOptions($config->getOptions());
                 }),
             'is_active',
-            'is_superadmin',
+            'is_superadmin' => FormInput::create()
+                ->setType(CmfConfig::getPrimary()->getUser()->is_superadmin ? FormInput::TYPE_BOOL : FormInput::TYPE_HIDDEN),
             'role' => FormInput::create()
                 ->setOptions(function () {
                     $options = array();
@@ -158,6 +159,16 @@ class CmsAdminsScaffoldConfig extends NormalTableScaffoldConfig {
         return parent::createFormConfig()
             ->setWidth(60)
             ->setFormInputs($formInputs)
+            ->setIncomingDataModifier(function (array $data, $isCreation) {
+                if (!CmfConfig::getPrimary()->getUser()->is_superadmin) {
+                    if ($isCreation) {
+                        $data['is_superadmin'] = false;
+                    } else {
+                        unset($data['is_superadmin']);
+                    }
+                }
+                return $data;
+            })
             ->setValidators(function () {
                 return $this->getBaseValidators();
             })
