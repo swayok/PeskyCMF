@@ -30,7 +30,9 @@ class CmsSettingsTableStructure extends CmsTableStructure {
     }
 
     private function value() {
-        return Column::create(Column::TYPE_JSON)
+        // DO NOT USE TYPE_JSON/TYPE_JSONB here. It will add duplicate json encoding and cause
+        // unnecessary problems with numeric values
+        return Column::create(Column::TYPE_TEXT)
             ->disallowsNullValues();
     }
 
