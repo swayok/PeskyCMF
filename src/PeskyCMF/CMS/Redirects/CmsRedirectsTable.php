@@ -4,23 +4,14 @@ namespace PeskyCMF\CMS\Redirects;
 
 use PeskyCMF\CMS\CmsTable;
 
+/**
+ * @method CmsRedirectsTableStructure getTableStructure()
+ * @method CmsRedirect newRecord()
+ */
 class CmsRedirectsTable extends CmsTable {
 
-    /**
-     * @return CmsRedirectsTableStructure
-     */
-    public function getTableStructure() {
-        return app(CmsRedirectsTableStructure::class);
-    }
-
-    /**
-     * @return CmsRedirect
-     */
-    public function newRecord() {
-        /** @var CmsRedirect $class */
-        $class = app(CmsRedirect::class);
-        return $class::newEmptyRecord();
-    }
+    static protected $tableStructureClass = CmsRedirectsTableStructure::class;
+    static protected $recordClass = CmsRedirect::class;
 
     /**
      * @return string

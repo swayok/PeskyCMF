@@ -56,8 +56,12 @@ use PeskyORM\ORM\RecordsSet;
  * @method $this    setIsPublished($value, $isFromDb = false)
  * @method $this    setPublishAt($value, $isFromDb = false)
  * @method $this    setCustomInfo($value, $isFromDb = false)
+ *
+ * @method static CmsPagesTable getTable()
  */
 class CmsPage extends CmsRecord {
+
+    static protected $tableClass = CmsPagesTable::class;
 
     const TYPE_PAGE = 'page';
     const TYPE_CATEGORY = 'category';
@@ -85,13 +89,6 @@ class CmsPage extends CmsRecord {
     ];
     /** @var CmsTextWrapper */
     protected $textsWrapper;
-
-    /**
-     * @return CmsPagesTable
-     */
-    static public function getTable() {
-        return app(CmsPagesTable::class);
-    }
 
     static public function getTypes($asOptions = false) {
         return static::toOptions(static::$types, $asOptions, function ($value) {

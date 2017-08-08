@@ -31,20 +31,17 @@ use PeskyCMF\CMS\Pages\CmsPagesTable;
  * @method $this    setIsPermanent($value, $isFromDb = false)
  * @method $this    setCreatedAt($value, $isFromDb = false)
  * @method $this    setUpdatedAt($value, $isFromDb = false)
+ *
+ * @method static CmsRedirectsTable getTable()
  */
 class CmsRedirect extends CmsRecord {
 
-    /**
-     * @return CmsRedirectsTable
-     */
-    static public function getTable() {
-        return app(CmsRedirectsTable::class);
-    }
+    static protected $tableClass = CmsRedirectsTable::class;
 
     protected function afterSave($isCreated) {
         parent::afterSave($isCreated);
         /** @var CmsPagesTable $pagesTable */
-        $pagesTable = app(CmsPagesTable::class);
+        $pagesTable = static::getSingletonInstanceOfDbClassFromServiceContainer(CmsPagesTable::class);
         $childPages = $pagesTable::select('*', ['parent_id' => $this->page_id]);
         $childPages->optimizeIteration();
         $redirect = static::newEmptyRecord();

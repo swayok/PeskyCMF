@@ -5,23 +5,14 @@ namespace PeskyCMF\CMS\Admins;
 use PeskyCMF\CMS\CmsTable;
 use PeskyORM\ORM\RecordInterface;
 
+/**
+ * @method CmsAdminsTableStructure getTableStructure()
+ * @method CmsAdmin newRecord()
+ */
 class CmsAdminsTable extends CmsTable {
 
-    /**
-     * @return CmsAdminsTableStructure
-     */
-    public function getTableStructure() {
-        return app(CmsAdminsTableStructure::class);
-    }
-
-    /**
-     * @return CmsAdmin
-     */
-    public function newRecord() {
-        /** @var CmsAdmin $class */
-        $class = app(CmsAdmin::class);
-        return $class::newEmptyRecord();
-    }
+    static protected $tableStructureClass = CmsAdminsTableStructure::class;
+    static protected $recordClass = CmsAdmin::class;
 
     /**
      * @return string

@@ -14,13 +14,13 @@ use Swayok\Utils\StringUtils;
 abstract class CmfDbTable extends Table {
 
     /** @var null|ScaffoldConfig */
-    protected $scaffoldConfig = null;
+    private $scaffoldConfig;
     /** @var null|string */
-    protected $recordClass = null;
+    private $recordClass;
     /** @var array */
-    static private $timeZonesList = null;
+    static private $timeZonesList;
     /** @var array */
-    static private $timeZonesOptions = null;
+    static private $timeZonesOptions;
     /** @var int */
     static private $currentTime;
 

@@ -16,16 +16,13 @@ use PeskyCMF\Db\Traits\KeyValueRecordHelpers;
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setKey($value, $isFromDb = false)
  * @method $this    setValue($value, $isFromDb = false)
+ *
+ * @method static CmsSettingsTable getTable()
  */
 class CmsSetting extends CmsRecord {
 
     use KeyValueRecordHelpers;
 
-    /**
-     * @return CmsSettingsTable|KeyValueTableInterface
-     */
-    static public function getTable() {
-        return app(CmsSettingsTable::class);
-    }
+    static protected $tableClass = CmsSettingsTable::class;
 
 }

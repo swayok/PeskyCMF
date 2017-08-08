@@ -6,23 +6,14 @@ use PeskyCMF\CMS\CmsTable;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 
+/**
+ * @method CmsPagesTableStructure getTableStructure()
+ * @method CmsPage newRecord()
+ */
 class CmsPagesTable extends CmsTable {
 
-    /**
-     * @return CmsPagesTableStructure
-     */
-    public function getTableStructure() {
-        return app(CmsPagesTableStructure::class);
-    }
-
-    /**
-     * @return CmsPage
-     */
-    public function newRecord() {
-        /** @var CmsPage $class */
-        $class = app(CmsPage::class);
-        return $class::newEmptyRecord();
-    }
+    static protected $tableStructureClass = CmsPagesTableStructure::class;
+    static protected $recordClass = CmsPage::class;
 
     /**
      * @return string

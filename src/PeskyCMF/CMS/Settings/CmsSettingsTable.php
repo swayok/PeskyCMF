@@ -6,9 +6,16 @@ use PeskyCMF\CMS\CmsTable;
 use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyCMF\Db\Traits\KeyValueTableHelpers;
 
+/**
+ * @method CmsSettingsTableStructure getTableStructure()
+ * @method CmsSetting newRecord()
+ */
 class CmsSettingsTable extends CmsTable implements KeyValueTableInterface {
 
     use KeyValueTableHelpers;
+
+    static protected $tableStructureClass = CmsSettingsTableStructure::class;
+    static protected $recordClass = CmsSetting::class;
 
     public function getMainForeignKeyColumnName() {
         return null;
@@ -20,22 +27,6 @@ class CmsSettingsTable extends CmsTable implements KeyValueTableInterface {
      */
     static public function getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue = null) {
         return 'app-settings';
-    }
-
-    /**
-     * @return CmsSettingsTableStructure
-     */
-    public function getTableStructure() {
-        return app(CmsSettingsTableStructure::class);
-    }
-
-    /**
-     * @return CmsSetting
-     */
-    public function newRecord() {
-        /** @var CmsSetting $class */
-        $class = app(CmsSetting::class);
-        return $class::newEmptyRecord();
     }
 
     /**

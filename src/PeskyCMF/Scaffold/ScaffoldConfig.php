@@ -381,7 +381,7 @@ abstract class ScaffoldConfig {
      * @param ScaffoldLoggerInterface $logger
      * @return $this
      */
-    public function setLogger(ScaffoldLoggerInterface $logger) {
+    public function setLogger(ScaffoldLoggerInterface $logger = null) {
         $this->logger = $logger;
         return $this;
     }

@@ -44,17 +44,14 @@ use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
  * @method $this    setLanguage($value, $isFromDb = false)
  * @method $this    setTimezone($value, $isFromDb = false)
  * @method $this    setRememberToken($value, $isFromDb = false)
+ *
+ * @method static CmsAdminsTable getTable()
  */
 class CmsAdmin extends CmsRecord implements AuthenticatableContract {
 
     use Authenticatable,
         ResetsPasswordsViaAccessKey;
 
-    /**
-     * @return CmsAdminsTable
-     */
-    static public function getTable() {
-        return app(CmsAdminsTable::class);
-    }
+    static protected $tableClass = CmsAdminsTable::class;
 
 }

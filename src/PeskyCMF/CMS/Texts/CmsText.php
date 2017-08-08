@@ -42,14 +42,11 @@ use PeskyCMF\CMS\Pages\CmsPage;
  * @method $this    setMetaDescription($value, $isFromDb = false)
  * @method $this    setMetaKeywords($value, $isFromDb = false)
  * @method $this    setCustomInfo($value, $isFromDb = false)
+ *
+ * @method static CmsTextsTable getTable()
  */
 class CmsText extends CmsRecord {
 
-    /**
-     * @return CmsTextsTable
-     */
-    static public function getTable() {
-        return app(CmsTextsTable::class);
-    }
+    static protected $tableClass = CmsTextsTable::class;
 
 }
