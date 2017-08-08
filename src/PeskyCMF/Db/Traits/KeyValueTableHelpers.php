@@ -4,6 +4,7 @@
 namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\KeyValueTableInterface;
+use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Relation;
@@ -90,7 +91,11 @@ trait KeyValueTableHelpers {
      * @return string
      */
     static public function encodeValue($value) {
-        return NormalizeValue::normalizeJson($value);
+        if ($value instanceof DbExpr) {
+            return $value;
+        } else {
+            return NormalizeValue::normalizeJson($value);
+        }
     }
 
     /**

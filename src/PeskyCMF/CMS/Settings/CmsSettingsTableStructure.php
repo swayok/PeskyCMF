@@ -30,7 +30,7 @@ class CmsSettingsTableStructure extends CmsTableStructure {
     }
 
     private function value() {
-        return Column::create(Column::TYPE_TEXT)
+        return Column::create(Column::TYPE_JSON)
             ->disallowsNullValues();
     }
 
