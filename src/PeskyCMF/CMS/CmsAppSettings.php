@@ -6,6 +6,9 @@ use PeskyCMF\CMS\Settings\CmsSettingsTable;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\KeyValueSetFormInput;
+use PeskyORM\Core\DbExpr;
+use Psr\Log\InvalidArgumentException;
+use Swayok\Utils\Set;
 
 /**
  * @method static string default_browser_title($default = null, $ignoreEmptyValue = true)
@@ -101,6 +104,33 @@ class CmsAppSettings {
     }
 
     /**
+     * Get all validators for specific key.
+     * Override this if you need some specific validation for keys that are not present in scaffold config form and
+     * can only be updated via static::update() method.
+     * @param string $key
+     * @return array
+     */
+    static protected function getValidatorsForKey($key) {
+        $validators = static::getValidatorsForScaffoldFormConfig(true);
+        $validatorsForKey = [];
+        foreach ($validators as $setting => $rules) {
+            if (preg_match("%^{$key}($|\.)%", $setting)) {
+                $validatorsForKey[] = $rules;
+            }
+        }
+        return $validatorsForKey;
+    }
+
+    /**
+     * Passed to FormConfig->setIncomingDataModifier()
+     * @param array $data
+     * @return array
+     */
+    static public function modifyIncomingData(array $data) {
+        return $data;
+    }
+
+    /**
      * Get default value for setting $name
      * @param string $name
      * @return mixed
@@ -131,13 +161,18 @@ class CmsAppSettings {
     }
 
     /**
+     * @return CmsSettingsTable
+     */
+    static protected function getTable() {
+        return app(CmsSettingsTable::class);
+    }
+
+    /**
      * @param bool $ignoreCache
      * @return array
      */
     static public function getAllValues($ignoreCache = false) {
-        /** @var CmsSettingsTable $settingsTable */
-        $settingsTable = app(CmsSettingsTable::class);
-        $settings = $settingsTable::getValuesForForeignKey(null, $ignoreCache, true);
+        $settings = static::getTable()->getValuesForForeignKey(null, $ignoreCache, true);
         foreach (static::getAllDefaultValues() as $name => $defaultValue) {
             if (!array_key_exists($name, $settings) || $settings[$name] === null) {
                 $settings[$name] = value($defaultValue);
@@ -152,16 +187,44 @@ class CmsAppSettings {
     }
 
     static public function __callStatic($name, $arguments) {
-        /** @var CmsSettingsTable $settingsTable */
-        $settingsTable = app(CmsSettingsTable::class);
         $default = array_get($arguments, 0, static::getDefaultValue($name));
         $ignoreEmptyValue = (bool)array_get($arguments, 1, true);
-        return $settingsTable::getValue($name, null, $default, $ignoreEmptyValue);
+        return static::getTable()->getValue($name, null, $default, $ignoreEmptyValue);
     }
 
     public function __call($name, $arguments) {
         /** @noinspection ImplicitMagicMethodCallInspection */
         return static::__callStatic($name, (array)$arguments);
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @param bool $validate
+     */
+    static public function update($key, $value, $validate = true) {
+        $data = [$key => $value];
+        if ($validate && !($value instanceof DbExpr)) {
+            $rules = static::getValidatorsForKey($key);
+            if (!empty($rules)) {
+                $validator = \Validator::make($data, $rules);
+                if ($validator->fails()) {
+                    throw new InvalidArgumentException(
+                        "Invalid value received for setting '$key'. Errors: "
+                        . var_export($validator->getMessageBag()->toArray(), true)
+                    );
+                }
+            }
+        }
+        $table = static::getTable();
+        $table::updateOrCreateRecord($table::makeDataForRecord($key, $value));
+    }
+
+    /**
+     * @param string $key
+     */
+    static public function delete($key) {
+        static::getTable()->delete([static::getTable()->getKeysColumnName() => $key]);
     }
 
 }

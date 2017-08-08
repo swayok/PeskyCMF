@@ -21,9 +21,13 @@ class CmsSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         /** @var CmsAppSettings $cmsAppSettings */
         $cmsAppSettings = app(CmsAppSettings::class);
         $cmsAppSettings::configureScaffoldFormConfig($formConfig);
-        $formConfig->setValidators(function () use ($cmsAppSettings) {
-            return $cmsAppSettings::getValidatorsForScaffoldFormConfig();
-        });
+        $formConfig
+            ->setValidators(function () use ($cmsAppSettings) {
+                return $cmsAppSettings::getValidatorsForScaffoldFormConfig();
+            })
+            ->setIncomingDataModifier(function (array $data) use ($cmsAppSettings) {
+                return $cmsAppSettings::modifyIncomingData($data);
+            });
         return $formConfig;
     }
 
