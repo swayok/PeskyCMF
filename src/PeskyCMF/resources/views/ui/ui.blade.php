@@ -6,6 +6,7 @@
 </aside>
 
 <header class="main-header">
+    <a href="javascript:void(0)" class="sidebar-toggle" data-toggle="push-menu" role="button"></a>
     <a href="{{ route('cmf_start_page', [], false, '/') }}" class="logo">
         <span class="logo-lg">
             {!! \PeskyCMF\Config\CmfConfig::getPrimary()->sidebar_logo() !!}

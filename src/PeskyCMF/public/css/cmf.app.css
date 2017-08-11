@@ -889,6 +889,35 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table .children-data-grid-table.empty {
   border-bottom-color: transparent;
 }
+.main-header {
+  position: relative;
+}
+.main-header a.sidebar-toggle {
+  position: absolute;
+  top: 0;
+  left: 5px;
+  float: none;
+}
+@media (max-width: 767px) {
+  .main-header {
+    text-align: center;
+  }
+  .main-header .logo {
+    display: inline-block;
+    width: auto;
+  }
+}
+.skin-blue .main-header {
+  background-color: #357ca5;
+  text-align: center;
+  height: 50px;
+}
+.skin-blue .main-header .logo {
+  background: transparent;
+}
+.skin-blue .main-header a.sidebar-toggle {
+  color: #bcdcec;
+}
 .skin-blue .sidebar-menu > li.header {
   color: #678b97;
 }

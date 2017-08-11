@@ -941,6 +941,43 @@ body[data-section="resource:table"] {
     }
 }
 
+.main-header {
+    position: relative;
+
+    a.sidebar-toggle {
+        position: absolute;
+        top: 0;
+        left: 5px;
+        float: none;
+    }
+
+}
+
+@media (max-width: 767px) {
+    .main-header {
+        text-align: center;
+
+        .logo {
+            display: inline-block;
+            width: auto;
+        }
+    }
+}
+
+.skin-blue .main-header {
+    background-color: #357ca5;
+    text-align: center;
+    height: 50px;
+
+    .logo {
+        background: transparent;
+    }
+
+    a.sidebar-toggle {
+        color: #bcdcec;
+    }
+}
+
 .skin-blue .sidebar-menu > li.header {
     color: #678b97;
 }
