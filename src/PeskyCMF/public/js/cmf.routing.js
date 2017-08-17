@@ -8,9 +8,8 @@ var CmfRoutingHelpers = {
         }
         next();
     },
-    cleanupHangedElementsInBody: function (request, next) {
+    cleanupHangedElementsInBody: function () {
         $('body > .tooltip, body > .bootstrap-select').remove();
-        next();
     },
     routeHandled: function (request, next, isModal) {
         request.handled = true;

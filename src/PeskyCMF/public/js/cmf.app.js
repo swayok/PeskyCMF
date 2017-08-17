@@ -16,7 +16,10 @@ $(function () {
 
     page.base(CmfConfig.rootUrl);
     page.exit(CmfRoutingHelpers.pageExitTransition);
-    page.exit(CmfRoutingHelpers.cleanupHangedElementsInBody);
+    page.exit(function (request, next) {
+        CmfRoutingHelpers.cleanupHangedElementsInBody();
+        next();
+    });
 
     if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
         CustomRoutes.init();
