@@ -39,6 +39,9 @@ class ImageConfig extends FileConfig {
     protected $fileTypeAliases = [
         self::JPEG => [
             'image/x-jpeg'
+        ],
+        self::PNG => [
+            'image/x-png'
         ]
     ];
 
