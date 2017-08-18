@@ -671,7 +671,7 @@ abstract class ScaffoldSectionConfig {
          Tag::a()
              ->setContent(trans('path.to.translation'))
              ->setClass('btn btn-warning')
-             ->setHref('url', route('route', [], false))
+             ->setHref(route('route', [], false))
              ->setTarget('_blank')
      * ONLY FOR DATA GRIDS:
      * - call some url via ajax passing all selected ids and then run "callback(json)"
