@@ -11,21 +11,51 @@ var CmfRoutingHelpers = {
     cleanupHangedElementsInBody: function () {
         $('body > .tooltip, body > .bootstrap-select').remove();
     },
-    routeHandled: function (request, next, isModal) {
+    hideModals: function () {
+        var deferred = $.Deferred();
+        if (CmfRoutingHelpers.$currentContent && CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+            CmfRoutingHelpers.$currentContent
+                .data('closed-automatically', '1')
+                .on('hidden.bs.modal', function () {
+                    deferred.resolve();
+                })
+                .modal('hide');
+        } else {
+            deferred.resolve();
+        }
+        return deferred;
+    },
+    initAsyncRouteHandling: function (request, next) {
+        request.handled = false;
+        return $.Deferred()
+            .done(function () {
+                if (request.push !== false) {
+                    request.pushState();
+                }
+                CmfRoutingHelpers.routeHandled(request, next);
+            })
+            .fail(function () {
+                CmfRoutingHelpers.routeHandlingFailed(request, next);
+            });
+    },
+    routeHandled: function (request, next) {
         request.handled = true;
         request.title = document.title;
-        if (!isModal && !request.is_restore) {
+        if (!CmfRoutingHelpers.$currentContent.hasClass('modal') && !request.is_restore) {
             CmfRoutingHelpers.lastNonModalPageRequest = request;
             Utils.highlightLinks(request);
         }
         next();
+        CmfRoutingHelpers.hideContentContainerPreloader();
     },
     routeHandlingFailed: function (request, next) {
         CmfRoutingHelpers.hideContentContainerPreloader();
         request.handled = true;
         request.error = true;
         next();
-        page.back('/');
+        if (request.push !== false) {
+            page.back('/');
+        }
     },
     setCurrentContentContainer: function ($el) {
         if (!CmfRoutingHelpers.$currentContentContainer || !CmfRoutingHelpers.$currentContentContainer.is($el)) {
@@ -92,18 +122,29 @@ var CmfRoutingHelpers = {
         }
         return deferred;
     },
-    initModalAndContent: function ($modal) {
+    initModalAndContent: function ($modal, request) {
         var deferred = $.Deferred();
-        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
-            CmfRoutingHelpers.$currentContent
-                .attr('data-ignore-back', '1')
-                .on('hidden.bs.modal', function () {
-                    CmfRoutingHelpers.initModalAndContent($modal).done(function () {
-                        deferred.resolve($modal);
-                    });
-                })
-                .modal('hide');
+        request.push = false;
+        if (!CmfRoutingHelpers.$currentContent) {
+            CmfConfig.getDebugDialog().showDebug(
+                'Unexpected application behavior detected',
+                'Current content is not defined yet. Possibly you\'re trying to show content in modal dialog instead of current page. Trace printed to console.'
+            );
+            console.trace();
+            deferred.reject();
             return deferred;
+        }
+        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
+            CmfRoutingHelpers
+                .hideModals()
+                .done(function () {
+                    CmfRoutingHelpers
+                        .initModalAndContent($modal, request)
+                        .done(function () {
+                            deferred.resolve($modal);
+                        });
+                });
+                return deferred;
         }
         var $prevContentContainer = CmfRoutingHelpers.$currentContentContainer;
         var $prevContent = CmfRoutingHelpers.$currentContent;
@@ -116,12 +157,8 @@ var CmfRoutingHelpers = {
                 $modal.remove();
                 CmfRoutingHelpers.$currentContent = $prevContent;
                 CmfRoutingHelpers.setCurrentContentContainer($prevContentContainer);
-                if ($modal.attr('data-ignore-back') !== '1') {
-                    if (CmfRoutingHelpers.lastNonModalPageRequest) {
-                        page.restoreRequest(CmfRoutingHelpers.lastNonModalPageRequest);
-                    } else {
-                        page.back('/');
-                    }
+                if (!$modal.data('closed-automatically')) {
+                    page.restoreContext(CmfRoutingHelpers.lastNonModalPageRequest, true, false);
                 }
             })
             .on('show.bs.modal', function () {
@@ -133,15 +170,8 @@ var CmfRoutingHelpers = {
         return deferred.resolve($modal);
     },
     closeCurrentModalAndReloadDataGrid: function () {
-        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
-            CmfRoutingHelpers.$currentContent.modal('hide');
-            ScaffoldDataGridHelper.reloadCurrentDataGrid();
-        }
-    },
-    closeCurrentModal: function () {
-        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
-            CmfRoutingHelpers.$currentContent.modal('hide');
-        }
+        CmfRoutingHelpers.hideModals();
+        ScaffoldDataGridHelper.reloadCurrentDataGrid();
     }
 };
 
@@ -183,10 +213,16 @@ CmfRouteChange.logout = function (request, next) {
 };
 
 CmfRouteChange.showPage = function (request, next) {
+    if (request.is_restore) {
+        CmfRoutingHelpers.routeHandled(request, next);
+        return;
+    }
+    var routingDeferred = CmfRoutingHelpers.initAsyncRouteHandling(request, next);
     $.when(
             Utils.downloadHtml(request.pathname, false, false),
             AdminUI.showUI()
         )
+        .then(CmfRoutingHelpers.hideModals())
         .done(function (html) {
             CmfRoutingHelpers
                 .setCurrentContent(html, Utils.getContentContainer())
@@ -196,18 +232,24 @@ CmfRouteChange.showPage = function (request, next) {
                         'page'
                     );
                 });
-            CmfRoutingHelpers.routeHandled(request, next);
+            routingDeferred.resolve();
         })
         .fail(function () {
-            CmfRoutingHelpers.routeHandlingFailed(request, next);
+            routingDeferred.reject();
         });
 };
 
 CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
+    if (request.is_restore) {
+        CmfRoutingHelpers.routeHandled(request, next);
+        return;
+    }
+    var routingDeferred = CmfRoutingHelpers.initAsyncRouteHandling(request, next);
     $.when(
             Utils.downloadHtml(request.pathname, false, false),
             AdminUI.showUI()
         )
+        .then(CmfRoutingHelpers.hideModals())
         .done(function (html) {
             CmfRoutingHelpers
                 .setCurrentContent(html, Utils.getContentContainer())
@@ -218,16 +260,15 @@ CmfRouteChange.scaffoldItemCustomPage = function (request, next) {
                         request.params.id
                     );
                 });
-            CmfRoutingHelpers.routeHandled(request, next);
+            routingDeferred.resolve();
         })
         .fail(function () {
-            CmfRoutingHelpers.routeHandlingFailed(request, next);
+            routingDeferred.reject();
         });
 };
 
 CmfRouteChange.scaffoldDataGridPage = function (request, next) {
-    if (request.customData.is_state_save) {
-        Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
+    if (request.customData.is_state_save || request.is_restore) {
         CmfRoutingHelpers.routeHandled(request, next);
         return;
     }
@@ -238,7 +279,6 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
         && CmfRoutingHelpers.lastNonModalPageRequest.pathname === request.pathname
     ) {
         var restoreDataGridPage = function () {
-            $(document.body).attr('data-modal-opened', '0');
             Utils.updatePageTitleFromH1(CmfRoutingHelpers.$currentContent);
             CmfRoutingHelpers.hideContentContainerPreloader();
             if (CmfRoutingHelpers.lastNonModalPageRequest.querystring !== request.querystring) {
@@ -250,23 +290,17 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
                 CmfRoutingHelpers.routeHandled(request, next);
             }
         };
-        if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
-            // modal was not closed (happens when "back" browser button pressed)
-            CmfRoutingHelpers.$currentContent
-                .attr('data-ignore-back', '1')
-                .on('hidden.bs.modal', function () {
-                    restoreDataGridPage();
-                })
-                .modal('hide');
-        } else {
-            // modal already closed
-            restoreDataGridPage();
-        }
+        $.when(CmfRoutingHelpers.hideModals())
+            .done(function () {
+                restoreDataGridPage();
+            });
     } else {
+        var routingDeferred = CmfRoutingHelpers.initAsyncRouteHandling(request, next);
         $.when(
                 ScaffoldsManager.getDataGridTpl(request.params.resource),
                 AdminUI.showUI()
             )
+            .then(CmfRoutingHelpers.hideModals())
             .done(function (html) {
                 CmfRoutingHelpers
                     .setCurrentContent(html, Utils.getContentContainer())
@@ -276,15 +310,20 @@ CmfRouteChange.scaffoldDataGridPage = function (request, next) {
                             'resource:table'
                         );
                     });
-                CmfRoutingHelpers.routeHandled(request, next);
+                routingDeferred.resolve();
             })
             .fail(function () {
-                CmfRoutingHelpers.routeHandlingFailed(request, next);
+                routingDeferred.reject();
             });
     }
 };
 
 CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
+    if (request.is_restore) {
+        CmfRoutingHelpers.routeHandled(request, next);
+        return;
+    }
+    var routingDeferred = CmfRoutingHelpers.initAsyncRouteHandling(request, next);
     $.when(
             ScaffoldsManager.getItemDetailsTpl(request.params.resource),
             ScaffoldsManager.getResourceItemData(request.params.resource, request.params.id, true),
@@ -301,12 +340,12 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                     }
                 }
             };
-            if (data.__modal && Utils.getCurrentSectionName() === 'resource:table') {
+            if (data.__modal && request.customData && request.customData.is_click) {
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
                     var $modal = $content.find('.modal');
                     CmfRoutingHelpers
-                        .initModalAndContent($modal)
+                        .initModalAndContent($modal, request)
                         .done(function () {
                             initContent($modal);
                             $modal.modal('show');
@@ -368,20 +407,25 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request, next) {
                     ).done(function ($content) {
                         Utils.switchBodyClass(
                             ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
-                            'resource:page',
+                            'resource:details',
                             request.params.id
                         );
                         initContent($content);
                     });
             }
-            CmfRoutingHelpers.routeHandled(request, next, data.__modal);
+            routingDeferred.resolve();
         })
         .fail(function () {
-            CmfRoutingHelpers.routeHandlingFailed(request, next);
+            routingDeferred.reject();
         });
 };
 
 CmfRouteChange.scaffoldItemFormPage = function (request, next) {
+    if (request.is_restore) {
+        CmfRoutingHelpers.routeHandled(request, next);
+        return;
+    }
+    var routingDeferred = CmfRoutingHelpers.initAsyncRouteHandling(request, next);
     var itemId = !request.params.id || request.params.id === 'create' ? null : request.params.id;
     var resource = request.params.resource;
     $.when(
@@ -451,12 +495,12 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
                 }
             }
             data._options = options;
-            if (data.__modal && Utils.getCurrentSectionName() === 'resource:table') {
+            if (data.__modal) {
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
                     var $modal = $content.find('.modal');
                     CmfRoutingHelpers
-                        .initModalAndContent($modal)
+                        .initModalAndContent($modal, request)
                         .done(function () {
                             initContent($modal, true);
                             $modal.modal('show');
@@ -479,9 +523,9 @@ CmfRouteChange.scaffoldItemFormPage = function (request, next) {
                         initContent($content, false);
                     });
             }
-            CmfRoutingHelpers.routeHandled(request, next, data.__modal);
+            routingDeferred.resolve();
         })
         .fail(function () {
-            CmfRoutingHelpers.routeHandlingFailed(request, next);
+            routingDeferred.reject();
         });
 };
