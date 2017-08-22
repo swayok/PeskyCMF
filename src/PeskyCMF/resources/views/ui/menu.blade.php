@@ -25,6 +25,9 @@
                         @if (!empty($subItem['class'])) class="{{ $subItem['class'] }}" @endif>
                             @if (!empty($subItem['icon']))<i class="{{ $subItem['icon'] }}"></i>@endif
                             <span>{!! trans($subItem['label']) !!}</span>{!! array_get($subItem, 'addition', '') !!}
+                            @if (!empty($subItem['counter']))
+                                <span class="pull-right-container" data-counter-name="{{ $subItem['counter'] }}"></span>
+                            @endif
                         </a>
                     </li>
                     @endforeach
@@ -35,8 +38,13 @@
                 <a href="{{ $info['url'] }}"
                 @if (!empty($info['id'])) id="{{ $info['id'] }}" @endif
                 @if (!empty($info['class'])) class="{{ $info['class'] }}" @endif>
-                    @if (!empty($info['icon']))<i class="{{ $info['icon'] }}"></i>@endif
+                    @if (!empty($info['icon']))
+                        <i class="{{ $info['icon'] }}"></i>
+                    @endif
                     <span>{!! trans($info['label']) !!}</span>{!! array_get($info, 'addition', '') !!}
+                    @if (!empty($info['counter']))
+                        <span class="pull-right-container" data-counter-name="{{ $info['counter'] }}"></span>
+                    @endif
                 </a>
             </li>
         @endif

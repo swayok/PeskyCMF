@@ -4,9 +4,13 @@ var CmfConfig = {
     defaultPageTitle: '',
     rootUrl: '/',
     scaffoldApiUrlSection: 'api',
-    uiUrl: null,
-    userDataUrl: null,
+    uiUrl: null,                //< absolute URL or relative URL that contains CmfConfig.rootUrl
+    userDataUrl: null,          //< absolute URL or relative URL that contains CmfConfig.rootUrl
     userDataCacheTimeoutMs: 30000,
+    enableMenuCounters: true,
+    menuCountersDataUrl: null,  //< absolute URL or relative URL that contains CmfConfig.rootUrl
+    menuCountersUpdateIntervalMs: 30000,
+    disableMenuCountersIfEmptyOrInvalidDataReceived: true,
     contentChangeAnimationDurationMs: 300,
     contentWrapperCssClass: 'section-content-wrapper',
     toastrOptions: {

@@ -346,7 +346,12 @@ Utils.makeTemplateFromText = function (text, clarification) {
 
 Utils.downloadHtml = function (url, cache, template) {
     var deferred = $.Deferred();
-    url = (url[0] === '/' ? url : CmfConfig.rootUrl + '/' + url).replace(/\.html$/i, '') + '.html';
+    if (!url || !url.length) {
+        console.warn('Empty url received in Utils.downloadHtml()');
+        console.trace();
+        return deferred.reject({});
+    }
+    url = (url[0] === '/' || url.match(/^https?:/) !== null ? url : CmfConfig.rootUrl + '/' + url).replace(/\.html$/i, '') + '.html';
     if (!cache || !CmfCache.views[url]) {
         $.ajax({
             url: url,
@@ -379,7 +384,7 @@ Utils.getUser = function (reload) {
         || Math.abs((new Date()).getMilliseconds() - CmfCache.userLastUpdateMs) > CmfConfig.userDataCacheTimeoutMs
     ) {
         $.ajax({
-            url: CmfConfig.rootUrl + '/' + CmfConfig.userDataUrl,
+            url: CmfConfig.userDataUrl,
             cache: false,
             dataType: 'json',
             method: 'GET'

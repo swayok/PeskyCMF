@@ -99,6 +99,11 @@ Route::group(
                     'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getUiView'
                 ]);
 
+                Route::get('page/menu/counters', [
+                    'as' => 'cmf_menu_counters_data',
+                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getMenuCounters'
+                ]);
+
                 // Admin profile
                 Route::get('page/profile/data', [
                     'as' => 'cmf_profile_data',

@@ -101,8 +101,9 @@
         var CmfSettings = {
             isDebug: {{ config('app.debug') ? 'true' : 'false' }},
             rootUrl: '/{{ $urlPrefix }}',
-            uiUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_main_ui', [], false)) }}',
-            userDataUrl: '{{ str_ireplace("/{$urlPrefix}/", '', route('cmf_profile_data', [], false)) }}',
+            uiUrl: '{{ route('cmf_main_ui', [], false) }}',
+            userDataUrl: '{{ route('cmf_profile_data', [], false) }}',
+            menuCountersDataUrl: '{{ route('cmf_menu_counters_data', [], false) }}',
             defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }}'
         };
 

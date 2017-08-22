@@ -505,6 +505,23 @@ abstract class CmfConfig extends ConfigsContainer {
      *              'submenu' => array(...)
      *         ),
      *    )
+     * Keys:
+     *  - label - text of menu item (required)
+     *  - icon - icon for menu item (optinal)
+     *  - url - where to send user (required if no 'submenu' present; can contain empty value to hide menu item)
+     *  - submenu - array of arrays (optional); arrays may contain all keys described here except 'submenu' (3rd level of menu items not supported)
+     *  - additional - any html to add to menu item (optional)
+     *  - counter - name of a "counter" variable (optional); adds <span class="pull-right-container"> to menu item.
+     *          You can provide contents for this tag via CmfConfig::getCountersForMenu() method.
+     *          Example: public function getCountersForMenu() {
+     *              return ['prending_orders' => '<span class="label label-primary pull-right">2</span>'];
+     *          }
+     *          'prending_orders' here is the name of a "counter".
+     *          The idea is to add a possibility to show some autoupdatable numbers (counters) on menu items like
+     *          pending orders count, new messages count, etc...
+     *          Counters updated on every POST/PUT/DELETE request and by timeout. Also you can be manually
+     *          request counters update by JS function AdminUI.updateMenuCounters();
+     *          Update interval can be changed via JS app config: CmfSettings.menuCountersUpdateIntervalMs = 30000;
      */
     static public function menu() {
         return array_merge(
@@ -528,7 +545,13 @@ abstract class CmfConfig extends ConfigsContainer {
                             'url' => '/resource/admins',
                             'icon' => 'glyphicon glyphicon-user'
                         ],
-                    ]
+                    ],
+                ]*/
+                /*[
+                    'label' => 'required',
+                    'icon' => 'optional',
+                    'submenu' => [], //< 'optional'
+                    'url' => 'required
                 ]*/
             ],
             static::$menuItems
@@ -543,6 +566,15 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function addMenuItem($itemKey, $menuItem) {
         static::$menuItems[$itemKey] = $menuItem;
+    }
+
+    /**
+     * Counters for menu items (details in CmfConfig::menu())
+     * Note: Better redirect this to Admin Record method if you're not using CmsAdmin
+     * @return array like ['pending_orders' => '<span class="label label-primary pull-right">2</span>']
+     */
+    static public function getCountersForMenu() {
+        return [];
     }
 
     /**

@@ -371,7 +371,13 @@ class CmfGeneralController extends Controller {
             $adminData['role'] = cmfTransCustom('.admins.role.' . $role);
         }
 
-        return response()->json($adminData);
+        return cmfJsonResponse()->setData($adminData);
+    }
+
+    public function getMenuCounters() {
+        $admin = CmfConfig::getPrimary()->getUser();
+        $this->authorize('resource.details', ['cmf_profile', $admin]);
+        return cmfJsonResponse()->setData(CmfConfig::getPrimary()->getCountersForMenu());
     }
 
     public function cleanCache() {

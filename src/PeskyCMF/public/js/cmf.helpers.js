@@ -530,6 +530,7 @@ AdminUI.destroyUI = function () {
     var deferred = $.Deferred();
     if (AdminUI.visible) {
         var wrapper = Utils.getPageWrapper();
+        AdminUI.stopMenuCountersUpdates();
         wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs, function () {
             if (AdminUI.$el) {
                 AdminUI.$el.detach();
@@ -556,6 +557,7 @@ AdminUI.showUI = function () {
         AdminUI.updateUserInfo();
         wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
         deferred.resolve();
+        AdminUI.startMenuCountersUpdates();
         $(document).trigger('appui:shown');
     } else {
         Utils.showPreloader(wrapper);
@@ -568,6 +570,7 @@ AdminUI.showUI = function () {
             AdminUI.updateUserInfo();
             wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
             deferred.resolve();
+            AdminUI.startMenuCountersUpdates();
             $(document).trigger('appui:shown');
         }).fail(deferred.reject);
     }
@@ -582,6 +585,7 @@ AdminUI.loadUI = function () {
                 AdminUI.loaded = true;
                 AdminUI.$el = $('<div class="ui-container"></div>').html(html);
                 deferred.resolve(AdminUI.$el);
+                AdminUI.initMenuCountersUpdatesAfterAjaxRequests();
                 $(document).trigger('appui:loaded');
             })
             .fail(deferred.reject);
@@ -610,4 +614,76 @@ AdminUI.updateUserInfo = function (userInfo) {
         });
     }
     container.html(AdminUI.userInfoTpl(userInfo)).removeClass('fade-out');
+};
+
+AdminUI.initMenuCountersUpdatesAfterAjaxRequests = function () {
+    if (CmfConfig.enableMenuCounters) {
+        $(document).ajaxSuccess(function (event, xhr, options) {
+            if (
+                $.inArray(options.type, ['POST', 'PUT', 'DELETE']) !== -1
+                || options.url.match(/_method=(POST|PUT|DELETE)/) !== null
+                || ($.isPlainObject(options.data) && options.data._method && $.inArray(options.data._method, ['POST', 'PUT', 'DELETE']) !== -1)
+                || (typeof options.data === 'string' && options.data.match(/_method=(POST|PUT|DELETE)/) !== null)
+            ) {
+                AdminUI.updateMenuCounters();
+            }
+        });
+    }
+};
+
+AdminUI.menuCountersInterval = null;
+AdminUI.startMenuCountersUpdates = function () {
+    if (AdminUI.menuCountersInterval || !CmfConfig.enableMenuCounters) {
+        return;
+    }
+    AdminUI.updateMenuCounters();
+    AdminUI.menuCountersInterval = setInterval(AdminUI.updateMenuCounters, CmfConfig.menuCountersUpdateIntervalMs);
+};
+
+AdminUI.stopMenuCountersUpdates = function () {
+    if (AdminUI.menuCountersInterval) {
+        clearInterval(AdminUI.menuCountersInterval);
+        AdminUI.menuCountersInterval = null;
+    }
+};
+
+AdminUI.disableMenuCountersUpdates = function () {
+    CmfConfig.enableMenuCounters = false;
+    AdminUI.stopMenuCountersUpdates();
+};
+
+AdminUI.updateMenuCounters = function () {
+    var deferred = $.Deferred();
+    if (!AdminUI.visible || !CmfConfig.enableMenuCounters) {
+        return deferred.resolve({});
+    }
+    $.ajax({
+        url: CmfConfig.menuCountersDataUrl,
+        cache: false,
+        dataType: 'json',
+        method: 'GET'
+    }).done(function (json) {
+        if ($.isPlainObject(json) && !$.isEmptyObject(json)) {
+            $(document).find('[data-counter-name]').each(function () {
+                var counterName = $.trim($(this).data('counter-name'));
+                if (counterName && json[counterName]) {
+                    $(this).html(json[counterName]);
+                }
+            });
+        } else if (CmfConfig.disableMenuCountersIfEmptyOrInvalidDataReceived) {
+            AdminUI.disableMenuCountersUpdates();
+            deferred.resolve({});
+            return;
+        }
+        deferred.resolve(json);
+    }).fail(function (xhr) {
+        Utils.handleAjaxError.call(this, xhr);
+        AdminUI.stopMenuCountersUpdates();
+        deferred.reject(xhr, this);
+        if (CmfConfig.disableMenuCountersIfEmptyOrInvalidDataReceived) {
+            AdminUI.disableMenuCountersUpdates();
+        }
+    });
+    return deferred;
+
 };

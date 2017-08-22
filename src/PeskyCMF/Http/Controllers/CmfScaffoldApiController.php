@@ -107,7 +107,7 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->updateBulkOfRecords();
     }
 
-    public function deleteItem($id) {
+    public function deleteItem($tableName, $id) {
         return $this->getScaffoldConfig()->deleteRecord($id);
     }
 
