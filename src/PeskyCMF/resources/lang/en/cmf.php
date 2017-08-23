@@ -53,12 +53,10 @@ return [
         'access_denied_to_scaffold' => 'You do not have enough rights to access requested section',
     ],
     'bool' => [
-        'bool' => [
-            'yes' => 'Yes',
-            'no' => 'No',
-            'on' => 'On',
-            'off' => 'Off'
-        ]
+        'yes' => 'Yes',
+        'no' => 'No',
+        'on' => 'On',
+        'off' => 'Off'
     ],
     'month' => [
         '01' => 'January',
