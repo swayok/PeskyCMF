@@ -1242,6 +1242,11 @@ var DataGridSearchHelper = {
                 if (!fieldNameTofilterIdMap[rule.f]) {
                     continue;
                 }
+                if (rule.v === true) {
+                    rule.v = 't';
+                } else if (rule.v === false) {
+                    rule.v = 'f';
+                }
                 ret.rules.push({
                     id: fieldNameTofilterIdMap[rule.f],
                     operator: rule.o,

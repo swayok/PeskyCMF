@@ -916,6 +916,9 @@ aside.main-sidebar .sidebar-menu li > a > .fa-angle-left {
   -o-transition: -o-transform 0.1s linear;
   transition: transform 0.1s linear;
 }
+aside.main-sidebar .sidebar-menu li > a > .pull-right-container {
+  margin-top: -9px;
+}
 aside.main-sidebar .sidebar-menu li > a:hover,
 aside.main-sidebar .sidebar-menu li.current-page:hover > a,
 aside.main-sidebar .sidebar-menu li.active:hover > a {
@@ -1037,8 +1040,9 @@ aside.main-sidebar .sidebar-menu li.header {
 aside.main-sidebar .sidebar-menu li .label,
 aside.main-sidebar .sidebar-menu li .badge {
   font-size: 11px;
-  line-height: normal;
-  padding: 2px 8px 2px 8px;
+  height: 18px;
+  line-height: 19px;
+  padding: 0 8px 0 8px;
   font-weight: normal;
   display: inline-block;
 }
