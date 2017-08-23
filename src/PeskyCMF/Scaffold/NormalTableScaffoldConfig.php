@@ -55,6 +55,12 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $conditions['ORDER'][] = DbExpr::create($config['column']->get() . ' ' . $config['dir'], false);
                 } else {
                     $conditions['ORDER'][$config['column']] = $config['dir'];
+                    if ($dataGridConfig->hasValueViewer($config['column'])) {
+                        $additionalOrders = $dataGridConfig->getValueViewer($config['column'])->getAdditionalOrderBy();
+                        if (!empty($additionalOrders)) {
+                            $conditions['ORDER'] = array_merge($conditions['ORDER'], $additionalOrders);
+                        }
+                    }
                 }
             }
         }

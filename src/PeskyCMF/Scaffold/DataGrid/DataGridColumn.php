@@ -21,6 +21,10 @@ class DataGridColumn extends RenderableValueViewer {
      * @var null|int
      */
     protected $columnWidth = null;
+    /**
+     * @var array
+     */
+    protected $additionalOrderBy = [];
 
     /**
      * @return boolean
@@ -139,6 +143,24 @@ class DataGridColumn extends RenderableValueViewer {
     }
 
     /**
+     * Add additional sorting to ORDER BY when user sorts by this column
+     * @param $column
+     * @param $isAscending
+     * @return $this
+     */
+    public function addAdditionalOrderBy($column, $isAscending) {
+        $this->additionalOrderBy[$column] = $isAscending ? 'ASC' : 'DESC';
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAdditionalOrderBy() {
+        return $this->additionalOrderBy;
+    }
+
+    /**
      * @return int
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
@@ -163,6 +185,5 @@ class DataGridColumn extends RenderableValueViewer {
         }
         return $this;
     }
-
 
 }
