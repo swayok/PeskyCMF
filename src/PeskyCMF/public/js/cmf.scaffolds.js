@@ -373,11 +373,11 @@ var ScaffoldDataGridHelper = {
         stateSaveCallback: function (settings, state) {
             var cleanedState = $.extend(true, {}, state);
             delete cleanedState.time;
+            var api = this.api();
             // compress sorting - using column index is not really readable idea and actually makes it less reliable on server side
             if (typeof cleanedState.order !== 'undefined' && $.isArray(cleanedState.order)) {
                 var sorting = cleanedState.order;
                 delete cleanedState.order;
-                var api = new $.fn.dataTable.Api(settings);
                 cleanedState.sort = {};
                 for (var k = 0; k < sorting.length; k++) {
                     cleanedState.sort[api.column(sorting[k][0]).dataSrc()] = sorting[k][1];
@@ -416,21 +416,22 @@ var ScaffoldDataGridHelper = {
                         page.show(newUrl, null, true, true, {
                             is_state_save: true,
                             is_datagrid: true,
-                            api: $.fn.dataTable.Api(settings)
+                            api: api
                         });
                     } else {
                         window.request.customData.is_datagrid = true;
-                        window.request.customData.api = $.fn.dataTable.Api(settings);
+                        window.request.customData.api = api;
                     }
                     settings.initialState = encodedState;
                 }
             } else {
                 settings.initialState = encodedState;
                 window.request.customData.is_datagrid = true;
-                window.request.customData.api = $.fn.dataTable.Api(settings);
+                window.request.customData.api = api;
             }
         },
         stateLoadCallback: function (settings) {
+            var api = this.api();
             if (window.request.query[settings.sTableId]) {
                 try {
                     var state = JSON.parse(window.request.query[settings.sTableId]);
@@ -478,7 +479,7 @@ var ScaffoldDataGridHelper = {
                     // restore compressed state.order
                     if (typeof state.sort !== 'undefined' && $.isPlainObject(state.sort)) {
                         state.order = [];
-                        var columns = new $.fn.dataTable.Api(settings).columns().dataSrc();
+                        var columns = api.columns().dataSrc();
                         for (var columnName in state.sort) {
                             var index = $.inArray(columnName, columns);
                             if (index >= 0) {
@@ -496,21 +497,50 @@ var ScaffoldDataGridHelper = {
                     }
                 }
             } else if (window.request.query.filter) {
+                var filters = null;
                 try {
-                    var filters = JSON.parse(window.request.query.filter);
-                    if (filters) {
-                        var search = DataGridSearchHelper.convertKeyValueFiltersToRules(filters);
-                        if (search) {
-                            this.api().search(search);
-                        }
-                        return {};
-                    }
+                    filters = JSON.parse(window.request.query.filter);
                 } catch (e) {
                     if (CmfConfig.isDebug) {
                         console.warn('Invalid json for "filter" query arg');
                     }
+                    return {};
                 }
-
+                try {
+                    if (filters && $.isPlainObject(filters)) {
+                        var tableConfigs = $(settings.nTable).data('configs');
+                        var fieldNameToFilterIdMap = null;
+                        if (
+                            $.isPlainObject(tableConfigs)
+                            && tableConfigs.hasOwnProperty('queryBuilderConfig')
+                            && $.isPlainObject(tableConfigs.queryBuilderConfig)
+                            && tableConfigs.queryBuilderConfig.hasOwnProperty('fieldNameToFilterIdMap')
+                        ) {
+                            fieldNameToFilterIdMap = tableConfigs.queryBuilderConfig.fieldNameToFilterIdMap;
+                        }
+                        var search = DataGridSearchHelper.convertKeyValueFiltersToRules(
+                            filters,
+                            fieldNameToFilterIdMap
+                        );
+                        if (search) {
+                            return {
+                                time: (new Date()).getTime(),
+                                search: {
+                                    caseInsensitive: true,
+                                    regex: false,
+                                    search: search,
+                                    smart: true
+                                }
+                            };
+                        }
+                    }
+                    return {};
+                } catch (e) {
+                    if (CmfConfig.isDebug) {
+                        console.error('Failed to apply filters from "filter" query arg', e);
+                    }
+                    return {};
+                }
             }
             return {};
         }
@@ -564,16 +594,23 @@ var ScaffoldDataGridHelper = {
                 }
             }
             var configsBackup = $.extend(true, {}, mergedConfigs);
-            $dataGrid.DataTable(mergedConfigs)
+            if (configs.queryBuilderConfig) {
+                mergedConfigs.queryBuilderConfig = DataGridSearchHelper.prepareConfigs(
+                    configs.queryBuilderConfig,
+                    configs.defaultSearchRules
+                );
+            }
+            $dataGrid
+                .data('configs', mergedConfigs)
+                .data('resourceName', mergedConfigs.resourceName)
+                .DataTable(mergedConfigs)
                 .on('init', function (event, settings) {
                     var $table = $(settings.nTable);
                     var $tableWrapper = $(settings.nTableWrapper);
-                    $table.data('configs', mergedConfigs);
-                    $table.data('resourceName', mergedConfigs.resourceName);
                     $table.dataTable().api().settings()[0].resourceName = mergedConfigs.resourceName;
                     ScaffoldDataGridHelper.initToolbar($tableWrapper, configs);
-                    if (configs.queryBuilderConfig) {
-                        DataGridSearchHelper.init(configs.queryBuilderConfig, configs.defaultSearchRules, $table);
+                    if (mergedConfigs.queryBuilderConfig) {
+                        DataGridSearchHelper.init($table, mergedConfigs.queryBuilderConfig);
                     }
                     ScaffoldDataGridHelper.initClickEvents($tableWrapper, $table, configs);
                     ScaffoldDataGridHelper.initRowActions($table, configs);
@@ -584,6 +621,7 @@ var ScaffoldDataGridHelper = {
                 }).on('preXhr', function (event, settings) {
                     ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                     CmfRoutingHelpers.cleanupHangedElementsInBody();
+                    $(this).dataTable().api().columns.adjust();
                 });
             return $dataGrid;
         } else {
@@ -1015,7 +1053,6 @@ var DataGridSearchHelper = {
         plugins: ['bt-tooltip-errors', 'bt-checkbox', 'bt-selectpicker', 'bt-selectpicker-values'],
         allow_empty: true
     },
-    resetButton: '#query-builder-reset',
     locale: {
         submit: 'Search',
         reset: 'Reset',
@@ -1026,170 +1063,205 @@ var DataGridSearchHelper = {
         rules: [
         ]
     },
-    init: function (config, defaultRules, $dataGrid) {
-        if (config && config.filters && config.filters.length > 0) {
-            var $builder = $('#' + DataGridSearchHelper.id);
-            $builder.prepend('<h4>' + DataGridSearchHelper.locale.header + '</h4>');
-            var $builderContent = $('<div></div>').attr('id' , DataGridSearchHelper.id + '-content');
-            $builder.append($builderContent);
-            var tableApi = $dataGrid.dataTable().api();
-            for (var i in config.filters) {
-                if (
-                    (config.filters[i].input === 'radio' || config.filters[i].input === 'checkbox')
-                    && !config.filters[i].color
-                ) {
-                    config.filters[i].color = 'primary';
+    getQueryBuilderNode: function () {
+        return $('#' + DataGridSearchHelper.id);
+    },
+    getDataGridNodeForQueryBuilder: function ($builder) {
+        return ($builder ? $builder : DataGridSearchHelper.getQueryBuilderNode()).data('dataGrid');
+    },
+    getDataGridApiForQueryBuilder: function ($builder) {
+        return ($builder ? $builder : DataGridSearchHelper.getQueryBuilderNode()).data('dataGridApi');
+    },
+    getFieldNameToFilterIdMapForQueryBuilder: function ($builder) {
+        return ($builder ? $builder : DataGridSearchHelper.getQueryBuilderNode()).data('config').fieldNameToFilterIdMap;
+    },
+    prepareConfigs: function (config, defaultRules) {
+        if (!config || !config.filters || config.filters.length <= 0) {
+            return;
+        }
+        for (var i in config.filters) {
+            if (
+                (config.filters[i].input === 'radio' || config.filters[i].input === 'checkbox')
+                && !config.filters[i].color
+            ) {
+                config.filters[i].color = 'primary';
+            }
+        }
+        var builderConfig = {rules: []};
+        if ($.isArray(defaultRules) && defaultRules.length) {
+            builderConfig = {rules: defaultRules};
+        } else if (defaultRules.rules) {
+            builderConfig = $.extend({}, defaultRules);
+        }
+        $.extend(
+            builderConfig,
+            DataGridSearchHelper.defaultConfig,
+            config
+        );
+        builderConfig.fieldNameToFilterIdMap = DataGridSearchHelper.makeFieldNameToFilterIdMapFromFiltersConfig(builderConfig.filters);
+        return builderConfig;
+    },
+    init: function ($dataGrid, builderConfig) {
+        if (!builderConfig) {
+            return;
+        }
+        var $builder = DataGridSearchHelper.getQueryBuilderNode();
+        $builder.prepend('<h4>' + DataGridSearchHelper.locale.header + '</h4>');
+        var $builderContent = $('<div></div>').attr('id' , DataGridSearchHelper.id + '-content');
+        $builder.append($builderContent);
+        var tableApi = $dataGrid.dataTable().api();
+        $dataGrid.data('queryBuilder', $builder);
+        $builder.data('dataGrid', $dataGrid);
+        $builder.data('dataGridApi', tableApi);
+        $builderContent.queryBuilder(builderConfig);
+        if (tableApi.search().length) {
+            try {
+                var currentSearch = JSON.parse(tableApi.search());
+                var decoded = DataGridSearchHelper.decodeRulesForDataTable(
+                    currentSearch,
+                    builderConfig.fieldNameToFilterIdMap
+                );
+                if ($.isPlainObject(decoded) && $.isArray(decoded.rules)) {
+                    $builderContent.queryBuilder('setRules', decoded);
+                } else {
+                    $builderContent.queryBuilder('setRules', builderConfig.rules);
                 }
+            } catch (ignore) {
+                console.warn('invalid filter rules: ' + tableApi.search());
             }
-            var builderConfig = {rules: []};
-            if ($.isArray(defaultRules) && defaultRules.length) {
-                builderConfig = {rules: defaultRules};
-            } else if (defaultRules.rules) {
-                builderConfig = $.extend({}, defaultRules);
-            }
-            builderConfig = $.extend(builderConfig, DataGridSearchHelper.defaultConfig, config);
-            $builderContent.queryBuilder(builderConfig);
-            if (tableApi.search().length) {
-                try {
-                    var currentSearch = JSON.parse(tableApi.search());
-                    var decoded = DataGridSearchHelper.decodeRulesForDataTable(
-                        currentSearch,
-                        DataGridSearchHelper.getFieldNameToFilterIdMap(config.filters)
-                    );
-                    if ($.isPlainObject(decoded) && $.isArray(decoded.rules)) {
-                        $builderContent.queryBuilder('setRules', decoded);
-                    } else {
-                        $builderContent.queryBuilder('setRules', builderConfig.rules);
-                    }
-                } catch (ignore) {
-                    console.warn('invalid filter rules: ' + tableApi.search());
-                }
-            }
-            var $runFilteringBtn = $('<button class="btn btn-success" type="button"></button>')
-                .text(DataGridSearchHelper.locale.submit);
-            $runFilteringBtn.on('click', function () {
-                // clean empty filters
-                $builderContent.find('.rule-container').each(function () {
-                    var model = $builderContent.queryBuilder('getModel', $(this));
-                    if (model && !model.filter) {
-                        model.drop();
-                    }
-                });
-                // clean empty filter groups
-                $builderContent.find('.rules-group-container').each(function () {
-                    var group = $builderContent.queryBuilder('getModel', $(this));
-                    if (group && group.length() <= 0 && !group.isRoot()) {
-                        var parentGroup = group.parent;
-                        group.drop();
-                        while (parentGroup && parentGroup.length() <= 0 && !parentGroup.isRoot()) {
-                            var parent = parentGroup.parent;
-                            parentGroup.drop();
-                            parentGroup = parent;
-                        }
-                    }
-                });
-                if ($builderContent.queryBuilder('validate')) {
-                    var rules = $builderContent.queryBuilder('getRules');
-                    var encoded;
-                    if (!rules.rules) {
-                        // empty rules set
-                        $builderContent.queryBuilder('reset');
-                        encoded = DataGridSearchHelper.encodeRulesForDataTable(DataGridSearchHelper.emptyRules)
-                    } else if ($builderContent.queryBuilder('validate')) {
-                        encoded = DataGridSearchHelper.encodeRulesForDataTable(rules);
-                    }
-                    tableApi.search(encoded).draw();
+        }
+        var $runFilteringBtn = $('<button class="btn btn-success" type="button"></button>')
+            .text(DataGridSearchHelper.locale.submit);
+        $runFilteringBtn.on('click', function () {
+            // clean empty filters
+            $builderContent.find('.rule-container').each(function () {
+                var model = $builderContent.queryBuilder('getModel', $(this));
+                if (model && !model.filter) {
+                    model.drop();
                 }
             });
-            var $resetFilteringBtnInToolbar = $('<button class="btn btn-danger reset-filter" type="button"></button>')
-                .text(DataGridSearchHelper.locale.reset);
-            $resetFilteringBtnInToolbar
-                .hide()
-                .on('click', function () {
+            // clean empty filter groups
+            $builderContent.find('.rules-group-container').each(function () {
+                var group = $builderContent.queryBuilder('getModel', $(this));
+                if (group && group.length() <= 0 && !group.isRoot()) {
+                    var parentGroup = group.parent;
+                    group.drop();
+                    while (parentGroup && parentGroup.length() <= 0 && !parentGroup.isRoot()) {
+                        var parent = parentGroup.parent;
+                        parentGroup.drop();
+                        parentGroup = parent;
+                    }
+                }
+            });
+            if ($builderContent.queryBuilder('validate')) {
+                var rules = $builderContent.queryBuilder('getRules');
+                var encoded;
+                if (!rules.rules) {
+                    // empty rules set
                     $builderContent.queryBuilder('reset');
-                    $builderContent.queryBuilder('setRules', builderConfig.rules);
-                    $runFilteringBtn.click();
+                    encoded = DataGridSearchHelper.encodeRulesForDataTable(
+                        DataGridSearchHelper.emptyRules,
+                        builderConfig.fieldNameToFilterIdMap
+                    );
+                } else if ($builderContent.queryBuilder('validate')) {
+                    encoded = DataGridSearchHelper.encodeRulesForDataTable(
+                        rules,
+                        builderConfig.fieldNameToFilterIdMap
+                    );
+                }
+                tableApi.search(encoded).draw();
+            }
+        });
+        var $resetFilteringBtnInToolbar = $('<button class="btn btn-danger reset-filter" type="button"></button>')
+            .text(DataGridSearchHelper.locale.reset);
+        $resetFilteringBtnInToolbar
+            .hide()
+            .on('click', function () {
+                $builderContent.queryBuilder('reset');
+                // $builderContent.queryBuilder('setRules', builderConfig.rules);
+                $runFilteringBtn.click();
+                // if (DataGridSearchHelper.countRules(builderConfig.rules) === 0) {
                     $resetFilteringBtnInToolbar.hide();
-                });
-            var $resetFilteringBtnInFilter = $resetFilteringBtnInToolbar.clone(true).show();
-            var $toolbar = $builder
-                .closest('.dataTables_wrapper')
-                .find('.filter-toolbar');
-            if (config.is_opened) {
-                console.warn('Filter: is_opened option is not working currently and may never work in future');
-                // $resetFilteringBtnInToolbar.show();
-                // $toolbar
-                //     .append($runFilteringBtn)
-                //     .append($resetFilteringBtnInToolbar);
-            } /*else {*/
-                var $counterBadge = $('<span class="counter label label-success ml10"></span>');
-                var $filterToggleButton = $('<button class="btn btn-default" type="button"></button>')
-                    .text(DataGridSearchHelper.locale.toggle)
-                    .append($counterBadge);
-                $builder.addClass('collapse');
-                var changeCountInBadge = function () {
-                    var rules = $builderContent.queryBuilder('getRules');
-                    var count = DataGridSearchHelper.countRules(rules);
-                    if (count) {
-                        $counterBadge.text(count).show();
+                // }
+            });
+        var $resetFilteringBtnInFilter = $resetFilteringBtnInToolbar.clone(true).show();
+        var $toolbar = $builder
+            .closest('.dataTables_wrapper')
+            .find('.filter-toolbar');
+        if (builderConfig.is_opened) {
+            console.warn('Filter: is_opened option is not working currently and may never work in future');
+            // $resetFilteringBtnInToolbar.show();
+            // $toolbar
+            //     .append($runFilteringBtn)
+            //     .append($resetFilteringBtnInToolbar);
+        } /*else {*/
+            var $counterBadge = $('<span class="counter label label-success ml10"></span>');
+            var $filterToggleButton = $('<button class="btn btn-default" type="button"></button>')
+                .text(DataGridSearchHelper.locale.toggle)
+                .append($counterBadge);
+            $builder.addClass('collapse');
+            var changeCountInBadge = function () {
+                var rules = $builderContent.queryBuilder('getRules');
+                var count = DataGridSearchHelper.countRules(rules);
+                if (count) {
+                    $counterBadge.text(count).show();
+                    $resetFilteringBtnInToolbar.show();
+                } else {
+                    $counterBadge.hide();
+                }
+            };
+            changeCountInBadge();
+            var toggleFilterPanel = function (hideFilterPanel, filterToggleButtonClicked) {
+                if (hideFilterPanel && !$builderContent.queryBuilder('validate', {skip_empty: true})) {
+                    // do not hide filter until there are invalid rules
+                    return false;
+                }
+                var $filterPanel = $('#' + DataGridSearchHelper.id);
+                var rulesCount = DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules'));
+                if (hideFilterPanel) {
+                    $filterPanel.collapse('hide');
+                    $filterToggleButton.removeClass('active');
+                    $runFilteringBtn.hide();
+                    if (rulesCount === 0) {
+                        $resetFilteringBtnInToolbar.hide();
+                    }
+                } else {
+                    $filterPanel.collapse('show');
+                    $filterToggleButton.addClass('active');
+                    $runFilteringBtn.show();
+                    if (rulesCount > 0) {
                         $resetFilteringBtnInToolbar.show();
-                    } else {
-                        $counterBadge.hide();
                     }
-                };
-                changeCountInBadge();
-                var toggleFilterPanel = function (hideFilterPanel, filterToggleButtonClicked) {
-                    if (hideFilterPanel && !$builderContent.queryBuilder('validate', {skip_empty: true})) {
-                        // do not hide filter until there are invalid rules
-                        return false;
+                }
+                return true;
+            };
+            $filterToggleButton
+                .on('click', function () {
+                    toggleFilterPanel($filterToggleButton.hasClass('active'));
+                });
+            $toolbar.append($filterToggleButton);
+            $runFilteringBtn
+                .on('click', function () {
+                    if (toggleFilterPanel(true)) {
+                        changeCountInBadge();
                     }
-                    var $filterPanel = $('#' + DataGridSearchHelper.id);
-                    var rulesCount = DataGridSearchHelper.countRules($builderContent.queryBuilder('getRules'));
-                    if (hideFilterPanel) {
-                        $filterPanel.collapse('hide');
-                        $filterToggleButton.removeClass('active');
-                        $runFilteringBtn.hide();
-                        if (rulesCount === 0) {
-                            $resetFilteringBtnInToolbar.hide();
-                        }
-                    } else {
-                        $filterPanel.collapse('show');
-                        $filterToggleButton.addClass('active');
-                        $runFilteringBtn.show();
-                        if (rulesCount > 0) {
-                            $resetFilteringBtnInToolbar.show();
-                        }
-                    }
-                    return true;
-                };
-                $filterToggleButton
-                    .on('click', function () {
-                        toggleFilterPanel($filterToggleButton.hasClass('active'));
-                    });
-                $toolbar.append($filterToggleButton);
-                $runFilteringBtn
-                    .on('click', function () {
-                        if (toggleFilterPanel(true)) {
-                            changeCountInBadge();
-                        }
-                    })
-                    .hide();
-                var $filterCloseButton = $('<button type="button" class="btn btn-default btn-sm">')
-                    .text(DataGridSearchHelper.locale.close)
-                    .on('click', function () {
-                        toggleFilterPanel(true);
-                    });
-                $builder.append(
-                    $('<div id="query-builder-controls">')
-                        .append($filterCloseButton.addClass('pull-left'))
-                        .append($runFilteringBtn.addClass('btn-sm'))
-                        .append($resetFilteringBtnInFilter.addClass('btn-sm'))
-                );
-                $toolbar.append($resetFilteringBtnInToolbar);
-            //}
-        }
+                })
+                .hide();
+            var $filterCloseButton = $('<button type="button" class="btn btn-default btn-sm">')
+                .text(DataGridSearchHelper.locale.close)
+                .on('click', function () {
+                    toggleFilterPanel(true);
+                });
+            $builder.append(
+                $('<div id="query-builder-controls">')
+                    .append($filterCloseButton.addClass('pull-left'))
+                    .append($runFilteringBtn.addClass('btn-sm'))
+                    .append($resetFilteringBtnInFilter.addClass('btn-sm'))
+            );
+            $toolbar.append($resetFilteringBtnInToolbar);
+        //}
     },
-    encodeRulesForDataTable: function (rules, asObject) {
+    encodeRulesForDataTable: function (rules, fieldNameToFilterIdMap, asObject) {
         if (!$.isPlainObject(rules)) {
             return {
                 c: 'AND',
@@ -1200,30 +1272,46 @@ var DataGridSearchHelper = {
             c: rules.condition || 'AND',
             r: []
         };
+        if (!$.isPlainObject(fieldNameToFilterIdMap)) {
+            fieldNameToFilterIdMap = {___unprefixedToPrefixedMap: {}};
+        } else if (!$.isPlainObject(fieldNameToFilterIdMap.___unprefixedToPrefixedMap)) {
+            fieldNameToFilterIdMap.___unprefixedToPrefixedMap = {};
+        }
         if (rules.rules) {
             for (var i = 0; i < rules.rules.length; i++) {
                 var rule = rules.rules[i];
                 if (rule.condition) {
-                    ret.r.push(DataGridSearchHelper.encodeRulesForDataTable(rule, true));
+                    ret.r.push(DataGridSearchHelper.encodeRulesForDataTable(rule, fieldNameToFilterIdMap, true));
                 } else {
+                    if (fieldNameToFilterIdMap.___unprefixedToPrefixedMap.hasOwnProperty(rule.field)) {
+                        // unprefixed field name detected: use prefixed name
+                        rule.field = fieldNameToFilterIdMap.___unprefixedToPrefixedMap[rule.field];
+                    }
                     ret.r.push({
                         f: rule.field,
                         o: rule.operator,
-                        v: rule.value
+                        v: DataGridSearchHelper.normalizeRuleValue(rule.value)
                     });
                 }
             }
         }
         return asObject ? ret : JSON.stringify(ret);
     },
-    getFieldNameToFilterIdMap: function (filters) {
-        var map = {};
+    makeFieldNameToFilterIdMapFromFiltersConfig: function (filters) {
+        var map = {___unprefixedToPrefixedMap: {}};
         for (var i = 0; i < filters.length; i++) {
             map[filters[i].field] = filters[i].id;
+            // add unprefixed field names (for 'Orders.is_accepted' field unprefixed name will be 'is_accepted')
+            // in case when map already contains unprefixed name - this one will be dropped
+            var matches = filters[i].field.match(/\.([a-zA-Z_0-9-]+)$/);
+            if (matches !== null && !map.hasOwnProperty(matches[1])) {
+                map[matches[1]] = filters[i].id;
+                map.___unprefixedToPrefixedMap[matches[1]] = filters[i].field;
+            }
         }
         return map;
     },
-    decodeRulesForDataTable: function (rules, fieldNameTofilterIdMap) {
+    decodeRulesForDataTable: function (rules, fieldNameToFilterIdMap) {
         if (!rules || !$.isArray(rules.r)) {
             return null;
         }
@@ -1234,23 +1322,18 @@ var DataGridSearchHelper = {
         for (var i = 0; i < rules.r.length; i++) {
             var rule = rules.r[i];
             if (rule.c) {
-                var subrules = DataGridSearchHelper.decodeRulesForDataTable(rule, fieldNameTofilterIdMap);
+                var subrules = DataGridSearchHelper.decodeRulesForDataTable(rule, fieldNameToFilterIdMap);
                 if (subrules !== null) {
                     ret.rules.push(subrules);
                 }
             } else {
-                if (!fieldNameTofilterIdMap[rule.f]) {
+                if (!fieldNameToFilterIdMap[rule.f]) {
                     continue;
                 }
-                if (rule.v === true) {
-                    rule.v = 't';
-                } else if (rule.v === false) {
-                    rule.v = 'f';
-                }
                 ret.rules.push({
-                    id: fieldNameTofilterIdMap[rule.f],
+                    id: fieldNameToFilterIdMap[rule.f],
                     operator: rule.o,
-                    value: rule.v
+                    value: DataGridSearchHelper.normalizeRuleValue(rule.v)
                 });
             }
         }
@@ -1260,7 +1343,7 @@ var DataGridSearchHelper = {
         if (!rules) {
             return 0;
         }
-        rules = DataGridSearchHelper.encodeRulesForDataTable(rules, true);
+        rules = DataGridSearchHelper.encodeRulesForDataTable(rules, null, true);
         var count = 0;
         for (var i = 0; i < rules.r.length; i++) {
             var rule = rules.r[i];
@@ -1272,7 +1355,7 @@ var DataGridSearchHelper = {
         }
         return count;
     },
-    convertKeyValueFiltersToRules: function (filters) {
+    convertKeyValueFiltersToRules: function (filters, fieldNameToFilterIdMap) {
         var rules = [];
         if (!filters) {
             return false;
@@ -1282,18 +1365,29 @@ var DataGridSearchHelper = {
                 rules.push({
                     field: field,
                     operator: 'equal',
-                    value: filters[field]
+                    value: DataGridSearchHelper.normalizeRuleValue(filters[field])
                 });
             }
         }
         if (rules.length) {
-            return DataGridSearchHelper.encodeRulesForDataTable({
-                condition: 'AND',
-                rules: rules
-            });
+            return DataGridSearchHelper.encodeRulesForDataTable(
+                {
+                    condition: 'AND',
+                    rules: rules
+                },
+                fieldNameToFilterIdMap
+            );
         } else {
             return false;
         }
+    },
+    normalizeRuleValue: function (value) {
+        if (value === true) {
+            return 't';
+        } else if (value === false) {
+            return 'f';
+        }
+        return value;
     }
 };
 
