@@ -15,6 +15,9 @@ $else = '{{??}}';
 $endIf = '{{?}}';
 $printPk = "{{= it.{$pkColName} }}";
 
+$pageUrl = $ifEdit . routeTpl('cmf_item_edit_form', ['table_name' => $tableNameForRoutes], ['id' => 'it.' . $table->getPkColumnName()])
+    . $else . routeTpl('cmf_item_add_form', ['table_name' => $tableNameForRoutes])
+    . $endIf;
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 $tabs = $formConfig->getTabs();
 $groups = $formConfig->getInputsGroups();
@@ -63,19 +66,12 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     </a>
                 <?php endif;*/ ?>
                 <?php if ($formConfig->isDeleteAllowed()) : ?>
-                    <?php
-                        $deleteUrl = str_ireplace(
-                            ':id:',
-                            "{{= it.{$table->getPkColumnName()} }}",
-                            route('cmf_api_delete_item', [$tableNameForRoutes, ':id:'])
-                        );
-                    ?>
                     {{? !!it.___delete_allowed }}
                     <a class="btn btn-danger" href="#"
-                    data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
-                    data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
-                    data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid"
-                    >
+                       data-action="request" data-method="delete"
+                       data-url="<?php echo routeTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
+                       data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
+                       data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
                         <?php echo cmfTransGeneral('.form.toolbar.delete'); ?>
                     </a>
                     {{?}}
@@ -202,16 +198,22 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                 <div class="modal-content item-form-modal-content">
                     <div class="modal-header pv10">
                         <div class="box-tools pull-right">
-                            <button type="button" data-action="reload" class="btn btn-box-tool fs13 va-t ptn mt5"
-                            data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.reload'); ?>">
+                            <a class="btn btn-box-tool fs13 va-t ptn mt5"
+                               href="<?php echo $pageUrl ?>"
+                               data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.reload'); ?>">
                                 <i class="glyphicon glyphicon-refresh"></i>
-                            </button>
-                            <a href="" class="btn btn-box-tool fs13 va-t ptn mt5" target="_blank" data-toggle="tooltip"
-                            title="<?php echo cmfTransGeneral('.modal.open_in_new_tab'); ?>">
+                            </a>
+<!--                            <button type="button" data-action="reload" class="btn btn-box-tool fs13 va-t ptn mt5"-->
+<!--                                    data-toggle="tooltip" title="--><?php //echo cmfTransGeneral('.modal.reload'); ?><!--">-->
+<!--                                <i class="glyphicon glyphicon-refresh"></i>-->
+<!--                            </button>-->
+                            <a class="btn btn-box-tool fs13 va-t ptn mt5" target="_blank"
+                               href="<?php echo $pageUrl; ?>"
+                               data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.open_in_new_tab'); ?>">
                                 <i class="glyphicon glyphicon-share"></i>
                             </a>
                             <button type="button" data-dismiss="modal" class="btn btn-box-tool va-t pbn ptn mt5"
-                            data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.close'); ?>">
+                                    data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.close'); ?>">
                                 <span class="fs24 lh15">&times;</span>
                             </button>
                         </div>

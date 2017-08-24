@@ -5,6 +5,7 @@
  * @var string $tableNameForRoutes
  * @var string $idSuffix
  */
+$pageUrl = routeTpl('cmf_item_details', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]);
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 $tabs = $itemDetailsConfig->getTabs();
 $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
@@ -126,33 +127,20 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 }
             ?>
             <?php if ($itemDetailsConfig->isDeleteAllowed()) : ?>
-                <?php
-                    $deleteUrl = str_ireplace(
-                        ':id:',
-                        "{{= it.{$table->getPkColumnName()} }}",
-                        route('cmf_api_delete_item', [$tableNameForRoutes, ':id:'])
-                    );
-                ?>
                 {{? !!it.___delete_allowed }}
                     <a class="btn btn-danger" href="#"
-                    data-action="request" data-method="delete" data-url="<?php echo $deleteUrl; ?>"
-                    data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
-                    data-on-success="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid"
-                    >
+                       data-action="request" data-method="delete"
+                       data-url="<?php echo routeTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
+                       data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
+                       data-on-success="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
                         <?php echo cmfTransGeneral('.item_details.toolbar.delete'); ?>
                     </a>
                 {{?}}
             <?php endif; ?>
             <?php if ($itemDetailsConfig->isEditAllowed()) : ?>
-                <?php
-                    $editUrl = str_ireplace(
-                        ':id:',
-                        "{{= it.{$table->getPkColumnName()} }}",
-                        routeToCmfItemEditForm($tableNameForRoutes, ':id:')
-                    );
-                ?>
                 {{? !!it.___edit_allowed }}
-                    <a class="btn btn-success" href="<?php echo $editUrl; ?>">
+                    <a class="btn btn-success"
+                       href="<?php echo routeTpl('cmf_item_edit_form', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>">
                         <?php echo cmfTransGeneral('.item_details.toolbar.edit'); ?>
                     </a>
                 {{?}}
@@ -177,16 +165,18 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 <div class="modal-content item-details-modal-content">
                     <div class="modal-header pv10">
                         <div class="box-tools pull-right">
-                            <button type="button" data-action="reload" class="btn btn-box-tool fs13 va-t ptn mt5"
-                            data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.reload'); ?>">
+                            <a class="btn btn-box-tool fs13 va-t ptn mt5"
+                               href="<?php echo $pageUrl ?>"
+                               data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.reload'); ?>">
                                 <i class="glyphicon glyphicon-refresh"></i>
-                            </button>
-                            <a href="" class="btn btn-box-tool fs13 va-t ptn mt5" target="_blank" data-toggle="tooltip"
-                            title="<?php echo cmfTransGeneral('.modal.open_in_new_tab'); ?>">
+                            </a>
+                            <a class="btn btn-box-tool fs13 va-t ptn mt5" target="_blank"
+                               href="<?php echo $pageUrl ?>"
+                               data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.open_in_new_tab'); ?>">
                                 <i class="glyphicon glyphicon-share"></i>
                             </a>
                             <button type="button" data-dismiss="modal" class="btn btn-box-tool va-t pbn ptn mt5"
-                            data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.close'); ?>">
+                                    data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.close'); ?>">
                                 <span class="fs24 lh15">&times;</span>
                             </button>
                         </div>
@@ -194,12 +184,12 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     </div>
                     <div class="modal-body pn">
                         <button type="button" class="prev-item" disabled
-                        data-toggle="tooltip" title="<?php echo cmfTransGeneral('.item_details.previous_item') ?>">
+                                data-toggle="tooltip" title="<?php echo cmfTransGeneral('.item_details.previous_item') ?>">
                             <i class="glyphicon glyphicon-arrow-left"></i>
                         </button>
                         {{# def.tabsheet() }}
                         <button type="button" class="next-item" disabled
-                        data-toggle="tooltip" title="<?php echo cmfTransGeneral('.item_details.next_item') ?>">
+                                data-toggle="tooltip" title="<?php echo cmfTransGeneral('.item_details.next_item') ?>">
                             <i class="glyphicon glyphicon-arrow-right"></i>
                         </button>
                     </div>
