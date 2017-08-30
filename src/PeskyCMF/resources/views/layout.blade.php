@@ -104,7 +104,8 @@
             uiUrl: '{{ route('cmf_main_ui', [], false) }}',
             userDataUrl: '{{ route('cmf_profile_data', [], false) }}',
             menuCountersDataUrl: '{{ route('cmf_menu_counters_data', [], false) }}',
-            defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }}'
+            defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }}',
+            pageTitleAddition: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->page_title_addition() }}'
         };
 
         var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};

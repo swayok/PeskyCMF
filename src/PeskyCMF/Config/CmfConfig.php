@@ -353,8 +353,18 @@ abstract class CmfConfig extends ConfigsContainer {
         ];
     }
 
+    /**
+     * @return string
+     */
     static public function default_page_title() {
         return static::transCustom('.default_page_title');
+    }
+
+    /**
+     * @return string
+     */
+    static public function page_title_addition() {
+        return static::default_page_title();
     }
 
     /**
