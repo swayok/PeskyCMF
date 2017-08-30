@@ -41,7 +41,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
 
     public function getValidators() {
         return [
-            $this->getName() => 'array',
+            $this->getName() => 'array|nullable',
         ];
     }
 
@@ -84,50 +84,18 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
                 ]);
             }
             $newFkValues = array_values($value);
-            array_walk($newFkValues, function (&$value) {
-                $value = (int)$value;
-            });
-            if (!$created) {
-                $existingRelatedRecords = $this->getRelation()->getForeignTable()->selectAssoc(
-                    $this->getRelation()->getForeignTable()->getPkColumnName(),
-                    $this->getRelationColumn(),
-                    [$this->getRelation()->getForeignColumnName() => $record->getValue($this->getRelation()->getLocalColumnName())]
-                );
-                $itemsToDelete = [];
-                $fkValuesToIgnore = [];
-                // filter existing to leave only new ones and find items to delete
-                foreach ($existingRelatedRecords as $pkValue => $fkValue) {
-                    if (in_array($fkValue, $newFkValues, true)) {
-                        $fkValuesToIgnore[] = $fkValue;
-                    } else {
-                        $itemsToDelete[] = $fkValue;
-                    }
-                }
-                $newFkValues = array_diff($newFkValues, $fkValuesToIgnore);
-                if (!empty($itemsToDelete)) {
-                    // delete unlinked records
-                    $this->getRelation()->getForeignTable()->delete([
-                        $this->getRelation()->getForeignTable()->getPkColumnName() => $itemsToDelete,
-                    ]);
-                }
-            }
-            if (empty($newFkValues)) {
-                return;
-            }
             $recordConstantData = [
                 $this->getRelation()->getForeignColumnName() => $record->getValue($this->getRelation()->getLocalColumnName()),
             ];
-            $foreignRecord = $this->getRelation()->getForeignTable()->newRecord();
+            $relatedRecords = [];
             foreach ($newFkValues as $fkValue) {
-                $foreignRecord
-                    ->fromData(array_merge(
-                        $recordConstantData,
-                        [
-                            $this->getRelationColumn() => $fkValue,
-                        ]
-                    ))
-                    ->save();
+                $relatedRecords[] = array_merge(
+                    $recordConstantData,
+                    [$this->getRelationColumn() => (int)$fkValue]
+                );
             }
+            $record->updateRelatedRecord($this->getRelation()->getName(), $relatedRecords, false);
+            $record->saveRelations([$this->getRelation()->getName()], true);
         };
     }
 
