@@ -2,6 +2,7 @@ var CmfConfig = {
     isDebug: false,
     debugDialog: null,
     defaultPageTitle: '',
+    pageTitleAddition: '',
     rootUrl: '/',
     scaffoldApiUrlSection: 'api',
     uiUrl: null,                //< absolute URL or relative URL that contains CmfConfig.rootUrl

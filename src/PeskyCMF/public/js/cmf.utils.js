@@ -439,12 +439,12 @@ Utils.cleanCache = function () {
 
 Utils.updatePageTitleFromH1 = function ($content) {
     var $h1 = $content && $content.length ? $content.find('h1, .modal-header').first() : $('#section-content h1, h1').first();
-    var defaultPageTitle = $.trim(String(CmfConfig.defaultPageTitle));
     if ($h1.length) {
         var $pageTitle = $h1.find('.page-title, .modal-title');
-        document.title = ($pageTitle.length ? $pageTitle.text() : $h1.text()) + (defaultPageTitle.length ? ' - ' + defaultPageTitle : '');
+        var pageTitleAddition = $.trim(String(CmfConfig.pageTitleAddition));
+        document.title = ($pageTitle.length ? $pageTitle.text() : $h1.text()) + (pageTitleAddition.length ? ' - ' + pageTitleAddition : '');
     } else {
-        document.title = defaultPageTitle;
+        document.title = $.trim(String(CmfConfig.defaultPageTitle));
     }
 };
 
