@@ -42,11 +42,8 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
     public function getValidators() {
         return [
             $this->getName() => 'array|nullable',
+            $this->getName(). '.' . $this->getRelationColumn() => 'integer',
         ];
-    }
-
-    public function hasOwnValueSavingMethod() {
-        return true;
     }
 
     public function setRelation(Relation $relation, $columnName) {
@@ -67,36 +64,18 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         return parent::getRelationColumn();
     }
 
-    public function getValueSaver() {
-        return function ($value, RecordInterface $record, $created = false) {
-            if (empty($value)) {
-                if (!$created) {
-                    // delete all related records
-                    $this->getRelation()->getForeignTable()->delete([
-                        $this->getRelation()->getForeignColumnName() => $record->getValue($this->getRelation()->getLocalColumnName()),
-                    ]);
-                }
-                return;
-            }
-            if (!is_array($value)) {
-                throw new InvalidDataException([
-                    $this->getName() => 'Value must be an array',
-                ]);
-            }
+    public function modifySubmitedValueBeforeValidation($value, array $data) {
+        if (empty($value)) {
+            $value = [];
+        }
+        if (is_array($value)) {
             $newFkValues = array_values($value);
-            $recordConstantData = [
-                $this->getRelation()->getForeignColumnName() => $record->getValue($this->getRelation()->getLocalColumnName()),
-            ];
-            $relatedRecords = [];
+            $value = [];
             foreach ($newFkValues as $fkValue) {
-                $relatedRecords[] = array_merge(
-                    $recordConstantData,
-                    [$this->getRelationColumn() => (int)$fkValue]
-                );
+                $value[] = [$this->getRelationColumn() => (int)$fkValue];
             }
-            $record->updateRelatedRecord($this->getRelation()->getName(), $relatedRecords, false);
-            $record->saveRelations([$this->getRelation()->getName()], true);
-        };
+        }
+        return parent::modifySubmitedValueBeforeValidation($value, $data);
     }
 
     public function doDefaultValueConversionByType($value, $type, array $record) {
@@ -193,9 +172,13 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
      * @throws \InvalidArgumentException
      */
     public function setDbQueryConditionsForDefaultOptionsLoader($conditonsAndOptions) {
-        if (!is_array($conditonsAndOptions) && !($conditonsAndOptions instanceof DbExpr)) {
+        if (
+            !is_array($conditonsAndOptions)
+            && !($conditonsAndOptions instanceof DbExpr)
+            && !($conditonsAndOptions instanceof \Closure)
+        ) {
             throw new \InvalidArgumentException(
-                '$conditonsAndOptions argument must be an array or a closure'
+                '$conditonsAndOptions argument must be a string, DbExpr or a Closure'
             );
         }
         $this->dbQueryConditionsForDefaultOptionsLoader = $conditonsAndOptions;
@@ -211,9 +194,13 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
      * @throws \InvalidArgumentException
      */
     public function setOptionLabelColumnForDefaultOptionsLoader($columnNameOrClosure) {
-        if (!is_string($columnNameOrClosure) && !($columnNameOrClosure instanceof DbExpr)) {
+        if (
+            !is_string($columnNameOrClosure)
+            && !($columnNameOrClosure instanceof DbExpr)
+            && !($columnNameOrClosure instanceof \Closure)
+        ) {
             throw new \InvalidArgumentException(
-                '$columnNameOrClosure argument must be a string or a closure'
+                '$columnNameOrClosure argument must be a string, DbExpr or a Closure'
             );
         }
         $this->optionLabelColumnForDefaultOptionsLoader = $columnNameOrClosure;
