@@ -47,7 +47,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         $this->app->register(PeskyOrmServiceProvider::class);
         $this->app->register(PeskyValidationServiceProvider::class);
         $this->app->register(SuppressLaravelDatabaseServiceProvider::class);
-        $this->app->register(LanguageDetectorServiceProvider::class);
+        $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
         $loader->alias('LanguageDetector', LanguageDetector::class);
 

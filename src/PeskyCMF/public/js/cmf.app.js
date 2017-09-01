@@ -25,7 +25,7 @@ $(function () {
         CustomRoutes.init();
     }
 
-    page('*', function (request, next) {
+    page.route('*', function (request, next) {
         request.query = qs.parse(request.querystring);
         window.request = request;
         next();
