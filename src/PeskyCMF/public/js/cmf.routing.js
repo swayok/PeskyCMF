@@ -158,7 +158,7 @@ var CmfRoutingHelpers = {
                 CmfRoutingHelpers.$currentContent = $prevContent;
                 CmfRoutingHelpers.setCurrentContentContainer($prevContentContainer);
                 if (!$modal.data('closed-automatically')) {
-                    page.restoreContext(CmfRoutingHelpers.lastNonModalPageRequest, true, false);
+                    page.restoreRequest(CmfRoutingHelpers.lastNonModalPageRequest, true, false);
                 }
             })
             .on('show.bs.modal', function () {

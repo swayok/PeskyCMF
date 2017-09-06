@@ -411,33 +411,33 @@ var ScaffoldDataGridHelper = {
             if (settings.iDraw > 1) {
                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                 if (encodedState !== settings.initialState) {
-                    if (!window.request.customData.is_history) {
-                        var newUrl = window.request.pathname + '?' + settings.sTableId + '=' + encodedState;
+                    if (!page.currentRequest().customData.is_history) {
+                        var newUrl = page.currentRequest().pathname + '?' + settings.sTableId + '=' + encodedState;
                         page.show(newUrl, null, true, true, {
                             is_state_save: true,
                             is_datagrid: true,
                             api: api
                         });
                     } else {
-                        window.request.customData.is_datagrid = true;
-                        window.request.customData.api = api;
+                        page.currentRequest().customData.is_datagrid = true;
+                        page.currentRequest().customData.api = api;
                     }
                     settings.initialState = encodedState;
                 }
             } else {
                 settings.initialState = encodedState;
-                window.request.customData.is_datagrid = true;
-                window.request.customData.api = api;
+                page.currentRequest().customData.is_datagrid = true;
+                page.currentRequest().customData.api = api;
             }
         },
         stateLoadCallback: function (settings) {
             var api = this.api();
-            if (window.request.query[settings.sTableId]) {
+            if (page.currentRequest().query[settings.sTableId]) {
                 try {
-                    var state = JSON.parse(window.request.query[settings.sTableId]);
+                    var state = JSON.parse(page.currentRequest().query[settings.sTableId]);
                 } catch (e) {
                     if (CmfConfig.isDebug) {
-                        console.warn('Invalid JSON', window.request.query[settings.sTableId], e);
+                        console.warn('Invalid JSON', page.currentRequest().query[settings.sTableId], e);
                     }
                 }
                 try {
@@ -496,10 +496,10 @@ var ScaffoldDataGridHelper = {
                         console.warn('Failed to parse DataTable state: ', state, e);
                     }
                 }
-            } else if (window.request.query.filter) {
+            } else if (page.currentRequest().query.filter) {
                 var filters = null;
                 try {
-                    filters = JSON.parse(window.request.query.filter);
+                    filters = JSON.parse(page.currentRequest().query.filter);
                 } catch (e) {
                     if (CmfConfig.isDebug) {
                         console.warn('Invalid json for "filter" query arg');
@@ -705,8 +705,8 @@ var ScaffoldDataGridHelper = {
                                 && (
                                     json.redirect === 'back'
                                     || json.redirect === 'reload'
-                                    || json.redirect === window.request.path
-                                    || json.redirect === window.request.pathname
+                                    || json.redirect === page.currentRequest().path
+                                    || json.redirect === page.currentRequest().pathname
                                 )
                             ) {
                                 api.ajax.reload(null, false);

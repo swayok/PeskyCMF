@@ -25,11 +25,6 @@ $(function () {
         CustomRoutes.init();
     }
 
-    page.route('*', function (request, next) {
-        request.query = qs.parse(request.querystring);
-        window.request = request;
-        next();
-    });
     page.route('/login', CmfRouteChange.authorizationPage);
     page.route('/forgot_password', CmfRouteChange.authorizationPage);
     page.route('/replace_password', CmfRouteChange.authorizationPage);
@@ -66,7 +61,9 @@ $(function () {
         CustomApp.beforeStart();
     }
 
-    page.start();
+    page.start({
+        decodeURLQuery: true
+    });
 
     if (typeof CustomApp !== 'undefined' && typeof CustomApp.afterStart === 'function') {
         CustomApp.afterStart();
