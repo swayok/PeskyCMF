@@ -789,7 +789,7 @@ class FormConfig extends ScaffoldSectionConfig {
                 /** @var array $value */
                 foreach ($value as &$validator) {
                     if (is_string($validator)) {
-                        $validator = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
+                        $validator = StringUtils::insert($validator, $data, ['before' => '{{', 'after' => '}}']);
                     }
                     if ($validator === 'array') {
                         $columnsWithArrayType[] = $key;

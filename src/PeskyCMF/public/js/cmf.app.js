@@ -15,10 +15,9 @@ $(function () {
     Utils.configureAppLibs();
 
     page.base(CmfConfig.rootUrl);
-    page.exit(CmfRoutingHelpers.pageExitTransition);
-    page.exit(function (request, next) {
+    page.exit(function () {
         CmfRoutingHelpers.cleanupHangedElementsInBody();
-        next();
+        CmfRoutingHelpers.pageExitTransition();
     });
 
     if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
@@ -68,16 +67,6 @@ $(function () {
     if (typeof CustomApp !== 'undefined' && typeof CustomApp.afterStart === 'function') {
         CustomApp.afterStart();
     }
-
-    page.route('*', function (request, next) {
-        // handle 404 requests
-        if (!request.handled && CmfConfig.isDebug) {
-            console.error('No route found for: ' + request.pathname);
-        }
-        if (!request.error) {
-            next(); //< use default behavior (use usual redirect to requested url)
-        }
-    });
 
 });
 

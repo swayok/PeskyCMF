@@ -2,11 +2,10 @@ var CmfRoutingHelpers = {
     lastNonModalPageRequest: null,
     $currentContentContainer: Utils.getPageWrapper(),
     $currentContent: null,
-    pageExitTransition: function (request, next) {
+    pageExitTransition: function (request) {
         if (!request.is_restore) {
             Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
         }
-        next();
     },
     cleanupHangedElementsInBody: function () {
         $('body > .tooltip, body > .bootstrap-select').remove();
@@ -25,8 +24,7 @@ var CmfRoutingHelpers = {
         }
         return deferred;
     },
-    initAsyncRouteHandling: function (request, next) {
-        request.handled = false;
+    initAsyncRouteHandling: function (request) {
         return $.Deferred()
             .done(function () {
                 if (request.push !== false) {
@@ -38,24 +36,13 @@ var CmfRoutingHelpers = {
                 CmfRoutingHelpers.routeHandlingFailed(request, next);
             });
     },
-    routeHandled: function (request, next) {
-        request.handled = true;
+    routeHandled: function (request) {
         request.title = document.title;
         if (!CmfRoutingHelpers.$currentContent.hasClass('modal') && !request.is_restore) {
             CmfRoutingHelpers.lastNonModalPageRequest = request;
             Utils.highlightLinks(request);
         }
-        next();
         CmfRoutingHelpers.hideContentContainerPreloader();
-    },
-    routeHandlingFailed: function (request, next) {
-        CmfRoutingHelpers.hideContentContainerPreloader();
-        request.handled = true;
-        request.error = true;
-        next();
-        if (request.push !== false) {
-            page.back('/');
-        }
     },
     setCurrentContentContainer: function ($el) {
         if (!CmfRoutingHelpers.$currentContentContainer || !CmfRoutingHelpers.$currentContentContainer.is($el)) {
@@ -179,8 +166,8 @@ var CmfRouteChange = {
 
 };
 
-CmfRouteChange.authorizationPage = function (request, next) {
-    $.when(
+CmfRouteChange.authorizationPage = function (request) {
+    return $.when(
             Utils.downloadHtml(request.pathname, true, false),
             AdminUI.destroyUI()
         )
@@ -199,11 +186,9 @@ CmfRouteChange.authorizationPage = function (request, next) {
                         });
                     }
                 });
-            CmfRoutingHelpers.routeHandled(request, next);
+            CmfRoutingHelpers.routeHandled(request);
         })
-        .fail(function () {
-            CmfRoutingHelpers.routeHandlingFailed(request, next);
-        });
+        .promise();
 };
 
 CmfRouteChange.logout = function (request, next) {
