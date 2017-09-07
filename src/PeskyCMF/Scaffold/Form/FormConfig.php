@@ -546,18 +546,21 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * @param array $data
+     * @param mixed $itemId - primary key value for current item
      * @return array
      */
-    public function getValidatorsForEdit() {
+    public function getValidatorsForEdit(array $data, $itemId) {
         return array_merge(
             $this->presetValidators,
-            $this->validators ? call_user_func($this->validators) : [],
-            $this->validatorsForCreate ? call_user_func($this->validatorsForEdit) : []
+            $this->validators ? call_user_func($this->validators, $data) : [],
+            $this->validatorsForCreate ? call_user_func($this->validatorsForEdit, $data, $itemId) : []
         );
     }
 
     /**
-     * @param \Closure $validatorsForEdit - you can insert fields from received data via '{{field_name}}'
+     * @param \Closure $validatorsForEdit - function (array $data, $itemId) { return []; }
+     * Note: You can insert fields from received data via '{{field_name}}'
      * @return $this
      */
     public function addValidatorsForEdit(\Closure $validatorsForEdit) {
@@ -566,18 +569,20 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * @param array $data
      * @return array
      */
-    public function getValidatorsForCreate() {
+    public function getValidatorsForCreate(array $data) {
         return array_merge(
             $this->presetValidators,
-            $this->validators ? call_user_func($this->validators) : [],
-            $this->validatorsForCreate ? call_user_func($this->validatorsForCreate) : []
+            $this->validators ? call_user_func($this->validators, $data) : [],
+            $this->validatorsForCreate ? call_user_func($this->validatorsForCreate, $data) : []
         );
     }
 
     /**
-     * @param \Closure $validatorsForCreate
+     * @param \Closure $validatorsForCreate = function (array $data) { return []; }
+     * Note: You can insert fields from received data via '{{field_name}}'
      * @return $this
      */
     public function addValidatorsForCreate(\Closure $validatorsForCreate) {
@@ -586,7 +591,8 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param \Closure $validators
+     * @param \Closure $validators = function (array $data) { return []; }
+     * Note: You can insert fields from received data via '{{field_name}}'
      * @return $this
      */
     public function setValidators(\Closure $validators) {
@@ -607,7 +613,12 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \BadMethodCallException
      */
     public function validateDataForCreate(array $data, array $messages = [], $isRevalidation = false) {
-        return $this->validateData($data, $this->getValidatorsForCreate(), $messages, $isRevalidation);
+        return $this->validateData(
+            $data,
+            $this->getValidatorsForCreate($data),
+            $messages,
+            $isRevalidation
+        );
     }
 
     /**
@@ -623,7 +634,15 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \BadMethodCallException
      */
     public function validateDataForEdit(array $data, array $messages = [], $isRevalidation = false) {
-        return $this->validateData($data, $this->getValidatorsForEdit(), $messages, $isRevalidation);
+        return $this->validateData(
+            $data,
+            $this->getValidatorsForEdit(
+                $data,
+                array_get($data, $this->getTable()->getPkColumnName(), null)
+            ),
+            $messages,
+            $isRevalidation
+        );
     }
 
     /**
@@ -639,7 +658,7 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \BadMethodCallException
      */
     public function validateDataForBulkEdit(array $data, array $messages = [], $isRevalidation = false) {
-        $rules = array_intersect_key($this->getValidatorsForEdit(), $data);
+        $rules = array_intersect_key($this->getValidatorsForEdit($data, null), $data);
         if (empty($rules)) {
             return [];
         }
