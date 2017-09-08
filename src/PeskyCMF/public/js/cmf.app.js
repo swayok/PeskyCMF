@@ -15,9 +15,9 @@ $(function () {
     Utils.configureAppLibs();
 
     page.base(CmfConfig.rootUrl);
-    page.exit(function () {
+    page.exit(function (prevRequest) {
         CmfRoutingHelpers.cleanupHangedElementsInBody();
-        CmfRoutingHelpers.pageExitTransition();
+        CmfRoutingHelpers.pageExitTransition(prevRequest);
     });
 
     if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
@@ -35,6 +35,11 @@ $(function () {
     page.route('/resource/:resource/create', CmfRouteChange.scaffoldItemFormPage);
     page.route('/resource/:resource/edit/:id', CmfRouteChange.scaffoldItemFormPage);
     page.route('/resource/:resource/:id/page/:page', CmfRouteChange.scaffoldItemCustomPage);
+
+    page.error('*', function (request) {
+        request.error_handled = false;
+        CmfRoutingHelpers.hideContentContainerPreloader();
+    });
 
     $(document).on('click', '[data-nav]', function (event) {
         event.preventDefault();
