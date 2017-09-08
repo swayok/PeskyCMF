@@ -3,7 +3,7 @@ var CmfRoutingHelpers = {
     $currentContentContainer: Utils.getPageWrapper(),
     $currentContent: null,
     pageExitTransition: function (request) {
-        if (!request.is_restore) {
+        if (!request.env().is_restore) {
             Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
         }
         return CmfRoutingHelpers.hideModals();
@@ -31,7 +31,7 @@ var CmfRoutingHelpers = {
     },
     routeHandled: function (request) {
         request.title = document.title;
-        if (!CmfRoutingHelpers.$currentContent.hasClass('modal') && !request.is_restore) {
+        if (!CmfRoutingHelpers.$currentContent.hasClass('modal') && !request.env().is_restore) {
             CmfRoutingHelpers.lastNonModalPageRequest = request;
             Utils.highlightLinks(request);
         }
@@ -100,7 +100,8 @@ var CmfRoutingHelpers = {
     },
     initModalAndContent: function ($modal, request) {
         var deferred = $.Deferred();
-        request.push = false;
+        // request.push = false;
+        request.handledByModalDialog();
         if (!CmfRoutingHelpers.$currentContent) {
             CmfConfig.getDebugDialog().showDebug(
                 'Unexpected application behavior detected',
@@ -134,7 +135,7 @@ var CmfRoutingHelpers = {
                 CmfRoutingHelpers.$currentContent = $prevContent;
                 CmfRoutingHelpers.setCurrentContentContainer($prevContentContainer);
                 if (!$modal.data('closed-automatically')) {
-                    page.restoreRequest(CmfRoutingHelpers.lastNonModalPageRequest, true, false);
+                    request.modalDialogClosed(true);
                 }
             })
             .on('show.bs.modal', function () {
@@ -187,7 +188,7 @@ CmfRouteChange.logout = function (request, next) {
 };
 
 CmfRouteChange.showPage = function (request) {
-    if (request.is_restore) {
+    if (request.env().is_restore) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
@@ -209,7 +210,7 @@ CmfRouteChange.showPage = function (request) {
 };
 
 CmfRouteChange.scaffoldItemCustomPage = function (request) {
-    if (request.is_restore) {
+    if (request.env().is_restore) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
@@ -232,13 +233,13 @@ CmfRouteChange.scaffoldItemCustomPage = function (request) {
 };
 
 CmfRouteChange.scaffoldDataGridPage = function (request) {
-    if (request.customData.is_state_save || request.is_restore) {
+    if (request.customData.is_state_save || request.env().is_restore) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
     if (
-        !request.customData.is_click
-        && !request.customData.is_reload
+        !request.env().is_click
+        && !request.env().is_reload
         && CmfRoutingHelpers.lastNonModalPageRequest
         && CmfRoutingHelpers.lastNonModalPageRequest.pathname === request.pathname
     ) {
@@ -272,7 +273,7 @@ CmfRouteChange.scaffoldDataGridPage = function (request) {
 };
 
 CmfRouteChange.scaffoldItemDetailsPage = function (request) {
-    if (request.is_restore) {
+    if (request.env().is_restore) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
@@ -292,7 +293,8 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
                     }
                 }
             };
-            if (data.__modal && request.customData && request.customData.is_click) {
+            console.log(request.customData);
+            if (data.__modal && request.env().is_click) {
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
                     var $modal = $content.find('.modal');
@@ -370,7 +372,7 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
 };
 
 CmfRouteChange.scaffoldItemFormPage = function (request) {
-    if (request.is_restore) {
+    if (request.env().is_restore) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }

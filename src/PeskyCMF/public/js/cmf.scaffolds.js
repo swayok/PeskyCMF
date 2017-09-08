@@ -411,7 +411,7 @@ var ScaffoldDataGridHelper = {
             if (settings.iDraw > 1) {
                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                 if (encodedState !== settings.initialState) {
-                    if (!page.currentRequest().customData.is_history) {
+                    if (!page.currentRequest().env().is_history) {
                         var newUrl = page.currentRequest().pathname + '?' + settings.sTableId + '=' + encodedState;
                         page.show(newUrl, null, true, true, {
                             is_state_save: true,
