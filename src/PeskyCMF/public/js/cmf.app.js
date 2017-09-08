@@ -37,7 +37,7 @@ $(function () {
     page.route('/resource/:resource/:id/page/:page', CmfRouteChange.scaffoldItemCustomPage);
 
     page.error('*', function (request) {
-        request.error_handled = false;
+        request.errorHandled = false;
         CmfRoutingHelpers.hideContentContainerPreloader();
     });
 
