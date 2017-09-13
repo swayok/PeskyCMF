@@ -411,18 +411,22 @@ var ScaffoldDataGridHelper = {
             if (settings.iDraw > 1) {
                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                 if (encodedState !== settings.initialState) {
-                    if (!page.currentRequest().env().is_history) {
-                        var newUrl = page.currentRequest().pathname + '?' + settings.sTableId + '=' + encodedState;
+                    if (page.currentRequest().env().is_history) {
+                        page.currentRequest().customData.is_datagrid = true;
+                        page.currentRequest().customData.api = api;
+                    } else {
+                        var request = new page.Request(document.location.pathname + document.location.search + document.location.hash);
+                        var newUrl = request.pathname + '?' + settings.sTableId + '=' + encodedState;
+                        if (request.hash.length > 0) {
+                            newUrl += '#' + request.hash;
+                        }
                         page.show(newUrl, null, true, true, {
                             is_state_save: true,
                             is_datagrid: true,
                             api: api
                         });
-                    } else {
-                        page.currentRequest().customData.is_datagrid = true;
-                        page.currentRequest().customData.api = api;
+                        settings.initialState = encodedState;
                     }
-                    settings.initialState = encodedState;
                 }
             } else {
                 settings.initialState = encodedState;
@@ -432,12 +436,13 @@ var ScaffoldDataGridHelper = {
         },
         stateLoadCallback: function (settings) {
             var api = this.api();
-            if (page.currentRequest().query[settings.sTableId]) {
+            var request = new page.Request(document.location.pathname + document.location.search + document.location.hash);
+            if (request.query[settings.sTableId]) {
                 try {
-                    var state = JSON.parse(page.currentRequest().query[settings.sTableId]);
+                    var state = JSON.parse(request.query[settings.sTableId]);
                 } catch (e) {
                     if (CmfConfig.isDebug) {
-                        console.warn('Invalid JSON', page.currentRequest().query[settings.sTableId], e);
+                        console.warn('Invalid JSON', request.query[settings.sTableId], e);
                     }
                 }
                 try {
@@ -496,10 +501,10 @@ var ScaffoldDataGridHelper = {
                         console.warn('Failed to parse DataTable state: ', state, e);
                     }
                 }
-            } else if (page.currentRequest().query.filter) {
+            } else if (request.query.filter) {
                 var filters = null;
                 try {
-                    filters = JSON.parse(page.currentRequest().query.filter);
+                    filters = JSON.parse(request.query.filter);
                 } catch (e) {
                     if (CmfConfig.isDebug) {
                         console.warn('Invalid json for "filter" query arg');
@@ -705,8 +710,9 @@ var ScaffoldDataGridHelper = {
                                 && (
                                     json.redirect === 'back'
                                     || json.redirect === 'reload'
-                                    || json.redirect === page.currentRequest().path
-                                    || json.redirect === page.currentRequest().pathname
+                                    || json.redirect === document.location.path
+                                    || json.redirect === document.location.pathname
+                                    || json.redirect === document.location.href
                                 )
                             ) {
                                 api.ajax.reload(null, false);
@@ -739,7 +745,13 @@ var ScaffoldDataGridHelper = {
                 ) {
                     var data = api.row($(this)).data();
                     if (data) {
-                        page.show(configs.doubleClickUrl(api.row($(this)).data()));
+                        page.show(
+                            configs.doubleClickUrl(api.row($(this)).data()),
+                            null,
+                            true,
+                            true,
+                            {env: {is_click: true, target: event.target}}
+                        );
                     }
                 }
                 return false;

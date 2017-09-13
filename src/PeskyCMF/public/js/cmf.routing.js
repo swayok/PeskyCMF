@@ -2,8 +2,8 @@ var CmfRoutingHelpers = {
     lastNonModalPageRequest: null,
     $currentContentContainer: Utils.getPageWrapper(),
     $currentContent: null,
-    pageExitTransition: function (request) {
-        if (!request.env().is_restore) {
+    pageExitTransition: function (prevRequest, currentRequest) {
+        if (!currentRequest.env().is_restore) {
             Utils.showPreloader(CmfRoutingHelpers.$currentContentContainer);
         }
         return CmfRoutingHelpers.hideModals();
@@ -101,7 +101,7 @@ var CmfRoutingHelpers = {
     initModalAndContent: function ($modal, request) {
         var deferred = $.Deferred();
         // request.push = false;
-        request.handledByModalDialog();
+        request.convertToSubrequest();
         if (!CmfRoutingHelpers.$currentContent) {
             CmfConfig.getDebugDialog().showDebug(
                 'Unexpected application behavior detected',
@@ -131,11 +131,12 @@ var CmfRoutingHelpers = {
                 show: false
             })
             .on('hidden.bs.modal', function () {
+                var closedAutomatically = !!$modal.data('closed-automatically');
                 $modal.remove();
                 CmfRoutingHelpers.$currentContent = $prevContent;
                 CmfRoutingHelpers.setCurrentContentContainer($prevContentContainer);
-                if (!$modal.data('closed-automatically')) {
-                    request.modalDialogClosed(true);
+                if (!closedAutomatically) {
+                    request.restoreParentRequest(true);
                 }
             })
             .on('show.bs.modal', function () {
@@ -181,14 +182,14 @@ CmfRouteChange.authorizationPage = function (request) {
         .promise();
 };
 
-CmfRouteChange.logout = function (request, next) {
+CmfRouteChange.logout = function (request) {
     Utils.showPreloader(document.body);
     Utils.getPageWrapper().fadeOut(500);
-    document.location = request.canonicalPath;
+    document.location = request.fullUrl();
 };
 
 CmfRouteChange.showPage = function (request) {
-    if (request.env().is_restore) {
+    if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
@@ -210,7 +211,7 @@ CmfRouteChange.showPage = function (request) {
 };
 
 CmfRouteChange.scaffoldItemCustomPage = function (request) {
-    if (request.env().is_restore) {
+    if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
@@ -233,7 +234,11 @@ CmfRouteChange.scaffoldItemCustomPage = function (request) {
 };
 
 CmfRouteChange.scaffoldDataGridPage = function (request) {
-    if (request.customData.is_state_save || request.env().is_restore) {
+    if (
+        request.customData.is_state_save
+        || request.env().is_restore
+        || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))
+    ) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
@@ -273,7 +278,7 @@ CmfRouteChange.scaffoldDataGridPage = function (request) {
 };
 
 CmfRouteChange.scaffoldItemDetailsPage = function (request) {
-    if (request.env().is_restore) {
+    if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
@@ -293,8 +298,8 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
                     }
                 }
             };
-            console.log(request.customData);
-            if (data.__modal && request.env().is_click) {
+            if ((data.__modal && request.env().is_click) || request.isSubRequest()) {
+                data.__modal = true;
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
                     var $modal = $content.find('.modal');
@@ -372,7 +377,7 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
 };
 
 CmfRouteChange.scaffoldItemFormPage = function (request) {
-    if (request.env().is_restore) {
+    if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
         return;
     }
@@ -445,7 +450,8 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                 }
             }
             data._options = options;
-            if (data.__modal) {
+            if ((data.__modal && request.env().is_click) || request.isSubRequest()) {
+                data.__modal = true;
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
                     var $modal = $content.find('.modal');

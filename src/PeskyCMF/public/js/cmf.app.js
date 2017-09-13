@@ -15,9 +15,9 @@ $(function () {
     Utils.configureAppLibs();
 
     page.base(CmfConfig.rootUrl);
-    page.exit(function (prevRequest) {
+    page.exit(function (prevRequest, currentRequest) {
         CmfRoutingHelpers.cleanupHangedElementsInBody();
-        CmfRoutingHelpers.pageExitTransition(prevRequest);
+        CmfRoutingHelpers.pageExitTransition(prevRequest, currentRequest);
     });
 
     if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
