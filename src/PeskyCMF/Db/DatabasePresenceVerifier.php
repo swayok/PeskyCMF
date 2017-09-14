@@ -12,6 +12,11 @@ use Symfony\Component\Debug\Exception\ClassNotFoundException;
 class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
     protected $tables = [];
+    /**
+     * Defines if column values should be compared in case sensitive mode or in case insensitive mode
+     * @var bool
+     */
+    protected $caseSensitiveModeEnabled = true;
 
     /**
      * Count the number of objects in a collection having the given value.
@@ -30,7 +35,11 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      * @throws \BadMethodCallException
      */
     public function getCount($tableName, $column, $value, $excludeId = null, $idColumn = null, array $extra = []) {
-        $conditions = [$column => $value];
+        if ($this->caseSensitiveModeEnabled || is_numeric($value)) {
+            $conditions = [$column => $value];
+        } else {
+            $conditions = [$column . ' ~*' => preg_quote($value, null)];
+        }
         if ($excludeId !== null && $excludeId !== 'NULL') {
             $conditions[($idColumn ?: 'id') . ' !='] = $excludeId;
         }
@@ -108,6 +117,16 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
     public function setConnection($connection) {
         // don't need this but may come
+    }
+
+    public function enableCaseInsensitiveMode() {
+        $this->caseSensitiveModeEnabled = false;
+        return $this;
+    }
+
+    public function enableCaseSensitiveMode() {
+        $this->caseSensitiveModeEnabled = true;
+        return $this;
     }
 
 }

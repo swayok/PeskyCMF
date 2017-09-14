@@ -39,7 +39,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         return static::TYPE_MULTISELECT;
     }
 
-    public function getValidators() {
+    public function getValidators($isCreation) {
         return [
             $this->getName() => 'array|nullable',
             $this->getName(). '.' . $this->getRelationColumn() => 'integer',

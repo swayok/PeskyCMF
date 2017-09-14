@@ -150,7 +150,7 @@ class KeyValueSetFormInput extends FormInput {
         return $renderer;
     }
 
-    public function getValidators() {
+    public function getValidators($isCreation) {
         return [
             $this->getName() => 'array|min:' . $this->getMinValuesCount() . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
             $this->getName() . '.*' => 'array',

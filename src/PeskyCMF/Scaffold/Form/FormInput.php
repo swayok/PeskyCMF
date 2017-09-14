@@ -2,10 +2,12 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
+use Illuminate\Validation\Rule;
 use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyCMF\Scaffold\ValueViewerConfigException;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\Relation;
 
 class FormInput extends RenderableValueViewer {
 
@@ -308,10 +310,63 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
+     * @param bool $isCreation - true: validators for record creation; false: validators for record update
      * @return array
      */
-    public function getValidators() {
-        return [];
+    public function getValidators($isCreation) {
+        $column = $this->getTableColumn();
+        $columnName = $column->getName();
+        $rule = $column->isValueCanBeNull() && ($column->isItPrimaryKey() && !$isCreation) ? 'nullable|' : 'required|';
+        if ($column->isValueMustBeUnique()) {
+            $additionalColumns = $column->getUniqueContraintAdditonalColumns();
+            $uniquenessValidator = Rule::unique($column->getTableStructure()->getTableName(), $columnName);
+            if (!$isCreation) {
+                $uniquenessValidator->ignore(
+                    '{' . $column->getTableStructure()->getPkColumnName() . '}',
+                    $column->getTableStructure()->getPkColumnName()
+                );
+            }
+            if (!empty($additionalColumns)) {
+                foreach ($additionalColumns as $additionalColumnName) {
+                    $uniquenessValidator->where($additionalColumnName, '{' . $additionalColumnName . '}');
+                }
+            }
+            if (!$column->isUniqueContraintCaseSensitive()) {
+                // validation with lowercasing of this column's value
+                $uniquenessValidator = preg_replace('%^unique%', 'unique-ceseinsensitive', (string)$uniquenessValidator);
+            }
+            $rule .= (string)$uniquenessValidator;
+        } else if (in_array($column->getType(), [$column::TYPE_JSON, $column::TYPE_JSONB], true)) {
+            $rule .= 'array';
+        } else if ($column->getType() === $column::TYPE_BOOL) {
+            $rule .= 'boolean';
+        } else if ($column->getType() === $column::TYPE_INT) {
+            $rule .= 'integer' . ($column->isItPrimaryKey() || $column->isItAForeignKey() ? '|min:1' : '');
+        } else if ($column->getType() === $column::TYPE_FLOAT) {
+            $rule .= 'numeric';
+        } else if ($column->getType() === $column::TYPE_EMAIL) {
+            $rule .= 'string|email';
+        } else if ($column->getType() === $column::TYPE_FILE) {
+            $rule .= 'file';
+        } else if ($column->getType() === $column::TYPE_IMAGE) {
+            $rule .= 'image';
+        } else if ($column->getType() === $column::TYPE_ENUM) {
+            $rule .= 'string|in:' . implode(',', $column->getAllowedValues());
+        } else if ($column->getType() === $column::TYPE_IPV4_ADDRESS) {
+            $rule .= 'ipv4';
+        } else if ($column->getType() === $column::TYPE_UNIX_TIMESTAMP) {
+            $rule .= 'integer|min:0';
+        } else if ($column->getType() === $column::TYPE_TIMEZONE_OFFSET) {
+            $rule .= 'integer';
+        } else {
+            $rule .= 'string';
+        }
+        if ($column->isItAForeignKey()) {
+            /** @var Relation $relation */
+            $relation = $column->getForeignKeyRelation();
+            $rule .= '|exists:' . $relation->getForeignTable()->getName() . ',' . $relation->getForeignColumnName();
+        }
+        return [$columnName => $rule];
     }
 
     /**
@@ -450,7 +505,7 @@ class FormInput extends RenderableValueViewer {
      *      - true: if input is not present in form this condition will be ignored
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @param null $changeValue
- *          - null: leave as is
+     *      - null: leave as is
      *      - string or bool: change value of this input when it gets "readonly" attribute
      * @return $this
      * @throws \UnexpectedValueException

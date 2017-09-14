@@ -37,11 +37,6 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /** @var bool */
     protected $hasOptionsLoader = null;
-    /**
-     * Validators provided by FormImput->getValidators()
-     * @var array
-     */
-    protected $presetValidators = [];
     /** @var \Closure */
     protected $validators;
     /** @var \Closure */
@@ -291,15 +286,23 @@ class FormConfig extends ScaffoldSectionConfig {
         if (!$viewer) {
             $viewer = $this->getValueViewer($name);
         }
-        $validators = $viewer->getValidators();
-        if (!empty($validators)) {
-            $this->presetValidators = array_merge($validators, $this->presetValidators);
-        }
         if ($this->currentInputsGroup === null) {
             $this->newInputsGroup('');
         }
         $this->inputGroups[$this->currentInputsGroup]['inputs_names'][] = $name;
         return $this;
+    }
+
+    /**
+     * @param bool $isCreation
+     * @return array
+     */
+    protected function collectPresetValidators($isCreation) {
+        $validators = [];
+        foreach ($this->getFormInputs() as $formInput) {
+            $validators = array_merge($validators, $formInput->getValidators($isCreation));
+        }
+        return $validators;
     }
 
     /**
@@ -552,7 +555,7 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function getValidatorsForEdit(array $data, $itemId) {
         return array_merge(
-            $this->presetValidators,
+            $this->collectPresetValidators(false),
             $this->validators ? call_user_func($this->validators, $data) : [],
             $this->validatorsForCreate ? call_user_func($this->validatorsForEdit, $data, $itemId) : []
         );
@@ -574,7 +577,7 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function getValidatorsForCreate(array $data) {
         return array_merge(
-            $this->presetValidators,
+            $this->collectPresetValidators(true),
             $this->validators ? call_user_func($this->validators, $data) : [],
             $this->validatorsForCreate ? call_user_func($this->validatorsForCreate, $data) : []
         );

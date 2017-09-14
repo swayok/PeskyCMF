@@ -152,7 +152,7 @@ class ImagesFormInput extends FormInput {
         return $ret;
     }
 
-    public function getValidators() {
+    public function getValidators($isCreation) {
         $validators = [];
         $configs = $this->getAcceptedFileConfigurations();
         foreach ($configs as $imageConfig) {

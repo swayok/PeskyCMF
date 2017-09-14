@@ -3,6 +3,7 @@
 namespace PeskyCMF\Providers;
 
 use Illuminate\Validation\ValidationServiceProvider;
+use PeskyCMF\Db\DatabasePresenceVerifier;
 use Validator;
 
 class PeskyValidationServiceProvider extends ValidationServiceProvider {
@@ -17,6 +18,7 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
      */
     public function boot() {
         $this->addAlternativeExistsValidator();
+        $this->addCaseInsensitiveUniquenessValidator();
     }
 
     protected function registerPresenceVerifier() {
@@ -37,6 +39,18 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
         });
         Validator::replacer('exists-eloquent', function ($message, $attribute, $rule, $parameters) {
             return trans('validation.exists', ['attribute' => $attribute]);
+        });
+    }
+
+    protected function addCaseInsensitiveUniquenessValidator() {
+        Validator::extend('unique-ceseinsensitive', function ($attribute, $value, $parameters) {
+            $validator = Validator::make([$attribute => $value], [$attribute => 'unique:' . implode(',', $parameters)]);
+            $verifier = new DatabasePresenceVerifier();
+            $validator->setPresenceVerifier($verifier->enableCaseInsensitiveMode());
+            return $validator->passes();
+        });
+        Validator::replacer('unique-ceseinsensitive', function ($message, $attribute, $rule, $parameters) {
+            return trans('validation.unique', ['attribute' => $attribute]);
         });
     }
 
