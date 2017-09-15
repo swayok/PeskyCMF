@@ -362,9 +362,15 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
         }
         $table::commitTransaction();
-        return cmfJsonResponse()->setMessage(
-            cmfTransGeneral($created ? '.form.resource_created_successfully' : '.form.resource_updated_successfully')
-        );
+        return cmfJsonResponse()
+            ->setMessage(
+                cmfTransGeneral($created ? '.form.resource_created_successfully' : '.form.resource_updated_successfully')
+            )
+            ->setRedirect(
+                $created
+                    ? routeToCmfItemEditForm($this->getTableNameForRoutes(), $object->getPrimaryKeyValue())
+                    : 'reload'
+            );
     }
 
     public function updateBulkOfRecords() {

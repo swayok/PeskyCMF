@@ -145,4 +145,15 @@ class PeskyOrmUserProvider implements UserProvider {
         $class = $this->dbRecordClass;
         return new $class();
     }
+
+    /**
+     * Needed for JWTGuard
+     *
+     * @return string
+     */
+    public function getModel() {
+        /** @var RecordInterface $class */
+        $class = $this->dbRecordClass;
+        return $class::getTable()->getName();
+    }
 }

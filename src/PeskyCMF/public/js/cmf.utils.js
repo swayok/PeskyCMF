@@ -196,7 +196,7 @@ Utils.handleAjaxSuccess = function (json) {
                     page.reload();
                     break;
                 default:
-                    page.show(json.redirect);
+                    page.show(json.redirect, null, true, true, {env: {is_ajax_response: true}});
             }
         }
     } catch (exc) {

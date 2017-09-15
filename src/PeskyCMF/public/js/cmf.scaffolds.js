@@ -11,7 +11,7 @@ ScaffoldsManager.buildResourceUrlSuffix = function (resourceName, additionalPara
 };
 
 ScaffoldsManager.isValidResourceName = function (resourceName) {
-    return typeof resourceName == 'string' && String(resourceName).match(/^[a-zA-Z_][a-zA-Z_0-9]+$/);
+    return typeof resourceName === 'string' && String(resourceName).match(/^[a-zA-Z_][a-zA-Z_0-9]+$/);
 };
 
 ScaffoldsManager.validateResourceName = function (resourceName, additionalParameter) {

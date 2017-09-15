@@ -298,7 +298,13 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
                     }
                 }
             };
-            if ((data.__modal && request.env().is_click) || request.isSubRequest()) {
+            if (
+                request.isSubRequest()
+                || (
+                    data.__modal
+                    && request.env().is_click
+                )
+            ) {
                 data.__modal = true;
                 var $content = $('<div></div>').html(dotJsTpl(data));
                 if ($content !== false) {
@@ -390,6 +396,23 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
             AdminUI.showUI()
         )
         .done(function (dotJsTpl, data, options) {
+            var renderTpl = function (data, options, isModal) {
+                data.__modal = !!isModal;
+                data._is_creation = !itemId;
+                if (data._is_creation) {
+                    // add alowed query args to data so that parogrammer can pass default values for inputs through query args
+                    for (var argName in request.query) {
+                        if (argName.match(/^_/)) {
+                            continue;
+                        }
+                        if (data.hasOwnProperty(argName)) {
+                            data[argName] = request.query[argName];
+                        }
+                    }
+                }
+                data._options = options;
+                return dotJsTpl(data);
+            };
             var initContent = function ($content, isModal) {
                 ScaffoldActionsHelper.initActions($content, false);
                 ScaffoldFormHelper.initForm($content.find('form'), function (json, $form) {
@@ -400,30 +423,30 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                     if (json.redirect) {
                         if (json.redirect === 'reload') {
                             if (isModal) {
-                                Utils.showPreloader($content);
-                                ScaffoldsManager.getResourceItemData(resource, itemId, false)
-                                    .done(function (data) {
-                                        var $newContent = $('<div></div>').html(dotJsTpl(data));
-                                        $content.html('').append($newContent.find('.modal-content'));
-                                        initContent($content, true);
+                                Utils.showPreloader($content.find('.modal-dialog'));
+                                $.when(
+                                        ScaffoldsManager.getResourceItemData(resource, itemId, false),
+                                        ScaffoldFormHelper.loadOptions(resource, itemId)
+                                    )
+                                    .done(function (data, options) {
+                                        data._options = options;
+                                        var $newContent = $('<div></div>').html(renderTpl(data, options, true));
+                                        initContent(
+                                            $content
+                                                .find('.modal-content')
+                                                .html('')
+                                                .append($newContent.find('.modal-content')),
+                                            true
+                                        );
                                     })
                                     .always(function () {
-                                        Utils.hidePreloader($content);
+                                        Utils.hidePreloader($content.find('.modal-dialog'));
                                     })
                             } else {
                                 page.reload();
                             }
                         } else {
-                            if (isModal) {
-                                $content
-                                    .attr('data-ignore-back', '1')
-                                    .on('hidden.bs.modal', function () {
-                                        page.show(json.redirect);
-                                    })
-                                    .modal('hide');
-                            } else {
-                                page.show(json.redirect);
-                            }
+                            page.show(json.redirect, null, true, true, {env: {is_ajax_response: true}});
                         }
                     } else {
                         if (isModal) {
@@ -437,22 +460,17 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                     }
                 });
             };
-            data._is_creation = !itemId;
-            if (data._is_creation) {
-                // add alowed query args to data so that parogrammer can pass default values for inputs through query args
-                for (var argName in request.query) {
-                    if (argName.match(/^_/)) {
-                        continue;
-                    }
-                    if (data.hasOwnProperty(argName)) {
-                        data[argName] = request.query[argName];
-                    }
-                }
-            }
-            data._options = options;
-            if ((data.__modal && request.env().is_click) || request.isSubRequest()) {
-                data.__modal = true;
-                var $content = $('<div></div>').html(dotJsTpl(data));
+            if (
+                request.isSubRequest()
+                || (
+                    data.__modal
+                    && (
+                        request.env().is_click
+                        || request.env().is_ajax_response
+                    )
+                )
+            ) {
+                var $content = $('<div></div>').html(renderTpl(data, options, true));
                 if ($content !== false) {
                     var $modal = $content.find('.modal');
                     CmfRoutingHelpers
@@ -465,10 +483,9 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                 }
                 CmfRoutingHelpers.hideContentContainerPreloader();
             } else {
-                data.__modal = false;
                 CmfRoutingHelpers
                     .setCurrentContent(
-                        dotJsTpl(data),
+                        renderTpl(data, options, false),
                         Utils.getContentContainer()
                     ).done(function ($content) {
                         Utils.switchBodyClass(
