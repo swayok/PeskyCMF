@@ -43,13 +43,13 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
     }
 
     protected function addCaseInsensitiveUniquenessValidator() {
-        Validator::extend('unique-ceseinsensitive', function ($attribute, $value, $parameters) {
+        Validator::extend('unique_ceseinsensitive', function ($attribute, $value, $parameters) {
             $validator = Validator::make([$attribute => $value], [$attribute => 'unique:' . implode(',', $parameters)]);
             $verifier = new DatabasePresenceVerifier();
             $validator->setPresenceVerifier($verifier->enableCaseInsensitiveMode());
             return $validator->passes();
         });
-        Validator::replacer('unique-ceseinsensitive', function ($message, $attribute, $rule, $parameters) {
+        Validator::replacer('unique_ceseinsensitive', function ($message, $attribute, $rule, $parameters) {
             return trans('validation.unique', ['attribute' => $attribute]);
         });
     }

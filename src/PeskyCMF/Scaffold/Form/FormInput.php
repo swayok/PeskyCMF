@@ -314,26 +314,29 @@ class FormInput extends RenderableValueViewer {
      * @return array
      */
     public function getValidators($isCreation) {
+        if (!$this->isLinkedToDbColumn()) {
+            return [];
+        }
         $column = $this->getTableColumn();
         $columnName = $column->getName();
-        $rule = $column->isValueCanBeNull() && ($column->isItPrimaryKey() && !$isCreation) ? 'nullable|' : 'required|';
+        $rule = !$column->isValueCanBeNull() || ($column->isItPrimaryKey() && $isCreation) ? 'required|' : 'nullable|';
         if ($column->isValueMustBeUnique()) {
             $additionalColumns = $column->getUniqueContraintAdditonalColumns();
             $uniquenessValidator = Rule::unique($column->getTableStructure()->getTableName(), $columnName);
             if (!$isCreation) {
                 $uniquenessValidator->ignore(
-                    '{' . $column->getTableStructure()->getPkColumnName() . '}',
+                    '{{' . $column->getTableStructure()->getPkColumnName() . '}}',
                     $column->getTableStructure()->getPkColumnName()
                 );
             }
             if (!empty($additionalColumns)) {
                 foreach ($additionalColumns as $additionalColumnName) {
-                    $uniquenessValidator->where($additionalColumnName, '{' . $additionalColumnName . '}');
+                    $uniquenessValidator->where($additionalColumnName, '{{' . $additionalColumnName . '}}');
                 }
             }
             if (!$column->isUniqueContraintCaseSensitive()) {
                 // validation with lowercasing of this column's value
-                $uniquenessValidator = preg_replace('%^unique%', 'unique-ceseinsensitive', (string)$uniquenessValidator);
+                $uniquenessValidator = preg_replace('%^unique%', 'unique_ceseinsensitive', (string)$uniquenessValidator);
             }
             $rule .= (string)$uniquenessValidator;
         } else if (in_array($column->getType(), [$column::TYPE_JSON, $column::TYPE_JSONB], true)) {
