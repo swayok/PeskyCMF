@@ -30,7 +30,7 @@ Utils.configureAjax = function () {
             var query = settings.url.replace(/^.*\?(.*)$/, '$1');
             console.group('Ajax: %s %s', settings.type || 'GET', path, xhr.status, xhr.statusText);
             if (query.length > 0) {
-                var queryData = $.extend(qs.parse(query), (settings.type !== 'GET' ? {} : (settings.data || {})));
+                var queryData = $.extend(page.queryString(query), (settings.type !== 'GET' ? {} : (settings.data || {})));
                 delete queryData._; //< remove anticache argument
                 if (!$.isEmptyObject(queryData)) {
                     console.groupCollapsed('GET');
@@ -43,7 +43,7 @@ Utils.configureAjax = function () {
                 if ($.isPlainObject(settings.data) || $.isArray(settings.data)) {
                     console.log(settings.data);
                 } else {
-                    console.log(qs.parse(settings.data));
+                    console.log(page.queryString.parse(settings.data));
                 }
                 console.groupEnd();
             }
