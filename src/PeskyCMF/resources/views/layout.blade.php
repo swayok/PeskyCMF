@@ -111,6 +111,8 @@
         var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
+    @php($scriptsVersion = '2.2.2')
+
     <script src="/packages/cmf-vendors/jquery3/jquery.min.js" type="text/javascript"></script>
 
     <script src="/packages/cmf-vendors/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
@@ -123,8 +125,7 @@
     <script src="/packages/adminlte/js/app.js" type="text/javascript"></script>
 
     <script src="/packages/cmf-vendors/modernizr.custom.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/router/page.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/router/query-parser.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/router/page.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/dotjs/doT.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/moment/moment.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/moment/locale/{{ app()->getLocale() }}.js" type="text/javascript"></script>
@@ -150,15 +151,15 @@
     <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/cropperjs/cropper.min.js" type="text/javascript"></script>
+    {{--<script src="/packages/cmf-vendors/cropperjs/cropper.min.js" type="text/javascript"></script>--}}
 
-    <script src="/packages/cmf/js/cmf.config.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/debug.dialog.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.helpers.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.utils.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.routing.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.scaffolds.js" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.app.js" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.config.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/debug.dialog.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.helpers.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.utils.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.routing.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.scaffolds.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.app.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
 
     @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_js_includes() as $jsPath)
         <script src="{{ $jsPath }}" rel="stylesheet" type="text/javascript"></script>
