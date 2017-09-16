@@ -152,8 +152,6 @@ class PeskyOrmUserProvider implements UserProvider {
      * @return string
      */
     public function getModel() {
-        /** @var RecordInterface $class */
-        $class = $this->dbRecordClass;
-        return $class::getTable()->getName();
+        return $this->dbRecordClass;
     }
 }
