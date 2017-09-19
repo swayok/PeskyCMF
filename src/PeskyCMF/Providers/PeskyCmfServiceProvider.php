@@ -18,6 +18,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
      * @param \Illuminate\Foundation\Application $app
      */
     public function __construct($app) {
+		$this->mergeConfigFrom($this->getConfigFilePath(), 'cmf');
         $this->defaultSiteLoaderClass = config('cmf.default_site_loader');
         $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
         $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders', []);
@@ -127,10 +128,14 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         ], 'public');
 
         $this->publishes([
-            $cmfPublicDir . '/Config/cmf.config.php' => config_path('cmf.php'),
+            $this->getConfigFilePath() => config_path('cmf.php'),
             $cmfPublicDir . '/Config/ru_validation_translations.php' => resource_path('lang/ru/validation.php'),
         ], 'config');
     }
+	
+	protected function getConfigFilePath() {
+		return __DIR__ . '/../Config/cmf.config.php';
+	}
 
     protected function registerCommands() {
         $this->registerInstallCommand();
