@@ -14,18 +14,6 @@ use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 
 class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
-    /**
-     * @param \Illuminate\Foundation\Application $app
-     */
-    public function __construct($app) {
-		$this->mergeConfigFrom($this->getConfigFilePath(), 'cmf');
-        $this->defaultSiteLoaderClass = config('cmf.default_site_loader');
-        $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
-        $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders', []);
-
-        parent::__construct($app);
-    }
-
     public function boot() {
         if (config('cmf.file_access_mask') !== null) {
             umask(config('cmf.file_access_mask'));
@@ -43,6 +31,11 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
     }
 
     public function register() {
+        $this->mergeConfigFrom($this->getConfigFilePath(), 'cmf');
+        $this->defaultSiteLoaderClass = config('cmf.default_site_loader');
+        $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
+        $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders', []);
+
         parent::register();
         $this->app->register(PeskyOrmServiceProvider::class);
         $this->app->register(PeskyValidationServiceProvider::class);
@@ -132,10 +125,10 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             $cmfPublicDir . '/Config/ru_validation_translations.php' => resource_path('lang/ru/validation.php'),
         ], 'config');
     }
-	
-	protected function getConfigFilePath() {
-		return __DIR__ . '/../Config/cmf.config.php';
-	}
+
+    protected function getConfigFilePath() {
+        return __DIR__ . '/../Config/cmf.config.php';
+    }
 
     protected function registerCommands() {
         $this->registerInstallCommand();

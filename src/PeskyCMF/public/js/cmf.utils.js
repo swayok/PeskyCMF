@@ -43,7 +43,7 @@ Utils.configureAjax = function () {
                 if ($.isPlainObject(settings.data) || $.isArray(settings.data)) {
                     console.log(settings.data);
                 } else {
-                    console.log(page.queryString.parse(settings.data));
+                    console.log(page.queryString(settings.data));
                 }
                 console.groupEnd();
             }
