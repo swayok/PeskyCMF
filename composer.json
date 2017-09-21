@@ -24,18 +24,14 @@
             "PeskyCMF": "/src"
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/swayok/peskyorm.git"
-        }
-    ],
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": ">=5.6",
         "laravel/framework": ">=5.3",
         "swayok/utils": "master@dev",
         "swayok/peskyorm": "v2.x-dev",
+        "swayok/peskyorm-laravel": "master@dev",
         "swayok/laravel-extended-errors": "master@dev",
         "swayok/html-tag-helper": "master@dev",
         "swayok/laravel-site-loader": "master@dev",
@@ -61,7 +57,8 @@
         "kartik-v/bootstrap-fileinput": "^4.3.5",
         "vluzrmos/language-detector": "1.*"
     },
-    "require-global": {
-        "fxp/composer-asset-plugin": "~1.2"
+    "suggest": {
+        "fxp/composer-asset-plugin": "~1.2 as global package - required to download bower and npm packages",
+        "swayok/laravel-antihack-tool": "master@dev - active hack protection tool"
     }
 }

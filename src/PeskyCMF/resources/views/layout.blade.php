@@ -111,7 +111,7 @@
         var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
-    @php($scriptsVersion = '2.2.2')
+    @php($scriptsVersion = '2.2.3')
 
     <script src="/packages/cmf-vendors/jquery3/jquery.min.js" type="text/javascript"></script>
 
