@@ -10,6 +10,11 @@ use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 use PeskyCMF\Console\Commands\CmsInstall;
+use PeskyCMF\Db\CmfDbRecord;
+use PeskyCMF\Db\CmfDbTable;
+use PeskyORM\ORM\Record;
+use PeskyORM\ORM\Table;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 
 class PeskyCmfServiceProvider extends AppSitesServiceProvider {
@@ -30,11 +35,32 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         $this->configureDefaultCmfTranslations();
     }
 
+    /**
+     * @return ParameterBag
+     */
+    protected function getAppConfig() {
+        return $this->app['config'];
+    }
+
     public function register() {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'cmf');
         $this->defaultSiteLoaderClass = config('cmf.default_site_loader');
         $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
         $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders', []);
+
+        $config = $this->getAppConfig()->get('peskyorm', []);
+        if (empty($config)) {
+            $config['base_table_class'] = CmfDbTable::class;
+            $config['base_record_class'] = CmfDbRecord::class;
+        } else {
+            if (array_get($config, 'base_table_class') === Table::class) {
+                $config['base_table_class'] = CmfDbTable::class;
+            }
+            if (array_get($config, 'base_table_class') === Record::class) {
+                $config['base_table_class'] = CmfDbRecord::class;
+            }
+        }
+        $this->getAppConfig()->set('peskyorm', $config);
 
         parent::register();
         $this->app->register(PeskyOrmServiceProvider::class);
