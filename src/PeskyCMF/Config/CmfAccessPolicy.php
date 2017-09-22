@@ -5,7 +5,7 @@ namespace PeskyCMF\Config;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyORM\ORM\RecordInterface;
-use PeskyORMLaravel\Db\KeyValueTableInterface;
+use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
 class CmfAccessPolicy {
 

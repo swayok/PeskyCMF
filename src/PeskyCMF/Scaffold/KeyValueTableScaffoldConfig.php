@@ -9,8 +9,8 @@ use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\TempRecord;
-use PeskyORMLaravel\Db\KeyValueDataSaver;
-use PeskyORMLaravel\Db\KeyValueTableInterface;
+use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueDataSaver;
+use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
 /**
  * @method KeyValueTableInterface getTable()

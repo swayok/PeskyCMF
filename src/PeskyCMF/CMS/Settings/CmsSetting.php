@@ -4,7 +4,7 @@ namespace PeskyCMF\CMS\Settings;
 
 use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyCMF\CMS\CmsRecord;
-use PeskyORMLaravel\Db\KeyValueRecordHelpers;
+use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueRecordHelpers;
 
 /**
  * @property-read int         $id
