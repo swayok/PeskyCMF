@@ -7,13 +7,13 @@ use PeskyCMF\CMS\CmsFrontendUtils;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
-use PeskyCMF\Console\Commands\CmfMakeDbClasses;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 use PeskyCMF\Console\Commands\CmsInstall;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Table;
+use PeskyORMLaravel\Providers\PeskyOrmServiceProvider;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 
@@ -48,24 +48,9 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
         $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders', []);
 
-        $config = $this->getAppConfig()->get('peskyorm', []);
-        if (empty($config)) {
-            $config['base_table_class'] = CmfDbTable::class;
-            $config['base_record_class'] = CmfDbRecord::class;
-        } else {
-            if (array_get($config, 'base_table_class') === Table::class) {
-                $config['base_table_class'] = CmfDbTable::class;
-            }
-            if (array_get($config, 'base_table_class') === Record::class) {
-                $config['base_table_class'] = CmfDbRecord::class;
-            }
-        }
-        $this->getAppConfig()->set('peskyorm', $config);
-
         parent::register();
-        $this->app->register(PeskyOrmServiceProvider::class);
-        $this->app->register(PeskyValidationServiceProvider::class);
-        $this->app->register(SuppressLaravelDatabaseServiceProvider::class);
+
+        $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
         $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
         $loader->alias('LanguageDetector', LanguageDetector::class);
@@ -80,6 +65,23 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         }
 
         $this->registerCommands();
+    }
+
+    protected function injectClassesIntoPeskyOrmClassBuilderConfig() {
+        // this method injects Record and Table classes into 'peskyorm' config between
+        $config = $this->getAppConfig()->get('peskyorm', []);
+        if (empty($config)) {
+            $config['base_table_class'] = static::$baseDbTableClass;
+            $config['base_record_class'] = static::$baseDbRecordClass;
+        } else {
+            if (array_get($config, 'base_table_class') === Table::class) {
+                $config['base_table_class'] = static::$baseDbTableClass;
+            }
+            if (array_get($config, 'base_table_class') === Record::class) {
+                $config['base_table_class'] = static::$baseDbRecordClass;
+            }
+        }
+        $this->getAppConfig()->set('peskyorm', $config);
     }
 
     protected function configurePublishes() {
@@ -148,18 +150,22 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
 
         $this->publishes([
             $this->getConfigFilePath() => config_path('cmf.php'),
+            $this->getOrmConfigFilePath() => config_path('peskyorm.php'),
             $cmfPublicDir . '/Config/ru_validation_translations.php' => resource_path('lang/ru/validation.php'),
         ], 'config');
     }
 
     protected function getConfigFilePath() {
-        return __DIR__ . '/../Config/cmf.config.php';
+        return __DIR__ . "/../Config/cmf.config.php";
+    }
+
+    protected function getOrmConfigFilePath() {
+        return __DIR__ . "/../Config/peskyorm.config.php";
     }
 
     protected function registerCommands() {
         $this->registerInstallCommand();
         $this->registerAddAdminCommand();
-        $this->registerMakeDbClassesCommand();
         $this->registerMakeScaffoldCommand();
         $this->registerCmsInstallCommand();
     }
@@ -176,13 +182,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             return new CmfAddAdmin();
         });
         $this->commands('command.cmf.add-admin');
-    }
-
-    protected function registerMakeDbClassesCommand() {
-        $this->app->singleton('command.cmf.make-db-classes', function() {
-            return new CmfMakeDbClasses();
-        });
-        $this->commands('command.cmf.make-db-classes');
     }
 
     protected function registerMakeScaffoldCommand() {

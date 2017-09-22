@@ -4,13 +4,13 @@
 namespace PeskyCMF\Scaffold;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\KeyValueDataSaver;
-use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\TempRecord;
+use PeskyORMLaravel\Db\KeyValueDataSaver;
+use PeskyORMLaravel\Db\KeyValueTableInterface;
 
 /**
  * @method KeyValueTableInterface getTable()

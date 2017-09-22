@@ -5,8 +5,8 @@ namespace PeskyCMF\CMS\Texts;
 use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
 use PeskyCMF\CMS\Traits\AdminIdColumn;
-use PeskyCMF\Db\Traits\IdColumn;
-use PeskyCMF\Db\Traits\TimestampColumns;
+use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 

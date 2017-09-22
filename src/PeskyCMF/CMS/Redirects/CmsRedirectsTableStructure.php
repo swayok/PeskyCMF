@@ -5,9 +5,9 @@ namespace PeskyCMF\CMS\Redirects;
 use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\CMS\Pages\CmsPagesTable;
 use PeskyORM\ORM\Column;
-use PeskyCMF\Db\Traits\IdColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
 use PeskyCMF\CMS\Traits\AdminIdColumn;
-use PeskyCMF\Db\Traits\TimestampColumns;
+use PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns;
 use PeskyORM\ORM\Relation;
 
 /**

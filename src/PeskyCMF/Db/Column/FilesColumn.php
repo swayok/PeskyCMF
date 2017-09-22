@@ -4,9 +4,9 @@ namespace PeskyCMF\Db\Column;
 
 use PeskyCMF\Db\Column\Utils\FileConfig;
 use PeskyCMF\Db\Column\Utils\ImageConfig;
-use PeskyCMF\Db\KeyValueTableInterface;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
+use PeskyORMLaravel\Db\KeyValueTableInterface;
 
 class FilesColumn extends Column implements \Iterator, \ArrayAccess {
 

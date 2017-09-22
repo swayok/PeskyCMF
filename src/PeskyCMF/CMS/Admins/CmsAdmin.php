@@ -5,8 +5,8 @@ namespace PeskyCMF\CMS\Admins;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use PeskyCMF\CMS\CmsRecord;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\Traits\Authenticatable;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
+use PeskyORMLaravel\Db\Traits\Authenticatable;
 
 /**
  * @property-read string      $id

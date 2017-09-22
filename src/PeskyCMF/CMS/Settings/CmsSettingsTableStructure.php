@@ -3,7 +3,7 @@
 namespace PeskyCMF\CMS\Settings;
 
 use PeskyCMF\CMS\CmsTableStructure;
-use PeskyCMF\Db\Traits\IdColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\DefaultColumnClosures;
 

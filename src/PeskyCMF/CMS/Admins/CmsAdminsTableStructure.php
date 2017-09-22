@@ -4,10 +4,10 @@ namespace PeskyCMF\CMS\Admins;
 
 use PeskyCMF\CMS\CmsTableStructure;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\Traits\IdColumn;
-use PeskyCMF\Db\Traits\IsActiveColumn;
-use PeskyCMF\Db\Traits\TimestampColumns;
-use PeskyCMF\Db\Traits\UserAuthColumns;
+use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\IsActiveColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns;
+use PeskyORMLaravel\Db\TableStructureTraits\UserAuthColumns;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 

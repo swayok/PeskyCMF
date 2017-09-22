@@ -4,7 +4,7 @@ namespace PeskyCMF\CMS;
 
 use PeskyCMF\CMS\Settings\CmsSettingsTable;
 use PeskyCMF\Db\CmfDbRecord;
-use PeskyCMF\Db\KeyValueTableInterface;
+use PeskyORMLaravel\Db\KeyValueTableInterface;
 
 /**
  * @method static CmsTableStructure getTableStructure()

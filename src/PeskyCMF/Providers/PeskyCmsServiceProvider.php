@@ -41,6 +41,10 @@ class PeskyCmsServiceProvider extends PeskyCmfServiceProvider {
         // note: scaffolds declared in CmsSiteLoader
     }
 
+    protected function getOrmConfigFilePath() {
+        return __DIR__ . "/../CMS/Config/peskyorm.config.php";
+    }
+
     // admins
 
     public function registerAdminsDbClasses() {
