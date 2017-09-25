@@ -2,12 +2,12 @@
 
 namespace PeskyCMF\Config;
 
-use PeskyCMF\CMS\Admins\CmsAdmin;
-use PeskyCMF\CMS\Admins\CmsAdminsTableStructure;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
+use PeskyCMS\Db\Admins\CmsAdmin;
+use PeskyCMS\Db\Admins\CmsAdminsTableStructure;
 use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;

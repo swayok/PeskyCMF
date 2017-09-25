@@ -3,12 +3,10 @@
 namespace PeskyCMF\Providers;
 
 use LaravelSiteLoader\Providers\AppSitesServiceProvider;
-use PeskyCMF\CMS\CmsFrontendUtils;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
-use PeskyCMF\Console\Commands\CmsInstall;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyORM\ORM\Record;
@@ -156,18 +154,17 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
     }
 
     protected function getConfigFilePath() {
-        return __DIR__ . "/../Config/cmf.config.php";
+        return __DIR__ . '/../Config/cmf.config.php';
     }
 
     protected function getOrmConfigFilePath() {
-        return __DIR__ . "/../Config/peskyorm.config.php";
+        return __DIR__ . '/../Config/peskyorm.config.php';
     }
 
     protected function registerCommands() {
         $this->registerInstallCommand();
         $this->registerAddAdminCommand();
         $this->registerMakeScaffoldCommand();
-        $this->registerCmsInstallCommand();
     }
 
     protected function registerInstallCommand() {
@@ -189,13 +186,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
             return new CmfMakeScaffold();
         });
         $this->commands('command.cmf.make-scaffold');
-    }
-
-    protected function registerCmsInstallCommand() {
-        $this->app->singleton('command.cms.install', function() {
-            return new CmsInstall();
-        });
-        $this->commands('command.cms.install');
     }
 
     protected function configureDefaultCmfTranslations() {
