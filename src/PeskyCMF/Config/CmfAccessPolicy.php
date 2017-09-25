@@ -3,7 +3,6 @@
 namespace PeskyCMF\Config;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
-use PeskyCMF\CMS\Admins\CmsAdmin;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
@@ -99,7 +98,7 @@ class CmfAccessPolicy {
     ];
 
     /**
-     * @param CmsAdmin $user
+     * @param RecordInterface|\PeskyCMS\Db\Admins\CmsAdmin $user
      * @param string $pageName
      * @return bool
      */
@@ -114,7 +113,7 @@ class CmfAccessPolicy {
     }
 
     /**
-     * @param CmsAdmin $user
+     * @param RecordInterface|\PeskyCMS\Db\Admins\CmsAdmin $user
      * @param string $ability
      * @param string $table
      * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue
@@ -143,7 +142,7 @@ class CmfAccessPolicy {
     }
 
     /**
-     * @param CmsAdmin $user
+     * @param RecordInterface|\PeskyCMS\Db\Admins\CmsAdmin $user
      * @param string $tableName
      * @param string $ability
      * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue

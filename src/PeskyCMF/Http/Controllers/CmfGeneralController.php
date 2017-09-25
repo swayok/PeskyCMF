@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
-use PeskyCMF\CMS\ApiDocs\CmsApiDocs;
+use PeskyCMF\ApiDocs\CmfApiDocsSection;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
@@ -430,7 +430,7 @@ class CmfGeneralController extends Controller {
         } else {
             return cmfTransGeneral('.ckeditor.fileupload.cannot_detect_table_and_field', ['editor_name' => $editorId]);
         }
-        $scaffoldConfig = CmfConfig::getPrimary()->getScaffoldConfigByTableName($tableName);
+        $scaffoldConfig = CmfConfig::getPrimary()->getScaffoldConfig($tableName);
         $columns = $scaffoldConfig->getFormConfig()->getValueViewers();
         if (array_key_exists($columnName, $columns)) {
             $column = $columns[$columnName];
@@ -536,7 +536,7 @@ class CmfGeneralController extends Controller {
             'item' => [],
         ];
         foreach (CmfConfig::getPrimary()->getApiDocsSections() as $methodsList) {
-            /** @var CmsApiDocs $apiMethodDocs */
+            /** @var CmfApiDocsSection $apiMethodDocs */
             foreach ($methodsList as $apiMethodDocs) {
                 $data['item'][] = $apiMethodDocs->getConfigForPostman();
             }

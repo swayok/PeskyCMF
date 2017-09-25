@@ -62,20 +62,6 @@ abstract class CmfDbTable extends Table {
     }
 
     /**
-     * @return ScaffoldConfig
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    public function getScaffoldConfig() {
-        if (!$this->scaffoldConfig) {
-            $this->scaffoldConfig = CmfConfig::getScaffoldConfig($this, static::getName());
-        }
-        return $this->scaffoldConfig;
-    }
-
-    /**
      * @return Record|CmfDbRecord
      */
     public function newRecord() {

@@ -31,5 +31,16 @@ return [
      * Alter umask()
      * Use 0000 to disable umask (allows to set any access rights to any file/folder created by app)
      */
-    'file_access_mask' => null
+    'file_access_mask' => null,
+
+    /**
+     * Email address that is used to send emails to users ('From' header).
+     * Default: 'noreply@' . request()->getHost()
+     */
+    //'system_email_address' => 'noreply@localhost',
+
+    /**
+     *
+     */
+    'recaptcha_private_key' => null,
 ];

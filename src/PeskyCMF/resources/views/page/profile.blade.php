@@ -84,9 +84,9 @@
                                     @if(!$canSubmit) disabled @endif
                                     data-live-search-placeholder="{{ cmfTransCustom('.page.profile.input.timezone_search') }}">
                                 <?php
-                                    $usersTable = \PeskyCMF\Config\CmfConfig::getPrimary()->getTableByUnderscoredName(
-                                        \PeskyCMF\Config\CmfConfig::getPrimary()->users_table_name()
-                                    );
+                                    /** @var \PeskyORM\ORM\RecordInterface|\PeskyCMS\Db\Admins\CmsAdmin $userClass */
+                                    $userClass = \PeskyCMF\Config\CmfConfig::getPrimary()->user_object_class();
+                                    $usersTable = $userClass::getTable();
                                 ?>
                                 <?php if (!$isRequired) ?>
                                 <option value="">{{ cmfTransCustom('.page.profile.input.no_timezone') }}</option>

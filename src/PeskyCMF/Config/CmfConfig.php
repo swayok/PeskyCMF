@@ -2,13 +2,12 @@
 
 namespace PeskyCMF\Config;
 
-use PeskyCMF\Db\CmfDbTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\Scaffold\ScaffoldConfig;
+use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
-use PeskyCMS\Db\Admins\CmsAdmin;
-use PeskyCMS\Db\Admins\CmsAdminsTableStructure;
 use PeskyORM\ORM\ClassBuilder;
+use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\StringUtils;
@@ -59,7 +58,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return $this
      */
     static public function getPrimary() {
-        return CmfConfig::getInstance();
+        return self::getInstance();
     }
 
     /**
@@ -75,6 +74,23 @@ abstract class CmfConfig extends ConfigsContainer {
         return self::$instances[$class];
     }
 
+    /**
+     * File name for this site section in 'configs' folder of project's root directory (without '.php' extension)
+     * Example: 'admin' for config/admin.php;
+     */
+    static protected function configsFileName() {
+        throw new \BadMethodCallException('You need to override ' . static::class . '::configsFileName() method');
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    static public function config($key, $default = null) {
+        return config(static::configsFileName() . '.' . $key, $default);
+    }
+
     static public function cmf_routes_config_files() {
         return [
             __DIR__ . '/cmf.routes.php'
@@ -85,25 +101,6 @@ abstract class CmfConfig extends ConfigsContainer {
         return [
 //            base_path('routes/admin.php')
         ];
-    }
-
-    /**
-     * Base DB model class. Used to get instances of real models.
-     * Note: you must overwrite this to avoid problems
-     * @return string
-     */
-    static public function base_db_table_class() {
-        return CmfDbTable::class;
-    }
-
-    /**
-     * Suffix for scaffold config class name.
-     * If DbObject class is named "Admin" and sufix is "ScaffoldConfig"
-     * then scaffold config class name will be "AdminScaffoldConfig"
-     * @return string
-     */
-    static public function scaffold_config_class_suffix() {
-        return 'ScaffoldConfig';
     }
 
     /**
@@ -184,7 +181,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function auth_guard_name() {
-        return 'cmf';
+        return static::config('auth_guard_name', 'cmf');
     }
 
     /**
@@ -195,7 +192,7 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @return CmsAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
+     * @return \PeskyCMS\Db\Admins\CmsAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
      */
     static public function getUser() {
         return static::getAuth()->user();
@@ -206,19 +203,17 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function auth_user_provider_name() {
-        return 'peskyorm';
+        return static::config('auth_user_provider_name', 'peskyorm');
     }
 
     /**
      * Class name of user db object
      * @return string
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     static public function user_object_class() {
-        return app(CmsAdmin::class);
+        return static::config('user_object_class', function () {
+            throw new \UnexpectedValueException('You need to provide a DB Record class for users');
+        });
     }
 
     /**
@@ -226,16 +221,16 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function users_table_name() {
-        /** @var CmsAdminsTableStructure $adminsTableStructure */
-        $adminsTableStructure = app(CmsAdminsTableStructure::class);
-        return $adminsTableStructure::getTableName();
+        /** @var RecordInterface $userObjectClass */
+        $userObjectClass = static::user_object_class();
+        return $userObjectClass::getTable()->getName();
     }
 
     /**
      * @return string
      */
     static public function user_login_column() {
-        return 'email';
+        return static::config('cmf.user_login_column', 'email');
     }
 
     /**
@@ -267,7 +262,9 @@ abstract class CmfConfig extends ConfigsContainer {
      * @throws \UnexpectedValueException
      */
     static public function system_email_address() {
-        return 'noreply@' . static::domain();
+        return config('peskycmf.system_email_address', function () {
+            return 'noreply@' . request()->getHost();
+        });
     }
 
     /**
@@ -295,16 +292,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function cmf_user_acceess_policy_class() {
-        return CmfAccessPolicy::class;
-    }
-
-    /**
-     * Domain name
-     * @return string
-     * @throws \UnexpectedValueException
-     */
-    static public function domain() {
-        return request()->getHost();
+        return static::config('acceess_policy_class', CmfAccessPolicy::class);
     }
 
     /**
@@ -312,14 +300,14 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function url_prefix() {
-        return 'admin';
+        return static::config('url_prefix', 'admin');
     }
 
     /**
      * @return string
      */
     static public function recaptcha_private_key() {
-        return config('app.recaptcha_private_key');
+        return config('peskycmf.recaptcha_private_key');
     }
 
     /**
@@ -330,7 +318,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function custom_views_prefix() {
-        return 'admin.';
+        return static::config('views_subfolder', 'admin') . '.';
     }
 
     /**
@@ -368,6 +356,7 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Path to CMF resources/views
      * @return string
      */
     static public function views_path() {
@@ -417,7 +406,7 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     static public function ui_skin() {
-        return 'skin-blue';
+        return static::config('ui_skin', 'skin-blue');
     }
 
     /**
@@ -433,7 +422,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return bool
      */
     static public function is_password_restore_allowed() {
-        return true;
+        return static::config('is_password_restore_allowed', true);
     }
 
     /**
@@ -600,7 +589,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function custom_dictionary_name() {
-        return 'cmf::custom';
+        return static::config('dictionary', 'cmf::custom');
     }
 
     /**
@@ -611,7 +600,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function transCustom($path, array $parameters = [], $locale = null) {
-        $dict = CmfConfig::getPrimary()->custom_dictionary_name();
+        $dict = self::getPrimary()->custom_dictionary_name();
         $primaryPath = $dict . $path;
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::custom') {
@@ -657,7 +646,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function default_locale() {
-        return 'en';
+        return static::config('locale', 'en');
     }
 
     /**
@@ -667,17 +656,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function locales() {
-        return [
-            'en',
-            //'fr' => 'en'
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    static public function locale_session_key() {
-        return ;
+        return static::config('locales', ['en']);
     }
 
     /**
@@ -717,9 +696,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function roles_list() {
-        return [
-            'admin'
-        ];
+        return static::config('roles', ['admin']);
     }
 
     /**
@@ -728,7 +705,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function default_role() {
-        return 'admin';
+        return static::config('default_role', 'admin');
     }
 
     /**
@@ -780,7 +757,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function login_logo() {
-        return '<img src="/packages/cmf/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
+        return static::config('login_logo', '<img src="/packages/cmf/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">');
     }
 
     /**
@@ -788,7 +765,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function sidebar_logo() {
-        return '<img src="/packages/cmf/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
+        return static::config('sidebar_logo', '<img src="/packages/cmf/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">');
     }
 
     /**
@@ -872,53 +849,54 @@ abstract class CmfConfig extends ConfigsContainer {
         return [];
     }
 
-    static private $tableNameInRouteMap = [];
+    protected $resources = [];
 
     /**
      * Map $tableNameInRoute to $table and $scaffoldConfigClass to be used in CmfConfig::getScaffoldConfig() and
      * CmfConfig::getTableByUnderscoredName()
-     * @param TableInterface $table
      * @param string $scaffoldConfigClass - name of class that extends PeskyCMF\Scaffold\ScaffoldConfig class
-     * @param null|string $tableNameInRoute - null: use table name from $table
+     * @param null|string $resourceName - null: use table name from $table
      */
-    static public function registerDbTableAndScaffoldConfig(TableInterface $table, $scaffoldConfigClass, $tableNameInRoute = null) {
-        self::$tableNameInRouteMap[$tableNameInRoute ?: $table->getTableStructure()->getTableName()] = [
-            'table' => $table,
-            'scaffold_class' => $scaffoldConfigClass
-        ];
+    static public function registerScaffoldConfigForResource($resourceName, $scaffoldConfigClass) {
+        static::getInstance()->resources[$resourceName] = $scaffoldConfigClass;
     }
 
     /**
      * Get ScaffoldConfig instance
-     * @param TableInterface $table - a model to be used in ScaffoldConfig
-     * @param string $tableNameInRoute - table name passed via route parameter, may differ from $table->getTableName()
+     * @param string $resourceName - table name passed via route parameter, may differ from $table->getTableName()
      *      and added here to be used in child configs when you need to use scaffolds with fake table names.
      *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
      * @return ScaffoldConfig
      * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    static public function getScaffoldConfig(TableInterface $table, $tableNameInRoute) {
-        if (array_key_exists($tableNameInRoute, self::$tableNameInRouteMap)) {
-            $className = self::$tableNameInRouteMap[$tableNameInRoute]['scaffold_class'];
-        } else if (app()->offsetExists("cms.section.{$tableNameInRoute}.scaffold")) {
-            return app("cms.section.{$tableNameInRoute}.scaffold");
-        } else {
-            /** @var ClassBuilder $builderClass */
-            $builderClass = static::getDbClassesBuilderClass();
-            $className = preg_replace(
-                '%\\\([A-Za-z0-9]+?)' . $builderClass::makeTableClassName('') . '$%',
-                '\\\$1' . static::scaffold_config_class_suffix(),
-                get_class($table)
-            );
-        }
+    static public function getScaffoldConfig($resourceName) {
+        $className = array_get(static::getInstance()->resources, $resourceName, function () use ($resourceName) {
+            return static::config('resources.' . $resourceName, function () use ($resourceName) {
+                throw new \InvalidArgumentException(
+                    'There is no known ScaffoldConfig class for resource "' . $resourceName . '"'
+                );
+            });
+        });
         if (!class_exists($className)) {
             throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
         }
-        return new $className($table, $tableNameInRoute);
+        return new $className($resourceName);
+    }
+
+    protected $tables = [];
+
+    /**
+     * Register DB Table for resource name (or table name if it is used as resource name) to optimize
+     * CmfCongig::getTableByUnderscoredName() usage
+     * @param TableInterface $table
+     * @param null|string $resourceName - null: $table::getName() will be used as resource name
+     */
+    static public function registerTable(TableInterface $table, $resourceName = null) {
+        if (empty($resourceName)) {
+            $resourceName = $table::getName();
+        }
+        static::getInstance()->tables[$resourceName] = $table;
     }
 
     /**
@@ -935,20 +913,31 @@ abstract class CmfConfig extends ConfigsContainer {
      * @throws \BadMethodCallException
      */
     static public function getTableByUnderscoredName($tableName) {
-        if (array_key_exists($tableName, self::$tableNameInRouteMap)) {
-            return self::$tableNameInRouteMap[$tableName]['table'];
-        } else if (app()->offsetExists("cms.section.{$tableName}.table")) {
-            return app("cms.section.{$tableName}.table");
-        } else {
-            /** @var ClassBuilder $builderClass */
-            $builderClass = static::getDbClassesBuilderClass();
-            /** @var Table $className */
-            $className = static::getDbClassesNamespaceForTable($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
-            if (!class_exists($className)) {
-                throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
+        if (!array_key_exists($tableName, static::getInstance()->tables)) {
+            if (array_key_exists($tableName, self::getInstance()->resources)) {
+                /** @var ScaffoldConfigInterface $scaffoldConfigClass */
+                $scaffoldConfigClass = self::getInstance()->resources[$tableName];
+                $table = $scaffoldConfigClass::getTable();
+            } else {
+                /** @var ClassBuilder $builderClass */
+                $builderClass = static::getDbClassesBuilderClass();
+                /** @var Table $className */
+                $className = static::getDbClassesNamespaceForTable($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
+                if (!class_exists($className)) {
+                    throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
+                }
+                $table = $className::getInstance();
             }
-            return $className::getInstance();
+            static::getInstance()->tables[$tableName] = $table;
         }
+        return static::getInstance()->tables[$tableName];
+    }
+
+    /**
+     * @return ClassBuilder
+     */
+    static protected function getDbClassesBuilderClass() {
+        return config('peskyorm.class_builder');
     }
 
     /**
@@ -956,45 +945,19 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      * @throws \ReflectionException
      */
-    static public function getDbClassesNamespaceForTable($tableName) {
+    static protected function getDbClassesNamespaceForTable($tableName) {
         static $namespace = null;
         if ($namespace === null) {
-            $namespace = '\\' . (new \ReflectionClass(static::base_db_table_class()) )->getNamespaceName() . '\\';
+            $namespace = rtrim(config('peskyorm.classes_namespace'), '\\') . '\\';
         }
         return $namespace . StringUtils::classify($tableName);
-    }
-
-    /**
-     * Shortcut to static::getScaffoldConfig()
-     * @param string $tableName
-     * @return ScaffoldConfig
-     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    static public function getScaffoldConfigByTableName($tableName) {
-        if (app()->offsetExists("cms.section.{$tableName}.scaffold")) {
-            return app("cms.section.{$tableName}.scaffold");
-        } else {
-            return static::getScaffoldConfig(static::getTableByUnderscoredName($tableName), $tableName);
-        }
-    }
-
-    /**
-     * Class that knows how to build db classes (table, structure and record)
-     * @return string
-     */
-    static public function getDbClassesBuilderClass() {
-        return ClassBuilder::class;
     }
 
     /**
      * @return string|null
      * @throws \UnexpectedValueException
      */
-    static public function getTableNameFromCurrentRoute() {
+    static public function getResourceNameFromCurrentRoute() {
         static $tableNameForRoutes;
         if ($tableNameForRoutes === null) {
             if (!request()->route()->hasParameter('table_name')) {
@@ -1031,19 +994,19 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array - key - section name, value - array that contains objects of class CmsApiDocs
      */
     static public function getApiDocsSections() {
-        return [];
+        return static::config('api_docs_class_names', []);
     }
 
-    static protected $httpRequestsLogger;
+    protected $httpRequestsLogger;
 
     /**
      * @return null|ScaffoldLoggerInterface;
      */
     static public function getHttpRequestsLogger() {
-        if (!static::$httpRequestsLogger && app()->bound(ScaffoldLoggerInterface::class)) {
+        if (!static::getInstance()->httpRequestsLogger && app()->bound(ScaffoldLoggerInterface::class)) {
             static::setHttpRequestsLogger(app(ScaffoldLoggerInterface::class));
         }
-        return static::$httpRequestsLogger;
+        return static::getInstance()->httpRequestsLogger;
     }
 
     /**
@@ -1051,7 +1014,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @param ScaffoldLoggerInterface $httpRequestsLogger
      */
     static public function setHttpRequestsLogger(ScaffoldLoggerInterface $httpRequestsLogger) {
-        static::$httpRequestsLogger = $httpRequestsLogger;
+        static::getInstance()->httpRequestsLogger = $httpRequestsLogger;
     }
 
 }

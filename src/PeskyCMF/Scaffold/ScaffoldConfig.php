@@ -3,7 +3,6 @@
 
 namespace PeskyCMF\Scaffold;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
@@ -16,7 +15,7 @@ use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
 
-abstract class ScaffoldConfig {
+abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     use DataValidationHelper;
 
@@ -56,23 +55,14 @@ abstract class ScaffoldConfig {
 
     /**
      * ScaffoldConfig constructor.
-     * @param TableInterface $table
      * @param string $tableNameForRoutes - table name to be used to build routes to resources of the $table
      */
-    public function __construct(TableInterface $table, $tableNameForRoutes) {
-        $this->table = $table;
+    public function __construct($tableNameForRoutes) {
         $this->tableNameForRoutes = $tableNameForRoutes;
         if ($this->viewsBaseTranslationKey === null) {
             $this->viewsBaseTranslationKey = $tableNameForRoutes;
         }
         $this->setLogger(CmfConfig::getInstance()->getHttpRequestsLogger());
-    }
-
-    /**
-     * @return TableInterface
-     */
-    public function getTable() {
-        return $this->table;
     }
 
     /**
@@ -96,7 +86,7 @@ abstract class ScaffoldConfig {
      */
     public function getConfigsForTemplatesRendering() {
         $configs = [
-            'table' => $this->getTable(),
+            'table' => static::getTable(),
             'scaffoldConfig' => $this
         ];
         $configs['dataGridConfig'] = $this->getDataGridConfig();
@@ -126,28 +116,28 @@ abstract class ScaffoldConfig {
      * @return DataGridConfig
      */
     protected function createDataGridConfig() {
-        return DataGridConfig::create($this->getTable(), $this);
+        return DataGridConfig::create(static::getTable(), $this);
     }
 
     /**
      * @return FilterConfig
      */
     protected function createDataGridFilterConfig() {
-        return FilterConfig::create($this->getTable(), $this);
+        return FilterConfig::create(static::getTable(), $this);
     }
 
     /**
      * @return ItemDetailsConfig
      */
     protected function createItemDetailsConfig() {
-        return ItemDetailsConfig::create($this->getTable(), $this);
+        return ItemDetailsConfig::create(static::getTable(), $this);
     }
 
     /**
      * @return FormConfig
      */
     protected function createFormConfig() {
-        return FormConfig::create($this->getTable(), $this);
+        return FormConfig::create(static::getTable(), $this);
     }
 
     /**
@@ -432,22 +422,6 @@ abstract class ScaffoldConfig {
         }
         return $this;
     }
-
-    abstract public function getRecordsForDataGrid();
-
-    abstract public function getRecordValues($id = null);
-
-    abstract public function getDefaultValuesForFormInputs();
-
-    abstract public function addRecord();
-
-    abstract public function updateRecord();
-
-    abstract public function updateBulkOfRecords();
-
-    abstract public function deleteRecord($id);
-
-    abstract public function deleteBulkOfRecords();
 
     public function getCustomData($dataId) {
         return cmfJsonResponse(HttpCode::NOT_FOUND);

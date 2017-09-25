@@ -16,7 +16,7 @@ class CmfMakeScaffold extends Command {
      *
      * @var string
      */
-    protected $signature = 'cmf:make-scaffold {table_name}'
+    protected $signature = 'cmf:make-scaffold {resource_name}'
                             . ' {--cmf-config-class= : full class name to a class that extends CmfConfig}'
                             . ' {--class-name= : short scaffold class name}';
 
@@ -92,7 +92,7 @@ class CmfMakeScaffold extends Command {
      * @throws \UnexpectedValueException
      */
     public function handle() {
-        $table = $this->getCmfConfigClass()->getTableByUnderscoredName($this->argument('table_name'));
+        $table = $this->getCmfConfigClass()->getTableByUnderscoredName($this->argument('resource_name'));
 
         $namespace = $this->getNamespaceByTable($table);
         $className = $this->getScaffoldClassName($table);

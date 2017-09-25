@@ -64,7 +64,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
-        $dbColumns = $this->getTable()->getTableStructure()->getColumns();
+        $dbColumns = static::getTable()->getTableStructure()->getColumns();
         $columnsToSelect = [];
         $virtualColumns = [];
         foreach (array_keys($dataGridConfig->getViewersLinkedToDbColumns(false)) as $colName) {
@@ -90,7 +90,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $columnsToSelect[$viewer->getRelation()->getName()] = ['*'];
             }
         }
-        $result = $this->getTable()->select($columnsToSelect, $conditions);
+        $result = static::getTable()->select($columnsToSelect, $conditions);
         $records = [];
         if ($result->count()) {
             $records = $dataGridConfig->prepareRecords($result->toArrays(), $virtualColumns);
@@ -105,7 +105,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
     public function getRecordValues($id = null) {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
-        $table = $this->getTable();
+        $table = static::getTable();
         if (
             ($isItemDetails && !$this->isDetailsViewerAllowed())
             || (!$isItemDetails && !$this->isEditAllowed())
@@ -168,7 +168,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.create.forbidden'));
         }
         $formConfig = $this->getFormConfig();
-        $data = $formConfig->alterDefaultValues($this->getTable()->newRecord()->getDefaults([], false, true));
+        $data = $formConfig->alterDefaultValues(static::getTable()->newRecord()->getDefaults([], false, true));
         return cmfJsonResponse()->setData($formConfig->prepareRecord($data));
     }
 
@@ -176,7 +176,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isCreateAllowed()) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.create.forbidden'));
         }
-        $table = $this->getTable();
+        $table = static::getTable();
         $formConfig = $this->getFormConfig();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
             $this->getRequest()->only(array_keys($formConfig->getValueViewers())),
@@ -236,7 +236,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isEditAllowed()) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
         }
-        $table = $this->getTable();
+        $table = static::getTable();
         $formConfig = $this->getFormConfig();
         $expectedFields = array_keys($formConfig->getValueViewers());
         $expectedFields[] = $table->getPkColumnName();
@@ -377,7 +377,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isEditAllowed()) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
         }
-        $table = $this->getTable();
+        $table = static::getTable();
         $formConfig = $this->getFormConfig();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
             array_intersect_key($this->getRequest()->input(), $formConfig->getBulkEditableColumns()), //< do not use request->only() !!!
@@ -443,7 +443,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isDeleteAllowed()) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden'));
         }
-        $table = $this->getTable();
+        $table = static::getTable();
         $object = $table->newRecord();
         if (count($object::getPrimaryKeyColumn()->validateValue($id)) > 0) {
             return $this->makeRecordNotFoundResponse($table);
@@ -476,7 +476,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (\Gate::denies('resource.delete_bulk', [$this->getTableNameForRoutes(), $conditions])) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden'));
         }
-        $deletedCount = $this->getTable()->delete($conditions);
+        $deletedCount = static::getTable()->delete($conditions);
         $message = $deletedCount
             ? cmfTransGeneral('.action.delete_bulk.success', ['count' => $deletedCount])
             : cmfTransGeneral('.action.delete_bulk.nothing_deleted');
@@ -505,7 +505,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $idsField => 'required|array',
                 $idsField . '.*' => 'integer|min:1'
             ]);
-            $conditions[$this->getTable()->getPkColumnName()] = $this->getRequest()->input($idsField);
+            $conditions[static::getTable()->getPkColumnName()] = $this->getRequest()->input($idsField);
         } else if ($this->getRequest()->has($conditionsField)) {
             $this->validate($this->getRequest()->input(), [
                 $conditionsField => 'string|regex:%^[\{\[].*[\}\]]$%s',

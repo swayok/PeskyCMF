@@ -13,14 +13,21 @@ use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueDataSaver;
 use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
 /**
- * @method KeyValueTableInterface getTable()
+ * @method static KeyValueTableInterface getTable()
  */
 abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
     protected $isCreateAllowed = false;
 
-    public function __construct(KeyValueTableInterface $table, $tableNameForRoutes) {
-        parent::__construct($table, $tableNameForRoutes);
+    public function __construct($tableNameForRoutes) {
+        $table = static::getTable();
+        if (!($table instanceof KeyValueTableInterface)) {
+            throw new \UnexpectedValueException(
+                'Class ' . get_class($table) . ' returned by '
+                . static::class . '->getTable() must implement of KeyValueTableInterface interface'
+            );
+        }
+        parent::__construct($tableNameForRoutes);
     }
 
     /**
@@ -42,7 +49,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
      */
     public function getFormConfig() {
         $formConfig = parent::getFormConfig();
-        $fkName = $this->getTable()->getMainForeignKeyColumnName();
+        $fkName = static::getTable()->getMainForeignKeyColumnName();
         if ($fkName && !$formConfig->hasFormInput($fkName)) {
             $formConfig->addValueViewer($fkName, FormInput::create()->setType(FormInput::TYPE_HIDDEN));
         }
@@ -61,7 +68,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
     public function getRecordValues($ownerRecordId = null) {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
-        $table = $this->getTable();
+        $table = static::getTable();
         if (
             ($isItemDetails && !$this->isDetailsViewerAllowed())
             || (!$isItemDetails && !$this->isEditAllowed())
@@ -95,7 +102,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isEditAllowed()) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
         }
-        $table = $this->getTable();
+        $table = static::getTable();
         $formConfig = $this->getFormConfig();
         $fkColumn = $table->getMainForeignKeyColumnName();
         $request = $this->getRequest();

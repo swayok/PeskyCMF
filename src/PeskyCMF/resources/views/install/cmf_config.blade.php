@@ -17,49 +17,8 @@ use PeskyCMF\Config\CmfConfig;
 
 class {{ $sectionName }}Config extends CmfConfig {
 
-    /**
-     * Url prefix for routes
-     * @return string
-     */
-    static public function url_prefix() {
-        return '{{ $urlPrefix }}';
-    }
-
-    static public function routes_config_files() {
-        return [
-            base_path('routes/{{ $urlPrefix }}.php')
-        ];
-    }
-
-    /**
-     * Prefix to load custom views from.
-     * For example
-     * - if custom views stored in /resources/views/admin - prefix should be "admin."
-     * - if you placed views under namespace "admin" - prefix should be "admin:"
-     * @return string
-     */
-    static public function custom_views_prefix() {
-        return '{{ $lowercasedSectionName }}.';
-    }
-
-    static public function layout_css_includes() {
-        return [
-            '/packages/{{ $lowercasedSectionName }}/css/{{ $lowercasedSectionName }}.custom.css'
-        ];
-    }
-
-    static public function layout_js_includes() {
-        return [
-            '/packages/{{ $lowercasedSectionName }}/js/{{ $lowercasedSectionName }}.custom.js'
-        ];
-    }
-
-    static public function base_db_table_class() {
-        return \App\{{ str_replace('/', '\\', $dbClassesAppSubfolder) }}\AbstractTable::class;
-    }
-
-    static public function user_object_class() {
-        return \PeskyCMF\CMS\Admins\CmsAdmin::class;
+    static protected function configsFileName() {
+        return '{{ $lowercasedSectionName }}'
     }
 
     /**
@@ -106,16 +65,6 @@ class {{ $sectionName }}Config extends CmfConfig {
             ],
             static::$menuItems
         );
-    }
-
-    static public function default_locale() {
-        return 'en';
-    }
-
-    static public function locales() {
-        return [
-            'en'
-        ];
     }
 
     /**

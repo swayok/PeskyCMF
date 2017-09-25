@@ -19,30 +19,23 @@ class CmfScaffoldApiController extends Controller {
     /**
      * @return TableInterface
      * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
+     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function getTable() {
-        if ($this->table === null) {
-            $this->table = CmfConfig::getPrimary()->getTableByUnderscoredName($this->getTableNameForRoutes());
-        }
-        return $this->table;
+        return $this->getScaffoldConfig()->getTable();
     }
 
     /**
      * @return ScaffoldConfig
-     * @throws \PeskyORM\Exception\OrmException
+     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \UnexpectedValueException
      */
     public function getScaffoldConfig() {
         if ($this->scaffoldConfig === null) {
             $cmfConfig = CmfConfig::getPrimary();
-            $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getTable(), $this->getTableNameForRoutes());
+            $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getTableNameForRoutes());
             if ($customScaffoldConfig instanceof ScaffoldConfig) {
                 $this->scaffoldConfig = $customScaffoldConfig;
             } else {
@@ -62,7 +55,7 @@ class CmfScaffoldApiController extends Controller {
      */
     public function getTableNameForRoutes() {
         if ($this->tableNameForRoutes === null) {
-            $tableName = CmfConfig::getPrimary()->getTableNameFromCurrentRoute();
+            $tableName = CmfConfig::getPrimary()->getResourceNameFromCurrentRoute();
             if (empty($tableName)) {
                 abort(404, 'Table name not found in route');
             }

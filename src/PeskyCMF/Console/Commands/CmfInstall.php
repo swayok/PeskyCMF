@@ -32,19 +32,29 @@ class CmfInstall extends Command {
                 ->write(\View::file($viewsPath . 'cmf_site_loader.blade.php', $dataForViews)->render());
         }
         // copy configs
-        File::load($baseFolderPath . '/' . $appSubfolder . 'Config.php', true, 0755, 0644)
-            ->write(\View::file($viewsPath . 'cmf_config.blade.php', $dataForViews)->render());
+        $cmfConfigFilePath = $baseFolderPath . '/' . $appSubfolder . 'Config.php';
+        $writeCmfConfigFile = !File::exist($cmfConfigFilePath) || $this->confirm('CmfConfig file ' . $cmfConfigFilePath . ' already exist. Overwrite?');
+        if ($writeCmfConfigFile) {
+            File::load($cmfConfigFilePath, true, 0755, 0644)
+                ->write(\View::file($viewsPath . 'cmf_config.blade.php', $dataForViews)->render());
+        }
         $routesFilePath = base_path('routes/' . snake_case($appSubfolder) . '.php');
         $writeRoutesFile = !File::exist($routesFilePath) || $this->confirm('Routes file ' . $routesFilePath . ' already exist. Overwrite?');
         if ($writeRoutesFile) {
             File::load($routesFilePath, true, 0755, 0644)
                 ->write(\View::file($viewsPath . 'cmf_routes.blade.php', $dataForViews)->render());
         }
+        $sectionConfigFilePath = base_path('routes/' . snake_case($appSubfolder) . '.php');
+        $writeSectionConfigFile = !File::exist($sectionConfigFilePath) || $this->confirm('Site section config file ' . $sectionConfigFilePath . ' already exist. Overwrite?');
+        if ($writeSectionConfigFile) {
+            File::load($sectionConfigFilePath, true, 0755, 0644)
+                ->write(\View::file($viewsPath . 'site_section_config.blade.php', $dataForViews)->render());
+        }
         // copy pages controller
         File::load($baseFolderPath . '/Http/Controllers/PagesController.php', true, 0755, 0644)
             ->write(\View::file($viewsPath . 'pages_controller.blade.php', $dataForViews)->render());
         // copy base db classes
-        $dbFolder = Folder::load(app_path('/' . $dataForViews['dbClassesAppSubfolder']), true, 0755);
+        /*$dbFolder = Folder::load(app_path('/' . $dataForViews['dbClassesAppSubfolder']), true, 0755);
         $abstractModelFilePath = $dbFolder->pwd() . '/AbstractTable.php';
         $writeAbstractModelFile = !File::exist($abstractModelFilePath) || $this->confirm('AbstractTable file ' . $abstractModelFilePath . ' already exist. Overwrite?');
         if ($writeAbstractModelFile) {
@@ -56,7 +66,7 @@ class CmfInstall extends Command {
         if ($writeAbstractRecordFile) {
             File::load($abstractRecordFilePath, true, 0755, 0644)
                 ->write(\View::file($viewsPath . 'db/base_db_record.php', $dataForViews)->render());
-        }
+        }*/
         // create js, less and css files
         $pathToPublicFiles = public_path('packages/' . $dataForViews['urlPrefix']) . '/';
         File::save($pathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js', '', 0664, 0755);
