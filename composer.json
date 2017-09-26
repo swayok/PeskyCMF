@@ -60,5 +60,15 @@
     "suggest": {
         "fxp/composer-asset-plugin": "~1.2 as global package - required to download bower and npm packages",
         "swayok/laravel-antihack-tool": "master@dev - active hack protection tool"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "PeskyCMF\\Providers\\PeskyCmfServiceProvider"
+            ],
+            "dont-discover": [
+                "PeskyORMLaravel\\Providers\\PeskyOrmServiceProvider"
+            ]
+        }
     }
 }
