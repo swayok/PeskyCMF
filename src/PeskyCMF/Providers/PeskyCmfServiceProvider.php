@@ -2,14 +2,13 @@
 
 namespace PeskyCMF\Providers;
 
-use Illuminate\Auth\AuthManager;
 use Illuminate\Support\ServiceProvider;
+use LaravelExtendedErrors\LoggingServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
 use PeskyCMF\Event\AdminAuthenticated;
-use PeskyCMF\Http\Middleware\ValidateCmfUser;
 use PeskyCMF\Listeners\AdminAuthenticatedEventListener;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
@@ -22,6 +21,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->initDefaultCmfConfig();
         $this->initPrimaryCmfConfig();
 
+        $this->app->register(LoggingServiceProvider::class);
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
         $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
