@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Providers;
 
-use LaravelSiteLoader\Providers\AppSitesServiceProvider;
+use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
@@ -10,20 +10,19 @@ use PeskyCMF\Console\Commands\CmfMakeScaffold;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 
-class PeskyCmfServiceProvider extends AppSitesServiceProvider {
+class PeskyCmfServiceProvider extends ServiceProvider {
 
     public function boot() {
-        if (config('cmf.file_access_mask') !== null) {
-            umask(config('cmf.file_access_mask'));
+        if (config('peskycmf.file_access_mask') !== null) {
+            umask(config('peskycmf.file_access_mask'));
         }
         $this->configurePublishes();
         /** @var CmfConfig|string $defaultCmfConfig */
-        $defaultCmfConfig = config('cmf.default_cmf_config');
+        $defaultCmfConfig = config('peskycmf.cmf_config');
         if (!empty($defaultCmfConfig)) {
             $defaultCmfConfig::getInstance()->useAsDefault();
         }
         require_once __DIR__ . '/../Config/helpers.php';
-        parent::boot();
         $this->configureDefaultCmfTranslations();
     }
 
@@ -35,12 +34,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
     }
 
     public function register() {
-        $this->mergeConfigFrom($this->getConfigFilePath(), 'cmf');
-        $this->defaultSiteLoaderClass = config('cmf.default_site_loader');
-        $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
-        $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders', []);
-
-        parent::register();
+        $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
 
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
         $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
@@ -124,7 +118,7 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         ], 'public');
 
         $this->publishes([
-            $this->getConfigFilePath() => config_path('cmf.php'),
+            $this->getConfigFilePath() => config_path('peskycmf.php'),
             $this->getOrmConfigFilePath() => config_path('peskyorm.php'),
             $cmfPublicDir . '/Config/ru_validation_translations.php' => resource_path('lang/ru/validation.php'),
         ], 'config');

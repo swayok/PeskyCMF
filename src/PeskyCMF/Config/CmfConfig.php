@@ -230,7 +230,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function user_login_column() {
-        return static::config('cmf.user_login_column', 'email');
+        return static::config('peskycmf.user_login_column', 'email');
     }
 
     /**
