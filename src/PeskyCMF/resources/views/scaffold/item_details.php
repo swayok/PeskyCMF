@@ -5,7 +5,7 @@
  * @var string $tableNameForRoutes
  * @var string $idSuffix
  */
-$pageUrl = routeTpl('cmf_item_details', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]);
+$pageUrl = cmfRouteTpl('cmf_item_details', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]);
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 $tabs = $itemDetailsConfig->getTabs();
 $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
@@ -130,7 +130,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 {{? !!it.___delete_allowed }}
                     <a class="btn btn-danger" href="#"
                        data-action="request" data-method="delete"
-                       data-url="<?php echo routeTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
+                       data-url="<?php echo cmfRouteTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
                        data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
                        data-on-success="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
                         <?php echo cmfTransGeneral('.item_details.toolbar.delete'); ?>
@@ -140,7 +140,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
             <?php if ($itemDetailsConfig->isEditAllowed()) : ?>
                 {{? !!it.___edit_allowed }}
                     <a class="btn btn-success"
-                       href="<?php echo routeTpl('cmf_item_edit_form', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>">
+                       href="<?php echo cmfRouteTpl('cmf_item_edit_form', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>">
                         <?php echo cmfTransGeneral('.item_details.toolbar.edit'); ?>
                     </a>
                 {{?}}

@@ -2,39 +2,25 @@
 
 namespace PeskyCMF\Providers;
 
+use Illuminate\Auth\AuthManager;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
+use PeskyCMF\Event\AdminAuthenticated;
+use PeskyCMF\Http\Middleware\ValidateCmfUser;
+use PeskyCMF\Listeners\AdminAuthenticatedEventListener;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 
 class PeskyCmfServiceProvider extends ServiceProvider {
 
-    public function boot() {
-        if (config('peskycmf.file_access_mask') !== null) {
-            umask(config('peskycmf.file_access_mask'));
-        }
-        $this->configurePublishes();
-        /** @var CmfConfig|string $defaultCmfConfig */
-        $defaultCmfConfig = config('peskycmf.cmf_config');
-        if (!empty($defaultCmfConfig)) {
-            $defaultCmfConfig::getInstance()->useAsDefault();
-        }
-        require_once __DIR__ . '/../Config/helpers.php';
-        $this->configureDefaultCmfTranslations();
-    }
-
-    /**
-     * @return ParameterBag
-     */
-    protected function getAppConfig() {
-        return $this->app['config'];
-    }
-
     public function register() {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
+
+        $this->initDefaultCmfConfig();
+        $this->initPrimaryCmfConfig();
 
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
         $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
@@ -51,6 +37,82 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         }
 
         $this->registerCommands();
+    }
+
+    public function provides() {
+        return [
+            CmfConfig::class,
+        ];
+    }
+
+    public function boot() {
+        if (config('peskycmf.file_access_mask') !== null) {
+            umask(config('peskycmf.file_access_mask'));
+        }
+        require_once __DIR__ . '/../Config/helpers.php';
+
+        $this->configurePublishes();
+
+        $this->configureTranslations();
+        $this->configureViews();
+
+        $this->configureRoutes();
+
+        if ($this->fitsRequestUri()) {
+            $this->configureSession();
+            $this->configureDefaultLocale();
+            $this->configureLocaleDetector();
+            $this->configureEventListeners();
+        }
+
+        $this->configureAuthentication();
+        $this->configureAuthorizationGatesAndPolicies();
+
+    }
+
+    /**
+     * @return int
+     */
+    protected function fitsRequestUri() {
+        $prefix = trim($this->getCmfConfig()->url_prefix(), '/');
+        return preg_match("%^/{$prefix}(/|$)%", array_get($_SERVER, 'REQUEST_URI', '/')) > 0;
+    }
+
+    /**
+     * @return CmfConfig
+     */
+    protected function getCmfConfig() {
+        static $config;
+        if ($config === null) {
+            /** @var CmfConfig|string $className */
+            $className = config('peskycmf.cmf_config', CmfConfig::class);
+            $config = $className::getInstance();
+        }
+        return $config;
+    }
+
+    /**
+     * @return CmfConfig|null - return null if your CmfConfig should not be default
+     */
+    protected function initDefaultCmfConfig() {
+        return $this->getCmfConfig()->useAsDefault();
+    }
+
+    /**
+     * @return CmfConfig|null - return null if your CmfConfig should not be default
+     */
+    protected function initPrimaryCmfConfig() {
+        $this->app->singleton(CmfConfig::class, function () {
+            return $this->getCmfConfig();
+        });
+        return $this->getCmfConfig()->useAsPrimary();
+    }
+
+    /**
+     * @return ParameterBag
+     */
+    protected function getAppConfig() {
+        return $this->app['config'];
     }
 
     protected function configurePublishes() {
@@ -159,10 +221,174 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->commands('command.cmf.make-scaffold');
     }
 
-    protected function configureDefaultCmfTranslations() {
-        if (!\Lang::has('cmf::test', 'en')) {
-            $this->loadTranslationsFrom(CmfConfig::cmf_dictionaries_path(), 'cmf');
+    protected function configureTranslations() {
+//        if (!\Lang::has('cmf::test', 'en')) {
+            $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'cmf');
+//        }
+    }
+
+    protected function configureDefaultLocale() {
+        $defaultLocale = $this->getCmfConfig()->default_locale();
+        $this->app['translator']->setFallback($defaultLocale);
+        \Request::setDefaultLocale($defaultLocale);
+    }
+
+    protected function configureLocaleDetector() {
+        $config = $this->getAppConfig()->get('lang-detector', []);
+        $this->getAppConfig()->set('lang-detector', array_replace_recursive($config, $this->getCmfConfig()->language_detector_configs()));
+    }
+
+    protected function configureViews() {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'cmf');
+    }
+
+    protected function configureRoutes() {
+        $cmfConfig = $this->getCmfConfig();
+        $groupConfig = $this->getRoutesGroupConfig();
+        // custom routes
+        $files = (array)$cmfConfig::config('routes_files', []);
+        if (count($files) > 0) {
+            foreach ($files as $filePath) {
+                \Route::group($groupConfig, function () use ($filePath, $cmfConfig) {
+                    // warning! $cmfConfig may be used inside included file
+                    include base_path($filePath);
+                });
+            }
         }
+
+        unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
+        \Route::group($groupConfig, function () use ($cmfConfig) {
+            // warning! $cmfConfig may be used inside included file
+            include $this->getCmfRoutesFilePath();
+        });
+
+        // special route for ckeditor config.js file
+        unset($groupConfig['middleware']);
+        \Route::group($groupConfig, function () {
+            \Route::get('ckeditor/config.js', [
+                'as' => 'cmf_ckeditor_config_js',
+                'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getCkeditorConfigJs'
+            ]);
+        });
+    }
+
+    protected function getCmfRoutesFilePath() {
+        return __DIR__ . '/../Config/cmf.routes.php';
+    }
+
+    protected function getRoutesGroupConfig() {
+        return [
+            'prefix' => $this->getCmfConfig()->url_prefix(),
+            'middleware' => (array)$this->getCmfConfig()->config('routes_middleware', ['web'])
+        ];
+    }
+
+    protected function configureSession() {
+        $config = $this->getAppConfig()->get('session', []);
+        $config['path'] = '/' . trim($this->getCmfConfig()->url_prefix(), '/');
+        $this->getAppConfig()->set('session', array_merge($config, (array)$this->getCmfConfig()->config('session', [])));
+    }
+
+    protected function configureEventListeners() {
+        \Event::listen(AdminAuthenticated::class, AdminAuthenticatedEventListener::class);
+    }
+
+    protected function configureAuthentication() {
+        // add guard and provider to configs provided by config/auth.php
+
+        $cmfAuthConfig = $this->getCmfConfig()->config('auth_guard');
+        if (!is_array($cmfAuthConfig)) {
+            // custom auth guard name provided
+            return;
+        }
+        $config = $this->getAppConfig()->get('auth', [
+            'guards' => [],
+            'providers' => []
+        ]);
+
+        $guardName = $this->getCmfConfig()->auth_guard_name();
+        if (array_key_exists($guardName, $config['guards'])) {
+            throw new \UnexpectedValueException('There is already an auth guard with name "' . $guardName . '"');
+        }
+        $provider = array_get($cmfAuthConfig, 'provider');
+        if (is_array($provider)) {
+            $providerName = array_get($provider, 'name', $guardName);
+        } else {
+            $providerName = $provider;
+            $provider = null;
+        }
+        if (array_key_exists($providerName, $config['providers'])) {
+            throw new \UnexpectedValueException('There is already an auth provider with name "' . $guardName . '"');
+        }
+        $config['guards'][$guardName] = [
+            'driver' => array_get($cmfAuthConfig, 'driver', 'session'),
+            'provider' => $providerName,
+        ];
+        if (!empty($provider)) {
+            $config['providers'][$providerName] = $provider;
+        }
+
+        $this->getAppConfig()->set('auth', $config);
+    }
+
+    /**
+     * In this method you should place authorisation gates and policies according to Laravel's docs:
+     * https://laravel.com/docs/5.4/authorization
+     * Predefined authorisation tests are available for:
+     * 1. Resources (scaffolds) - use
+     *      Gate::resource('resource', 'AdminAccessPolicy', [
+     * 'view' => 'view',
+     * 'details' => 'details',
+     * 'create' => 'create',
+     * 'update' => 'update',
+     * 'delete' => 'delete',
+     * 'update_bulk' => 'update_bulk',
+     * 'delete_bulk' => 'delete_bulk',
+     * ]);
+     *      or Gate::define('resource.{ability}', \Closure) to provide rules for some resource.
+     *      List of abilities used in scaffolds:
+     *      - 'view' is used for routes named 'cmf_api_get_items' and 'cmf_api_get_templates',
+     *      - 'details' => 'cmf_api_get_item',
+     *      - 'create' => 'cmf_api_create_item',
+     *      - 'update' => 'cmf_api_update_item'
+     *      - 'update_bulk' => 'cmf_api_edit_bulk'
+     *      - 'delete' => 'cmf_api_delete_item'
+     *      - 'delete_bulk' => 'cmf_api_delete_bulk'
+     *      For all abilities you will receive $tableName argument and RecordInterface $record or int $itemId argument
+     *      for 'details', 'update' and 'delete' abilities.
+     *      For KeyValueScaffoldConfig for 'update' ability you will receive $fkValue instead of $itemId/$record.
+     *      For 'update_bulk' and 'delete_bulk' you will receive $conditions array.
+     *      Note that $tableName passed to abilities is the name of the DB table used in routes and may differ from
+     *      the real name of the table provided in TableStructure.
+     *      For example: you have 2 resources named 'pages' and 'elements'. Both refer to PagesTable class but
+     *      different ScaffoldConfig classes (PagesScaffoldConfig and ElementsScafoldConfig respectively).
+     *      In this case $tableName will be 'pages' for PagesScaffoldConfig and 'elements' for ElementsScafoldConfig.
+     *      Note: If you forbid 'view' ability - you will forbid everything else
+     *      Note: there is no predefined authorization for routes based on 'cmf_item_custom_page'. You need to add it
+     *      manually to controller's action that handles that custom page
+     * 2. CMF Pages - use Gate::define('cmf_page', 'AdminAccessPolicy@cmf_page')
+     *      Abilities will receive $pageName argument - it will contain the value of the {page} property in route
+     *      called 'cmf_page' (url is '/{prefix}/page/{page}' by default)
+     * 3. Admin profile update - Gate::define('profile.update', \Closure);
+     *
+     * For any other routes where you resolve authorisation by yourself - feel free to use any naming you want
+     *
+     * @param string $policyName
+     */
+    protected function configureAuthorizationGatesAndPolicies($policyName = 'CmfAccessPolicy') {
+        $this->app->singleton($policyName, $this->getCmfConfig()->cmf_user_acceess_policy_class());
+        \Gate::resource('resource', $policyName, [
+            'view' => 'view',
+            'details' => 'details',
+            'create' => 'create',
+            'update' => 'update',
+            'edit' => 'edit',
+            'delete' => 'delete',
+            'update_bulk' => 'update_bulk',
+            'delete_bulk' => 'delete_bulk',
+            'others' => 'others',
+        ]);
+        \Gate::define('cmf_page', $policyName . '@cmf_page');
     }
 
 }

@@ -15,8 +15,8 @@ $else = '{{??}}';
 $endIf = '{{?}}';
 $printPk = "{{= it.{$pkColName} }}";
 
-$pageUrl = $ifEdit . routeTpl('cmf_item_edit_form', ['table_name' => $tableNameForRoutes], ['id' => 'it.' . $table->getPkColumnName()])
-    . $else . routeTpl('cmf_item_add_form', ['table_name' => $tableNameForRoutes])
+$pageUrl = $ifEdit . cmfRouteTpl('cmf_item_edit_form', ['table_name' => $tableNameForRoutes], ['id' => 'it.' . $table->getPkColumnName()])
+    . $else . cmfRouteTpl('cmf_item_add_form', ['table_name' => $tableNameForRoutes])
     . $endIf;
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 $tabs = $formConfig->getTabs();
@@ -69,7 +69,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     {{? !!it.___delete_allowed }}
                     <a class="btn btn-danger" href="#"
                        data-action="request" data-method="delete"
-                       data-url="<?php echo routeTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
+                       data-url="<?php echo cmfRouteTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
                        data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
                        data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
                         <?php echo cmfTransGeneral('.form.toolbar.delete'); ?>

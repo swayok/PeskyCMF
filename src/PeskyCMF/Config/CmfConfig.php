@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Config;
 
-use PeskyCMF\Http\Middleware\ValidateAdmin;
+use PeskyCMF\Http\Middleware\ValidateCmfUser;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
@@ -13,7 +13,7 @@ use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\StringUtils;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
 
-abstract class CmfConfig extends ConfigsContainer {
+class CmfConfig extends ConfigsContainer {
 
     static private $instances = [];
 
@@ -79,7 +79,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * Example: 'admin' for config/admin.php;
      */
     static protected function configsFileName() {
-        throw new \BadMethodCallException('You need to override ' . static::class . '::configsFileName() method');
+        return 'peskycmf';
     }
 
     /**
@@ -97,47 +97,9 @@ abstract class CmfConfig extends ConfigsContainer {
         ];
     }
 
-    static public function routes_config_files() {
-        return [
-//            base_path('routes/admin.php')
-        ];
-    }
-
     /**
-     * Session configs
      * @return array
-     * @throws \BadMethodCallException
      */
-    static public function session_configs() {
-        $config = [
-            'table' => static::sessions_table_name(),
-            'cookie' => static::sessions_table_name(),
-            'lifetime' => 1440,
-        ];
-        $sessionDriver = strtolower(config('session.driver', 'file'));
-        if (in_array($sessionDriver, ['database', 'redis'], true)) {
-            $config['connection'] = static::session_connection();
-        }
-        return $config;
-    }
-
-    /**
-     * Table name with sessions for db driver. Also cookie key
-     * @return string
-     */
-    static public function sessions_table_name() {
-        return str_plural(static::users_table_name()) . '_sessions';
-    }
-
-    /**
-     * Connection name for session. Required when you use redis or any db driver to store sessions
-     * @return string
-     * @throws \BadMethodCallException
-     */
-    static public function session_connection() {
-        throw new \BadMethodCallException('You must overwrite session_connection() in ' . get_called_class());
-    }
-
     static public function language_detector_configs() {
         return [
             'autodetect' => true,
@@ -149,39 +111,14 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Auth configs for cmf
-     * For examples - look for /config/auth.php
-     * This configs will be recursively merged over configs from /config/auth.php
-     * @return array
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    static public function auth_configs() {
-        return [
-            'guards' => [
-                static::auth_guard_name() => [
-                    'driver' => 'session',
-                    'provider' => static::auth_guard_name(),
-                ],
-            ],
-
-            'providers' => [
-                static::auth_guard_name() => [
-                    'driver' => static::auth_user_provider_name(),
-                    'model' => static::user_object_class()
-                ],
-            ],
-        ];
-    }
-
-    /**
      * Set Auth guard to use
      * @return string
      */
     static public function auth_guard_name() {
-        return static::config('auth_guard_name', 'cmf');
+        return static::config('peskycmf.auth_guard.name', function () {
+            $config = config('peskycmf.auth_guard');
+            return is_string($config) ? $config : 'admin';
+        });
     }
 
     /**
@@ -196,14 +133,6 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function getUser() {
         return static::getAuth()->user();
-    }
-
-    /**
-     * User provider name
-     * @return string
-     */
-    static public function auth_user_provider_name() {
-        return static::config('auth_user_provider_name', 'peskyorm');
     }
 
     /**
@@ -268,26 +197,6 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Used to configure User authorization rules (Gates and Policies)
-     * By default uses Laravel's \Gate helper (https://laravel.com/docs/5.4/authorization)
-     */
-    static public function configureAuthorization() {
-        app()->singleton('CmfAccessPolicy', static::cmf_user_acceess_policy_class());
-        \Gate::resource('resource', 'CmfAccessPolicy', [
-            'view' => 'view',
-            'details' => 'details',
-            'create' => 'create',
-            'update' => 'update',
-            'edit' => 'edit',
-            'delete' => 'delete',
-            'update_bulk' => 'update_bulk',
-            'delete_bulk' => 'delete_bulk',
-            'others' => 'others',
-        ]);
-        \Gate::define('cmf_page', 'CmfAccessPolicy@cmf_page');
-    }
-
-    /**
      * Usera access policy class to use in CMF
      * @return string
      */
@@ -307,7 +216,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function recaptcha_private_key() {
-        return config('peskycmf.recaptcha_private_key');
+        return config('app.recaptcha_private_key');
     }
 
     /**
@@ -326,9 +235,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function layout_css_includes() {
-        return [
-//            '/packages/admin/css/admin.custom.css'
-        ];
+        return (array)static::config('css_files', []);
     }
 
     /**
@@ -336,9 +243,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function layout_js_includes() {
-        return [
-//            '/packages/admin/css/admin.custom.js'
-        ];
+        return (array)static::config('js_files', []);
     }
 
     /**
@@ -356,19 +261,36 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Path to CMF resources/views
-     * @return string
-     */
-    static public function views_path() {
-        return __DIR__ . '/../resources/views';
-    }
-
-    /**
      * Controller class name for CMF scaffolds API
      * @return string
      */
     static public function cmf_scaffold_api_controller_class() {
         return \PeskyCMF\Http\Controllers\CmfScaffoldApiController::class;
+    }
+
+    /**
+     * General controller class name for CMF (basic ui views, custom pages views, login/logout, etc.)
+     * @return string
+     */
+    static public function cmf_general_controller_class() {
+        return \PeskyCMF\Http\Controllers\CmfGeneralController::class;
+    }
+
+    /**
+     * Prefix for route names in cmf.routes.php
+     * Use with caution and only when you really know what you're doing
+     * @return string
+     */
+    static public function routes_names_prefix() {
+        return '';
+    }
+
+    /**
+     * @param string $routeAlias
+     * @return string
+     */
+    static public function getRouteName($routeAlias) {
+        return static::routes_names_prefix() . $routeAlias;
     }
 
     /**
@@ -384,17 +306,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function middleware_for_routes_that_require_authentication() {
-        return [
-            ValidateAdmin::class,
-        ];
-    }
-
-    /**
-     * General controller class name for CMF (basic ui views, custom pages views, login/logout, etc.)
-     * @return string
-     */
-    static public function cmf_general_controller_class() {
-        return \PeskyCMF\Http\Controllers\CmfGeneralController::class;
+        return static::config('routes_auth_middleware', [ValidateCmfUser::class]);
     }
 
     /**
@@ -574,14 +486,6 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function getCountersForMenu() {
         return [];
-    }
-
-    /**
-     * Path to CMF translations
-     * @return string
-     */
-    static public function cmf_dictionaries_path() {
-        return __DIR__ . '/../resources/lang';
     }
 
     /**

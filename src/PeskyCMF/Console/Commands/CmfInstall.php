@@ -22,33 +22,22 @@ class CmfInstall extends Command {
         $dataForViews = [
             'sectionName' => $appSubfolder,
             'urlPrefix' => trim(trim($this->input->getArgument('url_prefix'), '/\\')),
-            'dbClassesAppSubfolder' => $this->input->getArgument('database_classes_app_subfolder')
+            'dbClassesAppSubfolder' => $this->input->getArgument('database_classes_app_subfolder'),
+            'cmfCongigClassName' => $appSubfolder . 'Config'
         ];
-        // create site loader
-        $siteLoaderFilePath = app_path('SiteLoaders/' . $appSubfolder . 'SiteLoader.php');
-        $writeSiteLoaderFile = !File::exist($siteLoaderFilePath) || $this->confirm('SiteLoader file ' . $siteLoaderFilePath . ' already exist. Overwrite?');
-        if ($writeSiteLoaderFile) {
-            File::load($siteLoaderFilePath, true, 0755, 0644)
-                ->write(\View::file($viewsPath . 'cmf_site_loader.blade.php', $dataForViews)->render());
-        }
         // copy configs
-        $cmfConfigFilePath = $baseFolderPath . '/' . $appSubfolder . 'Config.php';
+        $cmfConfigFilePath = $baseFolderPath . '/' . $dataForViews['cmfCongigClassName'] . '.php';
         $writeCmfConfigFile = !File::exist($cmfConfigFilePath) || $this->confirm('CmfConfig file ' . $cmfConfigFilePath . ' already exist. Overwrite?');
         if ($writeCmfConfigFile) {
             File::load($cmfConfigFilePath, true, 0755, 0644)
                 ->write(\View::file($viewsPath . 'cmf_config.blade.php', $dataForViews)->render());
         }
-        $routesFilePath = base_path('routes/' . snake_case($appSubfolder) . '.php');
+        $routesFileRelativePath = 'routes/' . snake_case($appSubfolder) . '.php';
+        $routesFilePath = base_path($routesFileRelativePath);
         $writeRoutesFile = !File::exist($routesFilePath) || $this->confirm('Routes file ' . $routesFilePath . ' already exist. Overwrite?');
         if ($writeRoutesFile) {
             File::load($routesFilePath, true, 0755, 0644)
                 ->write(\View::file($viewsPath . 'cmf_routes.blade.php', $dataForViews)->render());
-        }
-        $sectionConfigFilePath = config_path(snake_case($appSubfolder) . '.php');
-        $writeSectionConfigFile = !File::exist($sectionConfigFilePath) || $this->confirm('Site section config file ' . $sectionConfigFilePath . ' already exist. Overwrite?');
-        if ($writeSectionConfigFile) {
-            File::load($sectionConfigFilePath, true, 0755, 0644)
-                ->write(\View::file($viewsPath . 'site_section_config.blade.php', $dataForViews)->render());
         }
         // copy pages controller
         File::load($baseFolderPath . '/Http/Controllers/PagesController.php', true, 0755, 0644)
@@ -68,10 +57,29 @@ class CmfInstall extends Command {
                 ->write(\View::file($viewsPath . 'db/base_db_record.php', $dataForViews)->render());
         }*/
         // create js, less and css files
-        $pathToPublicFiles = public_path('packages/' . $dataForViews['urlPrefix']) . '/';
-        File::save($pathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js', '', 0664, 0755);
-        File::save($pathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css', '', 0664, 0755);
-        File::save($pathToPublicFiles . 'less/' . $dataForViews['urlPrefix'] . '.custom.less', '', 0664, 0755);
-        $this->line('Done');
+        $relativePathToPublicFiles = 'packages/' . $dataForViews['urlPrefix'] . '/';
+        $publicFiles = [
+            'js' => $relativePathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js',
+            'css' => $relativePathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css',
+            'less' => $relativePathToPublicFiles . 'less/' . $dataForViews['urlPrefix'] . '.custom.less',
+        ];
+        foreach ($publicFiles as $relativePath) {
+            File::save(public_path($relativePath), '', 0664, 0755);
+        }
+        $this->line("Done. Update next keys in 'configs/peskycmf.php' file to activate created files:");
+        $this->line(' ');
+
+        $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
+        $this->line("'cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
+        $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
+        $this->line("'routes_files' => ['{$routesFileRelativePath}'],");
+        $this->line("'views_subfolder' => ['{$subfolderName}'],");
+        $this->line("'css_files' => ['{$publicFiles['css']}'],");
+        $this->line("'js_files' => ['{$publicFiles['js']}'],");
+        $this->line("'user_object_class' => Admin::class,");
+        $this->line("'dictionary' => '{$subfolderName}',");
+
+        $this->line(' ');
+        $this->line("Also you may need to change configs in 'config/peskyorm.php' file");
     }
 }

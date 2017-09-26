@@ -3,32 +3,39 @@
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\Middleware\AjaxOnly;
 
+/**
+ * @var CmfConfig $cmfConfig
+ */
+$routeNamePrefix = $cmfConfig::routes_names_prefix();
+$apiControllerClass = $cmfConfig::cmf_scaffold_api_controller_class();
+$generalControllerClass = $cmfConfig::cmf_general_controller_class();
+
 Route::group(
     [
         'middleware' => AjaxOnly::class,
         'fallback' => ['route' => 'cmf_login']
     ],
-    function () {
+    function () use ($generalControllerClass) {
         Route::get('login.html', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getLoginTpl',
+            'uses' => $generalControllerClass . '@getLoginTpl',
             'log' => 'cmf.login'
         ]);
 
         Route::post('login', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@doLogin',
+            'uses' => $generalControllerClass . '@doLogin',
             'log' => 'cmf.login'
         ]);
     }
 );
 
 Route::get('login', [
-    'as' => 'cmf_login',
-    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getLogin'
+    'as' => $routeNamePrefix . 'cmf_login',
+    'uses' => $generalControllerClass . '@getLogin'
 ]);
 
 Route::get('logout', [
-    'as' => 'cmf_logout',
-    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@logout',
+    'as' => $routeNamePrefix . 'cmf_logout',
+    'uses' => $generalControllerClass . '@logout',
     'log' => 'cmf.logout'
 ]);
 
@@ -37,49 +44,49 @@ Route::group(
         'middleware' => AjaxOnly::class,
         'fallback' => ['route' => 'cmf_forgot_password']
     ],
-    function () {
+    function () use ($generalControllerClass) {
 
         Route::get('forgot_password.html', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getForgotPasswordTpl',
+            'uses' => $generalControllerClass . '@getForgotPasswordTpl',
             'log' => 'cmf.forgot_password'
         ]);
 
         Route::post('forgot_password', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@sendPasswordReplacingInstructions',
+            'uses' => $generalControllerClass . '@sendPasswordReplacingInstructions',
             'log' => 'cmf.forgot_password'
         ]);
 
         Route::get('replace_password/{access_key}.html', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getReplacePasswordTpl',
+            'uses' => $generalControllerClass . '@getReplacePasswordTpl',
             'log' => 'cmf.replace_password'
         ]);
 
         Route::put('replace_password/{access_key}', [
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@replacePassword',
+            'uses' => $generalControllerClass . '@replacePassword',
             'log' => 'cmf.replace_password'
         ]);
     }
 );
 
 Route::get('forgot_password', [
-    'as' => 'cmf_forgot_password',
-    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp'
+    'as' => $routeNamePrefix . 'cmf_forgot_password',
+    'uses' => $generalControllerClass . '@loadJsApp'
 ]);
 
 Route::get('replace_password/{access_key}', [
-    'as' => 'cmf_replace_password',
-    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getReplacePassword'
+    'as' => $routeNamePrefix . 'cmf_replace_password',
+    'uses' => $generalControllerClass . '@getReplacePassword'
 ]);
 
 Route::group(
     [
-        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authentication()
+        'middleware' => $cmfConfig::middleware_for_routes_that_require_authentication()
     ],
-    function () {
+    function () use ($generalControllerClass, $routeNamePrefix) {
 
         Route::post('ckeditor/upload/image', [
-            'as' => 'cmf_ckeditor_upload_image',
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@ckeditorUploadImage'
+            'as' => $routeNamePrefix . 'cmf_ckeditor_upload_image',
+            'uses' => $generalControllerClass . '@ckeditorUploadImage'
         ]);
 
         Route::group(
@@ -87,61 +94,61 @@ Route::group(
                 'middleware' => AjaxOnly::class,
                 'fallback' => ['route' => 'cmf_login']
             ],
-            function () {
+            function () use ($generalControllerClass, $routeNamePrefix) {
 
                 // UI views
                 Route::get('ui/ui.html', [
-                    'as' => 'cmf_main_ui',
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getBasicUiView'
+                    'as' => $routeNamePrefix . 'cmf_main_ui',
+                    'uses' => $generalControllerClass . '@getBasicUiView'
                 ]);
 
                 Route::get('ui/{view}.html', [
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getUiView'
+                    'uses' => $generalControllerClass . '@getUiView'
                 ]);
 
                 Route::get('page/menu/counters', [
-                    'as' => 'cmf_menu_counters_data',
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getMenuCounters'
+                    'as' => $routeNamePrefix . 'cmf_menu_counters_data',
+                    'uses' => $generalControllerClass . '@getMenuCounters'
                 ]);
 
                 // Admin profile
                 Route::get('page/profile/data', [
-                    'as' => 'cmf_profile_data',
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getAdminInfo'
+                    'as' => $routeNamePrefix . 'cmf_profile_data',
+                    'uses' => $generalControllerClass . '@getAdminInfo'
                 ]);
 
                 Route::get('page/profile.html', [
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getAdminProfile',
+                    'uses' => $generalControllerClass . '@getAdminProfile',
                     'log' => 'cmf.profile'
                 ]);
 
                 Route::put('page/profile', [
-                    'as' => 'cmf_profile',
-                    'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@updateAdminProfile',
+                    'as' => $routeNamePrefix . 'cmf_profile',
+                    'uses' => $generalControllerClass . '@updateAdminProfile',
                     'log' => 'cmf.profile'
                 ]);
 
                 // Custom Pages
-                Route::get('page/{page}.html', CmfConfig::getPrimary()->cmf_general_controller_class() . '@getPage');
+                Route::get('page/{page}.html', $generalControllerClass . '@getPage');
 
             }
         );
 
         // Custom Pages
-        Route::get('page/{page}',  CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp')
+        Route::get('page/{page}',  $generalControllerClass . '@loadJsApp')
             ->name('cmf_page')
             ->where('page', '^.*(?!\.html)$');
 
         // Switch locales
-        Route::get('switch_locale/{locale}', CmfConfig::getPrimary()->cmf_general_controller_class() . '@switchLocale');
+        Route::get('switch_locale/{locale}', $generalControllerClass . '@switchLocale');
 
         // Clean cache
-        Route::get('cache/clean', CmfConfig::getPrimary()->cmf_general_controller_class() . '@cleanCache');
+        Route::get('cache/clean', $generalControllerClass . '@cleanCache');
 
         // Api docs
         Route::get(
                 '/utils/api_docs/requests_collection_for_postman.json',
-                CmfConfig::getPrimary()->cmf_general_controller_class() . '@downloadApiRequestsCollectionForPostman'
+                $generalControllerClass . '@downloadApiRequestsCollectionForPostman'
             )
             ->name('cmf_api_docs_download_postman_collection');
     }
@@ -152,27 +159,27 @@ Route::pattern('table_name', '[a-z]+([_a-z0-9]*[a-z0-9])?');
 Route::group(
     [
         'prefix' => 'resource',
-        'middleware' => CmfConfig::getPrimary()->middleware_for_routes_that_require_authentication()
+        'middleware' => $cmfConfig::middleware_for_routes_that_require_authentication()
     ],
-    function () {
+    function () use ($generalControllerClass, $routeNamePrefix) {
         Route::get('{table_name}', [
-            'as' => 'cmf_items_table',
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp',
+            'as' => $routeNamePrefix . 'cmf_items_table',
+            'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
         Route::get('{table_name}/create', [
-            'as' => 'cmf_item_add_form',
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp',
+            'as' => $routeNamePrefix . 'cmf_item_add_form',
+            'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
         Route::get('{table_name}/details/{id}', [
-            'as' => 'cmf_item_details',
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp',
+            'as' => $routeNamePrefix . 'cmf_item_details',
+            'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
         Route::get('{table_name}/edit/{id}', [
-            'as' => 'cmf_item_edit_form',
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp',
+            'as' => $routeNamePrefix . 'cmf_item_edit_form',
+            'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
         Route::get('{table_name}/{id}/page/{page}.html', [
@@ -189,8 +196,8 @@ Route::group(
         ]);
 
         Route::get('{table_name}/{id}/page/{page}', [
-            'as' => 'cmf_item_custom_page',
-            'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@loadJsApp',
+            'as' => $routeNamePrefix . 'cmf_item_custom_page',
+            'uses' => $generalControllerClass . '@loadJsApp',
         ]);
     }
 );
@@ -201,15 +208,15 @@ Route::group(
         'prefix' => 'api',
         'middleware' => array_unique(array_merge(
             [AjaxOnly::class],
-            CmfConfig::getPrimary()->middleware_for_routes_that_require_authentication(),
-            CmfConfig::getPrimary()->middleware_for_cmf_scaffold_api_controller()
+            $cmfConfig::middleware_for_routes_that_require_authentication(),
+            $cmfConfig::middleware_for_cmf_scaffold_api_controller()
         ))
     ],
-    function () {
+    function () use ($apiControllerClass, $routeNamePrefix) {
 
         Route::get('{table_name}/service/templates', [
-            'as' => 'cmf_api_get_templates',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@getTemplates',
+            'as' => $routeNamePrefix . 'cmf_api_get_templates',
+            'uses' => $apiControllerClass . '@getTemplates',
             'fallback' => [
                 'route' => 'cmf_items_table',
                 'params' => true
@@ -217,8 +224,8 @@ Route::group(
         ]);
 
         Route::get('{table_name}/list', [
-            'as' => 'cmf_api_get_items',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@getItemsList',
+            'as' => $routeNamePrefix . 'cmf_api_get_items',
+            'uses' => $apiControllerClass . '@getItemsList',
             'fallback' => [
                 'route' => 'cmf_items_table',
                 'params' => true
@@ -226,8 +233,8 @@ Route::group(
         ]);
 
         Route::get('{table_name}/service/options', [
-            'as' => 'cmf_api_get_options',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@getOptions',
+            'as' => $routeNamePrefix . 'cmf_api_get_options',
+            'uses' => $apiControllerClass . '@getOptions',
             'fallback' => [
                 'route' => 'cmf_items_table',
                 'params' => true
@@ -235,8 +242,8 @@ Route::group(
         ]);
 
         Route::get('{table_name}/service/defaults', [
-            'as' => 'cmf_api_get_defaults',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@getItemDefaults',
+            'as' => $routeNamePrefix . 'cmf_api_get_defaults',
+            'uses' => $apiControllerClass . '@getItemDefaults',
             'fallback' => [
                 'route' => 'cmf_item_add_form',
                 'params' => true
@@ -244,8 +251,8 @@ Route::group(
         ]);
 
         Route::get('{table_name}/service/custom_data/{data_id}', [
-            'as' => 'cmf_api_get_custom_data',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@getCustomData',
+            'as' => $routeNamePrefix . 'cmf_api_get_custom_data',
+            'uses' => $apiControllerClass . '@getCustomData',
             'fallback' => [
                 'route' => 'cmf_items_table',
                 'params' => true
@@ -253,8 +260,8 @@ Route::group(
         ]);
 
         Route::delete('{table_name}/bulk', [
-            'as' => 'cmf_api_delete_bulk',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@deleteBulk',
+            'as' => $routeNamePrefix . 'cmf_api_delete_bulk',
+            'uses' => $apiControllerClass . '@deleteBulk',
             'fallback' => [
                 'route' => 'cmf_items_table',
                 'params' => true
@@ -262,8 +269,8 @@ Route::group(
         ]);
 
         Route::put('{table_name}/bulk', [
-            'as' => 'cmf_api_edit_bulk',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@updateBulk',
+            'as' => $routeNamePrefix . 'cmf_api_edit_bulk',
+            'uses' => $apiControllerClass . '@updateBulk',
             'fallback' => [
                 'route' => 'cmf_items_table',
                 'params' => true
@@ -271,8 +278,8 @@ Route::group(
         ]);
 
         Route::get('{table_name}/{id}', [
-            'as' => 'cmf_api_get_item',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@getItem',
+            'as' => $routeNamePrefix . 'cmf_api_get_item',
+            'uses' => $apiControllerClass . '@getItem',
             'fallback' => [
                 'route' => 'cmf_item_edit_form',
                 'params' => true
@@ -280,8 +287,8 @@ Route::group(
         ]);
 
         Route::put('{table_name}/{id}', [
-            'as' => 'cmf_api_update_item',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@updateItem',
+            'as' => $routeNamePrefix . 'cmf_api_update_item',
+            'uses' => $apiControllerClass . '@updateItem',
             'fallback' => [
                 'route' => 'cmf_item_edit_form',
                 'params' => true
@@ -289,8 +296,8 @@ Route::group(
         ]);
 
         Route::delete('{table_name}/{id}', [
-            'as' => 'cmf_api_delete_item',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@deleteItem',
+            'as' => $routeNamePrefix . 'cmf_api_delete_item',
+            'uses' => $apiControllerClass . '@deleteItem',
             'fallback' => [
                 'route' => 'cmf_items_table',
                 'params' => true
@@ -298,8 +305,8 @@ Route::group(
         ]);
 
         Route::post('{table_name}', [
-            'as' => 'cmf_api_create_item',
-            'uses' => CmfConfig::getPrimary()->cmf_scaffold_api_controller_class() . '@addItem',
+            'as' => $routeNamePrefix . 'cmf_api_create_item',
+            'uses' => $apiControllerClass . '@addItem',
             'fallback' => [
                 'route' => 'cmf_item_add_form',
                 'params' => true

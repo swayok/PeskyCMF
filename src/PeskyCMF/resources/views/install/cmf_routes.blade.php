@@ -5,12 +5,16 @@
  */
 echo "<?php\n";
 ?>
+use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Http\Middleware\AjaxOnly;
+
+/**
+ * @var CmfConfig $cmfConfig
+ */
 
 Route::group(
     [
-        'middleware' => [
-            PeskyCMF\Http\Middleware\ValidateAdmin::class
-        ]
+        'middleware' => $cmfConfig::middleware_for_routes_that_require_authentication()
     ],
     function () {
 
@@ -24,7 +28,7 @@ Route::group(
         Route::group(
             [
                 'middleware' => [
-                    \PeskyCMF\Http\Middleware\AjaxOnly::class
+                    AjaxOnly::class
                 ]
             ],
             function () {

@@ -492,7 +492,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             ->setDataAttr('method', 'put')
             ->setDataAttr('url', route('route', [], false))
             ->setDataAttr('data', 'id=:id:')
-            //->setDataAttr('url', routeTpl('route', [], ['id'], false))
+            //->setDataAttr('url', cmfRouteTpl('route', [], ['id'], false))
             ->setDataAttr('on-success', 'callbackFuncitonName')
             //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
             //^ It will receive 3 args: data, $link, defaultOnSuccessCallback

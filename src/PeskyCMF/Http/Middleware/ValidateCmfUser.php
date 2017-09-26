@@ -2,16 +2,18 @@
 namespace PeskyCMF\Http\Middleware;
 
 use Closure;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Event\AdminAuthenticated;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
+use PeskyORM\ORM\RecordInterface;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
-class ValidateAdmin {
+class ValidateCmfUser {
 
     /**
      * Handle an incoming request.
@@ -25,36 +27,36 @@ class ValidateAdmin {
         /** @var CmfConfig $configs */
         $configs = CmfConfig::getPrimary();
         //if this is a simple false value, send the user to the login redirect
-        $response = \Auth::guard()->check();
+        $response = $configs::getAuth()->check();
         if (!$response) {
             $loginUrl = route($configs::login_route());
-            $currentsUrl = $request->url();
+            $currentUrl = $request->url();
             if ($request->ajax()) {
-                \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
+                \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
                 return response()->json(['redirect_with_reload' => $loginUrl], HttpCode::UNAUTHORISED);
             } else {
-                return redirect()->guest($loginUrl)->with(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
+                return redirect()->guest($loginUrl)->with(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
             }
-        } else if (is_a($response, 'Illuminate\Http\JsonResponse') || is_a($response, 'Illuminate\Http\Response')) {
+        } else if (is_a($response, JsonResponse::class) || is_a($response, Response::class)) {
             return $response;
-        } else if (is_a($response, 'Illuminate\\Http\\RedirectResponse')) {
-            $currentsUrl = $request->url();
+        } else if (is_a($response, RedirectResponse::class)) {
+            $currentUrl = $request->url();
             /** @var RedirectResponse $response */
             if ($request->ajax()) {
-                \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
+                \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
                 return response()->json(['redirect' => $response->getTargetUrl()], HttpCode::UNAUTHORISED);
             } else {
-                return $response->with(CmfConfig::getPrimary()->session_redirect_key(), $currentsUrl);
+                return $response->with(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
             }
         }
-        /** @var CmfDbRecord $user */
-        $user = \Auth::guard()->user();
+        /** @var RecordInterface|Authenticatable $user */
+        $user = $configs::getUser();
         \Event::fire(new AdminAuthenticated($user));
 
         $response = $next($request);
         if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
             $fallbackUrl = $configs::login_route();
-            $message = cmfTransGeneral('.error.access_denied');
+            $message = $configs::transGeneral('.error.access_denied');
             $response = $request->ajax()
                 ? CmfJsonResponse::create([], HttpCode::FORBIDDEN)
                     ->setMessage($message)

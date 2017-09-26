@@ -1,14 +1,15 @@
 <?php
 
-if (!function_exists('routeTpl')) {
+if (!function_exists('cmfRouteTpl')) {
     /**
      * @param string $routeName
      * @param array $parameters
      * @param array $tplParams
      * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
      * @return string
      */
-    function routeTpl($routeName, array $parameters = [], array $tplParams = [], $absolute = false) {
+    function cmfRouteTpl($routeName, array $parameters = [], array $tplParams = [], $absolute = false, $cmfConfig = null) {
         $replacements = [];
         foreach ($tplParams as $name => $tplName) {
             $dotJsVarPrefix = '';
@@ -19,7 +20,10 @@ if (!function_exists('routeTpl')) {
             $parameters[$name] = '__' . $name . '__';
             $replacements['%' . preg_quote($parameters[$name], '%') . '%'] = "{{= {$dotJsVarPrefix}{$tplName} }}";
         }
-        $url = route($routeName, $parameters, $absolute);
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        $url = route($cmfConfig::getRouteName($routeName), $parameters, $absolute);
         return preg_replace(array_keys($replacements), array_values($replacements), $url);
     }
 }
@@ -29,13 +33,17 @@ if (!function_exists('routeToCmfPage')) {
      * @param string $pageId
      * @param array $queryArgs
      * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
      * @return string
      */
-    function routeToCmfPage($pageId, array $queryArgs = [], $absolute = false) {
+    function routeToCmfPage($pageId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
         if (Gate::denies('cmf_page', [$pageId])) {
             return null;
         }
-        return route('cmf_page', array_merge(['page' => $pageId], $queryArgs), $absolute);
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        return route($cmfConfig::getRouteName('cmf_page'), array_merge(['page' => $pageId], $queryArgs), $absolute);
     }
 }
 
@@ -45,9 +53,10 @@ if (!function_exists('routeToCmfItemsTable')) {
      * @param array $filters - key-value array where key is column name to add to filter and value is column's value.
      * Note: Operator is 'equals' (col1 = val1). Multiple filters joined by 'AND' (col1 = val1 AND col2 = val2)
      * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
      * @return string
      */
-    function routeToCmfItemsTable($tableName, array $filters = [], $absolute = false) {
+    function routeToCmfItemsTable($tableName, array $filters = [], $absolute = false, $cmfConfig = null) {
         if (Gate::denies('resource.view', [$tableName])) {
             return null;
         }
@@ -55,7 +64,10 @@ if (!function_exists('routeToCmfItemsTable')) {
         if (!empty($filters)) {
             $params['filter'] = json_encode($filters, JSON_UNESCAPED_UNICODE);
         }
-        return route('cmf_items_table', $params, $absolute);
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        return route($cmfConfig::getRouteName('cmf_items_table'), $params, $absolute);
     }
 }
 
@@ -64,13 +76,21 @@ if (!function_exists('routeToCmfTableCustomData')) {
      * @param string $tableName
      * @param string $dataId - identifier of data to be returned. For example: 'special_options'
      * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
      * @return string
      */
-    function routeToCmfTableCustomData($tableName, $dataId, $absolute = false) {
+    function routeToCmfTableCustomData($tableName, $dataId, $absolute = false, $cmfConfig = null) {
         if (Gate::denies('resource.view', [$tableName])) {
             return null;
         }
-        return route('cmf_api_get_custom_data', array_merge(['table_name' => $tableName, 'data_id' => $dataId]), $absolute);
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        return route(
+            $cmfConfig::getRouteName('cmf_api_get_custom_data'),
+            array_merge(['table_name' => $tableName, 'data_id' => $dataId]),
+            $absolute
+        );
     }
 }
 
@@ -78,13 +98,17 @@ if (!function_exists('routeToCmfItemAddForm')) {
     /**
      * @param string $tableName
      * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
      * @return string
      */
-    function routeToCmfItemAddForm($tableName, $absolute = false) {
+    function routeToCmfItemAddForm($tableName, $absolute = false, $cmfConfig = null) {
         if (Gate::denies('resource.create', [$tableName])) {
             return null;
         }
-        return route('cmf_item_add_form', ['table_name' => $tableName], $absolute);
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        return route($cmfConfig::getRouteName('cmf_item_add_form'), ['table_name' => $tableName], $absolute);
     }
 }
 
@@ -93,13 +117,17 @@ if (!function_exists('routeToCmfItemEditForm')) {
      * @param string $tableName
      * @param int|string $itemId
      * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
      * @return string
      */
-    function routeToCmfItemEditForm($tableName, $itemId, $absolute = false) {
+    function routeToCmfItemEditForm($tableName, $itemId, $absolute = false, $cmfConfig = null) {
         if (Gate::denies('resource.update', [$tableName, $itemId])) {
             return null;
         }
-        return route('cmf_item_edit_form', ['table_name' => $tableName, 'id' => $itemId], $absolute);
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        return route($cmfConfig::getRouteName('cmf_item_edit_form'), ['table_name' => $tableName, 'id' => $itemId], $absolute);
     }
 }
 
@@ -108,13 +136,17 @@ if (!function_exists('routeToCmfItemDetails')) {
      * @param string $tableName
      * @param int|string $itemId
      * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
      * @return string
      */
-    function routeToCmfItemDetails($tableName, $itemId, $absolute = false) {
+    function routeToCmfItemDetails($tableName, $itemId, $absolute = false, $cmfConfig = null) {
         if (Gate::denies('resource.details', [$tableName, $itemId])) {
             return null;
         }
-        return route('cmf_item_details', ['table_name' => $tableName, 'id' => $itemId], $absolute);
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        return route($cmfConfig::getRouteName('cmf_item_details'), ['table_name' => $tableName, 'id' => $itemId], $absolute);
     }
 }
 
@@ -125,11 +157,15 @@ if (!function_exists('routeToCmfItemCustomPage')) {
      * @param string $pageId
      * @param array $queryArgs
      * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
      * @return string
      */
-    function routeToCmfItemCustomPage($tableName, $itemId, $pageId, array $queryArgs = [], $absolute = false) {
+    function routeToCmfItemCustomPage($tableName, $itemId, $pageId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
         return route(
-            'cmf_item_custom_page',
+            $cmfConfig::getRouteName('cmf_item_custom_page'),
             array_merge(
                 ['table_name' => $tableName, 'id' => $itemId, 'page' => $pageId],
                 $queryArgs

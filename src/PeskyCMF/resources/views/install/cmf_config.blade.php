@@ -1,13 +1,8 @@
 <?php
 /**
  * @var string $sectionName
- * @var string $urlPrefix
- * @var string $dbClassesAppSubfolder
+ * @var string $cmfCongigClassName
  */
-if (empty($urlPrefix)) {
-    $urlPrefix = strtolower($sectionName);
-}
-$lowercasedSectionName = snake_case($sectionName);
 echo "<?php\n";
 ?>
 
@@ -15,11 +10,7 @@ namespace App\{{ $sectionName }};
 
 use PeskyCMF\Config\CmfConfig;
 
-class {{ $sectionName }}Config extends CmfConfig {
-
-    static protected function configsFileName() {
-        return '{{ $lowercasedSectionName }}'
-    }
+class {{ $cmfCongigClassName }} extends CmfConfig {
 
     /**
      * The menu structure of the site.

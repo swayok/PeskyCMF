@@ -34,7 +34,6 @@
         "swayok/peskyorm-laravel": "master@dev",
         "swayok/laravel-extended-errors": "master@dev",
         "swayok/html-tag-helper": "master@dev",
-        "swayok/laravel-site-loader": "master@dev",
         "almasaeed2010/adminlte": "~2.0",
         "FortAwesome/Font-Awesome": "*",
         "driftyco/ionicons": "*",
