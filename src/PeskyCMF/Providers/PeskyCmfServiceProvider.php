@@ -7,11 +7,6 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
-use PeskyCMF\Db\CmfDbRecord;
-use PeskyCMF\Db\CmfDbTable;
-use PeskyORM\ORM\Record;
-use PeskyORM\ORM\Table;
-use PeskyORMLaravel\Providers\PeskyOrmServiceProvider;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 
@@ -21,7 +16,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         if (config('cmf.file_access_mask') !== null) {
             umask(config('cmf.file_access_mask'));
         }
-        CmsFrontendUtils::registerBladeDirectiveForStringTemplateRendering();
         $this->configurePublishes();
         /** @var CmfConfig|string $defaultCmfConfig */
         $defaultCmfConfig = config('cmf.default_cmf_config');
@@ -63,23 +57,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         }
 
         $this->registerCommands();
-    }
-
-    protected function injectClassesIntoPeskyOrmClassBuilderConfig() {
-        // this method injects Record and Table classes into 'peskyorm' config between
-        $config = $this->getAppConfig()->get('peskyorm', []);
-        if (empty($config)) {
-            $config['base_table_class'] = static::$baseDbTableClass;
-            $config['base_record_class'] = static::$baseDbRecordClass;
-        } else {
-            if (array_get($config, 'base_table_class') === Table::class) {
-                $config['base_table_class'] = static::$baseDbTableClass;
-            }
-            if (array_get($config, 'base_table_class') === Record::class) {
-                $config['base_table_class'] = static::$baseDbRecordClass;
-            }
-        }
-        $this->getAppConfig()->set('peskyorm', $config);
     }
 
     protected function configurePublishes() {

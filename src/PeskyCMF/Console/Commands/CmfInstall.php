@@ -44,7 +44,7 @@ class CmfInstall extends Command {
             File::load($routesFilePath, true, 0755, 0644)
                 ->write(\View::file($viewsPath . 'cmf_routes.blade.php', $dataForViews)->render());
         }
-        $sectionConfigFilePath = base_path('routes/' . snake_case($appSubfolder) . '.php');
+        $sectionConfigFilePath = config_path(snake_case($appSubfolder) . '.php');
         $writeSectionConfigFile = !File::exist($sectionConfigFilePath) || $this->confirm('Site section config file ' . $sectionConfigFilePath . ' already exist. Overwrite?');
         if ($writeSectionConfigFile) {
             File::load($sectionConfigFilePath, true, 0755, 0644)
