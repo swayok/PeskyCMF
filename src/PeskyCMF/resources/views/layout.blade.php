@@ -101,9 +101,9 @@
         var CmfSettings = {
             isDebug: {{ config('app.debug') ? 'true' : 'false' }},
             rootUrl: '/{{ $urlPrefix }}',
-            uiUrl: '{{ route('cmf_main_ui', [], false) }}',
-            userDataUrl: '{{ route('cmf_profile_data', [], false) }}',
-            menuCountersDataUrl: '{{ route('cmf_menu_counters_data', [], false) }}',
+            uiUrl: '{{ cmfRoute('cmf_main_ui', [], false) }}',
+            userDataUrl: '{{ cmfRoute('cmf_profile_data', [], false) }}',
+            menuCountersDataUrl: '{{ cmfRoute('cmf_menu_counters_data', [], false) }}',
             defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }}',
             pageTitleAddition: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->page_title_addition() }}'
         };
@@ -139,7 +139,7 @@
     <script src="/packages/cmf-vendors/base64.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/ckeditor/ckeditor.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/ckeditor/adapters/jquery.js" type="text/javascript"></script>
-    <script src="{{ route('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
+    <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
 
     <script src="/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-en_US.min.js" type="text/javascript"></script>

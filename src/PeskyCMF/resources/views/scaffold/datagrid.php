@@ -120,7 +120,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     ->setContent(cmfTransGeneral('.datagrid.bulk_actions.delete_selected'))
                     ->setDataAttr('confirm', cmfTransGeneral('.datagrid.bulk_actions.delete_selected_confirm'))
                     ->setDataAttr('action', 'bulk-selected')
-                    ->setDataAttr('url', route('cmf_api_delete_bulk', [$tableNameForRoutes], false))
+                    ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                     ->setDataAttr('id-field', $pkName)
                     ->setDataAttr('method', 'delete')
                     ->setHref('javascript: void(0)')
@@ -140,7 +140,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setContent(cmfTransGeneral('.datagrid.bulk_actions.delete_filtered'))
                 ->setDataAttr('action', 'bulk-filtered')
                 ->setDataAttr('confirm', cmfTransGeneral('.datagrid.bulk_actions.delete_filtered_confirm'))
-                ->setDataAttr('url', route('cmf_api_delete_bulk', [$tableNameForRoutes], false))
+                ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                 ->setDataAttr('method', 'delete')
                 ->setHref('javascript: void(0)')
                 ->build();
@@ -246,7 +246,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
-                ->setDataAttr('url', route('cmf_api_delete_item', [$tableNameForRoutes, ":{$pkName}:"], false))
+                ->setDataAttr('url', cmfRoute('cmf_api_delete_item', [$tableNameForRoutes, ":{$pkName}:"], false))
                 ->setDataAttr('confirm', cmfTransGeneral('.action.delete.please_confirm'))
                 ->setHref('javascript: void(0)')
                 ->build();
@@ -273,7 +273,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         'pkColumnName' => $table::getPkColumnName(),
                         'processing' => true,
                         'serverSide' => true,
-                        'ajax' => route('cmf_api_get_items', ['table_name' => $tableNameForRoutes], false),
+                        'ajax' => cmfRoute('cmf_api_get_items', ['table_name' => $tableNameForRoutes], false),
                         'pageLength' => $dataGridConfig->getRecordsPerPage(),
                         'toolbarItems' => array_values($toolbar),
                         'order' => []
@@ -399,7 +399,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
 <div id="data-grid-tpl">
     <?php echo view('cmf::ui.default_page_header', [
         'header' => $dataGridConfig->translate(null, 'header'),
-        'defaultBackUrl' => route('cmf_start_page'),
+        'defaultBackUrl' => \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url(),
     ])->render(); ?>
     <div class="content">
         <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">

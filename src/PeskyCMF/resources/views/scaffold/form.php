@@ -131,8 +131,8 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         if ($formConfig->hasJsInitiator()) {
             $formAttributes['data-initiator'] = addslashes($formConfig->getJsInitiator());
         }
-        $editUrl = route('cmf_api_update_item', ['table_name' => $tableNameForRoutes, 'id' => ''], false) . '/' . $printPk;
-        $createUrl = route('cmf_api_create_item', ['table_name' => $tableNameForRoutes], false);
+        $editUrl = cmfRoute('cmf_api_update_item', ['table_name' => $tableNameForRoutes, 'id' => ''], false) . '/' . $printPk;
+        $createUrl = cmfRoute('cmf_api_create_item', ['table_name' => $tableNameForRoutes], false);
         $formAction = $ifEdit . $editUrl . $else . $createUrl . $endIf;
     ?>
     <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>

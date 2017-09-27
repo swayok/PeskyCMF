@@ -389,7 +389,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             * ->setDataAttr('action', 'bulk-selected')
             * ->setDataAttr('confirm', trans('path.to.translation'))
             * //^ confirm action before sending request to server
-            * ->setDataAttr('url', route('route', [], false))
+            * ->setDataAttr('url', cmfRoute('route', [], false))
             * ->setDataAttr('method', 'delete')
             * //^ can be 'post', 'put', 'delete' depending on action type
             * ->setDataAttr('id-field', 'id')
@@ -408,7 +408,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             * ->setDataAttr('action', 'bulk-filtered')
             * ->setDataAttr('confirm', trans('path.to.translation'))
             * //^ confirm action before sending request to server
-            * ->setDataAttr('url', route('route', [], false))
+            * ->setDataAttr('url', cmfRoute('route', [], false))
             * ->setDataAttr('method', 'put')
             * //^ can be 'post', 'put', 'delete' depending on action type
             * ->setDataAttr('on-success', 'callbackFuncitonName')
@@ -425,7 +425,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             * ->setClass('btn btn-success')
             * ->setDataAttr('type', 'bulk-selected')
             * //^ 'bulk-selected' or 'bulk-filtered'
-            * ->setDataAttr('url', route('route', [], false))
+            * ->setDataAttr('url', cmfRoute('route', [], false))
             * ->setDataAttr('id-field', 'id')
             * //^ id field name to use to get rows ids, default: 'id'
             * ->setOnClick('someFunction(this)')
@@ -490,7 +490,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             ->setDataAttr('block-datagrid', '1')
             ->setDataAttr('action', 'request')
             ->setDataAttr('method', 'put')
-            ->setDataAttr('url', route('route', [], false))
+            ->setDataAttr('url', cmfRoute('route', [], false))
             ->setDataAttr('data', 'id=:id:')
             //->setDataAttr('url', cmfRouteTpl('route', [], ['id'], false))
             ->setDataAttr('on-success', 'callbackFuncitonName')
@@ -505,7 +505,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             ->setTitle(cmfTransCustom('.path.to.translation'))
             ->setDataAttr('toggle', 'tooltip')
             ->setDataAttr('container', '#section-content .content') //< tooltip container
-            ->setHref(route('route', [], false))
+            ->setHref(cmfRoute('route', [], false))
             ->setTarget('_blank')
             ->build()
      *

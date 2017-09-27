@@ -203,7 +203,7 @@ class CmfGeneralController extends Controller {
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (empty($user)) {
             return cmfRedirectResponseWithMessage(
-                route(CmfConfig::getPrimary()->login_route()),
+                CmfConfig::getPrimary()->login_page_url(),
                 cmfTransCustom('.replace_password.invalid_access_key'),
                 'error'
             );
@@ -247,7 +247,7 @@ class CmfGeneralController extends Controller {
         } else {
             return cmfJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(cmfTransCustom('.replace_password.invalid_access_key'))
-                ->setRedirect(route(CmfConfig::getPrimary()->login_route()));
+                ->setRedirect(CmfConfig::getPrimary()->login_page_url());
         }
     }
 
@@ -309,7 +309,7 @@ class CmfGeneralController extends Controller {
                 );
             }
             $data = [
-                'url' => route('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
+                'url' => cmfRoute('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
                 'user' => $user->toArrayWithoutFiles(),
             ];
             $subject = cmfTransCustom('.forgot_password.email_subject');
@@ -325,7 +325,7 @@ class CmfGeneralController extends Controller {
 
         return cmfJsonResponse()
             ->setMessage(cmfTransCustom('.forgot_password.instructions_sent'))
-            ->setRedirect(route(CmfConfig::getPrimary()->login_route()));
+            ->setRedirect(CmfConfig::getPrimary()->login_page_url());
     }
 
     public function replacePassword(Request $request, $accessKey) {
@@ -341,7 +341,7 @@ class CmfGeneralController extends Controller {
             if ($user->commit()) {
                 return cmfJsonResponse()
                     ->setMessage(cmfTransCustom('.replace_password.password_replaced'))
-                    ->setRedirect(route(CmfConfig::getPrimary()->login_route()));
+                    ->setRedirect(CmfConfig::getPrimary()->login_page_url());
             } else {
                 return cmfJsonResponse(HttpCode::SERVER_ERROR)
                     ->setMessage(cmfTransCustom('.replace_password.failed_to_save'));
@@ -349,7 +349,7 @@ class CmfGeneralController extends Controller {
         } else {
             return cmfJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(cmfTransCustom('.replace_password.invalid_access_key'))
-                ->setRedirect(route(CmfConfig::getPrimary()->login_route()));
+                ->setRedirect(CmfConfig::getPrimary()->login_page_url());
         }
     }
 
@@ -358,7 +358,7 @@ class CmfGeneralController extends Controller {
         \Session::invalidate();
         CmfConfig::getPrimary()->resetLocale();
 
-        return Redirect::route(CmfConfig::getPrimary()->login_route());
+        return Redirect::to(CmfConfig::getPrimary()->login_page_url(true));
     }
 
     public function getAdminInfo() {

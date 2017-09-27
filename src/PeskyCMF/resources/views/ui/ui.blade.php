@@ -7,7 +7,7 @@
 
 <header class="main-header">
     <a href="javascript:void(0)" class="sidebar-toggle visible-xs" data-toggle="offcanvas" role="button"></a>
-    <a href="{{ route('cmf_start_page', [], false, '/') }}" class="logo">
+    <a href="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url() }}" class="logo">
         <span class="logo-lg">
             {!! \PeskyCMF\Config\CmfConfig::getPrimary()->sidebar_logo() !!}
         </span>

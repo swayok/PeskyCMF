@@ -660,7 +660,7 @@ abstract class ScaffoldSectionConfig {
              ->setContent(trans('path.to.translation'))
              ->setClass('btn btn-warning')
              ->setDataAttr('action', 'request')
-             ->setDataAttr('url', route('route', [], false))
+             ->setDataAttr('url', cmfRoute('route', [], false))
              ->setDataAttr('method', 'put')
              ->setDataAttr('data', 'id=:id:')
              ->setDataAttr('on-success', 'callbackFuncitonName')
@@ -671,7 +671,7 @@ abstract class ScaffoldSectionConfig {
          Tag::a()
              ->setContent(trans('path.to.translation'))
              ->setClass('btn btn-warning')
-             ->setHref(route('route', [], false))
+             ->setHref(cmfRoute('route', [], false))
              ->setTarget('_blank')
      * ONLY FOR DATA GRIDS:
      * - call some url via ajax passing all selected ids and then run "callback(json)"
@@ -681,7 +681,7 @@ abstract class ScaffoldSectionConfig {
              ->setDataAttr('action', 'bulk-selected')
              ->setDataAttr('confirm', trans('path.to.translation'))
              //^ confirm action before sending request to server
-             ->setDataAttr('url', route('route', [], false))
+             ->setDataAttr('url', cmfRoute('route', [], false))
              ->setDataAttr('method', 'delete')
              //^ can be 'post', 'put', 'delete' depending on action type
              ->setDataAttr('id-field', 'id')
@@ -700,7 +700,7 @@ abstract class ScaffoldSectionConfig {
              ->setDataAttr('action', 'bulk-filtered')
              ->setDataAttr('confirm', trans('path.to.translation'))
              //^ confirm action before sending request to server
-             ->setDataAttr('url', route('route', [], false))
+             ->setDataAttr('url', cmfRoute('route', [], false))
              ->setDataAttr('method', 'put')
              //^ can be 'post', 'put', 'delete' depending on action type
              ->setDataAttr('on-success', 'callbackFuncitonName')
@@ -717,7 +717,7 @@ abstract class ScaffoldSectionConfig {
              ->setClass('btn btn-success')
              ->setDataAttr('type', 'bulk-selected')
              //^ 'bulk-selected' or 'bulk-filtered'
-             ->setDataAttr('url', route('route', [], false))
+             ->setDataAttr('url', cmfRoute('route', [], false))
              ->setDataAttr('id-field', 'id')
              //^ id field name to use to get rows ids, default: 'id'
              ->setOnClick('someFunction(this)')

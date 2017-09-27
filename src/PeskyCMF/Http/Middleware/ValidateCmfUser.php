@@ -29,7 +29,7 @@ class ValidateCmfUser {
         //if this is a simple false value, send the user to the login redirect
         $response = $configs::getAuth()->check();
         if (!$response) {
-            $loginUrl = route($configs::login_route());
+            $loginUrl = $configs::login_page_url();
             $currentUrl = $request->url();
             if ($request->ajax()) {
                 \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
@@ -55,7 +55,7 @@ class ValidateCmfUser {
 
         $response = $next($request);
         if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
-            $fallbackUrl = $configs::login_route();
+            $fallbackUrl = $configs::login_page_url();
             $message = $configs::transGeneral('.error.access_denied');
             $response = $request->ajax()
                 ? CmfJsonResponse::create([], HttpCode::FORBIDDEN)

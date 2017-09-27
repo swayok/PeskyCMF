@@ -24,7 +24,7 @@ class AjaxOnly {
      *  'fallback' => '/some/url/{param}'
      *  // or
      *  'fallback' => [
-     *      'route' => 'cmf_login',
+     *      'route' => $routeNamePrefix . 'cmf_login',
      *      'params' => [] //< optional, can be array or boolean (by default === true: pass params from original url)
      *  ],
      *  ...

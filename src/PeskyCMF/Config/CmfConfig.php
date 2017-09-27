@@ -613,39 +613,33 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * The menu item that should be used as the default landing page of the administrative section
+     * Start page URL of CMS section
      *
+     * @param bool $absolute
      * @return string
      */
-    static public function home_page_url() {
-        return route('cmf_start_page');
+    static public function home_page_url($absolute = false) {
+        return route(static::getRouteName('cmf_start_page'), [], $absolute);
     }
 
     /**
-     * The route to which the user will be taken when they click the "back to site" button
+     * Login page URL of CMS section
      *
+     * @param bool $absolute
      * @return string
      */
-    static public function back_to_site_url() {
-        return '/';
-    }
-
-    /**
-     * The login route is the path where Administrator will send the user if they fail a permission check
-     *
-     * @return string
-     */
-    static public function login_route() {
-        return 'cmf_login';
+    static public function login_page_url($absolute = false) {
+        return route(static::getRouteName('cmf_login'), [], $absolute);
     }
 
     /**
      * The logout route is the path where Administrator will send the user when they click the logout link
      *
+     * @param bool $absolute
      * @return string
      */
-    static public function logout_route() {
-        return 'cmf_logout';
+    static public function logout_page_url($absolute = false) {
+        return route(static::getRouteName('cmf_logout'), [], $absolute);
     }
 
     /**
@@ -730,8 +724,8 @@ class CmfConfig extends ConfigsContainer {
             'forceEnterMode' => true,
             'removeDialogTabs' => 'image:advanced',
             'extraPlugins' => 'uploadimage',
-            'filebrowserImageUploadUrl' => route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
-            'uploadUrl' => route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
+            'filebrowserImageUploadUrl' => route(static::getRouteName('cmf_ckeditor_upload_image'), ['_token' => csrf_token()]),
+            'uploadUrl' => route(static::getRouteName('cmf_ckeditor_upload_image'), ['_token' => csrf_token()]),
             'contentsCss' => static::css_files_for_wysiwyg_editor()
         ];
     }

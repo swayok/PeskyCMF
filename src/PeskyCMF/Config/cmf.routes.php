@@ -13,7 +13,7 @@ $generalControllerClass = $cmfConfig::cmf_general_controller_class();
 Route::group(
     [
         'middleware' => AjaxOnly::class,
-        'fallback' => ['route' => 'cmf_login']
+        'fallback' => ['route' => $routeNamePrefix . 'cmf_login']
     ],
     function () use ($generalControllerClass) {
         Route::get('login.html', [
@@ -42,7 +42,7 @@ Route::get('logout', [
 Route::group(
     [
         'middleware' => AjaxOnly::class,
-        'fallback' => ['route' => 'cmf_forgot_password']
+        'fallback' => ['route' => $routeNamePrefix . 'cmf_forgot_password']
     ],
     function () use ($generalControllerClass) {
 
@@ -92,7 +92,7 @@ Route::group(
         Route::group(
             [
                 'middleware' => AjaxOnly::class,
-                'fallback' => ['route' => 'cmf_login']
+                'fallback' => ['route' => $routeNamePrefix . 'cmf_login']
             ],
             function () use ($generalControllerClass, $routeNamePrefix) {
 
@@ -185,7 +185,7 @@ Route::group(
         Route::get('{table_name}/{id}/page/{page}.html', [
             'middleware' => AjaxOnly::class,
             'fallback' => [
-                'route' => 'cmf_item_custom_page',
+                'route' => $routeNamePrefix . 'cmf_item_custom_page',
                 'params' => true
             ],
             'uses' => function () {
@@ -218,7 +218,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_get_templates',
             'uses' => $apiControllerClass . '@getTemplates',
             'fallback' => [
-                'route' => 'cmf_items_table',
+                'route' => $routeNamePrefix . 'cmf_items_table',
                 'params' => true
             ]
         ]);
@@ -227,7 +227,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_get_items',
             'uses' => $apiControllerClass . '@getItemsList',
             'fallback' => [
-                'route' => 'cmf_items_table',
+                'route' => $routeNamePrefix . 'cmf_items_table',
                 'params' => true
             ]
         ]);
@@ -236,7 +236,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_get_options',
             'uses' => $apiControllerClass . '@getOptions',
             'fallback' => [
-                'route' => 'cmf_items_table',
+                'route' => $routeNamePrefix . 'cmf_items_table',
                 'params' => true
             ]
         ]);
@@ -245,7 +245,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_get_defaults',
             'uses' => $apiControllerClass . '@getItemDefaults',
             'fallback' => [
-                'route' => 'cmf_item_add_form',
+                'route' => $routeNamePrefix . 'cmf_item_add_form',
                 'params' => true
             ]
         ]);
@@ -254,7 +254,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_get_custom_data',
             'uses' => $apiControllerClass . '@getCustomData',
             'fallback' => [
-                'route' => 'cmf_items_table',
+                'route' => $routeNamePrefix . 'cmf_items_table',
                 'params' => true
             ]
         ]);
@@ -263,7 +263,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_delete_bulk',
             'uses' => $apiControllerClass . '@deleteBulk',
             'fallback' => [
-                'route' => 'cmf_items_table',
+                'route' => $routeNamePrefix . 'cmf_items_table',
                 'params' => true
             ]
         ]);
@@ -272,7 +272,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_edit_bulk',
             'uses' => $apiControllerClass . '@updateBulk',
             'fallback' => [
-                'route' => 'cmf_items_table',
+                'route' => $routeNamePrefix . 'cmf_items_table',
                 'params' => true
             ]
         ]);
@@ -281,7 +281,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_get_item',
             'uses' => $apiControllerClass . '@getItem',
             'fallback' => [
-                'route' => 'cmf_item_edit_form',
+                'route' => $routeNamePrefix . 'cmf_item_edit_form',
                 'params' => true
             ]
         ]);
@@ -290,7 +290,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_update_item',
             'uses' => $apiControllerClass . '@updateItem',
             'fallback' => [
-                'route' => 'cmf_item_edit_form',
+                'route' => $routeNamePrefix . 'cmf_item_edit_form',
                 'params' => true
             ]
         ]);
@@ -299,7 +299,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_delete_item',
             'uses' => $apiControllerClass . '@deleteItem',
             'fallback' => [
-                'route' => 'cmf_items_table',
+                'route' => $routeNamePrefix . 'cmf_items_table',
                 'params' => true
             ]
         ]);
@@ -308,7 +308,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_api_create_item',
             'uses' => $apiControllerClass . '@addItem',
             'fallback' => [
-                'route' => 'cmf_item_add_form',
+                'route' => $routeNamePrefix . 'cmf_item_add_form',
                 'params' => true
             ]
         ]);

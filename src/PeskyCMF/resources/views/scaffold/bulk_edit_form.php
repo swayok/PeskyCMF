@@ -35,7 +35,7 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                     if ($formConfig->hasOptionsLoader()) {
                         $formAttributes['data-load-options'] = '1';
                     }
-                    $formAction = route('cmf_api_edit_bulk', ['table_name' => $tableNameForRoutes], false);
+                    $formAction = cmfRoute('cmf_api_edit_bulk', ['table_name' => $tableNameForRoutes], false);
                 ?>
                 <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
                 data-uuid="{{= it.formUUID }}">

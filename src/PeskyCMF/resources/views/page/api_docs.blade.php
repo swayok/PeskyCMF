@@ -2,7 +2,7 @@
     <h1>{{ cmfTransCustom('.api_docs.header') }}</h1>
     <ol class="breadcrumb">
         <li>
-            <a href="{{ route('cmf_api_docs_download_postman_collection') }}" download>
+            <a href="{{ cmfRoute('cmf_api_docs_download_postman_collection') }}" download>
                 <i class="glyphicon glyphicon-download-alt"></i>
                 {{ cmfTransCustom('.api_docs.download_postman_collection') }}
             </a>

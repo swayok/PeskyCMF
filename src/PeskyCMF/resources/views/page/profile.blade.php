@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\CMS\Admins\CmsAdmin $admin
+ * @var \PeskyCMS\Db\Admins\CmsAdmin|\PeskyORM\ORM\RecordInterface|\Illuminate\Contracts\Auth\Authenticatable $admin
  */
 ?>
 <div class="content-header">
@@ -9,7 +9,7 @@
     </h1>
     <ol class="breadcrumb">
         <li>
-            <a href="#" data-nav="back" data-default-url="{{ route('cmf_start_page') }}">
+            <a href="#" data-nav="back" data-default-url="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url() }}">
                 <i class="glyphicon fa fa-reply"></i>
                 {{ cmfTransGeneral('.action.back') }}
             </a>
@@ -27,7 +27,7 @@
     <div class="row"><div class="col-xs-6 col-xs-offset-3">
         <div class="box box-primary">
             <?php $canSubmit = \Gate::allows('resource.update', ['cmf_profile', \PeskyCMF\Config\CmfConfig::getPrimary()->getUser()]) ?>
-            <form role="form" method="post" action="{{ route('cmf_profile', [], false) }}" id="admin-profile-form">
+            <form role="form" method="post" action="{{ cmfRoute('cmf_profile', [], false) }}" id="admin-profile-form">
                 <input type="hidden" name="_method" value="PUT">
                 <!-- disable chrome email & password autofill -->
                 <input type="text" name="login" class="hidden" formnovalidate disabled>
@@ -105,7 +105,7 @@
                 <div class="box-footer">
                     <div class="row">
                         <div class="col-xs-6">
-                            <a class="btn btn-default" href="#" data-nav="back" data-default-url="{{ route('cmf_start_page') }}">
+                            <a class="btn btn-default" href="#" data-nav="back" data-default-url="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url() }}">
                                 {{ cmfTransGeneral('.form.toolbar.cancel') }}
                             </a>
                         </div>

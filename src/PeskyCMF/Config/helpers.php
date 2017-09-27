@@ -1,5 +1,21 @@
 <?php
 
+if (!function_exists('cmfRoute')) {
+    /**
+     * @param string $routeName
+     * @param array $parameters
+     * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @return string
+     */
+    function cmfRoute($routeName, array $parameters = [], $absolute = false, $cmfConfig = null) {
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        return route($cmfConfig::getRouteName($routeName), $parameters, $absolute);
+    }
+}
+
 if (!function_exists('cmfRouteTpl')) {
     /**
      * @param string $routeName
@@ -272,7 +288,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
             $message = cmfTransGeneral('.error.http404');
         }
         if (empty($fallbackUrl)) {
-            $fallbackUrl = route('cmf_start_page');
+            $fallbackUrl = \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url();
         }
         return cmfJsonResponse(\PeskyCMF\HttpCode::NOT_FOUND)
             ->setMessage($message)

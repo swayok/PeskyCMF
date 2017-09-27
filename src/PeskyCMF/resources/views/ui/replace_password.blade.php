@@ -10,7 +10,7 @@
         <b>{!! cmfTransCustom('.replace_password.header') !!}</b>
     </div>
     <div class="login-box-body" id="replace-password-form-container">
-        <form action="{{ route('cmf_replace_password', [$accessKey], false) }}" method="post" id="replace-password-form">
+        <form action="{{ cmfRoute('cmf_replace_password', [$accessKey], false) }}" method="post" id="replace-password-form">
             <input type="hidden" name="_method" value="PUT">
             <input type="hidden" name="id" value="{{ $userId }}">
             <div class="form-group has-feedback">
