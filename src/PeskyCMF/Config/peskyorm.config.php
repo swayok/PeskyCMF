@@ -19,7 +19,7 @@ return [
      */
     'base_table_class' => \PeskyCMF\Db\CmfDbTable::class,
     'base_record_class' => \PeskyCMF\Db\CmfDbRecord::class,
-    'base_table_structure_class' => \PeskyORM\ORM\TableStructure::class,
+    'base_table_structure_class' => \PeskyCMF\Db\CmfDbTableStructure::class,
 
     /**
      * DB classes builder class used to generate DB classes by table name
@@ -33,6 +33,7 @@ return [
      */
     'table_structure_traits' => [
         \PeskyORMLaravel\Db\TableStructureTraits\IdColumn::class,              // id
+        \PeskyCMF\Db\TableStructureTraits\AdminIdColumn::class,                // admin_id column + Admin relation
         \PeskyORMLaravel\Db\TableStructureTraits\IsActiveColumn::class,        // is_active
         \PeskyORMLaravel\Db\TableStructureTraits\IsPublishedColumn::class,     // is_published
         \PeskyORMLaravel\Db\TableStructureTraits\UserAuthColumns::class,       // password and remember_token

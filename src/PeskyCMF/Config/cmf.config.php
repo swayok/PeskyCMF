@@ -91,9 +91,9 @@ return [
 
     /**
      * DB Record class for users
-     * For CMS use \PeskyCMS\Db\Admins\CmsAdmin::class
+     * For CMS use \PeskyCMF\Db\Admins\CmfAdmin::class
      */
-    'user_object_class' => null,
+    'user_record_class' => \PeskyCMF\Db\Admins\CmfAdmin::class,
 
     /**
      * Column that is used as user's identifier
@@ -164,7 +164,7 @@ return [
      * - value = ScaffoldConfig class name
      */
     'resources' => [
-
+        'admins' => \PeskyCMF\Db\Admins\CmfAdminsScaffoldConfig::class,
     ],
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMS\Db\Admins\CmsAdmin|\PeskyORM\ORM\RecordInterface|\Illuminate\Contracts\Auth\Authenticatable $admin
+ * @var \PeskyCMF\Db\Admins\CmfAdmin|\PeskyORM\ORM\RecordInterface|\Illuminate\Contracts\Auth\Authenticatable $admin
  */
 ?>
 <div class="content-header">
@@ -84,8 +84,8 @@
                                     @if(!$canSubmit) disabled @endif
                                     data-live-search-placeholder="{{ cmfTransCustom('.page.profile.input.timezone_search') }}">
                                 <?php
-                                    /** @var \PeskyORM\ORM\RecordInterface|\PeskyCMS\Db\Admins\CmsAdmin $userClass */
-                                    $userClass = \PeskyCMF\Config\CmfConfig::getPrimary()->user_object_class();
+                                    /** @var \PeskyORM\ORM\RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $userClass */
+                                    $userClass = \PeskyCMF\Config\CmfConfig::getPrimary()->user_record_class();
                                     $usersTable = $userClass::getTable();
                                 ?>
                                 <?php if (!$isRequired) ?>

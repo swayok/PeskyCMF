@@ -224,7 +224,7 @@ class CmfGeneralController extends Controller {
      */
     protected function getUserFromPasswordRecoveryAccessKey($accessKey) {
         /** @var ResetsPasswordsViaAccessKey $userClass */
-        $userClass = CmfConfig::getPrimary()->user_object_class();
+        $userClass = CmfConfig::getPrimary()->user_record_class();
 
         return $userClass::loadFromPasswordRecoveryAccessKey($accessKey);
     }

@@ -76,7 +76,6 @@ class CmfInstall extends Command {
         $this->line("'views_subfolder' => ['{$subfolderName}'],");
         $this->line("'css_files' => ['{$publicFiles['css']}'],");
         $this->line("'js_files' => ['{$publicFiles['js']}'],");
-        $this->line("'user_object_class' => Admin::class,");
         $this->line("'dictionary' => '{$subfolderName}',");
 
         $this->line(' ');

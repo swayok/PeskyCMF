@@ -8,8 +8,14 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\CmfMakeScaffold;
+use PeskyCMF\Db\Admins\CmfAdmin;
+use PeskyCMF\Db\Admins\CmfAdminsTable;
+use PeskyCMF\Db\Admins\CmfAdminsTableStructure;
 use PeskyCMF\Event\AdminAuthenticated;
 use PeskyCMF\Listeners\AdminAuthenticatedEventListener;
+use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\TableInterface;
+use PeskyORM\ORM\TableStructureInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 
@@ -37,6 +43,11 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         }
 
         $this->registerCommands();
+
+        if ($this->fitsRequestUri()) {
+            $this->registerDbClasses();
+            $this->registerScaffoldConfigs();
+        }
     }
 
     public function provides() {
@@ -46,9 +57,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     public function boot() {
-        if (config('peskycmf.file_access_mask') !== null) {
-            umask(config('peskycmf.file_access_mask'));
-        }
         require_once __DIR__ . '/../Config/helpers.php';
 
         $this->configurePublishes();
@@ -59,6 +67,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->configureRoutes();
 
         if ($this->fitsRequestUri()) {
+            if ($this->getCmfConfig()->config('file_access_mask') !== null) {
+                umask($this->getCmfConfig()->config('file_access_mask'));
+            }
             $this->configureSession();
             $this->configureDefaultLocale();
             $this->configureLocaleDetector();
@@ -113,6 +124,90 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      */
     protected function getAppConfig() {
         return $this->app['config'];
+    }
+
+    /**
+     * Register DB classes used in CMF/CMS in app's service container
+     */
+    protected function registerDbClasses() {
+        if (!$this->app->bound(CmfAdmin::class)) {
+            /** @var RecordInterface $userRecordClass */
+            $userRecordClass = $this->getCmfConfig()->user_record_class();
+            $this->registerDbRecordClassNameSingleton(CmfAdmin::class, $userRecordClass);
+            $this->registerDbTableSingleton(CmfAdminsTable::class, $userRecordClass::getTable());
+            $this->registerDbTableStructureSingleton(
+                CmfAdminsTableStructure::class,
+                $userRecordClass::getTable()->getTableStructure()
+            );
+        }
+    }
+
+    /**
+     * Register resource name to ScaffoldConfig class mappings
+     * @throws \UnexpectedValueException
+     */
+    protected function registerScaffoldConfigs() {
+        $cmfConfig = $this->getCmfConfig();
+        $resources = (array)$cmfConfig::config('resources', []);
+        foreach ($resources as $resourceName => $scaffoldConfigClass) {
+            if (!is_string($resourceName)) {
+                throw new \UnexpectedValueException(
+                    'peskycmf.resources config contains resource without a name at ' . $resourceName
+                );
+            }
+            $cmfConfig::registerScaffoldConfigForResource($resourceName, $scaffoldConfigClass);
+            // todo: create default menu items
+        }
+    }
+
+    /**
+     * @param string $singletonName - singleton name in app's service container (should be a class name of DB Record)
+     * @param null|string $className - maps singleton to this class (when null - $singletonName is used as $className)
+     *      Singleton will return a class name, not an instance of class
+     */
+    protected function registerDbRecordClassNameSingleton($singletonName, $className = null) {
+        if (empty($className)) {
+            $className = $singletonName;
+        }
+        $this->app->singleton($className, function () use ($className) {
+            // note: do not create record here or you will possibly encounter infinite loop because this class may be
+            // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
+            return $className;
+        });
+    }
+
+    /**
+     * @param string $singletonName - singleton name in app's service container (should be a class name of DB Table)
+     * @param null|string|TableInterface $tableClassNameOrInstance - map this class/TableInterface to a singleton
+     *      Singleton will return TableInterface instance
+     */
+    protected function registerDbTableSingleton($singletonName, $tableClassNameOrInstance = null) {
+        if (empty($tableClassNameOrInstance)) {
+            $tableClassNameOrInstance = $singletonName;
+        }
+        $this->app->singleton($singletonName, function () use ($tableClassNameOrInstance) {
+            /** @var TableInterface $tableClassNameOrInstance */
+            return is_string($tableClassNameOrInstance)
+                ? $tableClassNameOrInstance::getInstance()
+                : $tableClassNameOrInstance;
+        });
+    }
+
+    /**
+     * @param string $singletonName - singleton name in app's service container (should be a class name of DB Table)
+     * @param null|string|TableStructureInterface $tableStructureClassNameOrInstance - map this class/TableInterface to a singleton
+     *      Singleton will return TableStructureInterface instance
+     */
+    protected function registerDbTableStructureSingleton($singletonName, $tableStructureClassNameOrInstance = null) {
+        if (empty($tableStructureClassNameOrInstance)) {
+            $tableStructureClassNameOrInstance = $singletonName;
+        }
+        $this->app->singleton($singletonName, function () use ($tableStructureClassNameOrInstance) {
+            /** @var TableStructureInterface $tableStructureClassNameOrInstance */
+            return is_string($tableStructureClassNameOrInstance)
+                ? $tableStructureClassNameOrInstance::getInstance()
+                : $tableStructureClassNameOrInstance;
+        });
     }
 
     protected function configurePublishes() {

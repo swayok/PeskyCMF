@@ -98,7 +98,7 @@ class CmfAccessPolicy {
     ];
 
     /**
-     * @param RecordInterface|\PeskyCMS\Db\Admins\CmsAdmin $user
+     * @param RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $user
      * @param string $pageName
      * @return bool
      */
@@ -113,7 +113,7 @@ class CmfAccessPolicy {
     }
 
     /**
-     * @param RecordInterface|\PeskyCMS\Db\Admins\CmsAdmin $user
+     * @param RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $user
      * @param string $ability
      * @param string $table
      * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue
@@ -142,7 +142,7 @@ class CmfAccessPolicy {
     }
 
     /**
-     * @param RecordInterface|\PeskyCMS\Db\Admins\CmsAdmin $user
+     * @param RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $user
      * @param string $tableName
      * @param string $ability
      * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue

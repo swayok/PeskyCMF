@@ -115,8 +115,8 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function auth_guard_name() {
-        return static::config('peskycmf.auth_guard.name', function () {
-            $config = config('peskycmf.auth_guard');
+        return static::config('auth_guard.name', function () {
+            $config = static::config('auth_guard');
             return is_string($config) ? $config : 'admin';
         });
     }
@@ -129,7 +129,7 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @return \PeskyCMS\Db\Admins\CmsAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
+     * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
      */
     static public function getUser() {
         return static::getAuth()->user();
@@ -139,8 +139,8 @@ class CmfConfig extends ConfigsContainer {
      * Class name of user db object
      * @return string
      */
-    static public function user_object_class() {
-        return static::config('user_object_class', function () {
+    static public function user_record_class() {
+        return static::config('user_record_class', function () {
             throw new \UnexpectedValueException('You need to provide a DB Record class for users');
         });
     }
@@ -151,7 +151,7 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function users_table_name() {
         /** @var RecordInterface $userObjectClass */
-        $userObjectClass = static::user_object_class();
+        $userObjectClass = static::user_record_class();
         return $userObjectClass::getTable()->getName();
     }
 
@@ -159,7 +159,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function user_login_column() {
-        return static::config('peskycmf.user_login_column', 'email');
+        return static::config('user_login_column', 'email');
     }
 
     /**
@@ -191,7 +191,7 @@ class CmfConfig extends ConfigsContainer {
      * @throws \UnexpectedValueException
      */
     static public function system_email_address() {
-        return config('peskycmf.system_email_address', function () {
+        return static::config('system_email_address', function () {
             return 'noreply@' . request()->getHost();
         });
     }
@@ -481,7 +481,7 @@ class CmfConfig extends ConfigsContainer {
 
     /**
      * Counters for menu items (details in CmfConfig::menu())
-     * Note: Better redirect this to Admin Record method if you're not using CmsAdmin
+     * Note: Better redirect this to Admin Record method if you're not using CmfAdmin
      * @return array like ['pending_orders' => '<span class="label label-primary pull-right">2</span>']
      */
     static public function getCountersForMenu() {
