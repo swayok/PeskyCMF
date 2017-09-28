@@ -10,6 +10,11 @@ return [
     'cmf_config' => \PeskyCMF\Config\CmfConfig::class,
 
     /**
+     * Application settings helper class
+     */
+    'app_settings_class' => \PeskyCMF\PeskyCmfAppSettings::class,
+
+    /**
      * Prefix used to separate cmf-based site section from other site sections,
      * Example: for prefix "admin" urrl will look like http://localhost/admin
      * You can use '/' inside prefix but it is not tested wel enough to be sure it works correctly
@@ -164,7 +169,8 @@ return [
      * - value = ScaffoldConfig class name
      */
     'resources' => [
-        'admins' => \PeskyCMF\Db\Admins\CmfAdminsScaffoldConfig::class,
+        \PeskyCMF\Db\Admins\CmfAdminsScaffoldConfig::class,
+        \PeskyCMF\Db\Settings\CmfSettingsScaffoldConfig::class,
     ],
 
     /**

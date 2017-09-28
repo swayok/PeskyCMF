@@ -142,7 +142,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$object->fromDb($conditions, [], array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        $this->logDbRecordLoad($object, $this->getTableNameForRoutes());
+        $this->logDbRecordLoad($object, static::getResourceName());
         $data = $object->toArray([], $relationsToRead, true);
         if (
             (
@@ -206,7 +206,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             try {
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
                 $object = $table->newRecord()->fromData($dataToSave, false);
-                $this->logDbRecordBeforeChange($object, $this->getTableNameForRoutes());
+                $this->logDbRecordBeforeChange($object, static::getResourceName());
                 $object->save(['*'], true);
                 $ret = $this->afterDataSaved($data, $object, true, $table, $formConfig);
                 $this->logDbRecordAfterChange($object);
@@ -281,7 +281,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $this->logDbRecordBeforeChange($object, $this->getTableNameForRoutes());
+                $this->logDbRecordBeforeChange($object, static::getResourceName());
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
                 $object->begin()->updateValues($dataToSave)->commit(['*'], true);
                 $ret = $this->afterDataSaved($data, $object, false, $table, $formConfig);
@@ -368,7 +368,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             )
             ->setRedirect(
                 $created
-                    ? routeToCmfItemEditForm($this->getTableNameForRoutes(), $object->getPrimaryKeyValue())
+                    ? routeToCmfItemEditForm(static::getResourceName(), $object->getPrimaryKeyValue())
                     : 'reload'
             );
     }
@@ -409,7 +409,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
-        if (\Gate::denies('resource.update_bulk', [$this->getTableNameForRoutes(), $conditions])) {
+        if (\Gate::denies('resource.update_bulk', [static::getResourceName(), $conditions])) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
         }
         $table::beginTransaction();
@@ -436,7 +436,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             : cmfTransGeneral('.action.bulk_edit.nothing_updated');
         return cmfJsonResponse()
             ->setMessage($message)
-            ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
+            ->goBack(routeToCmfItemsTable(static::getResourceName()));
     }
 
     public function deleteRecord($id) {
@@ -457,12 +457,12 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isRecordDeleteAllowed($object->toArrayWithoutFiles())) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden_for_record'));
         }
-        $this->logDbRecordBeforeChange($object, $this->getTableNameForRoutes());
+        $this->logDbRecordBeforeChange($object, static::getResourceName());
         $object->delete();
         $this->logDbRecordAfterChange($object);
         return cmfJsonResponse()
             ->setMessage(cmfTransGeneral('.action.delete.success'))
-            ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
+            ->goBack(routeToCmfItemsTable(static::getResourceName()));
     }
 
     public function deleteBulkOfRecords() {
@@ -473,7 +473,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
-        if (\Gate::denies('resource.delete_bulk', [$this->getTableNameForRoutes(), $conditions])) {
+        if (\Gate::denies('resource.delete_bulk', [static::getResourceName(), $conditions])) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden'));
         }
         $deletedCount = static::getTable()->delete($conditions);
@@ -482,7 +482,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             : cmfTransGeneral('.action.delete_bulk.nothing_deleted');
         return cmfJsonResponse()
             ->setMessage($message)
-            ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
+            ->goBack(routeToCmfItemsTable(static::getResourceName()));
     }
 
     /**

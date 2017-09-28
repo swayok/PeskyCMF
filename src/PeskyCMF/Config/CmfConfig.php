@@ -465,18 +465,8 @@ class CmfConfig extends ConfigsContainer {
                     'url' => 'required
                 ]*/
             ],
-            static::$menuItems
+            static::getMenuItems()
         );
-    }
-
-    static protected $menuItems = [];
-
-    /**
-     * @param string $itemKey
-     * @param array|\Closure $menuItem - format: see menu()
-     */
-    static public function addMenuItem($itemKey, $menuItem) {
-        static::$menuItems[$itemKey] = $menuItem;
     }
 
     /**
@@ -488,6 +478,42 @@ class CmfConfig extends ConfigsContainer {
         return [];
     }
 
+    private $menuItems = [];
+    private $menuItemsAreDirty = true;
+
+    /**
+     * @param string $itemKey
+     * @param array|\Closure $menuItem - format: see menu()
+     */
+    static public function addMenuItem($itemKey, $menuItem) {
+        static::getInstance()->menuItems[$itemKey] = $menuItem;
+        static::getInstance()->menuItemsAreDirty = true;
+    }
+
+    /**
+     * @return array
+     */
+    static protected function getMenuItems() {
+        if (static::getInstance()->menuItemsAreDirty) {
+            // filter menu items and exec closures
+            $items = [];
+            foreach (static::getInstance()->menuItems as $name => $value) {
+                if ($value instanceof \Closure) {
+                    // convert closures in menu items to arrays
+                    $tmp = $value();
+                    if (is_array($tmp) && !empty($tmp)) {
+                        $items[$name] = $tmp;
+                    }
+                } else if (!empty($value)) {
+                    $items[$name] = $value;
+                }
+            }
+            static::getInstance()->menuItems = $items;
+            static::getInstance()->menuItemsAreDirty = false;
+        }
+        return static::getInstance()->menuItems;
+    }
+
     /**
      * Name for custom CMF dictionary that contains translation for CMF resource sections and pages
      * @return string
@@ -497,15 +523,17 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Translate from custom dictionary. Uses CmfConfig::getPrimary()
-     * @param $path - must strat with '.'
+     * Translate from custom dictionary. You can use it via CmfConfig::transCustom() insetad of
+     * CmfConfig::getPrimary()->transCustom() if you need to get translation for primary config.
+     * Note: if there is no translation in your dictionary - it will be imported from 'cmf::custom' dictionary
+     * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
      * @param array $parameters
      * @param null|string $locale
      * @return string
      */
     static public function transCustom($path, array $parameters = [], $locale = null) {
         $dict = self::getPrimary()->custom_dictionary_name();
-        $primaryPath = $dict . $path;
+        $primaryPath = $dict . '.' . ltrim($path, '.');
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::custom') {
             $fallbackPath = 'cmf::custom' . $path;
@@ -526,14 +554,17 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @param $path - must strat with '.'
+     * Translate from custom dictionary. You can use it via CmfConfig::transGeneral() insetad of
+     * CmfConfig::getPrimary()->transGeneral() if you need to get translation for primary config
+     * Note: if there is no translation in your dictionary - it will be imported from 'cmf::cmf' dictionary
+     * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
      * @param array $parameters
      * @param null|string $locale
      * @return string
      */
     static public function transGeneral($path, array $parameters = [], $locale = null) {
-        $dict = CmfConfig::getPrimary()->cmf_general_dictionary_name();
-        $primaryPath = $dict . $path;
+        $dict = self::getPrimary()->cmf_general_dictionary_name();
+        $primaryPath = $dict . ltrim($path, '.');
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::cmf') {
             $fallbackPath = 'cmf::cmf' . $path;
@@ -751,12 +782,16 @@ class CmfConfig extends ConfigsContainer {
 
     /**
      * Map $tableNameInRoute to $table and $scaffoldConfigClass to be used in CmfConfig::getScaffoldConfig() and
-     * CmfConfig::getTableByUnderscoredName()
+     * CmfConfig::getTableByUnderscoredName(). It also adds menu item if it provided by ScaffoldConfig
      * @param string $scaffoldConfigClass - name of class that extends PeskyCMF\Scaffold\ScaffoldConfig class
      * @param null|string $resourceName - null: use table name from $table
      */
     static public function registerScaffoldConfigForResource($resourceName, $scaffoldConfigClass) {
+        /** @var ScaffoldConfig $scaffoldConfigClass */
         static::getInstance()->resources[$resourceName] = $scaffoldConfigClass;
+        static::addMenuItem($resourceName, function () use ($scaffoldConfigClass) {
+            return $scaffoldConfigClass::getMainMenuItem();
+        });
     }
 
     /**

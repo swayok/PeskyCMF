@@ -15,7 +15,14 @@ interface ScaffoldConfigInterface {
     /**
      * @return string
      */
-    public function getTableNameForRoutes();
+    static public function getResourceName();
+
+    /**
+     * Main menu item info. Return null if you do not want to add item to menu
+     * Details in CmfConfig::menu()
+     * @return array|null
+     */
+    static public function getMainMenuItem();
 
     /**
      * @return DataGridConfig

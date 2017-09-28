@@ -3,8 +3,11 @@
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
+use PeskyCMF\Providers\PeskyCmfServiceProvider;
+use PeskyORMLaravel\Providers\PeskyOrmServiceProvider;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
+use Swayok\Utils\StringUtils;
 
 class CmfInstall extends Command {
 
@@ -66,19 +69,142 @@ class CmfInstall extends Command {
         foreach ($publicFiles as $relativePath) {
             File::save(public_path($relativePath), '', 0664, 0755);
         }
-        $this->line("Done. Update next keys in 'configs/peskycmf.php' file to activate created files:");
-        $this->line(' ');
 
-        $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
-        $this->line("'cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
-        $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
-        $this->line("'routes_files' => ['{$routesFileRelativePath}'],");
-        $this->line("'views_subfolder' => ['{$subfolderName}'],");
-        $this->line("'css_files' => ['{$publicFiles['css']}'],");
-        $this->line("'js_files' => ['{$publicFiles['js']}'],");
-        $this->line("'dictionary' => '{$subfolderName}',");
+        $migrationsPath = database_path('migrations') . DIRECTORY_SEPARATOR;
+        // remove laravel's migrations
+        if (File::exist($migrationsPath . '2014_10_12_000000_create_users_table.php')) {
+            File::remove();
+        }
+        if (File::exist($migrationsPath . '2014_10_12_100000_create_password_resets_table.php')) {
+            File::remove();
+        }
+        // remove laravel's User model
+        if (File::exist(app_path('User.php'))) {
+            File::remove();
+        }
 
-        $this->line(' ');
-        $this->line("Also you may need to change configs in 'config/peskyorm.php' file");
+        // add AppSettings class if not exists
+        $appSettingsPath = app_path('AppSettings.php');
+        if (!File::exist($appSettingsPath)) {
+            File::save($appSettingsPath, $this->getAppSettignsClassContents());
+            $this->line('Added ' . $appSettingsPath);
+        } else {
+            $this->line('- ' . $appSettingsPath . ' already exist. skipped');
+        }
+
+        // create peskyorm.php in config_path() dir
+        $peskyOrmConfigFilePath = config_path('peskyorm.php');
+        $writeOrmConfigFile = !File::exist($peskyOrmConfigFilePath) || $this->confirm('PeskyORM config file ' . $peskyOrmConfigFilePath . ' already exist. Overwrite?');
+        if ($writeOrmConfigFile) {
+            File::load(__DIR__ . '/../../Config/peskyorm.config.php')->copy($peskyOrmConfigFilePath, true, 0664);
+        }
+        // create peskycmf.php in config_path() dir
+        $peskyCmfConfigFilePath = config_path('peskycmf.php');
+        $writeCmfConfigFile = !File::exist($peskyCmfConfigFilePath) || $this->confirm('PeskyCMF config file ' . $peskyCmfConfigFilePath . ' already exist. Overwrite?');
+        $updateKeysInConfigs = null;
+        if ($writeCmfConfigFile) {
+            File::load(__DIR__ . '/../../Config/cmf.config.php')->copy($peskyCmfConfigFilePath, true, 0664);
+            $updateKeysInConfigs = true;
+        }
+        if ($updateKeysInConfigs === null) {
+            $updateKeysInConfigs = $this->confirm('Do you wish to update some keys in ' . $peskyCmfConfigFilePath . ' by actual values?');
+        }
+        if ($updateKeysInConfigs) {
+            $configContents = file_get_contents($peskyCmfConfigFilePath);
+            $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
+            $replacements = [
+                "%('cmf_config')\s*=>\s*.*%im" => '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,',
+                "%('url_prefix')\s*=>\s*.*%im" => "$1 => '{$dataForViews['urlPrefix']}',",
+                "%('views_subfolder')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
+                "%('dictionary')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
+                "%('routes_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$routesFileRelativePath}',\n    ],",
+                "%('css_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$publicFiles['css']}',\n    ],",
+                "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$publicFiles['js']}',\n    ],",
+            ];
+            $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
+            File::save($peskyCmfConfigFilePath, $configContents, 0664, 0755);
+            $this->line($peskyCmfConfigFilePath . ' updated');
+        }
+
+        // add migrations for admins and settings tables
+        foreach (['settings', 'admins'] as $index => $tableName) {
+            $this->addMigrationForTable($tableName, $index, $migrationsPath);
+        }
+
+        $this->extender();
+
+        if ($updateKeysInConfigs) {
+            $this->line('Done');
+        } else {
+            $this->line("Done. Update next keys in 'configs/peskycmf.php' file to activate created files:");
+            $this->line(' ');
+
+            $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
+            $this->line("'cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
+            $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
+            $this->line("'routes_files' => ['{$routesFileRelativePath}'],");
+            $this->line("'views_subfolder' => ['{$subfolderName}'],");
+            $this->line("'css_files' => ['{$publicFiles['css']}'],");
+            $this->line("'js_files' => ['{$publicFiles['js']}'],");
+            $this->line("'dictionary' => '{$subfolderName}',");
+
+            $this->line(' ');
+            $this->line("Also you may need to change configs in {$peskyOrmConfigFilePath} file");
+        }
+
+        $this->outro();
+    }
+
+    /**
+     * Used in CmsInstall
+     */
+    protected function extender() {
+
+    }
+
+    protected function outro() {
+        $this->line('Remeber to perform next steps to activate cms:');
+        $this->line('1. Add ' . PeskyCmfServiceProvider::class . ' to you app.providers config');
+        $this->line('2. Remove ' . PeskyOrmServiceProvider::class . ' from you app.providers config');
+        $this->line('3. Run "php artisan migrate" to create tables in database');
+        $this->line('4. Run "php artisan cmf::add-admin your-email@address.com" to create superadmin for CMS');
+    }
+
+    protected function getAppSettignsClassContents() {
+        return <<<FILE
+<?php
+
+namespace App;
+
+use PeskyCMF\PeskyCmfAppSettings;
+
+class AppSettings extends PeskyCmfAppSettings {
+
+}
+
+FILE;
+    }
+
+    protected function addMigrationForTable($tableName, $index, $migrationsPath, $prefix = 'Cmf', $namespace = 'PeskyCMF') {
+        $filePath = $migrationsPath . "2014_10_12_{$index}00000_create_{$tableName}_table.php";
+        if (File::exist($filePath)) {
+            $this->line('- migration ' . $filePath . ' already exist. skipped.');
+            return;
+        }
+        $groupName = StringUtils::classify($tableName);
+        $className = 'Create' . $groupName . 'Table';
+        $extendsClass = $prefix . $groupName . 'Migration';
+        $fileContents = <<<FILE
+<?php 
+
+use {$namespace}\\DB\\{$groupName}\\{$extendsClass};
+
+class {$className} extends {$extendsClass} {
+
+}
+
+FILE;
+        File::save($filePath, $fileContents, 0664, 0755);
+        $this->line('Added migration ' . $migrationsPath);
     }
 }

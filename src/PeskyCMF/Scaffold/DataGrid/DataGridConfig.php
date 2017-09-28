@@ -455,7 +455,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             $record = $this->prepareRecord($record, $virtualColumns);
             if (array_get($record, '___details_allowed', false)) {
                 $record['___details_url'] = routeToCmfItemDetails(
-                    $this->getScaffoldConfig()->getTableNameForRoutes(),
+                    $this->getScaffoldConfig()->getResourceName(),
                     $record['___pk_value']
                 );
             }

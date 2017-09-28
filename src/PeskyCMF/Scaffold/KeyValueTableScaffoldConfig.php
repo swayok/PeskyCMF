@@ -12,9 +12,6 @@ use PeskyORM\ORM\TempRecord;
 use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueDataSaver;
 use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
-/**
- * @method static KeyValueTableInterface getTable()
- */
 abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
     protected $isCreateAllowed = false;
@@ -61,7 +58,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             CmfConfig::getPrimary()->scaffold_templates_view_for_key_value_table(),
             array_merge(
                 $this->getConfigsForTemplatesRendering(),
-                ['tableNameForRoutes' => $this->getTableNameForRoutes()]
+                ['tableNameForRoutes' => static::getResourceName()]
             )
         )->render();
     }
@@ -113,7 +110,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             );
         }
         $fkValue = empty($fkColumn) ? null : $request->input($fkColumn);
-        if (\Gate::denies('resource.update', [$this->getTableNameForRoutes(), $fkValue])) {
+        if (\Gate::denies('resource.update', [static::getResourceName(), $fkValue])) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
         }
         $inputConfigs = $formConfig->getValueViewers();
@@ -143,7 +140,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             try {
                 if ($this->hasLogger()) {
                     $tempRecord = TempRecord::newTempRecord($table::getValuesForForeignKey($fkValue, true), true);
-                    $this->logDbRecordBeforeChange($tempRecord, $this->getTableNameForRoutes());
+                    $this->logDbRecordBeforeChange($tempRecord, static::getResourceName());
                 }
                 KeyValueDataSaver::saveKeyValuePairs(
                     $table,

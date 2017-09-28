@@ -13,6 +13,8 @@ use PeskyCMF\Db\Admins\CmfAdminsTable;
 use PeskyCMF\Db\Admins\CmfAdminsTableStructure;
 use PeskyCMF\Event\AdminAuthenticated;
 use PeskyCMF\Listeners\AdminAuthenticatedEventListener;
+use PeskyCMF\PeskyCmfAppSettings;
+use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
 use PeskyORM\ORM\TableStructureInterface;
@@ -48,6 +50,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             $this->registerDbClasses();
             $this->registerScaffoldConfigs();
         }
+
+        $this->app->singleton(PeskyCmfAppSettings::class, function () {
+            return $this->getAppSettings();
+        });
     }
 
     public function provides() {
@@ -120,6 +126,19 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     /**
+     * @return PeskyCmfAppSettings
+     */
+    protected function getAppSettings() {
+        static $appSettings;
+        if ($appSettings === null) {
+            /** @var PeskyCmfAppSettings $appSettingsClass */
+            $appSettingsClass = $this->getCmfConfig()->config('app_settings_class') ?: PeskyCmfAppSettings::class;
+            $appSettings = $appSettingsClass::getInstance();
+        }
+        return $appSettings;
+    }
+
+    /**
      * @return ParameterBag
      */
     protected function getAppConfig() {
@@ -133,9 +152,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         if (!$this->app->bound(CmfAdmin::class)) {
             /** @var RecordInterface $userRecordClass */
             $userRecordClass = $this->getCmfConfig()->user_record_class();
-            $this->registerDbRecordClassNameSingleton(CmfAdmin::class, $userRecordClass);
-            $this->registerDbTableSingleton(CmfAdminsTable::class, $userRecordClass::getTable());
-            $this->registerDbTableStructureSingleton(
+            $this->registerClassNameSingleton(CmfAdmin::class, $userRecordClass);
+            $this->registerClassInstanceSingleton(CmfAdminsTable::class, $userRecordClass::getTable());
+            $this->registerClassInstanceSingleton(
                 CmfAdminsTableStructure::class,
                 $userRecordClass::getTable()->getTableStructure()
             );
@@ -148,24 +167,32 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      */
     protected function registerScaffoldConfigs() {
         $cmfConfig = $this->getCmfConfig();
-        $resources = (array)$cmfConfig::config('resources', []);
-        foreach ($resources as $resourceName => $scaffoldConfigClass) {
-            if (!is_string($resourceName)) {
-                throw new \UnexpectedValueException(
-                    'peskycmf.resources config contains resource without a name at ' . $resourceName
-                );
-            }
+        /** @var ScaffoldConfig $scaffoldConfigClass */
+        foreach ($this->getScaffoldConfigs() as $resourceName => $scaffoldConfigClass) {
             $cmfConfig::registerScaffoldConfigForResource($resourceName, $scaffoldConfigClass);
-            // todo: create default menu items
         }
     }
 
     /**
-     * @param string $singletonName - singleton name in app's service container (should be a class name of DB Record)
-     * @param null|string $className - maps singleton to this class (when null - $singletonName is used as $className)
+     * @return array
+     */
+    protected function getScaffoldConfigs() {
+        /** @var ScaffoldConfig[] $resources */
+        $resources = (array)$this->getCmfConfig()::config('resources', []);
+        $normalized = [];
+        foreach ($resources as $scaffoldConfig) {
+            $normalized[$scaffoldConfig::getResourceName()] = $scaffoldConfig;
+        }
+        return $normalized;
+    }
+
+    /**
+     * Used to register DB Record class names (Records are not singletons but class name is a singleton)
+     * @param string $singletonName - singleton name in app's service container (should be a class name)
+     * @param null|string $className - maps singleton to this class. When null - $singletonName is used as $className.
      *      Singleton will return a class name, not an instance of class
      */
-    protected function registerDbRecordClassNameSingleton($singletonName, $className = null) {
+    protected function registerClassNameSingleton($singletonName, $className = null) {
         if (empty($className)) {
             $className = $singletonName;
         }
@@ -177,36 +204,20 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     /**
-     * @param string $singletonName - singleton name in app's service container (should be a class name of DB Table)
-     * @param null|string|TableInterface $tableClassNameOrInstance - map this class/TableInterface to a singleton
-     *      Singleton will return TableInterface instance
+     * Used to register DB Table or DB TableStructure singleton instances
+     * @param string $singletonName - singleton name in app's service container (should be a class name)
+     * @param null|string|TableInterface|TableStructureInterface $classNameOrInstance - map this class/TableInterface
+     *      to a singleton. When null - $singletonName is used as $className. Singleton will return an instance of class
      */
-    protected function registerDbTableSingleton($singletonName, $tableClassNameOrInstance = null) {
-        if (empty($tableClassNameOrInstance)) {
-            $tableClassNameOrInstance = $singletonName;
+    protected function registerClassInstanceSingleton($singletonName, $classNameOrInstance = null) {
+        if (empty($classNameOrInstance)) {
+            $classNameOrInstance = $singletonName;
         }
-        $this->app->singleton($singletonName, function () use ($tableClassNameOrInstance) {
-            /** @var TableInterface $tableClassNameOrInstance */
-            return is_string($tableClassNameOrInstance)
-                ? $tableClassNameOrInstance::getInstance()
-                : $tableClassNameOrInstance;
-        });
-    }
-
-    /**
-     * @param string $singletonName - singleton name in app's service container (should be a class name of DB Table)
-     * @param null|string|TableStructureInterface $tableStructureClassNameOrInstance - map this class/TableInterface to a singleton
-     *      Singleton will return TableStructureInterface instance
-     */
-    protected function registerDbTableStructureSingleton($singletonName, $tableStructureClassNameOrInstance = null) {
-        if (empty($tableStructureClassNameOrInstance)) {
-            $tableStructureClassNameOrInstance = $singletonName;
-        }
-        $this->app->singleton($singletonName, function () use ($tableStructureClassNameOrInstance) {
-            /** @var TableStructureInterface $tableStructureClassNameOrInstance */
-            return is_string($tableStructureClassNameOrInstance)
-                ? $tableStructureClassNameOrInstance::getInstance()
-                : $tableStructureClassNameOrInstance;
+        $this->app->singleton($singletonName, function () use ($classNameOrInstance) {
+            /** @var TableInterface|TableStructureInterface $classNameOrInstance */
+            return is_string($classNameOrInstance)
+                ? $classNameOrInstance::getInstance()
+                : $classNameOrInstance;
         });
     }
 
@@ -369,7 +380,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         \Route::group($groupConfig, function () {
             \Route::get('ckeditor/config.js', [
                 'as' => 'cmf_ckeditor_config_js',
-                'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getCkeditorConfigJs'
+                'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getCkeditorConfigJs',
             ]);
         });
     }
@@ -381,7 +392,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     protected function getRoutesGroupConfig() {
         return [
             'prefix' => $this->getCmfConfig()->url_prefix(),
-            'middleware' => (array)$this->getCmfConfig()->config('routes_middleware', ['web'])
+            'middleware' => (array)$this->getCmfConfig()->config('routes_middleware', ['web']),
         ];
     }
 
@@ -405,7 +416,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         }
         $config = $this->getAppConfig()->get('auth', [
             'guards' => [],
-            'providers' => []
+            'providers' => [],
         ]);
 
         $guardName = $this->getCmfConfig()->auth_guard_name();

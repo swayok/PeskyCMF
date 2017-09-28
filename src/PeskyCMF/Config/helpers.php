@@ -227,7 +227,7 @@ if (!function_exists('transChoiceAlt')) {
 if (!function_exists('cmfTransGeneral')) {
 
     /**
-     * @param $path - must strat with '.'
+     * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
      * @param array $parameters
      * @param null|string $locale
      * @return string|array
@@ -240,7 +240,7 @@ if (!function_exists('cmfTransGeneral')) {
 if (!function_exists('cmfTransCustom')) {
 
     /**
-     * @param $path - must strat with '.'
+     * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
      * @param array $parameters
      * @param null|string $locale
      * @return string|array

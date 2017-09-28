@@ -68,8 +68,32 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return string
      */
-    public function getTableNameForRoutes() {
-        return $this->tableNameForRoutes;
+    static public function getResourceName() {
+        return static::getTable()->getName();
+    }
+
+    /**
+     * @return array|null
+     */
+    static public function getMainMenuItem() {
+        $resoureName = static::getResourceName();
+        $url = routeToCmfItemsTable(static::getResourceName());
+        if ($url === null) {
+            // access to this menu item was denied
+            return null;
+        }
+        return [
+            'label' => cmfTransCustom($resoureName . '.menu_title'),
+            'icon' => static::getIconForMenuItem(),
+            'url' => $url
+        ];
+    }
+
+    /**
+     * @return null|string
+     */
+    static protected function getIconForMenuItem() {
+        return null;
     }
 
     /**
@@ -190,7 +214,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @return bool
      */
     public function isSectionAllowed() {
-        return \Gate::allows('resource.view', [$this->getTableNameForRoutes()]);
+        return \Gate::allows('resource.view', [static::getResourceName()]);
     }
 
     /**
@@ -200,7 +224,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return (
             $this->isCreateAllowed
             && $this->isSectionAllowed()
-            && \Gate::allows('resource.create', [$this->getTableNameForRoutes()])
+            && \Gate::allows('resource.create', [static::getResourceName()])
         );
     }
 
@@ -232,7 +256,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @return bool
      */
     public function isRecordDeleteAllowed(array $record) {
-        return $this->isDeleteAllowed() && \Gate::allows('resource.delete', [$this->getTableNameForRoutes(), $record]);
+        return $this->isDeleteAllowed() && \Gate::allows('resource.delete', [static::getResourceName(), $record]);
     }
 
     /**
@@ -242,7 +266,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @return bool
      */
     public function isRecordEditAllowed(array $record) {
-        return $this->isEditAllowed() && \Gate::allows('resource.update', [$this->getTableNameForRoutes(), $record]);
+        return $this->isEditAllowed() && \Gate::allows('resource.update', [static::getResourceName(), $record]);
     }
 
     /**
@@ -254,7 +278,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     public function isRecordDetailsAllowed(array $record) {
         return (
             $this->isDetailsViewerAllowed()
-            && \Gate::allows('resource.details', [$this->getTableNameForRoutes(), $record])
+            && \Gate::allows('resource.details', [static::getResourceName(), $record])
         );
     }
 
@@ -287,7 +311,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             CmfConfig::getPrimary()->scaffold_templates_view_for_normal_table(),
             array_merge(
                 $this->getConfigsForTemplatesRendering(),
-                ['tableNameForRoutes' => $this->getTableNameForRoutes()]
+                ['tableNameForRoutes' => static::getResourceName()]
             )
         )->render();
     }
@@ -352,7 +376,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             $message = cmfTransGeneral('.error.resource_item_not_found');
         }
         return cmfJsonResponseForHttp404(
-            routeToCmfItemsTable($this->getTableNameForRoutes()),
+            routeToCmfItemsTable(static::getResourceName()),
             $message
         );
     }
@@ -364,7 +388,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     protected function makeAccessDeniedReponse($message) {
         return cmfJsonResponse(HttpCode::FORBIDDEN)
             ->setMessage($message)
-            ->goBack(routeToCmfItemsTable($this->getTableNameForRoutes()));
+            ->goBack(routeToCmfItemsTable(static::getResourceName()));
     }
 
     /**
