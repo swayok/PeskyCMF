@@ -38,9 +38,19 @@ return [
         'web'
     ],
 
+    /**
+     * List of middleware for cmf routes and routes provided in 'routes_files' that require user to be authenticated
+     */
     'routes_auth_middleware' => [
         \PeskyCMF\Http\Middleware\ValidateCmfUser::class
     ],
+
+    /**
+     * Namespace for custom controllers of this section.
+     * Will be added to routes configs so that you can use controller name without fully qualified namespace.
+     * Set to null if you want to disable this option
+     */
+    'controllers_namespace' => null,
 
     /**
      * Subfolder name in app's 'resources/views' folder that contains custom views for this site section

@@ -390,10 +390,15 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function getRoutesGroupConfig() {
-        return [
+        $config = [
             'prefix' => $this->getCmfConfig()->url_prefix(),
             'middleware' => (array)$this->getCmfConfig()->config('routes_middleware', ['web']),
         ];
+        $namespace = $this->getCmfConfig()->config('controllers_namespace');
+        if (!empty($namespace)) {
+            $config['namespace'] = ltrim($namespace, '\\');
+        }
+        return $config;
     }
 
     protected function configureSession() {
