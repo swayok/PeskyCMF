@@ -196,7 +196,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         if (empty($className)) {
             $className = $singletonName;
         }
-        $this->app->singleton($className, function () use ($className) {
+        $this->app->singleton($singletonName, function () use ($className) {
             // note: do not create record here or you will possibly encounter infinite loop because this class may be
             // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
             return $className;
@@ -431,6 +431,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $provider = array_get($cmfAuthConfig, 'provider');
         if (is_array($provider)) {
             $providerName = array_get($provider, 'name', $guardName);
+            if (empty($provider['model'])) {
+                $provider['model'] = app(CmfAdmin::class);
+            }
         } else {
             $providerName = $provider;
             $provider = null;
