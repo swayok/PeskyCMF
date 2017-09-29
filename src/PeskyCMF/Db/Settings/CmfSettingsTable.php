@@ -2,11 +2,11 @@
 
 namespace PeskyCMF\Db\Settings;
 
-use PeskyCMS\Db\CmsDbTable;
+use PeskyCMF\Db\CmfDbTable;
 use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableHelpers;
 use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
-class CmfSettingsTable extends CmsDbTable implements KeyValueTableInterface {
+class CmfSettingsTable extends CmfDbTable implements KeyValueTableInterface {
 
     use KeyValueTableHelpers;
 
