@@ -63,6 +63,23 @@ if (!function_exists('routeToCmfPage')) {
     }
 }
 
+if (!function_exists('redirectToCmfPage')) {
+    /**
+     * @param string $pageId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @return string
+     */
+    function redirectToCmfPage($pageId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
+        $url = routeToCmfPage('cmf_page', $queryArgs, $absolute, $cmfConfig);
+        if (!$url) {
+            abort(\PeskyCMF\HttpCode::FORBIDDEN);
+        }
+        return \Redirect::to($url);
+    }
+}
+
 if (!function_exists('routeToCmfItemsTable')) {
     /**
      * @param string $tableName

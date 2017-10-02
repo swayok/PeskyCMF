@@ -362,8 +362,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             }
         } else if (!\Route::has($cmfConfig::getRouteName('cmf_start_page'))) {
             \Route::group($groupConfig, function () use ($cmfConfig) {
-                \Route::get('/', function () use ($cmfConfig) {
-                        return redirect()->route($cmfConfig::getRouteName('cmf_profile'));
+                \Route::get('/', function () {
+                        return \Redirect::route(CmfConfig::getPrimary()->getRouteName('cmf_profile'));
                     })
                     ->name($cmfConfig::getRouteName('cmf_start_page'));
             });
