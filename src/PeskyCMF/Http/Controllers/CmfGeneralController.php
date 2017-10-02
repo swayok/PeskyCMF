@@ -194,7 +194,7 @@ class CmfGeneralController extends Controller {
         } else if (!CmfConfig::getPrimary()->getAuth()->check()) {
             return view(CmfConfig::getPrimary()->layout_view())->render();
         } else {
-            return Redirect::to($this->getIntendedUrl());
+            return \Redirect::to($this->getIntendedUrl());
         }
     }
 
@@ -357,7 +357,7 @@ class CmfGeneralController extends Controller {
         \Session::invalidate();
         CmfConfig::getPrimary()->resetLocale();
 
-        return Redirect::to(CmfConfig::getPrimary()->login_page_url(true));
+        return \Redirect::to(CmfConfig::getPrimary()->login_page_url(true));
     }
 
     public function getAdminInfo() {
