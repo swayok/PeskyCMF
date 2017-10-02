@@ -72,7 +72,7 @@ if (!function_exists('redirectToCmfPage')) {
      * @return string
      */
     function redirectToCmfPage($pageId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
-        $url = routeToCmfPage('cmf_page', $queryArgs, $absolute, $cmfConfig);
+        $url = routeToCmfPage($pageId, $queryArgs, $absolute, $cmfConfig);
         if (!$url) {
             abort(\PeskyCMF\HttpCode::FORBIDDEN);
         }

@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Providers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use LaravelExtendedErrors\LoggingServiceProvider;
 use PeskyCMF\Config\CmfConfig;
@@ -70,7 +71,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->configureTranslations();
         $this->configureViews();
 
-        $this->configureRoutes();
+        $this->declareRoutes();
+
+        $this->mergeAuthenticationConfigs();
 
         if ($this->fitsRequestUri()) {
             if ($this->getCmfConfig()->config('file_access_mask') !== null) {
@@ -80,10 +83,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             $this->configureDefaultLocale();
             $this->configureLocaleDetector();
             $this->configureEventListeners();
+            $this->configureAuthorizationGatesAndPolicies();
+            $this->configureDefaultAuthGuard();
         }
 
-        $this->configureAuthentication();
-        $this->configureAuthorizationGatesAndPolicies();
 
     }
 
@@ -348,7 +351,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'cmf');
     }
 
-    protected function configureRoutes() {
+    protected function declareRoutes() {
         $cmfConfig = $this->getCmfConfig();
         $groupConfig = $this->getRoutesGroupConfig();
         // custom routes
@@ -411,7 +414,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         \Event::listen(AdminAuthenticated::class, AdminAuthenticatedEventListener::class);
     }
 
-    protected function configureAuthentication() {
+    protected function mergeAuthenticationConfigs() {
         // add guard and provider to configs provided by config/auth.php
 
         $cmfAuthConfig = $this->getCmfConfig()->config('auth_guard');
@@ -450,6 +453,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         }
 
         $this->getAppConfig()->set('auth', $config);
+    }
+
+    protected function configureDefaultAuthGuard() {
+        \Auth::shouldUse($this->getCmfConfig()->auth_guard_name());
     }
 
     /**
