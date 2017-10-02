@@ -210,8 +210,9 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
     var deferred = $.Deferred();
     if (!itemId) {
         if (forDetailsViewer) {
-            console.error('ScaffoldsManager.getDataForItem(): itemId argument is requred when argument forDetailsViewer == true');
-            return deferred.reject();
+            var error = 'ScaffoldsManager.getDataForItem(): itemId argument is requred when argument forDetailsViewer == true';
+            console.error(error);
+            return deferred.reject(new Error(error));
         } else if (!CmfCache.itemDeafults[resourceName]) {
             itemId = 'service/defaults';
         } else {
@@ -230,7 +231,7 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
         }
         deferred.resolve(data);
     }).fail(function (xhr) {
-        deferred.reject();
+        deferred.reject(new Error(this.url + ': ' + xhr.statusText + '; Response: ' + xhr.responseText, xhr.status));
         Utils.handleAjaxError.call(this, xhr);
     });
     return deferred;

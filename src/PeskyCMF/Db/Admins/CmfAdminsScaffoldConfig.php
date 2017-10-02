@@ -26,6 +26,10 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
         return app(CmfAdminsTable::class);
     }
 
+    static protected function getIconForMenuItem() {
+        return 'fa fa-group';
+    }
+
     protected function createDataGridConfig() {
         $loginColumn = CmfConfig::getPrimary()->user_login_column();
         return parent::createDataGridConfig()

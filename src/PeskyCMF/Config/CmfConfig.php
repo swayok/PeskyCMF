@@ -533,7 +533,8 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function transCustom($path, array $parameters = [], $locale = null) {
         $dict = self::getPrimary()->custom_dictionary_name();
-        $primaryPath = $dict . '.' . ltrim($path, '.');
+        $path = '.' . ltrim($path, '.');
+        $primaryPath = $dict . $path;
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::custom') {
             $fallbackPath = 'cmf::custom' . $path;
@@ -564,7 +565,8 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function transGeneral($path, array $parameters = [], $locale = null) {
         $dict = self::getPrimary()->cmf_general_dictionary_name();
-        $primaryPath = $dict . ltrim($path, '.');
+        $path = '.' . ltrim($path, '.');
+        $primaryPath = $dict . $path;
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::cmf') {
             $fallbackPath = 'cmf::cmf' . $path;

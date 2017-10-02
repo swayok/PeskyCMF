@@ -4,11 +4,12 @@ namespace PeskyCMF\Scaffold;
 
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyORM\ORM\TableInterface;
+use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
 interface ScaffoldConfigInterface {
 
     /**
-     * @return TableInterface
+     * @return TableInterface|KeyValueTableInterface
      */
     static public function getTable();
 

@@ -258,6 +258,7 @@ CmfRouteChange.scaffoldDataGridPage = function (request) {
         } else {
             CmfRoutingHelpers.routeHandled(request);
         }
+        return;
     } else {
         return $.when(
                 ScaffoldsManager.getDataGridTpl(request.params.resource),

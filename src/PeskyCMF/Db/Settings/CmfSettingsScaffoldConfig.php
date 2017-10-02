@@ -24,6 +24,24 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         return $table;
     }
 
+    static public function getMainMenuItem() {
+        $resoureName = static::getResourceName();
+        $url = routeToCmfItemEditForm(static::getResourceName(), 'all');
+        if ($url === null) {
+            // access to this menu item was denied
+            return null;
+        }
+        return [
+            'label' => cmfTransCustom($resoureName . '.menu_title'),
+            'icon' => static::getIconForMenuItem(),
+            'url' => $url
+        ];
+    }
+
+    static public function getIconForMenuItem() {
+        return 'fa fa-cog';
+    }
+
     protected function createFormConfig() {
         $formConfig = parent::createFormConfig()
             ->setWidth(50)
@@ -56,8 +74,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
     }
 
     public function getDefaultValuesForFormInputs() {
-        return CmfJsonResponse::create([], HttpCode::MOVED_PERMANENTLY)
-            ->setRedirect(routeToCmfItemEditForm(static::getResourceName(), 'all'));
+        return $this->getRecordValues('all');
     }
 
     public function getRecordValues($ownerRecordId = null) {
