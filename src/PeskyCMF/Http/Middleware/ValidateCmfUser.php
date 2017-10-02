@@ -27,8 +27,8 @@ class ValidateCmfUser {
         /** @var CmfConfig $configs */
         $configs = CmfConfig::getPrimary();
         //if this is a simple false value, send the user to the login redirect
-        $response = $configs::getAuth()->check();
-        if (!$response) {
+        $authResponse = $configs::getAuth()->check();
+        if (!$authResponse) {
             $loginUrl = $configs::login_page_url();
             $currentUrl = $request->url();
             if ($request->ajax()) {
@@ -37,16 +37,16 @@ class ValidateCmfUser {
             } else {
                 return redirect()->guest($loginUrl)->with(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
             }
-        } else if (is_a($response, JsonResponse::class) || is_a($response, Response::class)) {
-            return $response;
-        } else if (is_a($response, RedirectResponse::class)) {
+        } else if (is_a($authResponse, JsonResponse::class) || is_a($authResponse, Response::class)) {
+            return $authResponse;
+        } else if (is_a($authResponse, RedirectResponse::class)) {
             $currentUrl = $request->url();
-            /** @var RedirectResponse $response */
+            /** @var RedirectResponse $authResponse */
             if ($request->ajax()) {
                 \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
-                return response()->json(['redirect' => $response->getTargetUrl()], HttpCode::UNAUTHORISED);
+                return response()->json(['redirect' => $authResponse->getTargetUrl()], HttpCode::UNAUTHORISED);
             } else {
-                return $response->with(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
+                return $authResponse->with(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
             }
         }
         /** @var RecordInterface|Authenticatable $user */
