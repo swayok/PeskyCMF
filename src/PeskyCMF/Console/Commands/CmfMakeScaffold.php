@@ -4,10 +4,12 @@ namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\File;
+use Swayok\Utils\StringUtils;
 
 class CmfMakeScaffold extends Command {
 
@@ -16,9 +18,11 @@ class CmfMakeScaffold extends Command {
      *
      * @var string
      */
-    protected $signature = 'cmf:make-scaffold {resource_name}'
+    protected $signature = 'cmf:make-scaffold {table_name}'
+                            . ' {--resource= : name of resource if it differs from table_name}'
                             . ' {--cmf-config-class= : full class name to a class that extends CmfConfig}'
-                            . ' {--class-name= : short scaffold class name}';
+                            . ' {--class-name= : short scaffold class name}'
+                            . ' {--keyvalue : table is key-value storage}';
 
     /**
      * The console command description.
@@ -33,11 +37,11 @@ class CmfMakeScaffold extends Command {
     protected $cmfConfigClass;
 
     protected function getScaffoldConfigParentClass() {
-        $abstractTableClass = $this->getBaseNamespace() . '\\AbstractScaffoldConfig';
-        if (class_exists($abstractTableClass)) {
-            return $abstractTableClass;
+        if ($this->option('keyvalue')) {
+            return $this->getCmfConfigClass()->config('scaffold_configs_base_class_for_key_value_tables') ?: KeyValueTableScaffoldConfig::class;
+        } else {
+            return $this->getCmfConfigClass()->config('scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
         }
-        return NormalTableScaffoldConfig::class;
     }
 
     /**
@@ -75,10 +79,10 @@ class CmfMakeScaffold extends Command {
      * @param TableInterface $table
      * @return string - short name of scaffold class to be created
      */
-    protected function getScaffoldClassName(TableInterface $table) {
+    protected function getScaffoldClassName(TableInterface $table, $resourceName = null) {
         $scaffoldClassName = $this->option('class-name');
         if (empty($scaffoldClassName)) {
-            return $table::getAlias() . 'ScaffoldConfig';
+            return (empty($resourceName) ? $table::getAlias() : StringUtils::classify($resourceName)) . 'ScaffoldConfig';
         }
         return $scaffoldClassName;
     }
@@ -92,10 +96,10 @@ class CmfMakeScaffold extends Command {
      * @throws \UnexpectedValueException
      */
     public function handle() {
-        $table = $this->getCmfConfigClass()->getTableByUnderscoredName($this->argument('resource_name'));
+        $table = $this->getCmfConfigClass()->getTableByUnderscoredName($this->argument('table_name'));
 
         $namespace = $this->getNamespaceByTable($table);
-        $className = $this->getScaffoldClassName($table);
+        $className = $this->getScaffoldClassName($table, $this->option('resource'));
 
         $filePath = $this->getFolder($namespace) . $className . '.php';
         if (File::exist($filePath)) {
@@ -122,39 +126,39 @@ class CmfMakeScaffold extends Command {
         $this->comment(<<<INFO
 Menu item for CmfConfig:
 [
-    'label' => cmfTransCustom('.{$table->getTableStructure()->getTableName()}.menu_title'),
+    'label' => cmfTransCustom('{$table->getTableStructure()->getTableName()}.menu_title'),
     'url' => routeToCmfItemsTable('{$table->getTableStructure()->getTableName()}'),
     'icon' => ''
-]
+],
 
 Translations:
-'{$table->getTableStructure()->getTableName()}' => [
-    'menu_title' => '',
-    'datagrid' => [
-        'header' => '',
-        'column' => [
-            $columnsTranslations
+    '{$table->getTableStructure()->getTableName()}' => [
+        'menu_title' => '',
+        'datagrid' => [
+            'header' => '',
+            'column' => [
+                $columnsTranslations
+            ],
+            'filter' => [
+                '{$table->getTableStructure()->getTableName()}' => [
+                    $columnsTranslationsFilter
+                ],
+            ],
         ],
-        'filter' => [
-            '{$table->getTableStructure()->getTableName()}' => [
-                $columnsTranslationsFilter
-            ]
-        ]
-    ],
-    'form' => [
-        'header_create' => '',
-        'header_edit' => '',
-        'input' => [
-            $columnsTranslations
+        'form' => [
+            'header_create' => '',
+            'header_edit' => '',
+            'input' => [
+                $columnsTranslations
+            ],
         ],
-    ],
-    'item_details' => [
-        'header' => '',
-        'field' => [
-            $columnsTranslations
+        'item_details' => [
+            'header' => '',
+            'field' => [
+                $columnsTranslations
+            ],
         ]
     ]
-]
 
 INFO
 );
@@ -165,7 +169,7 @@ INFO
 
     protected function getNamespaceByTable($table) {
         $namespace = (new \ReflectionClass($table))->getNamespaceName();
-        return preg_replace('%^PeskyCMF\\\CMS\\\%', 'App\\Db\\', $namespace);
+        return preg_replace('%^PeskyCM[FS]\\\Db\\\%', config('peskyorm.classes_namespace', '\\App\\Db') . '\\', $namespace);
     }
 
     protected function getFolder($namespace) {
@@ -184,6 +188,7 @@ INFO
     protected function createScaffoldClassFile(TableInterface $table, $namespace, $className, $filePath) {
         $parentClass = $this->getScaffoldConfigParentClass();
         $parentClassShort = class_basename($parentClass);
+        $tableClassShort = class_basename($table);
 
         $contents = <<<VIEW
 <?php
@@ -202,6 +207,14 @@ class {$className} extends {$parentClassShort} {
     protected \$isCreateAllowed = true;
     protected \$isEditAllowed = true;
     protected \$isDeleteAllowed = true;
+    
+    static public function getTable() {
+        return {$tableClassShort}::getInstance();
+    }
+    
+    static protected function getIconForMenuItem() {
+        return ''; //< icon classes like: 'fa fa-cog' or just delete if you do not want an icon
+    }
     
     protected function createDataGridConfig() {
         return parent::createDataGridConfig()
@@ -278,20 +291,20 @@ VIEW;
                     ->setType(DataGridColumn::TYPE_LINK)
 VIEW;
             } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
-                $valueViewers[] = "'{$column->getName()}'";
+                $valueViewers[] = "'{$column->getName()}',";
             }
         }
-        return implode(",\n                ", $valueViewers);
+        return implode("\n                ", $valueViewers);
     }
 
     protected function makeFiltersList(TableInterface $table) {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)) {
-                $valueViewers[] = "'{$column->getName()}'";
+                $valueViewers[] = "'{$column->getName()}',";
             }
         }
-        return implode(",\n                ", $valueViewers);
+        return implode("\n                ", $valueViewers);
     }
 
     protected function makeFieldsListForItemDetailsViewer(TableInterface $table) {
@@ -300,13 +313,13 @@ VIEW;
             if ($column->isItAForeignKey()) {
                 $valueViewers[] = <<<VIEW
 '{$column->getName()}' => ValueCell::create()
-                    ->setType(ValueCell::TYPE_LINK)
+                    ->setType(ValueCell::TYPE_LINK),
 VIEW;
             } else {
                 $valueViewers[] = "'{$column->getName()}'";
             }
         }
-        return implode(",\n                ", $valueViewers);
+        return implode("\n                ", $valueViewers);
     }
 
     protected function makeFieldsListForItemForms(TableInterface $table) {
@@ -319,15 +332,15 @@ VIEW;
                     ->setType(FormInput::TYPE_HIDDEN)
                     ->setSubmittedValueModifier(function () {
                         return \Auth::guard()->user()->getAuthIdentifier();
-                    })
+                    }),
 VIEW;
 
                 } else {
-                    $valueViewers[] = "'{$column->getName()}'";
+                    $valueViewers[] = "'{$column->getName()}',";
                 }
             }
         }
-        return implode(",\n                ", $valueViewers);
+        return implode("\n                ", $valueViewers);
     }
 
 }

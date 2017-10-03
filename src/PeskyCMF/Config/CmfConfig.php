@@ -883,7 +883,7 @@ class CmfConfig extends ConfigsContainer {
     static protected function getDbClassesNamespaceForTable($tableName) {
         static $namespace = null;
         if ($namespace === null) {
-            $namespace = rtrim(config('peskyorm.classes_namespace'), '\\') . '\\';
+            $namespace = rtrim(config('peskyorm.classes_namespace', 'App\\Db'), '\\') . '\\';
         }
         return $namespace . StringUtils::classify($tableName);
     }
