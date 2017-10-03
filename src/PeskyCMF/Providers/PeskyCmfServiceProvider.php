@@ -296,7 +296,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function getConfigFilePath() {
-        return __DIR__ . '/../Config/cmf.config.php';
+        return __DIR__ . '/../Config/peskycmf.config.php';
     }
 
     protected function getOrmConfigFilePath() {
@@ -389,7 +389,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function getCmfRoutesFilePath() {
-        return __DIR__ . '/../Config/cmf.routes.php';
+        return __DIR__ . '/../Config/peskycmf.routes.php';
     }
 
     protected function getRoutesGroupConfig() {

@@ -93,7 +93,7 @@ class CmfConfig extends ConfigsContainer {
 
     static public function cmf_routes_config_files() {
         return [
-            __DIR__ . '/cmf.routes.php'
+            __DIR__ . '/peskycmf.routes.php'
         ];
     }
 
@@ -277,7 +277,7 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Prefix for route names in cmf.routes.php
+     * Prefix for route names in peskycmf.routes.php
      * Use with caution and only when you really know what you're doing
      * @return string
      */
@@ -512,6 +512,15 @@ class CmfConfig extends ConfigsContainer {
             static::getInstance()->menuItemsAreDirty = false;
         }
         return static::getInstance()->menuItems;
+    }
+
+    /**
+     * Get menu item config or null if there is no such menu item
+     * @param string $resourceName
+     * @return array|null
+     */
+    static protected function getMenuItem($resourceName) {
+        return array_get(static::getMenuItems(), $resourceName);
     }
 
     /**

@@ -103,7 +103,7 @@ class CmfInstall extends Command {
         $writeCmfConfigFile = !File::exist($peskyCmfConfigFilePath) || $this->confirm('PeskyCMF config file ' . $peskyCmfConfigFilePath . ' already exist. Overwrite?');
         $updateKeysInConfigs = null;
         if ($writeCmfConfigFile) {
-            File::load(__DIR__ . '/../../Config/cmf.config.php')->copy($peskyCmfConfigFilePath, true, 0664);
+            File::load(__DIR__ . '/../../Config/peskycmf.config.php')->copy($peskyCmfConfigFilePath, true, 0664);
             $updateKeysInConfigs = true;
         }
         if ($updateKeysInConfigs === null) {

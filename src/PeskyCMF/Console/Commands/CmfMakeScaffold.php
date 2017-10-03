@@ -120,8 +120,8 @@ class CmfMakeScaffold extends Command {
         foreach ($table->getTableStructure()->getColumns() as $column) {
             $columnsTranslations[] = "'{$column->getName()}' => ''";
         }
-        $columnsTranslationsFilter = implode(",\n                ", $columnsTranslations) . ",";
-        $columnsTranslations = implode(",\n            ", $columnsTranslations) . ",";
+        $columnsTranslationsFilter = implode(",\n                    ", $columnsTranslations) . ",";
+        $columnsTranslations = implode(",\n                ", $columnsTranslations) . ",";
 
         $this->comment(<<<INFO
 Menu item for CmfConfig:
@@ -316,7 +316,7 @@ VIEW;
                     ->setType(ValueCell::TYPE_LINK),
 VIEW;
             } else {
-                $valueViewers[] = "'{$column->getName()}'";
+                $valueViewers[] = "'{$column->getName()}',";
             }
         }
         return implode("\n                ", $valueViewers);
