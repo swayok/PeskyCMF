@@ -2,9 +2,10 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyCMF\Db\Column\FilesColumn;
-use PeskyCMF\Db\Column\ImagesColumn;
-use PeskyCMF\Db\Column\Utils\FileInfo;
+use PeskyORMLaravel\Db\Column\FilesColumn;
+use PeskyORMLaravel\Db\Column\ImagesColumn;
+use PeskyORMLaravel\Db\Column\Utils\FileConfig;
+use PeskyORMLaravel\Db\Column\Utils\ImageConfig;
 
 /**
  * @method ImagesColumn|FilesColumn getTableColumn()
@@ -86,7 +87,7 @@ class ImagesFormInput extends FormInput {
     }
 
     /**
-     * @return \PeskyCMF\Db\Column\Utils\ImageConfig[]|\PeskyCMF\Db\Column\Utils\FileConfig[]
+     * @return ImageConfig[]|FileConfig[]
      * @throws \UnexpectedValueException
      */
     protected function getAcceptedFileConfigurations() {

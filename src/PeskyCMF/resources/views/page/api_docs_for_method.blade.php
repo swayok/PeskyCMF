@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\CMS\ApiDocs\CmsApiDocs $method
+ * @var \PeskyCMF\ApiDocs\CmfApiDocsSection $method
  */
 ?>
 <div class="panel box box-solid box-default">

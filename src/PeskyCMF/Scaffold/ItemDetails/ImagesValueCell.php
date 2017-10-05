@@ -2,11 +2,10 @@
 
 namespace PeskyCMF\Scaffold\ItemDetails;
 
-use PeskyCMF\Db\Column\FilesColumn;
-use PeskyCMF\Db\Column\ImagesColumn;
-use PeskyCMF\Db\Column\Utils\FileConfig;
-use PeskyCMF\Db\Column\Utils\FileInfo;
-use PeskyCMF\Db\Column\Utils\ImagesUploadingColumnClosures;
+use PeskyORMLaravel\Db\Column\FilesColumn;
+use PeskyORMLaravel\Db\Column\ImagesColumn;
+use PeskyORMLaravel\Db\Column\Utils\FileConfig;
+use PeskyORMLaravel\Db\Column\Utils\FileInfo;
 
 /**
  * @method ImagesColumn|FilesColumn getTableColumn()

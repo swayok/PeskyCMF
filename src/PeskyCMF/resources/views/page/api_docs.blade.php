@@ -28,7 +28,7 @@
                 <div class="box-body">
                     <div class="box-group">
                         @foreach($methods as $method)
-                            @include('cmf::page.api_docs_for_method', ['method' => $method])
+                            @include('cmf::page.api_docs_for_method', ['method' => $method::create()])
                         @endforeach
                     </div>
                 </div>

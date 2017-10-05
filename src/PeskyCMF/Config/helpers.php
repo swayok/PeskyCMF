@@ -446,3 +446,21 @@ if (!function_exists('pickLocalization')) {
     }
 
 }
+
+if (!function_exists('setting')) {
+
+    /**
+     * Get value for CmfSetting called $name (CmfSetting->key === $name)
+     * @param string $name - setting name
+     * @param mixed $default - default value
+     * @return mixed|\PeskyCMF\PeskyCmfAppSettings|\App\AppSettings
+     */
+    function setting($name = null, $default = null) {
+        $class = app(\PeskyCMF\PeskyCmfAppSettings::class);
+        if ($name === null) {
+            return $class::getInstance();
+        } else {
+            return $class::$name($default);
+        }
+    }
+}

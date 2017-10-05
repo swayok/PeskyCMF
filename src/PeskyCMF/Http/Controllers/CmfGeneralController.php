@@ -376,7 +376,7 @@ class CmfGeneralController extends Controller {
     public function getMenuCounters() {
         $admin = CmfConfig::getPrimary()->getUser();
         $this->authorize('resource.details', ['cmf_profile', $admin]);
-        return cmfJsonResponse()->setData(CmfConfig::getPrimary()->getCountersForMenu());
+        return cmfJsonResponse()->setData(CmfConfig::getPrimary()->getValuesForMenuItemsCounters());
     }
 
     public function cleanCache() {
@@ -537,7 +537,7 @@ class CmfGeneralController extends Controller {
         foreach (CmfConfig::getPrimary()->getApiDocsSections() as $methodsList) {
             /** @var CmfApiDocsSection $apiMethodDocs */
             foreach ($methodsList as $apiMethodDocs) {
-                $data['item'][] = $apiMethodDocs->getConfigForPostman();
+                $data['item'][] = $apiMethodDocs::create()->getConfigForPostman();
             }
         }
         return response(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), HttpCode::OK, [

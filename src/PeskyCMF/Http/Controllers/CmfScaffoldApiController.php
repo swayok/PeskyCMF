@@ -12,7 +12,7 @@ class CmfScaffoldApiController extends Controller {
 
     use AuthorizesRequests;
 
-    protected $tableNameForRoutes;
+    protected $requestedResourceName;
     protected $table;
     protected $scaffoldConfig;
 
@@ -35,7 +35,7 @@ class CmfScaffoldApiController extends Controller {
     public function getScaffoldConfig() {
         if ($this->scaffoldConfig === null) {
             $cmfConfig = CmfConfig::getPrimary();
-            $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getTableNameForRoutes());
+            $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getRequestedResourceName());
             if ($customScaffoldConfig instanceof ScaffoldConfig) {
                 $this->scaffoldConfig = $customScaffoldConfig;
             } else {
@@ -53,15 +53,15 @@ class CmfScaffoldApiController extends Controller {
      * @return string
      * @throws \UnexpectedValueException
      */
-    public function getTableNameForRoutes() {
-        if ($this->tableNameForRoutes === null) {
+    public function getRequestedResourceName() {
+        if ($this->requestedResourceName === null) {
             $tableName = CmfConfig::getPrimary()->getResourceNameFromCurrentRoute();
             if (empty($tableName)) {
                 abort(404, 'Table name not found in route');
             }
-            $this->tableNameForRoutes = $tableName;
+            $this->requestedResourceName = $tableName;
         }
-        return $this->tableNameForRoutes;
+        return $this->requestedResourceName;
     }
 
     public function __construct() {

@@ -93,7 +93,7 @@ class CmfConfig extends ConfigsContainer {
 
     static public function cmf_routes_config_files() {
         return [
-            __DIR__ . '/peskycmf.routes.php'
+            __DIR__ . '/peskycmf.routes.php',
         ];
     }
 
@@ -106,7 +106,7 @@ class CmfConfig extends ConfigsContainer {
             'driver' => 'browser',
             'cookie' => true,
             'cookie_name' => preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_locale',
-            'languages' => static::locales()
+            'languages' => static::locales(),
         ];
     }
 
@@ -470,12 +470,19 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Counters for menu items (details in CmfConfig::menu())
-     * Note: Better redirect this to Admin Record method if you're not using CmfAdmin
+     * Get values for menu items counters (details in CmfConfig::menu())
      * @return array like ['pending_orders' => '<span class="label label-primary pull-right">2</span>']
      */
-    static public function getCountersForMenu() {
-        return [];
+    static public function getValuesForMenuItemsCounters() {
+        $counters = [];
+        /** @var ScaffoldConfig $scaffoldConfigClass */
+        foreach (static::getInstance()->resources as $scaffoldConfigClass) {
+            $counterClosure = $scaffoldConfigClass::getMenuItemCounterValue();
+            if (!empty($counterClosure)) {
+                $counters[$scaffoldConfigClass::getMenuItemCounterName()] = value($counterClosure);
+            }
+        }
+        return $counters;
     }
 
     private $menuItems = [];
@@ -521,6 +528,19 @@ class CmfConfig extends ConfigsContainer {
      */
     static protected function getMenuItem($resourceName) {
         return array_get(static::getMenuItems(), $resourceName);
+    }
+
+    /**
+     * Menu item for api logs page.
+     * Note: it is not added automatically to menu items - you need to add it manually to self::menu()
+     * @return array
+     */
+    static public function getApiDocsMenuItem() {
+        return [
+            'label' => cmfTransCustom('api_docs.menu_title'),
+            'icon' => 'glyphicon glyphicon-book',
+            'url' => routeToCmfPage('api_docs'),
+        ];
     }
 
     /**
@@ -756,7 +776,7 @@ class CmfConfig extends ConfigsContainer {
                 [ 'name' => 'basicstyles', 'groups' => [ 'basicstyles', 'cleanup' ] ],
                 [ 'name' => 'paragraph', 'groups' => [ 'list', 'indent', 'blocks', 'align', 'bidi', 'paragraph' ] ],
                 [ 'name' => 'styles', 'groups' => [ 'styles' ] ],
-                [ 'name' => 'colors', 'groups' => [ 'colors' ] ]
+                [ 'name' => 'colors', 'groups' => [ 'colors' ] ],
             ],
             'removeButtons' => 'Superscript,Find,Replace,SelectAll,Scayt,Flash,Smiley,PageBreak,Iframe,Form,Checkbox,'
                 . 'Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,Maximize,Save,NewPage,Preview,Print,'
@@ -768,7 +788,7 @@ class CmfConfig extends ConfigsContainer {
             'extraPlugins' => 'uploadimage',
             'filebrowserImageUploadUrl' => route(static::getRouteName('cmf_ckeditor_upload_image'), ['_token' => csrf_token()]),
             'uploadUrl' => route(static::getRouteName('cmf_ckeditor_upload_image'), ['_token' => csrf_token()]),
-            'contentsCss' => static::css_files_for_wysiwyg_editor()
+            'contentsCss' => static::css_files_for_wysiwyg_editor(),
         ];
     }
 
@@ -934,8 +954,8 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Provides sections with list of objects of classes that extend CmsApiDocs class to be displayed in api docs section
-     * @return array - key - section name, value - array that contains objects of class CmsApiDocs
+     * Provides sections with list of objects of classes that extend CmfApiDocsSection class to be displayed in api docs section
+     * @return array - key - section name, value - array that contains names of classes that extend CmfApiDocsSection class
      */
     static public function getApiDocsSections() {
         return static::config('api_docs_class_names', []);
