@@ -189,8 +189,16 @@ CmfRouteChange.logout = function (request) {
 };
 
 CmfRouteChange.showPage = function (request) {
+    var switchBodyClass = function () {
+        Utils.switchBodyClass(
+            'page-' + request.params.uri.replace(/[^a-zA-Z0-9]+/, '-'),
+            'page'
+        );
+    };
     if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
+        switchBodyClass();
+        Utils.updatePageTitleFromH1(Utils.getContentContainer());
         return;
     }
     return $.when(
@@ -201,18 +209,24 @@ CmfRouteChange.showPage = function (request) {
             CmfRoutingHelpers
                 .setCurrentContent(html, Utils.getContentContainer())
                 .done(function () {
-                    Utils.switchBodyClass(
-                        'page-' + request.params.uri.replace(/[^a-zA-Z0-9]+/, '-'),
-                        'page'
-                    );
+                    switchBodyClass();
                 });
             CmfRoutingHelpers.routeHandled(request);
         });
 };
 
 CmfRouteChange.scaffoldItemCustomPage = function (request) {
+    var switchBodyClass = function () {
+        Utils.switchBodyClass(
+            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource) + ' resource-page-' + request.params.page,
+            'resource:page',
+            request.params.id
+        );
+    };
     if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
+        switchBodyClass();
+        Utils.updatePageTitleFromH1(Utils.getContentContainer());
         return;
     }
     $.when(
@@ -223,23 +237,27 @@ CmfRouteChange.scaffoldItemCustomPage = function (request) {
             CmfRoutingHelpers
                 .setCurrentContent(html, Utils.getContentContainer())
                 .done(function () {
-                    Utils.switchBodyClass(
-                        ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource) + ' resource-page-' + request.params.page,
-                        'resource:page',
-                        request.params.id
-                    );
+                    switchBodyClass();
                 });
             CmfRoutingHelpers.routeHandled(request);
         });
 };
 
 CmfRouteChange.scaffoldDataGridPage = function (request) {
+    var switchBodyClass = function () {
+        Utils.switchBodyClass(
+            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
+            'resource:table'
+        );
+    };
     if (
         request.customData.is_state_save
         || request.env().is_restore
         || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))
     ) {
         CmfRoutingHelpers.routeHandled(request);
+        switchBodyClass();
+        Utils.updatePageTitleFromH1(Utils.getContentContainer());
         return;
     }
     if (
@@ -268,10 +286,7 @@ CmfRouteChange.scaffoldDataGridPage = function (request) {
                 CmfRoutingHelpers
                     .setCurrentContent(html, Utils.getContentContainer())
                     .done(function () {
-                        Utils.switchBodyClass(
-                            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
-                            'resource:table'
-                        );
+                        switchBodyClass();
                     });
                 CmfRoutingHelpers.routeHandled(request);
             });
@@ -279,8 +294,17 @@ CmfRouteChange.scaffoldDataGridPage = function (request) {
 };
 
 CmfRouteChange.scaffoldItemDetailsPage = function (request) {
+    var switchBodyClass = function () {
+        Utils.switchBodyClass(
+            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
+            'resource:details',
+            request.params.id
+        );
+    };
     if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
+        switchBodyClass();
+        Utils.updatePageTitleFromH1(Utils.getContentContainer());
         return;
     }
     return $.when(
@@ -371,11 +395,7 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
                         dotJsTpl(data),
                         Utils.getContentContainer()
                     ).done(function ($content) {
-                        Utils.switchBodyClass(
-                            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource),
-                            'resource:details',
-                            request.params.id
-                        );
+                        switchBodyClass();
                         initContent($content);
                     });
             }
@@ -384,8 +404,17 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
 };
 
 CmfRouteChange.scaffoldItemFormPage = function (request) {
+    var switchBodyClass = function () {
+        Utils.switchBodyClass(
+            ScaffoldActionsHelper.makeResourceBodyClass(resource),
+            'resource:form',
+            itemId
+        );
+    };
     if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
+        switchBodyClass();
+        Utils.updatePageTitleFromH1(Utils.getContentContainer());
         return;
     }
     var itemId = !request.params.id || request.params.id === 'create' ? null : request.params.id;
@@ -489,11 +518,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                         renderTpl(data, options, false),
                         Utils.getContentContainer()
                     ).done(function ($content) {
-                        Utils.switchBodyClass(
-                            ScaffoldActionsHelper.makeResourceBodyClass(resource),
-                            'resource:form',
-                            itemId
-                        );
+                        switchBodyClass();
                         initContent($content, false);
                     });
             }
