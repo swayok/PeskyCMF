@@ -112,7 +112,7 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
                 })
                 .fail(function (jqxhr, settings, exception) {
                     alert('Failed to load js file ' + this.url + '. Error: ' + exception);
-                    deferred.reject();
+                    deferred.reject(exception);
                 });
         }
     } else {
@@ -147,10 +147,23 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
             }
         }
     }
-    return deferred;
+    return deferred.promise();
 };
 
-Utils.handleAjaxError = function (xhr) {
+/**
+ * Handle AJAX error
+ * @param {object} xhr
+ * @param {Deferred|null} deferredToRejectWithError - reject this deferred with Error object and good message
+ */
+Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
+    if (typeof deferredToRejectWithError === 'object' && typeof deferredToRejectWithError.reject === 'function') {
+        deferredToRejectWithError.reject(
+            new Error(
+                this.url + ': ' + xhr.statusText + '; Response: ' + xhr.responseText,
+                xhr.status
+            )
+        );
+    }
     var json = Utils.convertXhrResponseToJsonIfPossible(xhr);
     if (json) {
         if (json.redirect_with_reload) {
@@ -322,9 +335,10 @@ Utils.getAvailableContentContainer = function () {
 };
 
 Utils.makeTemplateFromText = function (text, clarification) {
+    var deferred = $.Deferred();
     try {
         var template = doT.template(text);
-        return function (data) {
+        deferred.resolve(function (data) {
             try {
                 return template(data);
             } catch (exc) {
@@ -335,21 +349,29 @@ Utils.makeTemplateFromText = function (text, clarification) {
                 CmfConfig.getDebugDialog().showDebug(title, content);
                 return '';
             }
-        }
+        });
     } catch (exc) {
         var title = 'Failed to convert text into doT.js template' + (!clarification ? '' : ' (' + clarification + ')');
         var content = '<h1>' + exc.name + ': ' + exc.message + '</h1><pre>' + exc.stack + '</pre><h2>Template:</h2>';
         CmfConfig.getDebugDialog().showDebug(title, content + '<pre>' + $('<div/>').text(text).html() + '</pre>');
-        return '';
+        deferred.reject(new Error(title));
     }
+    return deferred.promise();
 };
 
-Utils.downloadHtml = function (url, cache, template) {
+/**
+ * @param {string} url
+ * @param {bool?} cache - save to cache or not (default: no)
+ * @param {bool?} isTemplate - is loaded HTML is a dotJS template or not (default: no)
+ * @return {string|function} - depends on isTemplate argument
+ */
+Utils.downloadHtml = function (url, cache, isTemplate) {
     var deferred = $.Deferred();
     if (!url || !url.length) {
         console.warn('Empty url received in Utils.downloadHtml()');
         console.trace();
-        return deferred.reject({});
+        deferred.reject(new Error('Empty url received in Utils.downloadHtml()'));
+        return deferred.promise();
     }
     url = (url[0] === '/' || url.match(/^https?:/) !== null ? url : CmfConfig.rootUrl + '/' + url).replace(/\.html$/i, '') + '.html';
     if (!cache || !CmfCache.views[url]) {
@@ -359,21 +381,30 @@ Utils.downloadHtml = function (url, cache, template) {
             dataType: 'html',
             method: 'GET'
         }).done(function (html) {
-            if (template) {
-                html = Utils.makeTemplateFromText(html, url);
+            if (isTemplate) {
+                Utils.makeTemplateFromText(html, url)
+                    .done(function (template) {
+                        if (cache) {
+                            CmfCache.views[url] = template;
+                        }
+                        deferred.resolve(template);
+                    })
+                    .fail(function (error) {
+                        deferred.reject(error);
+                    });
+            } else {
+                if (cache) {
+                    CmfCache.views[url] = html;
+                }
+                deferred.resolve(html);
             }
-            if (cache) {
-                CmfCache.views[url] = html;
-            }
-            deferred.resolve(html);
         }).fail(function (xhr) {
-            Utils.handleAjaxError.call(this, xhr);
-            deferred.reject(xhr);
+            Utils.handleAjaxError.call(this, xhr, deferred);
         });
     } else {
         deferred.resolve(CmfCache.views[url]);
     }
-    return deferred;
+    return deferred.promise();
 };
 
 Utils.getUser = function (reload) {
@@ -391,11 +422,13 @@ Utils.getUser = function (reload) {
         }).done(function (json) {
             var user = Utils.setUser(json);
             deferred.resolve(user);
-        }).fail(Utils.handleAjaxError);
+        }).fail(function (xhr) {
+            Utils.handleAjaxError.call(this, xhr, deferred);
+        });
     } else {
         deferred.resolve(CmfCache.user);
     }
-    return deferred;
+    return deferred.promise();
 };
 
 Utils.setUser = function (userData) {

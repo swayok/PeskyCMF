@@ -544,7 +544,7 @@ AdminUI.destroyUI = function () {
     } else {
         deferred.resolve();
     }
-    return deferred;
+    return deferred.promise();
 };
 
 AdminUI.showUI = function () {
@@ -562,19 +562,23 @@ AdminUI.showUI = function () {
     } else {
         Utils.showPreloader(wrapper);
         $.when(
-            AdminUI.loadUI(),
-            wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs)
-        ).done(function ($ui) {
-            wrapper.addClass('with-ui').empty().append($ui);
-            AdminUI.visible = true;
-            AdminUI.updateUserInfo();
-            wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
-            deferred.resolve();
-            AdminUI.startMenuCountersUpdates();
-            $(document).trigger('appui:shown');
-        }).fail(deferred.reject);
+                AdminUI.loadUI(),
+                wrapper.fadeOut(CmfConfig.contentChangeAnimationDurationMs)
+            )
+            .done(function ($ui) {
+                wrapper.addClass('with-ui').empty().append($ui);
+                AdminUI.visible = true;
+                AdminUI.updateUserInfo();
+                wrapper.fadeIn(CmfConfig.contentChangeAnimationDurationMs);
+                deferred.resolve();
+                AdminUI.startMenuCountersUpdates();
+                $(document).trigger('appui:shown');
+            })
+            .fail(function (error) {
+                deferred.reject(error);
+            });
     }
-    return deferred;
+    return deferred.promise();
 };
 
 AdminUI.loadUI = function () {
@@ -588,11 +592,13 @@ AdminUI.loadUI = function () {
                 AdminUI.initMenuCountersUpdatesAfterAjaxRequests();
                 $(document).trigger('appui:loaded');
             })
-            .fail(deferred.reject);
+            .fail(function (error) {
+                deferred.reject(error);
+            });
     } else {
         deferred.resolve(AdminUI.$el);
     }
-    return deferred;
+    return deferred.promise();
 };
 
 AdminUI.updateUserInfo = function (userInfo) {
@@ -607,13 +613,24 @@ AdminUI.updateUserInfo = function (userInfo) {
     }
     var container = $(AdminUI.userInfoContainer);
     if (!AdminUI.userInfoTpl) {
-        AdminUI.userInfoTpl = html = Utils.makeTemplateFromText($(AdminUI.userInfoTplSelector).html(), 'User Info block template');
         container.addClass('fading fade-out').width();
-        $(document).on('change:user', function (event, userInfo) {
-            AdminUI.updateUserInfo(userInfo);
-        });
+        Utils.makeTemplateFromText(
+                $(AdminUI.userInfoTplSelector).html(),
+                'User Info block template'
+            )
+            .done(function (template) {
+                AdminUI.userInfoTpl = template;
+                container.html(AdminUI.userInfoTpl(userInfo)).removeClass('fade-out');
+                $(document).on('change:user', function (event, userInfo) {
+                    AdminUI.updateUserInfo(userInfo);
+                });
+            })
+            .fail(function (error) {
+                throw error;
+            });
+    } else {
+        container.html(AdminUI.userInfoTpl(userInfo)).removeClass('fade-out');
     }
-    container.html(AdminUI.userInfoTpl(userInfo)).removeClass('fade-out');
 };
 
 AdminUI.initMenuCountersUpdatesAfterAjaxRequests = function () {
@@ -677,13 +694,12 @@ AdminUI.updateMenuCounters = function () {
         }
         deferred.resolve(json);
     }).fail(function (xhr) {
-        Utils.handleAjaxError.call(this, xhr);
+        Utils.handleAjaxError.call(this, xhr, deferred);
         AdminUI.stopMenuCountersUpdates();
-        deferred.reject(xhr, this);
         if (CmfConfig.disableMenuCountersIfEmptyOrInvalidDataReceived) {
             AdminUI.disableMenuCountersUpdates();
         }
     });
-    return deferred;
+    return deferred.promise();
 
 };

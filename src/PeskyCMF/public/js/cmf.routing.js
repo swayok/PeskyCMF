@@ -27,7 +27,7 @@ var CmfRoutingHelpers = {
         } else {
             deferred.resolve();
         }
-        return deferred;
+        return deferred.promise();
     },
     routeHandled: function (request) {
         request.title = document.title;
@@ -68,7 +68,8 @@ var CmfRoutingHelpers = {
         var deferred = $.Deferred();
         var $el = CmfRoutingHelpers.wrapContent(html);
         if ($el === false) {
-            return deferred.reject();
+            deferred.reject(new Error('Failed to wrap content'));
+            return deferred.promise();
         }
         $el.hide();
         if ($container) {
@@ -96,7 +97,7 @@ var CmfRoutingHelpers = {
         } else {
             switchContent($el, deferred);
         }
-        return deferred;
+        return deferred.promise();
     },
     initModalAndContent: function ($modal, request) {
         var deferred = $.Deferred();
@@ -108,8 +109,8 @@ var CmfRoutingHelpers = {
                 'Current content is not defined yet. Possibly you\'re trying to show content in modal dialog instead of current page. Trace printed to console.'
             );
             console.trace();
-            deferred.reject();
-            return deferred;
+            deferred.reject(new Error('Current content is not defined yet'));
+            return deferred.promise();
         }
         if (CmfRoutingHelpers.$currentContent.hasClass('modal')) {
             CmfRoutingHelpers
@@ -121,7 +122,7 @@ var CmfRoutingHelpers = {
                             deferred.resolve($modal);
                         });
                 });
-                return deferred;
+            return deferred.promise();
         }
         var $prevContentContainer = CmfRoutingHelpers.$currentContentContainer;
         var $prevContent = CmfRoutingHelpers.$currentContent;
@@ -145,7 +146,8 @@ var CmfRoutingHelpers = {
                 Utils.updatePageTitleFromH1($modal);
             });
         $(document.body).append($modal);
-        return deferred.resolve($modal);
+        deferred.resolve($modal);
+        return deferred.promise();
     },
     closeCurrentModalAndReloadDataGrid: function () {
         CmfRoutingHelpers.hideModals();

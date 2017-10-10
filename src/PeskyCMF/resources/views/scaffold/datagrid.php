@@ -296,7 +296,17 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig, JSON_UNESCAPED_UNICODE); ?>;
             dataTablesConfig.resourceName = '<?php echo $tableNameForRoutes; ?>';
-            var rowActionsTpl = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
+            var rowActionsTpl = null;
+            Utils.makeTemplateFromText(
+                    '<?php echo addslashes($actionsTpl); ?>',
+                    'Data grid row actions template'
+                )
+                .done(function (template) {
+                    rowActionsTpl = template;
+                })
+                .fail(function (error) {
+                    throw error;
+                });
             dataTablesConfig.columnDefs = [];
             var fixedColumns = 0;
             <?php if ($dataGridConfig->isRowActionsFloating()): ?>
@@ -353,10 +363,17 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 <?php endif; ?>
             <?php endforeach; ?>
             <?php if (!empty($dblClickUrl)): ?>
-                dataTablesConfig.doubleClickUrl = Utils.makeTemplateFromText(
-                    '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%i', '{{= it.$2 }}', $dblClickUrl)); ?>',
-                    'Double click URL template'
-                );
+                dataTablesConfig.doubleClickUrl = null;
+                Utils.makeTemplateFromText(
+                        '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%i', '{{= it.$2 }}', $dblClickUrl)); ?>',
+                        'Double click URL template'
+                    )
+                    .done(function (template) {
+                        dataTablesConfig.doubleClickUrl = template;
+                    })
+                    .fail(function (error) {
+                        throw error;
+                    });
             <?php endif; ?>
             <?php
                 $defaultConditions = $dataGridFilterConfig->getDefaultConditions();
