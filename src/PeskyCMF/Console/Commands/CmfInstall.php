@@ -15,6 +15,11 @@ class CmfInstall extends Command {
     protected $signature = 'cmf:install {app_subfolder=Admin} {url_prefix=admin} {database_classes_app_subfolder=Db}';
 
     public function fire() {
+        // compatibility with Laravel <= 5.4
+        $this->handle();
+    }
+
+    public function handle() {
         $appSubfolder = ucfirst(trim(trim($this->input->getArgument('app_subfolder')), '/\\'));
         $baseFolderPath = app_path($appSubfolder);
         if (Folder::exist($baseFolderPath)) {
