@@ -250,10 +250,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/kartik-v/bootstrap-fileinput/css') => public_path('packages/cmf-vendors/bootstrap/fileinput/css'),
             base_path('vendor/kartik-v/bootstrap-fileinput/img') => public_path('packages/cmf-vendors/bootstrap/fileinput/img'),
             // font icons
-            base_path('vendor/fortawesome/font-awesome/css') => public_path('packages/cmf-vendors/fontions/font-awesome/css'),
-            base_path('vendor/fortawesome/font-awesome/fonts') => public_path('packages/cmf-vendors/fontions/font-awesome/fonts'),
-            base_path('vendor/driftyco/ionicons/css') => public_path('packages/cmf-vendors/fontions/ionicons/css'),
-            base_path('vendor/driftyco/ionicons/fonts') => public_path('packages/cmf-vendors/fontions/ionicons/fonts'),
+            base_path('vendor/fortawesome/font-awesome/css') => public_path('packages/cmf-vendors/fonticons/font-awesome/css'),
+            base_path('vendor/fortawesome/font-awesome/fonts') => public_path('packages/cmf-vendors/fonticons/font-awesome/fonts'),
+            base_path('vendor/driftyco/ionicons/css') => public_path('packages/cmf-vendors/fonticons/ionicons/css'),
+            base_path('vendor/driftyco/ionicons/fonts') => public_path('packages/cmf-vendors/fonticons/ionicons/fonts'),
             // jquery
             base_path('vendor/bower-asset/jquery/dist/jquery.js') => public_path('packages/cmf-vendors/jquery3/jquery.js'),
             base_path('vendor/bower-asset/jquery/dist/jquery.min.js') => public_path('packages/cmf-vendors/jquery3/jquery.min.js'),
@@ -284,7 +284,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/bower-asset/cropper/dist') => public_path('packages/cmf-vendors/cropperjs'),
             // additions to vendors
             $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
-
         ], 'public');
 
         $this->publishes([

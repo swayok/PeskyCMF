@@ -76,18 +76,6 @@ $(function () {
 });
 
 function fixAdminLte() {
-    /*
-
-    // to fix sidebar menu dropdown closing
-    var original = $.AdminLTE.tree;
-    $.AdminLTE.tree = function (menu) {
-        original.call(this, menu);
-        $(menu).on('click', 'li a', function (e) {
-            $.AdminLTE.layout.fix();
-            setTimeout($.AdminLTE.layout.fix, $.AdminLTE.options.animationSpeed + 10);
-        });
-    };*/
-
     $('body').layout('fix');
 }
 
