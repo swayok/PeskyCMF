@@ -1,5 +1,23 @@
 @import "lib";
 
+@import "../css/fonts/Roboto/roboto.css";
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 html,
 body {
     height: 100% !important;
@@ -956,20 +974,42 @@ body[data-section="resource:table"] {
         top: 0;
         left: 5px;
         float: none;
+        color: rgba(255, 255, 255, 0.7);
+
+        &:hover {
+            color: rgba(255, 255, 255, 1);
+        }
     }
 
-}
-
-.skin-blue .main-header {
-    background-color: #367fa9;
-
-    a.sidebar-toggle {
-        color: #bcdcec;
+    body.skin-blue-light &,
+    body.skin-blue & {
+        background-color: #367fa9;
     }
-}
 
-.skin-blue .sidebar-menu > li.header {
-    color: #80aab6;
+    body.skin-green-light &,
+    body.skin-green & {
+        background-color: #008d4c;
+    }
+
+    body.skin-black-light &,
+    body.skin-black & {
+        background-color: #333333;
+    }
+
+    body.skin-purple-light &,
+    body.skin-purple & {
+        background-color: #555299;
+    }
+
+    body.skin-red-light &,
+    body.skin-red & {
+        background-color: #d73925;
+    }
+
+    body.skin-yellow-light &,
+    body.skin-yellow & {
+        background-color: #e08e0b;
+    }
 }
 
 aside.main-sidebar {
@@ -1074,6 +1114,8 @@ aside.main-sidebar {
 
         &.header {
             padding: 10px 15px 10px 15px;
+            color: #a8b9c5;
+            text-align: center;
         }
 
         .label,

@@ -1,3 +1,19 @@
+@import "../css/fonts/Roboto/roboto.css";
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
 html,
 body {
   height: 100% !important;
@@ -901,15 +917,34 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
   top: 0;
   left: 5px;
   float: none;
+  color: rgba(255, 255, 255, 0.7);
 }
-.skin-blue .main-header {
+.main-header a.sidebar-toggle:hover {
+  color: #ffffff;
+}
+body.skin-blue-light .main-header,
+body.skin-blue .main-header {
   background-color: #367fa9;
 }
-.skin-blue .main-header a.sidebar-toggle {
-  color: #bcdcec;
+body.skin-green-light .main-header,
+body.skin-green .main-header {
+  background-color: #008d4c;
 }
-.skin-blue .sidebar-menu > li.header {
-  color: #80aab6;
+body.skin-black-light .main-header,
+body.skin-black .main-header {
+  background-color: #333333;
+}
+body.skin-purple-light .main-header,
+body.skin-purple .main-header {
+  background-color: #555299;
+}
+body.skin-red-light .main-header,
+body.skin-red .main-header {
+  background-color: #d73925;
+}
+body.skin-yellow-light .main-header,
+body.skin-yellow .main-header {
+  background-color: #e08e0b;
 }
 aside.main-sidebar .sidebar-menu li > a {
   border-right: 3px solid transparent;
@@ -1040,6 +1075,8 @@ aside.main-sidebar .sidebar-menu li.treeview.active .treeview-menu.menu-open > a
 }
 aside.main-sidebar .sidebar-menu li.header {
   padding: 10px 15px 10px 15px;
+  color: #a8b9c5;
+  text-align: center;
 }
 aside.main-sidebar .sidebar-menu li .label,
 aside.main-sidebar .sidebar-menu li .badge {
