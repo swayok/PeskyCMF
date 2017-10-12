@@ -59,6 +59,18 @@ return [
     'views_subfolder' => 'admin',
 
     /**
+     * Indicates if CMF JS and CSS files are compiled using webpack.mix.js and PeskyCMF/Optimization/cmf-assets-mixer.js
+     * node module. Add this to your webpack.mix.js next 2 lines to activate CMF assets mixing:
+     * var cmfAssets = require('./vendor/swayok/peskycmf/src/PeskyCMF/Optimization/cmf-assets-mixer');
+     * cmfAssets.mixCmfAssets(mix);
+     * This will mix most js and css files used in CMF into several files placed into /public/packages/cmf/compiled
+     * folder. These files then will be included in cmf layout instead of separate libs.
+     * Remember to run mixer before you set this to true:
+     * npm run production
+     */
+    'assets_are_mixed' => env('PESKYCMF_ASSETS_ARE_MIXED', false),
+
+    /**
      * CSS files to add to app
      * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.css' is created by "php artisan cmf:install"
      */
