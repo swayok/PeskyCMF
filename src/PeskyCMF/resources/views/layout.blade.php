@@ -108,8 +108,14 @@
             userDataUrl: '{{ cmfRoute('cmf_profile_data', [], false) }}',
             menuCountersDataUrl: '{{ cmfRoute('cmf_menu_counters_data', [], false) }}',
             defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }}',
-            pageTitleAddition: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->page_title_addition() }}'
+            pageTitleAddition: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->page_title_addition() }}',
+            localizationStrings: <?php echo json_encode(cmfTransGeneral('.ui.js_component'), JSON_UNESCAPED_UNICODE) ?>
         };
+
+        @if (\PeskyCMF\Config\CmfConfig::getPrimary()->config('optimize_ui_templates.enabled', false))
+            CmfSettings.pagesTemplates = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->getCachedPagesTemplates(), JSON_UNESCAPED_UNICODE) ?>;
+            CmfSettings.resourcesTemplates = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->getCachedResourcesTemplates(), JSON_UNESCAPED_UNICODE) ?>;
+        @endif
 
         var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>

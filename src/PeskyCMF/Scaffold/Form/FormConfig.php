@@ -323,7 +323,7 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function getTooltipsForInputs() {
         if ($this->tooltips === null) {
-            $resourceName = CmfConfig::getPrimary()->getResourceNameFromCurrentRoute();
+            $resourceName = $this->getScaffoldConfig()->getResourceName();
             if (!empty($resourceName)) {
                 /** @noinspection PhpParamsInspection */
                 $this->setTooltipsForInputs($this->translate(null, 'tooltip'));

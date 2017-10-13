@@ -5,6 +5,14 @@ $(function () {
     extendRouter();
 
     if (CmfSettings) {
+        // import localization strings
+        if (CmfSettings.localizationStrings && $.isPlainObject(CmfSettings.localizationStrings)) {
+            CmfConfig.setLocalizationStrings(CmfSettings.localizationStrings);
+        }
+        delete CmfSettings.localizationStrings;
+        // import templates
+        ScaffoldsManager.importTemplatesFromCmfSettings(CmfSettings);
+        // merge with default configs
         $.extend(CmfConfig, CmfSettings);
     }
 

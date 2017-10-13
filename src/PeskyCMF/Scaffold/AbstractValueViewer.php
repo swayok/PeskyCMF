@@ -67,7 +67,7 @@ abstract class AbstractValueViewer {
     }
 
     /**
-     * @return ScaffoldSectionConfig|DataGridConfig|ItemDetailsConfig|FormConfig|null
+     * @return ScaffoldSectionConfig|DataGridConfig|ItemDetailsConfig|FormConfig
      */
     public function getScaffoldSectionConfig() {
         return $this->scaffoldSectionConfig;

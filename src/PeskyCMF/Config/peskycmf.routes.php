@@ -136,7 +136,7 @@ Route::group(
 
         // Custom Pages
         Route::get('page/{page}',  $generalControllerClass . '@loadJsApp')
-            ->name('cmf_page')
+            ->name($routeNamePrefix . 'cmf_page')
             ->where('page', '^.*(?!\.html)$');
 
         // Switch locales
@@ -150,7 +150,7 @@ Route::group(
                 '/utils/api_docs/requests_collection_for_postman.json',
                 $generalControllerClass . '@downloadApiRequestsCollectionForPostman'
             )
-            ->name('cmf_api_docs_download_postman_collection');
+            ->name($routeNamePrefix . 'cmf_api_docs_download_postman_collection');
     }
 );
 

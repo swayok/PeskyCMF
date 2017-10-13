@@ -16,7 +16,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
     protected $isCreateAllowed = false;
 
-    public function __construct($tableNameForRoutes) {
+    public function __construct() {
         $table = static::getTable();
         if (!($table instanceof KeyValueTableInterface)) {
             throw new \UnexpectedValueException(
@@ -24,7 +24,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
                 . static::class . '->getTable() must implement of KeyValueTableInterface interface'
             );
         }
-        parent::__construct($tableNameForRoutes);
+        parent::__construct();
     }
 
     /**

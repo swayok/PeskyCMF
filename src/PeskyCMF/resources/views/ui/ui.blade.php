@@ -21,7 +21,6 @@
 @include(\PeskyCMF\Config\CmfConfig::getPrimary()->footer_view())
 
 <script type="application/javascript">
-    CmfConfig.setLocalizationStrings(<?php echo json_encode(cmfTransGeneral('.ui.js_component'), JSON_UNESCAPED_UNICODE) ?>);
     $(document).ready(function () {
         setTimeout(function () {
             // without timeout it works not correctly

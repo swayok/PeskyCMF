@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Providers;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use LaravelExtendedErrors\LoggingServiceProvider;
 use PeskyCMF\Config\CmfConfig;
@@ -94,8 +93,21 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      * @return int
      */
     protected function fitsRequestUri() {
-        $prefix = trim($this->getCmfConfig()->url_prefix(), '/');
-        return preg_match("%^/{$prefix}(/|$)%", array_get($_SERVER, 'REQUEST_URI', '/')) > 0;
+        if ($this->runningInConsole()) {
+            return true;
+        } else {
+            $prefix = trim($this->getCmfConfig()->url_prefix(), '/');
+            return preg_match("%^/{$prefix}(/|$)%", array_get($_SERVER, 'REQUEST_URI', '/')) > 0;
+        }
+    }
+
+    /**
+     * Overwrite this method in your custom service provider if you do want or do not want to run
+     * section-specific methods in register() and boot() methods
+     * @return bool
+     */
+    protected function runningInConsole() {
+        return $this->app->runningInConsole();
     }
 
     /**
@@ -181,7 +193,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      */
     protected function getScaffoldConfigs() {
         /** @var ScaffoldConfig[] $resources */
-        $resources = (array)$this->getCmfConfig()::config('resources', []);
+        $resources = (array)$this->getCmfConfig()->config('resources', []);
         $normalized = [];
         foreach ($resources as $scaffoldConfig) {
             $normalized[$scaffoldConfig::getResourceName()] = $scaffoldConfig;
@@ -276,7 +288,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/moment/moment/min/moment.min.js') => public_path('packages/cmf-vendors/moment/moment.min.js'),
             base_path('vendor/moment/moment/locale') => public_path('packages/cmf-vendors/moment/locale'),
             base_path('vendor/moment/moment/locale/en-gb.js') => public_path('packages/cmf-vendors/moment/locale/en.js'),
-            base_path('vendor/afarkas/html5shiv/dist/html5shiv.min.js') => public_path('packages/cmf-vendors/html5shiv.min.js'),
             base_path('vendor/select2/select2/dist') => public_path('packages/cmf-vendors/select2'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/jquery.inputmask.bundle.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),

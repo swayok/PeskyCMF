@@ -41,8 +41,20 @@ $.extend(CmfCache, {
     },
     selectOptions: {},
     selectOptionsTs: {},
-    itemDeafults: {}
+    itemDefaults: {}
 });
+
+ScaffoldsManager.importTemplatesFromCmfSettings = function (settings) {
+    if (settings.pagesTemplates  && $.isPlainObject(settings.pagesTemplates)) {
+        $.extend(CmfCache.views, settings.pagesTemplates);
+    }
+    delete settings.pagesTemplates;
+
+    if (settings.resourcesTemplates  && $.isPlainObject(settings.resourcesTemplates)) {
+        $.extend(CmfCache.rawTemplates, settings.resourcesTemplates);
+    }
+    delete settings.resourcesTemplates;
+};
 
 ScaffoldsManager.loadTemplates = function (resourceName, additionalParameter) {
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
@@ -74,7 +86,7 @@ ScaffoldsManager.setResourceTemplates = function (resourceName, additionalParame
         datagrid: false,
         itemForm: false,
         bulkEditForm: false,
-        itemdetails: false
+        itemDetails: false
     };
     var dataGridTpl = templates.find('#data-grid-tpl');
     if (dataGridTpl.length) {
@@ -259,10 +271,10 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
             console.error(error);
             deferred.reject(new Error(error));
             return deferred.promise();
-        } else if (!CmfCache.itemDeafults[resourceName]) {
+        } else if (!CmfCache.itemDefaults[resourceName]) {
             itemId = 'service/defaults';
         } else {
-            deferred.resolve(CmfCache.itemDeafults[resourceName]);
+            deferred.resolve(CmfCache.itemDefaults[resourceName]);
             return deferred.promise();
         }
     }
@@ -274,7 +286,7 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
         data.formUUID = Base64.encode(this.url + (new Date()).getTime());
         if (itemId === 'service/defaults') {
             data.isCreation = true;
-            CmfCache.itemDeafults[resourceName] = data;
+            CmfCache.itemDefaults[resourceName] = data;
         }
         deferred.resolve(data);
     }).fail(function (xhr) {
