@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+@php($scriptsVersion = '2.2.4')
 <head>
     <meta charset="UTF-8">
     <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }} @show</title>
@@ -33,13 +34,13 @@
         <link href="/packages/cmf-vendors/db-query-builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
 
         <link href="/packages/cmf/css/helpers.css" rel="stylesheet" type="text/css"/>
-        <link href="/packages/cmf/css/cmf.app.css" rel="stylesheet" type="text/css"/>
+        <link href="/packages/cmf/css/cmf.app.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
     @else
-        <link href="/packages/cmf/compiled/css/bootstrap-plugins.min.css" rel="stylesheet" type="text/css"/>
-        <link href="/packages/cmf/compiled/css/libs.min.css" rel="stylesheet" type="text/css"/>
+        <link href="/packages/cmf/compiled/css/bootstrap-plugins.min.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+        <link href="/packages/cmf/compiled/css/libs.min.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
         <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/adminlte/css/skins/{{ \PeskyCMF\Config\CmfConfig::getPrimary()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
-        <link href="/packages/cmf/compiled/css/cmf.min.css" rel="stylesheet" type="text/css"/>
+        <link href="/packages/cmf/compiled/css/cmf.min.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
     @endif
 
     <link href="/packages/cmf-vendors/fonticons/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
@@ -120,8 +121,6 @@
         var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
-    @php($scriptsVersion = '2.2.3')
-
     <script src="/packages/cmf-vendors/jquery3/jquery.min.js" type="text/javascript"></script>
 
     @if(!config('peskycmf.assets_are_mixed', false))
@@ -164,11 +163,11 @@
         <script src="/packages/cmf/js/cmf.scaffolds.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
         <script src="/packages/cmf/js/cmf.app.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
     @else
-        <script src="/packages/cmf/compiled/js/libs.min.js" type="text/javascript"></script>
-        <script src="/packages/cmf/compiled/js/bootstrap-and-plugins.min.js" type="text/javascript"></script>
-        <script src="/packages/cmf/compiled/js/datatables-and-plugins.min.js" type="text/javascript"></script>
-        <script src="/packages/cmf/compiled/js/jquery-plugins.min.js" type="text/javascript"></script>
-        <script src="/packages/cmf/compiled/js/cmf.min.js" type="text/javascript"></script>
+        <script src="/packages/cmf/compiled/js/libs.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+        <script src="/packages/cmf/compiled/js/bootstrap-and-plugins.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+        <script src="/packages/cmf/compiled/js/datatables-and-plugins.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+        <script src="/packages/cmf/compiled/js/jquery-plugins.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+        <script src="/packages/cmf/compiled/js/cmf.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
     @endif
 
     <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
