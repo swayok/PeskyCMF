@@ -121,6 +121,9 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldSectionConfigException
      */
@@ -182,8 +185,11 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return DataGridConfig
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function getDataGridConfig() {
         if (empty($this->dataGridConfig)) {
@@ -206,6 +212,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return ItemDetailsConfig
+     * @throws \BadMethodCallException
      */
     public function getItemDetailsConfig() {
         if (empty($this->itemDetailsConfig)) {
@@ -217,6 +224,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return FormConfig
+     * @throws \BadMethodCallException
      */
     public function getFormConfig() {
         if (empty($this->formConfig)) {

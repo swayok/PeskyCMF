@@ -531,4 +531,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         return $conditions;
     }
 
+    public function changeItemPosition() {
+        // todo: implement item position change
+    }
+
 }

@@ -276,7 +276,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         'ajax' => cmfRoute('cmf_api_get_items', ['table_name' => $tableNameForRoutes], false),
                         'pageLength' => $dataGridConfig->getRecordsPerPage(),
                         'toolbarItems' => array_values($toolbar),
-                        'order' => []
+                        'order' => [],
                     ]
                 );
                 if (!$dataGridConfig->getOrderBy() instanceof \PeskyORM\Core\DbExpr) {
@@ -292,6 +292,15 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         'value_column' => '__' . $table::getPkColumnName(),
                         'filter_column' => '__' . $dataGridConfig->getColumnNameForNestedView()
                     ];
+                }
+                if ($dataGridConfig->isRowsReorderingEnabled()) {
+                    $reorderingColumn = $dataGridConfig->getValueViewer($dataGridConfig->getRowsReorderingColumn());
+                    $dataTablesConfig['rowsReordering'] = [
+                        'column' => $reorderingColumn->getName(),
+                        'position' => $reorderingColumn->getPosition(),
+                        'url' => cmfRoute('cmf_api_change_item_position', ['table_name' => $tableNameForRoutes])
+                    ];
+                    // todo: make use of rowsReordering configuration in JS
                 }
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig, JSON_UNESCAPED_UNICODE); ?>;

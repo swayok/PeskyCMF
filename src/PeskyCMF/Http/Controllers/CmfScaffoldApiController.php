@@ -96,6 +96,10 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->updateRecord();
     }
 
+    public function changeItemPosition() {
+        return $this->getScaffoldConfig()->changeItemPosition();
+    }
+
     public function updateBulk() {
         return $this->getScaffoldConfig()->updateBulkOfRecords();
     }

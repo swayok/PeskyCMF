@@ -67,6 +67,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $isFilterOpened = false;
     /** @var string|null */
     protected $enableNestedViewBasedOnColumn;
+    /** @var string|null */
+    protected $rowsReorderingColumn;
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfigConfig) {
         parent::__construct($table, $scaffoldConfigConfig);
@@ -227,9 +229,15 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param string $orderBy
      * @param null $direction
      * @return $this
+     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
     public function setOrderBy($orderBy, $direction = null) {
+        if ($this->isRowsReorderingEnabled()) {
+            throw new \BadMethodCallException(
+                'You are not allowed to set rows ordering column when rows reordering is enabled'
+            );
+        }
         if (!($orderBy instanceof DbExpr) && !$this->getTable()->getTableStructure()->hasColumn($orderBy)) {
             throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$orderBy]");
         }
@@ -607,6 +615,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \BadMethodCallException
      * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function finish() {
         parent::finish();
@@ -615,6 +624,12 @@ class DataGridConfig extends ScaffoldSectionConfig {
         }
         if ($this->isNestedViewEnabled() && !$this->hasValueViewer($this->getColumnNameForNestedView())) {
             $this->addValueViewer($this->getColumnNameForNestedView(), DataGridColumn::create()->setIsVisible(false));
+        }
+        if ($this->isRowsReorderingEnabled()) {
+            $reorderingColumn = $this->getRowsReorderingColumn();
+            foreach ($this->getDataGridColumns() as $viewer) {
+                $viewer->setIsSortable($viewer->getName() === $reorderingColumn);
+            }
         }
     }
 
@@ -635,6 +650,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param string $parentIdColumnName
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
     public function enableNestedView($parentIdColumnName = 'parent_id') {
@@ -656,4 +673,33 @@ class DataGridConfig extends ScaffoldSectionConfig {
     public function getColumnNameForNestedView() {
         return $this->enableNestedViewBasedOnColumn;
     }
+
+    /**
+     * @param string $rowsOrderingColumn - column that is used to define rows order
+     * @param string $direction - ordering direction: 'ASC' or 'DESC'
+     * @return $this
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function enableRowsReordering($rowsOrderingColumn = 'position', $direction = 'ASC') {
+        $this->setOrderBy($rowsOrderingColumn, $direction);
+        $this->rowsReorderingColumn = $rowsOrderingColumn;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getRowsReorderingColumn() {
+        return $this->rowsReorderingColumn;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRowsReorderingEnabled() {
+        return !empty($this->rowsReorderingColumn);
+    }
+
+
 }

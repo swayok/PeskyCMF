@@ -186,4 +186,8 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             ->setRedirect('reload');
     }
 
+    public function changeItemPosition() {
+        throw new \BadMethodCallException('Rows reordering is not allowed for ' . self::class);
+    }
+
 }

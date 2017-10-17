@@ -295,6 +295,15 @@ Route::group(
             ]
         ]);
 
+        Route::put('{table_name}/change_item_position', [
+            'as' => $routeNamePrefix . 'cmf_api_change_item_position',
+            'uses' => $apiControllerClass . '@changeItemPosition',
+            'fallback' => [
+                'route' => $routeNamePrefix . 'cmf_items_table',
+                'params' => true
+            ]
+        ]);
+
         Route::delete('{table_name}/{id}', [
             'as' => $routeNamePrefix . 'cmf_api_delete_item',
             'uses' => $apiControllerClass . '@deleteItem',

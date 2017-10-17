@@ -62,6 +62,8 @@ interface ScaffoldConfigInterface {
 
     public function updateRecord();
 
+    public function changeItemPosition();
+
     public function updateBulkOfRecords();
 
     public function deleteRecord($id);
