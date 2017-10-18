@@ -5,6 +5,14 @@ $(function () {
     extendRouter();
 
     if (CmfSettings) {
+        // import localization strings
+        if (CmfSettings.localizationStrings && $.isPlainObject(CmfSettings.localizationStrings)) {
+            CmfConfig.setLocalizationStrings(CmfSettings.localizationStrings);
+        }
+        delete CmfSettings.localizationStrings;
+        // import templates
+        ScaffoldsManager.importTemplatesFromCmfSettings(CmfSettings);
+        // merge with default configs
         $.extend(CmfConfig, CmfSettings);
     }
 
@@ -76,50 +84,7 @@ $(function () {
 });
 
 function fixAdminLte() {
-    // fix sidebar/content min-height fixer
-    /*$.AdminLTE.layout.fix = function () {
-        $('body, html, .wrapper').css('height', '100vh');
-        // Get heights
-        var headerHeight = $('.main-header').outerHeight(true) || 0;
-        var headerLogoHeight = $('.main-header .logo').outerHeight(true) || 0;
-        var footerHeight = $('.main-footer').outerHeight(true) || 0;
-        var windowHeight = $(window).height();
-        var sidebarHeight = $(".sidebar").outerHeight(true) + headerLogoHeight;
-        var $elements = $(".content-wrapper, .right-side");
-        // Set the min-height of the content and sidebar based on the the height of the document.
-        if ($("body").hasClass("fixed")) {
-            $elements.css('min-height', windowHeight - footerHeight);
-        } else {
-            var newHeight;
-            if (windowHeight >= sidebarHeight) {
-                newHeight = windowHeight - headerHeight - footerHeight;
-            } else {
-                newHeight = sidebarHeight - headerHeight - footerHeight;
-            }
-            $elements.css('min-height', newHeight);
-
-            //Fix for the control sidebar height
-            var controlSidebar = $($.AdminLTE.options.controlSidebarOptions.selector);
-            if (typeof controlSidebar !== "undefined") {
-                if (controlSidebar.height() > newHeight) {
-                    $elements.css('min-height', controlSidebar.height());
-                }
-            }
-        }
-    };
-
-    // to fix sidebar menu dropdown closing
-    var original = $.AdminLTE.tree;
-    $.AdminLTE.tree = function (menu) {
-        original.call(this, menu);
-        $(menu).on('click', 'li a', function (e) {
-            $.AdminLTE.layout.fix();
-            setTimeout($.AdminLTE.layout.fix, $.AdminLTE.options.animationSpeed + 10);
-        });
-    };
-
-    $.AdminLTE.layout.fix();*/
-
+    $('body').layout('fix');
 }
 
 function extendRouter() {

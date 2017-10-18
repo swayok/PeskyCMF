@@ -21,8 +21,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /** @var TableInterface */
     protected $table;
-    /** @var string */
-    protected $tableNameForRoutes;
     /** @var DataGridConfig */
     protected $dataGridConfig = null;
     /** @var FilterConfig */
@@ -43,7 +41,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * Path to localization of views.
      * Usage: see $this->getLocalizationBasePath() method.
-     * By default if $viewsBaseTranslationKey is empty - $this->tableNameForRoutes will be used
+     * By default if $viewsBaseTranslationKey is empty - static::getResourceName() will be used
      * @return null|string
      */
     protected $viewsBaseTranslationKey = null;
@@ -55,14 +53,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * ScaffoldConfig constructor.
-     * @param string $tableNameForRoutes - table name to be used to build routes to resources of the $table
      */
-    public function __construct($tableNameForRoutes) {
-        $this->tableNameForRoutes = $tableNameForRoutes;
+    public function __construct() {
         if ($this->viewsBaseTranslationKey === null) {
-            $this->viewsBaseTranslationKey = $tableNameForRoutes;
+            $this->viewsBaseTranslationKey = static::getResourceName();
         }
-        $this->setLogger(CmfConfig::getInstance()->getHttpRequestsLogger());
+        $this->setLogger(CmfConfig::getPrimary()->getHttpRequestsLogger());
     }
 
     /**
@@ -125,6 +121,9 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return array
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldSectionConfigException
      */
@@ -186,8 +185,11 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return DataGridConfig
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function getDataGridConfig() {
         if (empty($this->dataGridConfig)) {
@@ -210,6 +212,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return ItemDetailsConfig
+     * @throws \BadMethodCallException
      */
     public function getItemDetailsConfig() {
         if (empty($this->itemDetailsConfig)) {
@@ -221,6 +224,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return FormConfig
+     * @throws \BadMethodCallException
      */
     public function getFormConfig() {
         if (empty($this->formConfig)) {
@@ -334,6 +338,25 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
                 ['tableNameForRoutes' => static::getResourceName()]
             )
         )->render();
+    }
+
+    /**
+     * @return array
+     */
+    public function renderTemplatesAndSplit() {
+        $blocks = [
+            'datagrid' => false,
+            'itemForm' => false,
+            'bulkEditForm' => false,
+            'itemDetails' => false,
+        ];
+        $html = $this->renderTemplates();
+        foreach ($blocks as $block => &$template) {
+            if (preg_match("%<!--\s*{$block}\s*start\s*-->(?:\s*\n*)*(.*?)<!--\s*{$block}\s*end\s*-->%is", $html, $matches)) {
+                $template = $matches[1];
+            }
+        }
+        return $blocks;
     }
 
     public function getHtmlOptionsForFormInputs() {

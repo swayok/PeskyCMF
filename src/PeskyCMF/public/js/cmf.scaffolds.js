@@ -41,8 +41,20 @@ $.extend(CmfCache, {
     },
     selectOptions: {},
     selectOptionsTs: {},
-    itemDeafults: {}
+    itemDefaults: {}
 });
+
+ScaffoldsManager.importTemplatesFromCmfSettings = function (settings) {
+    if (settings.pagesTemplates  && $.isPlainObject(settings.pagesTemplates)) {
+        $.extend(CmfCache.views, settings.pagesTemplates);
+    }
+    delete settings.pagesTemplates;
+
+    if (settings.resourcesTemplates  && $.isPlainObject(settings.resourcesTemplates)) {
+        $.extend(CmfCache.rawTemplates, settings.resourcesTemplates);
+    }
+    delete settings.resourcesTemplates;
+};
 
 ScaffoldsManager.loadTemplates = function (resourceName, additionalParameter) {
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
@@ -57,11 +69,13 @@ ScaffoldsManager.loadTemplates = function (resourceName, additionalParameter) {
         }).done(function (html) {
             ScaffoldsManager.setResourceTemplates(resourceName, additionalParameter, html);
             deferred.resolve(resourceName, additionalParameter);
-        }).fail(Utils.handleAjaxError);
+        }).fail(function (xhr) {
+            Utils.handleAjaxError.call(this, xhr, deferred);
+        });
     } else {
         deferred.resolve(resourceName, additionalParameter);
     }
-    return deferred;
+    return deferred.promise();
 };
 
 ScaffoldsManager.setResourceTemplates = function (resourceName, additionalParameter, html) {
@@ -72,7 +86,7 @@ ScaffoldsManager.setResourceTemplates = function (resourceName, additionalParame
         datagrid: false,
         itemForm: false,
         bulkEditForm: false,
-        itemdetails: false
+        itemDetails: false
     };
     var dataGridTpl = templates.find('#data-grid-tpl');
     if (dataGridTpl.length) {
@@ -131,79 +145,122 @@ ScaffoldsManager.hasItemDetailsTemplate = function (resourceName, additionalPara
 ScaffoldsManager.getDataGridTpl = function (resourceName, additionalParameter) {
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var deferred = $.Deferred();
-    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
-        if (!ScaffoldsManager.hasDataGridTemplate(resourceName, additionalParameter)) {
-            throw 'There is no data grid template for resource [' + resourceName + ']'
-                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
-        }
-        deferred.resolve(
-            CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
-        );
-    });
-    return deferred;
+    ScaffoldsManager
+        .loadTemplates(resourceName, additionalParameter)
+        .done(function () {
+            if (!ScaffoldsManager.hasDataGridTemplate(resourceName, additionalParameter)) {
+                throw 'There is no data grid template for resource [' + resourceName + ']'
+                    + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
+            }
+            deferred.resolve(
+                CmfCache.rawTemplates[ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter)].datagrid
+            );
+        })
+        .fail(function (error) {
+            deferred.reject(error);
+        });
+    return deferred.promise();
 };
 
 ScaffoldsManager.getItemFormTpl = function (resourceName, additionalParameter) {
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var deferred = $.Deferred();
-    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
-        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
-        if (!ScaffoldsManager.hasItemFormTemplate(resourceName, additionalParameter)) {
-            throw 'There is no item form template for resource [' + resourceName + ']'
-                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
-        }
-        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
-        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemForm[resourceId]) {
-            CmfCache.compiledTemplates.itemForm[resourceId] = Utils.makeTemplateFromText(
-                CmfCache.rawTemplates[resourceId].itemForm,
-                'Item form template for ' + resourceId
-            );
-        }
-        deferred.resolve(CmfCache.compiledTemplates.itemForm[resourceId]);
-    });
-    return deferred;
+    ScaffoldsManager
+        .loadTemplates(resourceName, additionalParameter)
+        .done(function () {
+            ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+            if (!ScaffoldsManager.hasItemFormTemplate(resourceName, additionalParameter)) {
+                throw 'There is no item form template for resource [' + resourceName + ']'
+                    + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
+            }
+            var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+            if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemForm[resourceId]) {
+                Utils.makeTemplateFromText(
+                        CmfCache.rawTemplates[resourceId].itemForm,
+                        'Item form template for ' + resourceId
+                    )
+                    .done(function (template) {
+                        CmfCache.compiledTemplates.itemForm[resourceId] = template;
+                        deferred.resolve(template);
+                    })
+                    .fail(function (error) {
+                        deferred.reject(error);
+                    });
+            } else {
+                deferred.resolve(CmfCache.compiledTemplates.itemForm[resourceId]);
+            }
+        })
+        .fail(function (error) {
+            deferred.reject(error);
+        });
+    return deferred.promise();
 };
 
 ScaffoldsManager.getBulkEditFormTpl = function (resourceName, additionalParameter) {
     ScaffoldsManager.validateResourceName(resourceName ,additionalParameter);
     var deferred = $.Deferred();
-    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
-        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
-        if (!ScaffoldsManager.hasBulkEditFormTemplate(resourceName, additionalParameter)) {
-            throw 'There is no bulk edit form template for resource [' + resourceName + ']'
-                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
-        }
-        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
-        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.bulkEditForm[resourceId]) {
-            CmfCache.compiledTemplates.bulkEditForm[resourceId] = Utils.makeTemplateFromText(
-                CmfCache.rawTemplates[resourceId].bulkEditForm,
-                'Bulk edit form template for ' + resourceId
-            );
-        }
-        deferred.resolve(CmfCache.compiledTemplates.bulkEditForm[resourceId]);
-    });
-    return deferred;
+    ScaffoldsManager
+        .loadTemplates(resourceName, additionalParameter)
+        .done(function () {
+            ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+            if (!ScaffoldsManager.hasBulkEditFormTemplate(resourceName, additionalParameter)) {
+                throw 'There is no bulk edit form template for resource [' + resourceName + ']'
+                    + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
+            }
+            var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+            if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.bulkEditForm[resourceId]) {
+                Utils.makeTemplateFromText(
+                        CmfCache.rawTemplates[resourceId].bulkEditForm,
+                        'Bulk edit form template for ' + resourceId
+                    )
+                    .done(function (template) {
+                        CmfCache.compiledTemplates.bulkEditForm[resourceId] = template;
+                        deferred.resolve(template);
+                    })
+                    .fail(function (error) {
+                        deferred.reject(error);
+                    });
+            } else {
+                deferred.resolve(CmfCache.compiledTemplates.bulkEditForm[resourceId]);
+            }
+        })
+        .fail(function (error) {
+            deferred.reject(error);
+        });
+    return deferred.promise();
 };
 
 ScaffoldsManager.getItemDetailsTpl = function (resourceName, additionalParameter) {
     ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
     var deferred = $.Deferred();
-    ScaffoldsManager.loadTemplates(resourceName, additionalParameter).done(function () {
-        ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
-        if (!ScaffoldsManager.hasItemDetailsTemplate(resourceName, additionalParameter)) {
-            throw 'There is no item details template for resource [' + resourceName + ']'
-                + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
-        }
-        var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
-        if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemDetails[resourceId]) {
-            CmfCache.compiledTemplates.itemDetails[resourceId] = Utils.makeTemplateFromText(
-                CmfCache.rawTemplates[resourceId].itemDetails,
-                'Item details template for ' + resourceId
-            );
-        }
-        deferred.resolve(CmfCache.compiledTemplates.itemDetails[resourceId]);
-    });
-    return deferred;
+    ScaffoldsManager
+        .loadTemplates(resourceName, additionalParameter).done(function () {
+            ScaffoldsManager.validateResourceName(resourceName, additionalParameter);
+            if (!ScaffoldsManager.hasItemDetailsTemplate(resourceName, additionalParameter)) {
+                throw 'There is no item details template for resource [' + resourceName + ']'
+                    + (typeof additionalParameter === 'undefined' ? '' : ' with additional parameter [' + additionalParameter + ']');
+            }
+            var resourceId = ScaffoldsManager.buildResourceUrlSuffix(resourceName, additionalParameter);
+            if (!ScaffoldsManager.cacheTemplates || !CmfCache.compiledTemplates.itemDetails[resourceId]) {
+                Utils.makeTemplateFromText(
+                        CmfCache.rawTemplates[resourceId].itemDetails,
+                        'Item details template for ' + resourceId
+                    )
+                    .done(function (template) {
+                        CmfCache.compiledTemplates.itemDetails[resourceId] = template;
+                        deferred.resolve(template);
+                    })
+                    .fail(function (error) {
+                        deferred.reject(error);
+                    });
+            } else {
+                deferred.resolve(CmfCache.compiledTemplates.itemDetails[resourceId]);
+            }
+        })
+        .fail(function (error) {
+            deferred.reject(error);
+        });
+    return deferred.promise();
 };
 
 ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetailsViewer) {
@@ -212,11 +269,13 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
         if (forDetailsViewer) {
             var error = 'ScaffoldsManager.getDataForItem(): itemId argument is requred when argument forDetailsViewer == true';
             console.error(error);
-            return deferred.reject(new Error(error));
-        } else if (!CmfCache.itemDeafults[resourceName]) {
+            deferred.reject(new Error(error));
+            return deferred.promise();
+        } else if (!CmfCache.itemDefaults[resourceName]) {
             itemId = 'service/defaults';
         } else {
-            return deferred.resolve(CmfCache.itemDeafults[resourceName]);
+            deferred.resolve(CmfCache.itemDefaults[resourceName]);
+            return deferred.promise();
         }
     }
     $.ajax({
@@ -227,14 +286,13 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
         data.formUUID = Base64.encode(this.url + (new Date()).getTime());
         if (itemId === 'service/defaults') {
             data.isCreation = true;
-            CmfCache.itemDeafults[resourceName] = data;
+            CmfCache.itemDefaults[resourceName] = data;
         }
         deferred.resolve(data);
     }).fail(function (xhr) {
-        deferred.reject(new Error(this.url + ': ' + xhr.statusText + '; Response: ' + xhr.responseText, xhr.status));
-        Utils.handleAjaxError.call(this, xhr);
+        Utils.handleAjaxError.call(this, xhr, deferred);
     });
-    return deferred;
+    return deferred.promise();
 };
 
 var ScaffoldActionsHelper = {
@@ -1422,11 +1480,13 @@ var ScaffoldFormHelper = {
                 CmfCache.selectOptionsTs[cacheKey] = Date.now();
                 CmfCache.selectOptions[cacheKey] = data;
                 deferred.resolve(CmfCache.selectOptions[cacheKey]);
-            }).fail(Utils.handleAjaxError);
+            }).fail(function (xhr) {
+                Utils.handleAjaxError.call(this, xhr, deferred);
+            });
         } else {
             deferred.resolve(CmfCache.selectOptions[cacheKey]);
         }
-        return deferred;
+        return deferred.promise();
     },
     cleanOptions: function (resourceName, itemId) {
         var cacheKey = resourceName + (itemId ? '' : String(itemId));

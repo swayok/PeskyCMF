@@ -14,11 +14,17 @@ $data = compact([
 $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
 ?>
 
+<!-- datagrid start -->
+
 <div id="data-grid-tpl">
     <script type="application/javascript">
         page.show('<?php echo routeToCmfItemAddForm($tableNameForRoutes) ?>');
     </script>
 </div>
+
+<!-- datagrid end -->
+
+<!-- itemForm start -->
 
 <?php echo view(
     $formConfig->getTemplate(),
@@ -26,10 +32,14 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
     $formConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
+<!-- itemForm end -->
+
+<!-- itemDetails start -->
+
 <?php echo view(
     $itemDetailsConfig->getTemplate(),
     $data,
     $itemDetailsConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
-
+<!-- itemDetails end -->

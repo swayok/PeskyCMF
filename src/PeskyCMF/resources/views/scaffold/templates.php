@@ -14,12 +14,17 @@ $data = compact([
 $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
 ?>
 
+<!-- datagrid start -->
+
 <?php echo view(
     $dataGridConfig->getTemplate(),
     $data,
     $dataGridConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
+<!-- datagrid end -->
+
+<!-- itemForm start -->
 
 <?php echo view(
     $formConfig->getTemplate(),
@@ -27,6 +32,9 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
     $formConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
+<!-- itemForm end -->
+
+<!-- bulkEditForm start -->
 
 <?php echo view(
     $formConfig->getBulkEditingTemplate(),
@@ -34,6 +42,9 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
     $formConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
+<!-- bulkEditForm start -->
+
+<!-- itemDetails start -->
 
 <?php echo view(
     $itemDetailsConfig->getTemplate(),
@@ -41,4 +52,4 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
     $itemDetailsConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
-
+<!-- itemDetails start -->

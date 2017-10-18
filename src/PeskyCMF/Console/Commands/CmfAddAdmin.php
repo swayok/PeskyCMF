@@ -14,6 +14,11 @@ class CmfAddAdmin extends Command {
     protected $signature = 'cmf:add-admin {email_or_login} {role=admin} {table=admins} {schema?} {--login : use [login] field instead of [email]}';
 
     public function fire() {
+        // compatibility with Laravel <= 5.4
+        $this->handle();
+    }
+
+    public function handle() {
         $db = DbConnectionsManager::getConnection('default');
         $args = $this->input->getArguments();
         $emailOrLogin = strtolower(trim($args['email_or_login']));

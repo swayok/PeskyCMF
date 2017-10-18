@@ -276,7 +276,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         'ajax' => cmfRoute('cmf_api_get_items', ['table_name' => $tableNameForRoutes], false),
                         'pageLength' => $dataGridConfig->getRecordsPerPage(),
                         'toolbarItems' => array_values($toolbar),
-                        'order' => []
+                        'order' => [],
                     ]
                 );
                 if (!$dataGridConfig->getOrderBy() instanceof \PeskyORM\Core\DbExpr) {
@@ -293,10 +293,29 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         'filter_column' => '__' . $dataGridConfig->getColumnNameForNestedView()
                     ];
                 }
+                if ($dataGridConfig->isRowsReorderingEnabled()) {
+                    $reorderingColumn = $dataGridConfig->getValueViewer($dataGridConfig->getRowsReorderingColumn());
+                    $dataTablesConfig['rowsReordering'] = [
+                        'column' => $reorderingColumn->getName(),
+                        'position' => $reorderingColumn->getPosition(),
+                        'url' => cmfRoute('cmf_api_change_item_position', ['table_name' => $tableNameForRoutes])
+                    ];
+                    // todo: make use of rowsReordering configuration in JS
+                }
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig, JSON_UNESCAPED_UNICODE); ?>;
             dataTablesConfig.resourceName = '<?php echo $tableNameForRoutes; ?>';
-            var rowActionsTpl = Utils.makeTemplateFromText('<?php echo addslashes($actionsTpl); ?>', 'Data grid row actions template');
+            var rowActionsTpl = null;
+            Utils.makeTemplateFromText(
+                    '<?php echo addslashes($actionsTpl); ?>',
+                    'Data grid row actions template'
+                )
+                .done(function (template) {
+                    rowActionsTpl = template;
+                })
+                .fail(function (error) {
+                    throw error;
+                });
             dataTablesConfig.columnDefs = [];
             var fixedColumns = 0;
             <?php if ($dataGridConfig->isRowActionsFloating()): ?>
@@ -353,10 +372,17 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 <?php endif; ?>
             <?php endforeach; ?>
             <?php if (!empty($dblClickUrl)): ?>
-                dataTablesConfig.doubleClickUrl = Utils.makeTemplateFromText(
-                    '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%i', '{{= it.$2 }}', $dblClickUrl)); ?>',
-                    'Double click URL template'
-                );
+                dataTablesConfig.doubleClickUrl = null;
+                Utils.makeTemplateFromText(
+                        '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%i', '{{= it.$2 }}', $dblClickUrl)); ?>',
+                        'Double click URL template'
+                    )
+                    .done(function (template) {
+                        dataTablesConfig.doubleClickUrl = template;
+                    })
+                    .fail(function (error) {
+                        throw error;
+                    });
             <?php endif; ?>
             <?php
                 $defaultConditions = $dataGridFilterConfig->getDefaultConditions();

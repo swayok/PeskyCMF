@@ -16,7 +16,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
     protected $isCreateAllowed = false;
 
-    public function __construct($tableNameForRoutes) {
+    public function __construct() {
         $table = static::getTable();
         if (!($table instanceof KeyValueTableInterface)) {
             throw new \UnexpectedValueException(
@@ -24,7 +24,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
                 . static::class . '->getTable() must implement of KeyValueTableInterface interface'
             );
         }
-        parent::__construct($tableNameForRoutes);
+        parent::__construct();
     }
 
     /**
@@ -184,6 +184,10 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         return cmfJsonResponse()
             ->setMessage(cmfTransGeneral('.form.resource_updated_successfully'))
             ->setRedirect('reload');
+    }
+
+    public function changeItemPosition() {
+        throw new \BadMethodCallException('Rows reordering is not allowed for ' . self::class);
     }
 
 }

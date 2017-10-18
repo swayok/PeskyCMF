@@ -1,4 +1,4 @@
-<ul class="sidebar-menu" id="common-menu">
+<ul class="sidebar-menu tree" data-widget="tree" id="common-menu">
     <li class="header">{{ cmfTransCustom('.main_menu.header') }}</li>
     @foreach (\PeskyCMF\Config\CmfConfig::getPrimary()->menu() as $info)
         @if (empty($info))
@@ -50,3 +50,11 @@
         @endif
     @endforeach
 </ul>
+
+<script type="application/javascript">
+    $(function () {
+        $('#common-menu').tree({
+            animationSpeed: 100
+        });
+    })
+</script>

@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Providers;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use LaravelExtendedErrors\LoggingServiceProvider;
 use PeskyCMF\Config\CmfConfig;
@@ -94,8 +93,21 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      * @return int
      */
     protected function fitsRequestUri() {
-        $prefix = trim($this->getCmfConfig()->url_prefix(), '/');
-        return preg_match("%^/{$prefix}(/|$)%", array_get($_SERVER, 'REQUEST_URI', '/')) > 0;
+        if ($this->runningInConsole()) {
+            return true;
+        } else {
+            $prefix = trim($this->getCmfConfig()->url_prefix(), '/');
+            return preg_match("%^/{$prefix}(/|$)%", array_get($_SERVER, 'REQUEST_URI', '/')) > 0;
+        }
+    }
+
+    /**
+     * Overwrite this method in your custom service provider if you do want or do not want to run
+     * section-specific methods in register() and boot() methods
+     * @return bool
+     */
+    protected function runningInConsole() {
+        return $this->app->runningInConsole();
     }
 
     /**
@@ -181,7 +193,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      */
     protected function getScaffoldConfigs() {
         /** @var ScaffoldConfig[] $resources */
-        $resources = (array)$this->getCmfConfig()::config('resources', []);
+        $resources = (array)$this->getCmfConfig()->config('resources', []);
         $normalized = [];
         foreach ($resources as $scaffoldConfig) {
             $normalized[$scaffoldConfig::getResourceName()] = $scaffoldConfig;
@@ -233,14 +245,13 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             $cmfPublicDir . '/public/less' => public_path('packages/cmf/less'),
             $cmfPublicDir . '/public/img' => public_path('packages/cmf/img'),
             // AdminLTE
-            base_path('vendor/almasaeed2010/adminlte/dist/js/app.js') => public_path('packages/adminlte/js/app.js'),
-            base_path('vendor/almasaeed2010/adminlte/dist/js/app.min.js') => public_path('packages/adminlte/js/app.min.js'),
+            base_path('vendor/almasaeed2010/adminlte/dist/js/adminlte.js') => public_path('packages/adminlte/js/app.js'),
+            base_path('vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js') => public_path('packages/adminlte/js/app.min.js'),
             base_path('vendor/almasaeed2010/adminlte/dist/img/boxed-bg.jpg') => public_path('packages/adminlte/img/boxed-bg.jpg'),
-            base_path('vendor/almasaeed2010/adminlte/dist/css/AdminLTE.css') => public_path('packages/adminlte/css/AdminLTE.css'),
-            base_path('vendor/almasaeed2010/adminlte/dist/css/AdminLTE.min.css') => public_path('packages/adminlte/css/AdminLTE.min.css'),
+            base_path('vendor/almasaeed2010/adminlte/dist/img/boxed-bg.png') => public_path('packages/adminlte/img/boxed-bg.png'),
+            base_path('vendor/almasaeed2010/adminlte/dist/css/alt/AdminLTE-without-plugins.css') => public_path('packages/adminlte/css/AdminLTE.css'),
+            base_path('vendor/almasaeed2010/adminlte/dist/css/alt/AdminLTE-without-plugins.min.css') => public_path('packages/adminlte/css/AdminLTE.min.css'),
             base_path('vendor/almasaeed2010/adminlte/dist/css/skins') => public_path('packages/adminlte/css/skins'),
-            base_path('vendor/almasaeed2010/adminlte/plugins/fastclick/fastclick.min.js') => public_path('packages/adminlte/plugins/fastclick/fastclick.min.js'),
-//            base_path('vendor/almasaeed2010/adminlte/plugins') => public_path('packages/adminlte/plugins'),
             // bootstrap
             base_path('vendor/twbs/bootstrap/dist') => public_path('packages/cmf-vendors/bootstrap'),
             base_path('vendor/eonasdan/bootstrap-datetimepicker/build') => public_path('packages/cmf-vendors/bootstrap/datetimepicker'),
@@ -251,10 +262,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/kartik-v/bootstrap-fileinput/css') => public_path('packages/cmf-vendors/bootstrap/fileinput/css'),
             base_path('vendor/kartik-v/bootstrap-fileinput/img') => public_path('packages/cmf-vendors/bootstrap/fileinput/img'),
             // font icons
-            base_path('vendor/fortawesome/font-awesome/css') => public_path('packages/cmf-vendors/fontions/font-awesome/css'),
-            base_path('vendor/fortawesome/font-awesome/fonts') => public_path('packages/cmf-vendors/fontions/font-awesome/fonts'),
-            base_path('vendor/driftyco/ionicons/css') => public_path('packages/cmf-vendors/fontions/ionicons/css'),
-            base_path('vendor/driftyco/ionicons/fonts') => public_path('packages/cmf-vendors/fontions/ionicons/fonts'),
+            base_path('vendor/fortawesome/font-awesome/css') => public_path('packages/cmf-vendors/fonticons/font-awesome/css'),
+            base_path('vendor/fortawesome/font-awesome/fonts') => public_path('packages/cmf-vendors/fonticons/font-awesome/fonts'),
+            base_path('vendor/driftyco/ionicons/css') => public_path('packages/cmf-vendors/fonticons/ionicons/css'),
+            base_path('vendor/driftyco/ionicons/fonts') => public_path('packages/cmf-vendors/fonticons/ionicons/fonts'),
             // jquery
             base_path('vendor/bower-asset/jquery/dist/jquery.js') => public_path('packages/cmf-vendors/jquery3/jquery.js'),
             base_path('vendor/bower-asset/jquery/dist/jquery.min.js') => public_path('packages/cmf-vendors/jquery3/jquery.min.js'),
@@ -277,7 +288,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/moment/moment/min/moment.min.js') => public_path('packages/cmf-vendors/moment/moment.min.js'),
             base_path('vendor/moment/moment/locale') => public_path('packages/cmf-vendors/moment/locale'),
             base_path('vendor/moment/moment/locale/en-gb.js') => public_path('packages/cmf-vendors/moment/locale/en.js'),
-            base_path('vendor/afarkas/html5shiv/dist/html5shiv.min.js') => public_path('packages/cmf-vendors/html5shiv.min.js'),
             base_path('vendor/select2/select2/dist') => public_path('packages/cmf-vendors/select2'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/jquery.inputmask.bundle.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
@@ -285,7 +295,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/bower-asset/cropper/dist') => public_path('packages/cmf-vendors/cropperjs'),
             // additions to vendors
             $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
-
         ], 'public');
 
         $this->publishes([

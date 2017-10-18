@@ -136,7 +136,7 @@ Route::group(
 
         // Custom Pages
         Route::get('page/{page}',  $generalControllerClass . '@loadJsApp')
-            ->name('cmf_page')
+            ->name($routeNamePrefix . 'cmf_page')
             ->where('page', '^.*(?!\.html)$');
 
         // Switch locales
@@ -150,7 +150,7 @@ Route::group(
                 '/utils/api_docs/requests_collection_for_postman.json',
                 $generalControllerClass . '@downloadApiRequestsCollectionForPostman'
             )
-            ->name('cmf_api_docs_download_postman_collection');
+            ->name($routeNamePrefix . 'cmf_api_docs_download_postman_collection');
     }
 );
 
@@ -291,6 +291,15 @@ Route::group(
             'uses' => $apiControllerClass . '@updateItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_edit_form',
+                'params' => true
+            ]
+        ]);
+
+        Route::put('{table_name}/change_item_position', [
+            'as' => $routeNamePrefix . 'cmf_api_change_item_position',
+            'uses' => $apiControllerClass . '@changeItemPosition',
+            'fallback' => [
+                'route' => $routeNamePrefix . 'cmf_items_table',
                 'params' => true
             ]
         ]);

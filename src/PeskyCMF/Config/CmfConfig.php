@@ -129,7 +129,7 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
+     * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|null
      */
     static public function getUser() {
         return static::getAuth()->user();
@@ -845,7 +845,14 @@ class CmfConfig extends ConfigsContainer {
         if (!class_exists($className)) {
             throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
         }
-        return new $className($resourceName);
+        return new $className();
+    }
+
+    /**
+     * @return ScaffoldConfig[]
+     */
+    static public function getRegisteredScaffolds() {
+        return static::getInstance()->resources;
     }
 
     protected $tables = [];
@@ -979,6 +986,123 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function setHttpRequestsLogger(ScaffoldLoggerInterface $httpRequestsLogger) {
         static::getInstance()->httpRequestsLogger = $httpRequestsLogger;
+    }
+
+    /**
+     * @return array
+     */
+    static public function getCachedUiTemplate() {
+        return \Cache::remember(
+            static::getCacheKeyForOptimizedUiTemplates('ui'),
+            (int)static::config('optimize_ui_templates.timeout', 0),
+            function () {
+                if (static::getUser()) {
+                    $generalControllerClass = static::cmf_general_controller_class();
+                    /** @var \PeskyCMF\Http\Controllers\CmfGeneralController $controller */
+                    $controller = new $generalControllerClass();
+                    $controller->getBasicUiView();
+                } else {
+                    return null;
+                }
+            }
+        );
+    }
+
+    /**
+     * @return array
+     */
+    static public function getCachedPagesTemplates() {
+        return \Cache::remember(
+            static::getCacheKeyForOptimizedUiTemplates('pages'),
+            (int)static::config('optimize_ui_templates.timeout', 0),
+            function () {
+                $generalControllerClass = static::cmf_general_controller_class();
+                /** @var \PeskyCMF\Http\Controllers\CmfGeneralController $controller */
+                $controller = new $generalControllerClass();
+                if (static::getUser()) {
+                    return [
+                        route(static::getRouteName('cmf_main_ui'), [], false) => $controller->getBasicUiView(),
+                    ];
+                } else {
+                    return [
+                        route(static::getRouteName('cmf_login'), [], false) . '.html' => $controller->getLoginTpl(),
+                        route(static::getRouteName('cmf_forgot_password'), [], false) . '.html' => $controller->getForgotPasswordTpl(),
+                    ];
+                }
+            }
+        );
+    }
+
+    /**
+     * @return array
+     */
+    static public function getCachedResourcesTemplates() {
+        if (!static::getUser()) {
+            return [];
+        }
+        return \Cache::remember(
+            static::getCacheKeyForOptimizedUiTemplates('resources'),
+            (int)static::config('optimize_ui_templates.timeout', 0),
+            function () {
+                return static::collectResourcesTemplatesToBeCached();
+            }
+        );
+    }
+
+    /**
+     * @return array
+     */
+    static protected function collectResourcesTemplatesToBeCached() {
+        $resourceTemplates = [];
+        /** @var ScaffoldConfig $scaffoldConfigClass */
+        foreach (static::getRegisteredScaffolds() as $resourceName => $scaffoldConfigClass) {
+            /** @var ScaffoldConfig $scaffoldConfig */
+            $scaffoldConfig = new $scaffoldConfigClass();
+            $splitted = $scaffoldConfig->renderTemplatesAndSplit();
+            if (!empty($splitted)) {
+                $resourceTemplates[$resourceName] = $splitted;
+            }
+        }
+        return $resourceTemplates;
+    }
+
+    /**
+     * User-id-based cache key
+     * @param string $group
+     * @return string
+     */
+    static protected function getCacheKeyForOptimizedUiTemplates($group) {
+        return static::getCacheKeyForOptimizedUiTemplatesBasedOnUserId($group);
+    }
+
+    /**
+     * User-id-based cache key
+     * @param string $group
+     * @return string
+     */
+    static protected function getCacheKeyForOptimizedUiTemplatesBasedOnUserId($group) {
+        if (static::cmf_user_acceess_policy_class() === CmfAccessPolicy::class) {
+            $userId = 'any';
+        } else {
+            $user = static::getUser();
+            $userId = $user ? $user->getAuthIdentifier() : 'not_authenticated';
+        }
+        return static::url_prefix() . '_templates_' . app()->getLocale() . '_' . $group . '_user_' . $userId;
+    }
+
+    /**
+     * Role-based cache key
+     * @param string $group
+     * @return string
+     */
+    static protected function getCacheKeyForOptimizedUiTemplatesBasedOnUserRole($group) {
+        if (static::cmf_user_acceess_policy_class() === CmfAccessPolicy::class) {
+            $userId = 'any';
+        } else {
+            $user = static::getUser();
+            $userId = $user ? $user->role : 'not_authenticated';
+        }
+        return static::url_prefix() . '_templates_' . app()->getLocale() . '_' . $group . '_user_' . $userId;
     }
 
 }
