@@ -487,9 +487,12 @@ FormHelper.inputsDisablers.isInputMustBeDisabled = function (disablerConfig) {
                 }
                 valueIsAffectedByValueIsEquals = true;
             }
-        } else {
+        } else if (condition.regexp) {
             // text input, select, textarea
             isConditionDisablesInput = condition.regexp.test(condition.$disablerInput.val());
+        } else {
+            // hidden/text input with bool value in it
+            isConditionDisablesInput = condition.$disablerInput.val() === (condition.on_value ? '1' : '0');
         }
         if (!valueIsAffectedByValueIsEquals && !condition.value_is_equals) {
             isConditionDisablesInput = !isConditionDisablesInput;
