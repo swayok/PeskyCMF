@@ -678,6 +678,7 @@ var ScaffoldDataGridHelper = {
                     }
                     ScaffoldDataGridHelper.initClickEvents($tableWrapper, $table, configs);
                     ScaffoldDataGridHelper.initRowActions($table, configs);
+                    ScaffoldDataGridHelper.initRowsRepositioning($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initMultiselect($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initBulkLinks($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initBulkEditing($table, $tableWrapper, configs);
@@ -884,7 +885,7 @@ var ScaffoldDataGridHelper = {
             }
         });
     },
-    showRowActions: function ($row, $table, mouseX) {
+    showRowActions: function ($row, $table) {
         var configs = $table.data('configs');
         var rowActionsContainer = $table.data('rowActionsContainer');
         if (configs && configs.rowActions && rowActionsContainer) {
@@ -910,6 +911,27 @@ var ScaffoldDataGridHelper = {
         var configs = $table.data('configs');
         if (configs && configs.rowActions && $table.data('rowActionsContainer')) {
             $table.data('rowActionsContainer').addClass('hidden');
+        }
+    },
+    initRowsRepositioning: function ($table, $tableWrapper, config) {
+        if (
+            config.hasOwnProperty('rowsReordering')
+            && $.isPlainObject(config.rowsReordering)
+            && config.rowsReordering.hasOwnProperty('column')
+            && config.rowsReordering.hasOwnProperty('url')
+        ) {
+            var api = $table.dataTable().api();
+            $table.on('draw.dt', function () {
+                api.column(config.rowsReordering.column + ':name').nodes().to$().addClass('reorderable');
+            });
+
+            new Sortable($table.find('tbody')[0], {
+                group: $table[0].id,
+                sorting: true,
+                scroll: true,
+                handle: '.reorderable',
+                chosenClass: 'reordering-this-element'
+            });
         }
     },
     initMultiselect: function ($table, $tableWrapper, configs) {

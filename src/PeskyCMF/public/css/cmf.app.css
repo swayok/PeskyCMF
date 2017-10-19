@@ -561,23 +561,33 @@ div.dataTables_wrapper table.dataTable thead .sorting_desc:after {
 div.dataTables_wrapper table.dataTable thead .sorting_asc:after {
   content: "\e093";
 }
-div.dataTables_wrapper table.dataTable tbody tr.selected {
+div.dataTables_wrapper table.dataTable tbody tr .reorderable {
+  cursor: move;
+  cursor: row-resize;
+}
+div.dataTables_wrapper table.dataTable tbody tr.selected,
+div.dataTables_wrapper table.dataTable tbody tr.reordering-this-element {
   background-color: rgba(78, 167, 205, 0.4);
   color: #000000;
 }
-div.dataTables_wrapper table.dataTable tbody tr.selected a {
+div.dataTables_wrapper table.dataTable tbody tr.selected a,
+div.dataTables_wrapper table.dataTable tbody tr.reordering-this-element a {
   color: #08C;
 }
-div.dataTables_wrapper table.dataTable tbody tr.selected a:hover {
+div.dataTables_wrapper table.dataTable tbody tr.selected a:hover,
+div.dataTables_wrapper table.dataTable tbody tr.reordering-this-element a:hover {
   color: #00a1ee;
 }
-div.dataTables_wrapper table.dataTable tbody tr.selected td.select-checkbox {
+div.dataTables_wrapper table.dataTable tbody tr.selected td.select-checkbox,
+div.dataTables_wrapper table.dataTable tbody tr.reordering-this-element td.select-checkbox {
   color: #08C;
 }
-div.dataTables_wrapper table.dataTable tbody tr.selected td.select-checkbox:hover {
+div.dataTables_wrapper table.dataTable tbody tr.selected td.select-checkbox:hover,
+div.dataTables_wrapper table.dataTable tbody tr.reordering-this-element td.select-checkbox:hover {
   color: #000000;
 }
-div.dataTables_wrapper table.dataTable tbody tr.selected td.select-checkbox:before {
+div.dataTables_wrapper table.dataTable tbody tr.selected td.select-checkbox:before,
+div.dataTables_wrapper table.dataTable tbody tr.reordering-this-element td.select-checkbox:before {
   content: "\f046";
 }
 div.dataTables_wrapper table.dataTable tbody tr td.select-checkbox {

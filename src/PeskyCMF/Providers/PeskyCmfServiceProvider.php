@@ -293,6 +293,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
             base_path('vendor/bower-asset/cropper/dist') => public_path('packages/cmf-vendors/cropperjs'),
+            base_path('vendor/bower-asset/sortalejs/Sortable.js') => public_path('packages/cmf-vendors/sortable/Sortable.js'),
             // additions to vendors
             $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
         ], 'public');

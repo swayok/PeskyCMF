@@ -300,7 +300,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         'position' => $reorderingColumn->getPosition(),
                         'url' => cmfRoute('cmf_api_change_item_position', ['table_name' => $tableNameForRoutes])
                     ];
-                    // todo: make use of rowsReordering configuration in JS
                 }
             ?>
             var dataTablesConfig = <?php echo json_encode($dataTablesConfig, JSON_UNESCAPED_UNICODE); ?>;

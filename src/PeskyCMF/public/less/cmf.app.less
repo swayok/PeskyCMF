@@ -522,7 +522,14 @@ div.dataTables_wrapper {
 
         tbody {
             tr {
-                &.selected {
+
+                .reorderable {
+                    cursor: move;
+                    cursor: row-resize;
+                }
+
+                &.selected,
+                &.reordering-this-element {
                     background-color: rgba(78, 167, 205, 0.4);
                     color: #000000;
 

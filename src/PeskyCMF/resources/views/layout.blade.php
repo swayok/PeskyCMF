@@ -153,6 +153,7 @@
         <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/sortable/Sortable.js" type="text/javascript"></script>
         {{--<script src="/packages/cmf-vendors/cropperjs/cropper.min.js" type="text/javascript"></script>--}}
 
         <script src="/packages/cmf/js/cmf.config.js?v={{ $scriptsVersion }}" type="text/javascript"></script>

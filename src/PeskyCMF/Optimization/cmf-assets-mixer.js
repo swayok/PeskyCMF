@@ -57,9 +57,11 @@ var mixCmfScripts = function (mix) {
         'public/packages/cmf-vendors/router/page.js',
         'public/packages/cmf-vendors/moment/moment.js',
         'public/packages/cmf-vendors/toastr/toastr.min.js',
-        'public/packages/cmf-vendors/base64.js',
         'public/packages/cmf-vendors/ckeditor/ckeditor.js',
-        'public/packages/cmf-vendors/ckeditor/adapters/jquery.js'
+        'public/packages/cmf-vendors/ckeditor/adapters/jquery.js',
+        'public/packages/cmf-vendors/cropperjs/cropper.min.js',
+        'public/packages/cmf-vendors/sortable/Sortable.js',
+        'public/packages/cmf-vendors/base64.js'
     ], 'public/packages/cmf/compiled/js/libs.min.js');
 
     mix.scripts([
