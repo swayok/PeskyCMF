@@ -47,7 +47,7 @@ class ValidateData {
     }
 
     protected function sendValidationErrorsResponse($errors) {
-        return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::INVALID);
+        return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::CANNOT_PROCESS);
     }
 
 }

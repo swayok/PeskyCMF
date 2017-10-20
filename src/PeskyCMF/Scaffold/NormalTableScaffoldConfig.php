@@ -533,33 +533,37 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
     public function changeItemPosition($id, $beforeId, $columnName, $direction) {
         $dataGridConfig = $this->getDataGridConfig();
-        if (!$dataGridConfig->isRowsReorderingEnabled()) {
+        if (
+            !$dataGridConfig->isRowsReorderingEnabled()
+            || !in_array($columnName, $dataGridConfig->getRowsPositioningColumns(), true)
+        ) {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.change_position.forbidden'));
         }
         $table = static::getTable();
-        $movedObject = $table->newRecord();
-        $beforeObject = $table->newRecord();
+        $movedRecord = $table->newRecord();
+        $nextRecord = $table->newRecord();
         if (
-            count($movedObject::getPrimaryKeyColumn()->validateValue($id)) > 0
-            || count($beforeObject::getPrimaryKeyColumn()->validateValue($beforeId)) > 0
+            count($movedRecord::getPrimaryKeyColumn()->validateValue($id)) > 0
+            || count($nextRecord::getPrimaryKeyColumn()->validateValue($beforeId)) > 0
         ) {
             return $this->makeRecordNotFoundResponse($table);
         }
         $specialConditions = $dataGridConfig->getSpecialConditions();
         if (
-            !$movedObject->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $id]))->existsInDb()
-            || !$beforeObject->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $beforeId]))->existsInDb()
+            !$movedRecord->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $id]))->existsInDb()
+            || !$nextRecord->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $beforeId]))->existsInDb()
         ) {
             return $this->makeRecordNotFoundResponse($table);
         }
         // todo: get 2 nearest record to $beforeId according to direction and decide if there is a place to insert $movedObject between
+        $prevRecord = $table->newRecord()->fromDb([
+            $columnName . ' <' => 1
+        ], $columnName);
 
-        $specialConditions = $dataGridConfig->getSpecialConditions();
-        $specialConditions['ORDER'] = '';
         $positionColumnName = $dataGridConfig->getRowsPositioningColumns();
-        $movedObject::getTable()->beginTransaction();
-        $movedObject->updateValue($positionColumnName, $postion, false);
-        $movedObject::getTable()->commitTransaction();
+        $movedRecord::getTable()->beginTransaction();
+        $movedRecord->updateValue($positionColumnName, $postion, false);
+        $movedRecord::getTable()->commitTransaction();
         return cmfJsonResponse()
             ->setMessage(cmfTransGeneral('.action.change_position.success'));
     }

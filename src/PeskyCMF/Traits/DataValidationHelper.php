@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Traits;
 
+use Illuminate\Validation\ValidationException;
 use PeskyCMF\HttpCode;
 use Swayok\Utils\Set;
 
@@ -42,10 +43,7 @@ trait DataValidationHelper {
     }
 
     protected function sendValidationErrorsResponse(array $errors) {
-        abort(
-            HttpCode::INVALID,
-            json_encode($this->prepareDataForValidationErrorsResponse($errors), JSON_UNESCAPED_UNICODE)
-        );
+        throw ValidationException::withMessages($errors);
         return true;
     }
 

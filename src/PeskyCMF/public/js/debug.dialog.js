@@ -21,6 +21,14 @@ var DebugDialog = function () {
         if (!content) {
             content = '';
         }
+        if (content.length > 3 && content[0] === '{' && content[content.length - 1] === '}') {
+            try {
+                var json = JSON.parse(content);
+                content = '<html><head></head><body><pre style="white-space: pre-wrap;">'
+                    + JSON.stringify(json, null, 3)
+                    + '</pre></body></html>';
+            } catch (ignore) {}
+        }
         if (!content.match(/^\s*<(html|!doctype)/i)) {
             content = content.replace(/^([\s\S]*?)((?:<!doctype[^>]*>)?\s*<html[\s\S]*?<body[^>]*>)/i, '$2$1', content);
         }

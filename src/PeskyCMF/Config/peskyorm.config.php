@@ -40,6 +40,7 @@ return [
         \PeskyORMLaravel\Db\TableStructureTraits\PasswordColumn::class,        // password
         \PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns::class,      // created_at and updated_at
         \PeskyORMLaravel\Db\TableStructureTraits\CreatedAtColumn::class,       // created_at
+        \PeskyORMLaravel\Db\TableStructureTraits\PositionColumn::class,       // position
     ]
 
 ];

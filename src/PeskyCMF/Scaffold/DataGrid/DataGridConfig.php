@@ -69,8 +69,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $isFilterOpened = false;
     /** @var string|null */
     protected $enableNestedViewBasedOnColumn;
-    /** @var string|null */
-    protected $rowsPositioningColumns;
+    /** @var array */
+    protected $rowsPositioningColumns = [];
     /** @var int|float */
     protected $rowsPosittioningStep = 100;
 
@@ -635,9 +635,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
                     );
                 }
                 $valueViewer = $this->getValueViewer($columnName);
-                if (!$valueViewer->isLinkedToDbColumn()) {
+                if (!$valueViewer->isLinkedToDbColumn() && $valueViewer->getTableColumn()->isItExistsInDb()) {
                     throw new \UnexpectedValueException(
-                        "Column '$columnName' provided for reordering must be linked to column that exists in database"
+                        "Column '$columnName' provided for reordering must be linked to a column that exists in database"
                     );
                 }
                 $colType = $valueViewer->getTableColumn()->getType();
@@ -703,7 +703,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @return null|string
+     * @return array
      */
     public function getRowsPositioningColumns() {
         return $this->rowsPositioningColumns;

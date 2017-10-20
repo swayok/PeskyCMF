@@ -289,7 +289,7 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
         if (empty($message)) {
             $message = cmfTransGeneral('.form.validation_errors');
         }
-        return cmfJsonResponse(\PeskyCMF\HttpCode::INVALID)
+        return cmfJsonResponse(\PeskyCMF\HttpCode::CANNOT_PROCESS)
             ->setErrors($errors, $message);
     }
 }
