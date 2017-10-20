@@ -531,8 +531,37 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         return $conditions;
     }
 
-    public function changeItemPosition() {
-        // todo: implement item position change
+    public function changeItemPosition($id, $beforeId, $columnName, $direction) {
+        $dataGridConfig = $this->getDataGridConfig();
+        if (!$dataGridConfig->isRowsReorderingEnabled()) {
+            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.change_position.forbidden'));
+        }
+        $table = static::getTable();
+        $movedObject = $table->newRecord();
+        $beforeObject = $table->newRecord();
+        if (
+            count($movedObject::getPrimaryKeyColumn()->validateValue($id)) > 0
+            || count($beforeObject::getPrimaryKeyColumn()->validateValue($beforeId)) > 0
+        ) {
+            return $this->makeRecordNotFoundResponse($table);
+        }
+        $specialConditions = $dataGridConfig->getSpecialConditions();
+        if (
+            !$movedObject->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $id]))->existsInDb()
+            || !$beforeObject->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $beforeId]))->existsInDb()
+        ) {
+            return $this->makeRecordNotFoundResponse($table);
+        }
+        // todo: get 2 nearest record to $beforeId according to direction and decide if there is a place to insert $movedObject between
+
+        $specialConditions = $dataGridConfig->getSpecialConditions();
+        $specialConditions['ORDER'] = '';
+        $positionColumnName = $dataGridConfig->getRowsPositioningColumns();
+        $movedObject::getTable()->beginTransaction();
+        $movedObject->updateValue($positionColumnName, $postion, false);
+        $movedObject::getTable()->commitTransaction();
+        return cmfJsonResponse()
+            ->setMessage(cmfTransGeneral('.action.change_position.success'));
     }
 
 }

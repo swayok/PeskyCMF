@@ -474,11 +474,7 @@ var ScaffoldDataGridHelper = {
                         page.currentRequest().customData.is_datagrid = true;
                         page.currentRequest().customData.api = api;
                     } else {
-                        var request = new page.Request(document.location.pathname + document.location.search + document.location.hash);
-                        var newUrl = request.pathname + '?' + settings.sTableId + '=' + encodedState;
-                        if (request.hash.length > 0) {
-                            newUrl += '#' + request.hash;
-                        }
+                        var newUrl = document.location.pathname + '?' + settings.sTableId + '=' + encodedState + document.location.hash;
                         page.show(newUrl, null, true, true, {
                             is_state_save: true,
                             is_datagrid: true,
@@ -917,20 +913,70 @@ var ScaffoldDataGridHelper = {
         if (
             config.hasOwnProperty('rowsReordering')
             && $.isPlainObject(config.rowsReordering)
-            && config.rowsReordering.hasOwnProperty('column')
+            && config.rowsReordering.hasOwnProperty('columns')
             && config.rowsReordering.hasOwnProperty('url')
         ) {
             var api = $table.dataTable().api();
-            $table.on('draw.dt', function () {
-                api.column(config.rowsReordering.column + ':name').nodes().to$().addClass('reorderable');
-            });
+            var onDraw = function () {
+                var ordering = api.order();
+                for (var i = 0; i < ordering.length; i++) {
+                    var column = api.column(ordering[i][0]);
+                    if ($.inArray(column.dataSrc(), config.rowsReordering.columns) >= 0) {
+                        column.nodes().to$().addClass('reorderable');
+                        break;
+                    }
+                }
+            };
+            onDraw();
+            $table.on('draw.dt', onDraw);
+            var urlTpl = doT.template(config.rowsReordering.url);
 
             new Sortable($table.find('tbody')[0], {
                 group: $table[0].id,
                 sorting: true,
                 scroll: true,
                 handle: '.reorderable',
-                chosenClass: 'reordering-this-element'
+                chosenClass: 'reordering-this-element',
+                onUpdate: function (event) {
+                    var direction = 'asc';
+                    var columnName = null;
+                    var ordering = api.order();
+                    for (var i = 0; i < ordering.length; i++) {
+                        var column = api.column(ordering[i][0]);
+                        if ($.inArray(column.dataSrc(), config.rowsReordering.columns) >= 0) {
+                            columnName = column.dataSrc();
+                            direction = ordering[i][1];
+                            break;
+                        }
+                    }
+                    if (columnName !== null) {
+                        var tplData = {
+                            moved_row: api.row(event.oldIndex).data(),
+                            next_row: api.row(event.newIndex).data(),
+                            column: columnName,
+                            direction: direction
+                        };
+                        Utils.showPreloader($tableWrapper);
+                        $.ajax({
+                                url: urlTpl(tplData),
+                                method: 'POST',
+                                data: {
+                                    _method: 'PUT'
+                                },
+                                type: 'json'
+                            })
+                            .done(function (json) {
+                                Utils.handleAjaxSuccess(json);
+                            })
+                            .fail(function (xhr) {
+                                Utils.handleAjaxError.call(this, xhr);
+                            })
+                            .always(function () {
+                                Utils.hidePreloader($tableWrapper);
+                                ScaffoldDataGridHelper.reloadCurrentDataGrid();
+                            });
+                    }
+                }
             });
         }
     },

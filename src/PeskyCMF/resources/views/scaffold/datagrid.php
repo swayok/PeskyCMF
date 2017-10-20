@@ -294,11 +294,18 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     ];
                 }
                 if ($dataGridConfig->isRowsReorderingEnabled()) {
-                    $reorderingColumn = $dataGridConfig->getValueViewer($dataGridConfig->getRowsReorderingColumn());
                     $dataTablesConfig['rowsReordering'] = [
-                        'column' => $reorderingColumn->getName(),
-                        'position' => $reorderingColumn->getPosition(),
-                        'url' => cmfRoute('cmf_api_change_item_position', ['table_name' => $tableNameForRoutes])
+                        'columns' => $dataGridConfig->getRowsPositioningColumns(),
+                        'url' => cmfRouteTpl(
+                            'cmf_api_change_item_position',
+                            ['table_name' => $tableNameForRoutes],
+                            [
+                                'id' => 'it.moved_row.__' . $pkName,
+                                'next_id' => 'it.next_row.__' . $pkName . ' || 0',
+                                'column',
+                                'direction'
+                            ]
+                        )
                     ];
                 }
             ?>

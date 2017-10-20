@@ -62,7 +62,7 @@ interface ScaffoldConfigInterface {
 
     public function updateRecord();
 
-    public function changeItemPosition();
+    public function changeItemPosition($id, $beforeId, $columnName, $direction);
 
     public function updateBulkOfRecords();
 

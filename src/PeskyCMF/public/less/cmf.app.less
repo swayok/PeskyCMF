@@ -528,6 +528,30 @@ div.dataTables_wrapper {
                     cursor: row-resize;
                 }
 
+                td.reorderable {
+                    position: relative;
+                    padding-right: 16px;
+
+                    &:after {
+                        content: "\f07d";
+                        font-family: FontAwesome;
+                        position: absolute;
+                        right: 10px;
+                        display: block;
+                        top: 50%;
+                        height: 20px;
+                        font-size: 14px;
+                        margin-top: -10px;
+
+                        .transition(opacity 0.1s linear);
+                        ._fade-to(0.2);
+                    }
+
+                    &:hover:after {
+                        ._fade-to(0.5);
+                    }
+                }
+
                 &.selected,
                 &.reordering-this-element {
                     background-color: rgba(78, 167, 205, 0.4);

@@ -295,14 +295,19 @@ Route::group(
             ]
         ]);
 
-        Route::put('{table_name}/change_item_position', [
-            'as' => $routeNamePrefix . 'cmf_api_change_item_position',
-            'uses' => $apiControllerClass . '@changeItemPosition',
-            'fallback' => [
-                'route' => $routeNamePrefix . 'cmf_items_table',
-                'params' => true
-            ]
-        ]);
+        Route::put('{table_name}/move/{id}/before/{next_id}/order/{column}/{direction}', [
+                'as' => $routeNamePrefix . 'cmf_api_change_item_position',
+                'uses' => $apiControllerClass . '@changeItemPosition',
+                'fallback' => [
+                    'route' => $routeNamePrefix . 'cmf_items_table',
+                    'params' => true
+                ]
+            ])
+            ->where([
+                'direction' => '^(asc|desc|ASC|DESC)$',
+                'next_id' => '^\d+$',
+                'column' => '^[a-zA-Z_0-9]+$'
+            ]);
 
         Route::delete('{table_name}/{id}', [
             'as' => $routeNamePrefix . 'cmf_api_delete_item',

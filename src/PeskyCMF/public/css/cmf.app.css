@@ -565,6 +565,31 @@ div.dataTables_wrapper table.dataTable tbody tr .reorderable {
   cursor: move;
   cursor: row-resize;
 }
+div.dataTables_wrapper table.dataTable tbody tr td.reorderable {
+  position: relative;
+  padding-right: 16px;
+}
+div.dataTables_wrapper table.dataTable tbody tr td.reorderable:after {
+  content: "\f07d";
+  font-family: FontAwesome;
+  position: absolute;
+  right: 10px;
+  display: block;
+  top: 50%;
+  height: 20px;
+  font-size: 14px;
+  margin-top: -10px;
+  -moz-transition: opacity 0.1s linear;
+  -webkit-transition: opacity 0.1s linear;
+  -o-transition: opacity 0.1s linear;
+  transition: opacity 0.1s linear;
+  opacity: 0.2;
+  filter: alpha(opacity=20);
+}
+div.dataTables_wrapper table.dataTable tbody tr td.reorderable:hover:after {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
 div.dataTables_wrapper table.dataTable tbody tr.selected,
 div.dataTables_wrapper table.dataTable tbody tr.reordering-this-element {
   background-color: rgba(78, 167, 205, 0.4);

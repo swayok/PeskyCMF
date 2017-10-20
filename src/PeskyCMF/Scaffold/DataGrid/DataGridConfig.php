@@ -2,11 +2,13 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
+use Exceptions\Data\NotFoundException;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\Core\DbExpr;
+use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 use Swayok\Utils\ValidateValue;
@@ -68,7 +70,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /** @var string|null */
     protected $enableNestedViewBasedOnColumn;
     /** @var string|null */
-    protected $rowsReorderingColumn;
+    protected $rowsPositioningColumns;
+    /** @var int|float */
+    protected $rowsPosittioningStep = 100;
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfigConfig) {
         parent::__construct($table, $scaffoldConfigConfig);
@@ -233,11 +237,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @throws \InvalidArgumentException
      */
     public function setOrderBy($orderBy, $direction = null) {
-        if ($this->isRowsReorderingEnabled()) {
-            throw new \BadMethodCallException(
-                'You are not allowed to set rows ordering column when rows reordering is enabled'
-            );
-        }
         if (!($orderBy instanceof DbExpr) && !$this->getTable()->getTableStructure()->hasColumn($orderBy)) {
             throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$orderBy]");
         }
@@ -611,11 +610,12 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
-     * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \BadMethodCallException
-     * @throws \UnexpectedValueException
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \UnexpectedValueException
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
+     * @throws \Exceptions\Data\NotFoundException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function finish() {
         parent::finish();
@@ -626,9 +626,28 @@ class DataGridConfig extends ScaffoldSectionConfig {
             $this->addValueViewer($this->getColumnNameForNestedView(), DataGridColumn::create()->setIsVisible(false));
         }
         if ($this->isRowsReorderingEnabled()) {
-            $reorderingColumn = $this->getRowsReorderingColumn();
-            foreach ($this->getDataGridColumns() as $viewer) {
-                $viewer->setIsSortable($viewer->getName() === $reorderingColumn);
+            $reorderingColumns = $this->getRowsPositioningColumns();
+            $allowedColumnTypes = [Column::TYPE_INT, Column::TYPE_FLOAT, Column::TYPE_UNIX_TIMESTAMP];
+            foreach ($reorderingColumns as $columnName) {
+                if (!$this->hasValueViewer($columnName)) {
+                    throw new NotFoundException(
+                        "Column '$columnName' provided for reordering was not found within declared data grid columns"
+                    );
+                }
+                $valueViewer = $this->getValueViewer($columnName);
+                if (!$valueViewer->isLinkedToDbColumn()) {
+                    throw new \UnexpectedValueException(
+                        "Column '$columnName' provided for reordering must be linked to column that exists in database"
+                    );
+                }
+                $colType = $valueViewer->getTableColumn()->getType();
+                if (!in_array($colType, $allowedColumnTypes, true)) {
+                    throw new \UnexpectedValueException(
+                        "Column '$columnName' provided for reordering should be of a numeric type (int, float, unix ts)."
+                        . "'{$colType}' type is not acceptable'"
+                    );
+                }
+                $valueViewer->setIsSortable(true);
             }
         }
     }
@@ -675,31 +694,26 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param string $rowsOrderingColumn - column that is used to define rows order
-     * @param string $direction - ordering direction: 'ASC' or 'DESC'
+     * @param array $rowsPositioningColumns - column that is used to define rows order
      * @return $this
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    public function enableRowsReordering($rowsOrderingColumn = 'position', $direction = 'ASC') {
-        $this->setOrderBy($rowsOrderingColumn, $direction);
-        $this->rowsReorderingColumn = $rowsOrderingColumn;
+    public function enableRowsReorderingOn(...$rowsPositioningColumns) {
+        $this->rowsPositioningColumns = $rowsPositioningColumns;
         return $this;
     }
 
     /**
      * @return null|string
      */
-    public function getRowsReorderingColumn() {
-        return $this->rowsReorderingColumn;
+    public function getRowsPositioningColumns() {
+        return $this->rowsPositioningColumns;
     }
 
     /**
      * @return bool
      */
     public function isRowsReorderingEnabled() {
-        return !empty($this->rowsReorderingColumn);
+        return !empty($this->rowsPositioningColumns);
     }
-
 
 }

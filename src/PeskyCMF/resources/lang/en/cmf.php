@@ -264,6 +264,10 @@ return [
             'forbidden' => 'It is forbidden to view Items details in this section',
             'forbidden_for_record' => 'It is forbidden to view details of this Item',
         ],
+        'change_position' => [
+            'forbidden' => 'It is forbidden to change items positions in this section',
+            'success' => 'Item\'s Position changed successfully',
+        ],
         'back' => 'Back',
         'reload_page' => 'Reload page',
     ],
