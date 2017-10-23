@@ -952,9 +952,10 @@ var ScaffoldDataGridHelper = {
                     if (columnName !== null) {
                         var tplData = {
                             moved_row: api.row(event.oldIndex).data(),
-                            next_row: api.row(event.newIndex).data(),
-                            column: columnName,
-                            direction: direction
+                            before_or_after: event.oldIndex > event.newIndex ? 'before' : 'after',
+                            other_row: api.row(event.newIndex).data(),
+                            sort_column: columnName,
+                            sort_direction: direction
                         };
                         Utils.showPreloader($tableWrapper);
                         $.ajax({

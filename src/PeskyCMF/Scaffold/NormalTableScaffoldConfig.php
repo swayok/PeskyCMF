@@ -12,6 +12,7 @@ use PeskyORM\Exception\DbException;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
+use PeskyORMLaravel\Db\Column\RecordPositionColumn;
 
 abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
@@ -531,7 +532,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         return $conditions;
     }
 
-    public function changeItemPosition($id, $beforeId, $columnName, $direction) {
+    public function changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection) {
         $dataGridConfig = $this->getDataGridConfig();
         if (
             !$dataGridConfig->isRowsReorderingEnabled()
@@ -540,30 +541,74 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.change_position.forbidden'));
         }
         $table = static::getTable();
-        $movedRecord = $table->newRecord();
-        $nextRecord = $table->newRecord();
         if (
-            count($movedRecord::getPrimaryKeyColumn()->validateValue($id)) > 0
-            || count($nextRecord::getPrimaryKeyColumn()->validateValue($beforeId)) > 0
+            count($table::getPkColumn()->validateValue($id)) > 0
+            || count($table::getPkColumn()->validateValue($otherId)) > 0
         ) {
             return $this->makeRecordNotFoundResponse($table);
         }
         $specialConditions = $dataGridConfig->getSpecialConditions();
-        if (
-            !$movedRecord->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $id]))->existsInDb()
-            || !$nextRecord->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $beforeId]))->existsInDb()
-        ) {
+        /** @var RecordPositionColumn $columnConfig */
+        $columnConfig = static::getTable()->getTableStructure()->getColumn($columnName);
+        $movedRecord = $table::getInstance()
+            ->newRecord()
+            ->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $id]));
+        if (!$movedRecord->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        // todo: get 2 nearest record to $beforeId according to direction and decide if there is a place to insert $movedObject between
-        $prevRecord = $table->newRecord()->fromDb([
-            $columnName . ' <' => 1
-        ], $columnName);
-
-        $positionColumnName = $dataGridConfig->getRowsPositioningColumns();
-        $movedRecord::getTable()->beginTransaction();
-        $movedRecord->updateValue($positionColumnName, $postion, false);
-        $movedRecord::getTable()->commitTransaction();
+        $position1 = $table::selectValue(
+            DbExpr::create("`$columnName`"),
+            array_merge($specialConditions, [$table->getPkColumnName() => $otherId])
+        );
+        if ($position1 === null) {
+            // this value must be present to continue
+            return $this->makeRecordNotFoundResponse($table);
+        }
+        $isFloat = $columnConfig->getType() === $columnConfig::TYPE_FLOAT;
+        $position1 = $isFloat ? (float)$position1 : (int)$position1;
+        // We have next situations here:
+        // 1. $sortDirection = 'asc', $beforeOrAfter = 'before':
+        //      We need to find out previous record's position using ORDER BY $columnName ASC and <= equation on $columnName
+        // 2. $sortDirection = 'asc', $beforeOrAfter = 'after':
+        //      We need to find out next record's position using ORDER BY $columnName ASC and <= equation on $columnName
+        // 3. $sortDirection = 'desc', $beforeOrAfter = 'before':
+        //      same as 2
+        // 4. $sortDirection = 'desc', $beforeOrAfter = 'after':
+        //      same as 1
+        $sortDirection = strtolower($sortDirection);
+        $beforeOrAfter = strtolower($beforeOrAfter);
+        $isAscending = ($sortDirection === 'asc' && $beforeOrAfter === 'before') || ($sortDirection === 'desc' && $beforeOrAfter === 'after');
+        $position2 = $table::selectValue(
+            DbExpr::create("`$columnName`"),
+            [
+                $columnName . ($isAscending ? ' <=' : ' >=') => $position1,
+                $table::getPkColumnName() . ' !=' => [$otherId, $movedRecord->getPrimaryKeyValue()],
+                'ORDER' => [$columnName => 'ASC']
+            ]
+        );
+        $increment = $columnConfig instanceof RecordPositionColumn ? $columnConfig->getIncrement() : 100;
+        if ($position2 === null) {
+            $position2 = $isAscending ? 0 : ($position1 + $increment * 2);
+        } else {
+            $position2 = $isFloat ? (float)$position2 : (int)$position2;
+        }
+        // calculate distance between records to find out if there is any space to add $movedRecord between them
+        $distance = abs($position1 - $position2);
+        $table::beginTransaction();
+        if ($distance > 1) {
+            $newPosition = min($position1, $position2) + ($isFloat ? (float)($distance / 2) : (int)($distance / 2));
+        } else {
+            // no free space - shift other records and insert $movedRecord to freed space
+            $table::update(
+                [$columnName => DbExpr::create("`{$columnName}` + ``{$increment}`` + ``{$increment}``")],
+                [
+                    $columnName . '>=' => max($position1, $position2)
+                ]
+            );
+            $newPosition = max($position1, $position2) + $increment;
+        }
+        $movedRecord->begin()->updateValue($columnName, $newPosition, false)->commit();
+        $table::commitTransaction();
         return cmfJsonResponse()
             ->setMessage(cmfTransGeneral('.action.change_position.success'));
     }

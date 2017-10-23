@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Db;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;

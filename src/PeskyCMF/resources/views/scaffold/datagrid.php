@@ -301,9 +301,10 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                             ['table_name' => $tableNameForRoutes],
                             [
                                 'id' => 'it.moved_row.__' . $pkName,
-                                'next_id' => 'it.next_row.__' . $pkName . ' || 0',
-                                'column',
-                                'direction'
+                                'before_or_after',
+                                'other_id' => 'it.other_row.__' . $pkName . ' || 0',
+                                'sort_column',
+                                'sort_direction'
                             ]
                         )
                     ];
