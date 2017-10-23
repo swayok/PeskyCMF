@@ -314,7 +314,7 @@ class FormInput extends RenderableValueViewer {
      * @return array
      */
     public function getValidators($isCreation) {
-        if (!$this->isLinkedToDbColumn()) {
+        if (!$this->isLinkedToDbColumn() || $this->hasRelation()) {
             return [];
         }
         $column = $this->getTableColumn();
