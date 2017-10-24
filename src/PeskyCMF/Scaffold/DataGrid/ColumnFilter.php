@@ -516,7 +516,7 @@ class ColumnFilter {
         if (empty($this->allowedValues) && $this->isItRequiresAllowedValues()) {
             throw new ScaffoldException('List of allowed values is empty');
         }
-        return $this->allowedValues instanceof \Closure ? call_user_func($this->allowedValues) : $this->allowedValues;
+        return value($this->allowedValues);
     }
 
     /**
