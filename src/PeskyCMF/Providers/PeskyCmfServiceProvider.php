@@ -469,64 +469,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         \Auth::shouldUse($this->getCmfConfig()->auth_guard_name());
     }
 
-    /**
-     * In this method you should place authorisation gates and policies according to Laravel's docs:
-     * https://laravel.com/docs/5.4/authorization
-     * Predefined authorisation tests are available for:
-     * 1. Resources (scaffolds) - use
-     *      Gate::resource('resource', 'AdminAccessPolicy', [
-     * 'view' => 'view',
-     * 'details' => 'details',
-     * 'create' => 'create',
-     * 'update' => 'update',
-     * 'delete' => 'delete',
-     * 'update_bulk' => 'update_bulk',
-     * 'delete_bulk' => 'delete_bulk',
-     * ]);
-     *      or Gate::define('resource.{ability}', \Closure) to provide rules for some resource.
-     *      List of abilities used in scaffolds:
-     *      - 'view' is used for routes named 'cmf_api_get_items' and 'cmf_api_get_templates',
-     *      - 'details' => 'cmf_api_get_item',
-     *      - 'create' => 'cmf_api_create_item',
-     *      - 'update' => 'cmf_api_update_item'
-     *      - 'update_bulk' => 'cmf_api_edit_bulk'
-     *      - 'delete' => 'cmf_api_delete_item'
-     *      - 'delete_bulk' => 'cmf_api_delete_bulk'
-     *      For all abilities you will receive $tableName argument and RecordInterface $record or int $itemId argument
-     *      for 'details', 'update' and 'delete' abilities.
-     *      For KeyValueScaffoldConfig for 'update' ability you will receive $fkValue instead of $itemId/$record.
-     *      For 'update_bulk' and 'delete_bulk' you will receive $conditions array.
-     *      Note that $tableName passed to abilities is the name of the DB table used in routes and may differ from
-     *      the real name of the table provided in TableStructure.
-     *      For example: you have 2 resources named 'pages' and 'elements'. Both refer to PagesTable class but
-     *      different ScaffoldConfig classes (PagesScaffoldConfig and ElementsScafoldConfig respectively).
-     *      In this case $tableName will be 'pages' for PagesScaffoldConfig and 'elements' for ElementsScafoldConfig.
-     *      Note: If you forbid 'view' ability - you will forbid everything else
-     *      Note: there is no predefined authorization for routes based on 'cmf_item_custom_page'. You need to add it
-     *      manually to controller's action that handles that custom page
-     * 2. CMF Pages - use Gate::define('cmf_page', 'AdminAccessPolicy@cmf_page')
-     *      Abilities will receive $pageName argument - it will contain the value of the {page} property in route
-     *      called 'cmf_page' (url is '/{prefix}/page/{page}' by default)
-     * 3. Admin profile update - Gate::define('profile.update', \Closure);
-     *
-     * For any other routes where you resolve authorisation by yourself - feel free to use any naming you want
-     *
-     * @param string $policyName
-     */
     protected function configureAuthorizationGatesAndPolicies($policyName = 'CmfAccessPolicy') {
-        $this->app->singleton($policyName, $this->getCmfConfig()->cmf_user_acceess_policy_class());
-        \Gate::resource('resource', $policyName, [
-            'view' => 'view',
-            'details' => 'details',
-            'create' => 'create',
-            'update' => 'update',
-            'edit' => 'edit',
-            'delete' => 'delete',
-            'update_bulk' => 'update_bulk',
-            'delete_bulk' => 'delete_bulk',
-            'others' => 'others',
-        ]);
-        \Gate::define('cmf_page', $policyName . '@cmf_page');
+        $this->getCmfConfig()->configureAuthorizationGatesAndPolicies($policyName);
     }
 
 }
