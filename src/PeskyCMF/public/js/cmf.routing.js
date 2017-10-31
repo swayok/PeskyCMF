@@ -10,6 +10,7 @@ var CmfRoutingHelpers = {
     },
     hideContentContainerPreloader: function () {
         Utils.hidePreloader(Utils.getPageWrapper());
+        Utils.hidePreloader(Utils.getContentContainer());
         Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
     },
     cleanupHangedElementsInBody: function () {
@@ -78,7 +79,7 @@ var CmfRoutingHelpers = {
         Utils.updatePageTitleFromH1($el);
         var switchContent = function ($el, deferred) {
             CmfRoutingHelpers.$currentContent = $el;
-            CmfRoutingHelpers.$currentContentContainer.append($el);
+            CmfRoutingHelpers.$currentContentContainer.html('').append($el);
             deferred.resolve(CmfRoutingHelpers.$currentContent);
             Utils.fadeIn(CmfRoutingHelpers.$currentContent, function () {
                 CmfRoutingHelpers.hideContentContainerPreloader();
