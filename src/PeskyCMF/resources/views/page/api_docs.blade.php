@@ -38,7 +38,9 @@
 </div>
 
 <script type="application/javascript">
-    $("#api-docs").find('.api-docs-section').activateBox();
+    $("#api-docs").find('.api-docs-section').boxWidget({
+        animationSpeed: 0
+    });
 </script>
 
 

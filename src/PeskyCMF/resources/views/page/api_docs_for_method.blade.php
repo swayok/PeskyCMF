@@ -6,11 +6,24 @@
 <div class="panel box box-solid box-default">
     <div class="box-header with-border" style="cursor:pointer" data-toggle="collapse" data-target="#{{ $method->getUuid() }}">
         <div class="col-xs-6 text-bold">{{ $method->title }}</div>
-        <div class="col-xs-2">{{ $method->httpMethod }}</div>
-        <div class="col-xs-4">{{ $method->url }}</div>
+        <div class="col-xs-6 text-nowrap of-h">
+            <div class="http-method ib" style="width: 65px;">{{ $method->httpMethod }}</div>
+            <span class="url">{{ $method->url }}</span>
+        </div>
     </div>
     <div id="{{ $method->getUuid() }}" class="panel-collapse collapse">
         <div class="box-body">
+            <div class="row">
+                <div class="col-xs-12 fs16 fw600">
+                    <div class="box box-solid box-default">
+                        <div class="box-body">
+                            <span class="http-method">{{ $method->httpMethod }}</span>
+                            <span class="fa fa-long-arrow-right"></span>
+                            <span class="url">{{ $method->url }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 @if(trim($method->description) !== '')
                 <div class="col-xs-12 col-xl-6">
