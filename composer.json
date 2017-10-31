@@ -41,7 +41,7 @@
         "Eonasdan/bootstrap-datetimepicker": "*",
         "datatables/datatables": "*",
         "twbs/bootstrap": "3.*",
-        "bower-asset/jquery": "~3.1.1-dev",
+        "bower-asset/jquery": "~3.1.1",
         "bower-asset/sortablejs": "~1.4.2",
         "swayok/page.js": "master@dev",
         "bootstrap-select/bootstrap-select": "*",
@@ -51,7 +51,7 @@
         "jquery-form/form": "4.*",
         "select2/select2": "*",
         "robinherbots/jquery.inputmask": "~3.3",
-        "bower-asset/cropper": "~2.3-dev",
+        "bower-asset/cropper": "~2.3",
         "vitalets/x-editable": "dev-master",
         "kartik-v/bootstrap-fileinput": "~4.3.5",
         "vluzrmos/language-detector": "1.*"
