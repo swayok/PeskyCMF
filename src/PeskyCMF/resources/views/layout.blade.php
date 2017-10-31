@@ -113,11 +113,6 @@
             localizationStrings: <?php echo json_encode(cmfTransGeneral('.ui.js_component'), JSON_UNESCAPED_UNICODE) ?>
         };
 
-        @if (\PeskyCMF\Config\CmfConfig::getPrimary()->config('optimize_ui_templates.enabled', false))
-            CmfSettings.pagesTemplates = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->getCachedPagesTemplates(), JSON_UNESCAPED_UNICODE) ?>;
-            CmfSettings.resourcesTemplates = <?php echo json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->getCachedResourcesTemplates(), JSON_UNESCAPED_UNICODE) ?>;
-        @endif
-
         var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
@@ -169,6 +164,10 @@
         <script src="/packages/cmf/compiled/js/datatables-and-plugins.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
         <script src="/packages/cmf/compiled/js/jquery-plugins.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
         <script src="/packages/cmf/compiled/js/cmf.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    @endif
+
+    @if (\PeskyCMF\Config\CmfConfig::getPrimary()->config('optimize_ui_templates.enabled', false))
+        <script src="{{ cmfRoute('cmf_cached_templates_js') }}" type="text/javascript"></script>
     @endif
 
     <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>

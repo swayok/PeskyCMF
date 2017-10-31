@@ -4,16 +4,19 @@ $(function () {
 
     extendRouter();
 
-    if (CmfSettings) {
+    if (typeof CmfSettings === 'object') {
         // import localization strings
         if (CmfSettings.localizationStrings && $.isPlainObject(CmfSettings.localizationStrings)) {
             CmfConfig.setLocalizationStrings(CmfSettings.localizationStrings);
         }
         delete CmfSettings.localizationStrings;
-        // import templates
-        ScaffoldsManager.importTemplatesFromCmfSettings(CmfSettings);
         // merge with default configs
         $.extend(CmfConfig, CmfSettings);
+    }
+
+    if (typeof CmfTemplates === 'object') {
+        // import templates
+        ScaffoldsManager.importTemplatesFromCmfSettings(CmfTemplates);
     }
 
     if (CmfConfig.isDebug) {

@@ -42,7 +42,7 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
     $formConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
-<!-- bulkEditForm start -->
+<!-- bulkEditForm end -->
 
 <!-- itemDetails start -->
 
@@ -52,4 +52,4 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
     $itemDetailsConfig->getAdditionalDataForTemplate()
 )->render(); ?>
 
-<!-- itemDetails start -->
+<!-- itemDetails end -->

@@ -44,16 +44,14 @@ $.extend(CmfCache, {
     itemDefaults: {}
 });
 
-ScaffoldsManager.importTemplatesFromCmfSettings = function (settings) {
-    if (settings.pagesTemplates  && $.isPlainObject(settings.pagesTemplates)) {
-        $.extend(CmfCache.views, settings.pagesTemplates);
+ScaffoldsManager.importTemplatesFromCmfSettings = function (templates) {
+    if (templates.hasOwnProperty('pages') && $.isPlainObject(templates.pages)) {
+        $.extend(CmfCache.views, templates.pages);
     }
-    delete settings.pagesTemplates;
 
-    if (settings.resourcesTemplates  && $.isPlainObject(settings.resourcesTemplates)) {
-        $.extend(CmfCache.rawTemplates, settings.resourcesTemplates);
+    if (templates.hasOwnProperty('resources') && $.isPlainObject(templates.resources)) {
+        $.extend(CmfCache.rawTemplates, templates.resources);
     }
-    delete settings.resourcesTemplates;
 };
 
 ScaffoldsManager.loadTemplates = function (resourceName, additionalParameter) {

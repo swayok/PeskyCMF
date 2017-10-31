@@ -390,10 +390,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
         // special route for ckeditor config.js file
         unset($groupConfig['middleware']);
-        \Route::group($groupConfig, function () {
+        \Route::group($groupConfig, function () use ($cmfConfig) {
             \Route::get('ckeditor/config.js', [
-                'as' => 'cmf_ckeditor_config_js',
-                'uses' => CmfConfig::getPrimary()->cmf_general_controller_class() . '@getCkeditorConfigJs',
+                'as' => $cmfConfig::routes_names_prefix() . 'cmf_ckeditor_config_js',
+                'uses' => $cmfConfig::cmf_general_controller_class() . '@getCkeditorConfigJs',
             ]);
         });
     }

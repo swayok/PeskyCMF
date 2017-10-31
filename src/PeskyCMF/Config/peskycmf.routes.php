@@ -89,6 +89,11 @@ Route::group(
             'uses' => $generalControllerClass . '@ckeditorUploadImage'
         ]);
 
+        \Route::get('ui/templates.js', [
+            'as' => $routeNamePrefix . 'cmf_cached_templates_js',
+            'uses' => $generalControllerClass . '@getCachedUiTemplatesJs',
+        ]);
+
         Route::group(
             [
                 'middleware' => AjaxOnly::class,

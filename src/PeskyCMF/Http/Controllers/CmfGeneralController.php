@@ -546,4 +546,14 @@ class CmfGeneralController extends Controller {
         ]);
     }
 
+    public function getCachedUiTemplatesJs() {
+        return view(
+            'cmf::ui.cached_templates',
+            [
+                'pages' => CmfConfig::getPrimary()->getCachedPagesTemplates(),
+                'resources' => CmfConfig::getPrimary()->getCachedResourcesTemplates()
+            ]
+        )->render();
+    }
+
 }
