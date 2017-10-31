@@ -365,8 +365,16 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
                                             event.preventDefault();
                                             $prevItemBtn.prop('disabled', true);
                                             $nextItemBtn.prop('disabled', true);
-                                            page.show(nextRow.data().___details_url);
+                                            page.show(
+                                                nextRow.data().___details_url,
+                                                null,
+                                                true,
+                                                true,
+                                                {env: {is_click: true, target: $nextItemBtn[0], clarify: 'next-item-details'}}
+                                            );
                                         });
+                                } else {
+                                    $nextItemBtn.prop('disabled', true);
                                 }
                                 // enable prev item button
                                 var shiftPrev = 1;
@@ -384,8 +392,16 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
                                             event.preventDefault();
                                             $prevItemBtn.prop('disabled', true);
                                             $nextItemBtn.prop('disabled', true);
-                                            page.show(prevRow.data().___details_url);
+                                            page.show(
+                                                prevRow.data().___details_url,
+                                                null,
+                                                true,
+                                                true,
+                                                {env: {is_click: true, target: $prevItemBtn[0], clarify: 'prev-item-details'}}
+                                            );
                                         });
+                                } else {
+                                    $prevItemBtn.prop('disabled', true);
                                 }
                             }
                         });
