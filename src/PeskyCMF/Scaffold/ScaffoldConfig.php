@@ -3,6 +3,7 @@
 
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
@@ -349,7 +350,13 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             'itemForm' => false,
             'bulkEditForm' => false,
             'itemDetails' => false,
+            'itemFormDefaults' => false
         ];
+        if (!$this instanceof KeyValueTableScaffoldConfig && ($this->isCreateAllowed() || $this->isEditAllowed())) {
+            /** @var JsonResponse $response */
+            $response = $this->getDefaultValuesForFormInputs();
+            $blocks['itemFormDefaults'] = $response->getData(true);
+        }
         $html = $this->renderTemplates();
         foreach ($blocks as $block => &$template) {
             if (preg_match("%<!--\s*{$block}\s*start\s*-->(?:\s*\n*)*(.*?)<!--\s*{$block}\s*end\s*-->%is", $html, $matches)) {

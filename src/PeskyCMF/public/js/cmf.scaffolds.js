@@ -50,7 +50,18 @@ ScaffoldsManager.importTemplatesFromCmfSettings = function (templates) {
     }
 
     if (templates.hasOwnProperty('resources') && $.isPlainObject(templates.resources)) {
-        $.extend(CmfCache.rawTemplates, templates.resources);
+        for (var key in templates.resources) {
+            if ($.isPlainObject(templates.resources[key])) {
+                CmfCache.rawTemplates[key] = templates.resources[key];
+                if (
+                    CmfCache.rawTemplates[key].hasOwnProperty('itemFormDefaults')
+                    && $.isPlainObject(CmfCache.rawTemplates[key].itemFormDefaults)
+                ) {
+                    ScaffoldsManager.cacheDefaultItemData(key, CmfCache.rawTemplates[key].itemFormDefaults);
+                    delete CmfCache.rawTemplates[key].itemFormDefaults;
+                }
+            }
+        }
     }
 };
 
@@ -283,14 +294,18 @@ ScaffoldsManager.getResourceItemData = function (resourceName, itemId, forDetail
     }).done(function (data) {
         data.formUUID = Base64.encode(this.url + (new Date()).getTime());
         if (itemId === 'service/defaults') {
-            data.isCreation = true;
-            CmfCache.itemDefaults[resourceName] = data;
+            ScaffoldsManager.cacheDefaultItemData(resourceName, data);
         }
         deferred.resolve(data);
     }).fail(function (xhr) {
         Utils.handleAjaxError.call(this, xhr, deferred);
     });
     return deferred.promise();
+};
+
+ScaffoldsManager.cacheDefaultItemData = function (resourceName, data) {
+    data.isCreation = true;
+    CmfCache.itemDefaults[resourceName] = data;
 };
 
 var ScaffoldActionsHelper = {
