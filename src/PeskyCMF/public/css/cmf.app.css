@@ -130,10 +130,10 @@ body #page-wrapper {
   background: rgba(255, 255, 255, 0.6);
   opacity: 0;
   filter: alpha(opacity=0);
-  -moz-transition: opacity 0.2s linear, height 0.2s step-end;
-  -webkit-transition: opacity 0.2s linear, height 0.2s step-end;
-  -o-transition: opacity 0.2s linear, height 0.2s step-end;
-  transition: opacity 0.2s linear, height 0.2s step-end;
+  -moz-transition: opacity 0.1s linear, height 0.1s step-end;
+  -webkit-transition: opacity 0.1s linear, height 0.1s step-end;
+  -o-transition: opacity 0.1s linear, height 0.1s step-end;
+  transition: opacity 0.1s linear, height 0.1s step-end;
 }
 .has-preloader:after {
   content: '';
@@ -170,10 +170,10 @@ body #page-wrapper {
   height: 100%;
   opacity: 1;
   filter: alpha(opacity=100);
-  -moz-transition: opacity 0.2s linear, height step-start;
-  -webkit-transition: opacity 0.2s linear, height step-start;
-  -o-transition: opacity 0.2s linear, height step-start;
-  transition: opacity 0.2s linear, height step-start;
+  -moz-transition: opacity 0.2s linear 0.1s, height step-start 0.1s;
+  -webkit-transition: opacity 0.2s linear 0.1s, height step-start 0.1s;
+  -o-transition: opacity 0.2s linear 0.1s, height step-start 0.1s;
+  transition: opacity 0.2s linear 0.1s, height step-start 0.1s;
 }
 #page-wrapper.has-preloader.loading:before,
 #page-wrapper.has-preloader.overlay:before {
@@ -401,10 +401,10 @@ div.dataTables_wrapper div.dataTables_processing:before {
   background: rgba(255, 255, 255, 0.6);
   opacity: 0;
   filter: alpha(opacity=0);
-  -moz-transition: opacity 0.2s linear, height 0.2s step-end;
-  -webkit-transition: opacity 0.2s linear, height 0.2s step-end;
-  -o-transition: opacity 0.2s linear, height 0.2s step-end;
-  transition: opacity 0.2s linear, height 0.2s step-end;
+  -moz-transition: opacity 0.1s linear, height 0.1s step-end;
+  -webkit-transition: opacity 0.1s linear, height 0.1s step-end;
+  -o-transition: opacity 0.1s linear, height 0.1s step-end;
+  transition: opacity 0.1s linear, height 0.1s step-end;
 }
 div.dataTables_wrapper div.dataTables_processing:after {
   content: '';
@@ -441,10 +441,10 @@ div.dataTables_wrapper div.dataTables_processing.overlay:before {
   height: 100%;
   opacity: 1;
   filter: alpha(opacity=100);
-  -moz-transition: opacity 0.2s linear, height step-start;
-  -webkit-transition: opacity 0.2s linear, height step-start;
-  -o-transition: opacity 0.2s linear, height step-start;
-  transition: opacity 0.2s linear, height step-start;
+  -moz-transition: opacity 0.2s linear 0.1s, height step-start 0.1s;
+  -webkit-transition: opacity 0.2s linear 0.1s, height step-start 0.1s;
+  -o-transition: opacity 0.2s linear 0.1s, height step-start 0.1s;
+  transition: opacity 0.2s linear 0.1s, height step-start 0.1s;
 }
 #page-wrapperdiv.dataTables_wrapper div.dataTables_processing.loading:before,
 #page-wrapperdiv.dataTables_wrapper div.dataTables_processing.overlay:before {
@@ -1523,6 +1523,21 @@ aside.main-sidebar .sidebar-menu li .badge {
 .item-details-table div.wysiwyg-data-insert:before {
   margin: 10px 0 10px 0;
   padding: 10px;
+}
+.modal {
+  /*&.in .modal-dialog {
+        .translate(0, 0);
+    }*/
+}
+.modal.fade .modal-dialog {
+  -webkit-transform: translate(0, 0);
+  -ms-transform: translate(0, 0);
+  -o-transform: translate(0, 0);
+  transform: translate(0, 0);
+  -webkit-transition: -webkit-transform 0.15s ease-out;
+  -moz-transition: -moz-transform 0.15s ease-out;
+  -o-transition: -o-transform 0.15s ease-out;
+  transition: transform 0.15s ease-out;
 }
 .modal .item-details-modal-content button.prev-item,
 .modal .item-details-modal-content button.next-item {

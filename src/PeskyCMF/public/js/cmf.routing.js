@@ -132,14 +132,16 @@ var CmfRoutingHelpers = {
                 backdrop: 'static',
                 show: false
             })
-            .on('hidden.bs.modal', function () {
+            .on('hide.bs.modal', function () {
                 var closedAutomatically = !!$modal.data('closed-automatically');
-                $modal.remove();
                 CmfRoutingHelpers.$currentContent = $prevContent;
                 CmfRoutingHelpers.setCurrentContentContainer($prevContentContainer);
                 if (!closedAutomatically) {
                     request.restoreParentRequest(true);
                 }
+            })
+            .on('hidden.bs.modal', function () {
+                $modal.remove();
             })
             .on('show.bs.modal', function () {
                 CmfRoutingHelpers.$currentContent = $modal;

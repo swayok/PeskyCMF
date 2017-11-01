@@ -131,6 +131,7 @@ body {
     min-height: 50px;
 
     @transitionDuration: 0.2s;
+    @transitionDelay: 0.2s;
 
     &:before {
         content: '';
@@ -144,8 +145,8 @@ body {
         ._fade-out;
 
         @transitions:
-            opacity @transitionDuration linear,
-            height @transitionDuration step-end;
+            opacity @transitionDuration / 2 linear,
+            height @transitionDuration / 2 step-end;
         .transition(@transitions);
 
     }
@@ -167,10 +168,10 @@ body {
         @transitions:
             opacity @transitionDuration linear,
             left @transitionDuration linear,
-            margin @transitionDuration/2 linear,
-            width @transitionDuration/2 linear,
-            height @transitionDuration/2 linear,
-            border @transitionDuration/2 linear;
+            margin @transitionDuration / 2 linear,
+            width @transitionDuration / 2 linear,
+            height @transitionDuration / 2 linear,
+            border @transitionDuration / 2 linear;
         .transition(@transitions);
 
         .preloader-pause;
@@ -183,8 +184,8 @@ body {
             ._fade-in;
 
             @transitions:
-                opacity @transitionDuration linear,
-                height step-start;
+                opacity @transitionDuration linear @transitionDelay / 2,
+                height step-start @transitionDelay / 2;
             .transition(@transitions);
 
             #page-wrapper& {
@@ -1542,42 +1543,54 @@ aside.main-sidebar {
 
 }
 
-.modal .item-details-modal-content {
+.modal {
 
-    button.prev-item,
-    button.next-item {
-        position: absolute;
-        top: 50%;
-        color: #FFFFFF;
-        background-color: transparent;
-        border-width: 0;
-        font-size: 30px;
-        ._fade-to(0.4);
-        outline: 0 none !important;
-        text-shadow:
-            -1px -1px 3px rgba(0, 0, 0, 0.30),
-            1px -1px 3px rgba(0, 0, 0, 0.30),
-            -1px 1px 5px rgba(0, 0, 0, 0.30),
-            1px 1px 5px rgba(0, 0, 0, 0.30);
-
-        .transition(opacity 0.2s linear);
-
-        &:hover {
-            ._fade-in;
-        }
-
-        &[disabled],
-        &.disabled {
-            display: none;
-        }
+    &.fade .modal-dialog {
+        .translate(0, 0);
+        .transition-transform(~"0.15s ease-out");
     }
 
-    .prev-item {
-        left: -50px;
-    }
+    /*&.in .modal-dialog {
+        .translate(0, 0);
+    }*/
 
-    .next-item {
-        right: -50px;
+    .item-details-modal-content {
+
+        button.prev-item,
+        button.next-item {
+            position: absolute;
+            top: 50%;
+            color: #FFFFFF;
+            background-color: transparent;
+            border-width: 0;
+            font-size: 30px;
+            ._fade-to(0.4);
+            outline: 0 none !important;
+            text-shadow:
+                -1px -1px 3px rgba(0, 0, 0, 0.30),
+                1px -1px 3px rgba(0, 0, 0, 0.30),
+                -1px 1px 5px rgba(0, 0, 0, 0.30),
+                1px 1px 5px rgba(0, 0, 0, 0.30);
+
+            .transition(opacity 0.2s linear);
+
+            &:hover {
+                ._fade-in;
+            }
+
+            &[disabled],
+            &.disabled {
+                display: none;
+            }
+        }
+
+        .prev-item {
+            left: -50px;
+        }
+
+        .next-item {
+            right: -50px;
+        }
     }
 }
 
