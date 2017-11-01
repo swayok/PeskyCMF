@@ -82,6 +82,9 @@ $dictionary = [
                     'name' => 'Creator\'s Name',
                 ]
             ],
+            'action' => [
+                'login_as' => 'Login as this user'
+            ],
         ],
         'form' => [
             'header_create' => 'Adding administrator',
@@ -114,6 +117,9 @@ $dictionary = [
                 'created_at' => 'Created',
                 'updated_at' => 'Updated',
                 'timezone' => 'Timezone',
+            ],
+            'action' => [
+                'login_as' => 'Login as this user'
             ]
         ]
     ],

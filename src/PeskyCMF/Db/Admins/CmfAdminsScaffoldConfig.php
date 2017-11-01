@@ -11,6 +11,7 @@ use PeskyCMF\Scaffold\Form\InputRenderer;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\Column;
+use Swayok\Html\Tag;
 
 class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
 
@@ -49,7 +50,24 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                 'parent_id' => DataGridColumn::create()
                     ->setType(ValueCell::TYPE_LINK),
                 'created_at'
-            ]);
+            ])
+            ->setRowActions(function () {
+                $actions = [];
+                if (\Gate::allows('cmf_page', ['login_as'])) {
+                    $actions[] = Tag::a()
+                        ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
+                        ->setClass('row-action text-muted')
+                        ->setTitle(cmfTransCustom('.admins.datagrid.action.login_as'))
+                        ->setDataAttr('toggle', 'tooltip')
+                        ->setDataAttr('container', '#section-content .content')
+                        ->setDataAttr('block-datagrid', '1')
+                        ->setDataAttr('action', 'request')
+                        ->setDataAttr('url', cmfRouteTpl('cmf_login_as_other_admin', [], ['id'], false))
+                        ->setHref('javascript: void(0)')
+                        ->build();
+                }
+                return $actions;
+            });
     }
 
     protected function createDataGridFilterConfig() {
@@ -109,7 +127,21 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
         }
         return parent::createItemDetailsConfig()
             ->readRelations(['ParentAdmin'])
-            ->setValueCells($valueCells);
+            ->setValueCells($valueCells)
+            ->setToolbarItems(function () {
+                $actions = [];
+                if (\Gate::allows('cmf_page', ['login_as'])) {
+                    $actions[] = Tag::button()
+                        ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
+                        ->setClass('btn btn-default')
+                        ->setTitle(cmfTransCustom('.admins.item_details.action.login_as'))
+                        ->setDataAttr('toggle', 'tooltip')
+                        ->setDataAttr('container', '#section-content .content')
+                        ->setDataAttr('action', 'request')
+                        ->setDataAttr('url', cmfRouteTpl('cmf_login_as_other_admin', [], ['id'], false));
+                }
+                return $actions;
+            });
     }
 
     protected function createFormConfig() {

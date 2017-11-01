@@ -259,6 +259,7 @@ class CmfConfig extends ConfigsContainer {
             'delete' => 'delete',
             'update_bulk' => 'update_bulk',
             'delete_bulk' => 'delete_bulk',
+            'other' => 'others',
             'others' => 'others',
         ]);
         \Gate::define('cmf_page', $policyName . '@cmf_page');
@@ -1139,8 +1140,11 @@ class CmfConfig extends ConfigsContainer {
         if (static::cmf_user_acceess_policy_class() === CmfAccessPolicy::class) {
             $userId = 'any';
         } else {
+            $userId = 'not_authenticated';
             $user = static::getUser();
-            $userId = $user ? $user->role : 'not_authenticated';
+            if ($user && $user->existsInDb()) {
+                $userId = $user->is_superadmin ? '__superadmin__' : $user->role;
+            }
         }
         return static::url_prefix() . '_templates_' . app()->getLocale() . '_' . $group . '_user_' . $userId;
     }

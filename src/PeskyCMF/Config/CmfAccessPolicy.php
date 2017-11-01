@@ -27,7 +27,7 @@ class CmfAccessPolicy {
      */
     static protected $resources = [
         'cmf_profile' => [
-            'others' => true
+            'others' => true,
         ],
     ];
 
@@ -80,7 +80,7 @@ class CmfAccessPolicy {
      * @var array
      */
     static protected $cmfPages = [
-
+        'login_as' => false, //< everyone except user with is_superadmin = true
     ];
 
     /**

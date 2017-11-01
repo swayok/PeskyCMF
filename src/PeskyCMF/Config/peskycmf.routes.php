@@ -101,6 +101,12 @@ Route::group(
             ],
             function () use ($generalControllerClass, $routeNamePrefix) {
 
+                Route::get('service/login/as/{id}', [
+                    'as' => $routeNamePrefix . 'cmf_login_as_other_admin',
+                    'uses' => $generalControllerClass . '@loginAs',
+                    'log' => 'cmf.service_login_as'
+                ]);
+
                 // UI views
                 Route::get('ui/ui.html', [
                     'as' => $routeNamePrefix . 'cmf_main_ui',
