@@ -161,6 +161,10 @@ var CmfRouteChange = {
 };
 
 CmfRouteChange.authorizationPage = function (request) {
+    if (request.hasSubRequest()) {
+        request.removeSubRequest();
+        request.saveState();
+    }
     return $.when(
             Utils.downloadHtml(request.pathname, true, false),
             AdminUI.destroyUI()
