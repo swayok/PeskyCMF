@@ -41,6 +41,11 @@ $dictionary = [
     ],
     'admins' => [
         'menu_title' => 'Administrators',
+        'login_as' => [
+            'success' => 'You have logged in to account :user. Use Logout button to return to your account',
+            'fail' => 'Failed to login to account with ID :id',
+            'same_user' => 'You are trying to login to your own account'
+        ],
         'role' => [
             'admin' => 'Administrator',
             'superadmin' => 'Superadmin'

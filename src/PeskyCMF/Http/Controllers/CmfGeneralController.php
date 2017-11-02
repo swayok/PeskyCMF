@@ -17,6 +17,7 @@ use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Record;
+use PeskyORM\ORM\RecordInterface;
 use Ramsey\Uuid\Uuid;
 use Swayok\Utils\Folder;
 use Swayok\Utils\Set;
@@ -26,6 +27,8 @@ class CmfGeneralController extends Controller {
 
     use DataValidationHelper,
         AuthorizesRequests;
+
+    protected $originalUserFromLoginAsActionSessionKey = '__original_user';
 
     public function __construct() {
 
@@ -352,12 +355,48 @@ class CmfGeneralController extends Controller {
         }
     }
 
-    public function logout() {
-        CmfConfig::getPrimary()->getAuth()->logout();
-        \Session::invalidate();
-        CmfConfig::getPrimary()->resetLocale();
+    public function loginAs($otherUserId) {
+        $this->authorize('cmf_page', ['login_as']);
+        $cmfConfig = CmfConfig::getPrimary();
+        $currentUserId = $cmfConfig::getUser()->getAuthIdentifier();
+        if ($currentUserId === $otherUserId || $currentUserId === (int)$otherUserId) {
+            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
+                ->setMessage(cmfTransCustom('admins.login_as.same_user'));
+        }
+        /** @var \PeskyCMF\Db\Admins\CmfAdmin|RecordInterface $otherUser */
+        $otherUser = $cmfConfig::getAuth()->loginUsingId($otherUserId);
+        if (!is_object($otherUser)) {
+            $cmfConfig::getAuth()->loginUsingId($currentUserId);
+            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
+                ->setMessage(cmfTransCustom('admins.login_as.fail', ['id' => $otherUserId]));
+        }
+        \Session::put([
+            $this->originalUserFromLoginAsActionSessionKey => [
+                'id' => $currentUserId,
+                'url' => \URL::previous($cmfConfig::home_page_url(true)),
+            ],
+            $cmfConfig::getPrimary()->session_message_key() => cmfTransCustom(
+                'admins.login_as.success',
+                ['user' => $otherUser->getValue($cmfConfig::user_login_column())]
+            )
+        ]);
+        return cmfJsonResponse()
+            ->setRedirect($cmfConfig::home_page_url());
+    }
 
-        return \Redirect::to(CmfConfig::getPrimary()->login_page_url(true));
+    public function logout() {
+        $cmfConfig = CmfConfig::getPrimary();
+        if (\Session::has($this->originalUserFromLoginAsActionSessionKey)) {
+            // logout to original account after 'login_as'
+            $userInfo = \Session::pull($this->originalUserFromLoginAsActionSessionKey);
+            if ($cmfConfig::getAuth()->loginUsingId(array_get($userInfo, 'id', -1))) {
+                return \Redirect::to(array_get($userInfo, 'url') ?: $cmfConfig::login_page_url(true));
+            }
+        }
+        $cmfConfig::getAuth()->logout();
+        \Session::invalidate();
+        $cmfConfig::resetLocale();
+        return \Redirect::to($cmfConfig::login_page_url(true));
     }
 
     public function getAdminInfo() {
