@@ -167,7 +167,7 @@
     @endif
 
     @if (\PeskyCMF\Config\CmfConfig::getPrimary()->config('optimize_ui_templates.enabled', false))
-        <script src="{{ cmfRoute('cmf_cached_templates_js') }}" type="text/javascript"></script>
+        <script src="{{ cmfRoute('cmf_cached_templates_js', ['_' => time()]) }}" type="text/javascript"></script>
     @endif
 
     <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>

@@ -224,7 +224,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $actionsCount++;
         }
         if ($dataGridConfig->isEditAllowed()) {
-            $url = $dblClickUrl = routeToCmfItemEditForm($tableNameForRoutes, ":{$pkName}:");
+            $url = $dblClickUrl = cmfRoute('cmf_item_edit_form', ['table_name' => $tableNameForRoutes, 'id' => ":{$pkName}:"]);
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green item-edit')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
