@@ -982,6 +982,9 @@ body.skin-yellow-light .main-header,
 body.skin-yellow .main-header {
   background-color: #e08e0b;
 }
+aside.main-sidebar {
+  z-index: 799;
+}
 aside.main-sidebar .sidebar-menu li > a {
   border-right: 3px solid transparent;
 }

@@ -59,7 +59,6 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                         ->setClass('row-action text-muted')
                         ->setTitle(cmfTransCustom('.admins.datagrid.action.login_as'))
                         ->setDataAttr('toggle', 'tooltip')
-                        ->setDataAttr('container', '#section-content .content')
                         ->setDataAttr('block-datagrid', '1')
                         ->setDataAttr('action', 'request')
                         ->setDataAttr('url', cmfRouteTpl('cmf_login_as_other_admin', [], ['id'], false))
@@ -136,7 +135,6 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                         ->setClass('btn btn-default')
                         ->setTitle(cmfTransCustom('.admins.item_details.action.login_as'))
                         ->setDataAttr('toggle', 'tooltip')
-                        ->setDataAttr('container', '#section-content .content')
                         ->setDataAttr('action', 'request')
                         ->setDataAttr('url', cmfRouteTpl('cmf_login_as_other_admin', [], ['id'], false));
                 }

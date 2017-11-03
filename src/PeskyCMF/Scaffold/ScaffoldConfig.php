@@ -362,7 +362,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             if (preg_match("%<!--\s*{$block}\s*start\s*-->(?:\s*\n*)*(.*?)<!--\s*{$block}\s*end\s*-->%is", $html, $matches)) {
                 $template = trim(preg_replace(
                     ['%^\s*<(div|script)[^>]+id="(data-grid-tpl|item-form-tpl|item-details-tpl|bulk-edit-form-tpl)"[^>]*>\s*(.*)\s*</\1>\s*$%is', '%^\s+%im'],
-                    ['$3', ''],
+                    ['$3', ' '],
                     $matches[1]
                 ));
             }

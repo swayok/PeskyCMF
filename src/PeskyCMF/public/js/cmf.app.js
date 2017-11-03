@@ -47,6 +47,22 @@ $(function () {
     page.route('/resource/:resource/edit/:id', CmfRouteChange.scaffoldItemFormPage);
     page.route('/resource/:resource/:id/page/:page', CmfRouteChange.scaffoldItemCustomPage);
 
+    page.route('*', function () {
+        if (CmfRoutingHelpers.$currentContentContainer) {
+            CmfRoutingHelpers.$currentContentContainer
+                .find('[data-toggle="tooltip"]')
+                .each(function () {
+                    if ($(this).attr('data-container')) {
+                        $(this).tooltip();
+                    } else {
+                        $(this).tooltip({
+                            container: CmfRoutingHelpers.$currentContentContainer
+                        });
+                    }
+                });
+        }
+    });
+
     page.error('*', function (request) {
         request.errorHandled = false;
         CmfRoutingHelpers.hideContentContainerPreloader();
@@ -88,6 +104,7 @@ $(function () {
 
 function fixAdminLte() {
     $('body').layout('fix');
+    $('body [data-toggle="tooltip"]').tooltip();
 }
 
 function extendRouter() {

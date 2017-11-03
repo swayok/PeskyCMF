@@ -197,7 +197,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
                 ->setTitle(cmfTransGeneral('.datagrid.actions.show_children'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('container', '#section-content .content')
                 ->setHref('javascript: void(0)')
                 ->build();
             $actionsTpl .= \Swayok\Html\Tag::a()
@@ -205,7 +204,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
                 ->setTitle(cmfTransGeneral('.datagrid.actions.hide_children'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('container', '#section-content .content')
                 ->setHref('javascript: void(0)')
                 ->build();
             $actionsCount++;
@@ -217,7 +215,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
                 ->setTitle(cmfTransGeneral('.datagrid.actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('container', '#section-content .content')
                 ->setHref(':___details_url:')
                 ->build();
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
@@ -230,7 +227,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
                 ->setTitle(cmfTransGeneral('.datagrid.actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('container', '#section-content .content')
                 ->setHref($url)
                 ->build();
             $actionsTpl .= '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
@@ -242,7 +238,6 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setClass('row-action text-red item-delete')
                 ->setTitle(cmfTransGeneral('.datagrid.actions.delete_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('container', '#section-content .content')
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')

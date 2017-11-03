@@ -692,10 +692,16 @@ var ScaffoldDataGridHelper = {
                     ScaffoldDataGridHelper.initBulkLinks($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initBulkEditing($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initNestedView($table, $tableWrapper, configsBackup, tableOuterHtml);
-                }).on('preXhr', function (event, settings) {
+                })
+                .on('preXhr', function (event, settings) {
                     ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                     CmfRoutingHelpers.cleanupHangedElementsInBody();
                     $(this).dataTable().api().columns.adjust();
+                })
+                .on('draw', function (event, settings) {
+                    $(settings.nTableWrapper)
+                        .find('[data-toggle="tooltip"]')
+                        .tooltip({container: CmfRoutingHelpers.$currentContentContainer});
                 });
             return $dataGrid;
         } else {
