@@ -87,6 +87,18 @@ return [
     ],
 
     /**
+     * JS code blocks to add to CMF layout.
+     * Example: google analytics, google firebase, other vendor script blocks.
+     * Notes:
+     *  - keys of this array are not used - you may use them to label blocks
+     *  - all code you provide via this array will be added to layout AS IS.
+     *  - if you want to use variables in code blocks - use your 'cmf_config' method called 'layout_js_code_blocks'
+     */
+    'js_code_blocks' => [
+
+    ],
+
+    /**
      * Session storage configs to be used within CMF/CMS pages.
      * Notes:
      * - you can overwrite any key present in 'config/session.php' to configure session the way you need

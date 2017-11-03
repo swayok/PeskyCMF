@@ -308,6 +308,13 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * @return array
+     */
+    static public function layout_js_code_blocks() {
+        return (array)static::config('js_code_blocks', []);
+    }
+
+    /**
      * @return string
      */
     static public function default_page_title() {

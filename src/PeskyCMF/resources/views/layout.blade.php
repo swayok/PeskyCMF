@@ -179,14 +179,18 @@
     @endif
 
     @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_js_includes() as $jsPath)
-        <script src="{{ $jsPath }}" rel="stylesheet" type="text/javascript"></script>
+        <script src="{!! $jsPath !!}" type="text/javascript"></script>
+    @endforeach
+
+    @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_js_code_blocks() as $jsCode)
+        {!! $jsCode !!}
     @endforeach
 
     @yield('js')
     @yield('js2')
 
     <?php $message = Session::pull(\PeskyCMF\Config\CmfConfig::getPrimary()->session_message_key(), false); ?>
-    @if (!empty($message) && (is_string($message) || is_array($message) && !empty($message['message'])))
+    @if (!empty($message) && (is_string($message) || (is_array($message) && !empty($message['message']))))
         <script type="application/javascript">
             <?php $type = is_string($message) || empty($message['type']) || !in_array($message['type'], ['success', 'info', 'warning', 'error']) ? 'info' : $message['type'] ?>
             $(document).ready(function () {
