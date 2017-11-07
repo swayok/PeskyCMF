@@ -101,18 +101,7 @@
     </div>
 
     <script type="application/javascript">
-        <?php $urlPrefix = \PeskyCMF\Config\CmfConfig::getPrimary()->url_prefix(); ?>
-        var CmfSettings = {
-            isDebug: {{ config('app.debug') ? 'true' : 'false' }},
-            rootUrl: '/{{ $urlPrefix }}',
-            uiUrl: '{{ cmfRoute('cmf_main_ui', [], false) }}',
-            userDataUrl: '{{ cmfRoute('cmf_profile_data', [], false) }}',
-            menuCountersDataUrl: '{{ cmfRoute('cmf_menu_counters_data', [], false) }}',
-            defaultPageTitle: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }}',
-            pageTitleAddition: '{{ \PeskyCMF\Config\CmfConfig::getPrimary()->page_title_addition() }}',
-            localizationStrings: <?php echo json_encode(cmfTransGeneral('.ui.js_component'), JSON_UNESCAPED_UNICODE) ?>
-        };
-
+        var CmfSettings = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_settings(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
         var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 

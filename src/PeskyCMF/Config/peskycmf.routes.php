@@ -78,6 +78,11 @@ Route::get('replace_password/{access_key}', [
     'uses' => $generalControllerClass . '@getReplacePassword'
 ]);
 
+\Route::get('ui/templates.js', [
+    'as' => $routeNamePrefix . 'cmf_cached_templates_js',
+    'uses' => $generalControllerClass . '@getCachedUiTemplatesJs',
+]);
+
 Route::group(
     [
         'middleware' => $cmfConfig::middleware_for_routes_that_require_authentication()
@@ -87,11 +92,6 @@ Route::group(
         Route::post('ckeditor/upload/image', [
             'as' => $routeNamePrefix . 'cmf_ckeditor_upload_image',
             'uses' => $generalControllerClass . '@ckeditorUploadImage'
-        ]);
-
-        \Route::get('ui/templates.js', [
-            'as' => $routeNamePrefix . 'cmf_cached_templates_js',
-            'uses' => $generalControllerClass . '@getCachedUiTemplatesJs',
         ]);
 
         Route::group(

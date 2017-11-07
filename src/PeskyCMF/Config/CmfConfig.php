@@ -129,7 +129,7 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|null
+     * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|\App\Db\Admins\Admin|null
      */
     static public function getUser() {
         return static::getAuth()->user();
@@ -866,6 +866,23 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function css_files_for_wysiwyg_editor() {
         return [];
+    }
+
+    /**
+     * JS application settings (accessed via CmfSettings global variable)
+     * @return array
+     */
+    static public function js_app_settings() {
+        return [
+            'isDebug' => config('app.debug'),
+            'rootUrl' => '/' . trim(static::url_prefix(), '/'),
+            'uiUrl' => cmfRoute('cmf_main_ui', [], false, static::getInstance()),
+            'userDataUrl' => cmfRoute('cmf_profile_data', [], false, static::getInstance()),
+            'menuCountersDataUrl' => cmfRoute('cmf_menu_counters_data', [], false, static::getInstance()),
+            'defaultPageTitle' => static::default_page_title(),
+            'pageTitleAddition' => static::page_title_addition(),
+            'localizationStrings' => static::transGeneral('ui.js_component')
+        ];
     }
 
     /**
