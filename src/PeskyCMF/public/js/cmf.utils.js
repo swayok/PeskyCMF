@@ -407,11 +407,9 @@ Utils.downloadHtml = function (url, cache, isTemplate) {
     return deferred.promise();
 };
 
-Utils.checkUser = function () {
-    return Utils.getUser(false, true);
-};
+Utils.userDataIsLoading = false;
 
-Utils.getUser = function (reload, ignoreError) {
+Utils.getUser = function (reload) {
     var deferred = $.Deferred();
     if (
         !!reload
@@ -427,11 +425,7 @@ Utils.getUser = function (reload, ignoreError) {
             var user = Utils.setUser(json);
             deferred.resolve(user);
         }).fail(function (xhr) {
-            if (ignoreError) {
-                deferred.reject(xhr);
-            } else {
-                Utils.handleAjaxError.call(this, xhr, deferred);
-            }
+            Utils.handleAjaxError.call(this, xhr, deferred);
         });
     } else {
         deferred.resolve(CmfCache.user);
