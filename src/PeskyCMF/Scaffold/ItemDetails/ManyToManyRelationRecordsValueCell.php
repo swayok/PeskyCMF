@@ -9,6 +9,8 @@ use Swayok\Html\Tag;
 class ManyToManyRelationRecordsValueCell extends ValueCell {
 
     protected $columnForLinksLabels;
+     /** @var Relation|null */
+    private $dataSourceRelation;
 
     /**
      * Name of the column in 'linker table' that contains primary key values of the foreign table
@@ -29,6 +31,7 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
         if ($columnName !== $relation->getForeignColumnName()) {
             $this->relationColumn = $columnName;
         }
+        $this->dataSourceRelation = null;
         return $this;
     }
 
@@ -59,8 +62,8 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
                         $relatedRecord[$this->getRelationColumn()]
                     ))
                     ->setContent($labelColumn instanceof \Closure
-                        ? $labelColumn($relatedRecord[$this->getDataSourceRelation()->getName()])
-                        : $relatedRecord[$this->getDataSourceRelation()->getName()][$labelColumn]
+                        ? $labelColumn($relatedRecord[$dataSourceRelation->getName()])
+                        : $relatedRecord[$dataSourceRelation->getName()][$labelColumn]
                     )
                     ->build();
             }
@@ -69,10 +72,15 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
         return '';
     }
 
+    /**
+     * @return Relation
+     * @throws \InvalidArgumentException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \BadMethodCallException
+     * @throws \UnexpectedValueException
+     */
     protected function getDataSourceRelation() {
-        /** @var Relation|null $dataSourceRelation */
-        static $dataSourceRelation;
-        if (!$dataSourceRelation) {
+        if (!$this->dataSourceRelation) {
             $relations = $this
                 ->getRelation()
                 ->getForeignTable()
@@ -81,11 +89,11 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
                 ->getRelations();
             foreach ($relations as $relation) {
                 if ($relation->getType() === Relation::HAS_ONE) {
-                    $dataSourceRelation = $relation;
+                    $this->dataSourceRelation = $relation;
                     break;
                 }
             }
-            if (!$dataSourceRelation) {
+            if (!$this->dataSourceRelation) {
                 throw new \UnexpectedValueException(
                     "Failed to detect data source Relation for ManyToManyRelationRecordsFormInput '{$this->getName()}'. "
                     . "Column '{$this->getRelation()->getForeignTable()->getName()}.{$this->getRelationColumn()}'"
@@ -93,7 +101,7 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
                 );
             }
         }
-        return $dataSourceRelation;
+        return $this->dataSourceRelation;
     }
 
     /**

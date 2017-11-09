@@ -11,6 +11,15 @@ FormHelper.initInputPlugins = function (container) {
             // somehow it is loosing value that was set by $('select').val('val');
             var $select = $(this);
             var val = $select.val();
+            if (val === null || typeof val === 'undefined') {
+                val = $select.find('option[selected]').first().val();
+                if (
+                    (val === null  || typeof val === 'undefined')
+                    && ($select.prop('required') || $select.find('option[value=""]').length === 0)
+                ) {
+                    val = $select.find('option:first').val();
+                }
+            }
             var pluginOptions = {};
             if ($select.find('option').length > 10) {
                 pluginOptions.liveSearch = true;
@@ -76,17 +85,18 @@ FormHelper.initInputPlugins = function (container) {
 FormHelper.setValuesFromDataAttributes = function (container) {
     var $container = (container);
     $container
-        .find('select[data-value!=""]')
+        .find('select[data-value]')
         .each(function () {
+            var value = this.getAttribute('data-value');
             if (this.multiple) {
                 try {
-                    var json = JSON.parse(this.getAttribute('data-value'));
+                    var json = JSON.parse(value);
                     $(this).val(json);
                 } catch (exc) {
-                    $(this).val(this.getAttribute('data-value'));
+                    $(this).val(value);
                 }
             } else {
-                $(this).val(this.getAttribute('data-value'));
+                $(this).val(value);
             }
             $(this).change();
         });
