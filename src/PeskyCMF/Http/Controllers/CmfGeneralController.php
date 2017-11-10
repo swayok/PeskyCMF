@@ -576,7 +576,11 @@ class CmfGeneralController extends Controller {
         foreach (CmfConfig::getPrimary()->getApiDocsSections() as $methodsList) {
             /** @var CmfApiDocsSection $apiMethodDocs */
             foreach ($methodsList as $apiMethodDocs) {
-                $data['item'][] = $apiMethodDocs::create()->getConfigForPostman();
+                $docsObject = $apiMethodDocs::create();
+                if (trim($docsObject->url) === '') {
+                    continue;
+                }
+                $data['item'][] = $docsObject->getConfigForPostman();
             }
         }
         return response(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), HttpCode::OK, [

@@ -5,25 +5,31 @@
 ?>
 <div class="panel box box-solid box-default">
     <div class="box-header with-border" style="cursor:pointer" data-toggle="collapse" data-target="#{{ $method->getUuid() }}">
-        <div class="col-xs-6 text-bold">{{ $method->title }}</div>
-        <div class="col-xs-6 text-nowrap of-h">
-            <div class="http-method ib" style="width: 65px;">{{ $method->httpMethod }}</div>
-            <span class="url">{{ $method->url }}</span>
-        </div>
+        @if (trim($method->url) !== '')
+            <div class="col-xs-6 text-bold">{{ $method->title }}</div>
+            <div class="col-xs-6 text-nowrap of-h">
+                <div class="http-method ib" style="width: 65px;">{{ $method->httpMethod }}</div>
+                <span class="url">{{ $method->url }}</span>
+            </div>
+        @else
+            <div class="col-xs-12 text-bold">{{ $method->title }}</div>
+        @endif
     </div>
     <div id="{{ $method->getUuid() }}" class="panel-collapse collapse">
         <div class="box-body">
-            <div class="row">
-                <div class="col-xs-12 fs16 fw600">
-                    <div class="box box-solid box-default">
-                        <div class="box-body">
-                            <span class="http-method">{{ $method->httpMethod }}</span>
-                            <span class="fa fa-long-arrow-right"></span>
-                            <span class="url">{{ $method->url }}</span>
+            @if(trim($method->url) !== '')
+                <div class="row">
+                    <div class="col-xs-12 fs16 fw600">
+                        <div class="box box-solid box-default">
+                            <div class="box-body">
+                                <span class="http-method">{{ $method->httpMethod }}</span>
+                                <span class="fa fa-long-arrow-right"></span>
+                                <span class="url">{{ $method->url }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
             <div class="row">
                 @if(trim($method->description) !== '')
                 <div class="col-xs-12 col-xl-6">
@@ -107,38 +113,45 @@
                 @endif
             </div>
             <div class="row">
-                <div class="col-xs-6">
-                    <div class="box box-solid box-success">
-                        <div class="box-header">
-                            <div class="box-title">
-                                {{ cmfTransCustom('.api_docs.response') }}
+                @php($errors = array_merge($method->getCommonErrors(), $method->getPossibleErrors()))
+
+                @if (!empty($method->onSuccess))
+                    <div class="@if(empty($errors)) col-xs-12 @else col-xs-6 @endif">
+                        <div class="box box-solid box-success">
+                            <div class="box-header">
+                                <div class="box-title">
+                                    {{ cmfTransCustom('.api_docs.response') }}
+                                </div>
+                            </div>
+                            <div class="box-body">
+                                <pre>{{ json_encode($method->onSuccess, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                             </div>
                         </div>
-                        <div class="box-body">
-                            <pre>{{ json_encode($method->onSuccess, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                        </div>
                     </div>
-                </div>
-                <div class="col-xs-6">
-                    <div class="box box-solid box-danger">
-                        <div class="box-header">
-                            <div class="box-title">
-                                {{ cmfTransCustom('.api_docs.errors') }}
+                @endif
+
+                @if(!empty($errors))
+                    <div class="@if(empty($method->onSuccess)) col-xs-12 @else col-xs-6 @endif">
+                        <div class="box box-solid box-danger">
+                            <div class="box-header">
+                                <div class="box-title">
+                                    {{ cmfTransCustom('.api_docs.errors') }}
+                                </div>
+                            </div>
+                            <div class="box-body">
+                                <dl>
+                                    @foreach($errors as $failInfo)
+                                        <dt>
+                                            <div>{{ array_get($failInfo, 'title', '*no title*') }}</div>
+                                            <small class="text-danger">HTTP code: {{ array_get($failInfo, 'code', '*no HTTP code*') }}</small>
+                                        </dt>
+                                        <dd><pre>{{ json_encode(array_get($failInfo, 'response', ''), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre></dd>
+                                    @endforeach
+                                </dl>
                             </div>
                         </div>
-                        <div class="box-body">
-                            <dl>
-                                @foreach(array_merge($method->getCommonErrors(), $method->getPossibleErrors()) as $failInfo)
-                                    <dt>
-                                        <div>{{ array_get($failInfo, 'title', '*no title*') }}</div>
-                                        <small class="text-danger">HTTP code: {{ array_get($failInfo, 'code', '*no HTTP code*') }}</small>
-                                    </dt>
-                                    <dd><pre>{{ json_encode(array_get($failInfo, 'response', ''), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre></dd>
-                                @endforeach
-                            </dl>
-                        </div>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>
