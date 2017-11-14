@@ -30,7 +30,6 @@ class PeskyCmfServiceProvider extends AppSitesServiceProvider {
         parent::register();
         $this->app->register(PeskyOrmServiceProvider::class);
         $this->app->register(PeskyValidationServiceProvider::class);
-        $this->app->register(SuppressLaravelDatabaseServiceProvider::class);
 
         if ($this->app->environment() === 'local') {
             if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
