@@ -288,7 +288,7 @@ VIEW;
             if ($column->isItAForeignKey()) {
                 $valueViewers[] = <<<VIEW
 '{$column->getName()}' => DataGridColumn::create()
-                    ->setType(DataGridColumn::TYPE_LINK)
+                    ->setType(DataGridColumn::TYPE_LINK),
 VIEW;
             } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
                 $valueViewers[] = "'{$column->getName()}',";
