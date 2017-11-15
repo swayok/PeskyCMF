@@ -782,9 +782,15 @@ class FormConfig extends ScaffoldSectionConfig {
             $messages = Set::flatten($messages);
         }
         $columnsWithArrayType = [];
+        $dataForInserts = $data;
+        array_walk_recursive($dataForInserts, function (&$value) {
+            if ($value === null) {
+                $value = 'NULL';
+            }
+        });
         foreach ($validators as $key => &$value) {
             if (is_string($value)) {
-                $value = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
+                $value = StringUtils::insert($value, $dataForInserts, ['before' => '{{', 'after' => '}}']);
                 if (preg_match('%(^|\|)array%i', $value)) {
                     $columnsWithArrayType[] = $key;
                 }
@@ -792,7 +798,7 @@ class FormConfig extends ScaffoldSectionConfig {
                 /** @var array $value */
                 foreach ($value as &$validator) {
                     if (is_string($validator)) {
-                        $validator = StringUtils::insert($validator, $data, ['before' => '{{', 'after' => '}}']);
+                        $validator = StringUtils::insert($validator, $dataForInserts, ['before' => '{{', 'after' => '}}']);
                     }
                     if ($validator === 'array') {
                         $columnsWithArrayType[] = $key;
