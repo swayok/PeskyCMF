@@ -1145,6 +1145,7 @@ var ScaffoldDataGridHelper = {
                         var $subTable = $(tableOuterHtml);
                         $subTable
                             .attr('id', $subTable.attr('id') + '-children-for-' + parentId)
+                            .attr('data-depth', (parseInt($tr.closest('.children-data-grid').attr('data-depth')) || 0) + 1)
                             .addClass('table-condensed');
                         row.child($subTable).show();
                         var configs = $.extend(true, {}, subTableConfigs);
@@ -1167,9 +1168,17 @@ var ScaffoldDataGridHelper = {
                                 ScaffoldDataGridHelper.initRowActions($subTable, configs);
                                 ScaffoldDataGridHelper.initNestedView($subTable, $subTableWrapper, subTableConfigs, tableOuterHtml);
                                 return false;
-                            }).on('preXhr', function (event, settings) {
+                            })
+                            .on('preXhr', function (event, settings) {
                                 ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
-                            }).on('draw', function (event, settings) {
+                            })
+                            .on('xhr', function (event, settings, json) {
+                                var depth = $subTable.attr('data-depth');
+                                for (var i = 0, len = json.data.length; i < len; i++) {
+                                    json.data[i].___nesting_depth = depth;
+                                }
+                            })
+                            .on('draw', function (event, settings) {
                                 var $subTableWrapper = $(settings.nTableWrapper);
                                 if ($(settings.nTable).dataTable().api().page.info().recordsTotal === 0) {
                                     $subTableWrapper.find('thead').hide();
@@ -1189,10 +1198,12 @@ var ScaffoldDataGridHelper = {
                         .find('a.hide-children')
                             .removeClass('hidden');
                 })
-                .on('click', 'a.hide-children', function () {
+                .on('click', 'a.hide-children', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     var $tr = $(this).closest('tr');
                     var row = api.row($tr);
-                    $(this).addClass('hidden');
+                    $(this).tooltip('hide').addClass('hidden');
                     if (row.child.isShown()) {
                         row.child.hide();
                     }
@@ -1200,6 +1211,7 @@ var ScaffoldDataGridHelper = {
                         .removeClass('children-table-opened')
                         .find('a.show-children')
                             .removeClass('hidden');
+                    return false;
                 });
         }
     }

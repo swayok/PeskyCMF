@@ -192,20 +192,23 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         $actionsTpl = '';
         $actionsCount = 0;
         if ($dataGridConfig->isNestedViewEnabled()) {
-            $actionsTpl .= \Swayok\Html\Tag::a()
+            $showChildren = \Swayok\Html\Tag::a()
                 ->setClass('row-action link-muted show-children')
                 ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
                 ->setTitle(cmfTransGeneral('.datagrid.actions.show_children'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref('javascript: void(0)')
                 ->build();
-            $actionsTpl .= \Swayok\Html\Tag::a()
+            $hideChildren = \Swayok\Html\Tag::a()
                 ->setClass('row-action link-muted hide-children hidden')
                 ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
                 ->setTitle(cmfTransGeneral('.datagrid.actions.hide_children'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref('javascript: void(0)')
                 ->build();
+            $actionsTpl .= '{{? it.___max_nesting_depth <= 0 || it.___max_nesting_depth > (parseInt(it.___nesting_depth) || 0) }}'
+                    . $showChildren . $hideChildren
+                . '{{?}}';
             $actionsCount++;
         }
         if ($dataGridConfig->isDetailsViewerAllowed()) {
@@ -285,7 +288,8 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 if ($dataGridConfig->isNestedViewEnabled()) {
                     $dataTablesConfig['nested_data_grid'] = [
                         'value_column' => '__' . $table::getPkColumnName(),
-                        'filter_column' => '__' . $dataGridConfig->getColumnNameForNestedView()
+                        'filter_column' => '__' . $dataGridConfig->getColumnNameForNestedView(),
+                        'max_depth' => $dataGridConfig->getNestedViewsDepthLimit()
                     ];
                 }
                 if ($dataGridConfig->isRowsReorderingEnabled()) {

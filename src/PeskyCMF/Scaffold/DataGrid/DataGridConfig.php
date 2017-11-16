@@ -69,6 +69,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $isFilterOpened = false;
     /** @var string|null */
     protected $enableNestedViewBasedOnColumn;
+    /** @var int */
+    protected $nestedViewsDepthLimit = -1;
     /** @var array */
     protected $rowsPositioningColumns = [];
     /** @var int|float */
@@ -466,6 +468,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
                     $record['___pk_value']
                 );
             }
+            $record['___max_nesting_depth'] = $this->getNestedViewsDepthLimit();
         }
         return $records;
     }
@@ -668,14 +671,17 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     /**
      * @param string $parentIdColumnName
+     * @param int $limitNestingDepthTo - number of nested data grids. <= 0 - no limit; 1 = 1 subview only;
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public function enableNestedView($parentIdColumnName = 'parent_id') {
+    public function enableNestedView($parentIdColumnName = 'parent_id', $limitNestingDepthTo = -1) {
         $this->getTable()->getTableStructure()->getColumn($parentIdColumnName); //< validates column existence
         $this->enableNestedViewBasedOnColumn = $parentIdColumnName;
+        $this->setNestedViewsDepthLimit($limitNestingDepthTo);
+        $this->setIsRowActionsColumnFixed(false);
         return $this;
     }
 
@@ -691,6 +697,22 @@ class DataGridConfig extends ScaffoldSectionConfig {
      */
     public function getColumnNameForNestedView() {
         return $this->enableNestedViewBasedOnColumn;
+    }
+
+    /**
+     * @param int $maxDepth
+     * @return $this
+     */
+    public function setNestedViewsDepthLimit($maxDepth) {
+        $this->nestedViewsDepthLimit = (int)$maxDepth;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNestedViewsDepthLimit() {
+        return $this->nestedViewsDepthLimit;
     }
 
     /**

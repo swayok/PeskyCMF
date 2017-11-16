@@ -925,6 +925,9 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
   border-right-width: 0;
   border-bottom-width: 0;
 }
+.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table-container:before {
+  top: -19px;
+}
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table,
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination {
   border-left-width: 1px;
