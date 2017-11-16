@@ -288,8 +288,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 if ($dataGridConfig->isNestedViewEnabled()) {
                     $dataTablesConfig['nested_data_grid'] = [
                         'value_column' => '__' . $table::getPkColumnName(),
-                        'filter_column' => '__' . $dataGridConfig->getColumnNameForNestedView(),
-                        'max_depth' => $dataGridConfig->getNestedViewsDepthLimit()
+                        'filter_column' => '__' . $dataGridConfig->getColumnNameForNestedView()
                     ];
                 }
                 if ($dataGridConfig->isRowsReorderingEnabled()) {
