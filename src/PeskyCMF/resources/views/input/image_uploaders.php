@@ -4,8 +4,8 @@
  * @var \PeskyCMF\Scaffold\Form\ImagesFormInput $valueViewer
  * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
  * @var \PeskyORM\ORM\TableInterface $table
+ * @var \PeskyORMLaravel\Db\Column\ImagesColumn $column
  */
-/** @var \PeskyORMLaravel\Db\Column\ImagesColumn $column */
 $column = $valueViewer->getTableColumn();
 $defaultId = $valueViewer->getDefaultId();
 $configNameToInputId = [];

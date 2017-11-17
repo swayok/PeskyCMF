@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold\Form;
 use PeskyORMLaravel\Db\Column\FilesColumn;
 use PeskyORMLaravel\Db\Column\ImagesColumn;
 use PeskyORMLaravel\Db\Column\Utils\FileConfig;
+use PeskyORMLaravel\Db\Column\Utils\FileInfo;
 use PeskyORMLaravel\Db\Column\Utils\ImageConfig;
 
 /**
@@ -29,7 +30,7 @@ class ImagesFormInput extends FormInput {
      * @return $this
      * @throws \InvalidArgumentException
      */
-    public function setImagesToAccept(...$imageNames) {
+    public function setImageConfigsToUse(...$imageNames) {
         if (empty($imageNames)) {
             throw new \InvalidArgumentException('$imageNames argument cannot be empty');
         }

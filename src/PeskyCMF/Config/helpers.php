@@ -94,13 +94,28 @@ if (!function_exists('routeToCmfItemsTable')) {
             return null;
         }
         $params = ['table_name' => $tableName];
+        $replaces = [];
         if (!empty($filters)) {
             $params['filter'] = json_encode($filters, JSON_UNESCAPED_UNICODE);
+            if (preg_match_all('%(\{\{=.*?\}\})%s', $params['filter'], $matches) > 0) {
+                // there are dotJs inserts inside filters
+                foreach ($matches[1] as $i => $dotJsInsert) {
+                    $replace = '__dotjs_' . $i . '_insert__';
+                    $replaces[$replace] = $matches[$i][0];
+                    $params['filter'] = str_replace($replaces[$replace], $replace, $params['filter']);
+                }
+            }
         }
         if (!$cmfConfig) {
             $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
         }
-        return route($cmfConfig::getRouteName('cmf_items_table'), $params, $absolute);
+        $url = route($cmfConfig::getRouteName('cmf_items_table'), $params, $absolute);
+        if (!empty($replaces)) {
+            foreach ($replaces as $search => $replace) {
+                $url = str_ireplace($search, $replace, $url);
+            }
+        }
+        return $url;
     }
 }
 
