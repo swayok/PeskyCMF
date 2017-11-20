@@ -606,7 +606,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
         return DataGridColumn::create()
             ->setIsLinkedToDbColumn(false)
             ->setName(static::ROW_ACTIONS_COLUMN_NAME)
-            ->setLabel(cmfTransGeneral('.datagrid.actions.column_label'))
+            ->setLabel($this->translateGeneral('actions.column_label'))
             ->setType(DataGridColumn::TYPE_STRING);
     }
 
@@ -655,18 +655,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
         }
     }
 
-    /**
-     * @param AbstractValueViewer|null $viewer
-     * @param string $suffix
-     * @param array $parameters
-     * @return string
-     */
-    public function translate(AbstractValueViewer $viewer = null, $suffix = '', array $parameters = []) {
-        if ($viewer) {
-            return $this->getScaffoldConfig()->translateForViewer('datagrid.column', $viewer, $suffix, $parameters);
-        } else {
-            return $this->getScaffoldConfig()->translate('datagrid', $suffix, $parameters);
-        }
+    protected function getSectionTranslationsPrefix($subtype = null) {
+        return $subtype === 'value_viewer' ? 'datagrid.column' : 'datagrid';
     }
 
     /**

@@ -83,7 +83,7 @@ class KeyValueSetFormInput extends FormInput {
      * @return string
      */
     public function getAddRowButtonLabel() {
-        return $this->addRowButtonLabel ?: cmfTransGeneral('.form.input.key_value_set.add_row');
+        return $this->addRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.add_row');
     }
 
     /**
@@ -99,7 +99,7 @@ class KeyValueSetFormInput extends FormInput {
      * @return string
      */
     public function getDeleteRowButtonLabel() {
-        return $this->deleteRowButtonLabel ?: cmfTransGeneral('.form.input.key_value_set.delete_row');
+        return $this->deleteRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.delete_row');
     }
 
     /**

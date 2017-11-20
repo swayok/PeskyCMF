@@ -1063,18 +1063,8 @@ class FormConfig extends ScaffoldSectionConfig {
         }
     }
 
-    /**
-     * @param AbstractValueViewer|null $viewer
-     * @param string $suffix
-     * @param array $parameters
-     * @return string
-     */
-    public function translate(AbstractValueViewer $viewer = null, $suffix = '', array $parameters = []) {
-        if ($viewer) {
-            return $this->getScaffoldConfig()->translateForViewer('form.input', $viewer, $suffix, $parameters);
-        } else {
-            return $this->getScaffoldConfig()->translate('form', $suffix, $parameters);
-        }
+    protected function getSectionTranslationsPrefix($subtype = null) {
+        return $subtype === 'value_viewer' ? 'form.column' : 'form';
     }
 
     /**

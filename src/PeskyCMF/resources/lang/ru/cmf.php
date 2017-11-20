@@ -42,14 +42,12 @@ return [
             ]
         ]
     ],
-    'error' => [
-        'resource_item_not_found' => 'Данные запрошенного объекта не найдены',
-        'db_record_not_exists' => 'Объект не найден в базе данных',
-        'invalid_data_received' => 'Получены недопустимые данные',
-        'csrf_token_missmatch' => 'Сессия устарела или невалидна. Требуется перезагрузка страницы.',
+    'message' => [
         'http404' => 'Запрошенная страница не найдена',
-        'invalid_date_received' => 'Некорректная дата',
         'access_denied' => 'У Вас недостаточно прав для просмотра этой страницы',
+        'resource_item_not_found' => 'Данные запрошенного объекта не найдены',
+        'invalid_data_received' => 'Получены недопустимые данные',
+        'invalid_date_received' => 'Некорректная дата',
         'access_denied_to_scaffold' => 'У Вас недостаточно прав для просмотра этого раздела',
     ],
     'bool' => [
@@ -141,11 +139,18 @@ return [
         'bulk_actions' => [
             'dropdown_label' => 'Массовые действия',
             'delete_selected' => '<span class="label label-danger">:count</span> Удалить выбранные',
-            'delete_selected_confirm' => 'Подтвердите удаление выбранных объектов',
             'edit_selected' => '<span class="label label-primary">:count</span> Редактировать выбранные',
             'delete_filtered' => '<span class="label label-danger">:count</span> Удалить отфильтрованные',
-            'delete_filtered_confirm' => 'Подтвердите удаление отфильтрованных объектов',
             'edit_filtered' => '<span class="label label-primary">:count</span> Редактировать отфильтрованные',
+            'message' => [
+                'delete_bulk' => [
+                    'forbidden' => 'Массовое удаление объектов запрещено для этого раздела',
+                    'delete_selected_confirm' => 'Подтвердите удаление выбранных объектов',
+                    'delete_filtered_confirm' => 'Подтвердите удаление отфильтрованных объектов',
+                    'success' => 'Объектов удалено: :count',
+                    'nothing_deleted' => 'Не удалено ни одного объекта',
+                ],
+            ]
         ],
         'field' => [
             'bool' => [
@@ -161,14 +166,21 @@ return [
             'select_all' => 'Выбрать все',
             'select_none' => 'Отменить выбор',
             'invert_selection' => 'Обратить выделение',
-            'show_children' => 'Показать дочерние элементы',
-            'hide_children' => 'Скрыть дочерние элементы',
+            'show_children' => 'Показать вложенные элементы',
+            'hide_children' => 'Скрыть вложенные элементы',
         ],
         'filter' => [
             'bool' => [
                 'yes' => 'Да',
                 'no' => 'Нет'
             ]
+        ],
+        'message' => [
+            'delete_item_confirm' => 'Подтвердите удаление объекта',
+            'change_position' => [
+                'forbidden' => 'Изменение позиций объектов в этом разделе запрещено',
+                'success' => 'Позиция объекта изменена',
+            ],
         ]
     ],
     'form' => [
@@ -179,10 +191,23 @@ return [
             'create' => 'Добавить',
             'delete' => 'Удалить'
         ],
-        'failed_to_save_resource_data' => 'Не удалось сохранить данные',
-        'validation_errors' => 'Обнаружены недопустимые данные',
-        'resource_created_successfully' => 'Объект успешно создан',
-        'resource_updated_successfully' => 'Объект успешно изменен',
+        'message' => [
+            'delete_item_confirm' => 'Подтвердите удаление объекта',
+            'create' => [
+                'forbidden' => 'Создание объектов запрещено для этого раздела',
+                'success' => 'Объект успешно создан',
+            ],
+            'edit' => [
+                'forbidden' => 'Редактирование объектов запрещено для этого раздела',
+                'forbidden_for_record' => 'Редактирование этого объекта запрещено',
+                'key_value_table' => [
+                    'no_foreign_key_value' => 'Не задан ID объекта, которому принадлежат значения'
+                ],
+                'success' => 'Объект успешно изменен',
+            ],
+            'failed_to_save_resource_data' => 'Не удалось сохранить данные',
+            'validation_errors' => 'Обнаружены недопустимые данные',
+        ],
         'input' => [
             'bool' => [
                 'yes' => 'Да',
@@ -204,12 +229,28 @@ return [
             ]
         ],
         'bulk_edit' => [
+            'toolbar' => [
+                'close' => 'Закрыть',
+                'cancel' => 'Отмена',
+                'submit' => 'Сохранить',
+            ],
             'enabler' => [
                 'edit_input' => 'Изменить',
                 'skip_input' => 'Пропустить',
                 'tooltip' => 'Вкл./выкл. Редактирование. Если редакрирование выключено - значение не будет сохранено'
+            ],
+            'message' => [
+                'forbidden' => 'Редактирование объектов запрещено для этого раздела',
+                'no_data_to_save' => 'Нет данных для сохранения',
+                'success' => 'Объектов изменено: :count',
+                'nothing_updated' => 'Не изменено ни одного объекта',
             ]
-        ]
+        ],
+        'modal' => [
+            'open_in_new_tab' => 'Открыть в отдельной вкладке',
+            'close' => 'Закрыть',
+            'reload' => 'Обновить данные'
+        ],
     ],
     'item_details' => [
         'toolbar' => [
@@ -228,45 +269,38 @@ return [
             ],
             'no_relation' => 'Связь отсутствует',
         ],
-    ],
-    'modal' => [
-        'open_in_new_tab' => 'Открыть в отдельной вкладке',
-        'close' => 'Закрыть',
-        'reload' => 'Обновить данные'
-    ],
-    'action' => [
-        'delete' => [
-            'forbidden' => 'Удаление объектов запрещено для этого раздела',
-            'forbidden_for_record' => 'Удаление этого объекта запрещено',
-            'success' => 'Объект успешно удален',
-            'please_confirm' => 'Подтвердите удаление объекта'
+        'modal' => [
+            'open_in_new_tab' => 'Открыть в отдельной вкладке',
+            'close' => 'Закрыть',
+            'reload' => 'Обновить данные'
         ],
-        'delete_bulk' => [
-            'success' => 'Объектов удалено: :count',
-            'nothing_deleted' => 'Не удалено ни одного объекта',
-        ],
-        'create' => [
-            'forbidden' => 'Создание объектов запрещено для этого раздела',
-        ],
-        'edit' => [
-            'forbidden' => 'Редактирование объектов запрещено для этого раздела',
-            'forbidden_for_record' => 'Редактирование этого объекта запрещено',
-            'key_value_table' => [
-                'no_foreign_key_value' => 'Не задан ID объекта, которому принадлежат значения'
-            ]
-        ],
-        'bulk_edit' => [
-            'no_data_to_save' => 'Нет данных для сохранения',
-            'success' => 'Объектов изменено: :count',
-            'nothing_updated' => 'Не изменено ни одного объекта',
-        ],
-        'item_details' => [
+        'message' => [
+            'delete_item_confirm' => 'Подтвердите удаление объекта',
             'forbidden' => 'Просмотр информации об объектах этого раздела запрещен',
             'forbidden_for_record' => 'Просмотр информации об этом объекте запрещен',
         ],
+    ],
+    'delete' => [
+        'forbidden' => 'Удаление объектов запрещено для этого раздела',
+        'forbidden_for_record' => 'Удаление этого объекта запрещено',
+        'success' => 'Объект успешно удален',
+    ],
+    'action' => [
+        'delete' => [
+        ],
+        'delete_bulk' => [
+        ],
+        'create' => [
+        ],
+        'edit' => [
+        ],
+        'bulk_edit' => [
+
+        ],
+        'item_details' => [
+
+        ],
         'change_position' => [
-            'forbidden' => 'Изменение позиций объектов в этом разделе запрещено',
-            'success' => 'Позиция объекта изменена',
         ],
         'back' => 'Назад',
         'reload_page' => 'Обновить страницу',

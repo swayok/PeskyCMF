@@ -66,7 +66,7 @@ class AjaxOnly {
         } catch (InvalidDataException $exc) {
             return $this->sendValidationErrorsResponse($exc->getErrors(true));
             /*return new JsonResponse([
-                '_message' => trans(cmfTransGeneral('.error.invalid_data_received')),
+                '_message' => trans(cmfTransGeneral('message.invalid_data_received')),
                 'errors' => $exc->getErrors()
             ], HttpCode::INVALID);*/
         }

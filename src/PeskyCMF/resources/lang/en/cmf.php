@@ -42,15 +42,13 @@ return [
             ]
         ]
     ],
-    'error' => [
-        'resource_item_not_found' => 'Requested Item not found',
-        'db_record_not_exists' => 'Item not found in database',
-        'invalid_data_received' => 'Invalid data received',
-        'csrf_token_missmatch' => 'Current session is outdated or invalid. Page reloading is required.',
+    'message' => [
         'http404' => 'Requested page not found',
-        'invalid_date_received' => 'Invalid date',
         'access_denied' => 'You do not have enough rights to access requested page',
+        'resource_item_not_found' => 'Requested Item not found',
         'access_denied_to_scaffold' => 'You do not have enough rights to access requested section',
+        'invalid_data_received' => 'Invalid data received',
+        'invalid_date_received' => 'Invalid date',
     ],
     'bool' => [
         'yes' => 'Yes',
@@ -141,11 +139,18 @@ return [
         'bulk_actions' => [
             'dropdown_label' => 'Bulk actions',
             'delete_selected' => '<span class="label label-danger">:count</span> Delete selected',
-            'delete_selected_confirm' => 'Confirm selected Items delete action',
             'edit_selected' => '<span class="label label-primary">:count</span> Edit selected',
             'delete_filtered' => '<span class="label label-danger">:count</span> Delete filtered',
-            'delete_filtered_confirm' => 'Confirm filtered Items delete action',
             'edit_filtered' => '<span class="label label-primary">:count</span> Edit filtered ',
+            'message' => [
+                'delete_bulk' => [
+                    'forbidden' => 'It is forbidden to delete bulk of Items from this section',
+                    'delete_selected_confirm' => 'Confirm selected Items delete action',
+                    'delete_filtered_confirm' => 'Confirm filtered Items delete action',
+                    'success' => 'Items deleted: :count',
+                    'nothing_deleted' => 'No items deleted',
+                ],
+            ]
         ],
         'field' => [
             'bool' => [
@@ -161,14 +166,21 @@ return [
             'select_all' => 'Select all',
             'select_none' => 'Select none',
             'invert_selection' => 'Invert selection',
-            'show_children' => 'Show children',
-            'hide_children' => 'Hide children',
+            'show_children' => 'Show nested items',
+            'hide_children' => 'Hide nested items',
         ],
         'filter' => [
             'bool' => [
                 'yes' => 'Yes',
                 'no' => 'No'
             ]
+        ],
+        'message' => [
+            'delete_item_confirm' => 'Confirm Item delete action',
+            'change_position' => [
+                'forbidden' => 'It is forbidden to change items positions in this section',
+                'success' => 'Item\'s Position changed successfully',
+            ],
         ]
     ],
     'form' => [
@@ -179,10 +191,23 @@ return [
             'create' => 'Add new',
             'delete' => 'Delete'
         ],
-        'failed_to_save_resource_data' => 'Failed to save data',
-        'validation_errors' => 'Invalid data detected',
-        'resource_created_successfully' => 'Item successfully created',
-        'resource_updated_successfully' => 'Item successfully updated',
+        'message' => [
+            'delete_item_confirm' => 'Confirm Item delete action',
+            'create' => [
+                'forbidden' => 'It is forbidden to create Items in this section',
+                'success' => 'Item successfully created',
+            ],
+            'edit' => [
+                'forbidden' => 'It is forbidden to edit Items in this section',
+                'forbidden_for_record' => 'It is forbidden to edit this Item',
+                'key_value_table' => [
+                    'no_foreign_key_value' => 'There is no ID for object that should be an owner of received values'
+                ],
+                'success' => 'Item successfully updated',
+            ],
+            'failed_to_save_resource_data' => 'Failed to save data',
+            'validation_errors' => 'Invalid data detected',
+        ],
         'input' => [
             'bool' => [
                 'yes' => 'Yes',
@@ -204,12 +229,28 @@ return [
             ]
         ],
         'bulk_edit' => [
+            'toolbar' => [
+                'close' => 'Close',
+                'cancel' => 'Cancel',
+                'submit' => 'Save',
+            ],
             'enabler' => [
                 'edit_input' => 'Change',
                 'skip_input' => 'Skip',
                 'tooltip' => 'Enable/disable editing. If editing is disabled - value will not be saved on form submit'
+            ],
+            'message' => [
+                'forbidden' => 'It is forbidden to edit Items in this section',
+                'no_data_to_save' => 'No data received',
+                'success' => 'Items updated: :count',
+                'nothing_updated' => 'No items updated',
             ]
-        ]
+        ],
+        'modal' => [
+            'open_in_new_tab' => 'Open in new tab',
+            'close' => 'Close',
+            'reload' => 'Reload data'
+        ],
     ],
     'item_details' => [
         'toolbar' => [
@@ -228,45 +269,38 @@ return [
             ],
             'no_relation' => 'Relation not exists'
         ],
-    ],
-    'modal' => [
-        'open_in_new_tab' => 'Open in new tab',
-        'close' => 'Close',
-        'reload' => 'Reload data'
-    ],
-    'action' => [
-        'delete' => [
-            'forbidden' => 'It is forbidden to delete Items from this section',
-            'success' => 'Item successfully deleted',
-            'please_confirm' => 'Confirm Item delete action',
-            'forbidden_for_record' => 'It is forbidden to delete this Item',
+        'modal' => [
+            'open_in_new_tab' => 'Open in new tab',
+            'close' => 'Close',
+            'reload' => 'Reload data'
         ],
-        'delete_bulk' => [
-            'success' => 'Items deleted: :count',
-            'nothing_deleted' => 'No items deleted',
-        ],
-        'create' => [
-            'forbidden' => 'It is forbidden to create Items in this section',
-        ],
-        'edit' => [
-            'forbidden' => 'It is forbidden to edit Items in this section',
-            'forbidden_for_record' => 'It is forbidden to edit this Item',
-            'key_value_table' => [
-                'no_foreign_key_value' => 'There is no ID for object that should be an owner of received values'
-            ]
-        ],
-        'bulk_edit' => [
-            'no_data_to_save' => 'No data received',
-            'success' => 'Items updated: :count',
-            'nothing_updated' => 'No items updated',
-        ],
-        'item_details' => [
+        'message' => [
+            'delete_item_confirm' => 'Confirm Item delete action',
             'forbidden' => 'It is forbidden to view Items details in this section',
             'forbidden_for_record' => 'It is forbidden to view details of this Item',
         ],
+    ],
+    'delete' => [
+        'forbidden' => 'It is forbidden to delete Items from this section',
+        'forbidden_for_record' => 'It is forbidden to delete this Item',
+        'success' => 'Item successfully deleted',
+    ],
+    'action' => [
+        'delete' => [
+
+        ],
+        'delete_bulk' => [
+        ],
+        'create' => [
+        ],
+        'edit' => [
+        ],
+        'bulk_edit' => [
+
+        ],
+        'item_details' => [
+        ],
         'change_position' => [
-            'forbidden' => 'It is forbidden to change items positions in this section',
-            'success' => 'Item\'s Position changed successfully',
         ],
         'back' => 'Back',
         'reload_page' => 'Reload page',

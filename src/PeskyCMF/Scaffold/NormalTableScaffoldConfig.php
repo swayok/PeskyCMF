@@ -18,7 +18,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
     public function getRecordsForDataGrid() {
         if (!$this->isSectionAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.error.access_denied_to_scaffold'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
         }
         $request = $this->getRequest();
         $dataGridConfig = $this->getDataGridConfig();
@@ -107,21 +107,22 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
     public function getRecordValues($id = null) {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
         $table = static::getTable();
+        if ($isItemDetails) {
+            $sectionConfig = $this->getItemDetailsConfig();
+        } else {
+            $sectionConfig = $this->getFormConfig();
+        }
         if (
             ($isItemDetails && !$this->isDetailsViewerAllowed())
             || (!$isItemDetails && !$this->isEditAllowed())
         ) {
             return $this->makeAccessDeniedReponse(
-                cmfTransGeneral('.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden'));
+                $sectionConfig->translateGeneral($isItemDetails ? 'message.forbidden' : 'message.edit.forbidden')
+            );
         }
         $object = $table->newRecord();
         if (count($object::getPrimaryKeyColumn()->validateValue($id)) > 0) {
             return $this->makeRecordNotFoundResponse($table);
-        }
-        if ($isItemDetails) {
-            $sectionConfig = $this->getItemDetailsConfig();
-        } else {
-            $sectionConfig = $this->getFormConfig();
         }
         $conditions = $sectionConfig->getSpecialConditions();
         $conditions[$table->getPkColumnName()] = $id;
@@ -157,28 +158,27 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             )
         ) {
             return $this->makeAccessDeniedReponse(
-                cmfTransGeneral('.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden_for_record')
+                $sectionConfig->translateGeneral($isItemDetails ? 'message.forbidden_for_record' : 'message.edit.forbidden_for_record')
             );
         }
         return cmfJsonResponse()->setData($sectionConfig->prepareRecord($data));
     }
 
     public function getDefaultValuesForFormInputs() {
-        /** @var FormConfig $config */
-        if (!$this->isCreateAllowed() && !$this->isEditAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.create.forbidden'));
-        }
         $formConfig = $this->getFormConfig();
+        if (!$this->isCreateAllowed() && !$this->isEditAllowed()) {
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.create.forbidden'));
+        }
         $data = $formConfig->alterDefaultValues(static::getTable()->newRecord()->getDefaults([], false, true));
         return cmfJsonResponse()->setData($formConfig->prepareRecord($data));
     }
 
     public function addRecord() {
+        $formConfig = $this->getFormConfig();
         if (!$this->isCreateAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.create.forbidden'));
+            return $this->makeAccessDeniedReponse($formConfig->translate('message.create.forbidden'));
         }
         $table = static::getTable();
-        $formConfig = $this->getFormConfig();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
             $this->getRequest()->only(array_keys($formConfig->getValueViewers())),
             true
@@ -234,11 +234,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
     }
 
     public function updateRecord() {
+        $formConfig = $this->getFormConfig();
         if (!$this->isEditAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden'));
         }
         $table = static::getTable();
-        $formConfig = $this->getFormConfig();
         $expectedFields = array_keys($formConfig->getValueViewers());
         $expectedFields[] = $table->getPkColumnName();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
@@ -263,7 +263,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeRecordNotFoundResponse($table);
         }
         if (!$this->isRecordEditAllowed($object->toArrayWithoutFiles())) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden_for_record'));
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden_for_record'));
         }
         if ($formConfig->hasBeforeSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
@@ -365,7 +365,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $table::commitTransaction();
         return cmfJsonResponse()
             ->setMessage(
-                cmfTransGeneral($created ? '.form.resource_created_successfully' : '.form.resource_updated_successfully')
+                $formConfig->translateGeneral($created ? 'message.create.success' : 'message.edit.success')
             )
             ->setRedirect(
                 $created
@@ -375,11 +375,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
     }
 
     public function updateBulkOfRecords() {
+        $formConfig = $this->getFormConfig();
         if (!$this->isEditAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.forbidden'));
         }
         $table = static::getTable();
-        $formConfig = $this->getFormConfig();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
             array_intersect_key($this->getRequest()->input(), $formConfig->getBulkEditableColumns()), //< do not use request->only() !!!
             false,
@@ -387,7 +387,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         );
         if (empty($data)) {
             return cmfJsonResponse(HttpCode::INVALID)
-                ->setMessage(cmfTransGeneral('.action.bulk_edit.no_data_to_save'));
+                ->setMessage($formConfig->translateGeneral('bulk_edit.message.no_data_to_save'));
         }
         $errors = $formConfig->validateDataForBulkEdit($data);
         if (count($errors) !== 0) {
@@ -411,7 +411,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $conditions; //< response
         }
         if (\Gate::denies('resource.update_bulk', [static::getResourceName(), $conditions])) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('bulk_edit.message.forbidden'));
         }
         $table::beginTransaction();
         $updatedCount = $table->update($data, $conditions);
@@ -433,8 +433,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $table::commitTransaction();
         $message = $updatedCount
-            ? cmfTransGeneral('.action.bulk_edit.success', ['count' => $updatedCount])
-            : cmfTransGeneral('.action.bulk_edit.nothing_updated');
+            ? $formConfig->translateGeneral('bulk_edit.message.success', ['count' => $updatedCount])
+            : $formConfig->translateGeneral('bulk_edit.message.nothing_updated');
         return cmfJsonResponse()
             ->setMessage($message)
             ->goBack(routeToCmfItemsTable(static::getResourceName()));
@@ -442,7 +442,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
     public function deleteRecord($id) {
         if (!$this->isDeleteAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('delete.forbidden'));
         }
         $table = static::getTable();
         $object = $table->newRecord();
@@ -456,31 +456,33 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeRecordNotFoundResponse($table);
         }
         if (!$this->isRecordDeleteAllowed($object->toArrayWithoutFiles())) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden_for_record'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('delete.forbidden_for_record'));
         }
         $this->logDbRecordBeforeChange($object, static::getResourceName());
         $object->delete();
         $this->logDbRecordAfterChange($object);
         return cmfJsonResponse()
-            ->setMessage(cmfTransGeneral('.action.delete.success'))
+            ->setMessage($this->translateGeneral('delete.success'))
             ->goBack(routeToCmfItemsTable(static::getResourceName()));
     }
 
     public function deleteBulkOfRecords() {
         if (!$this->isDeleteAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('delete.forbidden'));
         }
         $conditions = $this->getSelectConditionsForBulkActions();
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
         if (\Gate::denies('resource.delete_bulk', [static::getResourceName(), $conditions])) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.delete.forbidden'));
+            return $this->makeAccessDeniedReponse(
+                $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.forbidden')
+            );
         }
         $deletedCount = static::getTable()->delete($conditions);
         $message = $deletedCount
-            ? cmfTransGeneral('.action.delete_bulk.success', ['count' => $deletedCount])
-            : cmfTransGeneral('.action.delete_bulk.nothing_deleted');
+            ? $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.success', ['count' => $deletedCount])
+            : $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.nothing_deleted');
         return cmfJsonResponse()
             ->setMessage($message)
             ->goBack(routeToCmfItemsTable(static::getResourceName()));
@@ -497,7 +499,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
      * @throws \BadMethodCallException
      */
     protected function getSelectConditionsForBulkActions($inputNamePrefix = '') {
-        $specialConditions = $this->getFormConfig()->getSpecialConditions();
+        $formConfig = $this->getFormConfig();
+        $specialConditions = $formConfig->getSpecialConditions();
         $conditions = $specialConditions;
         $idsField = $inputNamePrefix . 'ids';
         $conditionsField = $inputNamePrefix . 'conditions';
@@ -515,7 +518,10 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 ? json_decode($this->getRequest()->input($conditionsField), true)
                 : [];
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
-                return cmfJsonResponseForValidationErrors([$conditionsField => 'JSON expected']);
+                return cmfJsonResponseForValidationErrors(
+                    [$conditionsField => 'JSON expected'],
+                    $formConfig->translateGeneral('validation_errors')
+                );
             }
             if (!empty($encodedConditions)) {
                 $filterConditions = $this
@@ -524,10 +530,13 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $conditions = array_merge($filterConditions, $specialConditions);
             }
         } else {
-            return cmfJsonResponseForValidationErrors([
-                $idsField => 'List of items IDs of filtering conditions expected',
-                $conditionsField => 'List of items IDs of filtering conditions expected',
-            ]);
+            return cmfJsonResponseForValidationErrors(
+                [
+                    $idsField => 'List of items IDs of filtering conditions expected',
+                    $conditionsField => 'List of items IDs of filtering conditions expected',
+                ],
+                $formConfig->translateGeneral('validation_errors')
+            );
         }
         return $conditions;
     }
@@ -538,7 +547,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             !$dataGridConfig->isRowsReorderingEnabled()
             || !in_array($columnName, $dataGridConfig->getRowsPositioningColumns(), true)
         ) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.change_position.forbidden'));
+            return $this->makeAccessDeniedReponse($dataGridConfig->translateGeneral('message.change_position.forbidden'));
         }
         $table = static::getTable();
         if (
@@ -610,7 +619,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $movedRecord->begin()->updateValue($columnName, $newPosition, false)->commit();
         $table::commitTransaction();
         return cmfJsonResponse()
-            ->setMessage(cmfTransGeneral('.action.change_position.success'));
+            ->setMessage($dataGridConfig->translateGeneral('message.change_position.success'));
     }
 
 }

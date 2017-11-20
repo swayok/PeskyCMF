@@ -56,7 +56,7 @@ class ValidateCmfUser {
         $response = $next($request);
         if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
             $fallbackUrl = $configs::login_page_url();
-            $message = $configs::transGeneral('.error.access_denied');
+            $message = $configs::transGeneral('.message.access_denied');
             $response = $request->ajax()
                 ? CmfJsonResponse::create([], HttpCode::FORBIDDEN)
                     ->setMessage($message)

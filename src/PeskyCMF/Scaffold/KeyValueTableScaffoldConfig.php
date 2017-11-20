@@ -66,23 +66,24 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
     public function getRecordValues($ownerRecordId = null) {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
         $table = static::getTable();
+        if ($isItemDetails) {
+            $sectionConfig = $this->getItemDetailsConfig();
+        } else {
+            $sectionConfig = $this->getFormConfig();
+        }
         if (
             ($isItemDetails && !$this->isDetailsViewerAllowed())
             || (!$isItemDetails && !$this->isEditAllowed())
         ) {
             return $this->makeAccessDeniedReponse(
-                cmfTransGeneral('.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden'));
+                $sectionConfig->translateGeneral($isItemDetails ? 'message.forbidden' : 'message.edit.forbidden')
+            );
         }
         $fkColumn = $table->getMainForeignKeyColumnName();
         if (empty($ownerRecordId) && !empty($fkColumn)) {
             return $this->makeRecordNotFoundResponse($table);
         }
         $keysAndValues = $table::getValuesForForeignKey(empty($fkColumn) ? null : $ownerRecordId, true);
-        if ($isItemDetails) {
-            $sectionConfig = $this->getItemDetailsConfig();
-        } else {
-            $sectionConfig = $this->getFormConfig();
-        }
         $keysAndValues[$table::getPkColumnName()] = 0;
         return cmfJsonResponse()->setData($sectionConfig->prepareRecord($keysAndValues));
     }
@@ -96,22 +97,22 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
     }
 
     public function updateRecord() {
+        $formConfig = $this->getFormConfig();
         if (!$this->isEditAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden'));
         }
         $table = static::getTable();
-        $formConfig = $this->getFormConfig();
         $fkColumn = $table->getMainForeignKeyColumnName();
         $request = $this->getRequest();
         if (!empty($fkColumn) && empty($request->input($fkColumn))) {
             return $this->makeRecordNotFoundResponse(
                 $table,
-                cmfTransGeneral('.action.edit.key_value_table.no_foreign_key_value')
+                $formConfig->translateGeneral('message.edit.key_value_table.no_foreign_key_value')
             );
         }
         $fkValue = empty($fkColumn) ? null : $request->input($fkColumn);
         if (\Gate::denies('resource.update', [static::getResourceName(), $fkValue])) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden'));
         }
         $inputConfigs = $formConfig->getValueViewers();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
@@ -182,7 +183,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             }
         }
         return cmfJsonResponse()
-            ->setMessage(cmfTransGeneral('.form.resource_updated_successfully'))
+            ->setMessage($formConfig->translateGeneral('message.edit.success'))
             ->setRedirect('reload');
     }
 

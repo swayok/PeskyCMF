@@ -10,6 +10,7 @@ use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\ApiDocs\CmfApiDocsSection;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\HttpCode;

@@ -16,7 +16,7 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"
-                    aria-label="<?php echo cmfTransGeneral('.form.toolbar.cancel'); ?>">
+                    aria-label="<?php echo $formConfig->translateGeneral('bulk_edit.toolbar.close'); ?>">
                         <span aria-hidden="true">&times;</span>
                     </button>
                     <h4 class="modal-title" id="scaffold-bulk-edit-<?php echo $idSuffix; ?>-header">
@@ -54,7 +54,7 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                     <!-- end of autofill disabler -->
                     <div class="modal-body">
                     <?php
-                        $enablerTooltip = cmfTransGeneral('.form.bulk_edit.enabler.tooltip');
+                        $enablerTooltip = $formConfig->translateGeneral('bulk_edit.enabler.tooltip');
                         $baseEnablerId = str_random() . '-enabler-for-';
                         foreach ($formConfig->getBulkEditableColumns() as $inputConfig) {
                             try {
@@ -79,12 +79,12 @@ INPUT;
                         <div class="row">
                             <div class="col-xs-6 text-left">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">
-                                    <?php echo cmfTransGeneral('.form.toolbar.cancel'); ?>
+                                    <?php echo $formConfig->translateGeneral('bulk_edit.toolbar.cancel'); ?>
                                 </button>
                             </div>
                             <div class="col-xs-6 text-right">
                                 <button type="submit" class="btn btn-success" disabled>
-                                    <?php echo cmfTransGeneral('.form.toolbar.submit'); ?>
+                                    <?php echo $formConfig->translateGeneral('bulk_edit.toolbar.submit'); ?>
                                 </button>
                             </div>
                         </div>

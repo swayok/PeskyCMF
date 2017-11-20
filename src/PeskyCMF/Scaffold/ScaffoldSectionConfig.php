@@ -121,12 +121,53 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
+     * Translate resource-related items (column names, input labels, etc.)
      * @param AbstractValueViewer|null $viewer
      * @param string $suffix
      * @param array $parameters
      * @return string
      */
-    abstract public function translate(AbstractValueViewer $viewer = null, $suffix = '', array $parameters = []);
+    public function translate(AbstractValueViewer $viewer = null, $suffix = '', array $parameters = []) {
+        if ($viewer) {
+            return $this
+                ->getScaffoldConfig()
+                ->translateForViewer($this->getSectionTranslationsPrefix('value_viewer'), $viewer, $suffix, $parameters);
+        } else {
+            return $this
+                ->getScaffoldConfig()
+                ->translate($this->getSectionTranslationsPrefix(), $suffix, $parameters);
+        }
+    }
+
+    /**
+     * Translate general UI elements (button labels, tooltips, messages, etc..)
+     * @param $path
+     * @param array $parameters
+     * @return mixed
+     */
+    public function translateGeneral($path, array $parameters = []) {
+        $prefix = $this->getSectionTranslationsPrefix();
+        $text = $this->getScaffoldConfig()->translate($prefix, $path, $parameters);
+        if (preg_match('%\.' . preg_quote($prefix . '.' . $path, '%') . '$%', $text)) {
+            $text = cmfTransGeneral($this->getSectionTranslationsPrefix('general') . '.' . $path);
+        }
+        return $text;
+    }
+
+    /**
+     * Prefix for this section's translations (ex: 'datagrid', 'item_details', 'form')
+     * Will be used in $this->translate() and $this->translateGeneral()
+     * @param bool $subtype - null, 'value_viewer', 'general'.
+     *      - null - common translations for section. Path will be like 'resource.{section}.translation'
+     *      - 'value_viewer' - translations for value viewers labels. It is preferred to nest
+     *          value viewer labels deeper in section (ex: 'datagrid.columns') or outside of section (ex: 'columns').
+     *          Path will be like 'resource.{section}.value_viewers.translation'
+     *      - 'general' - translations for general UI elements ($this->translateGeneral()). Used only when there is
+     *          no custom translation (example path: 'resource.{section}.translation') and system needs to get
+     *          translation from cmfTransGeneral(). By default it should be same as for $subtype = null
+     * @return string
+     */
+    abstract protected function getSectionTranslationsPrefix($subtype = null);
 
     /**
      * Disables any usage of TableStructure (validation, automatic field type guessing, etc)

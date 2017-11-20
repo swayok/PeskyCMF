@@ -317,7 +317,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
      */
     function cmfJsonResponseForHttp404($fallbackUrl = null, $message = null) {
         if (empty($message)) {
-            $message = cmfTransGeneral('.error.http404');
+            $message = cmfTransGeneral('.message.http404');
         }
         if (empty($fallbackUrl)) {
             $fallbackUrl = \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url();
@@ -379,7 +379,7 @@ if (!function_exists('formatDate')) {
             $date = strtotime($date);
         }
         if ($date <= 0) {
-            return cmfTransGeneral('.error.invalid_date_received');
+            return cmfTransGeneral('.message.invalid_date_received');
         }
         $month = cmfTransGeneral('.month.when.' . date('m', $date));
         return date('j ', $date) . $month . date(' Y', $date) . ($addTime ? date(' H:i', $date) : '');

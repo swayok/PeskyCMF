@@ -50,11 +50,11 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             <div class="col-xs-3">
                 {{? it.__modal }}
                     <button type="button" class="btn btn-default" data-dismiss="modal">
-                        <?php echo cmfTransGeneral('.form.toolbar.close'); ?>
+                        <?php echo $formConfig->translateGeneral('toolbar.close'); ?>
                     </button>
                 {{??}}
                     <button type="button" class="btn btn-default" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
-                        <?php echo cmfTransGeneral('.form.toolbar.cancel'); ?>
+                        <?php echo $formConfig->translateGeneral('toolbar.cancel'); ?>
                     </button>
                 {{?}}
             </div>
@@ -62,7 +62,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             <?php echo $ifEdit; ?>
                 <?php /*if ($formConfig->isCreateAllowed()) : ?>
                     <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
-                        <?php echo cmfTransGeneral('.form.toolbar.create'); ?>
+                        <?php echo $formConfig->translateGeneral('toolbar.create'); ?>
                     </a>
                 <?php endif;*/ ?>
                 <?php if ($formConfig->isDeleteAllowed()) : ?>
@@ -70,9 +70,9 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     <a class="btn btn-danger" href="#"
                        data-action="request" data-method="delete"
                        data-url="<?php echo cmfRouteTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
-                       data-confirm="<?php echo cmfTransGeneral('.action.delete.please_confirm'); ?>"
+                       data-confirm="<?php echo $formConfig->translateGeneral('message.delete_item_confirm'); ?>"
                        data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
-                        <?php echo cmfTransGeneral('.form.toolbar.delete'); ?>
+                        <?php echo $formConfig->translateGeneral('toolbar.delete'); ?>
                     </a>
                     {{?}}
                 <?php endif; ?>
@@ -80,7 +80,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             </div>
             <div class="col-xs-3 text-right">
                 <button type="submit" class="btn btn-success">
-                    <?php echo cmfTransGeneral('.form.toolbar.submit'); ?>
+                    <?php echo $formConfig->translateGeneral('toolbar.submit'); ?>
                 </button>
             </div>
         </div>
@@ -200,20 +200,20 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                         <div class="box-tools pull-right">
                             <a class="btn btn-box-tool fs13 va-t ptn mt5"
                                href="<?php echo $pageUrl ?>"
-                               data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.reload'); ?>">
+                               data-toggle="tooltip" title="<?php echo $formConfig->translateGeneral('modal.reload'); ?>">
                                 <i class="glyphicon glyphicon-refresh"></i>
                             </a>
 <!--                            <button type="button" data-action="reload" class="btn btn-box-tool fs13 va-t ptn mt5"-->
-<!--                                    data-toggle="tooltip" title="--><?php //echo cmfTransGeneral('.modal.reload'); ?><!--">-->
+<!--                                    data-toggle="tooltip" title="--><?php //echo $formConfig->translateGeneral('modal.reload'); ?><!--">-->
 <!--                                <i class="glyphicon glyphicon-refresh"></i>-->
 <!--                            </button>-->
                             <a class="btn btn-box-tool fs13 va-t ptn mt5" target="_blank"
                                href="<?php echo $pageUrl; ?>"
-                               data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.open_in_new_tab'); ?>">
+                               data-toggle="tooltip" title="<?php echo $formConfig->translateGeneral('modal.open_in_new_tab'); ?>">
                                 <i class="glyphicon glyphicon-share"></i>
                             </a>
                             <button type="button" data-dismiss="modal" class="btn btn-box-tool va-t pbn ptn mt5"
-                                    data-toggle="tooltip" title="<?php echo cmfTransGeneral('.modal.close'); ?>">
+                                    data-toggle="tooltip" title="<?php echo $formConfig->translateGeneral('modal.close'); ?>">
                                 <span class="fs24 lh15">&times;</span>
                             </button>
                         </div>

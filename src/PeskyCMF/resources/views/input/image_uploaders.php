@@ -48,7 +48,7 @@ $configNameToInputId = [];
         <?php if ($imageConfig->getMaxFilesCount() > 1): ?>
             <div class="mv15 text-center">
                 <button type="button" class="btn btn-default btn-sm" id="<?php echo $inputId; ?>-add">
-                    <?php echo cmfTransGeneral('.form.input.file_uploads.add_image') ?>
+                    <?php echo $sectionConfig->translateGeneral('input.file_uploads.add_image') ?>
                 </button>
             </div>
         <?php endif;?>

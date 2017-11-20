@@ -328,9 +328,23 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return cmfTransCustom(rtrim(".{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'), $parameters);
     }
 
+    /**
+     * Translate general UI elements (button labels, tooltips, messages, etc..)
+     * @param $path
+     * @param array $parameters
+     * @return mixed
+     */
+    public function translateGeneral($path, array $parameters = []) {
+        $text = $this->translate($path, $parameters);
+        if (preg_match('%\.' . preg_quote($path, '%') . '$%', $text)) {
+            $text = cmfTransGeneral($path);
+        }
+        return $text;
+    }
+
     public function renderTemplates() {
         if (!$this->isSectionAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.error.access_denied_to_scaffold'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
         }
         return view(
             CmfConfig::getPrimary()->scaffold_templates_view_for_normal_table(),
@@ -372,10 +386,10 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     public function getHtmlOptionsForFormInputs() {
         if (!$this->isSectionAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.error.access_denied_to_scaffold'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
         }
         if (!$this->isEditAllowed() && !$this->isCreateAllowed()) {
-            return $this->makeAccessDeniedReponse(cmfTransGeneral('.action.edit.forbidden'));
+            return $this->makeAccessDeniedReponse($this->getFormConfig()->translateGeneral('message.edit.forbidden'));
         }
         $formConfig = $this->getFormConfig();
         $columnsOptions = $formConfig->loadOptions($this->getRequest()->query('id'));
@@ -427,7 +441,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      */
     protected function makeRecordNotFoundResponse(TableInterface $table, $message = null) {
         if (empty($message)) {
-            $message = cmfTransGeneral('.error.resource_item_not_found');
+            $message = $this->translateGeneral('message.resource_item_not_found');
         }
         return cmfJsonResponseForHttp404(
             routeToCmfItemsTable(static::getResourceName()),

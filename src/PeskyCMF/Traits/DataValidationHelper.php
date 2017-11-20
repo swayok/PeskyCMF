@@ -2,8 +2,8 @@
 
 namespace PeskyCMF\Traits;
 
+use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
-use PeskyCMF\HttpCode;
 use Swayok\Utils\Set;
 
 trait DataValidationHelper {
@@ -14,7 +14,7 @@ trait DataValidationHelper {
      * @param array $rules
      * @param array $messages
      * @param array $customAttributes
-     * @return bool
+     * @return bool|Response
      */
     protected function validate(array $data, array $rules, array $messages = array(), array $customAttributes = array()) {
         $errors = $this->validateWithoutHalt($data, $rules, $messages, $customAttributes);
@@ -39,12 +39,16 @@ trait DataValidationHelper {
     }
 
     protected function getValidationErrorsResponseMessage() {
-        return cmfTransGeneral('.error.invalid_data_received');
+        return cmfTransGeneral('.message.invalid_data_received');
     }
 
+    /**
+     * @param array $errors
+     * @return Response
+     * @throws ValidationException
+     */
     protected function sendValidationErrorsResponse(array $errors) {
         throw ValidationException::withMessages($errors);
-        return true;
     }
 
     protected function prepareDataForValidationErrorsResponse(array $errors) {

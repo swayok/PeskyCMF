@@ -43,17 +43,17 @@ uasort($gridColumnsConfigs, function ($a, $b) {
 
                         $selectionActions = [
                             \Swayok\Html\Tag::a()
-                                ->setContent(cmfTransGeneral('.datagrid.actions.select_all'))
+                                ->setContent($dataGridConfig->translateGeneral('actions.select_all'))
                                 ->setClass('select-all')
                                 ->setHref('javascript: void(0)')
                                 ->build(),
                             \Swayok\Html\Tag::a()
-                                ->setContent(cmfTransGeneral('.datagrid.actions.select_none'))
+                                ->setContent($dataGridConfig->translateGeneral('actions.select_none'))
                                 ->setClass('select-none')
                                 ->setHref('javascript: void(0)')
                                 ->build(),
                             \Swayok\Html\Tag::a()
-                                ->setContent(cmfTransGeneral('.datagrid.actions.invert_selection'))
+                                ->setContent($dataGridConfig->translateGeneral('actions.invert_selection'))
                                 ->setClass('invert-selection')
                                 ->setHref('javascript: void(0)')
                                 ->build()
@@ -117,8 +117,8 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         if ($dataGridConfig->isAllowedMultiRowSelection()) {
             if ($dataGridConfig->isDeleteAllowed() && $dataGridConfig->isBulkItemsDeleteAllowed()) {
                 $bulkActions[] = \Swayok\Html\Tag::a()
-                    ->setContent(cmfTransGeneral('.datagrid.bulk_actions.delete_selected'))
-                    ->setDataAttr('confirm', cmfTransGeneral('.datagrid.bulk_actions.delete_selected_confirm'))
+                    ->setContent($dataGridConfig->translateGeneral('bulk_actions.message.delete_selected'))
+                    ->setDataAttr('confirm', $dataGridConfig->translateGeneral('bulk_actions.message.delete_selected_confirm'))
                     ->setDataAttr('action', 'bulk-selected')
                     ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                     ->setDataAttr('id-field', $pkName)
@@ -128,7 +128,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             }
             if ($dataGridConfig->isEditAllowed() && $dataGridConfig->isBulkItemsEditingAllowed()) {
                 $bulkActions[] = \Swayok\Html\Tag::a()
-                    ->setContent(cmfTransGeneral('.datagrid.bulk_actions.edit_selected'))
+                    ->setContent($dataGridConfig->translateGeneral('bulk_actions.edit_selected'))
                     ->setDataAttr('action', 'bulk-edit-selected')
                     ->setDataAttr('id-field', $pkName)
                     ->setHref('javascript: void(0)')
@@ -137,9 +137,9 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         if ($dataGridConfig->isDeleteAllowed() && $dataGridConfig->isFilteredItemsDeleteAllowed()) {
             $bulkActions[] = \Swayok\Html\Tag::a()
-                ->setContent(cmfTransGeneral('.datagrid.bulk_actions.delete_filtered'))
+                ->setContent($dataGridConfig->translateGeneral('bulk_actions.message.delete_filtered'))
                 ->setDataAttr('action', 'bulk-filtered')
-                ->setDataAttr('confirm', cmfTransGeneral('.datagrid.bulk_actions.delete_filtered_confirm'))
+                ->setDataAttr('confirm', $dataGridConfig->translateGeneral('bulk_actions.message.delete_filtered_confirm'))
                 ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                 ->setDataAttr('method', 'delete')
                 ->setHref('javascript: void(0)')
@@ -147,7 +147,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         if ($dataGridConfig->isEditAllowed() && $dataGridConfig->isFilteredItemsEditingAllowed()) {
             $bulkActions[] = \Swayok\Html\Tag::a()
-                ->setContent(cmfTransGeneral('.datagrid.bulk_actions.edit_filtered'))
+                ->setContent($dataGridConfig->translateGeneral('bulk_actions.edit_filtered'))
                 ->setDataAttr('action', 'bulk-edit-filtered')
                 ->setHref('javascript: void(0)')
                 ->build();
@@ -167,7 +167,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setDataAttr('toggle' , 'dropdown')
                 ->setAttribute('aria-haspopup', 'true')
                 ->setAttribute('aria-expanded', 'false')
-                ->setContent(cmfTransGeneral('.datagrid.bulk_actions.dropdown_label'))
+                ->setContent($dataGridConfig->translateGeneral('bulk_actions.dropdown_label'))
                 ->append('&nbsp;<span class="caret"></span>')
                 ->build();
 
@@ -183,7 +183,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         if ($dataGridConfig->isCreateAllowed()) {
             $toolbar['create'] = \Swayok\Html\Tag::a()
-                ->setContent(cmfTransGeneral('.datagrid.toolbar.create'))
+                ->setContent($dataGridConfig->translateGeneral('toolbar.create'))
                 ->setClass('btn btn-primary')
                 ->setHref(routeToCmfItemAddForm($tableNameForRoutes))
                 ->build();
@@ -195,14 +195,14 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $showChildren = \Swayok\Html\Tag::a()
                 ->setClass('row-action link-muted show-children')
                 ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
-                ->setTitle(cmfTransGeneral('.datagrid.actions.show_children'))
+                ->setTitle($dataGridConfig->translateGeneral('actions.show_children'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref('javascript: void(0)')
                 ->build();
             $hideChildren = \Swayok\Html\Tag::a()
                 ->setClass('row-action link-muted hide-children hidden')
                 ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
-                ->setTitle(cmfTransGeneral('.datagrid.actions.hide_children'))
+                ->setTitle($dataGridConfig->translateGeneral('actions.hide_children'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref('javascript: void(0)')
                 ->build();
@@ -216,7 +216,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue item-details')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
-                ->setTitle(cmfTransGeneral('.datagrid.actions.view_item'))
+                ->setTitle($dataGridConfig->translateGeneral('actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref(':___details_url:')
                 ->build();
@@ -228,7 +228,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green item-edit')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
-                ->setTitle(cmfTransGeneral('.datagrid.actions.edit_item'))
+                ->setTitle($dataGridConfig->translateGeneral('actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref($url)
                 ->build();
@@ -239,13 +239,13 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $btn = \Swayok\Html\Tag::a()
                 ->setContent('<i class="glyphicon glyphicon-trash"></i>')
                 ->setClass('row-action text-red item-delete')
-                ->setTitle(cmfTransGeneral('.datagrid.actions.delete_item'))
+                ->setTitle($dataGridConfig->translateGeneral('actions.delete_item'))
                 ->setDataAttr('toggle', 'tooltip')
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
                 ->setDataAttr('url', cmfRoute('cmf_api_delete_item', [$tableNameForRoutes, ":{$pkName}:"], false))
-                ->setDataAttr('confirm', cmfTransGeneral('.action.delete.please_confirm'))
+                ->setDataAttr('confirm', $dataGridConfig->translateGeneral('message.delete_item_confirm'))
                 ->setHref('javascript: void(0)')
                 ->build();
             $actionsTpl .= '{{? !!it.___delete_allowed }}' . $btn . '{{?}}';
@@ -412,7 +412,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 is_opened: <?php echo $dataGridConfig->isFilterOpenedByDefault() ? 'true' : 'false'; ?>
             };
 
-            DataGridSearchHelper.locale = <?php echo json_encode(cmfTransGeneral('.datagrid.toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
+            DataGridSearchHelper.locale = <?php echo json_encode($dataGridConfig->translateGeneral('toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
 
             <?php if ($dataGridConfig->hasJsInitiator()): ?>
                 <?php echo $dataGridConfig->getJsInitiator(); ?>.call($('#<?php echo $dataGridId; ?>'));

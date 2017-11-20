@@ -372,7 +372,7 @@ abstract class AbstractValueViewer {
         }
         $relationPkColumn = $relationConfig->getForeignTable()->getPkColumnName();
         if (empty($relationData) || empty($relationData[$relationPkColumn])) {
-            return cmfTransGeneral('.item_details.field.no_relation');
+            return $this->getScaffoldSectionConfig()->translateGeneral('field.no_relation');
         } else {
             if (empty($linkLabel)) {
                 if ($relationColumn instanceof \Closure) {
