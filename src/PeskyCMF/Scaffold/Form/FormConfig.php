@@ -1064,7 +1064,7 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     protected function getSectionTranslationsPrefix($subtype = null) {
-        return $subtype === 'value_viewer' ? 'form.column' : 'form';
+        return $subtype === 'value_viewer' ? 'form.input' : 'form';
     }
 
     /**

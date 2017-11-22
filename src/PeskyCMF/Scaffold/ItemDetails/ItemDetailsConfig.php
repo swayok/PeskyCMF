@@ -201,7 +201,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     }
 
     protected function getSectionTranslationsPrefix($subtype = null) {
-        return $subtype === 'value_viewer' ? 'item_details.column' : 'item_details';
+        return $subtype === 'value_viewer' ? 'item_details.field' : 'item_details';
     }
 
     /**

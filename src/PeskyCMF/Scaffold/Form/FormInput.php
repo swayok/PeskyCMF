@@ -401,8 +401,8 @@ class FormInput extends RenderableValueViewer {
      * @return mixed
      */
     public function modifySubmitedValueBeforeValidation($value, array $data) {
-        if (!empty($this->submittedValueModifier)) {
-            return call_user_func($this->submittedValueModifier, $value, $data);
+        if ($this->hasSubmittedValueModifier()) {
+            return call_user_func($this->getSubmittedValueModifier(), $value, $data);
         } else {
             return $value;
         }
@@ -416,6 +416,20 @@ class FormInput extends RenderableValueViewer {
     public function setSubmittedValueModifier(\Closure $modifier) {
         $this->submittedValueModifier = $modifier;
         return $this;
+    }
+
+    /**
+     * @return \Closure|null
+     */
+    protected function getSubmittedValueModifier() {
+        return $this->submittedValueModifier;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSubmittedValueModifier() {
+        return !empty($this->submittedValueModifier);
     }
 
     /**
