@@ -16,11 +16,6 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
     public function getValueConverter() {
         if (empty(parent::getValueConverter())) {
             switch ($this->getType()) {
-                case self::TYPE_BOOL:
-                    $this->setValueConverter(function ($value) {
-                        return CmfConfig::transBase('.item_details.field.bool.' . ($value ? 'yes' : 'no'));
-                    });
-                    break;
                 case self::TYPE_IMAGE:
                     $this->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
                         if (!empty($value) && is_array($value) && !empty($value['url']) && is_array($value['url'])) {
