@@ -13,10 +13,9 @@ $ifEdit = '{{? !it._is_creation }}';
 $ifCreate = '{{? it._is_creation }}';
 $else = '{{??}}';
 $endIf = '{{?}}';
-$printPk = "{{= it.{$pkColName} }}";
 
-$pageUrl = $ifEdit . cmfRouteTpl('cmf_item_edit_form', ['table_name' => $tableNameForRoutes], ['id' => 'it.' . $table->getPkColumnName()])
-    . $else . cmfRouteTpl('cmf_item_add_form', ['table_name' => $tableNameForRoutes])
+$pageUrl = $ifEdit . routeToCmfItemEditForm($tableNameForRoutes, '{{= it.' . $table->getPkColumnName() . '}}')
+    . $else . routeToCmfItemAddForm($tableNameForRoutes)
     . $endIf;
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 $tabs = $formConfig->getTabs();
@@ -69,7 +68,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     {{? !!it.___delete_allowed }}
                     <a class="btn btn-danger" href="#"
                        data-action="request" data-method="delete"
-                       data-url="<?php echo cmfRouteTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
+                       data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
                        data-confirm="<?php echo $formConfig->translateGeneral('message.delete_item_confirm'); ?>"
                        data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
                         <?php echo $formConfig->translateGeneral('toolbar.delete'); ?>
@@ -87,11 +86,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         <?php $toolbarItems = $formConfig->getToolbarItems(); ?>
         <?php if (count($toolbarItems) > 0) : ?>
             <div class="mt10 text-center">
-                <?php
-                    foreach ($toolbarItems as $toolbarItem) {
-                        echo ' ' . preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $toolbarItem) . ' ';
-                    }
-                ?>
+                <?php implode(' ', $toolbarItems); ?>
             </div>
         <?php endif; ?>
     </div>
@@ -131,7 +126,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         if ($formConfig->hasJsInitiator()) {
             $formAttributes['data-initiator'] = addslashes($formConfig->getJsInitiator());
         }
-        $editUrl = cmfRoute('cmf_api_update_item', ['table_name' => $tableNameForRoutes, 'id' => ''], false) . '/' . $printPk;
+        $editUrl = cmfRouteTpl('cmf_api_update_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.___pk_value'], false);
         $createUrl = cmfRoute('cmf_api_create_item', ['table_name' => $tableNameForRoutes], false);
         $formAction = $ifEdit . $editUrl . $else . $createUrl . $endIf;
     ?>
@@ -139,7 +134,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
     data-uuid="{{= it.formUUID }}">
         <?php echo $ifEdit; ?>
             <input type="hidden" name="_method" value="PUT">
-            <input type="hidden" name="<?php echo $pkColName; ?>" value="<?php echo $printPk; ?>">
+            <input type="hidden" name="<?php echo $pkColName; ?>" value="{{= it.___pk_value }}">
         <?php echo $endIf; ?>
         <!-- disable chrome email & password autofill -->
         <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>

@@ -5,7 +5,7 @@
  * @var string $tableNameForRoutes
  * @var string $idSuffix
  */
-$pageUrl = cmfRouteTpl('cmf_item_details', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]);
+$pageUrl = routeToCmfItemDetails($tableNameForRoutes, '{{= it.___pk_value }}');
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 $tabs = $itemDetailsConfig->getTabs();
 $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
@@ -121,16 +121,12 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
             <?php endif; ?>
         </div>
         <div class="{{? it.__modal }} col-xs-8 {{??}} col-xs-9 {{?}} text-right">
-            <?php
-                foreach ($itemDetailsConfig->getToolbarItems() as $toolbarItem) {
-                    echo ' ' . preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%is', '{{= it.$2 }}', $toolbarItem) . ' ';
-                }
-            ?>
+            <?php echo implode(' ', $itemDetailsConfig->getToolbarItems()); ?>
             <?php if ($itemDetailsConfig->isDeleteAllowed()) : ?>
                 {{? !!it.___delete_allowed }}
                     <a class="btn btn-danger" href="#"
                        data-action="request" data-method="delete"
-                       data-url="<?php echo cmfRouteTpl('cmf_api_delete_item', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>"
+                       data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
                        data-confirm="<?php echo $itemDetailsConfig->translateGeneral('message.delete_item_confirm'); ?>"
                        data-on-success="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
                         <?php echo $itemDetailsConfig->translateGeneral('toolbar.delete'); ?>
@@ -140,7 +136,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
             <?php if ($itemDetailsConfig->isEditAllowed()) : ?>
                 {{? !!it.___edit_allowed }}
                     <a class="btn btn-success"
-                       href="<?php echo cmfRouteTpl('cmf_item_edit_form', ['table_name' => $tableNameForRoutes], ['id' => 'it.__' . $table->getPkColumnName()]); ?>">
+                       href="<?php echo routeToCmfItemEditForm($tableNameForRoutes, '{{= it.___pk_value }}'); ?>">
                         <?php echo $itemDetailsConfig->translateGeneral('toolbar.edit'); ?>
                     </a>
                 {{?}}

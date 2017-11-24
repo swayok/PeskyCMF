@@ -212,19 +212,19 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $actionsCount++;
         }
         if ($dataGridConfig->isDetailsViewerAllowed()) {
-            $url = $dblClickUrl = ':___details_url:';
+            $url = $dblClickUrl = '{{ it.___details_url }}';
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue item-details')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
                 ->setTitle($dataGridConfig->translateGeneral('actions.view_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setHref(':___details_url:')
+                ->setHref('{{= it.___details_url }}')
                 ->build();
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
             $actionsCount++;
         }
         if ($dataGridConfig->isEditAllowed()) {
-            $url = $dblClickUrl = cmfRoute('cmf_item_edit_form', ['table_name' => $tableNameForRoutes, 'id' => ":{$pkName}:"]);
+            $url = $dblClickUrl = routeToCmfItemEditForm($tableNameForRoutes, "{{= it.___pk_value }}");
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green item-edit')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
@@ -244,7 +244,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
-                ->setDataAttr('url', cmfRoute('cmf_api_delete_item', [$tableNameForRoutes, ":{$pkName}:"], false))
+                ->setDataAttr('url', routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}', false))
                 ->setDataAttr('confirm', $dataGridConfig->translateGeneral('message.delete_item_confirm'))
                 ->setHref('javascript: void(0)')
                 ->build();
@@ -258,7 +258,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 $actionsCount++;
             }
         }
-        $actionsTpl = '<div class="row-actions text-nowrap">' . preg_replace('%:([a-zA-Z0-9_]+):%is', '{{= it.$1 }}', $actionsTpl) . '</div>'
+        $actionsTpl = '<div class="row-actions text-nowrap">' . $actionsTpl . '</div>';
     ?>
 
     <script type="application/javascript">
@@ -298,9 +298,9 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                             'cmf_api_change_item_position',
                             ['table_name' => $tableNameForRoutes],
                             [
-                                'id' => 'it.moved_row.__' . $pkName,
+                                'id' => 'it.moved_row.___pk_value',
                                 'before_or_after',
-                                'other_id' => 'it.other_row.__' . $pkName . ' || 0',
+                                'other_id' => 'it.other_row.___pk_value || 0',
                                 'sort_column',
                                 'sort_direction'
                             ]
@@ -379,7 +379,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             <?php if (!empty($dblClickUrl)): ?>
                 dataTablesConfig.doubleClickUrl = null;
                 Utils.makeTemplateFromText(
-                        '<?php echo addslashes(preg_replace('%(:|\%3A)([a-zA-Z0-9_]+)\1%i', '{{= it.$2 }}', $dblClickUrl)); ?>',
+                        '<?php echo addslashes($dblClickUrl); ?>',
                         'Double click URL template'
                     )
                     .done(function (template) {
