@@ -124,10 +124,21 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function setInvisibleColumns(...$columnNames) {
-        if (count($columnNames) && is_array($columnNames[0])) {
-            $columnNames = $columnNames[0];
-        }
-        foreach ($columnNames as $name) {
+        return call_user_func_array(array($this, 'setAdditionalColumnsToSelect'), $columnNames);
+    }
+
+    /**
+     * Mimics setInvisibleColumns()
+     * @param array $columnNames
+     * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \PeskyCMF\Scaffold\ScaffoldException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function setAdditionalColumnsToSelect(...$columnNames) {
+        parent::setAdditionalColumnsToSelect($columnNames);
+        foreach ($this->getAdditionalColumnsToSelect() as $name) {
             $this->addValueViewer($name, DataGridColumn::create()->setIsVisible(false));
         }
         return $this;

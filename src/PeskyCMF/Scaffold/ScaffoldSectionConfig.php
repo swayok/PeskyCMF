@@ -80,6 +80,8 @@ abstract class ScaffoldSectionConfig {
     protected $isFinished = false;
     /** @var  bool */
     protected $allowRelationsInValueViewers = false;
+    /** @var array */
+    protected $additionalColumnsToSelect = [];
 
     /**
      * @param TableInterface $table
@@ -614,7 +616,7 @@ abstract class ScaffoldSectionConfig {
         if (!empty($this->defaultFieldRenderer)) {
             return $this->defaultFieldRenderer;
         } else {
-            $this->setDefaultValueRenderer(function (AbstractValueViewer $valueViewer, $sectionConfig, array $dataForView) {
+            $this->setDefaultValueRenderer(function (RenderableValueViewer $valueViewer, $sectionConfig, array $dataForView) {
                 $rendererConfig = $this->createValueRenderer()->setData($dataForView);
                 $this->configureDefaultValueRenderer($rendererConfig, $valueViewer);
                 return $rendererConfig;
@@ -911,6 +913,25 @@ abstract class ScaffoldSectionConfig {
         } else {
             $this->isFinished = true;
         }
+    }
+
+    /**
+     * @param array $columnNames
+     * @return $this
+     */
+    public function setAdditionalColumnsToSelect(...$columnNames) {
+        if (count($columnNames) && is_array($columnNames[0])) {
+            $columnNames = $columnNames[0];
+        }
+        $this->additionalColumnsToSelect = $columnNames;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAdditionalColumnsToSelect() {
+        return $this->additionalColumnsToSelect;
     }
 
 }

@@ -76,7 +76,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $virtualColumns[] = $colName;
                 }
             } else {
-                throw new \UnexpectedValueException("Column '{$colName}' does not exist in DB");
+                throw new \UnexpectedValueException(
+                    "Column '{$colName}' does not exist in " . get_class(static::getTable()->getTableStructure())
+                );
             }
         }
         foreach ($dataGridConfig->getRelationsToRead() as $relationName => $columns) {
@@ -141,7 +143,20 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
-        if (!$object->fromDb($conditions, [], array_keys($relationsToRead))->existsInDb()) {
+        $dbColumns = static::getTable()->getTableStructure()->getColumns();
+        $columnsToSelect = $sectionConfig->getAdditionalColumnsToSelect();
+        foreach (array_keys($sectionConfig->getViewersLinkedToDbColumns(false)) as $colName) {
+            if (array_key_exists($colName, $dbColumns)) {
+                if ($dbColumns[$colName]->isItExistsInDb()) {
+                    $columnsToSelect[] = $colName;
+                }
+            } else {
+                throw new \UnexpectedValueException(
+                    "Column '{$colName}' does not exist in " . get_class(static::getTable()->getTableStructure())
+                );
+            }
+        }
+        if (!$object->fromDb($conditions, array_unique($columnsToSelect), array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
         $this->logDbRecordLoad($object, static::getResourceName());
