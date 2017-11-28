@@ -1579,6 +1579,22 @@ aside.main-sidebar .sidebar-menu li .badge {
 .modal .item-details-modal-content .next-item {
   right: -50px;
 }
+.modal .item-form-modal-content .toolbar .toolbar-left,
+.modal .item-details-modal-content .toolbar .toolbar-left,
+.modal .item-form-modal-content .toolbar .toolbar-center,
+.modal .item-details-modal-content .toolbar .toolbar-center,
+.modal .item-form-modal-content .toolbar .toolbar-right,
+.modal .item-details-modal-content .toolbar .toolbar-right {
+  margin-top: -10px;
+}
+.modal .item-form-modal-content .toolbar .toolbar-left .btn,
+.modal .item-details-modal-content .toolbar .toolbar-left .btn,
+.modal .item-form-modal-content .toolbar .toolbar-center .btn,
+.modal .item-details-modal-content .toolbar .toolbar-center .btn,
+.modal .item-form-modal-content .toolbar .toolbar-right .btn,
+.modal .item-details-modal-content .toolbar .toolbar-right .btn {
+  margin-top: 10px;
+}
 #scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
   min-height: 600px !important;
 }

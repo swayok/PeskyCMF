@@ -840,8 +840,8 @@ abstract class ScaffoldSectionConfig {
      * @param string $width
      * @return $this
      */
-    public function setWidth($width) {
-        $this->width = $width;
+    public function setWidth($percents) {
+        $this->width = $percents;
         return $this;
     }
 

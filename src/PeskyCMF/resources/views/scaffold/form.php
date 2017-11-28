@@ -45,8 +45,8 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
 
 <?php View::startSection('scaffold-form-footer'); ?>
     <div class="box-footer">
-        <div class="row">
-            <div class="col-xs-3">
+        <div class="row toolbar">
+            <div class="col-xs-3 toolbar-left">
                 {{? it.__modal }}
                     <button type="button" class="btn btn-default" data-dismiss="modal">
                         <?php echo $formConfig->translateGeneral('toolbar.close'); ?>
@@ -57,7 +57,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     </button>
                 {{?}}
             </div>
-            <div class="col-xs-6 text-center">
+            <div class="col-xs-6 text-center toolbar-center">
             <?php echo $ifEdit; ?>
                 <?php /*if ($formConfig->isCreateAllowed()) : ?>
                     <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
@@ -77,7 +77,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                 <?php endif; ?>
             <?php echo $endIf; ?>
             </div>
-            <div class="col-xs-3 text-right">
+            <div class="col-xs-3 text-right toolbar-right">
                 <button type="submit" class="btn btn-success">
                     <?php echo $formConfig->translateGeneral('toolbar.submit'); ?>
                 </button>

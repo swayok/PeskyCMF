@@ -103,8 +103,8 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 <?php View::stopSection(); ?>
 
 <?php View::startSection('item-detials-footer') ;?>
-    <div class="row">
-        <div class="{{? it.__modal }} col-xs-4 {{??}} col-xs-3 {{?}} text-left">
+    <div class="row toolbar">
+        <div class="{{? it.__modal }} col-xs-4 {{??}} col-xs-3 {{?}} text-left toolbar-left">
             {{? it.__modal }}
                 <button type="button" class="btn btn-default" data-dismiss="modal">
                     <?php echo $itemDetailsConfig->translateGeneral('toolbar.close'); ?>
@@ -120,7 +120,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 </a>
             <?php endif; ?>
         </div>
-        <div class="{{? it.__modal }} col-xs-8 {{??}} col-xs-9 {{?}} text-right">
+        <div class="{{? it.__modal }} col-xs-8 {{??}} col-xs-9 {{?}} text-right toolbar-right">
             <?php echo implode(' ', $itemDetailsConfig->getToolbarItems()); ?>
             <?php if ($itemDetailsConfig->isDeleteAllowed()) : ?>
                 {{? !!it.___delete_allowed }}

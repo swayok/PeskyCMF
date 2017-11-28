@@ -910,6 +910,7 @@ class CmfConfig extends ConfigsContainer {
         });
     }
 
+    protected $scaffoldConfigs = [];
     /**
      * Get ScaffoldConfig instance
      * @param string $resourceName - table name passed via route parameter, may differ from $table->getTableName()
@@ -920,17 +921,20 @@ class CmfConfig extends ConfigsContainer {
      * @throws \InvalidArgumentException
      */
     static public function getScaffoldConfig($resourceName) {
-        $className = array_get(static::getInstance()->resources, $resourceName, function () use ($resourceName) {
-            return static::config('resources.' . $resourceName, function () use ($resourceName) {
-                throw new \InvalidArgumentException(
-                    'There is no known ScaffoldConfig class for resource "' . $resourceName . '"'
-                );
+        if (!array_has(static::getInstance()->scaffoldConfigs, $resourceName)) {
+            $className = array_get(static::getInstance()->resources, $resourceName, function () use ($resourceName) {
+                return static::config('resources.' . $resourceName, function () use ($resourceName) {
+                    throw new \InvalidArgumentException(
+                        'There is no known ScaffoldConfig class for resource "' . $resourceName . '"'
+                    );
+                });
             });
-        });
-        if (!class_exists($className)) {
-            throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
+            if (!class_exists($className)) {
+                throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
+            }
+            static::getInstance()->scaffoldConfigs[$resourceName] = new $className();
         }
-        return new $className();
+        return static::getInstance()->scaffoldConfigs[$resourceName];
     }
 
     /**
