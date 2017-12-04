@@ -1600,6 +1600,31 @@ aside.main-sidebar {
         }
     }
 
+    .item-form-modal-content {
+        @creation-color: rgba(60, 141, 188, 1);
+        @creation-color-bg: rgba(60, 141, 188, 0.10);
+        &.item-creation {
+            border-top: 3px solid @creation-color;
+            .border-radius-top(4px);
+
+            .modal-header {
+                background-color: @creation-color-bg;
+            }
+
+        }
+
+        @editing-color: rgba(0, 141, 76, 1);
+        @editing-color-bg: rgba(0, 141, 76, 0.1);
+        &.item-editing {
+            border-top: 3px solid @editing-color;
+            .border-radius-top(4px);
+
+            .modal-header {
+                background-color: @editing-color-bg;
+            }
+        }
+    }
+
     .item-form-modal-content,
     .item-details-modal-content {
         .toolbar {

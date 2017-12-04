@@ -73,11 +73,11 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             <?php echo $endIf; ?>
             <div class="<?php echo $hasMidSection ?>col-xs-3<?php echo $else; ?>col-xs-9<?echo $endIf; ?> text-right toolbar-right">
                 <div class="btn-group ib" role="group">
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn <?php echo $ifCreate; ?>btn-primary<?php echo $else; ?>btn-success<?php echo $endIf; ?>">
                         <?php echo $formConfig->translateGeneral('toolbar.submit'); ?>
                     </button>
                     <?php echo $ifCreate ;?>
-                        <input type="submit" class="btn btn-success" name="create_another" value="+1" data-toggle="tooltip"
+                        <input type="submit" class="btn btn-primary" name="create_another" value="+1" data-toggle="tooltip"
                                title="<?php echo $formConfig->translateGeneral('toolbar.submit_and_add_another'); ?>">
                     <?php echo $endIf; ?>
                 </div>
@@ -139,7 +139,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         <!-- disable chrome email & password autofill -->
         <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>
         <!-- end of autofill disabler -->
-        <div class="nav-tabs-custom">
+        <div class="nav-tabs-custom mbn">
             <?php if ($hasTabs): ?>
                 <ul class="nav nav-tabs">
                     <?php foreach ($tabs as $idx => $tabInfo): ?>
@@ -152,7 +152,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                 </ul>
             <?php endif; ?>
 
-            <div class="<?php echo $hasTabs ? 'tab-content' : 'box {{? it.__modal }} br-t-n {{??}} box-primary {{?}}' ?>">
+            <div class="<?php echo $hasTabs ? 'tab-content' : 'box {{? it.__modal }} mbn br-t-n {{??}} ' . $ifCreate . 'box-primary' . $else . 'box-success' . $endIf . ' {{?}}' ?>">
                 <?php foreach ($tabs as $idx => $tabInfo): ?>
                     <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
                     <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $formId . '-' . (string)($idx + 1) ?>">
@@ -190,7 +190,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
     {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog <?php echo $formConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
-                <div class="modal-content item-form-modal-content">
+                <div class="modal-content item-form-modal-content <?php echo $ifCreate; ?>item-creation<?php echo $else; ?>item-editing<?php echo $endIf; ?>">
                     <div class="modal-header pv10">
                         <div class="box-tools pull-right">
                             <a class="btn btn-box-tool fs13 va-t ptn mt5"

@@ -1579,6 +1579,24 @@ aside.main-sidebar .sidebar-menu li .badge {
 .modal .item-details-modal-content .next-item {
   right: -50px;
 }
+.modal .item-form-modal-content.item-creation {
+  border-top: 3px solid #3c8dbc;
+  -moz-border-radius: 4px 4px 0 0;
+  -webkit-border-radius: 4px 4px 0 0;
+  border-radius: 4px 4px 0 0;
+}
+.modal .item-form-modal-content.item-creation .modal-header {
+  background-color: rgba(60, 141, 188, 0.1);
+}
+.modal .item-form-modal-content.item-editing {
+  border-top: 3px solid #008d4c;
+  -moz-border-radius: 4px 4px 0 0;
+  -webkit-border-radius: 4px 4px 0 0;
+  border-radius: 4px 4px 0 0;
+}
+.modal .item-form-modal-content.item-editing .modal-header {
+  background-color: rgba(0, 141, 76, 0.1);
+}
 .modal .item-form-modal-content .toolbar .toolbar-left,
 .modal .item-details-modal-content .toolbar .toolbar-left,
 .modal .item-form-modal-content .toolbar .toolbar-center,
