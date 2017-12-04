@@ -57,30 +57,30 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     </button>
                 {{?}}
             </div>
-            <div class="col-xs-6 text-center toolbar-center">
-            <?php echo $ifEdit; ?>
-                <?php /*if ($formConfig->isCreateAllowed()) : ?>
-                    <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
-                        <?php echo $formConfig->translateGeneral('toolbar.create'); ?>
-                    </a>
-                <?php endif;*/ ?>
-                <?php if ($formConfig->isDeleteAllowed()) : ?>
-                    {{? !!it.___delete_allowed }}
-                    <a class="btn btn-danger" href="#"
-                       data-action="request" data-method="delete"
-                       data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
-                       data-confirm="<?php echo $formConfig->translateGeneral('message.delete_item_confirm'); ?>"
-                       data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
-                        <?php echo $formConfig->translateGeneral('toolbar.delete'); ?>
-                    </a>
-                    {{?}}
-                <?php endif; ?>
+            <?php $hasMidSection = '{{? !it._is_creation && !!it.___delete_allowed }}' ?>
+            <?php echo $hasMidSection; ?>
+                <div class="col-xs-6 text-center toolbar-center">
+                    <?php if ($formConfig->isDeleteAllowed()) : ?>
+                        <a class="btn btn-danger" href="#"
+                           data-action="request" data-method="delete"
+                           data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
+                           data-confirm="<?php echo $formConfig->translateGeneral('message.delete_item_confirm'); ?>"
+                           data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
+                            <?php echo $formConfig->translateGeneral('toolbar.delete'); ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
             <?php echo $endIf; ?>
-            </div>
-            <div class="col-xs-3 text-right toolbar-right">
-                <button type="submit" class="btn btn-success">
-                    <?php echo $formConfig->translateGeneral('toolbar.submit'); ?>
-                </button>
+            <div class="<?php echo $hasMidSection ?>col-xs-3<?php echo $else; ?>col-xs-9<?echo $endIf; ?> text-right toolbar-right">
+                <div class="btn-group ib" role="group">
+                    <button type="submit" class="btn btn-success">
+                        <?php echo $formConfig->translateGeneral('toolbar.submit'); ?>
+                    </button>
+                    <?php echo $ifCreate ;?>
+                        <input type="submit" class="btn btn-success" name="create_another" value="+1" data-toggle="tooltip"
+                               title="<?php echo $formConfig->translateGeneral('toolbar.submit_and_add_another'); ?>">
+                    <?php echo $endIf; ?>
+                </div>
             </div>
         </div>
         <?php $toolbarItems = $formConfig->getToolbarItems(); ?>

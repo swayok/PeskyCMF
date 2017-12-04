@@ -189,6 +189,7 @@ return [
             'cancel' => 'Cancel',
             'submit' => 'Save',
             'create' => 'Add new',
+            'submit_and_add_another' => 'Save and add another one',
             'delete' => 'Delete'
         ],
         'message' => [

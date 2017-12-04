@@ -189,6 +189,7 @@ return [
             'cancel' => 'Отмена',
             'submit' => 'Сохранить',
             'create' => 'Добавить',
+            'submit_and_add_another' => 'Сохранить и добавить еще 1',
             'delete' => 'Удалить'
         ],
         'message' => [

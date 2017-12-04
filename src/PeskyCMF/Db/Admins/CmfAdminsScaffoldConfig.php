@@ -127,6 +127,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
         return parent::createItemDetailsConfig()
             ->readRelations(['ParentAdmin'])
             ->setValueCells($valueCells)
+            ->setWidth(60)
             ->setToolbarItems(function () {
                 $actions = [];
                 if (\Gate::allows('cmf_page', ['login_as'])) {
@@ -198,7 +199,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
             unset($formInputs['email']);
         }
         return parent::createFormConfig()
-            ->setWidth(60)
+            ->setWidth(50)
             ->setFormInputs($formInputs)
             ->setIncomingDataModifier(function (array $data, $isCreation) {
                 if (!CmfConfig::getPrimary()->getUser()->is_superadmin) {
