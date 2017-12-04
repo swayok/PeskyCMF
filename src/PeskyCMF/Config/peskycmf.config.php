@@ -117,7 +117,7 @@ return [
      * Notes:
      * - you can use string as 'auth_guard_config' or 'auth_guard_config.provider' to use
      *   guard or provider decalred in config/auth.php
-     * - use RecordInterface object with Authenticaable interface/trait as 'auth_guard_config.provider.model'
+     * - use RecordInterface object with Authenticatable interface/trait as 'auth_guard_config.provider.model'
      */
     'auth_guard' => [
         'name' => 'cmf',
