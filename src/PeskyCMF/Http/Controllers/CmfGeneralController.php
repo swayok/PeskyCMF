@@ -10,7 +10,6 @@ use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\ApiDocs\CmfApiDocsSection;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\HttpCode;
@@ -359,24 +358,32 @@ class CmfGeneralController extends Controller {
     public function loginAs($otherUserId) {
         $this->authorize('cmf_page', ['login_as']);
         $cmfConfig = CmfConfig::getPrimary();
-        $currentUserId = $cmfConfig::getUser()->getAuthIdentifier();
+        $currentUser = $cmfConfig::getUser();
+        $currentUserId = $currentUser->getAuthIdentifier();
         if ($currentUserId === $otherUserId || $currentUserId === (int)$otherUserId) {
             return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
                 ->setMessage(cmfTransCustom('admins.login_as.same_user'));
         }
+        $token = $currentUser->getRememberToken();
+        if (!$token) {
+            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
+                ->setMessage(cmfTransCustom('admins.login_as.no_auth_token'));
+        }
         /** @var \PeskyCMF\Db\Admins\CmfAdmin|RecordInterface $otherUser */
         $otherUser = $cmfConfig::getAuth()->loginUsingId($otherUserId);
         if (!is_object($otherUser)) {
-            $cmfConfig::getAuth()->loginUsingId($currentUserId);
+            // Warning: do not use $cmfConfig::getAuth()->login($currentUser) - it might fail
+            $cmfConfig::getAuth()->loginUsingId($currentUserId, false);
             return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
                 ->setMessage(cmfTransCustom('admins.login_as.fail', ['id' => $otherUserId]));
         }
         \Session::put([
             $this->originalUserFromLoginAsActionSessionKey => [
                 'id' => $currentUserId,
+                'token' => $token,
                 'url' => \URL::previous($cmfConfig::home_page_url(true)),
             ],
-            $cmfConfig::getPrimary()->session_message_key() => cmfTransCustom(
+            $cmfConfig::session_message_key() => cmfTransCustom(
                 'admins.login_as.success',
                 ['user' => $otherUser->getValue($cmfConfig::user_login_column())]
             )
@@ -390,7 +397,13 @@ class CmfGeneralController extends Controller {
         if (\Session::has($this->originalUserFromLoginAsActionSessionKey)) {
             // logout to original account after 'login_as'
             $userInfo = \Session::pull($this->originalUserFromLoginAsActionSessionKey);
-            if ($cmfConfig::getAuth()->loginUsingId(array_get($userInfo, 'id', -1))) {
+            $user = $cmfConfig::getAuth()->getProvider()->retrieveByToken(
+                array_get($userInfo, 'id', -1),
+                array_get($userInfo, 'token', -1)
+            );
+            if ($user) {
+                // Warning: do not use $cmfConfig::getAuth()->login($user) - it will fail to login previous user
+                $cmfConfig::getAuth()->loginUsingId($user->getAuthIdentifier(), false);
                 return \Redirect::to(array_get($userInfo, 'url') ?: $cmfConfig::login_page_url(true));
             }
         }

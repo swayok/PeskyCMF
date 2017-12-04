@@ -44,7 +44,8 @@ $dictionary = [
         'login_as' => [
             'success' => 'You have logged in to account :user. Use Logout button to return to your account',
             'fail' => 'Failed to login to account with ID :id',
-            'same_user' => 'You are trying to login to your own account'
+            'same_user' => 'You are trying to login to your own account',
+            'no_auth_token' => 'There is no auth token for current user'
         ],
         'role' => [
             'admin' => 'Administrator',
