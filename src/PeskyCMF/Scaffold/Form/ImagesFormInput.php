@@ -162,7 +162,7 @@ class ImagesFormInput extends FormInput {
             $isRequired = $imageConfig->getMinFilesCount() > 0 ? 'required|' : '';
             $validators[$baseName] = $isRequired . 'array|max:' . $imageConfig->getMaxFilesCount();
             $commonValidators = 'nullable|image|max:' . $imageConfig->getMaxFileSize()
-                . '|mimetypes:' . implode(',', $imageConfig->getAllowedFileTypes(true));
+                . '|mimetypes:' . implode(',', $imageConfig->getAllowedFileTypes());
             for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++) {
                 if ($imageConfig->getMinFilesCount() > $i) {
                     $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.old_file|{$commonValidators}";
