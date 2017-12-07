@@ -65,7 +65,7 @@ class CmfInstall extends Command {
                 ->write(\View::file($viewsPath . 'db/base_db_record.php', $dataForViews)->render());
         }*/
         // create js, less and css files
-        $relativePathToPublicFiles = 'packages/' . $dataForViews['urlPrefix'] . '/';
+        $relativePathToPublicFiles = '/packages/' . $dataForViews['urlPrefix'] . '/';
         $publicFiles = [
             'js' => $relativePathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js',
             'css' => $relativePathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css',
