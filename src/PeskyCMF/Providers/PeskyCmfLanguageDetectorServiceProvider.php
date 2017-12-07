@@ -27,4 +27,14 @@ class PeskyCmfLanguageDetectorServiceProvider extends LanguageDetectorServicePro
         }
 
     }
+
+    protected function registerAndPublishConfigurations() {
+        $reflection = new \ReflectionClass(LanguageDetectorServiceProvider::class);
+        $configFile = dirname($reflection->getFileName()) . '/../../config/lang-detector.php';
+
+        // fix absent group name
+        $this->publishes([$configFile => base_path('config/lang-detector.php')], 'config');
+
+        $this->mergeConfigFrom($configFile, 'lang-detector');
+    }
 }

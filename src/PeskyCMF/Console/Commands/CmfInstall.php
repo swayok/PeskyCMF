@@ -173,8 +173,11 @@ class CmfInstall extends Command {
         $this->line('Remeber to perform next steps to activate cms:');
         $this->line('1. Add ' . PeskyCmfServiceProvider::class . ' to you app.providers config');
         $this->line('2. Remove ' . PeskyOrmServiceProvider::class . ' from you app.providers config');
-        $this->line('3. Run "php artisan migrate" to create tables in database');
-        $this->line('4. Run "php artisan cmf::add-admin your-email@address.com" to create superadmin for CMS');
+        $this->line('3. Run "php artisan vendor:publish --tag=config" to add vendor configs to you "config" folder');
+        $this->line('4. Run "php artisan vendor:publish --tag=public --force" to publish vendor public files');
+        $this->line('5. Add "php artisan vendor:publish --tag=public --force" to you composer.json into "scripts"."post-autoload-dump" array to make all public vendor files be up to date');
+        $this->line('6. Run "php artisan migrate" to create tables in database');
+        $this->line('7. Run "php artisan cmf::add-admin your-email@address.com" to create superadmin for CMS');
     }
 
     protected function getAppSettignsClassContents() {
