@@ -54,7 +54,7 @@ class {{ $cmfCongigClassName }} extends CmfConfig {
                     ]
                 ]*/
             ],
-            static::$menuItems
+            static::getMenuItems()
         );
     }
 
