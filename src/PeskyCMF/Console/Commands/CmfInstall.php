@@ -114,12 +114,14 @@ class CmfInstall extends Command {
         if ($updateKeysInConfigs === null) {
             $updateKeysInConfigs = $this->confirm('Do you wish to update some keys in ' . $peskyCmfConfigFilePath . ' by actual values?');
         }
+        $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
+        $controllersNamespace = 'App\\' . $appSubfolder . '\\Http\\Controllers';
         if ($updateKeysInConfigs) {
             $configContents = file_get_contents($peskyCmfConfigFilePath);
-            $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
             $replacements = [
                 "%('cmf_config')\s*=>\s*.*%im" => '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,',
                 "%('url_prefix')\s*=>\s*.*%im" => "$1 => '{$dataForViews['urlPrefix']}',",
+                "%('controllers_namespace')\s*=>\s*.*%im" => "$1 => '{$controllersNamespace}',",
                 "%('views_subfolder')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('dictionary')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('routes_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$routesFileRelativePath}',\n    ],",
@@ -144,10 +146,10 @@ class CmfInstall extends Command {
             $this->line("Done. Update next keys in 'configs/peskycmf.php' file to activate created files:");
             $this->line(' ');
 
-            $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
             $this->line("'cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
             $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
             $this->line("'routes_files' => ['{$routesFileRelativePath}'],");
+            $this->line("'controllers_namespace' => '{$controllersNamespace}',");
             $this->line("'views_subfolder' => ['{$subfolderName}'],");
             $this->line("'css_files' => ['{$publicFiles['css']}'],");
             $this->line("'js_files' => ['{$publicFiles['js']}'],");
