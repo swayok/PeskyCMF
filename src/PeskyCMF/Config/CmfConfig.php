@@ -105,7 +105,8 @@ class CmfConfig extends ConfigsContainer {
             'autodetect' => true,
             'driver' => 'browser',
             'cookie' => true,
-            'cookie_name' => preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_locale',
+            'cookie_name' => static::makeUtilityKey('locale'),
+            'cookie_encrypt' => true,
             'languages' => static::locales(),
         ];
     }
@@ -715,14 +716,14 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function session_redirect_key() {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_redirect';
+        return static::makeUtilityKey('redirect');
     }
 
     /**
      * @return string
      */
     static public function session_message_key() {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_message';
+        return static::makeUtilityKey('message');
     }
 
     /**
@@ -1175,6 +1176,14 @@ class CmfConfig extends ConfigsContainer {
             }
         }
         return static::url_prefix() . '_templates_' . app()->getLocale() . '_' . $group . '_user_' . $userId;
+    }
+
+    /**
+     * @param $keySuffix
+     * @return string
+     */
+    static public function makeUtilityKey($keySuffix) {
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_' . $keySuffix;
     }
 
 }

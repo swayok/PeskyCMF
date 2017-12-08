@@ -20,8 +20,14 @@ use PeskyORM\ORM\TableInterface;
 use PeskyORM\ORM\TableStructureInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
+use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 class PeskyCmfServiceProvider extends ServiceProvider {
+
+    /**
+     * @var PeskyCmfLanguageDetectorServiceProvider
+     */
+    protected $langDetectorProvider;
 
     public function register() {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
@@ -31,7 +37,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
         $this->app->register(LoggingServiceProvider::class);
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
-        $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
+        /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
+        $langDetectorProvider = $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
+        $this->app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
         $loader->alias('LanguageDetector', LanguageDetector::class);
 
@@ -49,6 +57,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         if ($this->fitsRequestUri()) {
             $this->registerDbClasses();
             $this->registerScaffoldConfigs();
+            $langDetectorProvider->importConfigsFromPeskyCmf($this->getCmfConfig());
         }
 
         $this->app->singleton(PeskyCmfAppSettings::class, function () {
@@ -79,8 +88,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
                 umask($this->getCmfConfig()->config('file_access_mask'));
             }
             $this->configureSession();
-            $this->configureDefaultLocale();
-            $this->configureLocaleDetector();
             $this->configureEventListeners();
             $this->configureAuthorizationGatesAndPolicies();
             $this->configureDefaultAuthGuard();
@@ -344,17 +351,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 //        if (!\Lang::has('cmf::test', 'en')) {
             $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'cmf');
 //        }
-    }
-
-    protected function configureDefaultLocale() {
-        $defaultLocale = $this->getCmfConfig()->default_locale();
-        $this->app['translator']->setFallback($defaultLocale);
-        \Request::setDefaultLocale($defaultLocale);
-    }
-
-    protected function configureLocaleDetector() {
-        $config = $this->getAppConfig()->get('lang-detector', []);
-        $this->getAppConfig()->set('lang-detector', array_replace_recursive($config, $this->getCmfConfig()->language_detector_configs()));
     }
 
     protected function configureViews() {
