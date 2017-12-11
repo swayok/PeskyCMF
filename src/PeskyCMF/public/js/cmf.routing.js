@@ -16,6 +16,9 @@ var CmfRoutingHelpers = {
     cleanupHangedElementsInBody: function () {
         $('body > .tooltip, body > .bootstrap-select').remove();
     },
+    cleanupHangedElementsInContentWrapper: function () {
+        Utils.getContentContainer().find('.tooltip, .bootstrap-select').remove();
+    },
     hideModals: function () {
         var deferred = $.Deferred();
         if (CmfRoutingHelpers.$currentContent && CmfRoutingHelpers.$currentContent.hasClass('modal')) {
@@ -488,7 +491,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                                         var $newContent = $('<div></div>').html(renderTpl(data, options, true));
                                         initContent(
                                             $content
-                                                .find('.modal-content')
+                                                .find('.modal-dialog')
                                                 .html('')
                                                 .append($newContent.find('.modal-content')),
                                             true

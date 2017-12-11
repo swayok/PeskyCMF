@@ -696,12 +696,13 @@ var ScaffoldDataGridHelper = {
                 .on('preXhr', function (event, settings) {
                     ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                     CmfRoutingHelpers.cleanupHangedElementsInBody();
+                    CmfRoutingHelpers.cleanupHangedElementsInContentWrapper();
                     $(this).dataTable().api().columns.adjust();
                 })
                 .on('draw', function (event, settings) {
                     $(settings.nTableWrapper)
                         .find('[data-toggle="tooltip"]')
-                        .tooltip({container: CmfRoutingHelpers.$currentContentContainer});
+                        .tooltip({container: Utils.getContentContainer()});
                 });
             return $dataGrid;
         } else {
@@ -1673,7 +1674,7 @@ var ScaffoldFormHelper = {
                     return $bulkEditForm.find(
                         '.bulk-edit-form-input-enabler-switch:checked, .bulk-edit-form-input-enabler-input:checked'
                     ).length > 0;
-                }
+                };
                 var enablerValueChangeHandler = function () {
                     var $inputs = $(this)
                         .closest('.bulk-edit-form-input-container')
