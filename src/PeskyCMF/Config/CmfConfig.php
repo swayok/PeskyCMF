@@ -319,14 +319,18 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function default_page_title() {
-        return static::transCustom('.default_page_title');
+        return setting()->default_browser_title(function () {
+            return static::transCustom('.default_page_title');
+        }, true);
     }
 
     /**
      * @return string
      */
     static public function page_title_addition() {
-        return static::default_page_title();
+        return setting()->browser_title_addition(function () {
+            return static::default_page_title();
+        }, true);
     }
 
     /**
@@ -786,7 +790,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function login_logo() {
-        return static::config('login_logo', '<img src="/packages/cmf/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">');
+        return static::config('login_logo') ?: '<img src="/packages/cmf/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
     }
 
     /**
@@ -794,7 +798,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function sidebar_logo() {
-        return static::config('sidebar_logo', '<img src="/packages/cmf/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">');
+        return static::config('sidebar_logo') ?: '<img src="/packages/cmf/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
     }
 
     /**
