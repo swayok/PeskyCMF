@@ -62,8 +62,13 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
         $chain = 'it';
         for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
             $chain .= '.' . $parts[$i];
-            $conditions[] = "(typeof $chain !== 'undefined')";
+            if ($i != ($cnt - 1)) {
+                $conditions[] = "(typeof $chain == 'object')";
+            } else {
+                $conditions[] = "(typeof $chain !== 'undefined')";
+            }
         }
+        $fullName = implode('.', $parts);
         $conditions[] = "$fullName !== null";
         switch ($type) {
             case 'string':
