@@ -551,15 +551,16 @@ div.dataTables_wrapper table.dataTable thead .sorting:after {
 div.dataTables_wrapper table.dataTable thead .sorting_desc:after,
 div.dataTables_wrapper table.dataTable thead .sorting_asc:after {
   font-size: 12px;
-  top: 10px;
   opacity: 0.6;
   filter: alpha(opacity=60);
 }
 div.dataTables_wrapper table.dataTable thead .sorting_desc:after {
   content: "\e094";
+  top: 13px;
 }
 div.dataTables_wrapper table.dataTable thead .sorting_asc:after {
   content: "\e093";
+  top: 12px;
 }
 div.dataTables_wrapper table.dataTable tbody tr .reorderable {
   cursor: move;

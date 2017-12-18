@@ -38,7 +38,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                             ->setDataAttr('toggle' , 'dropdown')
                             ->setAttribute('aria-haspopup', 'true')
                             ->setAttribute('aria-expanded', 'false')
-                            ->setContent('<span class="glyphicon glyphicon-menu-hamburger"></span>')
+                            ->setContent('<span class="glyphicon glyphicon-menu-hamburger fs15"></span>')
                             ->build();
 
                         $selectionActions = [
@@ -117,8 +117,8 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         if ($dataGridConfig->isAllowedMultiRowSelection()) {
             if ($dataGridConfig->isDeleteAllowed() && $dataGridConfig->isBulkItemsDeleteAllowed()) {
                 $bulkActions[] = \Swayok\Html\Tag::a()
-                    ->setContent($dataGridConfig->translateGeneral('bulk_actions.message.delete_selected'))
-                    ->setDataAttr('confirm', $dataGridConfig->translateGeneral('bulk_actions.message.delete_selected_confirm'))
+                    ->setContent($dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
+                    ->setDataAttr('confirm', $dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_selected_confirm'))
                     ->setDataAttr('action', 'bulk-selected')
                     ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                     ->setDataAttr('id-field', $pkName)
@@ -137,9 +137,9 @@ uasort($gridColumnsConfigs, function ($a, $b) {
         }
         if ($dataGridConfig->isDeleteAllowed() && $dataGridConfig->isFilteredItemsDeleteAllowed()) {
             $bulkActions[] = \Swayok\Html\Tag::a()
-                ->setContent($dataGridConfig->translateGeneral('bulk_actions.message.delete_filtered'))
+                ->setContent($dataGridConfig->translateGeneral('bulk_actions.delete_filtered'))
                 ->setDataAttr('action', 'bulk-filtered')
-                ->setDataAttr('confirm', $dataGridConfig->translateGeneral('bulk_actions.message.delete_filtered_confirm'))
+                ->setDataAttr('confirm', $dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_filtered_confirm'))
                 ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$tableNameForRoutes], false))
                 ->setDataAttr('method', 'delete')
                 ->setHref('javascript: void(0)')
