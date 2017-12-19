@@ -284,6 +284,9 @@ CmfRouteChange.scaffoldResourceCustomPage = function (request) {
                 CmfRoutingHelpers
                     .initModalAndContent($modal, request)
                     .done(function () {
+                        $modal
+                            .find('.reload-url-button, .open-url-in-new-tab-button')
+                            .attr('href', request.makeUrlToUseItInParentRequest());
                         ScaffoldActionsHelper.initActions($modal);
                         $modal.modal('show');
                         $(document.body).attr('data-modal-opened', '1');

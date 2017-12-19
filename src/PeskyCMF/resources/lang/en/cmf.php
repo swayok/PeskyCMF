@@ -4,6 +4,11 @@ return [
     'test' => 'ok', //< used in PeskyCmfServiceProvider to load cmf dictionaries
     'ui' => [
         'close' => 'Close',
+        'modal' => [
+            'open_in_new_tab' => 'Open in new tab',
+            'close' => 'Close',
+            'reload' => 'Reload data'
+        ],
         'js_component' => [
             'data_tables' => [
 
