@@ -483,6 +483,15 @@ Utils.updatePageTitleFromH1 = function ($content) {
     }
 };
 
+Utils.getTitleFromContent = function ($content) {
+    var $h1 = $content.find('h1, .modal-header').first();
+    if ($h1.length) {
+        var $pageTitle = $h1.find('.page-title, .modal-title');
+        return $pageTitle.length ? $pageTitle.text() : $h1.text();
+    }
+    return '';
+};
+
 Utils.initDebuggingTools = function () {
     if (CmfConfig.isDebug) {
         var $opener = $('<button type="button" class="btn btn-xs btn-default">&nbsp;</button>')

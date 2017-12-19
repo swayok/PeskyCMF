@@ -60,45 +60,49 @@
 
     </div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal-normal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"
-                    aria-label="{{ cmfTransGeneral('.ui.close') }}">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title"></h4>
-                </div>
-                <div class="modal-body">
+    <script type="text/html" id="modal-normal">
+        <div class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-label="{{ cmfTransGeneral('.ui.close') }}">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body">
 
-                </div>
-                <div class="modal-footer hidden">
+                    </div>
+                    <div class="modal-footer hidden">
 
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </script>
 
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal-large">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"
-                    aria-label="{{ cmfTransGeneral('.ui.close') }}">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title"></h4>
-                </div>
-                <div class="modal-body">
+    <script type="text/html" id="modal-large">
+        <div class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-label="{{ cmfTransGeneral('.ui.close') }}">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body">
 
-                </div>
-                <div class="modal-footer hidden">
+                    </div>
+                    <div class="modal-footer hidden">
 
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </script>
 
     <script type="application/javascript">
         var CmfSettings = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_settings(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};

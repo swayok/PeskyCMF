@@ -227,13 +227,20 @@ CmfRouteChange.showPage = function (request) {
         });
 };
 
-CmfRouteChange.scaffoldItemCustomPage = function (request) {
+CmfRouteChange.scaffoldResourceCustomPage = function (request) {
     var switchBodyClass = function () {
-        Utils.switchBodyClass(
-            ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource) + ' resource-page-' + request.params.page,
-            'resource:page',
-            request.params.id
-        );
+        if (request.params.id) {
+            Utils.switchBodyClass(
+                ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource) + ' resource-item-page-' + request.params.page,
+                'resource:item-page',
+                request.params.id
+            );
+        } else {
+            Utils.switchBodyClass(
+                ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource) + ' resource-page-' + request.params.page,
+                'resource:page'
+            );
+        }
     };
     if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
@@ -241,16 +248,48 @@ CmfRouteChange.scaffoldItemCustomPage = function (request) {
         Utils.updatePageTitleFromH1(Utils.getContentContainer());
         return;
     }
-    $.when(
+    var isModal = request.isSubRequest();
+    var modalSize = 'large';
+    if (request.env().is_click && request.env().target && $(request.env().target).attr('data-modal')) {
+        isModal = true;
+    }
+    return $.when(
             Utils.downloadHtml(request.pathname, false, false),
             AdminUI.showUI()
         )
         .done(function (html) {
-            CmfRoutingHelpers
-                .setCurrentContent(html, Utils.getContentContainer())
-                .done(function () {
-                    switchBodyClass();
-                });
+            if (!isModal) {
+                CmfRoutingHelpers
+                    .setCurrentContent(html, Utils.getContentContainer())
+                    .done(function () {
+                        switchBodyClass();
+                    });
+            } else {
+                var $modal = $($('#modal-' + modalSize).html());
+                var $content = CmfRoutingHelpers.wrapContent(html);
+                $modal
+                    .attr('id', ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource) + '-page-' + request.params.page + '-modal')
+                    .find('.modal-title')
+                    .text(Utils.getTitleFromContent($content));
+                if ($content.find('.content').length) {
+                    $content = $content.find('.content').removeClass('content');
+                } else {
+                    $content.find('.content-header').remove();
+                    $content.find('h1').remove();
+                }
+                $modal
+                    .find('.modal-body')
+                    .html('')
+                    .append($content);
+                CmfRoutingHelpers
+                    .initModalAndContent($modal, request)
+                    .done(function () {
+                        ScaffoldActionsHelper.initActions($modal);
+                        $modal.modal('show');
+                        $(document.body).attr('data-modal-opened', '1');
+                    });
+                CmfRoutingHelpers.hideContentContainerPreloader();
+            }
             CmfRoutingHelpers.routeHandled(request);
         });
 };

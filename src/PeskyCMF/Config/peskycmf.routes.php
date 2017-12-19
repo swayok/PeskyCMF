@@ -172,7 +172,7 @@ Route::group(
         'prefix' => 'resource',
         'middleware' => $cmfConfig::middleware_for_routes_that_require_authentication()
     ],
-    function () use ($generalControllerClass, $routeNamePrefix) {
+    function () use ($apiControllerClass, $generalControllerClass, $routeNamePrefix) {
         Route::get('{table_name}', [
             'as' => $routeNamePrefix . 'cmf_items_table',
             'uses' => $generalControllerClass . '@loadJsApp',
@@ -199,15 +199,25 @@ Route::group(
                 'route' => $routeNamePrefix . 'cmf_item_custom_page',
                 'params' => true
             ],
-            'uses' => function () {
-                return view('cmf::ui.default_page_header', [
-                    'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined',
-                ]);
-            }
+            'uses' => $apiControllerClass . '@getCustomPageForItem',
         ]);
 
         Route::get('{table_name}/{id}/page/{page}', [
             'as' => $routeNamePrefix . 'cmf_item_custom_page',
+            'uses' => $generalControllerClass . '@loadJsApp',
+        ]);
+
+        Route::get('{table_name}/page/{page}.html', [
+            'middleware' => AjaxOnly::class,
+            'fallback' => [
+                'route' => $routeNamePrefix . 'cmf_resource_custom_page',
+                'params' => true
+            ],
+            'uses' => $apiControllerClass . '@getCustomPage',
+        ]);
+
+        Route::get('{table_name}/page/{page}', [
+            'as' => $routeNamePrefix . 'cmf_resource_custom_page',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
     }

@@ -76,7 +76,7 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->getRecordsForDataGrid();
     }
 
-    public function getItem($tableName, $id = null) {
+    public function getItem($resourceName, $id = null) {
         return $this->getScaffoldConfig()->getRecordValues($id);
     }
 
@@ -96,7 +96,7 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->updateRecord();
     }
 
-    public function changeItemPosition($tableName, $id, $beforeOrAfter, $otherId, $columnName, $sortDirection) {
+    public function changeItemPosition($resourceName, $id, $beforeOrAfter, $otherId, $columnName, $sortDirection) {
         return $this->getScaffoldConfig()->changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection);
     }
 
@@ -104,7 +104,7 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->updateBulkOfRecords();
     }
 
-    public function deleteItem($tableName, $id) {
+    public function deleteItem($resourceName, $id) {
         return $this->getScaffoldConfig()->deleteRecord($id);
     }
 
@@ -112,9 +112,19 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->deleteBulkOfRecords();
     }
 
-    public function getCustomData($tableName, $dataId) {
-        $this->authorize('resource.view', [$tableName]);
+    public function getCustomData($resourceName, $dataId) {
+        $this->authorize('resource.view', [$resourceName]);
         return $this->getScaffoldConfig()->getCustomData($dataId);
+    }
+
+    public function getCustomPage($resourceName, $pageName) {
+        $this->authorize('resource.custom_page', [$resourceName, $pageName]);
+        return $this->getScaffoldConfig()->getCustomPage($pageName);
+    }
+
+    public function getCustomPageForItem($resourceName, $itemId, $pageName) {
+        $this->authorize('resource.custom_page_for_item', [$resourceName, $pageName, $itemId]);
+        return $this->getScaffoldConfig()->getCustomPageForRecord($itemId, $pageName);
     }
 
 }

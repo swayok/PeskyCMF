@@ -262,6 +262,8 @@ class CmfConfig extends ConfigsContainer {
             'delete_bulk' => 'delete_bulk',
             'other' => 'others',
             'others' => 'others',
+            'custom_page' => 'custom_page',
+            'custom_page_for_item' => 'custom_page_for_item',
         ]);
         \Gate::define('cmf_page', $policyName . '@cmf_page');
     }

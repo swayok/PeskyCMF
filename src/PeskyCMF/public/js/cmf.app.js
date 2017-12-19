@@ -45,7 +45,8 @@ $(function () {
     page.route('/resource/:resource/details/:id', CmfRouteChange.scaffoldItemDetailsPage);
     page.route('/resource/:resource/create', CmfRouteChange.scaffoldItemFormPage);
     page.route('/resource/:resource/edit/:id', CmfRouteChange.scaffoldItemFormPage);
-    page.route('/resource/:resource/:id/page/:page', CmfRouteChange.scaffoldItemCustomPage);
+    page.route('/resource/:resource/page/:page', CmfRouteChange.scaffoldResourceCustomPage);
+    page.route('/resource/:resource/:id/page/:page', CmfRouteChange.scaffoldResourceCustomPage);
 
     page.route('*', function () {
         if (CmfRoutingHelpers.$currentContentContainer) {

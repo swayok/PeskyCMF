@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Providers;
 
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 use LaravelExtendedErrors\LoggingServiceProvider;
 use PeskyCMF\Config\CmfConfig;
@@ -40,7 +41,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
         $langDetectorProvider = $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
         $this->app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
-        $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+        $loader = AliasLoader::getInstance();
         $loader->alias('LanguageDetector', LanguageDetector::class);
 
         if ($this->app->environment() === 'local') {

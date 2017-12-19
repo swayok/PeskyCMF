@@ -519,4 +519,16 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return cmfJsonResponse(HttpCode::NOT_FOUND);
     }
 
+    public function getCustomPage($pageName) {
+        return view('cmf::ui.default_page_header', [
+            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined',
+        ]);
+    }
+
+    public function getCustomPageForRecord($itemId, $pageName) {
+        return view('cmf::ui.default_page_header', [
+            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined',
+        ]);
+    }
+
 }

@@ -72,4 +72,8 @@ interface ScaffoldConfigInterface {
 
     public function getCustomData($dataId);
 
+    public function getCustomPage($pageName);
+
+    public function getCustomPageForRecord($itemId, $pageName);
+
 }

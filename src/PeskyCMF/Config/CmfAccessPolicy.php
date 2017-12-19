@@ -238,4 +238,18 @@ class CmfAccessPolicy {
     public function others($user, $table, $ability, $recordOrItemIdOrFkValue = null) {
         return $this->resource($user, $ability, $table, $recordOrItemIdOrFkValue);
     }
+
+    public function custom_page($user, $table, $pageName, $recordOrItemIdOrFkValue = null) {
+        return (
+            $this->resource($user, 'view', $table, $recordOrItemIdOrFkValue)
+            && $this->resource($user, 'page:' . $pageName, $table, $recordOrItemIdOrFkValue)
+        );
+    }
+
+    public function custom_page_for_item($user, $table, $pageName, $recordOrItemIdOrFkValue = null) {
+        return (
+            $this->resource($user, 'details', $table, $recordOrItemIdOrFkValue)
+            && $this->resource($user, 'item_page:' . $pageName, $table, $recordOrItemIdOrFkValue)
+        );
+    }
 }
