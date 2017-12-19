@@ -1095,7 +1095,16 @@ var ScaffoldDataGridHelper = {
         // fitlered items
         if ($fitleringLinks.length) {
             var updateFilteredCountInLabel = function () {
-                var count = api.page.info().recordsTotal || 0;
+                var count = 0;
+                if (api.search()) {
+                    var rules = DataGridSearchHelper.decodeRulesForDataTable(
+                        JSON.parse(api.search()),
+                        DataGridSearchHelper.getFieldNameToFilterIdMapForQueryBuilder()
+                    );
+                    if (DataGridSearchHelper.countRules(rules) > 0) {
+                        count = api.page.info().recordsTotal || 0;
+                    }
+                }
                 updateCounter($fitleringLinks, count);
             };
             updateFilteredCountInLabel();
@@ -1286,6 +1295,7 @@ var DataGridSearchHelper = {
         $builder.data('dataGrid', $dataGrid);
         $builder.data('dataGridApi', tableApi);
         $builderContent.queryBuilder(builderConfig);
+        $builder.data('config', builderConfig);
         if (tableApi.search().length) {
             try {
                 var currentSearch = JSON.parse(tableApi.search());

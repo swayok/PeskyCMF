@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-@php($scriptsVersion = '2.2.4')
+@php($scriptsVersion = '2.2.5')
 <head>
     <meta charset="UTF-8">
     <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }} @show</title>
