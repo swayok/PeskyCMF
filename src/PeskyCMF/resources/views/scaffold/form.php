@@ -46,21 +46,18 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
 <?php View::startSection('scaffold-form-footer'); ?>
     <div class="box-footer">
         <div class="row toolbar">
-            <div class="col-xs-3 toolbar-left">
+            <div class="<?php echo $ifCreate; ?>col-xs-3<?php echo $else; ?>col-xs-5<?php echo $endIf; ?> toolbar-left">
                 {{? it.__modal }}
-                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                    <button type="button" class="btn btn-default mr5" data-dismiss="modal">
                         <?php echo $formConfig->translateGeneral('toolbar.close'); ?>
                     </button>
                 {{??}}
-                    <button type="button" class="btn btn-default" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
+                    <button type="button" class="btn btn-default mr5" data-nav="back" data-default-url="<?php echo $backUrl; ?>">
                         <?php echo $formConfig->translateGeneral('toolbar.cancel'); ?>
                     </button>
                 {{?}}
-            </div>
-            <?php $hasMidSection = '{{? !it._is_creation && !!it.___delete_allowed }}' ?>
-            <?php echo $hasMidSection; ?>
-                <div class="col-xs-6 text-center toolbar-center">
-                    <?php if ($formConfig->isDeleteAllowed()) : ?>
+                <?php echo $ifEdit; ?>
+                    {{? it.___delete_allowed }}
                         <a class="btn btn-danger" href="#"
                            data-action="request" data-method="delete"
                            data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
@@ -68,17 +65,24 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                            data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
                             <?php echo $formConfig->translateGeneral('toolbar.delete'); ?>
                         </a>
-                    <?php endif; ?>
-                </div>
-            <?php echo $endIf; ?>
-            <div class="<?php echo $hasMidSection ?>col-xs-3<?php echo $else; ?>col-xs-9<?echo $endIf; ?> text-right toolbar-right">
+                    {{?}}
+                <?php echo $endIf; ?>
+            </div>
+            <div class="<?php echo $ifCreate; ?>col-xs-9<?php echo $else; ?>col-xs-7<?php echo $endIf; ?> text-right toolbar-right">
                 <div class="btn-group ib" role="group">
                     <button type="submit" class="btn <?php echo $ifCreate; ?>btn-primary<?php echo $else; ?>btn-success<?php echo $endIf; ?>">
                         <?php echo $formConfig->translateGeneral('toolbar.submit'); ?>
                     </button>
-                    <?php echo $ifCreate ;?>
+                    <?php echo $ifCreate; ?>
                         <input type="submit" class="btn btn-primary" name="create_another" value="+1" data-toggle="tooltip"
                                title="<?php echo $formConfig->translateGeneral('toolbar.submit_and_add_another'); ?>">
+                    <?php echo $else; ?>
+                        {{? it.___cloning_allowed }}
+                            <a class="btn btn-success" href="<?php echo routeToCmfItemCloneForm($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
+                               data-toggle="tooltip" title="<?php echo $formConfig->translateGeneral('toolbar.clone_item'); ?>">
+                                <i class="fa fa-copy"></i>
+                            </a>
+                        {{?}}
                     <?php echo $endIf; ?>
                 </div>
             </div>

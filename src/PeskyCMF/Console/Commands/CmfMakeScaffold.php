@@ -206,6 +206,7 @@ class {$className} extends {$parentClassShort} {
     protected \$isDetailsViewerAllowed = true;
     protected \$isCreateAllowed = true;
     protected \$isEditAllowed = true;
+    protected \$isCloningAllowed = false;
     protected \$isDeleteAllowed = true;
     
     static public function getTable() {

@@ -200,6 +200,7 @@ return [
             'invert_selection' => 'Invert selection',
             'show_children' => 'Show nested items',
             'hide_children' => 'Hide nested items',
+            'clone_item' => 'Duplicate item',
         ],
         'filter' => [
             'bool' => [
@@ -222,6 +223,7 @@ return [
             'submit' => 'Save',
             'create' => 'Add new',
             'submit_and_add_another' => 'Save and add another one',
+            'clone_item' => 'Duplicate data',
             'delete' => 'Delete'
         ],
         'message' => [
@@ -292,6 +294,7 @@ return [
             'create' => 'Add new',
             'delete' => 'Delete',
             'close' => 'Close',
+            'clone' => 'Duplicate',
         ],
         'previous_item' => 'Previous item',
         'next_item' => 'Next item',

@@ -104,7 +104,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 
 <?php View::startSection('item-detials-footer') ;?>
     <div class="row toolbar">
-        <div class="{{? it.__modal }} col-xs-4 {{??}} col-xs-3 {{?}} text-left toolbar-left">
+        <div class="{{? it.__modal }} col-xs-3 {{??}} col-xs-2 {{?}} text-left toolbar-left">
             {{? it.__modal }}
                 <button type="button" class="btn btn-default" data-dismiss="modal">
                     <?php echo $itemDetailsConfig->translateGeneral('toolbar.close'); ?>
@@ -114,33 +114,35 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     <?php echo $itemDetailsConfig->translateGeneral('toolbar.cancel'); ?>
                 </button>
             {{?}}
-            <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
+            {{? !!it.___create_allowed && !it.__modal }}
                 <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
                     <?php echo $itemDetailsConfig->translateGeneral('toolbar.create'); ?>
                 </a>
-            <?php endif; ?>
+            {{?}}
         </div>
-        <div class="{{? it.__modal }} col-xs-8 {{??}} col-xs-9 {{?}} text-right toolbar-right">
+        <div class="{{? it.__modal }} col-xs-9 {{??}} col-xs-10 {{?}} text-right toolbar-right">
             <?php echo implode(' ', $itemDetailsConfig->getToolbarItems()); ?>
-            <?php if ($itemDetailsConfig->isDeleteAllowed()) : ?>
-                {{? !!it.___delete_allowed }}
-                    <a class="btn btn-danger" href="#"
-                       data-action="request" data-method="delete"
-                       data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
-                       data-confirm="<?php echo $itemDetailsConfig->translateGeneral('message.delete_item_confirm'); ?>"
-                       data-on-success="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
-                        <?php echo $itemDetailsConfig->translateGeneral('toolbar.delete'); ?>
-                    </a>
-                {{?}}
-            <?php endif; ?>
-            <?php if ($itemDetailsConfig->isEditAllowed()) : ?>
-                {{? !!it.___edit_allowed }}
-                    <a class="btn btn-success"
-                       href="<?php echo routeToCmfItemEditForm($tableNameForRoutes, '{{= it.___pk_value }}'); ?>">
-                        <?php echo $itemDetailsConfig->translateGeneral('toolbar.edit'); ?>
-                    </a>
-                {{?}}
-            <?php endif; ?>
+            {{? !!it.___delete_allowed }}
+                <a class="btn btn-danger" href="#"
+                   data-action="request" data-method="delete"
+                   data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
+                   data-confirm="<?php echo $itemDetailsConfig->translateGeneral('message.delete_item_confirm'); ?>"
+                   data-on-success="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
+                    <?php echo $itemDetailsConfig->translateGeneral('toolbar.delete'); ?>
+                </a>
+            {{?}}
+            {{? !!it.___cloning_allowed }}
+                <a class="btn btn-primary"
+                   href="<?php echo routeToCmfItemCloneForm($tableNameForRoutes, '{{= it.___pk_value }}'); ?>">
+                    <?php echo $itemDetailsConfig->translateGeneral('toolbar.clone'); ?>
+                </a>
+            {{?}}
+            {{? !!it.___edit_allowed }}
+                <a class="btn btn-success"
+                   href="<?php echo routeToCmfItemEditForm($tableNameForRoutes, '{{= it.___pk_value }}'); ?>">
+                    <?php echo $itemDetailsConfig->translateGeneral('toolbar.edit'); ?>
+                </a>
+            {{?}}
         </div>
     </div>
 <?php View::stopSection(); ?>

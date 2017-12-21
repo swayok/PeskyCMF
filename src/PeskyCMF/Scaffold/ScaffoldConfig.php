@@ -38,6 +38,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /** @var bool */
     protected $isEditAllowed = true;
     /** @var bool */
+    protected $isCloningAllowed = false;
+    /** @var bool */
     protected $isDeleteAllowed = true;
     /**
      * Path to localization of views.
@@ -258,6 +260,13 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      */
     public function isEditAllowed() {
         return $this->isEditAllowed && $this->isSectionAllowed();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCloningAllowed() {
+        return $this->isCloningAllowed && $this->isCreateAllowed();
     }
 
     /**

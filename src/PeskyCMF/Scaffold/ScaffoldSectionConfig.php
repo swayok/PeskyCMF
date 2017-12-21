@@ -416,6 +416,7 @@ abstract class ScaffoldSectionConfig {
         /** @noinspection UnnecessaryParenthesesInspection */
         $pkKey = $this->getTable()->getPkColumnName();
         $permissionsAndServiceData = [
+            '___create_allowed' => $this->isCreateAllowed(),
             '___delete_allowed' => (
                 $this->isDeleteAllowed()
                 && $this->getScaffoldConfig()->isRecordDeleteAllowed($record)
@@ -428,6 +429,7 @@ abstract class ScaffoldSectionConfig {
                 $this->isDetailsViewerAllowed()
                 && $this->getScaffoldConfig()->isRecordDetailsAllowed($record)
             ),
+            '___cloning_allowed' => $this->isCloningAllowed(),
             '__modal' => $this->isUsingDialog(),
             'DT_RowId' => 'item-' . preg_replace('%[^a-zA-Z0-9_-]+%', '-', $record[$pkKey]),
             '___pk_value' => $record[$pkKey]
@@ -784,6 +786,13 @@ abstract class ScaffoldSectionConfig {
      */
     public function isEditAllowed() {
         return $this->getScaffoldConfig()->isEditAllowed();
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isCloningAllowed() {
+        return $this->getScaffoldConfig()->isCloningAllowed();
     }
 
     /**

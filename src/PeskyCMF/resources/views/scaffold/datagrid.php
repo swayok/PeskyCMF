@@ -224,7 +224,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $actionsCount++;
         }
         if ($dataGridConfig->isEditAllowed()) {
-            $url = $dblClickUrl = routeToCmfItemEditForm($tableNameForRoutes, "{{= it.___pk_value }}");
+            $url = $dblClickUrl = routeToCmfItemEditForm($tableNameForRoutes, '{{= it.___pk_value }}');
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green item-edit')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
@@ -233,6 +233,18 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setHref($url)
                 ->build();
             $actionsTpl .= '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
+            $actionsCount++;
+        }
+        if ($dataGridConfig->isCloningAllowed()) {
+            $url = $dblClickUrl = routeToCmfItemCloneForm($tableNameForRoutes, '{{= it.___pk_value }}');
+            $btn = \Swayok\Html\Tag::a()
+                ->setClass('row-action text-primary item-clone')
+                ->setContent('<i class="fa fa-copy"></i>')
+                ->setTitle($dataGridConfig->translateGeneral('actions.clone_item'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setHref($url)
+                ->build();
+            $actionsTpl .= '{{? !!it.___cloning_allowed }}' . $btn . '{{?}}';
             $actionsCount++;
         }
         if ($dataGridConfig->isDeleteAllowed()) {
