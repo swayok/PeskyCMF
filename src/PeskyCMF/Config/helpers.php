@@ -207,6 +207,27 @@ if (!function_exists('routeToCmfItemEditForm')) {
     }
 }
 
+if (!function_exists('routeToCmfItemCloneForm')) {
+    /**
+     * @param string $tableName
+     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
+     * @param bool $absolute
+     * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @return string
+     */
+    function routeToCmfItemCloneForm($tableName, $itemId, $absolute = false, $cmfConfig = null) {
+        if (Gate::denies('resource.create', [$tableName, $itemId])) {
+            return null;
+        }
+        if (!$cmfConfig) {
+            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+        }
+        $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
+        $url = route($cmfConfig::getRouteName('cmf_item_clone_form'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
+        return str_replace('__dotjs_item_id_insert__', $itemId, $url);
+    }
+}
+
 if (!function_exists('routeToCmfItemDetails')) {
     /**
      * @param string $tableName

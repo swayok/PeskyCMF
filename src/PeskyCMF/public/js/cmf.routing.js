@@ -382,6 +382,7 @@ CmfRouteChange.scaffoldItemDetailsPage = function (request) {
                 || (
                     data.__modal
                     && request.env().is_click
+                    && request.env().is_modal !== false
                 )
             ) {
                 data.__modal = true;
@@ -489,6 +490,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
     }
     var itemId = !request.params.id || request.params.id === 'create' ? null : request.params.id;
     var resource = request.params.resource;
+    var isClone = !!request.env().is_clone;
     return $.when(
             ScaffoldsManager.getItemFormTpl(resource),
             ScaffoldsManager.getResourceItemData(resource, itemId, false),
@@ -496,9 +498,15 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
             AdminUI.showUI()
         )
         .done(function (dotJsTpl, data, options) {
+            if (isClone) {
+                delete data.___pk_value;
+                delete data.id;
+                delete data.__id;
+                delete data._is_cloning;
+            }
+            data._is_creation = isClone || !itemId;
             var renderTpl = function (data, options, isModal) {
                 data.__modal = !!isModal;
-                data._is_creation = !itemId;
                 if (data._is_creation) {
                     // add alowed query args to data so that parogrammer can pass default values for inputs through query args
                     for (var argName in request.query) {
@@ -530,6 +538,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                                     )
                                     .done(function (data, options) {
                                         data._options = options;
+                                        data._is_creation = !itemId;
                                         var $newContent = $('<div></div>').html(renderTpl(data, options, true));
                                         initContent(
                                             $content
@@ -546,7 +555,8 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                                 page.reload();
                             }
                         } else {
-                            page.show(json.redirect, null, true, true, {env: {is_ajax_response: true}});
+                            Utils.hidePreloader($form);
+                            page.show(json.redirect, null, true, true, {env: {is_ajax_response: true, is_modal: isModal}});
                         }
                     } else {
                         if (isModal) {
@@ -564,6 +574,7 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                 request.isSubRequest()
                 || (
                     data.__modal
+                    && request.env().is_modal !== false
                     && (
                         request.env().is_click
                         || request.env().is_ajax_response
@@ -594,4 +605,9 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
             }
             CmfRoutingHelpers.routeHandled(request);
         });
+};
+
+CmfRouteChange.scaffoldItemClone = function (request) {
+    request.env().is_clone = true;
+    return CmfRouteChange.scaffoldItemFormPage(request);
 };

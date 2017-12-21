@@ -193,6 +193,11 @@ Route::group(
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
+        Route::get('{table_name}/clone/{id}', [
+            'as' => $routeNamePrefix . 'cmf_item_clone_form',
+            'uses' => $generalControllerClass . '@loadJsApp',
+        ]);
+
         Route::get('{table_name}/{id}/page/{page}.html', [
             'middleware' => AjaxOnly::class,
             'fallback' => [
