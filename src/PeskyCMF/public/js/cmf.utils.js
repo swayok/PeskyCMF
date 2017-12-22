@@ -1,7 +1,7 @@
 var Utils = {
     bodyClass: false,
-    loadedJsFiles: [],
-    loadedCssFiles: [],
+    loadedJsFiles: {},
+    loadedCssFiles: {},
     cacheLoadedJsFiles: true
 };
 
@@ -87,27 +87,30 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
             if (typeof jsFiles[i] !== 'string') {
                 alert('jsFiles argument in Utils.requireFiles() must contain only strings. Not a string detected in index ' + i);
             }
-            if (
-                Utils.cacheLoadedJsFiles
-                && (
-                    $.inArray(jsFiles[i], Utils.loadedJsFiles) >= 0
-                    || $('script[src="' + jsFiles[i] + '"]').length
-                )
-            ) {
-                loadedJsFiles++;
-                if (jsFiles.length === loadedJsFiles) {
-                    deferred.resolve();
-                }
-                continue;
-            }
-            $.getScript(jsFiles[i])
-                .done(function (data, textStatus, jqxhr) {
+            var jsFileCleaned = jsFiles[i].replace(/(\?|&)_=[0-9]+/, '');
+            if (Utils.cacheLoadedJsFiles) {
+                if (Utils.loadedJsFiles[jsFileCleaned]) {
+                    Utils.loadedJsFiles[jsFileCleaned].done(function () {
+                        loadedJsFiles++;
+                        if (jsFiles.length === loadedJsFiles) {
+                            deferred.resolve();
+                        }
+                    });
+                    continue;
+                } else if ($('script[src^="' + jsFileCleaned + '"]').length) {
+                    Utils.loadedJsFiles[jsFileCleaned] = $.Deferred().resolve().promise();
                     loadedJsFiles++;
                     if (jsFiles.length === loadedJsFiles) {
                         deferred.resolve();
                     }
-                    if (this.url && Utils.cacheLoadedJsFiles) {
-                        Utils.loadedJsFiles.push(this.url.replace(/(\?|&)_=[0-9]+/, ''));
+                    continue;
+                }
+            }
+            Utils.loadedJsFiles[jsFileCleaned] = $.getScript(jsFiles[i])
+                .done(function (data, textStatus, jqxhr) {
+                    loadedJsFiles++;
+                    if (jsFiles.length === loadedJsFiles) {
+                        deferred.resolve();
                     }
                 })
                 .fail(function (jqxhr, settings, exception) {
@@ -133,7 +136,9 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
                 if (typeof cssFiles[i] !== 'string') {
                     alert('cssFiles argument in Utils.requireFiles() must contain only strings. Not a string detected in index ' + i);
                 }
-                if ($.inArray(cssFiles[i], Utils.loadedCssFiles) >= 0 || $('link[href="' + cssFiles[i] + '"]').length) {
+                var cssFileCleaned = cssFiles[i].replace(/(\?|&)_=[0-9]+/, '');
+                if (Utils.loadedCssFiles[cssFileCleaned] || $('link[href^="' + cssFileCleaned + '"]').length) {
+                    Utils.loadedCssFiles[cssFileCleaned] = true;
                     continue;
                 }
                 if (document.createStyleSheet) {
@@ -142,7 +147,7 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
                     $('body').before(
                         $('<link rel="stylesheet" href="' + cssFiles[i] + '" type="text/css" />')
                     );
-                    Utils.loadedCssFiles.push(cssFiles[i].replace(/(\?|&)_=[0-9]+/, ''));
+                    Utils.loadedCssFiles[cssFileCleaned] = true;
                 }
             }
         }
