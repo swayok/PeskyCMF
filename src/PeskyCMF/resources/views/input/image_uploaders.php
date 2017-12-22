@@ -24,14 +24,18 @@ $configNameToInputId = [];
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
             <div class="image-upload-input-container form-group mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
                 <input type="file" class="file-loading"
-                id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
+                       id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
                 <input type="hidden" value="{{= it.info || '{}' }}"
-                id="<?php echo $inputId; ?>-{{= it.index }}-info" name="<?php echo $inputName; ?>[{{= it.index }}][info]">
+                       id="<?php echo $inputId; ?>-{{= it.index }}-info" name="<?php echo $inputName; ?>[{{= it.index }}][info]">
                 <input type="hidden" value="0"
-                id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
-                {{? it.info }}
+                       id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
+                {{? it.url }}
+                    {{? it.is_cloning }}
+                        <input type="hidden" value="{{= it.file_clone || '{}' }}" class="file-cloning-input"
+                               id="<?php echo $inputId; ?>-{{= it.index }}-file-clone" name="<?php echo $inputName; ?>[{{= it.index }}][file_clone]">
+                    {{?}}
                     <input type="hidden" value="{{! JSON.stringify(it) }}"
-                    id="<?php echo $inputId; ?>-{{= it.index }}-old-file" name="<?php echo $inputName; ?>[{{= it.index }}][old_file]">
+                           id="<?php echo $inputId; ?>-{{= it.index }}-old-file" name="<?php echo $inputName; ?>[{{= it.index }}][old_file]">
                 {{?}}
             </div>
         </script>
@@ -39,9 +43,9 @@ $configNameToInputId = [];
 
         </div>
         <div class="form-group">
-            <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>">
+            <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>-for-errors">
             <?php for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++): ?>
-                <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>]" id="<?php echo $inputId; ?>">
+                <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>]" id="<?php echo $inputId . '-' . $i; ?>-for-errors">
             <?php endfor; ?>
             <?php echo $valueViewer->getFormattedTooltipForImageConfig($configName); ?>
         </div>
@@ -60,7 +64,8 @@ $configNameToInputId = [];
         Utils.requireFiles(['/packages/cmf/js/inputs/cmf.fileuploads.js']).done(function () {
             var data = {
                 files: <?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode') ?>,
-                configs: <?php echo json_encode($configNameToInputId); ?>
+                configs: <?php echo json_encode($configNameToInputId); ?>,
+                is_cloning: {{= !!it._is_cloning }}
             };
             CmfFileUploads.initImageUploaders(data);
         });

@@ -13,9 +13,16 @@ $ifEdit = '{{? !it._is_creation }}';
 $ifCreate = '{{? it._is_creation }}';
 $else = '{{??}}';
 $endIf = '{{?}}';
+$ifClone = '{{? !!it._is_cloning }}';
 
-$pageUrl = $ifEdit . routeToCmfItemEditForm($tableNameForRoutes, '{{= it.' . $table->getPkColumnName() . '}}')
-    . $else . routeToCmfItemAddForm($tableNameForRoutes)
+$pageUrl = $ifEdit
+        . routeToCmfItemEditForm($tableNameForRoutes, '{{= it.___pk_value}}')
+    . $else
+        . $ifClone
+            . routeToCmfItemCloneForm($tableNameForRoutes, '{{= it.___pk_value}}')
+        . $else
+            . routeToCmfItemAddForm($tableNameForRoutes)
+        .$endIf
     . $endIf;
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 $tabs = $formConfig->getTabs();
@@ -139,6 +146,10 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         <?php echo $ifEdit; ?>
             <input type="hidden" name="_method" value="PUT">
             <input type="hidden" name="<?php echo $pkColName; ?>" value="{{= it.___pk_value }}">
+        <?php echo $else; ?>
+            <?php echo $ifClone; ?>
+                <input type="hidden" name="_clone" value="{{= it.___pk_value }}">
+            <?php echo $endIf; ?>
         <?php echo $endIf; ?>
         <!-- disable chrome email & password autofill -->
         <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>

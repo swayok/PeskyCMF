@@ -37,6 +37,7 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
         maxFileSize: imageConfig.max_file_size
     });
     imageConfig.inputsAdded = 0;
+    imageConfig.isCloning = !!data.is_cloning;
     Utils.makeTemplateFromText(
             $('#' + imageConfig.id + '-tpl').html(),
             'initImageUploaders for image ' + imageName
@@ -47,9 +48,11 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                 if (imageConfig.inputsAdded >= imageConfig.max_files_count) {
                     return false;
                 }
-                var $renderedTemplate = $(imageConfig.inputTpl(
-                    $.extend({index: imageConfig.inputsAdded}, $.isPlainObject(existingFileData) ? existingFileData : {}))
-                );
+                if (!$.isPlainObject(existingFileData)) {
+                    existingFileData = {};
+                }
+                existingFileData = $.extend({index: imageConfig.inputsAdded}, existingFileData);
+                var $renderedTemplate = $(imageConfig.inputTpl(existingFileData));
                 $('#' + imageConfig.id + '-container').append($renderedTemplate);
                 imageConfig.inputsAdded++;
                 var $fileInput = $renderedTemplate.find('input[type="file"]');
@@ -59,10 +62,28 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                     $.isPlainObject(pluginOptions) ? pluginOptions : {}/*,
                     {minFileCount: imageConfig.inputsAdded >= imageConfig.min_files_count ? 1 : 0}*/
                 );
+
+                if (existingFileData.is_cloning && existingFileData.url) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onload = function(){
+                        var reader = new FileReader();
+                        reader.onloadend = function() {
+                            $('#' + $fileInput[0].id + '-file-clone').val(JSON.stringify($.extend({file_data: reader.result}, existingFileData)));
+                        };
+                        reader.readAsDataURL(xhr.response);
+                    };
+                    xhr.open('GET', existingFileData.url);
+                    xhr.responseType = 'blob';
+                    xhr.send();
+                }
                 $fileInput
                     .fileinput(options)
                     .on('fileclear', function() {
                         $('#' + this.id + '-deleted').val('1');
+                        $('#' + this.id + '-file-clone').remove();
+                    })
+                    .on('change', function () {
+                        $('#' + this.id + '-file-clone').remove();
                     });
             };
             $('#' + imageConfig.id + '-add')
@@ -95,7 +116,10 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                                 initialPreviewConfig: [existingFilesPreviewsInfo[i]],
                                 initialCaption: [existingFilesPreviewsInfo[i].caption]
                             },
-                            existingFiles[i]
+                            $.extend(
+                                {url: existingFilesUrls[i], is_cloning: imageConfig.isCloning},
+                                existingFiles[i]
+                            )
                         )
                     }
                 }

@@ -498,13 +498,8 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
             AdminUI.showUI()
         )
         .done(function (dotJsTpl, data, options) {
-            if (isClone) {
-                delete data.___pk_value;
-                delete data.id;
-                delete data.__id;
-                delete data._is_cloning;
-            }
-            data._is_creation = isClone || !itemId;
+            data._is_cloning = isClone;
+            data._is_creation = data._is_cloning || !itemId;
             var renderTpl = function (data, options, isModal) {
                 data.__modal = !!isModal;
                 if (data._is_creation) {
