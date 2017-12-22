@@ -31,8 +31,8 @@ $configNameToInputId = [];
                        id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
                 {{? it.url }}
                     {{? it.is_cloning }}
-                        <input type="hidden" value="{{= it.file_clone || '{}' }}" class="file-cloning-input"
-                               id="<?php echo $inputId; ?>-{{= it.index }}-file-clone" name="<?php echo $inputName; ?>[{{= it.index }}][file_clone]">
+                        <input type="hidden" value="{{= it.file_data || '{}' }}"
+                               id="<?php echo $inputId; ?>-{{= it.index }}-file-data" name="<?php echo $inputName; ?>[{{= it.index }}][file_data]">
                     {{?}}
                     <input type="hidden" value="{{! JSON.stringify(it) }}"
                            id="<?php echo $inputId; ?>-{{= it.index }}-old-file" name="<?php echo $inputName; ?>[{{= it.index }}][old_file]">

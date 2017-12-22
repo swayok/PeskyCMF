@@ -34,7 +34,7 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
         allowedFileExtensions: imageConfig.allowed_extensions,
         minFileCount: 0,
         maxFileCount: 1,
-        maxFileSize: imageConfig.max_file_size
+        maxFileSize: imageConfig.max_file_size,
     });
     imageConfig.inputsAdded = 0;
     imageConfig.isCloning = !!data.is_cloning;
@@ -68,7 +68,7 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                     xhr.onload = function(){
                         var reader = new FileReader();
                         reader.onloadend = function() {
-                            $('#' + $fileInput[0].id + '-file-clone').val(JSON.stringify($.extend({file_data: reader.result}, existingFileData)));
+                            $('#' + $fileInput[0].id + '-file-data').val(JSON.stringify($.extend({data: reader.result}, existingFileData)));
                         };
                         reader.readAsDataURL(xhr.response);
                     };
@@ -80,10 +80,10 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                     .fileinput(options)
                     .on('fileclear', function() {
                         $('#' + this.id + '-deleted').val('1');
-                        $('#' + this.id + '-file-clone').remove();
+                        $('#' + this.id + '-file-data').remove();
                     })
                     .on('change', function () {
-                        $('#' + this.id + '-file-clone').remove();
+                        $('#' + this.id + '-file-data').remove();
                     });
             };
             $('#' + imageConfig.id + '-add')
