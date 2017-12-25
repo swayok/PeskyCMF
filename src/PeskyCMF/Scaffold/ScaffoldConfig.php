@@ -55,6 +55,33 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     protected $logger;
 
     /**
+     * List of record's columns to log on record usage/modification
+     * @var null|array
+     */
+    protected $loggableRecordColumns = null;
+
+    /**
+     * List of record's columns that should not be logged on record usage/modification
+     * @var null|array
+     */
+    protected $notLoggableRecordColumns = null;
+
+    /**
+     * Should record's file columns be logged on record usage/modification?
+     * @var bool
+     */
+    protected $logFileColumns = true;
+
+    /**
+     * List of record's relations and their columns to log together with record's data
+     * Note: relation's data will be logged only when it is already loaded (no additional DB queries wil be done)
+     * Format: ['Relation1', 'Relation2' => ['column1', 'column2']]; Default: ['*']
+     * Use FALSE to disable logging of relations' data
+     * @var null|array|false
+     */
+    protected $loggableRecordRelations = false;
+
+    /**
      * ScaffoldConfig constructor.
      */
     public function __construct() {
@@ -124,6 +151,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return array
+     * @throws \Exceptions\Data\NotFoundException
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
@@ -188,6 +217,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return DataGridConfig
+     * @throws \Exceptions\Data\NotFoundException
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \UnexpectedValueException
@@ -493,11 +523,20 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @param RecordInterface $record
+     * @param null|string $tableName
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function logDbRecordBeforeChange(RecordInterface $record, $tableName = null) {
         if ($this->hasLogger()) {
-            $this->getLogger()->logDbRecordBeforeChange($record, $tableName);
+            $this->getLogger()->logDbRecordBeforeChange(
+                $record,
+                $tableName,
+                $this->getLoggableRecordColumns($record),
+                $this->getLoggableRecordRelations($record)
+            );
         }
         return $this;
     }
@@ -505,23 +544,70 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @param RecordInterface $record
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function logDbRecordAfterChange(RecordInterface $record) {
         if ($this->hasLogger()) {
-            $this->getLogger()->logDbRecordAfterChange($record);
+            $this->getLogger()->logDbRecordAfterChange(
+                $record,
+                $this->getLoggableRecordColumns($record),
+                $this->getLoggableRecordRelations($record)
+            );
         }
         return $this;
     }
 
     /**
      * @param RecordInterface $record
+     * @param null|string $tableName
      * @return $this
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      */
     public function logDbRecordLoad(RecordInterface $record, $tableName = null) {
         if ($this->hasLogger()) {
             $this->getLogger()->logDbRecordUsage($record, $tableName);
         }
         return $this;
+    }
+
+    /**
+     * @param RecordInterface $record
+     * @return array
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    protected function getLoggableRecordColumns(RecordInterface $record) {
+        $fields = $this->loggableRecordColumns ?: array_keys($record::getTable()->getTableStructure()->getColumns());
+        if (is_array($this->notLoggableRecordColumns)) {
+            $fields = array_diff($fields, $this->notLoggableRecordColumns);
+        }
+        if (!$this->logFileColumns) {
+            $fields = array_diff($fields, array_keys($record::getTable()->getTableStructure()->getFileColumns()));
+        }
+        $fields[] = $record::getTable()->getTableStructure()->getPkColumnName();
+        return array_unique($fields);
+    }
+
+    /**
+     * @param RecordInterface $record
+     * @return array
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    protected function getLoggableRecordRelations(RecordInterface $record) {
+        if ($this->loggableRecordRelations === false) {
+            return [];
+        } else if (is_array($this->loggableRecordRelations)) {
+            return $this->loggableRecordRelations;
+        } else {
+            return array_keys($record::getTable()->getTableStructure()->getRelations());
+        }
     }
 
     public function getCustomData($dataId) {
