@@ -18,7 +18,10 @@ var CmfFileUploads = {
             "</div>"
         },
         overwriteInitial: true,
-        initialPreviewAsData: true
+        initialPreviewAsData: true,
+        fileActionSettings: {
+            showDrag: false
+        }
     }
 };
 
@@ -34,10 +37,12 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
         allowedFileExtensions: imageConfig.allowed_extensions,
         minFileCount: 0,
         maxFileCount: 1,
-        maxFileSize: imageConfig.max_file_size,
+        maxFileSize: imageConfig.max_file_size
     });
     imageConfig.inputsAdded = 0;
     imageConfig.isCloning = !!data.is_cloning;
+    imageConfig.isInModal = !!data.is_in_modal;
+
     Utils.makeTemplateFromText(
             $('#' + imageConfig.id + '-tpl').html(),
             'initImageUploaders for image ' + imageName
@@ -84,6 +89,13 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                     })
                     .on('change', function () {
                         $('#' + this.id + '-file-data').remove();
+                    })
+                    .on('filezoomhidden', function (event, params) {
+                        params.modal.remove();
+                        if (imageConfig.isInModal) {
+                            $('body').addClass('modal-open');
+                            $('.modal.in').css('padding-left', '17px');
+                        }
                     });
             };
             $('#' + imageConfig.id + '-add')
