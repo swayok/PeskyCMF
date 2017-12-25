@@ -20,6 +20,8 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
     protected $isEditAllowed = true;
     protected $isDeleteAllowed = true;
 
+    protected $notLoggableRecordColumns = ['password'];
+
     /**
      * @return CmfAdminsTable
      */
