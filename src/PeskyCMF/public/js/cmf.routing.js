@@ -14,10 +14,10 @@ var CmfRoutingHelpers = {
         Utils.hidePreloader(CmfRoutingHelpers.$currentContentContainer);
     },
     cleanupHangedElementsInBody: function () {
-        $('body > .tooltip, body > .bootstrap-select').remove();
+        $('body > .tooltip, body > .bs-container.bootstrap-select').remove();
     },
     cleanupHangedElementsInContentWrapper: function () {
-        Utils.getContentContainer().find('.tooltip, .bootstrap-select').remove();
+        Utils.getContentContainer().find('.tooltip, .bs-container.bootstrap-select').remove();
     },
     hideModals: function () {
         var deferred = $.Deferred();
