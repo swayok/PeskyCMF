@@ -1012,7 +1012,7 @@ aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container.ss-co
   padding-bottom: 0;
 }
 aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container.ss-container .ss-content {
-  padding-bottom: 10px;
+  padding: 0 0 10px 0;
   width: calc(100% + 17px);
   right: 0;
   overflow-y: scroll;
