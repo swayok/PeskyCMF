@@ -603,6 +603,12 @@ AdminUI.loadUI = function () {
                 AdminUI.$el = $('<div class="ui-container"></div>').html(html);
                 deferred.resolve(AdminUI.$el);
                 AdminUI.initMenuCountersUpdatesAfterAjaxRequests();
+                var $scrollbarContainers = AdminUI.$el.find('[ss-container]');
+                console.log($scrollbarContainers);
+                for (var i = 0; i < $scrollbarContainers.length; i++) {
+                    console.log($scrollbarContainers[i]);
+                    SimpleScrollbar.initEl($scrollbarContainers[i]);
+                }
                 $(document).trigger('appui:loaded');
             })
             .fail(function (error) {
