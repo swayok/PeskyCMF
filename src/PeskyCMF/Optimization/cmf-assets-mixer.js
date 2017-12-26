@@ -9,6 +9,7 @@ var mixCmfStyles = function (mix) {
     ], 'public/packages/cmf/compiled/css/bootstrap-plugins.min.css');
 
     mix.styles([
+        'public/packages/cmf-vendors/scrollbar/simple-scrollbar.css',
         'public/packages/cmf-vendors/datatables/css/dataTables.bootstrap.css',
         'public/packages/cmf-vendors/datatables/extensions/FixedColumns/css/fixedColumns.bootstrap.min.css',
         'public/packages/cmf-vendors/select2/css/select2.min.css',
@@ -52,6 +53,7 @@ var mixCmfScripts = function (mix) {
     ], 'public/packages/cmf/compiled/js/jquery-plugins.min.js');
 
     mix.scripts([
+        'public/packages/cmf-vendors/scrollbar/simple-scrollbar.js',
         'public/packages/cmf-vendors/modernizr.custom.js',
         'public/packages/cmf-vendors/dotjs/doT.js',
         'public/packages/cmf-vendors/router/page.js',

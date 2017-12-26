@@ -998,6 +998,7 @@ aside.main-sidebar section.sidebar {
   width: 100%;
   padding-top: 50px;
   padding-bottom: 0;
+  overflow: hidden;
 }
 aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container {
   position: absolute;
@@ -1005,6 +1006,38 @@ aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container {
   width: 100%;
   overflow: auto;
   padding-bottom: 10px;
+}
+aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container.ss-container {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container.ss-container .ss-content {
+  padding-bottom: 10px;
+  width: calc(100% + 17px);
+  right: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container .ss-scroll {
+  margin-left: 0;
+  width: 6px;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container .ss-scroll.hidden {
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+body.skin-red aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container .ss-scroll,
+body.skin-purple aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container .ss-scroll,
+body.skin-black aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container .ss-scroll,
+body.skin-green aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container .ss-scroll,
+body.skin-blue aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container .ss-scroll,
+body.skin-yellow aside.main-sidebar section.sidebar #main-sidebar-menu-scrollable-container .ss-scroll {
+  background-color: rgba(255, 255, 255, 0.4);
 }
 aside.main-sidebar .sidebar-menu li > a {
   border-right: 3px solid transparent;

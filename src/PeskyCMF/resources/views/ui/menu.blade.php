@@ -1,7 +1,7 @@
 <ul class="sidebar-menu" data-widget="tree" id="common-menu-header">
     <li class="header">{{ cmfTransCustom('.main_menu.header') }}</li>
 </ul>
-<div id="main-sidebar-menu-scrollable-container">
+<div id="main-sidebar-menu-scrollable-container" ss-container>
     <ul class="sidebar-menu tree" data-widget="tree" id="common-menu">
         @foreach (\PeskyCMF\Config\CmfConfig::getPrimary()->menu() as $info)
             @if (empty($info))

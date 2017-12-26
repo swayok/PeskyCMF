@@ -1063,6 +1063,7 @@ aside.main-sidebar {
         width: 100%;
         padding-top: 50px;
         padding-bottom: 0;
+        overflow: hidden;
 
         #main-sidebar-menu-scrollable-container {
             position: absolute;
@@ -1070,6 +1071,39 @@ aside.main-sidebar {
             width: 100%;
             overflow: auto;
             padding-bottom: 10px;
+
+            &.ss-container {
+                overflow: hidden;
+                padding-bottom: 0;
+
+                .ss-content {
+                    padding-bottom: 10px;
+                    width: ~"calc(100% + 17px)";
+                    right: 0;
+                    overflow-y: scroll;
+                    overflow-x: hidden;
+                }
+            }
+
+            .ss-scroll {
+                margin-left: 0;
+                width: 6px;
+                .border-radius(0);
+                ._fade-in;
+
+                &.hidden {
+                    ._fade-out;
+                }
+
+                body.skin-red &,
+                body.skin-purple &,
+                body.skin-black &,
+                body.skin-green &,
+                body.skin-blue &,
+                body.skin-yellow & {
+                    background-color: rgba(255, 255, 255, 0.4);
+                }
+            }
         }
     }
 
