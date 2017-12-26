@@ -57,7 +57,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
         if ($this->fitsRequestUri()) {
             $this->registerDbClasses();
-            $this->registerScaffoldConfigs();
             $langDetectorProvider->importConfigsFromPeskyCmf($this->getCmfConfig());
         }
 
@@ -88,6 +87,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             if ($this->getCmfConfig()->config('file_access_mask') !== null) {
                 umask($this->getCmfConfig()->config('file_access_mask'));
             }
+            $this->registerScaffoldConfigs();
             $this->configureSession();
             $this->configureEventListeners();
             $this->configureAuthorizationGatesAndPolicies();
