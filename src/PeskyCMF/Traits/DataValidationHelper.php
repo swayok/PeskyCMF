@@ -4,6 +4,7 @@ namespace PeskyCMF\Traits;
 
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
+use PeskyCMF\HttpCode;
 use Swayok\Utils\Set;
 
 trait DataValidationHelper {
@@ -45,10 +46,9 @@ trait DataValidationHelper {
     /**
      * @param array $errors
      * @return Response
-     * @throws ValidationException
      */
     protected function sendValidationErrorsResponse(array $errors) {
-        throw ValidationException::withMessages($errors);
+        return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::CANNOT_PROCESS);
     }
 
     protected function prepareDataForValidationErrorsResponse(array $errors) {

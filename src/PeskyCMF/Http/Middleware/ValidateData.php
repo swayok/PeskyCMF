@@ -46,8 +46,4 @@ class ValidateData {
         return $next($request);
     }
 
-    protected function sendValidationErrorsResponse($errors) {
-        return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::CANNOT_PROCESS);
-    }
-
 }
