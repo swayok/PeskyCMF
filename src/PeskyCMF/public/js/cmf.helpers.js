@@ -603,6 +603,7 @@ AdminUI.loadUI = function () {
                 AdminUI.$el = $('<div class="ui-container"></div>').html(html);
                 deferred.resolve(AdminUI.$el);
                 AdminUI.initMenuCountersUpdatesAfterAjaxRequests();
+                AdminUI.initCustomScrollbars(AdminUI.$el);
                 $(document).trigger('appui:loaded');
             })
             .fail(function (error) {
@@ -612,6 +613,34 @@ AdminUI.loadUI = function () {
         deferred.resolve(AdminUI.$el);
     }
     return deferred.promise();
+};
+
+AdminUI.initCustomScrollbars = function ($el) {
+    var $scrollbarContainers = $el.find('[ss-container]');
+    if ($scrollbarContainers.length) {
+        var observer = null;
+        var observerConfig = {subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class']};
+        if (typeof MutationObserver !== 'undefined') {
+            observer = new MutationObserver(function (mutations) {
+                var $scrollContainer = $(mutations[0].target).closest('.ss-container');
+                if ($scrollContainer.length && $scrollContainer[0].hasOwnProperty('data-simple-scrollbar')) {
+                    $scrollContainer[0]['data-simple-scrollbar'].moveBar();
+                }
+            });
+        }
+        for (var i = 0; i < $scrollbarContainers.length; i++) {
+            if (!$scrollbarContainers[i].hasOwnProperty('data-simple-scrollbar')) {
+                Object.defineProperty(
+                    $scrollbarContainers[i],
+                    'data-simple-scrollbar',
+                    {value: new SimpleScrollbar($scrollbarContainers[i])}
+                );
+            }
+            if (observer) {
+                observer.observe($($scrollbarContainers[i]).find('.ss-content')[0], observerConfig);
+            }
+        }
+    }
 };
 
 AdminUI.updateUserInfo = function (userInfo) {

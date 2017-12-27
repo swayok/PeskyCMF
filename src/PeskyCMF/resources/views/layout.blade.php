@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-@php($scriptsVersion = '2.2.6')
+@php($scriptsVersion = '2.2.7')
 <head>
     <meta charset="UTF-8">
     <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }} @show</title>
@@ -14,6 +14,7 @@
     <link href="/packages/cmf-vendors/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
 
     @if(!config('peskycmf.assets_are_mixed', false))
+        <link href="/packages/cmf-vendors/scrollbar/simple-scrollbar.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
@@ -112,6 +113,7 @@
     <script src="/packages/cmf-vendors/jquery3/jquery.min.js" type="text/javascript"></script>
 
     @if(!config('peskycmf.assets_are_mixed', false))
+        <script src="/packages/cmf-vendors/scrollbar/simple-scrollbar.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/switches/js/bootstrap-switch.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/datatables/js/jquery.dataTables.min.js" type="text/javascript"></script>

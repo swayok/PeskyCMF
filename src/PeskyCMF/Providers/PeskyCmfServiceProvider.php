@@ -57,7 +57,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
         if ($this->fitsRequestUri()) {
             $this->registerDbClasses();
-            $this->registerScaffoldConfigs();
             $langDetectorProvider->importConfigsFromPeskyCmf($this->getCmfConfig());
         }
 
@@ -88,6 +87,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             if ($this->getCmfConfig()->config('file_access_mask') !== null) {
                 umask($this->getCmfConfig()->config('file_access_mask'));
             }
+            $this->registerScaffoldConfigs();
             $this->configureSession();
             $this->configureEventListeners();
             $this->configureAuthorizationGatesAndPolicies();
@@ -289,6 +289,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 //            base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
 //            base_path('vendor/ckeditor/ckeditor/skins') => public_path('packages/cmf-vendors/ckeditor/skins'),
             // libs
+            base_path('vendor/npm-asset/simple-scrollbar/simple-scrollbar.css') => public_path('packages/cmf-vendors/scrollbar/simple-scrollbar.css'),
+            base_path('vendor/npm-asset/simple-scrollbar/simple-scrollbar.js') => public_path('packages/cmf-vendors/scrollbar/simple-scrollbar.js'),
             base_path('vendor/swayok/page.js/page.js') => public_path('packages/cmf-vendors/router/page.js'),
             base_path('vendor/datatables/datatables/media') => public_path('packages/cmf-vendors/datatables'),
             base_path('vendor/grimmlink/toastr/build') => public_path('packages/cmf-vendors/toastr'),
