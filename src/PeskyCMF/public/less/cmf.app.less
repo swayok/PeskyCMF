@@ -1701,11 +1701,56 @@ aside.main-sidebar {
     min-height: 600px !important;
 }
 
-.file-input {
-    .file-preview {
-        .fileinput-remove {
-            top: 9px;
-            right: 9px;
+.file-upload-input-container,
+.image-upload-input-container {
+    .file-input {
+        .file-preview {
+            .fileinput-remove {
+                top: 9px;
+                right: 9px;
+                z-index: 2;
+            }
+
+            .file-preview-thumbnails {
+                .file-preview-frame {
+                    &.krajee-default {
+                        float: none;
+                        width: 100%;
+                        text-align: center;
+                        box-shadow: none;
+                        border-width: 0;
+                        margin: 0;
+
+                        .kv-file-content {
+                            display: inline-block;
+                        }
+                    }
+                }
+            }
+
+            .no-file {
+                display: none;
+            }
         }
+
+        &.file-input-new {
+            & .file-preview.multi-file-upload {
+                display: block;
+                min-height: 263px;
+                position: relative;
+
+                .no-file {
+                    display: block;
+                    position: absolute;
+                    width: 100%;
+                    top: 50%;
+                    left: 0;
+                    text-align: center;
+                    margin-top: -10px;
+                    color: #777;
+                }
+            }
+        }
+
     }
 }

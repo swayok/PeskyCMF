@@ -1667,7 +1667,43 @@ aside.main-sidebar .sidebar-menu li .badge {
 #scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
   min-height: 600px !important;
 }
-.file-input .file-preview .fileinput-remove {
+.file-upload-input-container .file-input .file-preview .fileinput-remove,
+.image-upload-input-container .file-input .file-preview .fileinput-remove {
   top: 9px;
   right: 9px;
+  z-index: 2;
+}
+.file-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default,
+.image-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default {
+  float: none;
+  width: 100%;
+  text-align: center;
+  box-shadow: none;
+  border-width: 0;
+  margin: 0;
+}
+.file-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default .kv-file-content,
+.image-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default .kv-file-content {
+  display: inline-block;
+}
+.file-upload-input-container .file-input .file-preview .no-file,
+.image-upload-input-container .file-input .file-preview .no-file {
+  display: none;
+}
+.file-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload,
+.image-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload {
+  display: block;
+  min-height: 263px;
+  position: relative;
+}
+.file-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload .no-file,
+.image-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload .no-file {
+  display: block;
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 0;
+  text-align: center;
+  margin-top: -10px;
+  color: #777;
 }

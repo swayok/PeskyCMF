@@ -44,6 +44,9 @@ return [
             ],
             'form' => [
                 'invalid_data_received' => 'Invalid data received'
+            ],
+            'file_uploader' => [
+                'no_file' => 'File not selected yet'
             ]
         ]
     ],

@@ -44,6 +44,9 @@ return [
             ],
             'form' => [
                 'invalid_data_received' => 'Получены недопустимые данные'
+            ],
+            'file_uploader' => [
+                'no_file' => 'Файл еще не выбран'
             ]
         ]
     ],
