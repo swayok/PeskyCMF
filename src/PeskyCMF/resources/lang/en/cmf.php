@@ -188,7 +188,8 @@ return [
             'bool' => [
                 'yes' => 'Yes',
                 'no' => 'No'
-            ]
+            ],
+            'no_relation' => 'Relation not exists'
         ],
         'actions' => [
             'column_label' => 'Actions',
