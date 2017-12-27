@@ -191,7 +191,8 @@ return [
             'bool' => [
                 'yes' => 'Да',
                 'no' => 'Нет'
-            ]
+            ],
+            'no_relation' => 'Связь отсутствует',
         ],
         'actions' => [
             'column_label' => 'Действия',

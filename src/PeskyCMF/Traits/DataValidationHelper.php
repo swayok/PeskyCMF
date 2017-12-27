@@ -2,23 +2,27 @@
 
 namespace PeskyCMF\Traits;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
+use PeskyCMF\HttpCode;
 use Swayok\Utils\Set;
 
 trait DataValidationHelper {
 
     /**
-     * Validate data and send Validation Errors Response (abort(HttpCode::INVALID)) if it is invalid
+     * Validate data and throw ValidationException if it is invalid
      * @param array $data
      * @param array $rules
      * @param array $messages
      * @param array $customAttributes
-     * @return bool|Response
+     * @throws ValidationException
      */
     protected function validate(array $data, array $rules, array $messages = array(), array $customAttributes = array()) {
         $errors = $this->validateWithoutHalt($data, $rules, $messages, $customAttributes);
-        return $errors === true ? true : $this->sendValidationErrorsResponse($errors);
+        if ($errors !== true) {
+            $this->throwValidationErrorsResponse($errors);
+        }
     }
 
     /**
@@ -45,10 +49,17 @@ trait DataValidationHelper {
     /**
      * @param array $errors
      * @return Response
-     * @throws ValidationException
      */
     protected function sendValidationErrorsResponse(array $errors) {
-        throw ValidationException::withMessages($errors);
+        return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::CANNOT_PROCESS);
+    }
+
+    /**
+     * @param array $errors
+     * @throws ValidationException
+     */
+    protected function throwValidationErrorsResponse(array $errors) {
+        throw new ValidationException(\Validator::make([], []), $this->sendValidationErrorsResponse());
     }
 
     protected function prepareDataForValidationErrorsResponse(array $errors) {
