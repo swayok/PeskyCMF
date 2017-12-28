@@ -29,6 +29,10 @@ $configNameToInputId = [];
                        id="<?php echo $inputId; ?>-{{= it.index }}-info" name="<?php echo $inputName; ?>[{{= it.index }}][info]">
                 <input type="hidden" value="0"
                        id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
+                <input type="hidden" value="{{! it.index }}"
+                       id="<?php echo $inputId; ?>-{{= it.index }}-old-position" name="<?php echo $inputName; ?>[{{= it.index }}][old_position]">
+                <input type="hidden" value="{{! it.index }}"
+                       id="<?php echo $inputId; ?>-{{= it.index }}-new-position" name="<?php echo $inputName; ?>[{{= it.index }}][new_position]">
                 {{? it.url }}
                     {{? it.is_cloning }}
                         <input type="hidden" value="{{= it.file_data || '{}' }}"

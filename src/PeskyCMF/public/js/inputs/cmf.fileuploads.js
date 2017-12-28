@@ -130,10 +130,7 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                     forceFallback: true,
                     onUpdate: function (event) {
                         $(event.to).find('.image-upload-input-container').each(function (index, item) {
-                            $(item).find('input[name]').each(function (i, item) {
-                                item.name = item.name.replace(/\]\[\d+\]\[/, '][' + String(index) + '][');
-                                console.log(item, item.name);
-                            });
+                            $(item).find('input[name$="[new_position]"]').val(String(index));
                         });
                     }
                 });
