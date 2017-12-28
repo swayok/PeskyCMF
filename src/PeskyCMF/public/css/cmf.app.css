@@ -1667,6 +1667,47 @@ aside.main-sidebar .sidebar-menu li .badge {
 #scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
   min-height: 600px !important;
 }
+.file-upload-input-container.sortable-chosen .file-input .file-preview,
+.image-upload-input-container.sortable-chosen .file-input .file-preview {
+  background-color: rgba(0, 161, 238, 0.1);
+}
+.file-upload-input-container.sortable-ghost .file-input .file-preview,
+.image-upload-input-container.sortable-ghost .file-input .file-preview {
+  background-color: rgba(0, 161, 238, 0.1);
+}
+.file-upload-input-container .file-input,
+.image-upload-input-container .file-input {
+  position: relative;
+}
+.file-upload-input-container .file-input .fileinput-dragger,
+.image-upload-input-container .file-input .fileinput-dragger {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  padding: 6px 8px 8px 8px;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
+  font-size: 13px;
+  outline: 0 none;
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+  cursor: move;
+}
+.file-upload-input-container .file-input .fileinput-dragger:hover,
+.image-upload-input-container .file-input .fileinput-dragger:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+.file-upload-input-container .file-input .file-preview,
+.image-upload-input-container .file-input .file-preview {
+  min-height: 80px;
+}
+.file-upload-input-container .file-input .file-preview.multi-file-upload,
+.image-upload-input-container .file-input .file-preview.multi-file-upload {
+  min-height: 263px;
+}
 .file-upload-input-container .file-input .file-preview .fileinput-remove,
 .image-upload-input-container .file-input .file-preview .fileinput-remove {
   top: 9px;
@@ -1693,7 +1734,6 @@ aside.main-sidebar .sidebar-menu li .badge {
 .file-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload,
 .image-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload {
   display: block;
-  min-height: 263px;
   position: relative;
 }
 .file-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload .no-file,

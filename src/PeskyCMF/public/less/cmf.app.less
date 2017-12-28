@@ -1703,8 +1703,53 @@ aside.main-sidebar {
 
 .file-upload-input-container,
 .image-upload-input-container {
+
+    &.sortable-chosen {
+        .file-input {
+            .file-preview {
+                background-color: rgba(0, 161, 238, 0.1);
+            }
+        }
+    }
+
+    &.sortable-ghost {
+        .file-input {
+            .file-preview {
+                background-color: rgba(0, 161, 238, 0.1);
+            }
+        }
+    }
+
     .file-input {
+        position: relative;
+
+        .fileinput-dragger {
+            position: absolute;
+            z-index: 2;
+            top: 0;
+            left: 0;
+            padding: 6px 8px 8px 8px;
+            background: transparent;
+            border: 0;
+            -webkit-appearance: none;
+            font-size: 13px;
+            outline: 0 none;
+            ._fade-to(0.5);
+            cursor: move;
+
+            &:hover {
+                ._fade-in;
+            }
+        }
+
         .file-preview {
+
+            min-height: 80px;
+
+            &.multi-file-upload {
+                min-height: 263px;
+            }
+
             .fileinput-remove {
                 top: 9px;
                 right: 9px;
@@ -1736,7 +1781,6 @@ aside.main-sidebar {
         &.file-input-new {
             & .file-preview.multi-file-upload {
                 display: block;
-                min-height: 263px;
                 position: relative;
 
                 .no-file {

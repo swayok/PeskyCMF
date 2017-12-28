@@ -15,6 +15,7 @@ use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
+use PeskyORM\ORM\TempRecord;
 
 abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
@@ -582,7 +583,13 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @throws \BadMethodCallException
      */
     protected function getLoggableRecordColumns(RecordInterface $record) {
-        $fields = $this->loggableRecordColumns ?: array_keys($record::getTable()->getTableStructure()->getColumns());
+        if (is_array($this->loggableRecordColumns)) {
+            $fields = $this->loggableRecordColumns;
+        } else if ($record instanceof TempRecord) {
+            return null;
+        } else {
+            $fields = array_keys($record::getTable()->getTableStructure()->getColumns());
+        }
         if (is_array($this->notLoggableRecordColumns)) {
             $fields = array_diff($fields, $this->notLoggableRecordColumns);
         }
@@ -601,7 +608,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @throws \BadMethodCallException
      */
     protected function getLoggableRecordRelations(RecordInterface $record) {
-        if ($this->loggableRecordRelations === false) {
+        if ($this->loggableRecordRelations === false || $record instanceof TempRecord) {
             return [];
         } else if (is_array($this->loggableRecordRelations)) {
             return $this->loggableRecordRelations;

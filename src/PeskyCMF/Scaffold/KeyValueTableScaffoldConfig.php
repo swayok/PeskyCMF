@@ -139,12 +139,14 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
+                $originalValues = $table::getValuesForForeignKey($fkValue, true);
                 if ($this->hasLogger()) {
-                    $tempRecord = TempRecord::newTempRecord($table::getValuesForForeignKey($fkValue, true), true);
+                    $tempRecord = TempRecord::newTempRecord($originalValues, true);
                     $this->logDbRecordBeforeChange($tempRecord, static::getResourceName());
                 }
                 KeyValueDataSaver::saveKeyValuePairs(
                     $table,
+                    $originalValues,
                     $data,
                     $fkValue,
                     $formConfig->getCustomDataForRecord([])
