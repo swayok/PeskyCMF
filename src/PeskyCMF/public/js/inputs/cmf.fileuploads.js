@@ -43,21 +43,24 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
         previewClass: (isSingleFile ? 'single-file-upload' : 'multi-file-upload')
     });
     if (!isSingleFile) {
-        imageConfig.defaultPluginOptions.layoutTemplates.main2 = '{preview}\n<div class="kv-upload-progress kv-hidden"></div>\n' +
+        imageConfig.defaultPluginOptions.layoutTemplates.main2 =
+            '<button class="fileinput-dragger" type="button"><span class="fa fa-arrows"></span></button>' +
+            '{preview}\n<div class="kv-upload-progress kv-hidden"></div>\n' +
             '<div class="clearfix"></div>\n' +
             '<div class="kv-upload-toolbar text-center">{remove}\n{cancel}\n{upload}\n{browse}\n</div>';
 
-        imageConfig.defaultPluginOptions.layoutTemplates.preview = '<div class="file-preview {class}">\n' +
-                '    {close}' +
-                '    <div class="no-file">' + CmfConfig.getLocalizationStringsForComponent('file_uploader').no_file + '</div>' +
-                '    <div class="{dropClass}">\n' +
-                '    <div class="file-preview-thumbnails">\n' +
-                '    </div>\n' +
-                '    <div class="clearfix"></div>' +
-                '    <div class="file-preview-status text-center text-success"></div>\n' +
-                '    <div class="kv-fileinput-error"></div>\n' +
-                '    </div>\n' +
-                '</div>';
+        imageConfig.defaultPluginOptions.layoutTemplates.preview =
+            '<div class="file-preview {class}">\n' +
+            '    {close}' +
+            '    <div class="no-file">' + CmfConfig.getLocalizationStringsForComponent('file_uploader').no_file + '</div>' +
+            '    <div class="{dropClass}">\n' +
+            '    <div class="file-preview-thumbnails">\n' +
+            '    </div>\n' +
+            '    <div class="clearfix"></div>' +
+            '    <div class="file-preview-status text-center text-success"></div>\n' +
+            '    <div class="kv-fileinput-error"></div>\n' +
+            '    </div>\n' +
+            '</div>';
     }
     imageConfig.inputsAdded = 0;
     imageConfig.isCloning = !!data.is_cloning;
@@ -118,6 +121,22 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
             // add required amount of inputs
             for (var k = imageConfig.inputsAdded; k < imageConfig.min_files_count; k++) {
                 imageConfig.addInput();
+            }
+            if (!isSingleFile) {
+                Sortable.create($('#' + imageConfig.id + '-container')[0], {
+                    handle: '.fileinput-dragger',
+                    draggable: '.image-upload-input-container',
+                    animation: 200,
+                    forceFallback: true,
+                    onUpdate: function (event) {
+                        $(event.to).find('.image-upload-input-container').each(function (index, item) {
+                            $(item).find('input[name]').each(function (i, item) {
+                                item.name = item.name.replace(/\]\[\d+\]\[/, '][' + String(index) + '][');
+                                console.log(item, item.name);
+                            });
+                        });
+                    }
+                });
             }
         });
 };
