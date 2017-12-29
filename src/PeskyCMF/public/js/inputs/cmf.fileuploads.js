@@ -20,7 +20,8 @@ var CmfFileUploads = {
         overwriteInitial: true,
         initialPreviewAsData: true,
         fileActionSettings: {
-            showDrag: false
+            showDrag: false,
+            showDownload: true
         }
     }
 };
@@ -173,6 +174,7 @@ CmfFileUploads.initImageUploaderInput = function (imageConfig, pluginOptions, ex
     $fileInput
         .fileinput(options)
         .on('fileclear', function() {
+            $('#' + this.id + '-deleted').val('1');
             $('#' + this.id + '-file-data').remove();
         })
         .on('change', function () {

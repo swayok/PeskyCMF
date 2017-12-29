@@ -138,18 +138,21 @@ class ImagesFormInput extends FormInput {
             $ret['files'][$imageName] = [];
             /** @var FileInfo $fileInfo */
             foreach ($fileInfoArray as $fileInfo) {
-                $ret['urls'][$imageName][] = $fileInfo->getAbsoluteUrl();
-                $ret['files'][$imageName][] = [
-                    'info' => $fileInfo->getCustomInfo(),
-                    'name' => $fileInfo->getFileName(),
-                    'extension' => $fileInfo->getFileExtension(),
-                    'uuid' => $fileInfo->getUuid(),
-                ];
-                $ret['preview_info'][$imageName][] = [
-                    'caption' => $fileInfo->getFileNameWithExtension(),
-                    'size' => filesize($fileInfo->getAbsoluteFilePath()),
-                    'key' => 1
-                ];
+                if ($fileInfo->exists()) {
+                    $ret['urls'][$imageName][] = $fileInfo->getAbsoluteUrl();
+                    $ret['files'][$imageName][] = [
+                        'info' => $fileInfo->getCustomInfo(),
+                        'name' => $fileInfo->getOriginalFileName() ?: $fileInfo->getFileName(),
+                        'extension' => $fileInfo->getFileExtension(),
+                        'uuid' => $fileInfo->getUuid(),
+                    ];
+                    $ret['preview_info'][$imageName][] = [
+                        'caption' => $fileInfo->getOriginalFileNameWithExtension(),
+                        'size' => filesize($fileInfo->getAbsoluteFilePath()),
+                        'downloadUrl' => $fileInfo->getAbsoluteUrl(),
+                        'key' => 1
+                    ];
+                }
             }
         }
         return $ret;
@@ -166,11 +169,11 @@ class ImagesFormInput extends FormInput {
                 . '|mimetypes:' . implode(',', $imageConfig->getAllowedFileTypes());
             for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++) {
                 if ($imageConfig->getMinFilesCount() > $i) {
-                    $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.old_file|{$commonValidators}";
-                    $validators["{$baseName}.{$i}.old_file"] = "required_without:{$baseName}.{$i}.file|nullable|string";
+                    $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.uuid|{$commonValidators}";
+                    $validators["{$baseName}.{$i}.uuid"] = "required_without:{$baseName}.{$i}.file|nullable|string";
                 } else {
                     $validators["{$baseName}.{$i}.file"] = "nullable|{$commonValidators}";
-                    $validators["{$baseName}.{$i}.old_file"] = 'nullable|string';
+                    $validators["{$baseName}.{$i}.uuid"] = 'nullable|string';
                 }
             }
         }

@@ -28,10 +28,12 @@ $configNameToInputId = [];
                 {{? it.uuid }}
                     <input type="hidden" value="{{! it.uuid }}"
                            id="<?php echo $inputId; ?>-{{= it.index }}-uuid" name="<?php echo $inputName; ?>[{{= it.index }}][uuid]">
+                    <input type="hidden" value="0"
+                           id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
                 {{?}}
                 <input type="hidden" value="{{= it.info || '{}' }}"
                        id="<?php echo $inputId; ?>-{{= it.index }}-info" name="<?php echo $inputName; ?>[{{= it.index }}][info]">
-                <input type="hidden" value="{{! it.position }}"
+                <input type="hidden" value="{{! it.index }}"
                        id="<?php echo $inputId; ?>-{{= it.index }}-position" name="<?php echo $inputName; ?>[{{= it.index }}][position]">
                 {{? it.is_cloning }}
                     <input type="hidden" value="{{= it.file_data || '{}' }}"
