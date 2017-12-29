@@ -68,10 +68,10 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
 
     Utils.makeTemplateFromText(
             $('#' + imageConfig.id + '-tpl').html(),
-            'initImageUploaders for image ' + imageName
+            'CmfFileUploads.initImageUploader for image ' + imageName
         )
-        .done(function (template) {
-            imageConfig.inputTpl = template;
+        .done(function (inputTemplate) {
+            imageConfig.inputTpl = inputTemplate;
             imageConfig.addInput = function (pluginOptions, existingFileData) {
                 return CmfFileUploads.initImageUploaderInput(imageConfig, pluginOptions, existingFileData);
             };
@@ -106,7 +106,7 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                                 initialCaption: [existingFilesPreviewsInfo[i].caption]
                             },
                             $.extend(
-                                {url: existingFilesUrls[i], is_cloning: imageConfig.isCloning},
+                                {is_cloning: imageConfig.isCloning},
                                 existingFiles[i]
                             )
                         )
@@ -130,7 +130,7 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                     forceFallback: true,
                     onUpdate: function (event) {
                         $(event.to).find('.image-upload-input-container').each(function (index, item) {
-                            $(item).find('input[name$="[new_position]"]').val(String(index));
+                            $(item).find('input[name$="][position]"]').val(String(index));
                         });
                     }
                 });
@@ -173,7 +173,6 @@ CmfFileUploads.initImageUploaderInput = function (imageConfig, pluginOptions, ex
     $fileInput
         .fileinput(options)
         .on('fileclear', function() {
-            $('#' + this.id + '-deleted').val('1');
             $('#' + this.id + '-file-data').remove();
         })
         .on('change', function () {

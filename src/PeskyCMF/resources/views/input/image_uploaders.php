@@ -23,23 +23,19 @@ $configNameToInputId = [];
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
             <div class="image-upload-input-container form-group mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
-                <input type="file" class="file-loading"
+                <input type="file" class="file-loading" data-old-file-uuid="{{= it.uuid }}"
                        id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
+                {{? it.uuid }}
+                    <input type="hidden" value="{{! it.uuid }}"
+                           id="<?php echo $inputId; ?>-{{= it.index }}-uuid" name="<?php echo $inputName; ?>[{{= it.index }}][uuid]">
+                {{?}}
                 <input type="hidden" value="{{= it.info || '{}' }}"
                        id="<?php echo $inputId; ?>-{{= it.index }}-info" name="<?php echo $inputName; ?>[{{= it.index }}][info]">
-                <input type="hidden" value="0"
-                       id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
-                <input type="hidden" value="{{! it.index }}"
-                       id="<?php echo $inputId; ?>-{{= it.index }}-old-position" name="<?php echo $inputName; ?>[{{= it.index }}][old_position]">
-                <input type="hidden" value="{{! it.index }}"
-                       id="<?php echo $inputId; ?>-{{= it.index }}-new-position" name="<?php echo $inputName; ?>[{{= it.index }}][new_position]">
-                {{? it.url }}
-                    {{? it.is_cloning }}
-                        <input type="hidden" value="{{= it.file_data || '{}' }}"
-                               id="<?php echo $inputId; ?>-{{= it.index }}-file-data" name="<?php echo $inputName; ?>[{{= it.index }}][file_data]">
-                    {{?}}
-                    <input type="hidden" value="{{! JSON.stringify(it) }}"
-                           id="<?php echo $inputId; ?>-{{= it.index }}-old-file" name="<?php echo $inputName; ?>[{{= it.index }}][old_file]">
+                <input type="hidden" value="{{! it.position }}"
+                       id="<?php echo $inputId; ?>-{{= it.index }}-position" name="<?php echo $inputName; ?>[{{= it.index }}][position]">
+                {{? it.is_cloning }}
+                    <input type="hidden" value="{{= it.file_data || '{}' }}"
+                           id="<?php echo $inputId; ?>-{{= it.index }}-file-data" name="<?php echo $inputName; ?>[{{= it.index }}][file_data]">
                 {{?}}
             </div>
         </script>
@@ -47,7 +43,8 @@ $configNameToInputId = [];
 
         </div>
         <div class="form-group">
-            <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>-for-errors">
+            <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>-arr-for-errors">
+            <input type="hidden" disabled name="<?php echo $inputName; ?>" id="<?php echo $inputId; ?>-noarr-for-errors">
             <?php for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++): ?>
                 <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>]" id="<?php echo $inputId . '-' . $i; ?>-for-errors">
             <?php endfor; ?>

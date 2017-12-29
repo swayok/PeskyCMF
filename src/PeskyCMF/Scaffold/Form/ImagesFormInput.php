@@ -143,6 +143,7 @@ class ImagesFormInput extends FormInput {
                     'info' => $fileInfo->getCustomInfo(),
                     'name' => $fileInfo->getFileName(),
                     'extension' => $fileInfo->getFileExtension(),
+                    'uuid' => $fileInfo->getUuid(),
                 ];
                 $ret['preview_info'][$imageName][] = [
                     'caption' => $fileInfo->getFileNameWithExtension(),
