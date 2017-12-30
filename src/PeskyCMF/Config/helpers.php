@@ -437,7 +437,7 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
      */
     function cmfJsonResponseForValidationErrors(array $errors = [], $message = null) {
         if (empty($message)) {
-            $message = cmfTransGeneral('.form.validation_errors');
+            $message = cmfTransGeneral('.form.message.validation_errors');
         }
         return cmfJsonResponse(\PeskyCMF\HttpCode::CANNOT_PROCESS)
             ->setErrors($errors, $message);

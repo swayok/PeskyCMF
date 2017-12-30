@@ -535,7 +535,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
                 return cmfJsonResponseForValidationErrors(
                     [$conditionsField => 'JSON expected'],
-                    $formConfig->translateGeneral('validation_errors')
+                    $formConfig->translateGeneral('message.validation_errors')
                 );
             }
             if (!empty($encodedConditions)) {
@@ -550,7 +550,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $idsField => 'List of items IDs of filtering conditions expected',
                     $conditionsField => 'List of items IDs of filtering conditions expected',
                 ],
-                $formConfig->translateGeneral('validation_errors')
+                $formConfig->translateGeneral('message.validation_errors')
             );
         }
         return $conditions;
