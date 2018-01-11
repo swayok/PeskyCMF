@@ -49,6 +49,8 @@ $configNameToInputId = [];
             <input type="hidden" disabled name="<?php echo $inputName; ?>" id="<?php echo $inputId; ?>-noarr-for-errors">
             <?php for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++): ?>
                 <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>]" id="<?php echo $inputId . '-' . $i; ?>-for-errors">
+                <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>][file]" id="<?php echo $inputId . '-' . $i; ?>-for-errors-file">
+                <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>][uuid]" id="<?php echo $inputId . '-' . $i; ?>-for-errors-uuid">
             <?php endfor; ?>
             <?php echo $valueViewer->getFormattedTooltipForImageConfig($configName); ?>
         </div>
