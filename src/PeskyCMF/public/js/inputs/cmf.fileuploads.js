@@ -131,7 +131,7 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                     forceFallback: true,
                     onUpdate: function (event) {
                         $(event.to).find('.image-upload-input-container').each(function (index, item) {
-                            $(item).find('input[name$="][position]"]').val(String(index));
+                            $(item).find('input[name$="][position]"]').val(String(index + 1));
                         });
                     }
                 });
