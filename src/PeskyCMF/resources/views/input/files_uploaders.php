@@ -1,28 +1,30 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\ImagesFormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\FilesFormInput $valueViewer
  * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
  * @var \PeskyORM\ORM\TableInterface $table
- * @var \PeskyORMLaravel\Db\Column\ImagesColumn $column
+ * @var \PeskyORMLaravel\Db\Column\FilesColumn $column
+ * @var \PeskyORMLaravel\Db\Column\Utils\FileConfig[] $filesConfigs
  */
 $column = $valueViewer->getTableColumn();
 $defaultId = $valueViewer->getDefaultId();
 $configNameToInputId = [];
+$isImages = $column->isItAnImage();
 ?>
 
 <div id="<?php echo $defaultId; ?>-container">
-    <?php foreach ($column as $configName => $imageConfig): ?>
+    <?php foreach ($filesConfigs as $configName => $fileConfig): ?>
         <?php
             $inputId = $defaultId . '-' . preg_replace('%[^a-zA-Z0-9]+%', '-', $configName);
-            $configNameToInputId[$configName] = array_merge(['id' => $inputId], $imageConfig->getConfigsArrayForJs());
+            $configNameToInputId[$configName] = array_merge(['id' => $inputId], $fileConfig->getConfigsArrayForJs());
             $inputName = $valueViewer->getName(true) . '[' . $configName . ']';
         ?>
         <div class="section-divider">
             <span><?php echo $sectionConfig->translate($valueViewer, $configName); ?></span>
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
-            <div class="image-upload-input-container form-group mb15 col-xs-12 col-md-<?php echo $imageConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
+            <div class="file-upload-input-container <?php echo $isImages ? 'image-upload' : ''; ?> form-group mb15 col-xs-12 col-md-<?php echo $fileConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
                 <input type="file" class="file-loading" data-old-file-uuid="{{= it.uuid }}"
                        id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
                 {{? it.uuid }}
@@ -49,15 +51,15 @@ $configNameToInputId = [];
         <div class="form-group">
             <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $inputId; ?>-arr-for-errors">
             <input type="hidden" disabled name="<?php echo $inputName; ?>" id="<?php echo $inputId; ?>-noarr-for-errors">
-            <?php for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++): ?>
+            <?php for ($i = 0; $i < $fileConfig->getMaxFilesCount(); $i++): ?>
                 <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>]" id="<?php echo $inputId . '-' . $i; ?>-for-errors">
             <?php endfor; ?>
-            <?php echo $valueViewer->getFormattedTooltipForImageConfig($configName); ?>
+            <?php echo $valueViewer->getFormattedTooltipForFileConfig($configName); ?>
         </div>
-        <?php if ($imageConfig->getMaxFilesCount() > 1): ?>
+        <?php if ($fileConfig->getMaxFilesCount() > 1): ?>
             <div class="mv15 text-center">
                 <button type="button" class="btn btn-default btn-sm" id="<?php echo $inputId; ?>-add">
-                    <?php echo $sectionConfig->translateGeneral('input.file_uploads.add_image') ?>
+                    <?php echo $sectionConfig->translateGeneral('input.file_uploads.' . ($isImages ? 'add_image' : 'add_file')) ?>
                 </button>
             </div>
         <?php endif;?>
@@ -73,7 +75,7 @@ $configNameToInputId = [];
                 is_cloning: {{= !!it._is_cloning }},
                 is_in_modal: {{= !!it.__modal }}
             };
-            CmfFileUploads.initImageUploaders(data);
+            CmfFileUploads.initFileUploaders(data, <?php echo $isImages ? 'true' : 'false'; ?>);
         });
     });
 </script>

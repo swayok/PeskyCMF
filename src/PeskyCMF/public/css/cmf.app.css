@@ -1667,20 +1667,16 @@ aside.main-sidebar .sidebar-menu li .badge {
 #scaffold-form-pages #t-pages-c-Texts_ru_content-input + div.cke > .cke_inner > .cke_contents {
   min-height: 600px !important;
 }
-.file-upload-input-container.sortable-chosen .file-input .file-preview,
-.image-upload-input-container.sortable-chosen .file-input .file-preview {
+.file-upload-input-container.sortable-chosen .file-input .file-preview {
   background-color: rgba(0, 161, 238, 0.1);
 }
-.file-upload-input-container.sortable-ghost .file-input .file-preview,
-.image-upload-input-container.sortable-ghost .file-input .file-preview {
+.file-upload-input-container.sortable-ghost .file-input .file-preview {
   background-color: rgba(0, 161, 238, 0.1);
 }
-.file-upload-input-container .file-input,
-.image-upload-input-container .file-input {
+.file-upload-input-container .file-input {
   position: relative;
 }
-.file-upload-input-container .file-input .fileinput-dragger,
-.image-upload-input-container .file-input .fileinput-dragger {
+.file-upload-input-container .file-input .fileinput-dragger {
   position: absolute;
   z-index: 2;
   top: 0;
@@ -1695,27 +1691,22 @@ aside.main-sidebar .sidebar-menu li .badge {
   filter: alpha(opacity=50);
   cursor: move;
 }
-.file-upload-input-container .file-input .fileinput-dragger:hover,
-.image-upload-input-container .file-input .fileinput-dragger:hover {
+.file-upload-input-container .file-input .fileinput-dragger:hover {
   opacity: 1;
   filter: alpha(opacity=100);
 }
-.file-upload-input-container .file-input .file-preview,
-.image-upload-input-container .file-input .file-preview {
+.file-upload-input-container .file-input .file-preview {
   min-height: 80px;
 }
-.file-upload-input-container .file-input .file-preview.multi-file-upload,
-.image-upload-input-container .file-input .file-preview.multi-file-upload {
+.file-upload-input-container .file-input .file-preview.multi-file-upload {
   min-height: 263px;
 }
-.file-upload-input-container .file-input .file-preview .fileinput-remove,
-.image-upload-input-container .file-input .file-preview .fileinput-remove {
+.file-upload-input-container .file-input .file-preview .fileinput-remove {
   top: 9px;
   right: 9px;
   z-index: 2;
 }
-.file-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default,
-.image-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default {
+.file-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default {
   float: none;
   width: 100%;
   text-align: center;
@@ -1723,21 +1714,17 @@ aside.main-sidebar .sidebar-menu li .badge {
   border-width: 0;
   margin: 0;
 }
-.file-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default .kv-file-content,
-.image-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default .kv-file-content {
+.file-upload-input-container .file-input .file-preview .file-preview-thumbnails .file-preview-frame.krajee-default .kv-file-content {
   display: inline-block;
 }
-.file-upload-input-container .file-input .file-preview .no-file,
-.image-upload-input-container .file-input .file-preview .no-file {
+.file-upload-input-container .file-input .file-preview .no-file {
   display: none;
 }
-.file-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload,
-.image-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload {
+.file-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload {
   display: block;
   position: relative;
 }
-.file-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload .no-file,
-.image-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload .no-file {
+.file-upload-input-container .file-input.file-input-new .file-preview.multi-file-upload .no-file {
   display: block;
   position: absolute;
   width: 100%;

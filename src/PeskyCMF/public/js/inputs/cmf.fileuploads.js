@@ -1,56 +1,93 @@
 var CmfFileUploads = {
-    defaultImageUploaderOptions: {
+    baseUploaderOptions: {
         language: $(document.body).attr('data-locale'),
-        allowedFileTypes: ['image'],
-        previewFileType: 'image',
         validateInitialCount: true,
-        browseIcon: '<i class=\"glyphicon glyphicon-picture\"></i>',
         showUpload: false,
-        layoutTemplates: {
-            main1: "{preview}\n" +
-            "<div class=\'input-group {class}\'>\n" +
-            "   <div class=\'input-group-btn\'>\n" +
-            "       {browse}\n" +
-            "       {upload}\n" +
-            "       {remove}\n" +
-            "   </div>\n" +
-            "   {caption}\n" +
-            "</div>"
-        },
-        overwriteInitial: true,
+        allowedFileTypes: ['image', 'text', 'video', 'audio', 'object'],
+        allowedPreviewTypes: ['image', 'video', 'audio'],
+        previewFileType: 'any',
+        previewFileIcon: '<i class="fa fa-file"></i>',
         initialPreviewAsData: true,
+        overwriteInitial: true,
         fileActionSettings: {
             showDrag: false,
             showDownload: true
+        },
+        browseIcon: '<i class=\"glyphicon glyphicon-picture\"></i>',
+        layoutTemplates: {
+            main1: "{preview}\n" +
+                "<div class=\'input-group {class}\'>\n" +
+                "   <div class=\'input-group-btn\'>\n" +
+                "       {browse}\n" +
+                "       {upload}\n" +
+                "       {remove}\n" +
+                "   </div>\n" +
+                "   {caption}\n" +
+                "</div>"
+        }
+    },
+    imageUploaderOptions: {
+        allowedFileTypes: ['image'],
+        allowedPreviewTypes: ['image'],
+        previewFileType: 'image',
+        initialPreviewFileType: 'image'
+    },
+    fileUploaderOptions: {
+        fileActionSettings: {
+            showDrag: false,
+            showDownload: true,
+            showBrowse: false
+        },
+        previewFileIconSettings: {
+            'doc': '<i class="fa fa-file-word-o text-primary"></i>',
+            'docx': '<i class="fa fa-file-word-o text-primary"></i>',
+            'txt': '<i class="fa fa-file-text-o"></i>',
+            'json': '<i class="fa fa-file-text-o"></i>',
+            'js': '<i class="fa fa-file-text-o"></i>',
+            'rtf': '<i class="fa fa-file-text-o"></i>',
+            'xls': '<i class="fa fa-file-excel-o text-success"></i>',
+            'xlsx': '<i class="fa fa-file-excel-o text-success"></i>',
+            'csv': '<i class="fa fa-file-excel-o text-success"></i>',
+            'ppt': '<i class="fa fa-file-powerpoint-o text-danger"></i>',
+            'pptx': '<i class="fa fa-file-powerpoint-o text-danger"></i>',
+            'pdf': '<i class="fa fa-file-pdf-o text-danger"></i>',
+            'zip': '<i class="fa fa-file-archive-o text-muted"></i>',
+            'gzip': '<i class="fa fa-file-archive-o text-muted"></i>',
+            'rar': '<i class="fa fa-file-archive-o text-muted"></i>'
         }
     }
 };
 
-CmfFileUploads.initImageUploaders = function (data) {
-    for (var imageName in data.configs) {
-        CmfFileUploads.initImageUploader(data, imageName);
+CmfFileUploads.initFileUploaders = function (data, isImages) {
+    for (var filesGroupName in data.configs) {
+        CmfFileUploads.initFileUploader(data, filesGroupName, isImages);
     }
 };
 
-CmfFileUploads.initImageUploader = function (data, imageName) {
-    var imageConfig = data.configs[imageName];
-    var isSingleFile = imageConfig.max_files_count === 1;
-    imageConfig.defaultPluginOptions = $.extend({layoutTemplates: {}}, CmfFileUploads.defaultImageUploaderOptions, {
-        allowedFileExtensions: imageConfig.allowed_extensions,
-        minFileCount: 0,
-        maxFileCount: 1,
-        maxFileSize: imageConfig.max_file_size,
-        showCaption: isSingleFile,
-        previewClass: (isSingleFile ? 'single-file-upload' : 'multi-file-upload')
-    });
+CmfFileUploads.initFileUploader = function (data, filesGroupName, isImages) {
+    var fileConfig = data.configs[filesGroupName];
+    var isSingleFile = fileConfig.max_files_count === 1;
+    fileConfig.defaultPluginOptions = $.extend(
+        {layoutTemplates: {}},
+        CmfFileUploads.baseUploaderOptions,
+        isImages ? CmfFileUploads.imageUploaderOptions : CmfFileUploads.fileUploaderOptions,
+        {
+            allowedFileExtensions: fileConfig.allowed_extensions,
+            minFileCount: 0,
+            maxFileCount: 1,
+            maxFileSize: fileConfig.max_file_size,
+            showCaption: isSingleFile,
+            previewClass: (isSingleFile ? 'single-file-upload' : 'multi-file-upload')
+        }
+    );
     if (!isSingleFile) {
-        imageConfig.defaultPluginOptions.layoutTemplates.main2 =
+        fileConfig.defaultPluginOptions.layoutTemplates.main2 =
             '<button class="fileinput-dragger" type="button"><span class="fa fa-arrows"></span></button>' +
             '{preview}\n<div class="kv-upload-progress kv-hidden"></div>\n' +
             '<div class="clearfix"></div>\n' +
             '<div class="kv-upload-toolbar text-center">{remove}\n{cancel}\n{upload}\n{browse}\n</div>';
 
-        imageConfig.defaultPluginOptions.layoutTemplates.preview =
+        fileConfig.defaultPluginOptions.layoutTemplates.preview =
             '<div class="file-preview {class}">\n' +
             '    {close}' +
             '    <div class="no-file">' + CmfConfig.getLocalizationStringsForComponent('file_uploader').no_file + '</div>' +
@@ -63,23 +100,23 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
             '    </div>\n' +
             '</div>';
     }
-    imageConfig.inputsAdded = 0;
-    imageConfig.isCloning = !!data.is_cloning;
-    imageConfig.isInModal = !!data.is_in_modal;
+    fileConfig.inputsAdded = 0;
+    fileConfig.isCloning = !!data.is_cloning;
+    fileConfig.isInModal = !!data.is_in_modal;
 
     Utils.makeTemplateFromText(
-            $('#' + imageConfig.id + '-tpl').html(),
-            'CmfFileUploads.initImageUploader for image ' + imageName
+            $('#' + fileConfig.id + '-tpl').html(),
+            'CmfFileUploads.initFileUploader for files group ' + filesGroupName
         )
         .done(function (inputTemplate) {
-            imageConfig.inputTpl = inputTemplate;
-            imageConfig.addInput = function (pluginOptions, existingFileData) {
-                return CmfFileUploads.initImageUploaderInput(imageConfig, pluginOptions, existingFileData);
+            fileConfig.inputTpl = inputTemplate;
+            fileConfig.addInput = function (pluginOptions, existingFileData) {
+                return CmfFileUploads.initFileUploaderInput(fileConfig, pluginOptions, existingFileData);
             };
-            $('#' + imageConfig.id + '-add')
+            $('#' + fileConfig.id + '-add')
                 .on('click', function () {
-                    imageConfig.addInput();
-                    if (imageConfig.inputsAdded >= imageConfig.max_files_count) {
+                    fileConfig.addInput();
+                    if (fileConfig.inputsAdded >= fileConfig.max_files_count) {
                         $(this).remove();
                     }
                     return false;
@@ -89,25 +126,25 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                 data.files
                 && $.isPlainObject(data.files)
                 && data.files.urls
-                && data.files.urls[imageName]
+                && data.files.urls[filesGroupName]
                 && data.files.preview_info
-                && data.files.preview_info[imageName]
+                && data.files.preview_info[filesGroupName]
                 && data.files.files
-                && data.files.files[imageName]
+                && data.files.files[filesGroupName]
             ) {
-                var existingFilesUrls = data.files.urls[imageName];
-                var existingFilesPreviewsInfo = data.files.preview_info[imageName];
-                var existingFiles = data.files.files[imageName];
+                var existingFilesUrls = data.files.urls[filesGroupName];
+                var existingFilesPreviewsInfo = data.files.preview_info[filesGroupName];
+                var existingFiles = data.files.files[filesGroupName];
                 if ($.isArray(existingFilesUrls) && $.isArray(existingFilesPreviewsInfo) && $.isArray(existingFiles)) {
                     for (var i = 0; i < existingFilesUrls.length; i++) {
-                        imageConfig.addInput(
+                        fileConfig.addInput(
                             {
                                 initialPreview: [existingFilesUrls[i]],
                                 initialPreviewConfig: [existingFilesPreviewsInfo[i]],
                                 initialCaption: [existingFilesPreviewsInfo[i].caption]
                             },
                             $.extend(
-                                {is_cloning: imageConfig.isCloning},
+                                {is_cloning: fileConfig.isCloning},
                                 existingFiles[i]
                             )
                         )
@@ -115,22 +152,22 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
                 }
             }
             // add empty inputs
-            if (imageConfig.inputsAdded === 0 && (isSingleFile || imageConfig.min_files_count > 0)) {
+            if (fileConfig.inputsAdded === 0 && (isSingleFile || fileConfig.min_files_count > 0)) {
                 // add at least 1 input
-                imageConfig.addInput();
+                fileConfig.addInput();
             }
             // add required amount of inputs
-            for (var k = imageConfig.inputsAdded; k < imageConfig.min_files_count; k++) {
-                imageConfig.addInput();
+            for (var k = fileConfig.inputsAdded; k < fileConfig.min_files_count; k++) {
+                fileConfig.addInput();
             }
             if (!isSingleFile) {
-                Sortable.create($('#' + imageConfig.id + '-container')[0], {
+                Sortable.create($('#' + fileConfig.id + '-container')[0], {
                     handle: '.fileinput-dragger',
-                    draggable: '.image-upload-input-container',
+                    draggable: '.file-upload-input-container',
                     animation: 200,
                     forceFallback: true,
                     onUpdate: function (event) {
-                        $(event.to).find('.image-upload-input-container').each(function (index, item) {
+                        $(event.to).find('.file-upload-input-container').each(function (index, item) {
                             $(item).find('input[name$="][position]"]').val(String(index + 1));
                         });
                     }
@@ -139,23 +176,22 @@ CmfFileUploads.initImageUploader = function (data, imageName) {
         });
 };
 
-CmfFileUploads.initImageUploaderInput = function (imageConfig, pluginOptions, existingFileData) {
-    if (imageConfig.inputsAdded >= imageConfig.max_files_count) {
+CmfFileUploads.initFileUploaderInput = function (fileConfig, pluginOptions, existingFileData) {
+    if (fileConfig.inputsAdded >= fileConfig.max_files_count) {
         return false;
     }
     if (!$.isPlainObject(existingFileData)) {
         existingFileData = {};
     }
-    existingFileData = $.extend({index: imageConfig.inputsAdded}, existingFileData);
-    var $renderedTemplate = $(imageConfig.inputTpl(existingFileData));
-    $('#' + imageConfig.id + '-container').append($renderedTemplate);
-    imageConfig.inputsAdded++;
+    existingFileData = $.extend({index: fileConfig.inputsAdded}, existingFileData);
+    var $renderedTemplate = $(fileConfig.inputTpl(existingFileData));
+    $('#' + fileConfig.id + '-container').append($renderedTemplate);
+    fileConfig.inputsAdded++;
     var $fileInput = $renderedTemplate.find('input[type="file"]');
     var options = $.extend(
         {},
-        imageConfig.defaultPluginOptions,
-        $.isPlainObject(pluginOptions) ? pluginOptions : {}/*,
-        {minFileCount: imageConfig.inputsAdded >= imageConfig.min_files_count ? 1 : 0}*/
+        fileConfig.defaultPluginOptions,
+        $.isPlainObject(pluginOptions) ? pluginOptions : {}
     );
 
     if (existingFileData.is_cloning && existingFileData.url) {
@@ -182,7 +218,7 @@ CmfFileUploads.initImageUploaderInput = function (imageConfig, pluginOptions, ex
         })
         .on('filezoomhidden', function (event, params) {
             params.modal.remove();
-            if (imageConfig.isInModal) {
+            if (fileConfig.isInModal) {
                 $('body').addClass('modal-open');
                 $('.modal.in').css('padding-left', '17px');
             }
