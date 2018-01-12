@@ -30,6 +30,8 @@ $configNameToInputId = [];
                            id="<?php echo $inputId; ?>-{{= it.index }}-uuid" name="<?php echo $inputName; ?>[{{= it.index }}][uuid]">
                     <input type="hidden" value="0"
                            id="<?php echo $inputId; ?>-{{= it.index }}-deleted" name="<?php echo $inputName; ?>[{{= it.index }}][deleted]">
+                {{??}}
+                    <input type="hidden" disabled value="" name="<?php echo $inputName; ?>[{{= it.index }}][uuid]">
                 {{?}}
                 <input type="hidden" value="{{= it.info || '{}' }}"
                        id="<?php echo $inputId; ?>-{{= it.index }}-info" name="<?php echo $inputName; ?>[{{= it.index }}][info]">
@@ -49,8 +51,6 @@ $configNameToInputId = [];
             <input type="hidden" disabled name="<?php echo $inputName; ?>" id="<?php echo $inputId; ?>-noarr-for-errors">
             <?php for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++): ?>
                 <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>]" id="<?php echo $inputId . '-' . $i; ?>-for-errors">
-                <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>][file]" id="<?php echo $inputId . '-' . $i; ?>-for-errors-file">
-                <input type="hidden" disabled name="<?php echo $inputName; ?>[<?php echo (string)$i; ?>][uuid]" id="<?php echo $inputId . '-' . $i; ?>-for-errors-uuid">
             <?php endfor; ?>
             <?php echo $valueViewer->getFormattedTooltipForImageConfig($configName); ?>
         </div>

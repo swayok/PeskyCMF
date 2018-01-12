@@ -169,7 +169,7 @@ class ImagesFormInput extends FormInput {
                 . '|mimetypes:' . implode(',', $imageConfig->getAllowedFileTypes());
             for ($i = 0; $i < $imageConfig->getMaxFilesCount(); $i++) {
                 if ($imageConfig->getMinFilesCount() > $i) {
-                    $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.uuid|{$commonValidators}";
+                    $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.uuid|required_if:{$baseName}.{$i}.deleted,1|{$commonValidators}";
                     $validators["{$baseName}.{$i}.uuid"] = "required_without:{$baseName}.{$i}.file|nullable|string";
                 } else {
                     $validators["{$baseName}.{$i}.file"] = "nullable|{$commonValidators}";
