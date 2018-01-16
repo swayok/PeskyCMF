@@ -4,7 +4,7 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyORMLaravel\Db\Column\FilesColumn;
 use PeskyORMLaravel\Db\Column\ImagesColumn;
-use PeskyORMLaravel\Db\Column\Utils\FileConfig;
+use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
 use PeskyORMLaravel\Db\Column\Utils\FileInfo;
 
 /**
@@ -12,7 +12,7 @@ use PeskyORMLaravel\Db\Column\Utils\FileInfo;
  */
 class ImagesValueCell extends ValueCell {
 
-    /** @var FileConfig[]|null */
+    /** @var FilesGroupConfig[]|null */
     protected $fileConfigsToShow;
     /** @var string  */
     protected $templateForDefaultRenderer = 'cmf::item_details.images';

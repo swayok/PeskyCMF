@@ -3,9 +3,9 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyORMLaravel\Db\Column\FilesColumn;
-use PeskyORMLaravel\Db\Column\Utils\FileConfig;
+use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
 use PeskyORMLaravel\Db\Column\Utils\FileInfo;
-use PeskyORMLaravel\Db\Column\Utils\ImageConfig;
+use PeskyORMLaravel\Db\Column\Utils\ImagesGroupConfig;
 
 /**
  * @method FilesColumn getTableColumn()
@@ -88,14 +88,14 @@ class FilesFormInput extends FormInput {
     }
 
     /**
-     * @return FileConfig[]
+     * @return FilesGroupConfig[]
      * @throws \UnexpectedValueException
      */
     protected function getAcceptedFileConfigurations() {
         $column = $this->getTableColumn();
         $configsNames = value($this->fileConfigsToUse);
         if ($configsNames === null) {
-            return $column->getFilesConfigurations();
+            return $column->getFilesGroupsConfigurations();
         } else if (!is_array($configsNames)) {
             throw new \UnexpectedValueException(
                 static::class . '->fileConfigsToUse property must be an array or \Closure that returns an array'
@@ -103,7 +103,7 @@ class FilesFormInput extends FormInput {
         } else {
             $ret = [];
             foreach ($configsNames as $name) {
-                $ret[$name] = $column->getFileConfiguration($name);
+                $ret[$name] = $column->getFilesGroupConfiguration($name);
             }
             return $ret;
         }
@@ -163,16 +163,37 @@ class FilesFormInput extends FormInput {
                         'extension' => $fileInfo->getFileExtension(),
                         'uuid' => $fileInfo->getUuid(),
                     ];
+
                     $ret['preview_info'][$fileName][] = [
                         'caption' => $fileInfo->getOriginalFileNameWithExtension(),
-                        'size' => filesize($fileInfo->getAbsoluteFilePath()),
+                        'size' => $fileInfo->getSize(),
                         'downloadUrl' => $fileInfo->getAbsoluteUrl(),
+                        'filetype' => $fileInfo->getMimeType(),
+                        'type' => static::getUploaderPreviewTypeFromFileInfo($fileInfo),
                         'key' => 1
                     ];
                 }
             }
         }
         return $ret;
+    }
+
+    /**
+     * @param FileInfo $fileInfo
+     * @return string
+     */
+    static protected function getUploaderPreviewTypeFromFileInfo(FileInfo $fileInfo) {
+        $type = $fileInfo->getFileType();
+        switch ($type) {
+            case FilesGroupConfig::TYPE_IMAGE:
+            case FilesGroupConfig::TYPE_AUDIO:
+            case FilesGroupConfig::TYPE_VIDEO:
+            case FilesGroupConfig::TYPE_TEXT:
+            case FilesGroupConfig::TYPE_OFFICE:
+                return $type;
+            default:
+                return 'object';
+        }
     }
 
     public function getValidators($isCreation) {
@@ -182,8 +203,8 @@ class FilesFormInput extends FormInput {
             $baseName = $this->getName() . '.' . $fileConfig->getName();
             $isRequired = $fileConfig->getMinFilesCount() > 0 ? 'required|' : '';
             $validators[$baseName] = $isRequired . 'array|max:' . $fileConfig->getMaxFilesCount();
-            $commonValidators = 'nullable|' . ($fileConfig instanceof ImageConfig ? 'image' : 'file') . '|max:' . $fileConfig->getMaxFileSize()
-                . '|mimetypes:' . implode(',', $fileConfig->getAllowedFileTypes());
+            $commonValidators = 'nullable|' . ($fileConfig instanceof ImagesGroupConfig ? 'image' : 'file') . '|max:' . $fileConfig->getMaxFileSize()
+                . '|mimetypes:' . implode(',', $fileConfig->getAllowedMimeTypes());
             for ($i = 0; $i < $fileConfig->getMaxFilesCount(); $i++) {
                 if ($fileConfig->getMinFilesCount() > $i) {
                     $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.uuid|required_if:{$baseName}.{$i}.deleted,1|{$commonValidators}";

@@ -5,7 +5,7 @@
  * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
  * @var \PeskyORM\ORM\TableInterface $table
  * @var \PeskyORMLaravel\Db\Column\FilesColumn $column
- * @var \PeskyORMLaravel\Db\Column\Utils\FileConfig[] $filesConfigs
+ * @var \PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig[] $filesConfigs
  */
 $column = $valueViewer->getTableColumn();
 $defaultId = $valueViewer->getDefaultId();

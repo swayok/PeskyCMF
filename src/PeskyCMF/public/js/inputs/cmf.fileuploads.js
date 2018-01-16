@@ -38,6 +38,7 @@ var CmfFileUploads = {
             showDownload: true,
             showBrowse: false
         },
+        initialPreviewFileType: 'object',
         previewFileIconSettings: {
             'doc': '<i class="fa fa-file-word-o text-primary"></i>',
             'docx': '<i class="fa fa-file-word-o text-primary"></i>',
@@ -169,6 +170,9 @@ CmfFileUploads.initFileUploader = function (data, filesGroupName, isImages) {
                     onUpdate: function (event) {
                         $(event.to).find('.file-upload-input-container').each(function (index, item) {
                             $(item).find('input[name$="][position]"]').val(String(index + 1));
+                            $(item).find('input[name]').each(function (_, input) {
+                                input.name = String(input.name).replace(/\]\[[0-9]\]\[/, '][' + String(index) + '][');
+                            })
                         });
                     }
                 });
