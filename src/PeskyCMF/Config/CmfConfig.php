@@ -7,6 +7,7 @@ use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\ClassBuilder;
+use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
@@ -708,6 +709,7 @@ class CmfConfig extends ConfigsContainer {
         static::_protect();
         \LanguageDetector::apply($locale);
         \LanguageDetector::addCookieToQueue(\App::getLocale());
+        Column::setValidationErrorsMessages((array)static::transGeneral('form.message.column_validation_errors') ?: []);
     }
 
     /**
