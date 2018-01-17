@@ -17,9 +17,9 @@ class ImagesFormInput extends FilesFormInput {
      * @return $this
      * @throws \InvalidArgumentException
      */
-    public function setImageConfigsToUse($imageGroups) {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return parent::setFileConfigsToUse($imageGroups);
+    public function setImagesGroupsToUse($imageGroups) {
+        parent::setFilesGroupsToUse($imageGroups);
+        return $this;
     }
 
 }

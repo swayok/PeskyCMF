@@ -32,10 +32,10 @@ class FilesFormInput extends FormInput {
      * @return $this
      * @throws \InvalidArgumentException
      */
-    public function setFileConfigsToUse($fileGroups) {
+    public function setFilesGroupsToUse($fileGroups) {
         if (empty($fileGroups)) {
             throw new \InvalidArgumentException('$fileGroups argument cannot be empty');
-        } else if (!is_array($fileGroups) && $fileGroups instanceof \Closure) {
+        } else if (!is_array($fileGroups) && !($fileGroups instanceof \Closure)) {
             throw new \InvalidArgumentException('$fileGroups argument must be an array or \Closure');
         }
         $this->fileConfigsToUse = $fileGroups;
