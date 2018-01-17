@@ -24,7 +24,8 @@ $isImages = $column->isItAnImage();
             <span><?php echo $sectionConfig->translate($valueViewer, $configName); ?></span>
         </div>
         <script type="text/html" id="<?php echo $inputId ?>-tpl">
-            <div class="file-upload-input-container <?php echo $isImages ? 'image-upload' : ''; ?> form-group mb15 col-xs-12 col-md-<?php echo $fileConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>">
+            <div class="file-upload-input-container <?php echo $isImages ? 'image-upload' : ''; ?> form-group mb15 col-xs-12 col-md-<?php echo $fileConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>"
+                data-id="<?php echo $inputId; ?>-{{= it.index }}">
                 <input type="file" class="file-loading" data-old-file-uuid="{{= it.uuid }}"
                        id="<?php echo $inputId; ?>-{{= it.index }}" name="<?php echo $inputName; ?>[{{= it.index }}][file]">
                 {{? it.uuid }}

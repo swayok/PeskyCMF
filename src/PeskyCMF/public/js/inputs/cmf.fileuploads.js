@@ -162,20 +162,24 @@ CmfFileUploads.initFileUploader = function (data, filesGroupName, isImages) {
                 fileConfig.addInput();
             }
             if (!isSingleFile) {
-                Sortable.create($('#' + fileConfig.id + '-container')[0], {
-                    handle: '.fileinput-dragger',
-                    draggable: '.file-upload-input-container',
-                    animation: 200,
-                    forceFallback: true,
-                    onUpdate: function (event) {
-                        $(event.to).find('.file-upload-input-container').each(function (index, item) {
-                            $(item).find('input[name$="][position]"]').val(String(index + 1));
-                            $(item).find('input[name]').each(function (_, input) {
-                                input.name = String(input.name).replace(/\]\[[0-9]\]\[/, '][' + String(index) + '][');
-                            })
-                        });
+                var container = $('#' + fileConfig.id + '-container');
+                container.data('sortable', Sortable.create(
+                    container[0],
+                    {
+                        handle: '.fileinput-dragger',
+                        draggable: '.file-upload-input-container',
+                        animation: 200,
+                        forceFallback: true,
+                        onUpdate: function (event) {
+                            $(event.to).find('.file-upload-input-container').each(function (index, item) {
+                                $(item).find('input[name$="][position]"]').val(String(index + 1));
+                                $(item).find('input[name]').each(function (_, input) {
+                                    input.name = String(input.name).replace(/\]\[[0-9]\]\[/, '][' + String(index) + '][');
+                                })
+                            });
+                        }
                     }
-                });
+                ));
             }
         });
 };
@@ -216,6 +220,16 @@ CmfFileUploads.initFileUploaderInput = function (fileConfig, pluginOptions, exis
         .on('fileclear', function() {
             $('#' + this.id + '-deleted').val('1');
             $('#' + this.id + '-file-data').remove();
+            var sortable = $('#' + fileConfig.id + '-container').data('sortable');
+            if (sortable) {
+                var order = sortable.toArray();
+                var index = $.inArray(this.id, order);
+                if (index >= 0) {
+                    order.splice(index, 1);
+                    order.push(this.id);
+                    sortable.sort(order);
+                }
+            }
         })
         .on('change', function () {
             $('#' + this.id + '-file-data').remove();
