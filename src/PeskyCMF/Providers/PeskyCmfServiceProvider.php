@@ -269,6 +269,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/kartik-v/bootstrap-fileinput/js') => public_path('packages/cmf-vendors/bootstrap/fileinput/js'),
             base_path('vendor/kartik-v/bootstrap-fileinput/css') => public_path('packages/cmf-vendors/bootstrap/fileinput/css'),
             base_path('vendor/kartik-v/bootstrap-fileinput/img') => public_path('packages/cmf-vendors/bootstrap/fileinput/img'),
+            base_path('vendor/npm-asset/bootstrap-menu/dist/BootstrapMenu.min.js') => public_path('packages/cmf-vendors/bootstrap/context-menu.min.js'),
             // font icons
             base_path('vendor/fortawesome/font-awesome/css') => public_path('packages/cmf-vendors/fonticons/font-awesome/css'),
             base_path('vendor/fortawesome/font-awesome/fonts') => public_path('packages/cmf-vendors/fonticons/font-awesome/fonts'),

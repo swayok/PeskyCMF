@@ -5,7 +5,7 @@ var mixCmfStyles = function (mix) {
         'public/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css',
         'public/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css',
         'public/packages/cmf-vendors/bootstrap/fileinput/css/fileinput.min.css',
-        'public/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css'
+        'public/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox.css'
     ], 'public/packages/cmf/compiled/css/bootstrap-plugins.min.css');
 
     mix.styles([
@@ -33,7 +33,8 @@ var mixCmfScripts = function (mix) {
         'public/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-en_US.min.js',
         'public/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js',
         'public/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js',
-        'public/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js'
+        'public/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js',
+        'public/packages/cmf-vendors/bootstrap/context-menu.min.js'
     ], 'public/packages/cmf/compiled/js/bootstrap-and-plugins.min.js');
 
     mix.scripts([

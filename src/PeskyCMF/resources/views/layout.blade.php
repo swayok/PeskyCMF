@@ -19,7 +19,7 @@
         <link href="/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/fileinput/css/fileinput.min.css" rel="stylesheet" type="text/css"/>
-        <link href="/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
+        <link href="/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
         {{-- DO NOT USE THIS CSS AS IT IS!!! it declares css classes globally overwriting normal behavior globally. datepicker will not work anymore for example --}}
         {{--<link href="/packages/cmf-vendors/bootstrap/x-editale/css/bootstrap-editable.css" rel="stylesheet" type="text/css"/>--}}
 
@@ -27,7 +27,7 @@
         <link href="/packages/cmf-vendors/datatables/extensions/FixedColumns/css/fixedColumns.bootstrap.min.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/toastr/toastr.css" rel="stylesheet" type="text/css"/>
-        <link href="/packages/cmf-vendors/cropperjs/cropper.css" rel="stylesheet" type="text/css"/>
+        {{--<link href="/packages/cmf-vendors/cropperjs/cropper.css" rel="stylesheet" type="text/css"/>--}}
 
         <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/adminlte/css/skins/{{ \PeskyCMF\Config\CmfConfig::getPrimary()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
@@ -139,6 +139,7 @@
         <script src="/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-en_US.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/context-menu.min.js" type="text/javascript"></script>
 
         <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js" type="text/javascript"></script>
