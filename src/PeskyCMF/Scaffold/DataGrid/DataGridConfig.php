@@ -75,6 +75,10 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $rowsPositioningColumns = [];
     /** @var int|float */
     protected $rowsPosittioningStep = 100;
+    /** @var \Closure */
+    protected $contextMenuItems = [];
+    /** @var bool */
+    protected $isContextMenuEnabled = true;
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfigConfig) {
         parent::__construct($table, $scaffoldConfigConfig);
@@ -492,10 +496,10 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @return Tag[]
+     * @return Tag[]|string[]
      */
     public function getRowActions() {
-        return $this->rowActions instanceof \Closure ? call_user_func($this->rowActions, $this) : $this->rowActions;
+        return call_user_func($this->rowActions, $this);
     }
 
     /**
@@ -575,6 +579,77 @@ class DataGridConfig extends ScaffoldSectionConfig {
      */
     public function setIsRowActionsColumnFixed($isFixed) {
         $this->isRowActionsColumnFixed = (bool)$isFixed;
+        return $this;
+    }
+
+    /**
+     * @param bool $isEnabled
+     * @return $this
+     */
+    public function setIsContextMenuEnabled($isEnabled) {
+        $this->isContextMenuEnabled = (bool)$isEnabled;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isContextMenuEnabled() {
+        return $this->isContextMenuEnabled;
+    }
+
+    /**
+     * @return array
+     */
+    public function getContextMenuItems() {
+        return call_user_func($this->contextMenuItems, $this);
+    }
+
+    /**
+     * Note: common actions: 'details', 'edit', 'delete', 'delete_selected', 'delete_filtered',
+     * 'edit_selected', 'edit_filtered' will be added automatically before custom menu items.
+     * You can manipulate positioning of common items using actions names (ex: 'details') instead of MenuItem array.
+     * @param \Closure $contextMenuItems - function (ScaffolSectionConfig $scaffoldSectionConfig) { return []; }
+     * Format:
+     *  MenuItem =
+            [
+                'label' => 'label for menu item',   //< requried
+                'icon' => 'fa-lock',                //< optional
+                'class' => 'text-green',            //< optional
+                'url' => cmfRouteTpl('route', [], ['id'], false),    //< required
+                'enable' => 'it.status == 1',       //< optional, dotJs condition, results in: {{? it.status == 1 }}
+                'show' => 'it.status == 2',         //< optional, dotJs condition, results in: {{? it.status == 2 }}
+                'action' => 'request',              //< optional, can be only 'request' to send ajax request to provided URL instead of redirecting
+                'method' => 'put',                  //< optional, default = 'get', used only with 'action' == 'request'
+                'data' => 'id={{= it.__id }}&test={{= it.__test }}',  //< optional, data to send to server. Format: like URL query, used only with 'action' == 'request'
+                'confirm' => 'Are you sure?',       //< optional, use it to confirm action before using url, used only with 'action' == 'request'
+                'block_datagrid' => true,           //< optional, default: false, used only with 'action' == 'request'
+                'on_success' => 'callbackFuncitonName', //< optional, function to call after successful execution of ajax request
+            ]
+     *   - List of menu items (plain)
+            [
+                MenuItem1,
+                MenuItem2,
+                'edit'
+                ...
+            ]
+     *   - List of menu items with groups
+            [
+                'group1_name' => [
+                    MenuItem1,
+                    MenuItem2,
+                    ...
+                ],
+                'group2_name' => [
+                    MenuItem3,
+                    'delete'
+                ]
+            ]
+     * @return $this
+     */
+    public function setContextMenuItems(\Closure $contextMenuItems) {
+        $this->setIsContextMenuEnabled(true);
+        $this->contextMenuItems = $contextMenuItems;
         return $this;
     }
 
