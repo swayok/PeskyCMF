@@ -57,12 +57,12 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $allowFilteredItemsDelete = false;
     /** @var \Closure|null */
     protected $bulkActionsToolbarItems;
+    /** @var bool */
+    protected $isRowActionsEnabled = true;
     /** @var \Closure|null */
     protected $rowActions;
     /** @var array */
     protected $additionalDataTablesConfig = [];
-    /** @var bool */
-    protected $isRowActionsFloating = false;
     /** @var bool */
     protected $isRowActionsColumnFixed = true;
     /** @var bool */
@@ -79,6 +79,10 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $contextMenuItems;
     /** @var bool */
     protected $isContextMenuEnabled = true;
+    /** @var bool */
+    protected $isMultiRowSelectionColumnFixed = true;
+    /** @var array */
+    protected $additionalViewsForTemplate = [];
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfigConfig) {
         parent::__construct($table, $scaffoldConfigConfig);
@@ -285,19 +289,37 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isAllowedMultiRowSelection() {
         return $this->allowMultiRowSelection;
     }
 
     /**
-     * @param boolean $allowMultiRowSelection
+     * @param bool $allowMultiRowSelection
      * @return $this
      */
     public function setMultiRowSelection($allowMultiRowSelection) {
         $this->allowMultiRowSelection = (bool)$allowMultiRowSelection;
         return $this;
+    }
+
+    /**
+     * Pass 'true' to fix/stick multi-row selection column in data grid so it will not move during
+     * horisontal scrolling of data grid
+     * @param bool $isFixed
+     * @return $this
+     */
+    public function setIsMultiRowSelectionColumnFixed($isFixed) {
+        $this->isMultiRowSelectionColumnFixed = (bool)$isFixed;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMultiRowSelectionColumnFixed() {
+        return $this->isMultiRowSelectionColumnFixed;
     }
 
     /**
@@ -499,7 +521,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @return Tag[]|string[]
      */
     public function getRowActions() {
-        return $this->rowActions ? call_user_func($this->rowActions, $this) : [];
+        return $this->rowActions ? (array)call_user_func($this->rowActions, $this) : [];
     }
 
     /**
@@ -543,26 +565,19 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * @param bool $isEnabled
+     * @return $this
+     */
+    public function setIsRowActionsEnabled($isEnabled) {
+        $this->isRowActionsEnabled = (bool)$isEnabled;
+        return $this;
+    }
+
+    /**
      * @return bool
      */
-    public function isRowActionsFloating() {
-        return $this->isRowActionsFloating;
-    }
-
-    /**
-     * @return $this
-     */
-    public function displayRowActionsInActionsColumn() {
-        $this->isRowActionsFloating = false;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function displayRowActionsInFloatingPanel() {
-        $this->isRowActionsFloating = true;
-        return $this;
+    public function isRowActionsEnabled() {
+        return $this->isRowActionsEnabled;
     }
 
     /**
@@ -573,7 +588,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * Pass 'true' to fix actions column in data grid so it will not move during horisontal scrolling of data grid
+     * Pass 'true' to fix/stick actions column in data grid so it will not move during
+     * horisontal scrolling of data grid
      * @param bool $isFixed
      * @return $this
      */
@@ -602,7 +618,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @return array
      */
     public function getContextMenuItems() {
-        return $this->contextMenuItems ? call_user_func($this->contextMenuItems, $this) : [];
+        return $this->contextMenuItems ? (array)call_user_func($this->contextMenuItems, $this) : [];
     }
 
     /**
@@ -708,7 +724,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      */
     public function finish() {
         parent::finish();
-        if (!$this->isRowActionsFloating() && !$this->hasValueViewer(static::ROW_ACTIONS_COLUMN_NAME)) {
+        if ($this->isRowActionsEnabled() && !$this->hasValueViewer(static::ROW_ACTIONS_COLUMN_NAME)) {
             $this->addValueViewer(static::ROW_ACTIONS_COLUMN_NAME, null);
         }
         if ($this->isNestedViewEnabled() && !$this->hasValueViewer($this->getColumnNameForNestedView())) {
@@ -815,12 +831,55 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * @return array
+     */
+    public function getAdditionalViewsForTemplate() {
+        return $this->additionalViewsForTemplate instanceof \Closure
+            ? call_user_func($this->additionalViewsForTemplate, $this)
+            : $this->additionalViewsForTemplate;
+    }
+
+    /**
+     * Provide additional Laravel views to be inserted after data grid.
+     * This will solve almost any problem with complex data grid cells that need to be rendered separately.
+     * Use this method in couple with $this->setJsInitiator('jsFunctionName') to have full control over data grid
+     * initialization and configuration.
+     *
+     * Each view will be rendered using view($viewPath, $generalData, $customData) calls.
+     *
+     * $generalData contains:
+     *      'idSuffix' => string
+     *      'table' => TableInterface
+     *      'dataGridConfig' => DataGridConfig
+     * $customData may be provided for each view separately via $views argument
+     *
+     * @param array|\Closure $views -
+     *      - array: list of Laravel views in format
+     *          [
+     *              'folder.view',
+     *              'folder.view2' => $customData,
+     *              'ns::folder.view',
+     *          ]
+     *      - \Closure: function (DataGridConfig $dataGridConfig) { reurn [] } returned value must
+     *          fit same format as array (see above)
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
+    public function setAdditionalViewsForTemplate($views) {
+        if (!is_array($views) || !($views instanceof \Closure)) {
+            throw new \InvalidArgumentException('$views argument must be an array or \Closure');
+        }
+        $this->additionalViewsForTemplate = $views;
+        return $this;
+    }
+
+    /**
      * @param FilterConfig $dataGridFilterConfig
      * @param TableInterface $table
      * @param string $tableNameForRoutes
      * @return DataGridRendererHelper
      */
     public function getRendererHelper(FilterConfig $dataGridFilterConfig, TableInterface $table, $tableNameForRoutes) {
-        return new \PeskyCMF\Scaffold\DataGrid\DataGridRendererHelper($this, $dataGridFilterConfig, $table, $tableNameForRoutes);
+        return new DataGridRendererHelper($this, $dataGridFilterConfig, $table, $tableNameForRoutes);
     }
 }

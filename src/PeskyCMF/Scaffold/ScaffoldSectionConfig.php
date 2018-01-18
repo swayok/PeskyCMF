@@ -661,7 +661,7 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @return string[]
-     * @throws \LogicException
+     * @throws \UnexpectedValueException
      */
     public function getToolbarItems() {
         if (empty($this->toolbarItems)) {
@@ -669,7 +669,7 @@ abstract class ScaffoldSectionConfig {
         }
         $toolbarItems = call_user_func($this->toolbarItems, $this);
         if (!is_array($toolbarItems)) {
-            throw new \LogicException(get_class($this) . '->toolbarItems closure must return an array');
+            throw new \UnexpectedValueException(get_class($this) . '->toolbarItems closure must return an array');
         }
         /**
          * @var array $toolbarItems
@@ -682,12 +682,12 @@ abstract class ScaffoldSectionConfig {
                 } else if (method_exists($item, '__toString')) {
                     $item = (string) $item;
                 } else {
-                    throw new \LogicException(
+                    throw new \UnexpectedValueException(
                         get_class($this) . '->toolbarItems: array may contain only strings and objects with build() or __toString() methods'
                     );
                 }
             } else if (!is_string($item)) {
-                throw new \LogicException(
+                throw new \UnexpectedValueException(
                     get_class($this) . '->toolbarItems: array may contain only strings and objects with build() or __toString() methods'
                 );
             }
@@ -699,6 +699,9 @@ abstract class ScaffoldSectionConfig {
      * @param \Closure $callback - function (ScaffoldSectionConfig $scaffoldSectionConfig) { return []; }
      * Callback must return an array.
      * Array may contain only strings, Tag class instances, or any object with build() or __toString() method
+     * Note: you can change positions of default toolbar items ('create', 'bulk_actions') using item names as a key in
+     * resulting array of items while leaving value to be null:
+     * function ($scaffoldSectionConfig) { return [$myItem, 'create' => null, $otherItem, 'bulk_actions' => 'null'] }
      * Examples:
      * - call some url via ajax and then run "callback(json)"
          Tag::a()
@@ -883,8 +886,11 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * NOTES for data grids:
-     * - JS function will be called before any other common js executed (even before DataTables plugin initiated)
-     * - JS function will be called within the context of the data grid (use this to access it)
+     * - JS function will be called instead of ScaffoldDataGridHelper.init()
+     * - JS function will receive 3 arguments: dataGridSelector, dataTablesConfig
+     * - You may want to call ScaffoldDataGridHelper.init(dataGridSelector, dataTablesConfig) in this
+     *   function to continue normal initialization
+     * - Function MUST return DataTables object
      * @param string $jsFunctionName
      * @return $this
      * @throws \InvalidArgumentException

@@ -4,17 +4,6 @@
  * @var string $tableNameForRoutes
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\FilterConfig $dataGridFilterConfig
- * @var string $idSuffix
- * @var array $includes - views to include into this template.
- *      Possible use: add datatable cell templates and use them in $dataTablesInitializer
- *      All views receive:
-            * var string $idSuffix
-            * var \PeskyCMF\Db\CmfDbTable $table
-            * var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
- * @var string|null $dataTablesInitializer - js function like
-        funciton (tableSelector, dataTablesConfig, originalInitializer) {
-            return originalInitializer(tableSelector, dataTablesConfig);
-        }
  */
 $helper = $dataGridConfig->getRendererHelper($dataGridFilterConfig, $table, $tableNameForRoutes);
 $dataGridId = $helper->getId();
@@ -30,269 +19,23 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
             </tr>
         </thead>
     </table>
-    <?php
-        if (!empty($includes)) {
-            if (!is_array($includes)) {
-                $includes = [$includes];
-            }
-            $dataForViews = compact('idSuffix', 'table', 'dataGridConfig');
-            foreach ($includes as $include) {
-                echo view($include, $dataForViews)->render();
-                echo "\n\n";
-            }
-        }
-    ?>
+
+    <?php echo $helper->getAdditionalViews(); ?>
+
 <?php View::stopSection(); ?>
 
 <?php View::startSection('scaffold-datagrid-js'); ?>
-    <?php
-        $pkName = $table->getPkColumnName();
-        $dblClickUrl = null;
-        // bulk actions
-        $bulkActions = [];
-        if ($dataGridConfig->isAllowedMultiRowSelection()) {
-            if ($dataGridConfig->isDeleteAllowed() && $dataGridConfig->isBulkItemsDeleteAllowed()) {
-                $bulkActions[] = \Swayok\Html\Tag::a()
-                    ->setContent($dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
-                    ->setDataAttr('confirm', $dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_selected_confirm'))
-                    ->setDataAttr('action', 'bulk-selected')
-                    ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$tableNameForRoutes], false))
-                    ->setDataAttr('id-field', $pkName)
-                    ->setDataAttr('method', 'delete')
-                    ->setHref('javascript: void(0)')
-                    ->build();
-            }
-            if ($dataGridConfig->isEditAllowed() && $dataGridConfig->isBulkItemsEditingAllowed()) {
-                $bulkActions[] = \Swayok\Html\Tag::a()
-                    ->setContent($dataGridConfig->translateGeneral('bulk_actions.edit_selected'))
-                    ->setDataAttr('action', 'bulk-edit-selected')
-                    ->setDataAttr('id-field', $pkName)
-                    ->setHref('javascript: void(0)')
-                    ->build();
-            }
-        }
-        if ($dataGridConfig->isDeleteAllowed() && $dataGridConfig->isFilteredItemsDeleteAllowed()) {
-            $bulkActions[] = \Swayok\Html\Tag::a()
-                ->setContent($dataGridConfig->translateGeneral('bulk_actions.delete_filtered'))
-                ->setDataAttr('action', 'bulk-filtered')
-                ->setDataAttr('confirm', $dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_filtered_confirm'))
-                ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$tableNameForRoutes], false))
-                ->setDataAttr('method', 'delete')
-                ->setHref('javascript: void(0)')
-                ->build();
-        }
-        if ($dataGridConfig->isEditAllowed() && $dataGridConfig->isFilteredItemsEditingAllowed()) {
-            $bulkActions[] = \Swayok\Html\Tag::a()
-                ->setContent($dataGridConfig->translateGeneral('bulk_actions.edit_filtered'))
-                ->setDataAttr('action', 'bulk-edit-filtered')
-                ->setHref('javascript: void(0)')
-                ->build();
-        }
-        foreach ($dataGridConfig->getBulkActionsToolbarItems() as $toolbarItem) {
-            $bulkActions[] = $toolbarItem;
-        }
-        // main toolbar
-        $toolbar = [];
-        foreach ($dataGridConfig->getToolbarItems() as $toolbarItem) {
-            $toolbar[] = $toolbarItem;
-        }
-        if (!empty($bulkActions)) {
-            $dropdownBtn = \Swayok\Html\Tag::button()
-                ->setType('button')
-                ->setClass('btn btn-default dropdown-toggle')
-                ->setDataAttr('toggle' , 'dropdown')
-                ->setAttribute('aria-haspopup', 'true')
-                ->setAttribute('aria-expanded', 'false')
-                ->setContent($dataGridConfig->translateGeneral('bulk_actions.dropdown_label'))
-                ->append('&nbsp;<span class="caret"></span>')
-                ->build();
-
-            $dropdownMenu = \Swayok\Html\Tag::ul()
-                ->setClass('dropdown-menu dropdown-menu-right')
-                ->setContent('<li>' . implode('</li><li>', $bulkActions) . '</li>')
-                ->build();
-
-            $toolbar['bulk_actions'] = \Swayok\Html\Tag::div()
-                ->setClass('btn-group bulk-actions float-none')
-                ->setContent($dropdownBtn . $dropdownMenu)
-                ->build();
-        }
-        if ($dataGridConfig->isCreateAllowed()) {
-            $toolbar['create'] = \Swayok\Html\Tag::a()
-                ->setContent($dataGridConfig->translateGeneral('toolbar.create'))
-                ->setClass('btn btn-primary')
-                ->setHref(routeToCmfItemAddForm($tableNameForRoutes))
-                ->build();
-        }
-        // row actions
-        $actionsTpl = '';
-        $actionsCount = 0;
-        if ($dataGridConfig->isNestedViewEnabled()) {
-            $showChildren = \Swayok\Html\Tag::a()
-                ->setClass('row-action link-muted show-children')
-                ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
-                ->setTitle($dataGridConfig->translateGeneral('actions.show_children'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref('javascript: void(0)')
-                ->build();
-            $hideChildren = \Swayok\Html\Tag::a()
-                ->setClass('row-action link-muted hide-children hidden')
-                ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
-                ->setTitle($dataGridConfig->translateGeneral('actions.hide_children'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref('javascript: void(0)')
-                ->build();
-            $actionsTpl .= '{{? it.___max_nesting_depth <= 0 || it.___max_nesting_depth > (parseInt(it.___nesting_depth) || 0) }}'
-                    . $showChildren . $hideChildren
-                . '{{?}}';
-            $actionsCount++;
-        }
-        if ($dataGridConfig->isDetailsViewerAllowed()) {
-            $url = $dblClickUrl = '{{= it.___details_url }}';
-            $btn = \Swayok\Html\Tag::a()
-                ->setClass('row-action text-light-blue item-details')
-                ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
-                ->setTitle($dataGridConfig->translateGeneral('actions.view_item'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref('{{= it.___details_url }}')
-                ->build();
-            $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
-            $actionsCount++;
-        }
-        if ($dataGridConfig->isEditAllowed()) {
-            $url = $dblClickUrl = routeToCmfItemEditForm($tableNameForRoutes, '{{= it.___pk_value }}');
-            $btn = \Swayok\Html\Tag::a()
-                ->setClass('row-action text-green item-edit')
-                ->setContent('<i class="glyphicon glyphicon-edit"></i>')
-                ->setTitle($dataGridConfig->translateGeneral('actions.edit_item'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref($url)
-                ->build();
-            $actionsTpl .= '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
-            $actionsCount++;
-        }
-        if ($dataGridConfig->isCloningAllowed()) {
-            $url = $dblClickUrl = routeToCmfItemCloneForm($tableNameForRoutes, '{{= it.___pk_value }}');
-            $btn = \Swayok\Html\Tag::a()
-                ->setClass('row-action text-primary item-clone')
-                ->setContent('<i class="fa fa-copy"></i>')
-                ->setTitle($dataGridConfig->translateGeneral('actions.clone_item'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref($url)
-                ->build();
-            $actionsTpl .= '{{? !!it.___cloning_allowed }}' . $btn . '{{?}}';
-            $actionsCount++;
-        }
-        if ($dataGridConfig->isDeleteAllowed()) {
-            $btn = \Swayok\Html\Tag::a()
-                ->setContent('<i class="glyphicon glyphicon-trash"></i>')
-                ->setClass('row-action text-red item-delete')
-                ->setTitle($dataGridConfig->translateGeneral('actions.delete_item'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('block-datagrid', '1')
-                ->setDataAttr('action', 'request')
-                ->setDataAttr('method', 'delete')
-                ->setDataAttr('url', routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}', false))
-                ->setDataAttr('confirm', $dataGridConfig->translateGeneral('message.delete_item_confirm'))
-                ->setHref('javascript: void(0)')
-                ->build();
-            $actionsTpl .= '{{? !!it.___delete_allowed }}' . $btn . '{{?}}';
-            $actionsCount++;
-        }
-        $customRowActions = $dataGridConfig->getRowActions();
-        if (!empty($customRowActions)) {
-            foreach ($customRowActions as $rowAction) {
-                $actionsTpl .= $rowAction;
-                $actionsCount++;
-            }
-        }
-        $actionsTpl = '<div class="row-actions text-nowrap">' . $actionsTpl . '</div>';
-    ?>
-
     <script type="application/javascript">
         (function() {
-            <?php
-                $dataTablesConfig = array_replace(
-                    \PeskyCMF\Config\CmfConfig::getPrimary()->data_tables_config(),
-                    $dataGridConfig->getAdditionalDataTablesConfig(),
-                    [
-                        'pkColumnName' => $table::getPkColumnName(),
-                        'processing' => true,
-                        'serverSide' => true,
-                        'ajax' => cmfRoute('cmf_api_get_items', ['table_name' => $tableNameForRoutes], false),
-                        'pageLength' => $dataGridConfig->getRecordsPerPage(),
-                        'toolbarItems' => array_values($toolbar),
-                        'order' => [],
-                    ]
-                );
-                if (!$dataGridConfig->getOrderBy() instanceof \PeskyORM\Core\DbExpr) {
-                    $dataTablesConfig['order'] = [
-                        [
-                            $dataGridConfig->getValueViewer($dataGridConfig->getOrderBy())->getPosition(),
-                            $dataGridConfig->getOrderDirection()
-                        ]
-                    ];
-                }
-                if ($dataGridConfig->isNestedViewEnabled()) {
-                    $dataTablesConfig['nested_data_grid'] = [
-                        'value_column' => '__' . $table::getPkColumnName(),
-                        'filter_column' => '__' . $dataGridConfig->getColumnNameForNestedView()
-                    ];
-                }
-                if ($dataGridConfig->isRowsReorderingEnabled()) {
-                    $dataTablesConfig['rowsReordering'] = [
-                        'columns' => $dataGridConfig->getRowsPositioningColumns(),
-                        'url' => cmfRouteTpl(
-                            'cmf_api_change_item_position',
-                            ['table_name' => $tableNameForRoutes],
-                            [
-                                'id' => 'it.moved_row.___pk_value',
-                                'before_or_after',
-                                'other_id' => 'it.other_row.___pk_value || 0',
-                                'sort_column',
-                                'sort_direction'
-                            ]
-                        )
-                    ];
-                }
-            ?>
-            var dataTablesConfig = <?php echo json_encode($dataTablesConfig, JSON_UNESCAPED_UNICODE); ?>;
-            dataTablesConfig.resourceName = '<?php echo $tableNameForRoutes; ?>';
-            var rowActionsTpl = null;
-            Utils.makeTemplateFromText(
-                    '<?php echo addslashes($actionsTpl); ?>',
-                    'Data grid row actions template'
-                )
-                .done(function (template) {
-                    rowActionsTpl = template;
-                })
-                .fail(function (error) {
-                    throw error;
-                });
+            var dataTablesConfig = <?php echo json_encode($helper->getDataTablesConfig(), JSON_UNESCAPED_UNICODE); ?>;
             dataTablesConfig.columnDefs = [];
             var fixedColumns = 0;
-            <?php if ($dataGridConfig->isRowActionsFloating()): ?>
-                dataTablesConfig.rowActions = rowActionsTpl;
-            <?php else: ?>
-                <?php
-                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $actionsValueViewer */
-                    $actionsValueViewer = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
-                ?>
-                <?php if ($actionsValueViewer->getPosition() === (int)$dataGridConfig->isAllowedMultiRowSelection()): ?>
+
+            // multiselect column
+            if (dataTablesConfig.multiselect) {
+                <?php if ($dataGridConfig->isMultiRowSelectionColumnFixed()) : ?>
                     fixedColumns++;
                 <?php endif; ?>
-                dataTablesConfig.columnDefs = [
-                    {
-                        targets: <?php echo $actionsValueViewer->getPosition(); ?>,
-                        render: function (data, type, row) {
-                            return rowActionsTpl(row);
-                        },
-                        width: <?php echo max($actionsCount * 27, 80); ?>
-                    }
-                ];
-            <?php endif; ?>
-            <?php if ($dataGridConfig->isAllowedMultiRowSelection()) :?>
-                fixedColumns++;
                 dataTablesConfig.columnDefs.push({
                     targets: 0,
                     orderable: false,
@@ -302,20 +45,53 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
                         return '';
                     }
                 });
-                dataTablesConfig.multiselect = true;
                 dataTablesConfig.select = {
                     style: 'multi+shift',
                     selector: 'td.select-checkbox',
                     info: false
                 };
+            }
+
+            // row actions
+            <?php if ($dataGridConfig->isRowActionsEnabled()) : ?>
+                var rowActionsTpl = null;
+                Utils.makeTemplateFromText(
+                        '<?php echo addslashes($helper->getRowActionsDotJsTemplate()); ?>',
+                        'Data grid row actions template'
+                    )
+                    .done(function (template) {
+                        rowActionsTpl = template;
+                    })
+                    .fail(function (error) {
+                        throw error;
+                    });
+
+                <?php
+                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $actionsValueViewer */
+                    $actionsValueViewer = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
+                ?>
+                <?php if ($actionsValueViewer->getPosition() === (int)$dataGridConfig->isAllowedMultiRowSelection()): ?>
+                    fixedColumns++;
+                <?php endif; ?>
+
+                dataTablesConfig.columnDefs = [
+                    {
+                        targets: <?php echo $actionsValueViewer->getPosition(); ?>,
+                        render: function (data, type, row) {
+                            return rowActionsTpl(row);
+                        },
+                        width: <?php echo max($helper->getRowActionsCount() * 27, 80); ?>
+                    }
+                ];
             <?php endif; ?>
-            <?php if ($dataGridConfig->isRowActionsColumnFixed()) : ?>
-                if (fixedColumns > 0) {
-                    dataTablesConfig.fixedColumns = {
-                        leftColumns: fixedColumns
-                    };
-                }
-            <?php endif; ?>
+
+            if (fixedColumns > 0) {
+                dataTablesConfig.fixedColumns = {
+                    leftColumns: fixedColumns
+                };
+            }
+
+            // other columns
             <?php foreach ($gridColumnsConfigs as $columnConfig) : ?>
                 <?php if ($columnConfig->hasCustomWidth()) : ?>
                     dataTablesConfig.columnDefs.push({
@@ -324,6 +100,9 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
                     });
                 <?php endif; ?>
             <?php endforeach; ?>
+
+            // double click action on row
+            <?php $dblClickUrl = $helper->getDoubleClickUrl(); ?>
             <?php if (!empty($dblClickUrl)): ?>
                 dataTablesConfig.doubleClickUrl = null;
                 Utils.makeTemplateFromText(
@@ -337,6 +116,8 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
                         throw error;
                     });
             <?php endif; ?>
+
+            // default data grid filter conditions
             <?php
                 $defaultConditions = $dataGridFilterConfig->getDefaultConditions();
                 if (empty($defaultConditions['rules'])) {
@@ -349,6 +130,8 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
             if (dataTablesConfig.defaultSearchRules.rules) {
                 dataTablesConfig.search = {search: DataGridSearchHelper.encodeRulesForDataTable(dataTablesConfig.defaultSearchRules)};
             }
+
+            // data grid filters
             <?php
                 $fitlers = [];
                 foreach($dataGridFilterConfig->getFilters() as $filterConfig) {
@@ -360,17 +143,18 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
                 is_opened: <?php echo $dataGridConfig->isFilterOpenedByDefault() ? 'true' : 'false'; ?>
             };
 
+            // data grid filters localization strings
             DataGridSearchHelper.locale = <?php echo json_encode($dataGridConfig->translateGeneral('toolbar.filter'), JSON_UNESCAPED_UNICODE); ?>;
 
+            // init data grid using collected conditions
+            var $dataGrid = $('#<?php echo $dataGridId; ?>');
             <?php if ($dataGridConfig->hasJsInitiator()): ?>
-                <?php echo $dataGridConfig->getJsInitiator(); ?>.call($('#<?php echo $dataGridId; ?>'));
-            <?php endif ?>
-            <?php if (empty($dataTablesInitializer)): ?>
-                var dataGrid = ScaffoldDataGridHelper.init('#<?php echo $dataGridId; ?>', dataTablesConfig);
+                <?php echo $dataGridConfig->getJsInitiator(); ?>($dataGrid, dataTablesConfig);
             <?php else: ?>
-                var dataGrid = <?php echo $dataTablesInitializer; ?>('#<?php echo $dataGridId; ?>', dataTablesConfig, ScaffoldDataGridHelper.init);
+                ScaffoldDataGridHelper.init($dataGrid, dataTablesConfig);
             <?php endif; ?>
-            ScaffoldDataGridHelper.setCurrentDataGrid(dataGrid);
+            ScaffoldDataGridHelper.setCurrentDataGrid($dataGrid);
+
         })();
     </script>
 <?php View::stopSection(); ?>

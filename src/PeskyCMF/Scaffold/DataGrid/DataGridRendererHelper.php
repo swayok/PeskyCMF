@@ -2,6 +2,8 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
+use PeskyCMF\Config\CmfConfig;
+use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 
@@ -17,6 +19,12 @@ class DataGridRendererHelper {
     protected $dataGridFilterConfig;
     /** @var DataGridColumn */
     protected $sortedColumnConfigs;
+    /** @var string */
+    protected $idSuffix;
+    /** @var string */
+    protected $id;
+    /** @var int */
+    protected $rowActionsCount = 0;
 
     /**
      * DataGridRendererHelper constructor.
@@ -40,8 +48,21 @@ class DataGridRendererHelper {
     /**
      * @return string
      */
+    public function getIdSuffix() {
+        if (!$this->idSuffix) {
+            $this->idSuffix = str_slug(strtolower($this->tableNameForRoutes));
+        }
+        return $this->idSuffix;
+    }
+
+    /**
+     * @return string
+     */
     public function getId() {
-        return 'scaffold-data-grid-' . str_slug(strtolower($this->tableNameForRoutes));
+        if (!$this->id) {
+            $this->id = 'scaffold-data-grid-' . $this->getIdSuffix();
+        }
+        return $this->id;
     }
 
     /**
@@ -137,5 +158,353 @@ class DataGridRendererHelper {
             }
         }
         return $miltiselectColumn . $visibleColumns . $invisibleColumns;
+    }
+
+    /**
+     * @return array
+     * @throws \LogicException
+     */
+    public function getBulkActions() {
+        $bulkActions = [];
+        $placeFirst = [];
+        if ($this->dataGridConfig->isAllowedMultiRowSelection()) {
+            $pkName = $this->table->getPkColumnName();
+            foreach ($this->dataGridConfig->getBulkActionsToolbarItems() as $key => $bulkAction) {
+                if ($bulkAction instanceof Tag) {
+                    $bulkAction = $bulkAction->build();
+                }
+                if (is_string($key)) {
+                    $bulkActions[$key] = $bulkAction;
+                } else {
+                    $bulkActions[] = $bulkAction;
+                }
+            }
+            if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isBulkItemsDeleteAllowed()) {
+                $action = Tag::a()
+                    ->setContent($this->dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
+                    ->setDataAttr('confirm', $this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_selected_confirm'))
+                    ->setDataAttr('action', 'bulk-selected')
+                    ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$this->tableNameForRoutes], false))
+                    ->setDataAttr('id-field', $pkName)
+                    ->setDataAttr('method', 'delete')
+                    ->setHref('javascript: void(0)')
+                    ->build();
+                if (array_key_exists('delete_selected', $bulkActions)) {
+                    $bulkActions['delete_selected'] = $action;
+                } else {
+                    $placeFirst[] = $action;
+                }
+            }
+            if ($this->dataGridConfig->isEditAllowed() && $this->dataGridConfig->isBulkItemsEditingAllowed()) {
+                $action = Tag::a()
+                    ->setContent($this->dataGridConfig->translateGeneral('bulk_actions.edit_selected'))
+                    ->setDataAttr('action', 'bulk-edit-selected')
+                    ->setDataAttr('id-field', $pkName)
+                    ->setHref('javascript: void(0)')
+                    ->build();
+                if (array_key_exists('edit_selected', $bulkActions)) {
+                    $bulkActions['edit_selected'] = $action;
+                } else {
+                    $placeFirst = $action;
+                }
+            }
+        }
+        if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isFilteredItemsDeleteAllowed()) {
+            $action = Tag::a()
+                ->setContent($this->dataGridConfig->translateGeneral('bulk_actions.delete_filtered'))
+                ->setDataAttr('action', 'bulk-filtered')
+                ->setDataAttr('confirm', $this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_filtered_confirm'))
+                ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$this->tableNameForRoutes], false))
+                ->setDataAttr('method', 'delete')
+                ->setHref('javascript: void(0)')
+                ->build();
+            if (array_key_exists('delete_filtered', $bulkActions)) {
+                $bulkActions['delete_filtered'] = $action;
+            } else {
+                $placeFirst = $action;
+            }
+        }
+        if ($this->dataGridConfig->isEditAllowed() && $this->dataGridConfig->isFilteredItemsEditingAllowed()) {
+            $action = Tag::a()
+                ->setContent($this->dataGridConfig->translateGeneral('bulk_actions.edit_filtered'))
+                ->setDataAttr('action', 'bulk-edit-filtered')
+                ->setHref('javascript: void(0)')
+                ->build();
+            if (array_key_exists('edit_filtered', $bulkActions)) {
+                $bulkActions['edit_filtered'] = $action;
+            } else {
+                $placeFirst = $action;
+            }
+        }
+        return array_merge($placeFirst, array_values($bulkActions));
+    }
+
+    /**
+     * @return array
+     * @throws \UnexpectedValueException
+     * @throws \Swayok\Html\HtmlTagException
+     */
+    public function getToolbarItems() {
+        $toolbar = [];
+        foreach ($this->dataGridConfig->getToolbarItems() as $key => $toolbarItem) {
+            if ($toolbarItem instanceof Tag) {
+                $toolbarItem = $toolbarItem->build();
+            }
+            if (is_string($key)) {
+                $toolbar[$key] = $toolbarItem;
+            } else {
+                $toolbar[] = $toolbarItem;
+            }
+        }
+        $bulkActions = $this->getBulkActions();
+        if (!empty($bulkActions)) {
+            $dropdownBtn = Tag::button()
+                ->setType('button')
+                ->setClass('btn btn-default dropdown-toggle')
+                ->setDataAttr('toggle' , 'dropdown')
+                ->setAttribute('aria-haspopup', 'true')
+                ->setAttribute('aria-expanded', 'false')
+                ->setContent($this->dataGridConfig->translateGeneral('bulk_actions.dropdown_label'))
+                ->append('&nbsp;<span class="caret"></span>')
+                ->build();
+
+            $dropdownMenu = Tag::ul()
+                ->setClass('dropdown-menu dropdown-menu-right')
+                ->setContent('<li>' . implode('</li><li>', $bulkActions) . '</li>')
+                ->build();
+
+            $item = Tag::div()
+                ->setClass('btn-group bulk-actions float-none')
+                ->setContent($dropdownBtn . $dropdownMenu)
+                ->build();
+            if (array_key_exists('bulk_actions', $toolbar)) {
+                $toolbar['bulk_actions'] = $item;
+            } else {
+                $toolbar[] = $item;
+            }
+        }
+        if ($this->dataGridConfig->isCreateAllowed()) {
+            $item = Tag::a()
+                ->setContent($this->dataGridConfig->translateGeneral('toolbar.create'))
+                ->setClass('btn btn-primary')
+                ->setHref(routeToCmfItemAddForm($this->tableNameForRoutes))
+                ->build();
+            if (array_key_exists('create', $toolbar)) {
+                $toolbar['create'] = $item;
+            } else {
+                $toolbar[] = $item;
+            }
+        }
+        return array_values($toolbar);
+    }
+
+    /**
+     * @return string
+     */
+    public function getRowActionsDotJsTemplate() {
+        $this->rowActionsCount = 0;
+        $rowActions = [];
+        $placeFirst = [];
+        if ($this->dataGridConfig->isNestedViewEnabled()) {
+            $showChildren = Tag::a()
+                ->setClass('row-action link-muted show-children')
+                ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
+                ->setTitle($this->dataGridConfig->translateGeneral('actions.show_children'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setHref('javascript: void(0)')
+                ->build();
+            $hideChildren = Tag::a()
+                ->setClass('row-action link-muted hide-children hidden')
+                ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
+                ->setTitle($this->dataGridConfig->translateGeneral('actions.hide_children'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setHref('javascript: void(0)')
+                ->build();
+            $rowAction =
+                '{{? it.___max_nesting_depth <= 0 || it.___max_nesting_depth > (parseInt(it.___nesting_depth) || 0) }}'
+                    . $showChildren . $hideChildren
+                . '{{?}}';
+            $placeFirst[] = $rowAction;
+        }
+
+        foreach ($this->dataGridConfig->getRowActions() as $key => $rowAction) {
+            if ($rowAction instanceof Tag) {
+                $rowAction = $rowAction->build();
+            }
+            if (is_string($key)) {
+                $rowActions[$key] = $rowAction;
+            } else {
+                $rowActions[] = $rowAction;
+            }
+        }
+
+        if ($this->dataGridConfig->isDetailsViewerAllowed()) {
+            $btn = Tag::a()
+                ->setClass('row-action text-light-blue item-details')
+                ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
+                ->setTitle($this->dataGridConfig->translateGeneral('actions.view_item'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setHref('{{= it.___details_url }}')
+                ->build();
+            $rowAction = '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
+            if (array_key_exists('details', $rowActions)) {
+                $rowActions['details'] = $rowAction;
+            } else {
+                $placeFirst[] = $rowAction;
+            }
+        }
+        if ($this->dataGridConfig->isEditAllowed()) {
+            $btn = Tag::a()
+                ->setClass('row-action text-green item-edit')
+                ->setContent('<i class="glyphicon glyphicon-edit"></i>')
+                ->setTitle($this->dataGridConfig->translateGeneral('actions.edit_item'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setHref(routeToCmfItemEditForm($this->tableNameForRoutes, '{{= it.___pk_value }}'))
+                ->build();
+            $rowAction = '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
+            if (array_key_exists('edit', $rowActions)) {
+                $rowActions['edit'] = $rowAction;
+            } else {
+                $placeFirst[] = $rowAction;
+            }
+        }
+        if ($this->dataGridConfig->isCloningAllowed()) {
+            $btn = Tag::a()
+                ->setClass('row-action text-primary item-clone')
+                ->setContent('<i class="fa fa-copy"></i>')
+                ->setTitle($this->dataGridConfig->translateGeneral('actions.clone_item'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setHref(routeToCmfItemCloneForm($this->tableNameForRoutes, '{{= it.___pk_value }}'))
+                ->build();
+            $rowAction = '{{? !!it.___cloning_allowed }}' . $btn . '{{?}}';
+            if (array_key_exists('clone', $rowActions)) {
+                $rowActions['clone'] = $rowAction;
+            } else {
+                $placeFirst[] = $rowAction;
+            }
+        }
+        if ($this->dataGridConfig->isDeleteAllowed()) {
+            $btn = Tag::a()
+                ->setContent('<i class="glyphicon glyphicon-trash"></i>')
+                ->setClass('row-action text-red item-delete')
+                ->setTitle($this->dataGridConfig->translateGeneral('actions.delete_item'))
+                ->setDataAttr('toggle', 'tooltip')
+                ->setDataAttr('block-datagrid', '1')
+                ->setDataAttr('action', 'request')
+                ->setDataAttr('method', 'delete')
+                ->setDataAttr('url', routeToCmfItemDelete($this->tableNameForRoutes, '{{= it.___pk_value }}', false))
+                ->setDataAttr('confirm', $this->dataGridConfig->translateGeneral('message.delete_item_confirm'))
+                ->setHref('javascript: void(0)')
+                ->build();
+            $rowAction = '{{? !!it.___delete_allowed }}' . $btn . '{{?}}';
+            if (array_key_exists('delete', $rowActions)) {
+                $rowActions['delete'] = $rowAction;
+            } else {
+                $placeFirst[] = $rowAction;
+            }
+        }
+        $this->rowActionsCount = count($rowActions);
+        return Tag::div()
+            ->setClass('row-actions text-nowrap')
+            ->setContent(implode('', array_merge($placeFirst, array_values($rowActions))))
+            ->build();
+    }
+
+    /**
+     * @return int
+     */
+    public function getRowActionsCount() {
+        return $this->rowActionsCount;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getDoubleClickUrl() {
+        $doubleClickUrl = null;
+        if ($this->dataGridConfig->isEditAllowed()) {
+            return routeToCmfItemEditForm($this->tableNameForRoutes, '{{= it.___pk_value }}');
+        } else if ($this->dataGridConfig->isDetailsViewerAllowed()) {
+            return '{{= it.___details_url }}';
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @throws \UnexpectedValueException
+     * @throws \Swayok\Html\HtmlTagException
+     * @throws \InvalidArgumentException
+     */
+    public function getDataTablesConfig() {
+        $dataTablesConfig = array_replace(
+            CmfConfig::getPrimary()->data_tables_config(),
+            $this->dataGridConfig->getAdditionalDataTablesConfig(),
+            [
+                'resourceName' => $this->tableNameForRoutes,
+                'pkColumnName' => $this->table->getPkColumnName(),
+                'processing' => true,
+                'serverSide' => true,
+                'ajax' => cmfRoute('cmf_api_get_items', ['table_name' => $this->tableNameForRoutes], false),
+                'pageLength' => $this->dataGridConfig->getRecordsPerPage(),
+                'toolbarItems' => $this->getToolbarItems(),
+                'order' => [],
+                'multiselect' => $this->dataGridConfig->isAllowedMultiRowSelection()
+            ]
+        );
+        if (!$this->dataGridConfig->getOrderBy() instanceof DbExpr) {
+            $dataTablesConfig['order'] = [
+                [
+                    $this->dataGridConfig->getValueViewer($this->dataGridConfig->getOrderBy())->getPosition(),
+                    $this->dataGridConfig->getOrderDirection()
+                ]
+            ];
+        }
+        if ($this->dataGridConfig->isNestedViewEnabled()) {
+            $dataTablesConfig['nested_data_grid'] = [
+                'value_column' => '__' . $table::getPkColumnName(),
+                'filter_column' => '__' . $this->dataGridConfig->getColumnNameForNestedView()
+            ];
+        }
+        if ($this->dataGridConfig->isRowsReorderingEnabled()) {
+            $dataTablesConfig['rowsReordering'] = [
+                'columns' => $this->dataGridConfig->getRowsPositioningColumns(),
+                'url' => cmfRouteTpl(
+                    'cmf_api_change_item_position',
+                    ['table_name' => $this->tableNameForRoutes],
+                    [
+                        'id' => 'it.moved_row.___pk_value',
+                        'before_or_after',
+                        'other_id' => 'it.other_row.___pk_value || 0',
+                        'sort_column',
+                        'sort_direction'
+                    ]
+                )
+            ];
+        }
+        return $dataTablesConfig;
+    }
+
+    /**
+     * @return string
+     * @throws \Throwable
+     */
+    public function getAdditionalViews() {
+        $ret = '';
+        $dataForViews = [
+            'idSuffix' => $this->getIdSuffix(),
+            'table' => $this->table,
+            'dataGridConfig' => $this->dataGridConfig
+        ];
+        foreach ($this->dataGridConfig->getAdditionalViewsForTemplate() as $view => $data) {
+            if (is_int($view)) {
+                $view = $data;
+                $data = [];
+            } else if (!is_array($data)) {
+                $data = [];
+            }
+            $ret .= view($view, $dataForViews, $data)->render() . "\n\n";
+        }
+        return $ret;
     }
 }

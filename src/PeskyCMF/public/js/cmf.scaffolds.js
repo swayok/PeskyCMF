@@ -481,7 +481,6 @@ var ScaffoldDataGridHelper = {
             }
             var encodedState = JSON.stringify(cleanedState);
             if (settings.iDraw > 1) {
-                ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                 if (encodedState !== settings.initialState) {
                     if (page.currentRequest().env().is_history) {
                         page.currentRequest().customData.is_datagrid = true;
@@ -686,7 +685,6 @@ var ScaffoldDataGridHelper = {
                         DataGridSearchHelper.init($table, mergedConfigs.queryBuilderConfig);
                     }
                     ScaffoldDataGridHelper.initClickEvents($tableWrapper, $table, configs);
-                    ScaffoldDataGridHelper.initRowActions($table, configs);
                     ScaffoldDataGridHelper.initRowsRepositioning($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initMultiselect($table, $tableWrapper, configs);
                     ScaffoldDataGridHelper.initBulkLinks($table, $tableWrapper, configs);
@@ -694,7 +692,6 @@ var ScaffoldDataGridHelper = {
                     ScaffoldDataGridHelper.initNestedView($table, $tableWrapper, configsBackup, tableOuterHtml);
                 })
                 .on('preXhr', function (event, settings) {
-                    ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                     CmfRoutingHelpers.cleanupHangedElementsInBody();
                     CmfRoutingHelpers.cleanupHangedElementsInContentWrapper();
                     $(this).dataTable().api().columns.adjust();
@@ -832,101 +829,6 @@ var ScaffoldDataGridHelper = {
                 }
                 return false;
             });
-        }
-    },
-    initRowActions: function ($table, configs) {
-        if (!configs || !configs.rowActions) {
-            return;
-        }
-        var $actionsContainer = $('<div class="row-actions-container hidden"></div>');
-        $table.data('rowActionsContainer', $actionsContainer);
-        $table.parent().append($actionsContainer);
-
-        var $actionsBoxEl = $('<div class="row-actions-block box box-primary"></div>');
-        $table.data('rowActionsBoxEl', $actionsBoxEl);
-        $actionsContainer.append($actionsBoxEl);
-
-        var blockHout = false;
-        $actionsContainer.on('click tap', 'a,[data-action]', function () {
-            ScaffoldDataGridHelper.hideRowActions($table);
-            $table.find('tr.selected').removeClass('selected');
-        }).on('mouseenter', function () {
-            blockHout = true;
-        }).on('mouseleave', function () {
-            blockHout = false;
-        });
-
-        var allowHover = true;
-        var closingTimeout = false;
-        $table.on('click tap', 'tbody tr', function (event) {
-            if (event.target.tagName.toLowerCase() === 'a') {
-                return true;
-            }
-            var $row = $(this);
-            if ($row.hasClass('selected')) {
-                $row.removeClass('selected');
-                ScaffoldDataGridHelper.hideRowActions($table);
-                allowHover = true;
-            } else {
-                $table.find('tr.selected').removeClass('selected');
-                $row.addClass('selected');
-                ScaffoldDataGridHelper.showRowActions($row, $table);
-                allowHover = false;
-            }
-            return false;
-        }).on('mouseenter', 'tbody tr', function () {
-            if (closingTimeout) {
-                clearTimeout(closingTimeout);
-            }
-            if (allowHover) {
-                $table.find('tr.selected').removeClass('selected');
-                ScaffoldDataGridHelper.showRowActions($(this), $table);
-            }
-        }).on('mouseleave', 'tbody tr', function () {
-            closingTimeout = setTimeout(function () {
-                if (allowHover && !blockHout) {
-                    $table.find('tr.selected').removeClass('selected');
-                    ScaffoldDataGridHelper.hideRowActions($table);
-                }
-            }, 50);
-        }).on('mousemove', 'tbody tr', function (event) {
-            if (!$actionsContainer.hasClass('hidden')) {
-                var left = $actionsBoxEl.offset().left;
-                var width = $actionsBoxEl.width();
-                if (event.pageX < left || event.pageX > left + width) {
-                    var mouseXRelative = event.pageX - $actionsContainer.offset().left;
-                    $actionsContainer.css({'text-align': 'left'});
-                    $actionsBoxEl.css({left: Math.max(0, Math.round(mouseXRelative - width / 2))});
-                }
-            }
-        });
-    },
-    showRowActions: function ($row, $table) {
-        var configs = $table.data('configs');
-        var rowActionsContainer = $table.data('rowActionsContainer');
-        if (configs && configs.rowActions && rowActionsContainer) {
-            var data = $table.dataTable().api().row($row).data();
-            if (data) {
-                var $actionsEl = $(configs.rowActions(data));
-                if ($actionsEl.find('a, button').length) {
-                    var position = $row.position();
-                    position.top += $row.height();
-                    //position.left = 0;
-                    $table.data('rowActionsBoxEl').empty().append($actionsEl);
-                    rowActionsContainer.removeClass('hidden').width();
-                    rowActionsContainer.css(position);
-                } else {
-                    rowActionsContainer.addClass('hidden');
-                }
-            } else {
-                ScaffoldDataGridHelper.hideRowActions($table);
-            }
-        }
-    },
-    hideRowActions: function ($table) {
-        var configs = $table.data('configs');
-        if (configs && configs.rowActions && $table.data('rowActionsContainer')) {
-            $table.data('rowActionsContainer').addClass('hidden');
         }
     },
     initRowsRepositioning: function ($table, $tableWrapper, config) {
@@ -1175,12 +1077,8 @@ var ScaffoldDataGridHelper = {
                                     .data('configs', configs)
                                     .addClass('children-data-grid-table');
                                 ScaffoldDataGridHelper.initClickEvents($subTableWrapper, $subTable, configs);
-                                ScaffoldDataGridHelper.initRowActions($subTable, configs);
                                 ScaffoldDataGridHelper.initNestedView($subTable, $subTableWrapper, subTableConfigs, tableOuterHtml);
                                 return false;
-                            })
-                            .on('preXhr', function (event, settings) {
-                                ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
                             })
                             .on('xhr', function (event, settings, json) {
                                 var depth = $subTable.attr('data-depth');
