@@ -19,7 +19,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     protected $allowRelationsInValueViewers = true;
 
-    protected $template = 'cmf::scaffold/datagrid';
+    protected $template = 'cmf::scaffold.datagrid';
     /**
      * @var int
      */
@@ -56,9 +56,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /** @var bool */
     protected $allowFilteredItemsDelete = false;
     /** @var \Closure|null */
-    protected $bulkActionsToolbarItems = null;
-    /** @var \Closure */
-    protected $rowActions = [];
+    protected $bulkActionsToolbarItems;
+    /** @var \Closure|null */
+    protected $rowActions;
     /** @var array */
     protected $additionalDataTablesConfig = [];
     /** @var bool */
@@ -75,8 +75,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $rowsPositioningColumns = [];
     /** @var int|float */
     protected $rowsPosittioningStep = 100;
-    /** @var \Closure */
-    protected $contextMenuItems = [];
+    /** @var \Closure|null */
+    protected $contextMenuItems;
     /** @var bool */
     protected $isContextMenuEnabled = true;
 
@@ -499,7 +499,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @return Tag[]|string[]
      */
     public function getRowActions() {
-        return call_user_func($this->rowActions, $this);
+        return $this->rowActions ? call_user_func($this->rowActions, $this) : [];
     }
 
     /**
@@ -602,7 +602,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @return array
      */
     public function getContextMenuItems() {
-        return call_user_func($this->contextMenuItems, $this);
+        return $this->contextMenuItems ? call_user_func($this->contextMenuItems, $this) : [];
     }
 
     /**
@@ -814,4 +814,13 @@ class DataGridConfig extends ScaffoldSectionConfig {
         return !empty($this->rowsPositioningColumns);
     }
 
+    /**
+     * @param FilterConfig $dataGridFilterConfig
+     * @param TableInterface $table
+     * @param string $tableNameForRoutes
+     * @return DataGridRendererHelper
+     */
+    public function getRendererHelper(FilterConfig $dataGridFilterConfig, TableInterface $table, $tableNameForRoutes) {
+        return new \PeskyCMF\Scaffold\DataGrid\DataGridRendererHelper($this, $dataGridFilterConfig, $table, $tableNameForRoutes);
+    }
 }

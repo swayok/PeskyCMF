@@ -16,8 +16,8 @@ use Swayok\Utils\StringUtils;
 
 class FormConfig extends ScaffoldSectionConfig {
 
-    protected $template = 'cmf::scaffold/form';
-    protected $bulkEditingTemplate = 'cmf::scaffold/bulk_edit_form';
+    protected $template = 'cmf::scaffold.form';
+    protected $bulkEditingTemplate = 'cmf::scaffold.bulk_edit_form';
 
     protected $allowRelationsInValueViewers = true;
 

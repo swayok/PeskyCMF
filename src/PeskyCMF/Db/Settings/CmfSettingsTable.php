@@ -10,6 +10,11 @@ class CmfSettingsTable extends CmfDbTable implements KeyValueTableInterface {
 
     use KeyValueTableHelpers;
 
+    /** @var CmfSettingsTableStructure */
+    static private $tableStructure;
+    /** @var CmfSetting */
+    static private $recordClass;
+
     public function getMainForeignKeyColumnName() {
         return null;
     }
@@ -33,25 +38,24 @@ class CmfSettingsTable extends CmfDbTable implements KeyValueTableInterface {
      * @return CmfSettingsTableStructure
      */
     public function getTableStructure() {
-        static $tableStructure;
-        if ($tableStructure === null) {
-            $tableStructure = app()->bound(CmfSettingsTableStructure::class)
+        if (static::$tableStructure === null) {
+            static::$tableStructure = app()->bound(CmfSettingsTableStructure::class)
                 ? app(CmfSettingsTableStructure::class)
                 : CmfSettingsTableStructure::getInstance();
         }
-        return $tableStructure;
+        return static::$tableStructure;
     }
 
     /**
      * @return CmfSetting
      */
     public function newRecord() {
-        /** @var CmfSetting $recordClass */
-        static $recordClass;
-        if ($recordClass === null) {
-            $recordClass = app()->bound(CmfSetting::class) ? app(CmfSetting::class) : CmfSetting::class;
+        if (static::$recordClass === null) {
+            static::$recordClass = app()->bound(CmfSetting::class)
+                ? app(CmfSetting::class)
+                : CmfSetting::class;
         }
-        return $recordClass::newEmptyRecord();
+        return static::$recordClass::newEmptyRecord();
     }
 
 }

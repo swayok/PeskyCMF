@@ -21,19 +21,21 @@ class CmfSetting extends CmfDbRecord {
 
     use KeyValueRecordHelpers;
 
-    static protected $tableClass = null;
+    static protected $tableClass;
+
+    /** @var CmfSettingsTable */
+    static private $table;
 
     /**
      * @return CmfSettingsTable
      */
     static public function getTable() {
-        static $table;
-        if ($table === null) {
-            $table = app()->bound(CmfSettingsTable::class)
+        if (static::$table === null) {
+            static::$table = app()->bound(CmfSettingsTable::class)
                 ? app(CmfSettingsTable::class)
                 : CmfSettingsTable::getInstance();
         }
-        return $table;
+        return static::$table;
     }
 
 }

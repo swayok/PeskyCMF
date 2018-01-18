@@ -30,6 +30,16 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      */
     protected $langDetectorProvider;
 
+    /**
+     * @var CmfConfig
+     */
+    private $config;
+
+    /**
+     * @var PeskyCmfAppSettings
+     */
+    private $appSettings;
+
     public function register() {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
 
@@ -71,6 +81,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         ];
     }
 
+    /**
+     * @throws \UnexpectedValueException
+     */
     public function boot() {
         require_once __DIR__ . '/../Config/helpers.php';
 
@@ -122,13 +135,12 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      * @return CmfConfig
      */
     protected function getCmfConfig() {
-        static $config;
-        if ($config === null) {
+        if ($this->config === null) {
             /** @var CmfConfig|string $className */
             $className = config('peskycmf.cmf_config', CmfConfig::class);
-            $config = $className::getInstance();
+            $this->config = $className::getInstance();
         }
-        return $config;
+        return $this->config;
     }
 
     /**
@@ -152,13 +164,12 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      * @return PeskyCmfAppSettings
      */
     protected function getAppSettings() {
-        static $appSettings;
-        if ($appSettings === null) {
+        if ($this->appSettings === null) {
             /** @var PeskyCmfAppSettings $appSettingsClass */
             $appSettingsClass = $this->getCmfConfig()->config('app_settings_class') ?: PeskyCmfAppSettings::class;
-            $appSettings = $appSettingsClass::getInstance();
+            $this->appSettings = $appSettingsClass::getInstance();
         }
-        return $appSettings;
+        return $this->appSettings;
     }
 
     /**

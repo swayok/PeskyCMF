@@ -128,21 +128,21 @@ class PeskyCmfAppSettings {
         return $data;
     }
 
+    private $defaultValues;
     /**
      * Get default value for setting $name
      * @param string $name
      * @return mixed
      */
     static public function getDefaultValue($name) {
-        static $defaults;
-        if (!$defaults) {
-            $defaults = static::getAllDefaultValues();
+        if (!static::getInstance()->defaultValues) {
+            static::getInstance()->defaultValues = static::getAllDefaultValues();
         }
-        if (array_has($defaults, $name)) {
-            if ($defaults[$name] instanceof \Closure) {
-                $defaults[$name] = $defaults[$name]();
+        if (array_has(static::getInstance()->defaultValues, $name)) {
+            if (static::getInstance()->defaultValues[$name] instanceof \Closure) {
+                static::getInstance()->defaultValues[$name] = static::getInstance()->defaultValues[$name]();
             }
-            return $defaults[$name];
+            return static::getInstance()->defaultValues[$name];
         }
         return null;
     }

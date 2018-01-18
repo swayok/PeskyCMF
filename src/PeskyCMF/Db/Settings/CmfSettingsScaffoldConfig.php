@@ -2,8 +2,6 @@
 
 namespace PeskyCMF\Db\Settings;
 
-use PeskyCMF\Http\CmfJsonResponse;
-use PeskyCMF\HttpCode;
 use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 
@@ -14,14 +12,19 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
     protected $isEditAllowed = true;
     protected $isDeleteAllowed = false;
 
+    /** @var CmfSettingsTable */
+    static private $table;
+
+    /**
+     * @return CmfSettingsTable|\PeskyORM\ORM\TableInterface|\PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface
+     */
     static public function getTable() {
-        static $table;
-        if ($table === null) {
-            $table = app()->bound(CmfSettingsTable::class)
+        if (static::$table === null) {
+            static::$table = app()->bound(CmfSettingsTable::class)
                 ? app(CmfSettingsTable::class)
                 : CmfSettingsTable::getInstance();
         }
-        return $table;
+        return static::$table;
     }
 
     static public function getMainMenuItem() {

@@ -1009,32 +1009,29 @@ class CmfConfig extends ConfigsContainer {
         return config('peskyorm.class_builder');
     }
 
+    private $dbClassesNamespace;
     /**
      * @param string $tableName
      * @return string
      * @throws \ReflectionException
      */
     static protected function getDbClassesNamespaceForTable($tableName) {
-        static $namespace = null;
-        if ($namespace === null) {
-            $namespace = rtrim(config('peskyorm.classes_namespace', 'App\\Db'), '\\') . '\\';
+        if (static::getInstance()->dbClassesNamespace === null) {
+            static::getInstance()->dbClassesNamespace = rtrim(config('peskyorm.classes_namespace', 'App\\Db'), '\\') . '\\';
         }
-        return $namespace . StringUtils::classify($tableName);
+        return static::getInstance()->dbClassesNamespace . StringUtils::classify($tableName);
     }
 
+    private $currentResourceName;
     /**
      * @return string|null
      * @throws \UnexpectedValueException
      */
     static public function getResourceNameFromCurrentRoute() {
-        static $tableNameForRoutes;
-        if ($tableNameForRoutes === null) {
-            if (!request()->route()->hasParameter('table_name')) {
-                return null;
-            }
-            $tableNameForRoutes = request()->route()->parameter('table_name');
+        if (static::getInstance()->currentResourceName === null) {
+            static::getInstance()->currentResourceName = request()->route()->parameter('table_name');
         }
-        return $tableNameForRoutes;
+        return static::getInstance()->currentResourceName;
     }
 
     /**

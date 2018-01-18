@@ -9,7 +9,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
 
     protected $allowRelationsInValueViewers = true;
 
-    protected $template = 'cmf::scaffold/item_details';
+    protected $template = 'cmf::scaffold.item_details';
 
     /** @var array */
     protected $tabs = [];

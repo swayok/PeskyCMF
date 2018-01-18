@@ -16,13 +16,9 @@
             return originalInitializer(tableSelector, dataTablesConfig);
         }
  */
-$dataGridId = "scaffold-data-grid-{$idSuffix}";
-$gridColumnsConfigs = $dataGridConfig->getDataGridColumns();
-uasort($gridColumnsConfigs, function ($a, $b) {
-    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $a */
-    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $b */
-    return ($a->getPosition() > $b->getPosition());
-});
+$helper = $dataGridConfig->getRendererHelper($dataGridFilterConfig, $table, $tableNameForRoutes);
+$dataGridId = $helper->getId();
+$gridColumnsConfigs = $helper->getSortedColumnConfigs();
 
 ?>
 
@@ -30,67 +26,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
     <table id="<?php echo $dataGridId ?>" class="table table-bordered table-hover table-striped fluid-width">
         <thead>
             <tr>
-                <?php
-                    if ($dataGridConfig->isAllowedMultiRowSelection()) {
-                        $dropdownBtn = \Swayok\Html\Tag::button()
-                            ->setType('button')
-                            ->setClass('rows-selection-options-dropdown-btn')
-                            ->setDataAttr('toggle' , 'dropdown')
-                            ->setAttribute('aria-haspopup', 'true')
-                            ->setAttribute('aria-expanded', 'false')
-                            ->setContent('<span class="glyphicon glyphicon-menu-hamburger fs15"></span>')
-                            ->build();
-
-                        $selectionActions = [
-                            \Swayok\Html\Tag::a()
-                                ->setContent($dataGridConfig->translateGeneral('actions.select_all'))
-                                ->setClass('select-all')
-                                ->setHref('javascript: void(0)')
-                                ->build(),
-                            \Swayok\Html\Tag::a()
-                                ->setContent($dataGridConfig->translateGeneral('actions.select_none'))
-                                ->setClass('select-none')
-                                ->setHref('javascript: void(0)')
-                                ->build(),
-                            \Swayok\Html\Tag::a()
-                                ->setContent($dataGridConfig->translateGeneral('actions.invert_selection'))
-                                ->setClass('invert-selection')
-                                ->setHref('javascript: void(0)')
-                                ->build()
-                        ];
-                        $dropdownMenu = \Swayok\Html\Tag::ul()
-                            ->setClass('dropdown-menu')
-                            ->setContent('<li>' . implode('</li><li>', $selectionActions) . '</li>')
-                            ->build();
-
-                        echo \Swayok\Html\Tag::th()
-                            ->setContent(
-                                \Swayok\Html\Tag::div()
-                                    ->setClass('btn-group rows-selection-options float-none')
-                                    ->setContent($dropdownBtn . $dropdownMenu)
-                                    ->build()
-                            )
-                            ->setClass('text-nowrap text-center')
-                            ->build();
-                    }
-                    $invisibleColumns = [];
-                    /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $config */
-                    foreach ($gridColumnsConfigs as $config) {
-                        $th = \Swayok\Html\Tag::th()
-                            ->setContent($config->isVisible() ? $config->getLabel() : '&nbsp;')
-                            ->setClass('text-nowrap')
-                            ->setDataAttr('visible', $config->isVisible() ? null : 'false')
-                            ->setDataAttr('orderable', $config->isVisible() && $config->isSortable() ? 'true' : 'false')
-                            ->setDataAttr('name', $config->getName())
-                            ->setDataAttr('data', $config->getName());
-                        if ($config->isVisible()) {
-                            echo $th->build();
-                        } else {
-                            $invisibleColumns[] = $th->build();
-                        }
-                    }
-                    echo implode("\n", $invisibleColumns);
-                ?>
+                <?php echo $helper->getHtmlTableColumnsHeaders(); ?>
             </tr>
         </thead>
     </table>

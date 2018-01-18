@@ -21,8 +21,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     use DataValidationHelper;
 
-    /** @var TableInterface */
-    protected $table;
     /** @var DataGridConfig */
     protected $dataGridConfig = null;
     /** @var FilterConfig */
