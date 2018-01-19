@@ -967,6 +967,9 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table .children-data-grid-table.empty {
   border-bottom-color: transparent;
 }
+.dropdown.bootstrapMenu i.glyphicon {
+  font-family: 'Glyphicons Halflings' !important;
+}
 .main-header {
   position: relative;
 }
