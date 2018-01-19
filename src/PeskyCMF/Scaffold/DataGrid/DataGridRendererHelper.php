@@ -70,54 +70,63 @@ class DataGridRendererHelper {
      * @throws \Swayok\Html\HtmlTagException
      */
     public function getHtmlTableMultiselectColumnHeader() {
-        if ($this->dataGridConfig->isAllowedMultiRowSelection()) {
-            $dropdownBtn = Tag::button()
-                ->setType('button')
-                ->setClass('rows-selection-options-dropdown-btn')
-                ->setDataAttr('toggle' , 'dropdown')
-                ->setAttribute('aria-haspopup', 'true')
-                ->setAttribute('aria-expanded', 'false')
-                ->setContent('<span class="glyphicon glyphicon-menu-hamburger fs15"></span>')
-                ->build();
+        $dropdownBtn = Tag::button()
+            ->setType('button')
+            ->setClass('rows-selection-options-dropdown-btn')
+            ->setDataAttr('toggle' , 'dropdown')
+            ->setAttribute('aria-haspopup', 'true')
+            ->setAttribute('aria-expanded', 'false')
+            ->setContent('<span class="glyphicon glyphicon-menu-hamburger fs15"></span>')
+            ->build();
 
-            $selectionActions = [
-                Tag::a()
-                    ->setContent($this->dataGridConfig->translateGeneral('actions.select_all'))
-                    ->setClass('select-all')
-                    ->setHref('javascript: void(0)')
-                    ->build(),
-                Tag::a()
-                    ->setContent($this->dataGridConfig->translateGeneral('actions.select_none'))
-                    ->setClass('select-none')
-                    ->setHref('javascript: void(0)')
-                    ->build(),
-                Tag::a()
-                    ->setContent($this->dataGridConfig->translateGeneral('actions.invert_selection'))
-                    ->setClass('invert-selection')
-                    ->setHref('javascript: void(0)')
+        $selectionActions = [
+            Tag::a()
+                ->setContent($this->dataGridConfig->translateGeneral('actions.select_all'))
+                ->setClass('select-all')
+                ->setHref('javascript: void(0)')
+                ->build(),
+            Tag::a()
+                ->setContent($this->dataGridConfig->translateGeneral('actions.select_none'))
+                ->setClass('select-none')
+                ->setHref('javascript: void(0)')
+                ->build(),
+            Tag::a()
+                ->setContent($this->dataGridConfig->translateGeneral('actions.invert_selection'))
+                ->setClass('invert-selection')
+                ->setHref('javascript: void(0)')
+                ->build()
+        ];
+        $dropdownMenu = Tag::ul()
+            ->setClass('dropdown-menu')
+            ->setContent('<li>' . implode('</li><li>', $selectionActions) . '</li>')
+            ->build();
+
+        return Tag::th()
+            ->setContent(
+                Tag::div()
+                    ->setClass('btn-group rows-selection-options float-none')
+                    ->setContent($dropdownBtn . $dropdownMenu)
                     ->build()
-            ];
-            $dropdownMenu = Tag::ul()
-                ->setClass('dropdown-menu')
-                ->setContent('<li>' . implode('</li><li>', $selectionActions) . '</li>')
-                ->build();
+            )
+            ->setClass('text-nowrap text-center')
+            ->build();
+    }
 
-            return Tag::th()
-                ->setContent(
-                    Tag::div()
-                        ->setClass('btn-group rows-selection-options float-none')
-                        ->setContent($dropdownBtn . $dropdownMenu)
-                        ->build()
-                )
-                ->setClass('text-nowrap text-center')
-                ->build();
-        }
-        return '';
+    /**
+     * @return string
+     */
+    public function getHtmlTableNestedViewsColumnHeader() {
+        return Tag::th()
+            ->setContent('&nbsp;')
+            ->setDataAttr('visible', 'true')
+            ->setDataAttr('orderable', 'false')
+            ->setDataAttr('name', $this->table->getPkColumnName())
+            ->setDataAttr('data', $this->table->getPkColumnName())
+            ->build();
     }
 
     /**
      * @return \PeskyCMF\Scaffold\AbstractValueViewer[]|DataGridColumn|DataGridColumn[]
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getSortedColumnConfigs() {
         if (!$this->sortedColumnConfigs) {
@@ -125,6 +134,7 @@ class DataGridRendererHelper {
             uasort($this->sortedColumnConfigs, function ($a, $b) {
                 /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $a */
                 /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $b */
+                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
                 return ($a->getPosition() > $b->getPosition());
             });
         }
@@ -138,8 +148,14 @@ class DataGridRendererHelper {
      * @throws \Swayok\Html\HtmlTagException
      */
     public function getHtmlTableColumnsHeaders() {
-        $miltiselectColumn = $this->getHtmlTableMultiselectColumnHeader() . "\n";
-        $invisibleColumns = $visibleColumns = '';
+        $invisibleColumns = '';
+        $visibleColumns = '';
+        if ($this->dataGridConfig->isAllowedMultiRowSelection()) {
+            $visibleColumns .= $this->getHtmlTableMultiselectColumnHeader() . "\n";
+        }
+        if ($this->dataGridConfig->isNestedViewEnabled()) {
+            $visibleColumns .= $this->getHtmlTableNestedViewsColumnHeader() . "\n";
+        }
         $columns = $this->getSortedColumnConfigs();
         /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $config */
         foreach ($columns as $config) {
@@ -157,7 +173,7 @@ class DataGridRendererHelper {
                 $invisibleColumns .= $th . "\n";
             }
         }
-        return $miltiselectColumn . $visibleColumns . $invisibleColumns;
+        return $visibleColumns . $invisibleColumns;
     }
 
     /**
@@ -301,31 +317,39 @@ class DataGridRendererHelper {
     /**
      * @return string
      */
+    public function getNestedViewTriggerCellTemplate() {
+        $showChildren = Tag::a()
+            ->setClass('row-action link-muted show-children')
+            ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
+            ->setTitle($this->dataGridConfig->translateGeneral('actions.show_children'))
+            ->setDataAttr('toggle', 'tooltip')
+            ->setHref('javascript: void(0)')
+            ->build();
+        $hideChildren = Tag::a()
+            ->setClass('row-action link-muted hide-children hidden')
+            ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
+            ->setTitle($this->dataGridConfig->translateGeneral('actions.hide_children'))
+            ->setDataAttr('toggle', 'tooltip')
+            ->setHref('javascript: void(0)')
+            ->build();
+        $buttons =
+            '{{? it.___max_nesting_depth <= 0 || it.___max_nesting_depth > (parseInt(it.___nesting_depth) || 0) }}'
+                . $showChildren . $hideChildren
+            . '{{?}}';
+        return Tag::div()
+            ->setClass('row-actions text-nowrap')
+            ->setContent($buttons)
+            ->build();
+    }
+
+    /**
+     * @return string
+     */
     public function getRowActionsDotJsTemplate() {
         $this->rowActionsCount = 0;
         $rowActions = [];
         $placeFirst = [];
-        if ($this->dataGridConfig->isNestedViewEnabled()) {
-            $showChildren = Tag::a()
-                ->setClass('row-action link-muted show-children')
-                ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
-                ->setTitle($this->dataGridConfig->translateGeneral('actions.show_children'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref('javascript: void(0)')
-                ->build();
-            $hideChildren = Tag::a()
-                ->setClass('row-action link-muted hide-children hidden')
-                ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
-                ->setTitle($this->dataGridConfig->translateGeneral('actions.hide_children'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref('javascript: void(0)')
-                ->build();
-            $rowAction =
-                '{{? it.___max_nesting_depth <= 0 || it.___max_nesting_depth > (parseInt(it.___nesting_depth) || 0) }}'
-                    . $showChildren . $hideChildren
-                . '{{?}}';
-            $placeFirst[] = $rowAction;
-        }
+
 
         foreach ($this->dataGridConfig->getRowActions() as $key => $rowAction) {
             if ($rowAction instanceof Tag) {
@@ -346,7 +370,7 @@ class DataGridRendererHelper {
                 ->setDataAttr('toggle', 'tooltip')
                 ->setHref('{{= it.___details_url }}')
                 ->build();
-            $rowAction = '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
+            $rowAction = '{{? !!it.___details_allowed && it.___details_url }}' . $btn . '{{?}}';
             if (array_key_exists('details', $rowActions)) {
                 $rowActions['details'] = $rowAction;
             } else {
@@ -359,9 +383,9 @@ class DataGridRendererHelper {
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
                 ->setTitle($this->dataGridConfig->translateGeneral('actions.edit_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setHref(routeToCmfItemEditForm($this->tableNameForRoutes, '{{= it.___pk_value }}'))
+                ->setHref('{{= it.___edit_url }}')
                 ->build();
-            $rowAction = '{{? !!it.___edit_allowed }}' . $btn . '{{?}}';
+            $rowAction = '{{? !!it.___edit_allowed && it.___edit_url }}' . $btn . '{{?}}';
             if (array_key_exists('edit', $rowActions)) {
                 $rowActions['edit'] = $rowAction;
             } else {
@@ -374,9 +398,9 @@ class DataGridRendererHelper {
                 ->setContent('<i class="fa fa-copy"></i>')
                 ->setTitle($this->dataGridConfig->translateGeneral('actions.clone_item'))
                 ->setDataAttr('toggle', 'tooltip')
-                ->setHref(routeToCmfItemCloneForm($this->tableNameForRoutes, '{{= it.___pk_value }}'))
+                ->setHref('{{= it.___clone_url }}')
                 ->build();
-            $rowAction = '{{? !!it.___cloning_allowed }}' . $btn . '{{?}}';
+            $rowAction = '{{? !!it.___cloning_allowed && it.___clone_url }}' . $btn . '{{?}}';
             if (array_key_exists('clone', $rowActions)) {
                 $rowActions['clone'] = $rowAction;
             } else {
@@ -392,11 +416,11 @@ class DataGridRendererHelper {
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
-                ->setDataAttr('url', routeToCmfItemDelete($this->tableNameForRoutes, '{{= it.___pk_value }}', false))
+                ->setDataAttr('url', '{{= it.___delete_url }}')
                 ->setDataAttr('confirm', $this->dataGridConfig->translateGeneral('message.delete_item_confirm'))
                 ->setHref('javascript: void(0)')
                 ->build();
-            $rowAction = '{{? !!it.___delete_allowed }}' . $btn . '{{?}}';
+            $rowAction = '{{? !!it.___delete_allowed && it.___delete_url }}' . $btn . '{{?}}';
             if (array_key_exists('delete', $rowActions)) {
                 $rowActions['delete'] = $rowAction;
             } else {
@@ -449,7 +473,7 @@ class DataGridRendererHelper {
                 'pageLength' => $this->dataGridConfig->getRecordsPerPage(),
                 'toolbarItems' => $this->getToolbarItems(),
                 'order' => [],
-                'multiselect' => $this->dataGridConfig->isAllowedMultiRowSelection()
+                'multiselect' => $this->dataGridConfig->isAllowedMultiRowSelection(),
             ]
         );
         if (!$this->dataGridConfig->getOrderBy() instanceof DbExpr) {
@@ -462,7 +486,7 @@ class DataGridRendererHelper {
         }
         if ($this->dataGridConfig->isNestedViewEnabled()) {
             $dataTablesConfig['nested_data_grid'] = [
-                'value_column' => '__' . $table::getPkColumnName(),
+                'value_column' => '__' . $this->table->getPkColumnName(),
                 'filter_column' => '__' . $this->dataGridConfig->getColumnNameForNestedView()
             ];
         }
@@ -481,6 +505,9 @@ class DataGridRendererHelper {
                     ]
                 )
             ];
+        }
+        if ($this->dataGridConfig->isContextMenuEnabled()) {
+            $dataTablesConfig['contextMenu'] = $this->getContextMenuItems();
         }
         return $dataTablesConfig;
     }
@@ -506,5 +533,122 @@ class DataGridRendererHelper {
             $ret .= view($view, $dataForViews, $data)->render() . "\n\n";
         }
         return $ret;
+    }
+
+    /**
+     * @return array
+     * @throws \UnexpectedValueException
+     */
+    public function getContextMenuItems() {
+        $contextMenuItems = [
+            'common' => []
+        ];
+
+        if ($this->dataGridConfig->isDetailsViewerAllowed()) {
+            $contextMenuItems['common']['details'] = [
+                'label' => $this->dataGridConfig->translateGeneral('context_menu.view_item'),
+                'icon' => 'glyphicon glyphicon-info-sign',
+                'class' => 'text-light-blue item-details',
+                'show' => '!!it.___details_allowed && it.___details_url',
+                'url' => '{{= it.___details_url || "" }}',
+            ];
+        }
+        if ($this->dataGridConfig->isEditAllowed()) {
+            $contextMenuItems['common']['edit'] = [
+                'label' => $this->dataGridConfig->translateGeneral('context_menu.edit_item'),
+                'icon' => 'glyphicon glyphicon-edit',
+                'class' => 'text-green item-edit',
+                'show' => '!!it.___edit_allowed && it.___edit_url',
+                'url' => '{{= it.___edit_url || "" }}',
+            ];
+        }
+        if ($this->dataGridConfig->isCloningAllowed()) {
+            $contextMenuItems['common']['clone'] = [
+                'label' => $this->dataGridConfig->translateGeneral('context_menu.clone_item'),
+                'icon' => 'fa fa-copy',
+                'class' => 'text-primary item-clone',
+                'show' => '!!it.___cloning_allowed && it.___clone_url',
+                'url' => '{{= it.___clone_url || "" }}',
+            ];
+        }
+        if ($this->dataGridConfig->isDeleteAllowed()) {
+            $contextMenuItems['common']['delete'] = [
+                'label' => $this->dataGridConfig->translateGeneral('context_menu.delete_item'),
+                'icon' => 'glyphicon glyphicon-trash',
+                'class' => 'text-red item-delete',
+                'show' => '!!it.___delete_allowed && it.___delete_url',
+                'url' => '{{= it.___delete_url || "" }}',
+                'method' => 'delete',
+                'action' => 'request',
+                'block_datagrid' => true,
+                'confirm' => $this->dataGridConfig->translateGeneral('message.delete_item_confirm')
+            ];
+        }
+
+        $freeFormGroup = [];
+        foreach ($this->dataGridConfig->getContextMenuItems() as $key => $menuItem) {
+            if (is_string($menuItem)) {
+                // replace $menuItem with menu item from $commonActionsGroup (details, edit, clone, delete, etc...)
+                $code = $menuItem;
+                if (array_key_exists($code, $contextMenuItems['common'])) {
+                    $freeFormGroup[] = $contextMenuItems['common'][$code];
+                    unset($contextMenuItems['common'][$code]);
+                }
+                continue;
+            } else if (!is_array($menuItem)) {
+                throw new \UnexpectedValueException(
+                    '$menuItem must be an array. ' . gettype($menuItem) . ' received for key/index ' . $key
+                );
+            }
+            if (array_key_exists('label', $menuItem)) {
+                if (array_has($menuItem, ['label', 'url'])) {
+                    $freeFormGroup[] = $menuItem;
+                } else {
+                    throw new \UnexpectedValueException(
+                        '$menuItem array must have at least "label" and "url" keys'
+                    );
+                }
+            } else if (count($menuItem) > 0) {
+                // group
+                if (count($freeFormGroup) > 0) {
+                    $contextMenuItems[] = $freeFormGroup;
+                    $freeFormGroup = [];
+                }
+                $group = [];
+                foreach ($menuItem as $subKey => $realMenuItem) {
+                    if (is_string($realMenuItem)) {
+                        // replace $menuItem with menu item from $commonActionsGroup (details, edit, clone, delete, etc...)
+                        $code = $realMenuItem;
+                        if (array_key_exists($code, $contextMenuItems['common'])) {
+                            $group[] = $contextMenuItems['common'][$code];
+                            unset($contextMenuItems['common'][$code]);
+                        }
+                        continue;
+                    } else if (!is_array($realMenuItem)) {
+                        throw new \UnexpectedValueException(
+                            '$realMenuItem must be an array. ' . gettype($realMenuItem) . ' received for key ' . $key . '->' . $subKey
+                        );
+                    }
+                    if (array_has($realMenuItem, ['label', 'url'])) {
+                        $group[] = $realMenuItem;
+                    } else {
+                        throw new \UnexpectedValueException(
+                            '$realMenuItem array must have at least "label" and "url" keys'
+                        );
+                    }
+                }
+                $contextMenuItems[] = $group;
+            }
+        }
+        if (count($freeFormGroup) > 0) {
+            $contextMenuItems[] = $freeFormGroup;
+        }
+        // normalize or remove $commonActionsGroup
+        if (count($contextMenuItems['common']) > 0) {
+            $contextMenuItems['common'] = array_values($contextMenuItems['common']);
+        } else {
+            array_shift($contextMenuItems['common']);
+        }
+        return array_values($contextMenuItems);
     }
 }

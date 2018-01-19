@@ -206,6 +206,12 @@ return [
             'hide_children' => 'Hide nested items',
             'clone_item' => 'Duplicate item',
         ],
+        'context_menu' => [
+            'edit_item' => 'Edit item',
+            'view_item' => 'View item',
+            'delete_item' => 'Delete item',
+            'clone_item' => 'Duplicate item',
+        ],
         'filter' => [
             'bool' => [
                 'yes' => 'Yes',

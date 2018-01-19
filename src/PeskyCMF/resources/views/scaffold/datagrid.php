@@ -52,6 +52,33 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
                 };
             }
 
+            // nested view trigger column
+            <?php if ($dataGridConfig->isNestedViewEnabled()) : ?>
+                var nestedViewsTriggerTpl = null;
+                Utils.makeTemplateFromText(
+                        '<?php echo addslashes($helper->getNestedViewTriggerCellTemplate()); ?>',
+                        'Data grid row actions template'
+                    )
+                    .done(function (template) {
+                        nestedViewsTriggerTpl = template;
+                    })
+                    .fail(function (error) {
+                        throw error;
+                    });
+                if (fixedColumns > 0) {
+                    fixedColumns++;
+                }
+                dataTablesConfig.columnDefs.push({
+                    targets: dataTablesConfig.multiselect ? 1 : 0,
+                    orderable: false,
+                    className: 'text-center posr ph5',
+                    width: '1%',
+                    render: function (data, type, row) {
+                        return nestedViewsTriggerTpl(row);
+                    }
+                });
+            <?php endif; ?>
+
             // row actions
             <?php if ($dataGridConfig->isRowActionsEnabled()) : ?>
                 var rowActionsTpl = null;
@@ -74,15 +101,13 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
                     fixedColumns++;
                 <?php endif; ?>
 
-                dataTablesConfig.columnDefs = [
-                    {
-                        targets: <?php echo $actionsValueViewer->getPosition(); ?>,
-                        render: function (data, type, row) {
-                            return rowActionsTpl(row);
-                        },
-                        width: <?php echo max($helper->getRowActionsCount() * 27, 80); ?>
-                    }
-                ];
+                dataTablesConfig.columnDefs.push({
+                    targets: <?php echo $actionsValueViewer->getPosition(); ?>,
+                    render: function (data, type, row) {
+                        return rowActionsTpl(row);
+                    },
+                    width: <?php echo max($helper->getRowActionsCount() * 27, 80); ?>
+                });
             <?php endif; ?>
 
             if (fixedColumns > 0) {

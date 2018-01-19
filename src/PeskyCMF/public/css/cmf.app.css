@@ -861,6 +861,23 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
 .scaffold-data-grid-container table tbody a.row-action.hide-children {
   color: #82afbb;
 }
+.scaffold-data-grid-container table tbody a.row-action.hide-children i {
+  position: relative;
+  z-index: 2;
+}
+.scaffold-data-grid-container table tbody a.row-action.hide-children:after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  margin-left: -1px;
+  width: 0;
+  height: 50%;
+  border: 2px solid #82afbb;
+  border-right-width: 0;
+  border-bottom-width: 0;
+}
 .scaffold-data-grid-container table tbody tr.children-data-grid-row {
   border-left-width: 0;
   background-color: #FFFFFF;
@@ -915,20 +932,20 @@ body[data-section="resource:table"] .section-content-wrapper .pagination-contain
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container {
   border-left: 10px solid #82afbb;
   position: relative;
-}
-.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container:before {
-  content: '';
-  position: absolute;
-  top: -23px;
-  left: -6px;
-  width: 10px;
-  height: 30px;
-  border: 2px solid #82afbb;
-  border-right-width: 0;
-  border-bottom-width: 0;
-}
-.scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table-container:before {
-  top: -19px;
+  /*&:before {
+                            content: '';
+                            position: absolute;
+                            top: -23px;
+                            left: -6px;
+                            width: 10px;
+                            height: 30px;
+                            border: 2px solid @subtable-indication-color;
+                            border-right-width: 0;
+                            border-bottom-width: 0;
+                        }*/
+  /*.children-data-grid-table-container:before {
+                            top: -19px;
+                        }*/
 }
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-table,
 .scaffold-data-grid-container table tbody tr.children-data-grid-row td.children-data-grid-cell .children-data-grid-table-container .children-data-grid-pagination {

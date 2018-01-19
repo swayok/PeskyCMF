@@ -499,11 +499,18 @@ class DataGridConfig extends ScaffoldSectionConfig {
     public function prepareRecords(array $records, array $virtualColumns = []) {
         foreach ($records as $idx => &$record) {
             $record = $this->prepareRecord($record, $virtualColumns);
+            $resourceName = $this->getScaffoldConfig()->getResourceName();
             if (array_get($record, '___details_allowed', false)) {
-                $record['___details_url'] = routeToCmfItemDetails(
-                    $this->getScaffoldConfig()->getResourceName(),
-                    $record['___pk_value']
-                );
+                $record['___details_url'] = routeToCmfItemDetails($resourceName, $record['___pk_value']);
+            }
+            if (array_get($record, '___edit_allowed', false)) {
+                $record['___edit_url'] = routeToCmfItemEditForm($resourceName, $record['___pk_value']);
+            }
+            if (array_get($record, '___delete_allowed', false)) {
+                $record['___delete_url'] = routeToCmfItemDelete($resourceName, $record['___pk_value']);
+            }
+            if (array_get($record, '___cloning_allowed', false)) {
+                $record['___clone_url'] = routeToCmfItemCloneForm($resourceName, $record['___pk_value']);
             }
             $record['___max_nesting_depth'] = $this->getNestedViewsDepthLimit();
         }
@@ -622,8 +629,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * Note: common actions: 'details', 'edit', 'delete', 'delete_selected', 'delete_filtered',
-     * 'edit_selected', 'edit_filtered' will be added automatically before custom menu items.
+     * Note: common actions: 'details', 'edit', 'clone', 'delete' will be added automatically before custom menu items.
      * You can manipulate positioning of common items using actions names (ex: 'details') instead of MenuItem array.
      * @param \Closure $contextMenuItems - function (ScaffolSectionConfig $scaffoldSectionConfig) { return []; }
      * Format:
