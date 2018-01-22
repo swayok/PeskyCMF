@@ -532,8 +532,20 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
+     * Note: common actions: 'details', 'edit', 'clone', 'delete' will be added automatically before custom menu items.
+     * You can manipulate positioning of common items using actions names as keys (ex: 'details' => null).
      * @param \Closure $rowActionsBuilder - function (ScaffolSectionConfig $scaffoldSectionConfig) { return []; }
      * Examples:
+     * 1. RowAction
+     * a. Preferred usage:
+     * - CmfMenuItem::redirect(cmfRoute('route', [], false))
+            ->setTitle($this->translate('action.details'))
+            ->setIconClasses('fa fa-user text-primary')
+     * - CmfMenuItem::request(cmfRoute('route', [], false), 'delete')
+            ->setTitle($this->translate('action.delete'))
+            ->setIconClasses('fa fa-trash text-danger')
+            ->setConfirm($this->translate('message.delete_confirm'));
+     * b. Alternative usage:
      * - call some url via ajax blocking data grid while waiting for response and then run "callback(json)"
         * Tag::a()
             ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
@@ -545,7 +557,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             ->setDataAttr('action', 'request')
             ->setDataAttr('method', 'put')
             ->setDataAttr('url', cmfRoute('route', [], false))
-            ->setDataAttr('data', 'id=:id:')
+            ->setDataAttr('data', 'id={{= it.id }}')
             //->setDataAttr('url', cmfRouteTpl('route', [], ['id'], false))
             ->setDataAttr('on-success', 'callbackFuncitonName')
             //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
@@ -562,9 +574,13 @@ class DataGridConfig extends ScaffoldSectionConfig {
             ->setHref(cmfRoute('route', [], false))
             ->setTarget('_blank')
             ->build()
-     *
+     * 2. List of row actions:
+     *      [
+     *          RowAction1,
+     *          RowAction2,
+     *          'delete' => null
+     *      ]
      * @return $this
-     * @throws \Swayok\Html\HtmlTagException
      */
     public function setRowActions(\Closure $rowActionsBuilder) {
         $this->rowActions = $rowActionsBuilder;
@@ -633,36 +649,31 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * You can manipulate positioning of common items using actions names (ex: 'details') instead of MenuItem array.
      * @param \Closure $contextMenuItems - function (ScaffolSectionConfig $scaffoldSectionConfig) { return []; }
      * Format:
-     *  MenuItem =
-            [
-                'label' => 'label for menu item',   //< requried
-                'icon' => 'fa-lock',                //< optional
-                'class' => 'text-green',            //< optional
-                'url' => cmfRouteTpl('route', [], ['id'], false),    //< required
-                'enable' => 'it.status == 1',       //< optional, dotJs condition, results in: {{? it.status == 1 }}
-                'show' => 'it.status == 2',         //< optional, dotJs condition, results in: {{? it.status == 2 }}
-                'action' => 'request',              //< optional, can be only 'request' to send ajax request to provided URL instead of redirecting
-                'method' => 'put',                  //< optional, default = 'get', used only with 'action' == 'request'
-                'data' => 'id={{= it.__id }}&test={{= it.__test }}',  //< optional, data to send to server. Format: like URL query, used only with 'action' == 'request'
-                'confirm' => 'Are you sure?',       //< optional, use it to confirm action before using url, used only with 'action' == 'request'
-                'block_datagrid' => true,           //< optional, default: false, used only with 'action' == 'request'
-                'on_success' => 'callbackFuncitonName', //< optional, function to call after successful execution of ajax request
-            ]
-     *   - List of menu items (plain)
+     * 1. MenuItem
+     * - CmfMenuItem::redirect(cmfRoute('route', [], false))
+            ->setTitle($this->translate('action.details'))
+            ->setIconClasses('fa fa-user text-primary')
+     * - CmfMenuItem::request(cmfRoute('route', [], false), 'delete')
+            ->setTitle($this->translate('action.delete'))
+            ->setIconClasses('fa fa-trash text-danger')
+            ->setConfirm($this->translate('message.delete_confirm'));
+     * - Tag::li(Tag::a()) (For Tag::a() format see setRowActions() docs)
+     * 2. List of menu items:
+     * - No grouping:
             [
                 MenuItem1,
                 MenuItem2,
                 'edit'
                 ...
             ]
-     *   - List of menu items with groups
+     * - With groups:
             [
-                'group1_name' => [
+                'g1' => [
                     MenuItem1,
                     MenuItem2,
                     ...
                 ],
-                'group2_name' => [
+                'g2' => [
                     MenuItem3,
                     'delete'
                 ]

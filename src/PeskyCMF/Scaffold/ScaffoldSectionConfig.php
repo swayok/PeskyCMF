@@ -696,6 +696,9 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
+     * Note: common actions: 'details', 'edit', 'clone', 'delete', 'create' will be added automatically
+     * before custom menu items. You can manipulate positioning of common items using actions names as keys
+     * Example: 'details' => null.
      * @param \Closure $callback - function (ScaffoldSectionConfig $scaffoldSectionConfig) { return []; }
      * Callback must return an array.
      * Array may contain only strings, Tag class instances, or any object with build() or __toString() method
@@ -703,6 +706,21 @@ abstract class ScaffoldSectionConfig {
      * resulting array of items while leaving value to be null:
      * function ($scaffoldSectionConfig) { return [$myItem, 'create' => null, $otherItem, 'bulk_actions' => 'null'] }
      * Examples:
+     * 1. ToolbarItem:
+     * a. Preferred usage:
+     * - CmfMenuItem::redirect(cmfRoute('route', [], false))
+            ->setTitle($this->translate('action.details'))
+     * - CmfMenuItem::request(cmfRoute('route', [], false), 'delete')
+            ->setTitle($this->translate('action.delete'))
+            ->setConfirm($this->translate('message.delete_confirm'));
+     * - CmfMenuItem::bulkActionOnSelectedRows(cmfRoute('route', [], false), 'delete')
+            ->setTitle($this->translate('action.delete'))
+            ->setPrimaryKeyColumnName('id')
+            ->setConfirm($this->translate('message.delete_confirm'));
+     * - CmfMenuItem::bulkActionOnFilteredRows(cmfRoute('route', [], false), 'delete')
+            ->setTitle($this->translate('action.delete'))
+            ->setConfirm($this->translate('message.delete_confirm'));
+     * b. Alternative usage:
      * - call some url via ajax and then run "callback(json)"
          Tag::a()
              ->setContent(trans('path.to.translation'))
@@ -710,7 +728,7 @@ abstract class ScaffoldSectionConfig {
              ->setDataAttr('action', 'request')
              ->setDataAttr('url', cmfRoute('route', [], false))
              ->setDataAttr('method', 'put')
-             ->setDataAttr('data', 'id=:id:')
+             ->setDataAttr('data', 'id={{= it.id }}')
              ->setDataAttr('on-success', 'callbackFuncitonName')
              //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
              //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
@@ -721,7 +739,7 @@ abstract class ScaffoldSectionConfig {
              ->setClass('btn btn-warning')
              ->setHref(cmfRoute('route', [], false))
              ->setTarget('_blank')
-     * ONLY FOR DATA GRIDS:
+     * c. ONLY FOR DATA GRIDS:
      * - call some url via ajax passing all selected ids and then run "callback(json)"
          Tag::a()
              ->setContent(trans('path.to.translation'))
@@ -733,7 +751,7 @@ abstract class ScaffoldSectionConfig {
              ->setDataAttr('method', 'delete')
              //^ can be 'post', 'put', 'delete' depending on action type
              ->setDataAttr('id-field', 'id')
-             //^ id field name to use to get rows ids, default: 'id'
+             //^ for bulk actions on selected items id field name to use to get rows ids, default: 'id'
              ->setDataAttr('on-success', 'callbackFuncitonName')
              //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
              //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
@@ -770,6 +788,12 @@ abstract class ScaffoldSectionConfig {
              //^ id field name to use to get rows ids, default: 'id'
              ->setOnClick('someFunction(this)')
              //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
+     * 2. List of toolbar items:
+     *      [
+     *          ToolbarItem1,
+     *          ToolbarItem2,
+     *          'delete' => null
+     *      ]
      * @return $this
      */
     public function setToolbarItems(\Closure $callback) {
