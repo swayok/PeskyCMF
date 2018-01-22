@@ -363,14 +363,7 @@ class DataGridRendererHelper {
         }
 
         if ($this->dataGridConfig->isDetailsViewerAllowed()) {
-            $btn = Tag::a()
-                ->setClass('row-action text-light-blue item-details')
-                ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
-                ->setTitle($this->dataGridConfig->translateGeneral('actions.view_item'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref('{{= it.___details_url }}')
-                ->build();
-            $rowAction = '{{? !!it.___details_allowed && it.___details_url }}' . $btn . '{{?}}';
+            $rowAction = $this->dataGridConfig->getItemDetailsMenuItem()->renderAsIcon('row-action item-details');
             if (array_key_exists('details', $rowActions)) {
                 $rowActions['details'] = $rowAction;
             } else {
@@ -378,14 +371,7 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isEditAllowed()) {
-            $btn = Tag::a()
-                ->setClass('row-action text-green item-edit')
-                ->setContent('<i class="glyphicon glyphicon-edit"></i>')
-                ->setTitle($this->dataGridConfig->translateGeneral('actions.edit_item'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref('{{= it.___edit_url }}')
-                ->build();
-            $rowAction = '{{? !!it.___edit_allowed && it.___edit_url }}' . $btn . '{{?}}';
+            $rowAction = $this->dataGridConfig->getItemEditMenuItem()->renderAsIcon('row-action item-edit');
             if (array_key_exists('edit', $rowActions)) {
                 $rowActions['edit'] = $rowAction;
             } else {

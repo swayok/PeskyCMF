@@ -162,7 +162,7 @@ return [
     ],
     'datagrid' => [
         'toolbar' => [
-            'create' => 'Add new',
+            'create_item' => 'Add new',
             'filter' => [
                 'header' => 'Filtering rules',
                 'reset' => 'Reset filter',
@@ -231,10 +231,11 @@ return [
             'close' => 'Close',
             'cancel' => 'Cancel',
             'submit' => 'Save',
-            'create' => 'Add new',
             'submit_and_add_another' => 'Save and add another one',
+            'create_item' => 'Add new',
+            'view_item' => 'Item details',
             'clone_item' => 'Duplicate data',
-            'delete' => 'Delete'
+            'delete_item' => 'Delete'
         ],
         'message' => [
             'delete_item_confirm' => 'Confirm Item delete action',
@@ -325,11 +326,11 @@ return [
     'item_details' => [
         'toolbar' => [
             'cancel' => 'Back',
-            'edit' => 'Edit',
-            'create' => 'Add new',
-            'delete' => 'Delete',
             'close' => 'Close',
-            'clone' => 'Duplicate',
+            'edit_item' => 'Edit',
+            'create_item' => 'Add new',
+            'delete_item' => 'Delete',
+            'clone_item' => 'Duplicate',
         ],
         'previous_item' => 'Previous item',
         'next_item' => 'Next item',
@@ -351,28 +352,7 @@ return [
             'forbidden_for_record' => 'It is forbidden to view details of this Item',
         ],
     ],
-    'delete' => [
-        'forbidden' => 'It is forbidden to delete Items from this section',
-        'forbidden_for_record' => 'It is forbidden to delete this Item',
-        'success' => 'Item successfully deleted',
-    ],
     'action' => [
-        'delete' => [
-
-        ],
-        'delete_bulk' => [
-        ],
-        'create' => [
-        ],
-        'edit' => [
-        ],
-        'bulk_edit' => [
-
-        ],
-        'item_details' => [
-        ],
-        'change_position' => [
-        ],
         'back' => 'Back',
         'reload_page' => 'Reload page',
     ],

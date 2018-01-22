@@ -162,7 +162,7 @@ return [
     ],
     'datagrid' => [
         'toolbar' => [
-            'create' => 'Добавить',
+            'create_item' => 'Добавить',
             'filter' => [
                 'header' => 'Правила поиска',
                 'reset' => 'Сбросить поиск',
@@ -231,10 +231,11 @@ return [
             'close' => 'Закрыть',
             'cancel' => 'Отмена',
             'submit' => 'Сохранить',
-            'create' => 'Добавить',
             'submit_and_add_another' => 'Сохранить и добавить еще 1',
+            'create_item' => 'Добавить',
+            'view_item' => 'Просмотр данных',
             'clone_item' => 'Дублировать данные',
-            'delete' => 'Удалить'
+            'delete_item' => 'Удалить'
         ],
         'message' => [
             'delete_item_confirm' => 'Подтвердите удаление объекта',
@@ -326,10 +327,10 @@ return [
         'toolbar' => [
             'cancel' => 'Назад',
             'close' => 'Закрыть',
-            'edit' => 'Редактировать',
-            'create' => 'Добавить',
-            'delete' => 'Удалить',
-            'clone' => 'Дублировать',
+            'edit_item' => 'Редактировать',
+            'create_item' => 'Добавить',
+            'delete_item' => 'Удалить',
+            'clone_item' => 'Дублировать',
         ],
         'previous_item' => 'Предыдущий элемент',
         'next_item' => 'Следующий элемент',
@@ -351,28 +352,7 @@ return [
             'forbidden_for_record' => 'Просмотр информации об этом объекте запрещен',
         ],
     ],
-    'delete' => [
-        'forbidden' => 'Удаление объектов запрещено для этого раздела',
-        'forbidden_for_record' => 'Удаление этого объекта запрещено',
-        'success' => 'Объект успешно удален',
-    ],
     'action' => [
-        'delete' => [
-        ],
-        'delete_bulk' => [
-        ],
-        'create' => [
-        ],
-        'edit' => [
-        ],
-        'bulk_edit' => [
-
-        ],
-        'item_details' => [
-
-        ],
-        'change_position' => [
-        ],
         'back' => 'Назад',
         'reload_page' => 'Обновить страницу',
     ],

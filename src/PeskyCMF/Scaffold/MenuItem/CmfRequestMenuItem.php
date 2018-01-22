@@ -170,16 +170,18 @@ class CmfRequestMenuItem extends CmfMenuItem {
 
     /**
      * Render menu item as <button>
+     * @param bool $allowTooltip
      * @return string
      */
-    public function renderAsButton(): string {
+    public function renderAsButton(bool $allowTooltip = true): string {
         if ($this->isAccessible()) {
             $button = Tag::button($this->makeIcon() . ' ' . $this->getTitle())
                 ->setClass($this->getButtonClasses())
+                ->setType('button')
                 ->addCustomRenderedAttributeWithValue($this->makeConditionalDisabledAttribute())
-                ->setTitle($this->getTooltip())
-                ->setDataAttr('toggle', $this->hasTooltip() ? 'tooltip' : null)
-                ->setDataAttr('position', $this->hasTooltip() ? $this->getTooltipPosition() : null)
+                ->setTitle($allowTooltip ? $this->getTooltip() : null)
+                ->setDataAttr('toggle', $allowTooltip && $this->hasTooltip() ? 'tooltip' : null)
+                ->setDataAttr('position', $allowTooltip && $this->hasTooltip() ? $this->getTooltipPosition() : null)
                 ->setDataAttr('action', $this->getActionType())
                 ->setDataAttr('url', $this->getUrl())
                 ->setDataAttr('method', $this->getHttpMethod())
@@ -196,14 +198,16 @@ class CmfRequestMenuItem extends CmfMenuItem {
 
     /**
      * Render menu item as <a> icon (title will be used as tooltip)
+     * @param string $additionalClasses
      * @return string
      */
-    public function renderAsIcon(): string {
+    public function renderAsIcon(string $additionalClasses = ''): string {
         if ($this->isAccessible()) {
-            $button = Tag::a($this->makeIcon())
+            $button = Tag::a($this->makeIcon(true))
                 ->addCustomRenderedAttributeWithValue($this->makeConditionalDisabledAttribute())
                 ->setTitle($this->getTooltipOrTitle())
                 ->setHref('javascript: void(0)')
+                ->setClass($additionalClasses)
                 ->setDataAttr('toggle', $this->hasTooltipOrTitle() ? 'tooltip' : null)
                 ->setDataAttr('position', $this->hasTooltipOrTitle() ? $this->getTooltipPosition() : null)
                 ->setDataAttr('action', $this->getActionType())
@@ -221,18 +225,18 @@ class CmfRequestMenuItem extends CmfMenuItem {
     }
 
     /**
-     * Render menu item as <li><a>...</a></li> or <li><button>...</button></li>
+     * Render menu item as <li><a>...</a></li>
+     * @param bool $allowTooltip
      * @return string
      */
-    public function renderAsBootstrapDropdownMenuButton(): string {
+    public function renderAsBootstrapDropdownMenuItem(bool $allowTooltip = true): string {
         if ($this->isAccessible()) {
-            $button = Tag::a($this->makeIcon() . ' ' . $this->getTitle())
+            $button = Tag::a($this->makeIcon(true) . ' ' . $this->getTitle())
                 ->setHref('javascript: void(0)')
-                ->setClass($this->getButtonClasses())
                 ->addCustomRenderedAttributeWithValue($this->makeConditionalDisabledAttribute())
-                ->setTitle($this->getTooltip())
-                ->setDataAttr('toggle', $this->hasTooltip() ? 'tooltip' : null)
-                ->setDataAttr('position', $this->hasTooltip() ? $this->getTooltipPosition() : null)
+                ->setTitle($allowTooltip ? $this->getTooltip() : null)
+                ->setDataAttr('toggle', $allowTooltip && $this->hasTooltip() ? 'tooltip' : null)
+                ->setDataAttr('position', $allowTooltip && $this->hasTooltip() ? $this->getTooltipPosition() : null)
                 ->setDataAttr('action', $this->getActionType())
                 ->setDataAttr('url', $this->getUrl())
                 ->setDataAttr('method', $this->getHttpMethod())

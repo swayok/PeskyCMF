@@ -10,6 +10,8 @@ abstract class CmfMenuItem {
     protected $title = '';
     /** @var string */
     protected $iconClasses = '';
+    /** @var string  */
+    protected $iconColorClass = '';
     /** @var string */
     protected $buttonClasses = 'btn btn-default';
     /** @var string|null */
@@ -63,21 +65,24 @@ abstract class CmfMenuItem {
 
     /**
      * Render menu item as <a> or <button>
+     * @param bool $allowTooltip
      * @return string
      */
-    abstract public function renderAsButton(): string;
+    abstract public function renderAsButton(bool $allowTooltip = true): string;
 
     /**
      * Render menu item as <a> icon (title will be used as tooltip)
+     * @param string $additionalClasses - classes to add to <a> tag
      * @return string
      */
-    abstract public function renderAsIcon(): string;
+    abstract public function renderAsIcon(string $additionalClasses = ''): string;
 
     /**
-     * Render menu item as <li><a>...</a></li> or <li><button>...</button></li>
+     * Render menu item as <li><a>...</a></li>
+     * @param bool $allowTooltip
      * @return string
      */
-    abstract public function renderAsBootstrapDropdownMenuButton(): string;
+    abstract public function renderAsBootstrapDropdownMenuItem(bool $allowTooltip = true): string;
 
     /**
      * @param string $url
@@ -129,9 +134,23 @@ abstract class CmfMenuItem {
         return $this;
     }
 
-    public function makeIcon(): string {
+    public function getIconColorClass(): string {
+        return ' ' . $this->iconColorClass . ' ';
+    }
+
+    /**
+     * Used in renderAsIcon() and renderAsBootstrapDropdownMenuButton() to alter icon color
+     * @param string $iconColorClass - example: 'text-primary'
+     * @return $this
+     */
+    public function setIconColorClass(string $iconColorClass) {
+        $this->iconColorClass = $iconColorClass;
+        return $this;
+    }
+
+    public function makeIcon($addColorClass = false): string {
         if ($this->iconClasses) {
-            return '<i class="' . $this->iconClasses . '"></i>';
+            return '<i class="' . $this->iconClasses . ' ' . ($addColorClass ? $this->getIconColorClass() : '') . '"></i>';
         }
         return '';
     }
@@ -144,6 +163,7 @@ abstract class CmfMenuItem {
     }
 
     /**
+     * Note: used only in renderAsButton()
      * @param string $buttonClasses
      * @return $this
      */

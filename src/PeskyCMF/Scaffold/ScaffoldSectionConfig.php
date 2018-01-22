@@ -5,6 +5,8 @@ namespace PeskyCMF\Scaffold;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
+use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
+use PeskyCMF\Scaffold\MenuItem\CmfRedirectMenuItem;
 use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
@@ -971,6 +973,38 @@ abstract class ScaffoldSectionConfig {
      */
     public function getAdditionalColumnsToSelect() {
         return $this->additionalColumnsToSelect;
+    }
+
+    /**
+     * @return CmfRedirectMenuItem
+     */
+    public function getItemEditMenuItem() {
+        return CmfMenuItem::redirect(routeToCmfItemEditForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'))
+            ->setTitle($this->translateGeneral('actions.edit_item'))
+            ->setIconClasses('glyphicon glyphicon-edit')
+            ->setIconColorClass('text-green')
+            ->setButtonClasses('btn btn-success item-edit')
+            ->setTooltip($this->translateGeneral('toolbar.edit_item'))
+            ->setAccessProvider(function () {
+                return $this->isEditAllowed();
+            })
+            ->setConditionToShow('it.___edit_allowed');
+    }
+
+    /**
+     * @return CmfRedirectMenuItem
+     */
+    public function getItemDetailsMenuItem() {
+        return CmfMenuItem::redirect(routeToCmfItemDetails($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'))
+            ->setTitle($this->translateGeneral('actions.view_item'))
+            ->setIconClasses('glyphicon glyphicon-info-sign')
+            ->setIconColorClass('text-light-blue')
+            ->setButtonClasses('btn btn-info')
+            ->setTooltip($this->translateGeneral('toolbar.view_item'))
+            ->setAccessProvider(function () {
+                return $this->isDetailsViewerAllowed();
+            })
+            ->setConditionToShow('it.___details_allowed');
     }
 
 }
