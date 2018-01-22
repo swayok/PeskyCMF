@@ -1,6 +1,6 @@
 <?php
 
-namespace PeskyCMF\Scaffold;
+namespace PeskyCMF\Scaffold\MenuItem;
 
 abstract class CmfMenuItem {
 
