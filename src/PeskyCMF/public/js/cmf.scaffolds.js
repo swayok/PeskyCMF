@@ -726,7 +726,7 @@ var ScaffoldDataGridHelper = {
             }
             if ($.isArray(configs.toolbarItems)) {
                 for (i = 0; i < configs.toolbarItems.length; i++) {
-                    $toolbarEl.append(configs.toolbarItems[i]);
+                    $toolbarEl.append(doT.template(configs.toolbarItems[i])({}));
                 }
             }
         }

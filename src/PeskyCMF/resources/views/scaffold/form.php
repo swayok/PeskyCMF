@@ -63,17 +63,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                         <?php echo $formConfig->translateGeneral('toolbar.cancel'); ?>
                     </button>
                 {{?}}
-                <?php echo $ifEdit; ?>
-                    {{? it.___delete_allowed }}
-                        <a class="btn btn-danger" href="#"
-                           data-action="request" data-method="delete"
-                           data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
-                           data-confirm="<?php echo $formConfig->translateGeneral('message.delete_item_confirm'); ?>"
-                           data-on-sucess="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
-                            <?php echo $formConfig->translateGeneral('toolbar.delete'); ?>
-                        </a>
-                    {{?}}
-                <?php echo $endIf; ?>
+                <?php echo $ifEdit . $formConfig->getItemDeleteMenuItem()->renderAsButton(false) . $endIf; ?>
             </div>
             <div class="<?php echo $ifCreate; ?>col-xs-9<?php echo $else; ?>col-xs-7<?php echo $endIf; ?> text-right toolbar-right">
                 <div class="btn-group ib" role="group">
@@ -84,12 +74,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                         <input type="submit" class="btn btn-primary" name="create_another" value="+1" data-toggle="tooltip"
                                title="<?php echo $formConfig->translateGeneral('toolbar.submit_and_add_another'); ?>">
                     <?php echo $else; ?>
-                        {{? it.___cloning_allowed }}
-                            <a class="btn btn-success" href="<?php echo routeToCmfItemCloneForm($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
-                               data-toggle="tooltip" title="<?php echo $formConfig->translateGeneral('toolbar.clone_item'); ?>">
-                                <i class="fa fa-copy"></i>
-                            </a>
-                        {{?}}
+                        <?php echo $formConfig->getItemCloneMenuItem()->renderAsIcon('btn btn-success', false) ?>
                     <?php echo $endIf; ?>
                 </div>
             </div>
@@ -97,7 +82,17 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         <?php $toolbarItems = $formConfig->getToolbarItems(); ?>
         <?php if (count($toolbarItems) > 0) : ?>
             <div class="mt10 text-center">
-                <?php implode(' ', $toolbarItems); ?>
+                <?php
+                    foreach ($toolbarItems as $item) {
+                        if ($item instanceof \Swayok\Html\Tag) {
+                            echo $item->build();
+                        } else if ($item instanceof PeskyCMF\Scaffold\MenuItem\CmfMenuItem) {
+                            echo $item->renderAsButton();
+                        } else {
+                            echo $item;
+                        }
+                    }
+                ?>
             </div>
         <?php endif; ?>
     </div>

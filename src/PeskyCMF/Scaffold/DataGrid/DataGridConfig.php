@@ -391,7 +391,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     /**
      * @return string[]
-     * @throws \LogicException
+     * @throws \UnexpectedValueException
      */
     public function getBulkActionsToolbarItems() {
         if (empty($this->bulkActionsToolbarItems)) {
@@ -399,7 +399,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
         }
         $bulkActionsToolbarItems = call_user_func($this->bulkActionsToolbarItems, $this);
         if (!is_array($bulkActionsToolbarItems)) {
-            throw new \LogicException(get_class($this) . '->bulkActionsToolbarItems closure must return an array');
+            throw new \UnexpectedValueException(get_class($this) . '->bulkActionsToolbarItems closure must return an array');
         }
         /** @var Tag|string $item */
         /** @var array $bulkActionsToolbarItems */
@@ -410,12 +410,12 @@ class DataGridConfig extends ScaffoldSectionConfig {
                 } else if (method_exists($item, '__toString')) {
                     $item = (string) $item;
                 } else {
-                    throw new \LogicException(
+                    throw new \UnexpectedValueException(
                         get_class($this) . '->bulkActionsToolbarItems: array may contain only strings and objects with build() or __toString() methods'
                     );
                 }
             } else if (!is_string($item)) {
-                throw new \LogicException(
+                throw new \UnexpectedValueException(
                     get_class($this) . '->bulkActionsToolbarItems: array may contain only strings and objects with build() or __toString() methods'
                 );
             }

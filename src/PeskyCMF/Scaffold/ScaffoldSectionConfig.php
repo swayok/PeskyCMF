@@ -7,6 +7,7 @@ use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRedirectMenuItem;
+use PeskyCMF\Scaffold\MenuItem\CmfRequestMenuItem;
 use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
@@ -875,7 +876,7 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * @param string $width
+     * @param $percents
      * @return $this
      */
     public function setWidth($percents) {
@@ -976,15 +977,15 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
+     * @param string $section
      * @return CmfRedirectMenuItem
      */
-    public function getItemEditMenuItem() {
+    public function getItemEditMenuItem($section = 'toolbar') {
         return CmfMenuItem::redirect(routeToCmfItemEditForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'))
-            ->setTitle($this->translateGeneral('actions.edit_item'))
+            ->setTitle($this->translateGeneral($section . '.edit_item'))
             ->setIconClasses('glyphicon glyphicon-edit')
             ->setIconColorClass('text-green')
             ->setButtonClasses('btn btn-success item-edit')
-            ->setTooltip($this->translateGeneral('toolbar.edit_item'))
             ->setAccessProvider(function () {
                 return $this->isEditAllowed();
             })
@@ -992,19 +993,70 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
+     * @param string $section
      * @return CmfRedirectMenuItem
      */
-    public function getItemDetailsMenuItem() {
+    public function getItemCloneMenuItem($section = 'toolbar') {
+        return CmfMenuItem::redirect(routeToCmfItemCloneForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'))
+            ->setTitle($this->translateGeneral($section . '.clone_item'))
+            ->setIconClasses('fa fa-copy')
+            ->setIconColorClass('text-primary')
+            ->setButtonClasses('btn btn-primary item-clone')
+            ->setAccessProvider(function () {
+                return $this->isCloningAllowed();
+            })
+            ->setConditionToShow('it.___cloning_allowed');
+    }
+
+    /**
+     * @param string $section
+     * @return CmfRedirectMenuItem
+     */
+    public function getItemCreateMenuItem($section = 'toolbar') {
+        return CmfMenuItem::redirect(routeToCmfItemAddForm($this->getScaffoldConfig()->getResourceName()))
+            ->setTitle($this->translateGeneral($section . '.create_item'))
+            ->setIconClasses('fa fa-file-o')
+            ->setIconColorClass('text-primary')
+            ->setButtonClasses('btn btn-primary item-add')
+            ->setAccessProvider(function () {
+                return $this->isCreateAllowed();
+            })
+            ->setConditionToShow('it.___create_allowed');
+
+    }
+
+    /**
+     * @param string $section
+     * @return CmfRedirectMenuItem
+     */
+    public function getItemDetailsMenuItem($section = 'toolbar') {
         return CmfMenuItem::redirect(routeToCmfItemDetails($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'))
-            ->setTitle($this->translateGeneral('actions.view_item'))
+            ->setTitle($this->translateGeneral($section . '.view_item'))
             ->setIconClasses('glyphicon glyphicon-info-sign')
             ->setIconColorClass('text-light-blue')
             ->setButtonClasses('btn btn-info')
-            ->setTooltip($this->translateGeneral('toolbar.view_item'))
             ->setAccessProvider(function () {
                 return $this->isDetailsViewerAllowed();
             })
             ->setConditionToShow('it.___details_allowed');
+    }
+
+    /**
+     * @param string $section
+     * @return CmfRequestMenuItem
+     */
+    public function getItemDeleteMenuItem($section = 'toolbar') {
+        return CmfMenuItem::request(routeToCmfItemDelete($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'), 'delete')
+            ->setTitle($this->translateGeneral($section . '.delete_item'))
+            ->setIconClasses('glyphicon glyphicon-trash')
+            ->setIconColorClass('text-red')
+            ->setButtonClasses('btn btn-danger item-delete')
+            ->setBlockDataGrid(true)
+            ->setConfirm($this->translateGeneral('message.delete_item_confirm'))
+            ->setAccessProvider(function () {
+                return $this->isDeleteAllowed();
+            })
+            ->setConditionToShow('it.___delete_allowed');
     }
 
 }

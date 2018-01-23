@@ -65,24 +65,25 @@ abstract class CmfMenuItem {
 
     /**
      * Render menu item as <a> or <button>
-     * @param bool $allowTooltip
+     * @param bool $withIcon
      * @return string
      */
-    abstract public function renderAsButton(bool $allowTooltip = true): string;
+    abstract public function renderAsButton(bool $withIcon = true): string;
 
     /**
      * Render menu item as <a> icon (title will be used as tooltip)
      * @param string $additionalClasses - classes to add to <a> tag
+     * @param bool $allowIconColorClass
      * @return string
      */
-    abstract public function renderAsIcon(string $additionalClasses = ''): string;
+    abstract public function renderAsIcon(string $additionalClasses = '', bool $allowIconColorClass = true): string;
 
     /**
      * Render menu item as <li><a>...</a></li>
      * @param bool $allowTooltip
      * @return string
      */
-    abstract public function renderAsBootstrapDropdownMenuItem(bool $allowTooltip = true): string;
+    abstract public function renderAsBootstrapDropdownMenuItem(): string;
 
     /**
      * @param string $url
@@ -148,7 +149,7 @@ abstract class CmfMenuItem {
         return $this;
     }
 
-    public function makeIcon($addColorClass = false): string {
+    public function makeIcon(bool $addColorClass = false): string {
         if ($this->iconClasses) {
             return '<i class="' . $this->iconClasses . ' ' . ($addColorClass ? $this->getIconColorClass() : '') . '"></i>';
         }

@@ -9,18 +9,18 @@ class CmfRedirectMenuItem extends CmfMenuItem {
 
     /**
      * Render menu item as <a>
-     * @param bool $allowTooltip
+     * @param bool $withIcon
      * @return string
      */
-    public function renderAsButton(bool $allowTooltip = true): string {
+    public function renderAsButton(bool $withIcon = true): string {
         if ($this->isAccessible()) {
             return $this->wrapIntoShowCondition(
-                Tag::a($this->makeIcon() . ' ' . $this->getTitle())
+                Tag::a(($withIcon ? $this->makeIcon() . ' ' : '') . $this->getTitle())
                     ->setClass($this->getButtonClasses() . ' ' . $this->makeConditionalDisabledAttribute())
                     ->setHref($this->getUrl())
-                    ->setTitle($allowTooltip ? $this->getTooltip() : null)
-                    ->setDataAttr('toggle', $allowTooltip && $this->hasTooltip() ? 'tooltip' : null)
-                    ->setDataAttr('position', $allowTooltip && $this->hasTooltip() ? $this->getTooltipPosition() : null)
+                    ->setTitle($this->getTooltip())
+                    ->setDataAttr('toggle', $this->hasTooltip() ? 'tooltip' : null)
+                    ->setDataAttr('position', $this->hasTooltip() ? $this->getTooltipPosition() : null)
                     ->build()
             );
         } else {
@@ -31,12 +31,13 @@ class CmfRedirectMenuItem extends CmfMenuItem {
     /**
      * Render menu item as <a> icon (title will be used as tooltip)
      * @param string $additionalClasses - classes to add to <a> tag
+     * @param bool $allowIconColorClass
      * @return string
      */
-    public function renderAsIcon(string $additionalClasses = ''): string {
+    public function renderAsIcon(string $additionalClasses = '', bool $allowIconColorClass = true): string {
         if ($this->isAccessible()) {
             return $this->wrapIntoShowCondition(
-                Tag::a($this->makeIcon(true))
+                Tag::a($this->makeIcon($allowIconColorClass))
                     ->setClass($additionalClasses)
                     ->setHref($this->getUrl())
                     ->setTitle($this->getTooltipOrTitle())
@@ -51,16 +52,15 @@ class CmfRedirectMenuItem extends CmfMenuItem {
 
     /**
      * Render menu item as <li><a>...</a></li> or <li><button>...</button></li>
-     * @param bool $allowTooltip
      * @return string
      */
-    public function renderAsBootstrapDropdownMenuItem(bool $allowTooltip = true): string {
+    public function renderAsBootstrapDropdownMenuItem(): string {
         if ($this->isAccessible()) {
             $link = Tag::a($this->makeIcon(true) . ' ' . $this->getTitle())
                 ->setHref($this->getUrl())
-                ->setTitle($allowTooltip ? $this->getTooltip() : null)
-                ->setDataAttr('toggle', $allowTooltip && $this->hasTooltip() ? 'tooltip' : null)
-                ->setDataAttr('position', $allowTooltip && $this->hasTooltip() ? $this->getTooltipPosition() : null)
+                ->setTitle($this->getTooltip())
+                ->setDataAttr('toggle', $this->hasTooltip() ? 'tooltip' : null)
+                ->setDataAttr('position', $this->hasTooltip() ? $this->getTooltipPosition() : null)
                 ->build();
             return $this->wrapIntoShowCondition(
                 '<li ' . $this->makeConditionalDisabledAttribute() . '>' . $link . '</li>'

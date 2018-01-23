@@ -3,6 +3,7 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
@@ -178,7 +179,8 @@ class DataGridRendererHelper {
 
     /**
      * @return array
-     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public function getBulkActions() {
         $bulkActions = [];
@@ -188,6 +190,8 @@ class DataGridRendererHelper {
             foreach ($this->dataGridConfig->getBulkActionsToolbarItems() as $key => $bulkAction) {
                 if ($bulkAction instanceof Tag) {
                     $bulkAction = $bulkAction->build();
+                } else if ($bulkAction instanceof CmfMenuItem) {
+                    $bulkAction = $bulkAction->renderAsButton();
                 }
                 if (is_string($key)) {
                     $bulkActions[$key] = $bulkAction;
@@ -196,15 +200,12 @@ class DataGridRendererHelper {
                 }
             }
             if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isBulkItemsDeleteAllowed()) {
-                $action = Tag::a()
-                    ->setContent($this->dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
-                    ->setDataAttr('confirm', $this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_selected_confirm'))
-                    ->setDataAttr('action', 'bulk-selected')
-                    ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$this->tableNameForRoutes], false))
-                    ->setDataAttr('id-field', $pkName)
-                    ->setDataAttr('method', 'delete')
-                    ->setHref('javascript: void(0)')
-                    ->build();
+                $action = CmfMenuItem::bulkActionOnSelectedRows(cmfRoute('cmf_api_delete_bulk', [$this->tableNameForRoutes]), 'delete')
+                    ->setTitle($this->dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
+                    ->setConfirm($this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_selected_confirm'))
+                    ->setPrimaryKeyColumnName($pkName)
+                    ->renderAsBootstrapDropdownMenuItem();
+
                 if (array_key_exists('delete_selected', $bulkActions)) {
                     $bulkActions['delete_selected'] = $action;
                 } else {
@@ -218,6 +219,7 @@ class DataGridRendererHelper {
                     ->setDataAttr('id-field', $pkName)
                     ->setHref('javascript: void(0)')
                     ->build();
+                $action = '<li>' . $action . '</li>';
                 if (array_key_exists('edit_selected', $bulkActions)) {
                     $bulkActions['edit_selected'] = $action;
                 } else {
@@ -226,14 +228,10 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isFilteredItemsDeleteAllowed()) {
-            $action = Tag::a()
-                ->setContent($this->dataGridConfig->translateGeneral('bulk_actions.delete_filtered'))
-                ->setDataAttr('action', 'bulk-filtered')
-                ->setDataAttr('confirm', $this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_filtered_confirm'))
-                ->setDataAttr('url', cmfRoute('cmf_api_delete_bulk', [$this->tableNameForRoutes], false))
-                ->setDataAttr('method', 'delete')
-                ->setHref('javascript: void(0)')
-                ->build();
+            $action = CmfMenuItem::bulkActionOnFilteredRows(cmfRoute('cmf_api_delete_bulk', [$this->tableNameForRoutes]), 'delete')
+                ->setTitle($this->dataGridConfig->translateGeneral('bulk_actions.delete_filtered'))
+                ->setConfirm($this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_filtered_confirm'))
+                ->renderAsBootstrapDropdownMenuItem();
             if (array_key_exists('delete_filtered', $bulkActions)) {
                 $bulkActions['delete_filtered'] = $action;
             } else {
@@ -246,6 +244,7 @@ class DataGridRendererHelper {
                 ->setDataAttr('action', 'bulk-edit-filtered')
                 ->setHref('javascript: void(0)')
                 ->build();
+            $action = '<li>' . $action . '</li>';
             if (array_key_exists('edit_filtered', $bulkActions)) {
                 $bulkActions['edit_filtered'] = $action;
             } else {
@@ -265,6 +264,8 @@ class DataGridRendererHelper {
         foreach ($this->dataGridConfig->getToolbarItems() as $key => $toolbarItem) {
             if ($toolbarItem instanceof Tag) {
                 $toolbarItem = $toolbarItem->build();
+            } else if ($toolbarItem instanceof CmfMenuItem) {
+                $toolbarItem = $toolbarItem->renderAsButton();
             }
             if (is_string($key)) {
                 $toolbar[$key] = $toolbarItem;
@@ -286,7 +287,7 @@ class DataGridRendererHelper {
 
             $dropdownMenu = Tag::ul()
                 ->setClass('dropdown-menu dropdown-menu-right')
-                ->setContent('<li>' . implode('</li><li>', $bulkActions) . '</li>')
+                ->setContent(implode('', $bulkActions))
                 ->build();
 
             $item = Tag::div()
@@ -300,11 +301,10 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isCreateAllowed()) {
-            $item = Tag::a()
-                ->setContent($this->dataGridConfig->translateGeneral('toolbar.create'))
-                ->setClass('btn btn-primary')
-                ->setHref(routeToCmfItemAddForm($this->tableNameForRoutes))
-                ->build();
+            $item = $this->dataGridConfig
+                ->getItemCreateMenuItem()
+                ->setConditionToShow('true')
+                ->renderAsButton(false);
             if (array_key_exists('create', $toolbar)) {
                 $toolbar['create'] = $item;
             } else {
@@ -344,6 +344,7 @@ class DataGridRendererHelper {
 
     /**
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function getRowActionsDotJsTemplate() {
         $this->rowActionsCount = 0;
@@ -354,6 +355,8 @@ class DataGridRendererHelper {
         foreach ($this->dataGridConfig->getRowActions() as $key => $rowAction) {
             if ($rowAction instanceof Tag) {
                 $rowAction = $rowAction->build();
+            } else if ($rowAction instanceof CmfMenuItem) {
+                $rowAction = $rowAction->renderAsButton();
             }
             if (is_string($key)) {
                 $rowActions[$key] = $rowAction;
@@ -363,7 +366,9 @@ class DataGridRendererHelper {
         }
 
         if ($this->dataGridConfig->isDetailsViewerAllowed()) {
-            $rowAction = $this->dataGridConfig->getItemDetailsMenuItem()->renderAsIcon('row-action item-details');
+            $rowAction = $this->dataGridConfig
+                ->getItemDetailsMenuItem('actions')
+                ->renderAsIcon('row-action item-details');
             if (array_key_exists('details', $rowActions)) {
                 $rowActions['details'] = $rowAction;
             } else {
@@ -371,7 +376,9 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isEditAllowed()) {
-            $rowAction = $this->dataGridConfig->getItemEditMenuItem()->renderAsIcon('row-action item-edit');
+            $rowAction = $this->dataGridConfig
+                ->getItemEditMenuItem('actions')
+                ->renderAsIcon('row-action item-edit');
             if (array_key_exists('edit', $rowActions)) {
                 $rowActions['edit'] = $rowAction;
             } else {
@@ -379,14 +386,9 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isCloningAllowed()) {
-            $btn = Tag::a()
-                ->setClass('row-action text-primary item-clone')
-                ->setContent('<i class="fa fa-copy"></i>')
-                ->setTitle($this->dataGridConfig->translateGeneral('actions.clone_item'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setHref('{{= it.___clone_url }}')
-                ->build();
-            $rowAction = '{{? !!it.___cloning_allowed && it.___clone_url }}' . $btn . '{{?}}';
+            $rowAction = $this->dataGridConfig
+                ->getItemCloneMenuItem('actions')
+                ->renderAsIcon('row-action item-clone');
             if (array_key_exists('clone', $rowActions)) {
                 $rowActions['clone'] = $rowAction;
             } else {
@@ -394,19 +396,9 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isDeleteAllowed()) {
-            $btn = Tag::a()
-                ->setContent('<i class="glyphicon glyphicon-trash"></i>')
-                ->setClass('row-action text-red item-delete')
-                ->setTitle($this->dataGridConfig->translateGeneral('actions.delete_item'))
-                ->setDataAttr('toggle', 'tooltip')
-                ->setDataAttr('block-datagrid', '1')
-                ->setDataAttr('action', 'request')
-                ->setDataAttr('method', 'delete')
-                ->setDataAttr('url', '{{= it.___delete_url }}')
-                ->setDataAttr('confirm', $this->dataGridConfig->translateGeneral('message.delete_item_confirm'))
-                ->setHref('javascript: void(0)')
-                ->build();
-            $rowAction = '{{? !!it.___delete_allowed && it.___delete_url }}' . $btn . '{{?}}';
+            $rowAction = $this->dataGridConfig
+                ->getItemDeleteMenuItem('actions')
+                ->renderAsIcon('row-action item-delete');
             if (array_key_exists('delete', $rowActions)) {
                 $rowActions['delete'] = $rowAction;
             } else {

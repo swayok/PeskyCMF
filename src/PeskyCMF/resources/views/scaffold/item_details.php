@@ -114,35 +114,29 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                     <?php echo $itemDetailsConfig->translateGeneral('toolbar.cancel'); ?>
                 </button>
             {{?}}
-            {{? !!it.___create_allowed && !it.__modal }}
-                <a class="btn btn-primary" href="<?php echo routeToCmfItemAddForm($tableNameForRoutes); ?>">
-                    <?php echo $itemDetailsConfig->translateGeneral('toolbar.create'); ?>
-                </a>
+            {{? !it.__modal }}
+                 <?php echo $itemDetailsConfig->getItemCreateMenuItem()->renderAsButton(false); ?>
             {{?}}
         </div>
         <div class="{{? it.__modal }} col-xs-9 {{??}} col-xs-10 {{?}} text-right toolbar-right">
-            <?php echo implode(' ', $itemDetailsConfig->getToolbarItems()); ?>
-            {{? !!it.___delete_allowed }}
-                <a class="btn btn-danger" href="#"
-                   data-action="request" data-method="delete"
-                   data-url="<?php echo routeToCmfItemDelete($tableNameForRoutes, '{{= it.___pk_value }}'); ?>"
-                   data-confirm="<?php echo $itemDetailsConfig->translateGeneral('message.delete_item_confirm'); ?>"
-                   data-on-success="CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid">
-                    <?php echo $itemDetailsConfig->translateGeneral('toolbar.delete'); ?>
-                </a>
-            {{?}}
-            {{? !!it.___cloning_allowed }}
-                <a class="btn btn-primary"
-                   href="<?php echo routeToCmfItemCloneForm($tableNameForRoutes, '{{= it.___pk_value }}'); ?>">
-                    <?php echo $itemDetailsConfig->translateGeneral('toolbar.clone'); ?>
-                </a>
-            {{?}}
-            {{? !!it.___edit_allowed }}
-                <a class="btn btn-success"
-                   href="<?php echo routeToCmfItemEditForm($tableNameForRoutes, '{{= it.___pk_value }}'); ?>">
-                    <?php echo $itemDetailsConfig->translateGeneral('toolbar.edit'); ?>
-                </a>
-            {{?}}
+            <?php
+                $toolbarItems = $itemDetailsConfig->getToolbarItems();
+                foreach ($toolbarItems as $item) {
+                    if ($item instanceof \Swayok\Html\Tag) {
+                        echo $item->build();
+                    } else if ($item instanceof PeskyCMF\Scaffold\MenuItem\CmfMenuItem) {
+                        echo $item->renderAsButton();
+                    } else {
+                        echo $item;
+                    }
+                }
+                echo $itemDetailsConfig
+                    ->getItemDeleteMenuItem()
+                    ->setOnSuccess('CmfRoutingHelpers.closeCurrentModalAndReloadDataGrid')
+                    ->renderAsButton(false);
+                echo $itemDetailsConfig->getItemCloneMenuItem()->renderAsButton(false);
+                echo $itemDetailsConfig->getItemEditMenuItem()->renderAsButton(false);
+            ?>
         </div>
     </div>
 <?php View::stopSection(); ?>
