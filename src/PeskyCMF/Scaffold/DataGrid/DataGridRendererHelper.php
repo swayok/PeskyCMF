@@ -223,7 +223,7 @@ class DataGridRendererHelper {
                 if (array_key_exists('edit_selected', $bulkActions)) {
                     $bulkActions['edit_selected'] = $action;
                 } else {
-                    $placeFirst = $action;
+                    $placeFirst[] = $action;
                 }
             }
         }
@@ -235,7 +235,7 @@ class DataGridRendererHelper {
             if (array_key_exists('delete_filtered', $bulkActions)) {
                 $bulkActions['delete_filtered'] = $action;
             } else {
-                $placeFirst = $action;
+                $placeFirst[] = $action;
             }
         }
         if ($this->dataGridConfig->isEditAllowed() && $this->dataGridConfig->isFilteredItemsEditingAllowed()) {
@@ -248,7 +248,7 @@ class DataGridRendererHelper {
             if (array_key_exists('edit_filtered', $bulkActions)) {
                 $bulkActions['edit_filtered'] = $action;
             } else {
-                $placeFirst = $action;
+                $placeFirst[] = $action;
             }
         }
         return array_merge($placeFirst, array_values($bulkActions));
