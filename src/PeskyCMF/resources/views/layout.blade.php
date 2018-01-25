@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-@php($scriptsVersion = '2.2.7')
+@php($scriptsVersion = '2.2.8')
 <head>
     <meta charset="UTF-8">
     <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }} @show</title>
@@ -139,7 +139,6 @@
         <script src="/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-en_US.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js" type="text/javascript"></script>
-        <script src="/packages/cmf-vendors/bootstrap/context-menu.min.js" type="text/javascript"></script>
 
         <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js" type="text/javascript"></script>
