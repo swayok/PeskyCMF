@@ -751,7 +751,7 @@ var ScaffoldDataGridHelper = {
         }
     },
     initContextMenu: function ($tableWrapper, $table, configs) {
-        if (configs.contextMenu && $.isArray(configs.contextMenu)) {
+        /*if (configs.contextMenu && $.isArray(configs.contextMenu)) {
             var api = $table.dataTable().api();
 
             function convertMenuItemToValidConfig(menuItem) {
@@ -880,7 +880,7 @@ var ScaffoldDataGridHelper = {
             };
             var contextMenu = new BootstrapMenu('#' + $table.attr('id') + ' tbody tr', pluginConfig);
             $table.data('contextMenu', contextMenu);
-        }
+        }*/
     },
     initClickEvents: function ($tableWrapper, $table, configs) {
         var api = $table.dataTable().api();
