@@ -645,8 +645,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * Note: common actions: 'details', 'edit', 'clone', 'delete' will be added automatically before custom menu items.
-     * You can manipulate positioning of common items using actions names (ex: 'details') instead of MenuItem array.
+     * Note: common actions: 'details', 'edit', 'clone', 'delete' will be added automatically before custom
+     * menu items. You can manipulate positioning of common items using action name as key and null as value
+     * (ex: 'details' => null) instead of CmfMenuItem or Tag.
      * @param \Closure $contextMenuItems - function (ScaffolSectionConfig $scaffoldSectionConfig) { return []; }
      * Format:
      * 1. MenuItem
@@ -663,19 +664,19 @@ class DataGridConfig extends ScaffoldSectionConfig {
             [
                 MenuItem1,
                 MenuItem2,
-                'edit'
+                'edit' => null
                 ...
             ]
      * - With groups:
             [
-                'g1' => [
+                [
                     MenuItem1,
                     MenuItem2,
                     ...
                 ],
-                'g2' => [
+                [
                     MenuItem3,
-                    'delete'
+                    'delete' => null
                 ]
             ]
      * @return $this
