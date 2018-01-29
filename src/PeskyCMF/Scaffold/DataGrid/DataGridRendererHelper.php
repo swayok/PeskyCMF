@@ -485,8 +485,9 @@ class DataGridRendererHelper {
             ];
         }
         if ($this->dataGridConfig->isContextMenuEnabled()) {
-            $dataTablesConfig['contextMenu'] = $this->getContextMenuItems();
+            $dataTablesConfig['contextMenuTpl'] = $this->getContextMenuDotJsTemplate();
         }
+
         return $dataTablesConfig;
     }
 
@@ -514,119 +515,84 @@ class DataGridRendererHelper {
     }
 
     /**
-     * @return array
+     * @return string
      * @throws \UnexpectedValueException
      */
-    public function getContextMenuItems() {
+    public function getContextMenuDotJsTemplate() {
         $contextMenuItems = [
             'common' => []
         ];
 
         if ($this->dataGridConfig->isDetailsViewerAllowed()) {
-            $contextMenuItems['common']['details'] = [
-                'label' => $this->dataGridConfig->translateGeneral('context_menu.view_item'),
-                'icon' => 'glyphicon glyphicon-info-sign',
-                'class' => 'text-light-blue item-details',
-                'show' => '!!it.___details_allowed && it.___details_url',
-                'url' => '{{= it.___details_url || "" }}',
-            ];
+            $contextMenuItems['common']['details'] = $this->dataGridConfig->getItemDetailsMenuItem('context_menu');
         }
         if ($this->dataGridConfig->isEditAllowed()) {
-            $contextMenuItems['common']['edit'] = [
-                'label' => $this->dataGridConfig->translateGeneral('context_menu.edit_item'),
-                'icon' => 'glyphicon glyphicon-edit',
-                'class' => 'text-green item-edit',
-                'show' => '!!it.___edit_allowed && it.___edit_url',
-                'url' => '{{= it.___edit_url || "" }}',
-            ];
+            $contextMenuItems['common']['edit'] = $this->dataGridConfig->getItemEditMenuItem('context_menu');
         }
         if ($this->dataGridConfig->isCloningAllowed()) {
-            $contextMenuItems['common']['clone'] = [
-                'label' => $this->dataGridConfig->translateGeneral('context_menu.clone_item'),
-                'icon' => 'fa fa-copy',
-                'class' => 'text-primary item-clone',
-                'show' => '!!it.___cloning_allowed && it.___clone_url',
-                'url' => '{{= it.___clone_url || "" }}',
-            ];
+            $contextMenuItems['common']['clone'] = $this->dataGridConfig->getItemCloneMenuItem('context_menu');
         }
         if ($this->dataGridConfig->isDeleteAllowed()) {
-            $contextMenuItems['common']['delete'] = [
-                'label' => $this->dataGridConfig->translateGeneral('context_menu.delete_item'),
-                'icon' => 'glyphicon glyphicon-trash',
-                'class' => 'text-red item-delete',
-                'show' => '!!it.___delete_allowed && it.___delete_url',
-                'url' => '{{= it.___delete_url || "" }}',
-                'method' => 'delete',
-                'action' => 'request',
-                'block_datagrid' => true,
-                'confirm' => $this->dataGridConfig->translateGeneral('message.delete_item_confirm')
-            ];
+            $contextMenuItems['common']['delete'] = $this->dataGridConfig->getItemDeleteMenuItem('context_menu');
         }
-
+        // normalize into groups
         $freeFormGroup = [];
         foreach ($this->dataGridConfig->getContextMenuItems() as $key => $menuItem) {
-            if (is_string($menuItem)) {
+            if (is_string($key) && empty($menuItem)) {
                 // replace $menuItem with menu item from $commonActionsGroup (details, edit, clone, delete, etc...)
-                $code = $menuItem;
-                if (array_key_exists($code, $contextMenuItems['common'])) {
-                    $freeFormGroup[] = $contextMenuItems['common'][$code];
-                    unset($contextMenuItems['common'][$code]);
+                if (array_key_exists($key, $contextMenuItems['common'])) {
+                    $freeFormGroup[] = $contextMenuItems['common'][$key];
+                    unset($contextMenuItems['common'][$key]);
                 }
                 continue;
-            } else if (!is_array($menuItem)) {
-                throw new \UnexpectedValueException(
-                    '$menuItem must be an array. ' . gettype($menuItem) . ' received for key/index ' . $key
-                );
-            }
-            if (array_key_exists('label', $menuItem)) {
-                if (array_has($menuItem, ['label', 'url'])) {
-                    $freeFormGroup[] = $menuItem;
-                } else {
-                    throw new \UnexpectedValueException(
-                        '$menuItem array must have at least "label" and "url" keys'
-                    );
-                }
-            } else if (count($menuItem) > 0) {
-                // group
+            } else if ($menuItem instanceof Tag) {
+                $freeFormGroup[] = $menuItem->build();
+            } else if ($menuItem instanceof CmfMenuItem) {
+                $freeFormGroup[] = $menuItem->renderAsBootstrapDropdownMenuItem();
+            } else if (is_string($menuItem)) {
+                $freeFormGroup[] = $menuItem;
+            } else if (is_array($menuItem)) {
+                // group of menu items
                 if (count($freeFormGroup) > 0) {
                     $contextMenuItems[] = $freeFormGroup;
                     $freeFormGroup = [];
                 }
-                $group = [];
-                foreach ($menuItem as $subKey => $realMenuItem) {
-                    if (is_string($realMenuItem)) {
-                        // replace $menuItem with menu item from $commonActionsGroup (details, edit, clone, delete, etc...)
-                        $code = $realMenuItem;
-                        if (array_key_exists($code, $contextMenuItems['common'])) {
-                            $group[] = $contextMenuItems['common'][$code];
-                            unset($contextMenuItems['common'][$code]);
-                        }
-                        continue;
-                    } else if (!is_array($realMenuItem)) {
-                        throw new \UnexpectedValueException(
-                            '$realMenuItem must be an array. ' . gettype($realMenuItem) . ' received for key ' . $key . '->' . $subKey
-                        );
-                    }
-                    if (array_has($realMenuItem, ['label', 'url'])) {
-                        $group[] = $realMenuItem;
-                    } else {
-                        throw new \UnexpectedValueException(
-                            '$realMenuItem array must have at least "label" and "url" keys'
-                        );
-                    }
+                if (count($menuItem) > 0) {
+                    $contextMenuItems[] = $menuItem;
                 }
-                $contextMenuItems[] = $group;
+            } else {
+                throw new \UnexpectedValueException(
+                    '$menuItem must be an array. ' . gettype($menuItem) . ' received for key/index ' . $key
+                );
             }
         }
         if (count($freeFormGroup) > 0) {
             $contextMenuItems[] = $freeFormGroup;
         }
-        // normalize or remove $commonActionsGroup
-        if (count($contextMenuItems['common']) > 0) {
-            $contextMenuItems['common'] = array_values($contextMenuItems['common']);
-        } else {
-            array_shift($contextMenuItems['common']);
+        // normalize menu items and create dot.js template
+        $template = [];
+        foreach ($contextMenuItems as &$group) {
+            if (count($group) === 0) {
+                continue;
+            }
+            $groupTemplate = '';
+            foreach ($group as &$menuItem) {
+                if ($menuItem instanceof Tag) {
+                    $menuItem = $menuItem->build();
+                } else if ($menuItem instanceof CmfMenuItem) {
+                    $menuItem = $menuItem->renderAsBootstrapDropdownMenuItem();
+                } else if (!is_string($menuItem)) {
+                    throw new \UnexpectedValueException(
+                        '$menuItem must be an string or instance of Tag or CmfMenuItem class. ' . gettype($menuItem) . ' received'
+                    );
+                }
+                $groupTemplate .= '<li>' . $menuItem . '</li>';
+            }
+            unset($menuItem);
+            $template[] = $groupTemplate;
         }
-        return array_values($contextMenuItems);
+        return '<ul class="dropdown-menu datagrid-context-menu">'
+                . implode('<li role="separator" class="divider"></li>', $template)
+            . '</ul>';
     }
 }

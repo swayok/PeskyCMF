@@ -751,136 +751,104 @@ var ScaffoldDataGridHelper = {
         }
     },
     initContextMenu: function ($tableWrapper, $table, configs) {
-        /*if (configs.contextMenu && $.isArray(configs.contextMenu)) {
+        if (configs.contextMenuTpl) {
+            if (typeof configs.contextMenuTpl !== 'function') {
+                var $deferred = Utils.makeTemplateFromText(
+                        configs.contextMenuTpl,
+                        'Data grid context menu template'
+                    )
+                    .done(function (template) {
+                        configs.contextMenuTpl = template;
+                    })
+                    .fail(function (error) {
+                        throw error;
+                    });
+            }
             var api = $table.dataTable().api();
 
-            function convertMenuItemToValidConfig(menuItem) {
-                var itemConfig = {
-                    name: menuItem.label
-                };
-                if (menuItem.icon) {
-                    itemConfig.iconClass = menuItem.icon;
-                }
-                if (menuItem.class) {
-                    itemConfig.classNames = menuItem.class;
-                }
-                if (menuItem.show) {
-                    var tpl1 = doT.template('{{? ' + menuItem.show + ' }}1{{??}}0{{?}}');
-                    itemConfig.isShown = function (row) {
-                        return !!tpl1(row);
-                    };
-                }
-                if (menuItem.enable) {
-                    var tpl2 = doT.template('{{? ' + menuItem.enable + ' }}1{{??}}0{{?}}');
-                    itemConfig.isEnabled = function (row) {
-                        return !!tpl2(row);
-                    };
-                }
-                var action = menuItem.action || 'redirect';
-                var urlTpl = doT.template(menuItem.url);
-                // todo: add row selection on context menu call/hide
-                switch (action) {
-                    case 'request':
-                        var blockDataGrid = !!menuItem.block_datagrid;
-                        var constantLinkAttributes = {};
-                        if (menuItem.method) {
-                            constantLinkAttributes['data-method'] = menuItem.method;
-                        }
-                        if (menuItem.data) {
-                            menuItem.data = doT.template(menuItem.data);
-                        }
-                        if (menuItem.confirm) {
-                            constantLinkAttributes['data-confirm'] = menuItem.confirm;
-                        }
-                        if (menuItem.on_success) {
-                            constantLinkAttributes['data-on-success'] = menuItem.on_success;
-                        }
-                        itemConfig.onClick = function (rowData) {
-                            if (blockDataGrid) {
-                                Utils.showPreloader($tableWrapper);
-                            }
-                            var linkAttributes = $.extend({href: urlTpl(rowData)}, constantLinkAttributes);
-                            if (menuItem.data) {
-                                linkAttributes['data-data'] = menuItem.data(rowData);
-                            }
-                            ScaffoldActionsHelper.handleRequestAction($('<a>').attr(linkAttributes), function (json) {
-                                    if (
-                                        json.redirect
-                                        && (
-                                            json.redirect === 'back'
-                                            || json.redirect === 'reload'
-                                            || json.redirect === document.location.path
-                                            || json.redirect === document.location.pathname
-                                            || json.redirect === document.location.href
-                                        )
-                                    ) {
-                                        api.ajax.reload(null, false);
-                                        delete json.redirect;
-                                    }
-                                    ScaffoldActionsHelper.onSuccess(json);
-                                })
-                                .always(function () {
-                                    if (blockDataGrid) {
-                                        Utils.hidePreloader($tableWrapper);
-                                    }
-                                });
-                        };
-                        break;
-                    default:
-                        // redirect
-                        itemConfig.onClick = function (rowData) {
-                            page.show(urlTpl(rowData), null, true, true, {env: {is_click: true, context_menu: true}});
-                        };
-                }
-                return itemConfig;
-            }
-            var menuActions = {};
-            var groups = [];
-            for (var i = 0; i < configs.contextMenu.length; i++) {
-                if (!$.isArray(configs.contextMenu[i])) {
-                    console.error(
-                        'Context menu items must be grouped. Standalone context menu items are not allowed. Index: ' + i,
-                        configs.contextMenu[i]
-                    );
-                    continue;
-                }
-                var group = [];
+            var getMenuPosition = function ($menu, mouse, direction, scrollDir) {
+                 var win = $(window)[direction]();
+                 var scroll = $(window)[scrollDir]();
+                 var menu = $menu[direction]();
+                 var position = mouse + scroll;
 
-                for (var k = 0; k < configs.contextMenu[i].length; k++) {
-                    var menuItem = configs.contextMenu[i][k];
-                    if(!$.isPlainObject(menuItem)) {
-                        console.error(
-                            'Context menu item must be a plain object. Group Index: ' + i + '; item index: ' + k,
-                            menuItem
-                        );
-                        continue;
-                    } else if (!menuItem.label || !menuItem.url) {
-                        console.error(
-                            'Context menu item must object must have at least \'label\' and \'url\' properties. Group Index: ' + i + '; item index: ' + k,
-                            menuItem
-                        );
-                        continue;
-                    }
-                    // convert menu items to valid context menu item config
-                    var actionKey = 'item' + String(i) + String(k);
-                    menuActions[actionKey] = convertMenuItemToValidConfig(menuItem);
-                    group.push(actionKey);
+                // opening menu would pass the side of the page
+                if (mouse + menu > win && menu < mouse) {
+                    position -= menu;
                 }
-                if (group.length > 0) {
-                    groups.push(group);
-                }
-            }
-
-            var pluginConfig = {
-                fetchElementData: function ($tr) {
-                    return api.row($tr).data();
-                },
-                actionsGroups: groups,
-                actions: menuActions
+                return position;
             };
-            var contextMenu = new BootstrapMenu('#' + $table.attr('id') + ' tbody tr', pluginConfig);
-            $table.data('contextMenu', contextMenu);
-        }*/
+
+            var $menu = null;
+            $table
+                .on('contextmenu', 'td', function (event) {
+                    if (event.ctrlKey) {
+                        return; //< default context menu
+                    }
+                    if ($menu) {
+                        $menu.remove();
+                        $menu = null;
+                    }
+                    var row = api.row($(this).closest('tr'));
+                    $menu = $(configs.contextMenuTpl(row.data()));
+                    $(document.body).append($menu);
+                    $menu
+                        .slideDown(80)
+                        .css({
+                            position: "absolute",
+                            left: getMenuPosition($menu, event.clientX, 'width', 'scrollLeft'),
+                            top: getMenuPosition($menu, event.clientY, 'height', 'scrollTop')
+                        })
+                        .on('click', 'a', function () {
+                            if ($(this).attr('data-action') === 'request') {
+                                var $el = $(this);
+                                var blockDataGrid = !!$el.attr('data-block-datagrid');
+                                if (blockDataGrid) {
+                                    Utils.showPreloader($tableWrapper);
+                                }
+                                ScaffoldActionsHelper.handleRequestAction($el, function (json) {
+                                        if (
+                                            json.redirect
+                                            && (
+                                                json.redirect === 'back'
+                                                || json.redirect === 'reload'
+                                                || json.redirect === document.location.path
+                                                || json.redirect === document.location.pathname
+                                                || json.redirect === document.location.href
+                                            )
+                                        ) {
+                                            api.ajax.reload(null, false);
+                                            delete json.redirect;
+                                        }
+                                        ScaffoldActionsHelper.onSuccess(json);
+                                    })
+                                    .always(function () {
+                                        if (blockDataGrid) {
+                                            Utils.hidePreloader($tableWrapper);
+                                        }
+                                    });
+                            }
+                            $menu.slideUp(80, function () {
+                                $menu.remove();
+                                $menu = null;
+                            });
+                        })
+                        .on('mousedown', 'a', function (event) {
+                            event.preventDefault();
+                            return false;
+                        });
+                    $('body').one('mousedown contextmenu keydown', function () {
+                        if ($menu && !$.contains($menu[0], this)) {
+                            $menu.slideUp(80, function () {
+                                $menu.remove();
+                                $menu = null;
+                            });
+                        }
+                    });
+                    event.preventDefault();
+                    return false;
+                });
+        }
     },
     initClickEvents: function ($tableWrapper, $table, configs) {
         var api = $table.dataTable().api();
