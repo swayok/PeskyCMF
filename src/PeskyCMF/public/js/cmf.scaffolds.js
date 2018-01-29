@@ -786,12 +786,14 @@ var ScaffoldDataGridHelper = {
                         return; //< default context menu
                     }
                     if ($menu) {
-                        $menu.remove();
+                        $menu.trigger('hide.contextmenu');
                         $menu = null;
                     }
-                    var row = api.row($(this).closest('tr'));
+                    var $tr = $(this).closest('tr');
+                    var row = api.row($tr);
                     $menu = $(configs.contextMenuTpl(row.data()));
                     $(document.body).append($menu);
+                    $tr.addClass('selected context-menu');
                     $menu
                         .slideDown(80)
                         .css({
@@ -828,21 +830,24 @@ var ScaffoldDataGridHelper = {
                                         }
                                     });
                             }
-                            $menu.slideUp(80, function () {
-                                $menu.remove();
-                                $menu = null;
-                            });
+                            $menu.trigger('hide.contextmenu');
+                            $menu = null;
                         })
                         .on('mousedown', 'a', function (event) {
                             event.preventDefault();
                             return false;
+                        })
+                        .on('hide.contextmenu', function () {
+                            var $item = $(this);
+                            $table.find('tr.selected.context-menu').removeClass('selected context-menu');
+                            $item.slideUp(80, function () {
+                                $item.remove();
+                            });
                         });
                     $('body').one('mousedown contextmenu keydown', function () {
                         if ($menu && !$.contains($menu[0], this)) {
-                            $menu.slideUp(80, function () {
-                                $menu.remove();
-                                $menu = null;
-                            });
+                            $menu.trigger('hide.contextmenu');
+                            $menu = null;
                         }
                     });
                     event.preventDefault();
