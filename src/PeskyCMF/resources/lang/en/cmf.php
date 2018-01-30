@@ -57,6 +57,11 @@ return [
         'access_denied_to_scaffold' => 'You do not have enough rights to access requested section',
         'invalid_data_received' => 'Invalid data received',
         'invalid_date_received' => 'Invalid date',
+        'delete' => [
+            'success' => 'Item deleted',
+            'forbidden_for_record' => 'This item cannot be deleted',
+            'forbidden' => 'Items deletion in this section is forbidden'
+        ]
     ],
     'bool' => [
         'yes' => 'Yes',

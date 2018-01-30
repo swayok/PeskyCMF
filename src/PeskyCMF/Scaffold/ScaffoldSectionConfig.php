@@ -154,7 +154,7 @@ abstract class ScaffoldSectionConfig {
         $prefix = $this->getSectionTranslationsPrefix();
         $text = $this->getScaffoldConfig()->translate($prefix, $path, $parameters);
         if (preg_match('%\.' . preg_quote($prefix . '.' . $path, '%') . '$%', $text)) {
-            $text = cmfTransGeneral($this->getSectionTranslationsPrefix('general') . '.' . $path);
+            $text = cmfTransGeneral($this->getSectionTranslationsPrefix('general') . '.' . $path, $parameters);
         }
         return $text;
     }

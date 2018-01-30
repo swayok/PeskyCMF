@@ -613,7 +613,7 @@ $dictionary = [
             ],
         ],
         'item_details' => [
-            'header' => 'Информация о перенаправлении',
+            'header' => 'Redirect details',
             'field' => [
                 'relative_url' => 'Redirect from URL',
                 'page_id' => 'Redirect to page',
@@ -623,6 +623,59 @@ $dictionary = [
                 'created_at' => 'Created',
                 'updated_at' => 'Updated',
             ]
+        ]
+    ],
+    'http_request_stats' => [
+        'menu_title' => 'HTTP requests stats',
+        'datagrid' => [
+            'header' => 'HTTP requests stats',
+            'column' => [
+                'http_method' => 'Method',
+                'url' => 'URL',
+                'route' => 'Route',
+                'duration' => 'Duration',
+                'duration_sql' => 'Duration (SQL)',
+                'memory_usage_mb' => 'Memory',
+                'is_cache' => 'Cached?',
+                'url_params' => 'URL parameters',
+                'sql' => 'SQL queries',
+                'id' => 'ID',
+                'created_at' => 'Created',
+                'http_code' => 'HTTP code',
+            ],
+            'filter' => [
+                'http_request_stats' => [
+                    'http_method' => 'Method',
+                    'url' => 'URL',
+                    'route' => 'Route',
+                    'duration' => 'Duration',
+                    'duration_sql' => 'Duration (SQL)',
+                    'memory_usage_mb' => 'Memory',
+                    'is_cache' => 'Cached?',
+                    'url_params' => 'URL parameters',
+                    'sql' => 'SQL queries',
+                    'id' => 'ID',
+                    'created_at' => 'Created',
+                    'http_code' => 'Response code',
+                ],
+            ],
+        ],
+        'item_details' => [
+            'header' => '',
+            'field' => [
+                'http_method' => 'Method',
+                'url' => 'URL',
+                'route' => 'Route',
+                'duration' => 'Duration',
+                'duration_sql' => 'Duration (SQL)',
+                'memory_usage_mb' => 'Memory',
+                'is_cache' => 'Cached?',
+                'url_params' => 'URL parameters',
+                'sql' => 'SQL queries',
+                'id' => 'ID',
+                'created_at' => 'Created',
+                'http_code' => 'Response code',
+            ],
         ]
     ]
 ];

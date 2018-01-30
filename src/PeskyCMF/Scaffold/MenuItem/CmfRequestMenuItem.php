@@ -43,7 +43,7 @@ class CmfRequestMenuItem extends CmfMenuItem {
      * @throws \InvalidArgumentException
      */
     protected function setHttpMethod(string $httpMethod) {
-        $this->method = strtolower($httpMethod);
+        $this->httpMethod = strtolower($httpMethod);
         if (!in_array($this->httpMethod, ['get', 'post', 'put', 'delete'], true)) {
             throw new \InvalidArgumentException(
                 '$httpMethod argument must be one of: get, post, put, delete. Received: ' . $httpMethod

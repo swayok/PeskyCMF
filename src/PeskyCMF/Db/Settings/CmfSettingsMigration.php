@@ -13,7 +13,7 @@ class CmfSettingsMigration extends Migration {
                 $table->increments('id');
                 $table->string('key');
 
-                if (config('database.connections.' . config('database.default') . '.driver') === 'pgsql') {
+                if (config('database.connections.' . ($this->getConnection() ?: config('database.default')) . '.driver') === 'pgsql') {
                     $table->jsonb('value');
                 } else {
                     $table->mediumText('value');

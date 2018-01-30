@@ -457,7 +457,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
     public function deleteRecord($id) {
         if (!$this->isDeleteAllowed()) {
-            return $this->makeAccessDeniedReponse($this->translateGeneral('delete.forbidden'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden'));
         }
         $table = static::getTable();
         $object = $table->newRecord();
@@ -471,19 +471,19 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeRecordNotFoundResponse($table);
         }
         if (!$this->isRecordDeleteAllowed($object->toArrayWithoutFiles())) {
-            return $this->makeAccessDeniedReponse($this->translateGeneral('delete.forbidden_for_record'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden_for_record'));
         }
         $this->logDbRecordBeforeChange($object, static::getResourceName());
         $object->delete();
         $this->logDbRecordAfterChange($object);
         return cmfJsonResponse()
-            ->setMessage($this->translateGeneral('delete.success'))
+            ->setMessage($this->translateGeneral('message.delete.success'))
             ->goBack(routeToCmfItemsTable(static::getResourceName()));
     }
 
     public function deleteBulkOfRecords() {
         if (!$this->isDeleteAllowed()) {
-            return $this->makeAccessDeniedReponse($this->translateGeneral('delete.forbidden'));
+            return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden'));
         }
         $conditions = $this->getSelectConditionsForBulkActions();
         if (!is_array($conditions)) {

@@ -621,6 +621,59 @@ $dictionary = [
                 'updated_at' => 'Изменено',
             ]
         ]
+    ],
+    'http_request_stats' => [
+        'menu_title' => 'Статистика HTTP запросов',
+        'datagrid' => [
+            'header' => 'Статистика HTTP запросов',
+            'column' => [
+                'http_method' => 'Метод',
+                'url' => 'URL',
+                'route' => 'Route',
+                'duration' => 'Длительность',
+                'duration_sql' => 'Длительность (SQL)',
+                'memory_usage_mb' => 'Память',
+                'is_cache' => 'Кеширование?',
+                'url_params' => 'URL-параметры',
+                'sql' => 'SQL запросы',
+                'id' => 'ID',
+                'created_at' => 'Создано',
+                'http_code' => 'HTTP код',
+            ],
+            'filter' => [
+                'http_request_stats' => [
+                    'http_method' => 'Метод',
+                    'url' => 'URL',
+                    'route' => 'Route',
+                    'duration' => 'Длительность',
+                    'duration_sql' => 'Длительность (SQL)',
+                    'memory_usage_mb' => 'Память',
+                    'is_cache' => 'Кеширование?',
+                    'url_params' => 'URL-параметры',
+                    'sql' => 'SQL запросы',
+                    'id' => 'ID',
+                    'created_at' => 'Создано',
+                    'http_code' => 'HTTP код',
+                ],
+            ],
+        ],
+        'item_details' => [
+            'header' => 'Статистика HTTP запроса',
+            'field' => [
+                'http_method' => 'Метод',
+                'url' => 'URL',
+                'route' => 'Route',
+                'duration' => 'Длительность',
+                'duration_sql' => 'Длительность (SQL)',
+                'memory_usage_mb' => 'Память',
+                'is_cache' => 'Кеширование?',
+                'url_params' => 'URL-параметры',
+                'sql' => 'SQL запросы',
+                'id' => 'ID',
+                'created_at' => 'Создано',
+                'http_code' => 'HTTP код',
+            ],
+        ]
     ]
 ];
 
