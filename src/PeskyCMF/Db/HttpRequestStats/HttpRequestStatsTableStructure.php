@@ -20,6 +20,8 @@ use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
  * @property-read Column    $url_params
  * @property-read Column    $sql
  * @property-read Column    $http_code
+ * @property-read Column    $request_data
+ * @property-read Column    $checkpoints
  */
 class HttpRequestStatsTableStructure extends CmfDbTableStructure {
 
@@ -40,6 +42,12 @@ class HttpRequestStatsTableStructure extends CmfDbTableStructure {
     private function url() {
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues();
+    }
+
+    private function request_data() {
+        return Column::create(Column::TYPE_JSONB)
+            ->disallowsNullValues()
+            ->setDefaultValue('{}');
     }
 
     private function route() {
@@ -75,6 +83,12 @@ class HttpRequestStatsTableStructure extends CmfDbTableStructure {
     }
 
     private function sql() {
+        return Column::create(Column::TYPE_JSONB)
+            ->disallowsNullValues()
+            ->setDefaultValue('{}');
+    }
+
+    private function checkpoints() {
         return Column::create(Column::TYPE_JSONB)
             ->disallowsNullValues()
             ->setDefaultValue('{}');

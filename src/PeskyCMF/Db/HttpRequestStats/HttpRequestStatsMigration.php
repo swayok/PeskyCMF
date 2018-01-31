@@ -24,9 +24,13 @@ class HttpRequestStatsMigration extends Migration {
                 if (config('database.connections.' . ($this->getConnection() ?: config('database.default'))  . '.driver') === 'pgsql') {
                     $table->jsonb('url_params')->default('{}');
                     $table->jsonb('sql')->default('{}');
+                    $table->jsonb('request_data')->default('{}');
+                    $table->jsonb('checkpoints')->default('{}');
                 } else {
                     $table->mediumText('url_params')->default('{}');
                     $table->text('sql')->default('{}');
+                    $table->text('request_data')->default('{}');
+                    $table->text('checkpoints')->default('{}');
                 }
 
                 $table->index('url');

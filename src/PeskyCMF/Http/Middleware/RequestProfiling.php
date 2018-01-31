@@ -7,7 +7,7 @@ use PeskyCMF\Db\HttpRequestStats\HttpRequestStat;
 use PeskyORM\Profiling\PeskyOrmPdoProfiler;
 use Symfony\Component\HttpFoundation\Response;
 
-class RequestProfiler {
+class RequestProfiling {
 
     /**
      * @param Request $request
@@ -16,9 +16,6 @@ class RequestProfiler {
      * @return mixed
      * @throws \LogicException
      * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PeskyORM\Exception\InvalidTableColumnConfigException
-     * @throws \PeskyORM\Exception\InvalidDataException
      * @throws \PeskyORM\Exception\DbException
      * @throws \PDOException
      * @throws \InvalidArgumentException
@@ -28,28 +25,17 @@ class RequestProfiler {
         if ($mode === 'all' || array_get($request->route()->getAction(), 'profiler')) {
             // begin profiling
             PeskyOrmPdoProfiler::init();
-            $stat = HttpRequestStat::new1()
-                ->setCreatedAt(date('Y-m-d H:i:s'));
-            $startedAt = microtime(true);
-
+            $stat = HttpRequestStat::createForProfiling();
+            // process request
             $response = $next($request);
-
+            // on HTTP response
             if ($response instanceof Response) {
                 try {
-                    // finish profiling
                     $stat
-                        ->setDuration(round(microtime(true) - $startedAt, 3))
-                        ->setUrl($request->getRequestUri())
-                        ->setHttpMethod($request->getMethod())
-                        ->setRoute('/' . ltrim($request->route()->getPrefix() . '/' . ltrim($request->route()->uri(), '/'), '/'))
-                        ->setUrlParams($request->route()->parameters())
-                        ->setHttpCode($response->getStatusCode())
-                        ->setMemoryUsageMb(memory_get_peak_usage(true) / 1024 / 1024);
-                    $sqlQueriesInfo = PeskyOrmPdoProfiler::collect();
-                    $stat
-                        ->setSql($sqlQueriesInfo)
-                        ->setDurationSql(round($sqlQueriesInfo['accumulated_duration'], 3))
-                        ->save();
+                        ->processRequest($request)
+                        ->processResponse($response)
+                        ->addSqlProfilingData()
+                        ->finishAndSave();
                 } catch (\Exception $exception) {
                     \Log::error($exception);
                 }
@@ -60,4 +46,5 @@ class RequestProfiler {
             return $next($request);
         }
     }
+
 }

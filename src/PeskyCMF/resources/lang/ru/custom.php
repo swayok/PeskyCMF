@@ -628,12 +628,12 @@ $dictionary = [
             'header' => 'Статистика HTTP запросов',
             'column' => [
                 'http_method' => 'Метод',
-                'url' => 'URL',
-                'route' => 'Route',
+                'url' => 'Route и URL',
+                'route' => 'Route и URL',
                 'duration' => 'Длительность',
                 'duration_sql' => 'Длительность (SQL)',
                 'memory_usage_mb' => 'Память',
-                'is_cache' => 'Кеширование?',
+                'is_cache' => 'Кеш?',
                 'url_params' => 'URL-параметры',
                 'sql' => 'SQL запросы',
                 'id' => 'ID',
@@ -672,6 +672,8 @@ $dictionary = [
                 'id' => 'ID',
                 'created_at' => 'Создано',
                 'http_code' => 'HTTP код',
+                'request_data' => 'Данные запроса',
+                'checkpoints' => 'Замеры',
             ],
         ]
     ]

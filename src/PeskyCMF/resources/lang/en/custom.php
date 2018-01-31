@@ -631,8 +631,8 @@ $dictionary = [
             'header' => 'HTTP requests stats',
             'column' => [
                 'http_method' => 'Method',
-                'url' => 'URL',
-                'route' => 'Route',
+                'url' => 'Route and URL',
+                'route' => 'Route and URL',
                 'duration' => 'Duration',
                 'duration_sql' => 'Duration (SQL)',
                 'memory_usage_mb' => 'Memory',
@@ -675,6 +675,8 @@ $dictionary = [
                 'id' => 'ID',
                 'created_at' => 'Created',
                 'http_code' => 'Response code',
+                'request_data' => 'Request data',
+                'checkpoints' => 'Checkpoints',
             ],
         ]
     ]

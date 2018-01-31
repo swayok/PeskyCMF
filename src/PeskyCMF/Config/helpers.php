@@ -614,3 +614,19 @@ if (!function_exists('setting')) {
         }
     }
 }
+
+if (!function_exists('hidePasswords')) {
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    function hidePasswords(array $data) {
+        foreach ($data as $key => &$value) {
+            if (!empty($value) && preg_match('(pass(word|phrase|wd)?|pwd)', $key)) {
+                $value = '******';
+            }
+        }
+        return $data;
+    }
+}
