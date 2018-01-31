@@ -12,7 +12,9 @@ class RequestProfiling {
     /**
      * @param Request $request
      * @param \Closure $next
-     * @param string $mode - 'all', 'none', 'custom'
+     * @param string $mode - 'all', 'custom'; custom mode means that profiling will be enabled for routes that
+     *      have 'profiler' option with positive value in route's configuration.
+     *      Example: Route::get('/path', [..., 'profiler' => true, ...]);
      * @return mixed
      * @throws \LogicException
      * @throws \UnexpectedValueException

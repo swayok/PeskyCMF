@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @property-read int         $created_at_as_unix_ts
  * @property-read float       $duration
  * @property-read float       $duration_sql
+ * @property-read float       $duration_error
  * @property-read float       $memory_usage_mb
  * @property-read bool        $is_cache
  * @property-read string      $url_params
@@ -41,6 +42,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @method $this    setCreatedAt($value, $isFromDb = false)
  * @method $this    setDuration($value, $isFromDb = false)
  * @method $this    setDurationSql($value, $isFromDb = false)
+ * @method $this    setDurationError($value, $isFromDb = false)
  * @method $this    setMemoryUsageMb($value, $isFromDb = false)
  * @method $this    setIsCache($value, $isFromDb = false)
  * @method $this    setUrlParams($value, $isFromDb = false)
@@ -52,6 +54,9 @@ use Symfony\Component\HttpFoundation\Response;
 class HttpRequestStat extends AbstractRecord {
 
     static protected $startedAt;
+    static protected $checkpointsStack = [];
+    protected $accumulatedDurationError = 0;
+    static protected $current;
 
     /**
      * @return HttpRequestStatsTable
@@ -69,66 +74,105 @@ class HttpRequestStat extends AbstractRecord {
      * @return static
      */
     static public function createForProfiling(float $startedAt = null) {
+        static::$current = static::new1()->setCreatedAt(date('Y-m-d H:i:s'));
         static::$startedAt = $startedAt === null ? microtime(true) : $startedAt;
-        $stat = static::new1()
-            ->setCreatedAt(date('Y-m-d H:i:s'));
-        app()->instance(self::class, $stat);
-        return $stat;
+        return static::$current;
     }
 
     /**
      * @return static
      */
     static public function getCurrent() {
-        if (!app()->bound(self::class)) {
-            $stat = static::new1();
-            app()->instance(self::class, $stat);
+        if (!static::$current) {
+            static::$current = static::new1();
         }
-        return app(self::class);
+        return static::$current;
     }
 
     /**
      * @param string $key - checkpoint key to be used to finish it
      * @param string|null $descrption
-     * @return static
+     * @throws \InvalidArgumentException
      */
     static public function startCheckpoint(string $key, string $descrption = null) {
-        $stat = static::getCurrent();
         if (static::$startedAt) {
+            $time = microtime(true);
+            $stat = static::getCurrent();
             $checkpoints = $stat->checkpoints_as_array;
-            $checkpoints[$key] = [
+            $data = [
                 'started_at' => microtime(true) - static::$startedAt,
                 'desctiption' => $descrption,
-                'memory_before' => memory_get_usage(true)
+                'memory_before' => memory_get_usage(true),
+                'checkpoints' => []
             ];
+            if (count(static::$checkpointsStack) === 0) {
+                if (array_key_exists($key, $checkpoints)) {
+                    throw new \InvalidArgumentException("Checkpoint with key \"$key\" already exists");
+                }
+                $checkpoints[$key] = $data;
+            } else {
+                $path = implode('.checkpoints.', static::$checkpointsStack) . '.checkpoints.' . $key;
+                if (array_has($checkpoints, $path)) {
+                    throw new \InvalidArgumentException("Checkpoint at path \"$path\" already exists");
+                }
+                array_set($checkpoints, $path, $data);
+            }
             $stat->setCheckpoints($checkpoints);
+            static::$checkpointsStack[] = $key;
+            $stat->accumulatedDurationError += microtime(true) - $time;
         }
-        return $stat;
     }
 
     /**
      * @param string $key - checkpoint key used in static::startCheckpoint()
      * @param array $data
-     * @return static
      * @throws \InvalidArgumentException
      */
-    static public function endCheckpoint(string $key, array $data) {
-        $stat = static::getCurrent();
+    static public function endCheckpoint(string $key, array $data = []) {
         if (static::$startedAt) {
+            $time = microtime(true);
+            $stat = static::getCurrent();
             $checkpoints = $stat->checkpoints_as_array;
-            if (!array_key_exists($key, $checkpoints)) {
+            $path = implode('.checkpoints.', static::$checkpointsStack);
+            $lastKeyInStack = array_pop(static::$checkpointsStack);
+            if ($key !== $lastKeyInStack) {
                 throw new \InvalidArgumentException(
-                    'There is no checkpoint with key "' . $key . '". Use HttpRequestStat::startCheckpoint() before.'
+                    "You need to end checkpoint at path \"$lastKeyInStack\" before trying to end checkpoint with key \"$key\""
                 );
             }
-            $checkpoints[$key]['ended_at'] = microtime(true) - static::$startedAt;
-            $checkpoints[$key]['duration'] = $checkpoints[$key]['ended_at'] - $checkpoints[$key]['started_at'];
-            $checkpoints[$key]['memory_after'] = memory_get_usage(true);
-            $checkpoints[$key]['memory_usage'] = $checkpoints[$key]['memory_after'] - $checkpoints[$key]['memory_before'];
-            $checkpoints[$key]['data'] = $data;
+            if (!array_has($checkpoints, $path)) {
+                throw new \InvalidArgumentException(
+                    'There is no checkpoint at path "' . $path . '". Use HttpRequestStat::startCheckpoint() before HttpRequestStat::endCheckpoint().'
+                );
+            }
+            $checkpoint = array_get($checkpoints, $path);
+            $checkpoint['ended_at'] = microtime(true) - static::$startedAt;
+            $checkpoint['duration'] = $checkpoint['ended_at'] - $checkpoint['started_at'];
+            $checkpoint['memory_after'] = memory_get_usage(true);
+            $checkpoint['memory_usage'] = $checkpoint['memory_after'] - $checkpoint['memory_before'];
+            $checkpoint['data'] = $data;
+            array_set($checkpoints, $path, $checkpoint);
             $stat->setCheckpoints($checkpoints);
+            $stat->accumulatedDurationError += microtime(true) - $time;
         }
-        return $stat;
+    }
+
+    /**
+     * @param $checkpointKey
+     * @param \Closure $closure
+     * @return mixed
+     */
+    static public function profileClosure($checkpointKey, \Closure $closure) {
+        static::startCheckpoint($checkpointKey);
+        $ret = value($closure);
+        static::endCheckpoint($checkpointKey);
+        return $ret;
+    }
+
+    static public function requestUsesCachedData() {
+        if (static::$startedAt) {
+            static::getCurrent()->setIsCache(true);
+        }
     }
 
     /**
@@ -137,6 +181,7 @@ class HttpRequestStat extends AbstractRecord {
      * @throws \LogicException
      */
     public function processRequest(Request $request) {
+        $time = microtime(true);
         $this
             ->setUrl($request->getRequestUri())
             ->setHttpMethod($request->getMethod())
@@ -146,6 +191,7 @@ class HttpRequestStat extends AbstractRecord {
                 'GET' => hidePasswords($request->query()),
                 'POST' => hidePasswords($request->input())
             ]);
+        $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
     }
 
@@ -158,10 +204,12 @@ class HttpRequestStat extends AbstractRecord {
         if ($startedAt === null) {
             $startedAt = static::$startedAt;
         }
+        $time = microtime(true);
         $this
             ->setDuration(round(microtime(true) - $startedAt, 6))
             ->setMemoryUsageMb(memory_get_peak_usage(true) / 1024 / 1024)
             ->setHttpCode($response->getStatusCode());
+        $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
     }
 
@@ -173,15 +221,18 @@ class HttpRequestStat extends AbstractRecord {
         if ($startedAt === null) {
             $startedAt = static::$startedAt;
         }
+        $time = microtime(true);
         $sqlQueriesInfo = PeskyOrmPdoProfiler::collect();
         $this
             ->setDurationSql(round($sqlQueriesInfo['accumulated_duration'], 6))
             ->setSql(static::processSqlProfiling($sqlQueriesInfo, $startedAt));
+        $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
     }
 
     /**
      * @return $this
+     * @throws \LogicException
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\DbException
      * @throws \PDOException
@@ -192,6 +243,19 @@ class HttpRequestStat extends AbstractRecord {
      * @throws \PeskyORM\Exception\OrmException
      */
     public function finishAndSave() {
+        $this->setDurationError(round($this->accumulatedDurationError, 6));
+        if (count(static::$checkpointsStack) > 0) {
+            if ($this->http_code >= 400) {
+                $stackReversed = array_reverse(static::$checkpointsStack);
+                foreach ($stackReversed as $key) {
+                    static::endCheckpoint($key, ['automatically closed due to error response']);
+                }
+            } else {
+                throw new \LogicException(
+                    'All checkpoints must be ended. Possibly you have forgotten to call HttpRequestStat::endCheckpoint() somewhere'
+                );
+            }
+        }
         $this->save();
         return $this;
     }
@@ -205,7 +269,7 @@ class HttpRequestStat extends AbstractRecord {
         $ret = [
             'statements_count' => "{$sqlProfilingData['statements_count']} (Failed: {$sqlProfilingData['failed_statements_count']})",
             'total_duration' => round($sqlProfilingData['accumulated_duration'], 6) . 's',
-            'max_memory_usage' => round($sqlProfilingData['max_memory_usage'], 4) . ' MB',
+            'max_memory_usage' => round($sqlProfilingData['max_memory_usage'] / 1024 / 1024, 4) . ' MB',
             'statements' => []
         ];
         foreach ($sqlProfilingData['statements'] as $connection => $statements) {

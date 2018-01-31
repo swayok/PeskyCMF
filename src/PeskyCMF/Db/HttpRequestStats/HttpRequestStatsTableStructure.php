@@ -15,6 +15,7 @@ use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
  * @property-read Column    $created_at
  * @property-read Column    $duration
  * @property-read Column    $duration_sql
+ * @property-read Column    $duration_error
  * @property-read Column    $memory_usage_mb
  * @property-read Column    $is_cache
  * @property-read Column    $url_params
@@ -63,6 +64,12 @@ class HttpRequestStatsTableStructure extends CmfDbTableStructure {
     private function duration_sql() {
         return Column::create(Column::TYPE_FLOAT)
             ->disallowsNullValues();
+    }
+
+    private function duration_error() {
+        return Column::create(Column::TYPE_FLOAT)
+            ->disallowsNullValues()
+            ->setDefaultValue(0);
     }
 
     private function memory_usage_mb() {
