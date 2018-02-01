@@ -101,7 +101,7 @@ class HttpRequestStat extends AbstractRecord {
             $checkpoints = $stat->checkpoints_as_array;
             $data = [
                 'started_at' => microtime(true) - static::$startedAt,
-                'desctiption' => $descrption,
+                'description' => $descrption ?: 'Checkpoint ' . $key,
                 'memory_before' => memory_get_usage(true),
                 'checkpoints' => []
             ];
@@ -281,9 +281,9 @@ class HttpRequestStat extends AbstractRecord {
                     $stats['query_params'] = $statementStats['params'];
                 }
                 $stats['rows_affected'] = $statementStats['row_count'];
-                $stats['started_at'] = round($statementStats['started_at'] - $startedAt, 6) . 's';
-                $stats['duration'] = round($statementStats['duration'], 6) . 's';
-                $stats['ended_at'] = round($statementStats['ended_at'] - $startedAt, 6) . 's';
+                $stats['started_at'] = round($statementStats['started_at'] - $startedAt, 8) . 's';
+                $stats['duration'] = round($statementStats['duration'], 8) . 's';
+                $stats['ended_at'] = round($statementStats['ended_at'] - $startedAt, 8) . 's';
                 $stats['memory_before'] = round($statementStats['memory_before'] / 1024 / 1024, 4) . ' MB';
                 $stats['memory_after'] = round($statementStats['memory_after'] / 1024 / 1024, 4) . ' MB';
                 $stats['memory_used'] = round($statementStats['memory_used'] / 1024 / 1024, 4) . ' MB';
