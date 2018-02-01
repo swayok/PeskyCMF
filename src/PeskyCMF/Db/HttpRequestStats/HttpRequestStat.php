@@ -101,8 +101,8 @@ class HttpRequestStat extends AbstractRecord {
             $checkpoints = $stat->checkpoints_as_array;
             $data = [
                 'started_at' => microtime(true) - static::$startedAt,
-                'description' => $descrption ?: 'Checkpoint ' . $key,
-                'memory_before' => memory_get_usage(true),
+                'description' => $descrption ?: 'Checkpoint "' . $key . '"',
+                'memory_before' => memory_get_usage(false),
                 'checkpoints' => []
             ];
             if (count(static::$checkpointsStack) === 0) {
@@ -148,7 +148,7 @@ class HttpRequestStat extends AbstractRecord {
             $checkpoint = array_get($checkpoints, $path);
             $checkpoint['ended_at'] = microtime(true) - static::$startedAt;
             $checkpoint['duration'] = $checkpoint['ended_at'] - $checkpoint['started_at'];
-            $checkpoint['memory_after'] = memory_get_usage(true);
+            $checkpoint['memory_after'] = memory_get_usage(false);
             $checkpoint['memory_usage'] = $checkpoint['memory_after'] - $checkpoint['memory_before'];
             $checkpoint['data'] = $data;
             array_set($checkpoints, $path, $checkpoint);
@@ -207,7 +207,7 @@ class HttpRequestStat extends AbstractRecord {
         $time = microtime(true);
         $this
             ->setDuration(round(microtime(true) - $startedAt, 6))
-            ->setMemoryUsageMb(memory_get_peak_usage(true) / 1024 / 1024)
+            ->setMemoryUsageMb(memory_get_peak_usage(false) / 1024 / 1024)
             ->setHttpCode($response->getStatusCode());
         $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
