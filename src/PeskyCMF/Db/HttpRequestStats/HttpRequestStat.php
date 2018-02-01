@@ -248,12 +248,14 @@ class HttpRequestStat extends AbstractRecord {
         }
         $time = microtime(true);
         $sqlQueriesInfo = PeskyOrmPdoProfiler::collect();
+        $formattedLog = static::processSqlProfiling($sqlQueriesInfo, $startedAt);
+        $counters = $this->counters_as_array;
+        $counters['sql_queries'] = count($formattedLog['statements']);
         $this
             ->setDurationSql(round($sqlQueriesInfo['accumulated_duration'], 6))
-            ->setSql(static::processSqlProfiling($sqlQueriesInfo, $startedAt));
-        $queriesCount = count((array)array_get($sqlQueriesInfo, 'statements', []));
+            ->setSql($formattedLog)
+            ->setCounters($counters);
         $this->accumulatedDurationError += microtime(true) - $time;
-        static::increment('sql_queries', $queriesCount);
         return $this;
     }
 
