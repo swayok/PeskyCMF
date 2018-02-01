@@ -110,8 +110,8 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                             $ret = is_array($sqlCheckpoints)
                                 ? $this->buildSqlQueriesLog($sqlCheckpoints, $record['duration'])
                                 : '<pre class="json-text">' . $sqlCheckpoints . '</pre>';
-                            if (empty($phpCheckpoints)) {
-                                $ret .= '<pre class="json-text">' . $phpCheckpoints . '</pre>';
+                            if (!empty($phpCheckpoints)) {
+                                $ret .= '<pre class="json-text">' . (string)$phpCheckpoints . '</pre>';
                             }
                             return $ret;
                         } else {
@@ -143,7 +143,7 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
             $delta = (float)$statement['started_at'] - (float)$prevStatement['started_at'];
             $precent = round($delta / $totalDuration, 2) * 100;
             $ret .= "<hr class='mv10'>PHP: <b>{$delta}s ~ {$precent}%</b> ({$prevStatement['started_at']} -> {$statement['started_at']})<hr class='mv10'>";
-            $ret .= $this->buildSqlQueryLog($statement, '<b>{$index}.</b>', $totalDuration);
+            $ret .= $this->buildSqlQueryLog($statement, "<b>{$index}.</b>", $totalDuration);
             $prevStatement = $statement;
             $index++;
         }
