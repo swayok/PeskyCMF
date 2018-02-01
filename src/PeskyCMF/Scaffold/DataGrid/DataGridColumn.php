@@ -165,7 +165,11 @@ class DataGridColumn extends RenderableValueViewer {
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getPosition() {
-        if ($this->getName() === DataGridConfig::ROW_ACTIONS_COLUMN_NAME && $this->getScaffoldSectionConfig()->isRowActionsColumnFixed()) {
+        if (
+            $this->getName() === DataGridConfig::ROW_ACTIONS_COLUMN_NAME
+            && $this->getScaffoldSectionConfig()->isRowActionsEnabled()
+            && $this->getScaffoldSectionConfig()->isRowActionsColumnFixed()
+        ) {
             return (
                 ($this->getScaffoldSectionConfig()->isAllowedMultiRowSelection() ? 1 : 0)
                 + ($this->getScaffoldSectionConfig()->isNestedViewEnabled() ? 1 : 0)
@@ -173,7 +177,7 @@ class DataGridColumn extends RenderableValueViewer {
         } else {
             return (int)$this->position
                 + ($this->getScaffoldSectionConfig()->isAllowedMultiRowSelection() ? 1 : 0)
-                + ($this->getScaffoldSectionConfig()->isRowActionsColumnFixed() ? 1 : 0)
+                + ($this->getScaffoldSectionConfig()->isRowActionsEnabled() && $this->getScaffoldSectionConfig()->isRowActionsColumnFixed() ? 1 : 0)
                 + ($this->getScaffoldSectionConfig()->isNestedViewEnabled() ? 1 : 0);
         }
     }

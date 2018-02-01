@@ -272,7 +272,7 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         $ret = "
             <div>
                 $numeration
-                Duration: <b>{$statement['duration']}~ {$durationPercent}%</b> ({$statement['started_at']} -> {$statement['ended_at']})
+                Duration: <b>{$statement['duration']} ~ {$durationPercent}%</b> ({$statement['started_at']} -> {$statement['ended_at']})
             </div>
             <div>Memory: {$statement['memory_used']} ({$statement['memory_before']} -> {$statement['memory_after']})</div>
             <div>Rows affected: {$statement['rows_affected']}</div><pre class='json-text'>$query</pre>
