@@ -207,7 +207,7 @@ class HttpRequestStat extends AbstractRecord {
         $time = microtime(true);
         $this
             ->setDuration(round(microtime(true) - $startedAt, 6))
-            ->setMemoryUsageMb(memory_get_peak_usage(false) / 1024 / 1024)
+            ->setMemoryUsageMb(round(memory_get_peak_usage(false) / 1024 / 1024, 4))
             ->setHttpCode($response->getStatusCode());
         $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
