@@ -40,6 +40,7 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                             <br><span class='text-nowrap'>SQL: {$record['duration_sql']}s ({$sqlDurPercent}%)</span>
                         ";
                     }),
+                'counters:sql_queries',
                 'memory_usage_mb' => DataGridColumn::create()
                     ->setValueConverter(function ($value) {
                         return "$value MB";
@@ -102,6 +103,7 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                 'http_code',
                 'is_cache',
                 'created_at',
+                'counters',
                 'checkpoints' => ValueCell::create()
                     ->setValueConverter(function ($_, $__, $record) {
                         $sqlCheckpoints = json_decode($record['sql'], true);

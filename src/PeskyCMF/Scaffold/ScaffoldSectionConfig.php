@@ -8,6 +8,7 @@ use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRedirectMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRequestMenuItem;
+use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
@@ -83,6 +84,11 @@ abstract class ScaffoldSectionConfig {
     protected $isFinished = false;
     /** @var  bool */
     protected $allowRelationsInValueViewers = false;
+    /**
+     * Allow viewer names like "column_name:key_name" for json/jsonb DB columns
+     * @var bool
+     */
+    protected $allowComplexValueViewerNames = false;
     /** @var array */
     protected $additionalColumnsToSelect = [];
 
@@ -292,6 +298,7 @@ abstract class ScaffoldSectionConfig {
             !$this->thereIsNoDbColumns
             && (!$viewer || $viewer->isLinkedToDbColumn())
             && !$this->getTable()->getTableStructure()->hasColumn($name)
+            && !$this->isValidComplexValueViewerName($name) //< $name is something like "column_name:key_name"
         ) {
             if ($this->allowRelationsInValueViewers) {
                 list($relation, $relationColumnName) = $this->validateRelationValueViewerName($name);
@@ -343,6 +350,22 @@ abstract class ScaffoldSectionConfig {
             }
         }
         return [$relation, $columnName];
+    }
+
+    /**
+     * Check if $name is complex column name like "column_name:key_name"
+     * @param string $name
+     * @return bool
+     */
+    protected function isValidComplexValueViewerName($name) {
+        if ($this->allowComplexValueViewerNames && AbstractValueViewer::isComplexViewerName($name)) {
+            list($colName, ) = AbstractValueViewer::splitComplexViewerName($name);
+            if ($this->getTable()->getTableStructure()->hasColumn($colName)) {
+                $type = $this->getTable()->getTableStructure()->getColumn($colName)->getType();
+                return in_array($type, [Column::TYPE_JSON, Column::TYPE_JSONB], true);
+            }
+        }
+        return false;
     }
 
     /**
@@ -479,7 +502,12 @@ abstract class ScaffoldSectionConfig {
                     || $valueViewer->isVisible()
                 )
             ) {
-                $recordWithBackup[$key] = $valueViewer->convertValue($recordWithBackup[$key], $record);
+                $convertedValue = $valueViewer->convertValue($recordWithBackup[$key], $record);
+                if ($valueViewer instanceof DataGridColumn) {
+                    $recordWithBackup[$valueViewer::convertNameForDataTables($key)] = $convertedValue;
+                } else {
+                    $recordWithBackup[$key] = $convertedValue;
+                }
             }
         }
         if (!empty($customData) && is_array($customData)) {

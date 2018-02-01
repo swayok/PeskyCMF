@@ -640,6 +640,7 @@ $dictionary = [
                 'id' => 'ID',
                 'created_at' => 'Создано',
                 'http_code' => 'HTTP код',
+                'counters:sql_queries' => 'SQL запросов',
             ],
             'filter' => [
                 'http_request_stats' => [
@@ -655,6 +656,7 @@ $dictionary = [
                     'id' => 'ID',
                     'created_at' => 'Создано',
                     'http_code' => 'HTTP код',
+                    'counters' => 'Счетчики',
                 ],
             ],
         ],
@@ -676,6 +678,7 @@ $dictionary = [
                 'http_code' => 'HTTP код',
                 'request_data' => 'Данные запроса',
                 'checkpoints' => 'Замеры',
+                'counters' => 'Счетчики',
             ],
         ]
     ]

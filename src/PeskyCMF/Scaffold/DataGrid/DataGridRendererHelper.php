@@ -160,13 +160,15 @@ class DataGridRendererHelper {
         $columns = $this->getSortedColumnConfigs();
         /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $config */
         foreach ($columns as $config) {
+            $dtName = $config::convertNameForDataTables($config->getName());
             $th = Tag::th()
                 ->setContent($config->isVisible() ? $config->getLabel() : '&nbsp;')
                 ->setClass('text-nowrap')
                 ->setDataAttr('visible', $config->isVisible() ? null : 'false')
                 ->setDataAttr('orderable', $config->isVisible() && $config->isSortable() ? 'true' : 'false')
-                ->setDataAttr('name', $config->getName())
-                ->setDataAttr('data', $config->getName())
+                ->setDataAttr('name', $dtName)
+                ->setDataAttr('data', $dtName)
+                ->setDataAttr('default-content', ' ')
                 ->build();
             if ($config->isVisible()) {
                 $visibleColumns .= $th . "\n";

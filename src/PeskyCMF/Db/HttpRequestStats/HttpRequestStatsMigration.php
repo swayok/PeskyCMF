@@ -27,11 +27,13 @@ class HttpRequestStatsMigration extends Migration {
                     $table->jsonb('sql')->default('{}');
                     $table->jsonb('request_data')->default('{}');
                     $table->jsonb('checkpoints')->default('{}');
+                    $table->jsonb('counters')->default('{}');
                 } else {
                     $table->mediumText('url_params')->default('{}');
                     $table->text('sql')->default('{}');
                     $table->text('request_data')->default('{}');
                     $table->text('checkpoints')->default('{}');
+                    $table->text('counters')->default('{}');
                 }
 
                 $table->index('url');

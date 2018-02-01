@@ -93,7 +93,8 @@ abstract class AbstractValueViewer {
         if ($this->relation) {
             return $this->relation->getForeignTable()->getTableStructure()->getColumn($this->relationColumn);
         } else {
-            return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($this->getName());
+            $nameParts = explode('.', $this->getName());
+            return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($nameParts[0]);
         }
     }
 
@@ -168,9 +169,30 @@ abstract class AbstractValueViewer {
      */
     public function getName() {
         if (empty($this->name)) {
-            throw new ValueViewerConfigException($this, 'Field name not provided');
+            throw new ValueViewerConfigException($this, 'Value viewer name not provided');
         }
         return $this->name;
+    }
+
+    /**
+     * Check if name is something like "column_name:key_name"
+     * @param string $name
+     * @return bool
+     */
+    final static public function isComplexViewerName($name) {
+        return (bool)preg_match('%^[^:]+?:[^:]+?$%', $name);
+    }
+
+    /**
+     * @param string $name - something like "column_name:key_name"
+     * @return array - 0 - column name; 1 = key name or null
+     */
+    final static public function splitComplexViewerName($name) {
+        $parts = explode(':', $name, 2);
+        if (count($parts) === 1) {
+            $parts[1] = null;
+        }
+        return $parts;
     }
 
     /**
@@ -207,7 +229,11 @@ abstract class AbstractValueViewer {
      */
     public function getType() {
         if (empty($this->type)) {
-            $this->setType($this->isLinkedToDbColumn() ? $this->getTableColumn()->getType() : static::TYPE_STRING);
+            if ($this->isLinkedToDbColumn() && !static::isComplexViewerName($this->getName())) {
+                $this->setType($this->getTableColumn()->getType());
+            } else {
+                $this->setType(static::TYPE_STRING);
+            }
         }
         return $this->type;
     }

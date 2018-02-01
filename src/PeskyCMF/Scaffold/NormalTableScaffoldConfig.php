@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use PeskyCMF\HttpCode;
+use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyORM\Core\DbExpr;
@@ -55,7 +56,13 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 if ($config['column'] instanceof DbExpr) {
                     $conditions['ORDER'][] = DbExpr::create($config['column']->get() . ' ' . $config['dir'], false);
                 } else {
-                    $conditions['ORDER'][$config['column']] = $config['dir'];
+                    if (AbstractValueViewer::isComplexViewerName($config['column'])) {
+                        list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($config['column']);
+                        $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$config['dir']}", false);
+                    } else {
+                        $conditions['ORDER'][$config['column']] = $config['dir'];
+                    }
+
                     if ($dataGridConfig->hasValueViewer($config['column'])) {
                         $additionalOrders = $dataGridConfig->getValueViewer($config['column'])->getAdditionalOrderBy();
                         if (!empty($additionalOrders)) {
@@ -68,12 +75,17 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $dbColumns = static::getTable()->getTableStructure()->getColumns();
         $columnsToSelect = [];
         $virtualColumns = [];
-        foreach (array_keys($dataGridConfig->getViewersLinkedToDbColumns(false)) as $colName) {
+        foreach (array_keys($dataGridConfig->getViewersLinkedToDbColumns(false)) as $originalColName) {
+            list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($originalColName);
             if (array_key_exists($colName, $dbColumns)) {
                 if ($dbColumns[$colName]->isItExistsInDb()) {
-                    $columnsToSelect[] = $colName;
+                    if ($keyName) {
+                        $columnsToSelect[$originalColName] = DbExpr::create("`{$colName}`->>``{$keyName}``", false);
+                    } else {
+                        $columnsToSelect[] = $colName;
+                    }
                 } else {
-                    $virtualColumns[] = $colName;
+                    $virtualColumns[] = implode('.', $colName);
                 }
             } else {
                 throw new \UnexpectedValueException(

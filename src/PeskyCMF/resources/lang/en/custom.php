@@ -642,6 +642,7 @@ $dictionary = [
                 'id' => 'ID',
                 'created_at' => 'Created',
                 'http_code' => 'HTTP code',
+                'counters:sql_queries' => 'SQL queries',
             ],
             'filter' => [
                 'http_request_stats' => [
@@ -657,6 +658,7 @@ $dictionary = [
                     'id' => 'ID',
                     'created_at' => 'Created',
                     'http_code' => 'Response code',
+                    'counters' => 'Counters',
                 ],
             ],
         ],
@@ -677,6 +679,7 @@ $dictionary = [
                 'http_code' => 'Response code',
                 'request_data' => 'Request data',
                 'checkpoints' => 'Checkpoints',
+                'counters' => 'Counters',
             ],
         ]
     ]

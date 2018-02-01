@@ -34,6 +34,9 @@ use Symfony\Component\HttpFoundation\Response;
  * @property-read string      $checkpoints
  * @property-read array       $checkpoints_as_array
  * @property-read object      $checkpoints_as_object
+ * @property-read string      $counters
+ * @property-read array       $counters_as_array
+ * @property-read object      $counters_as_object
  *
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setHttpMethod($value, $isFromDb = false)
@@ -50,6 +53,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @method $this    setHttpCode($value, $isFromDb = false)
  * @method $this    setRequestData($value, $isFromDb = false)
  * @method $this    setCheckpoints($value, $isFromDb = false)
+ * @method $this    setCounters($value, $isFromDb = false)
  */
 class HttpRequestStat extends AbstractRecord {
 
@@ -94,7 +98,7 @@ class HttpRequestStat extends AbstractRecord {
      * @param string|null $descrption
      * @throws \InvalidArgumentException
      */
-    static public function startCheckpoint(string $key, string $descrption = null) {
+    static public function startCheckpoint(string $key, string $descrption = null): void {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -128,7 +132,7 @@ class HttpRequestStat extends AbstractRecord {
      * @param array $data
      * @throws \InvalidArgumentException
      */
-    static public function endCheckpoint(string $key, array $data = []) {
+    static public function endCheckpoint(string $key, array $data = []): void {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -157,19 +161,40 @@ class HttpRequestStat extends AbstractRecord {
         }
     }
 
-    /**
-     * @param $checkpointKey
-     * @param \Closure $closure
-     * @return mixed
-     */
-    static public function profileClosure($checkpointKey, \Closure $closure) {
+    static public function profileClosure(string $checkpointKey, \Closure $closure): mixed {
         static::startCheckpoint($checkpointKey);
         $ret = value($closure);
         static::endCheckpoint($checkpointKey);
         return $ret;
     }
 
-    static public function requestUsesCachedData() {
+    static public function setCounterValue(string $counterName, float $value): void {
+        if (static::$startedAt) {
+            $time = microtime(true);
+            $stat = static::getCurrent();
+            $counters = $stat->counters_as_array;
+            $counters[$counterName] = $value;
+            $stat->setCounters($counters);
+            $stat->accumulatedDurationError += microtime(true) - $time;
+        }
+    }
+
+    static public function increment(string $counterName, float $increment = 1): void {
+        if (static::$startedAt) {
+            $time = microtime(true);
+            $stat = static::getCurrent();
+            $counters = $stat->counters_as_array;
+            $counters[$counterName] = array_get($counters, $counterName, 0) + $increment;
+            $stat->setCounters($counters);
+            $stat->accumulatedDurationError += microtime(true) - $time;
+        }
+    }
+
+    static public function decrement(string $counterName, float $increment = 1): void {
+        static::increment($counterName, -$increment);
+    }
+
+    static public function requestUsesCachedData(): void {
         if (static::$startedAt) {
             static::getCurrent()->setIsCache(true);
         }
@@ -226,7 +251,9 @@ class HttpRequestStat extends AbstractRecord {
         $this
             ->setDurationSql(round($sqlQueriesInfo['accumulated_duration'], 6))
             ->setSql(static::processSqlProfiling($sqlQueriesInfo, $startedAt));
+        $queriesCount = count((array)array_get($sqlQueriesInfo, 'statements', []));
         $this->accumulatedDurationError += microtime(true) - $time;
+        static::increment('sql_queries', $queriesCount);
         return $this;
     }
 

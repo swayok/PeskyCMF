@@ -23,6 +23,7 @@ use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
  * @property-read Column    $http_code
  * @property-read Column    $request_data
  * @property-read Column    $checkpoints
+ * @property-read Column    $counters
  */
 class HttpRequestStatsTableStructure extends CmfDbTableStructure {
 
@@ -96,6 +97,12 @@ class HttpRequestStatsTableStructure extends CmfDbTableStructure {
     }
 
     private function checkpoints() {
+        return Column::create(Column::TYPE_JSONB)
+            ->disallowsNullValues()
+            ->setDefaultValue('{}');
+    }
+
+    private function counters() {
         return Column::create(Column::TYPE_JSONB)
             ->disallowsNullValues()
             ->setDefaultValue('{}');

@@ -19,6 +19,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     protected $allowRelationsInValueViewers = true;
 
+    protected $allowComplexValueViewerNames = true;
+
     protected $template = 'cmf::scaffold.datagrid';
     /**
      * @var int

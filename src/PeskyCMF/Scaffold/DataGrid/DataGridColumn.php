@@ -26,6 +26,10 @@ class DataGridColumn extends RenderableValueViewer {
      */
     protected $additionalOrderBy = [];
 
+    static public function convertNameForDataTables($name) {
+        return str_replace('.', ':', $name);
+    }
+
     /**
      * @return boolean
      */
