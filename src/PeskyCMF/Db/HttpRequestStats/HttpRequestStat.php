@@ -249,12 +249,9 @@ class HttpRequestStat extends AbstractRecord {
         $time = microtime(true);
         $sqlQueriesInfo = PeskyOrmPdoProfiler::collect();
         $formattedLog = static::processSqlProfiling($sqlQueriesInfo, $startedAt);
-        $counters = $this->counters_as_array;
-        $counters['sql_queries'] = count($formattedLog['statements']);
         $this
             ->setDurationSql(round($sqlQueriesInfo['accumulated_duration'], 6))
-            ->setSql($formattedLog)
-            ->setCounters($counters);
+            ->setSql($formattedLog);
         $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
     }
@@ -296,7 +293,10 @@ class HttpRequestStat extends AbstractRecord {
      */
     static protected function processSqlProfiling(array $sqlProfilingData, float $startedAt) {
         $ret = [
-            'statements_count' => "{$sqlProfilingData['statements_count']} (Failed: {$sqlProfilingData['failed_statements_count']})",
+            'statements_count' => $sqlProfilingData['statements_count'],
+            'failed_statements_count' => $sqlProfilingData['failed_statements_count'],
+            'rows_affected' => 0,
+            'statements_count_str' => "{$sqlProfilingData['statements_count']} (Failed: {$sqlProfilingData['failed_statements_count']})",
             'total_duration' => round($sqlProfilingData['accumulated_duration'], 6) . 's',
             'max_memory_usage' => round($sqlProfilingData['max_memory_usage'] / 1024 / 1024, 4) . ' MB',
             'statements' => []
@@ -309,7 +309,7 @@ class HttpRequestStat extends AbstractRecord {
                 if (!empty($statementStats['params'])) {
                     $stats['query_params'] = $statementStats['params'];
                 }
-                $stats['rows_affected'] = $statementStats['row_count'];
+                $ret['rows_affected'] += $stats['rows_affected'] = $statementStats['row_count'];
                 $stats['started_at'] = round($statementStats['started_at'] - $startedAt, 8) . 's';
                 $stats['duration'] = round($statementStats['duration'], 8) . 's';
                 $stats['ended_at'] = round($statementStats['ended_at'] - $startedAt, 8) . 's';

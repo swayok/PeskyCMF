@@ -489,7 +489,7 @@ abstract class ScaffoldSectionConfig {
             }
             if (empty($valueViewers[$key])) {
                 if ($key !== $pkKey) {
-                    unset($recordWithBackup[$key]);
+                    unset($recordWithBackup[$key], $recordWithBackup['__' . $key]);
                 }
                 continue;
             }
@@ -503,6 +503,24 @@ abstract class ScaffoldSectionConfig {
                 )
             ) {
                 $convertedValue = $valueViewer->convertValue($recordWithBackup[$key], $record);
+                if ($valueViewer instanceof DataGridColumn) {
+                    $recordWithBackup[$valueViewer::convertNameForDataTables($key)] = $convertedValue;
+                } else {
+                    $recordWithBackup[$key] = $convertedValue;
+                }
+            }
+        }
+        foreach ($valueViewers as $key => $valueViewer) {
+            if (
+                !$valueViewer->isLinkedToDbColumn()
+                && !array_key_exists($key, $recordWithBackup)
+                && method_exists($valueViewer, 'convertValue')
+                && (
+                    !method_exists($valueViewer, 'isVisible')
+                    || $valueViewer->isVisible()
+                )
+            ) {
+                $convertedValue = $valueViewer->convertValue(null, $record);
                 if ($valueViewer instanceof DataGridColumn) {
                     $recordWithBackup[$valueViewer::convertNameForDataTables($key)] = $convertedValue;
                 } else {

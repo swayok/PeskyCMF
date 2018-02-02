@@ -22,7 +22,11 @@ use PeskyORM\ORM\TableStructureInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
+use Illuminate\Foundation\Application;
 
+/**
+ * @property Application $app
+ */
 class PeskyCmfServiceProvider extends ServiceProvider {
 
     /**
@@ -40,6 +44,11 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      */
     private $appSettings;
 
+    /**
+     * @var null|bool
+     */
+    private $fitsRequestUri = null;
+
     public function register() {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
 
@@ -51,8 +60,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
         $langDetectorProvider = $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
         $this->app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
-        $loader = AliasLoader::getInstance();
-        $loader->alias('LanguageDetector', LanguageDetector::class);
+        AliasLoader::getInstance()->alias('LanguageDetector', LanguageDetector::class);
 
         if ($this->app->environment() === 'local') {
             if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
@@ -78,6 +86,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     public function provides() {
         return [
             CmfConfig::class,
+            PeskyCmfAppSettings::class,
         ];
     }
 
@@ -92,11 +101,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->configureTranslations();
         $this->configureViews();
 
-        $this->declareRoutes();
-
-        $this->mergeAuthenticationConfigs();
-
         if ($this->fitsRequestUri()) {
+            $this->declareRoutes();
+            $this->mergeAuthenticationConfigs();
             if ($this->getCmfConfig()->config('file_access_mask') !== null) {
                 umask($this->getCmfConfig()->config('file_access_mask'));
             }
@@ -114,12 +121,16 @@ class PeskyCmfServiceProvider extends ServiceProvider {
      * @return int
      */
     protected function fitsRequestUri() {
-        if ($this->runningInConsole()) {
-            return true;
-        } else {
-            $prefix = trim($this->getCmfConfig()->url_prefix(), '/');
-            return preg_match("%^/{$prefix}(/|$)%", array_get($_SERVER, 'REQUEST_URI', '/')) > 0;
+        if ($this->fitsRequestUri === null) {
+            if ($this->runningInConsole()) {
+                $this->fitsRequestUri = true;
+            } else {
+                $prefix = trim($this->getCmfConfig()->url_prefix(), '/');
+                $this->fitsRequestUri = preg_match("%^/{$prefix}(/|$)%", array_get($_SERVER, 'REQUEST_URI', '/')) > 0;
+            }
+            $this->app->offsetSet('is_peskycmf_section', $this->fitsRequestUri);
         }
+        return $this->fitsRequestUri;
     }
 
     /**
@@ -256,6 +267,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function configurePublishes() {
+        if (!$this->runningInConsole()) {
+            return ;
+        }
         $cmfPublicDir = __DIR__ . '/..';
         $this->publishes([
             // cmf

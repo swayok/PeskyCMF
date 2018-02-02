@@ -26,7 +26,7 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return parent::createDataGridConfig()
             ->setOrderBy('created_at', 'desc')
-            ->setInvisibleColumns('http_method', 'route', 'duration_sql', 'duration_error', 'id')
+            ->setInvisibleColumns('http_method', 'route', 'duration_sql', 'duration_error', 'id', 'sql:failed_statements_count', 'sql:rows_affected')
             ->setColumns([
                 'url' => DataGridColumn::create()
                     ->setValueConverter(function ($value, $_, array $record) {
@@ -36,11 +36,24 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setValueConverter(function ($value, $_, array $record) {
                         $durErrorPercent = round($record['duration_error'] / $record['duration'], 4) * 100;
                         $sqlDurPercent = round($record['duration_sql'] / $record['duration'], 4) * 100;
-                        return "<span class='text-nowrap'>{$record['duration']}s (-{$record['duration_error']}s ~ {$durErrorPercent}%)</span>
+                        return "<span class='text-nowrap'>
+                                {$record['duration']}s 
+                                <span class='text-muted fs12'>(-{$record['duration_error']}s ~ {$durErrorPercent}%)</span>
+                            </span>
                             <br><span class='text-nowrap'>SQL: {$record['duration_sql']}s ({$sqlDurPercent}%)</span>
-                        ";
+                            ";
                     }),
-                'counters:sql_queries',
+                'sql:statements_count' => DataGridColumn::create()
+                    ->setValueConverter(function ($value, $_, array $record) {
+                        $rowsAffected = $this->translate('datagrid.column', 'rows_affected');
+                        $failed = $this->translate('datagrid.column', 'failed_statements');
+                        return "<span class='text-nowrap'>
+                                {$value} 
+                                <span class='text-muted fs12'>({$failed}: {$record['sql:failed_statements_count']})
+                            </span>
+                            <br><span class='text-nowrap text-muted fs12'>$rowsAffected: {$record['sql:rows_affected']}</span>
+                            ";
+                    }),
                 'memory_usage_mb' => DataGridColumn::create()
                     ->setValueConverter(function ($value) {
                         return "$value MB";
@@ -120,6 +133,7 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                             if (!is_array($sqlCheckpoints)) {
                                 $sqlCheckpoints = [
                                     'statements_count' => 0,
+                                    'statements_count_str' => "0",
                                     'total_duration' => '0s',
                                     'max_memory_usage' => '0 MB',
                                     'statements' => []
@@ -257,7 +271,7 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
     protected function buildSqlLogIntro(array $data): string {
         return "
             <div>
-                SQL queries executed: {$data['statements_count']} 
+                SQL queries executed: {$data['statements_count_str']} 
                 / Total Duration: {$data['total_duration']} 
                 / Peak memory: {$data['max_memory_usage']}
             </div>

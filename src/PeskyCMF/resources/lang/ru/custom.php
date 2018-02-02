@@ -640,7 +640,9 @@ $dictionary = [
                 'id' => 'ID',
                 'created_at' => 'Создано',
                 'http_code' => 'HTTP код',
-                'counters:sql_queries' => 'SQL запросов',
+                'sql:statements_count' => 'SQL запросов',
+                'rows_affected' => 'Затронуто строк',
+                'failed_statements' => 'Провалов',
             ],
             'filter' => [
                 'http_request_stats' => [

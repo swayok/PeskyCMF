@@ -642,7 +642,9 @@ $dictionary = [
                 'id' => 'ID',
                 'created_at' => 'Created',
                 'http_code' => 'HTTP code',
-                'counters:sql_queries' => 'SQL queries',
+                'sql:statements_count' => 'SQL queries',
+                'rows_affected' => 'Rows affected',
+                'failed_statements' => 'Failed',
             ],
             'filter' => [
                 'http_request_stats' => [

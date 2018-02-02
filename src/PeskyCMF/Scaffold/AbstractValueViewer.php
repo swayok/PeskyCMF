@@ -93,8 +93,8 @@ abstract class AbstractValueViewer {
         if ($this->relation) {
             return $this->relation->getForeignTable()->getTableStructure()->getColumn($this->relationColumn);
         } else {
-            $nameParts = explode('.', $this->getName());
-            return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($nameParts[0]);
+            list($columnName, ) = static::splitComplexViewerName($this->getName());
+            return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($columnName);
         }
     }
 
