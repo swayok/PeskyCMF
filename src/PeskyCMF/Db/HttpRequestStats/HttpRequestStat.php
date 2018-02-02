@@ -208,7 +208,7 @@ class HttpRequestStat extends AbstractRecord {
     public function processRequest(Request $request) {
         $time = microtime(true);
         $this
-            ->setUrl($request->getRequestUri())
+            ->setUrl($request->getPathInfo())
             ->setHttpMethod($request->getMethod())
             ->setRoute('/' . ltrim($request->route()->uri(), '/'))
             ->setUrlParams($request->route()->parameters())
