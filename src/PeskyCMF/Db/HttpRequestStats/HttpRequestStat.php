@@ -98,7 +98,7 @@ class HttpRequestStat extends AbstractRecord {
      * @param string|null $descrption
      * @throws \InvalidArgumentException
      */
-    static public function startCheckpoint(string $key, string $descrption = null): void {
+    static public function startCheckpoint(string $key, string $descrption = null) {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -132,7 +132,7 @@ class HttpRequestStat extends AbstractRecord {
      * @param array $data
      * @throws \InvalidArgumentException
      */
-    static public function endCheckpoint(string $key, array $data = []): void {
+    static public function endCheckpoint(string $key, array $data = []) {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -168,7 +168,7 @@ class HttpRequestStat extends AbstractRecord {
         return $ret;
     }
 
-    static public function setCounterValue(string $counterName, float $value): void {
+    static public function setCounterValue(string $counterName, float $value) {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -179,7 +179,7 @@ class HttpRequestStat extends AbstractRecord {
         }
     }
 
-    static public function increment(string $counterName, float $increment = 1): void {
+    static public function increment(string $counterName, float $increment = 1) {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -190,11 +190,11 @@ class HttpRequestStat extends AbstractRecord {
         }
     }
 
-    static public function decrement(string $counterName, float $increment = 1): void {
+    static public function decrement(string $counterName, float $increment = 1) {
         static::increment($counterName, -$increment);
     }
 
-    static public function requestUsesCachedData(): void {
+    static public function requestUsesCachedData() {
         if (static::$startedAt) {
             static::getCurrent()->setIsCache(true);
         }
