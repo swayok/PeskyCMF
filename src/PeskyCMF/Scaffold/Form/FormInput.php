@@ -367,6 +367,7 @@ class FormInput extends RenderableValueViewer {
         if ($column->isItAForeignKey()) {
             /** @var Relation $relation */
             $relation = $column->getForeignKeyRelation();
+            /** @noinspection NullPointerExceptionInspection */
             $rule .= '|exists:' . $relation->getForeignTable()->getName() . ',' . $relation->getForeignColumnName();
         }
         return [$columnName => $rule];
