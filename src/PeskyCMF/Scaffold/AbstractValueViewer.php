@@ -386,10 +386,10 @@ abstract class AbstractValueViewer {
         $relationAlias = null;
         $relationColumn = null;
         $relationData = [];
-        foreach ($columnConfig->getRelations() as $alias => $relation) {
+        foreach ($columnConfig->getRelations() as $relation) {
             if (in_array($relation->getType(), [Relation::BELONGS_TO, Relation::HAS_ONE], true)) {
                 $relationConfig = $relation;
-                $relationAlias = $alias;
+                $relationAlias = $relation->getName();
                 $relationData = array_get($record, $relationAlias);
                 $relationColumn = $relationConfig->getDisplayColumnName();
                 break;
