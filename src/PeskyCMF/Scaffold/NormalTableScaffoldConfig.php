@@ -643,7 +643,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             );
             $newPosition = max($position1, $position2) + $increment;
         }
-        $movedRecord->begin()->updateValue($columnName, $newPosition, false)->commit();
+        $movedRecord->begin()->updateValue($columnConfig, $newPosition, false)->commit();
         $table::commitTransaction();
         return cmfJsonResponse()
             ->setMessage($dataGridConfig->translateGeneral('message.change_position.success'));
