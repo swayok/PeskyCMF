@@ -388,38 +388,41 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     protected function declareRoutes() {
         $cmfConfig = $this->getCmfConfig();
         $groupConfig = $this->getRoutesGroupConfig();
-        // custom routes
-        $files = (array)$cmfConfig::config('routes_files', []);
-        if (count($files) > 0) {
-            foreach ($files as $filePath) {
-                \Route::group($groupConfig, function () use ($filePath, $cmfConfig) {
-                    // warning! $cmfConfig may be used inside included file
-                    include base_path($filePath);
+        if (!$this->app->routesAreCached()) {
+            // custom routes
+            $files = (array)$cmfConfig::config('routes_files', []);
+            if (count($files) > 0) {
+                foreach ($files as $filePath) {
+                    \Route::group($groupConfig, function () use ($filePath, $cmfConfig) {
+                        // warning! $cmfConfig may be used inside included file
+                        include base_path($filePath);
+                    });
+                }
+            }
+            if (!\Route::has($cmfConfig::getRouteName('cmf_start_page'))) {
+                \Route::group($groupConfig, function () use ($cmfConfig) {
+                    \Route::get('/', [
+                        'uses' => $cmfConfig::cmf_general_controller_class() . '@redirectToUserProfile',
+                        'as' => $cmfConfig::getRouteName('cmf_start_page')
+                    ]);
                 });
             }
-        } else if (!\Route::has($cmfConfig::getRouteName('cmf_start_page'))) {
+
+            unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
             \Route::group($groupConfig, function () use ($cmfConfig) {
-                \Route::get('/', function () {
-                        return \Redirect::route(CmfConfig::getPrimary()->getRouteName('cmf_profile'));
-                    })
-                    ->name($cmfConfig::getRouteName('cmf_start_page'));
+                // warning! $cmfConfig may be used inside included file
+                include $this->getCmfRoutesFilePath();
+            });
+
+            // special route for ckeditor config.js file
+            unset($groupConfig['middleware']);
+            \Route::group($groupConfig, function () use ($cmfConfig) {
+                \Route::get('ckeditor/config.js', [
+                    'as' => $cmfConfig::routes_names_prefix() . 'cmf_ckeditor_config_js',
+                    'uses' => $cmfConfig::cmf_general_controller_class() . '@getCkeditorConfigJs',
+                ]);
             });
         }
-
-        unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
-        \Route::group($groupConfig, function () use ($cmfConfig) {
-            // warning! $cmfConfig may be used inside included file
-            include $this->getCmfRoutesFilePath();
-        });
-
-        // special route for ckeditor config.js file
-        unset($groupConfig['middleware']);
-        \Route::group($groupConfig, function () use ($cmfConfig) {
-            \Route::get('ckeditor/config.js', [
-                'as' => $cmfConfig::routes_names_prefix() . 'cmf_ckeditor_config_js',
-                'uses' => $cmfConfig::cmf_general_controller_class() . '@getCkeditorConfigJs',
-            ]);
-        });
     }
 
     protected function getCmfRoutesFilePath() {

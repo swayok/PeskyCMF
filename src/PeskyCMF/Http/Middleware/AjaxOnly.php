@@ -25,12 +25,13 @@ class AjaxOnly {
      *  // or
      *  'fallback' => [
      *      'route' => $routeNamePrefix . 'cmf_login',
-     *      'params' => [] //< optional, can be array or boolean (by default === true: pass params from original url)
+     *      'use_params' => bool //< optional, default === true: pass all params from original url to fallback url,
+     *      'add_params' => [] //< optional, additional params to pass to fallback route
      *  ],
      *  ...
      * ]
      * If 'params' === true - all params retrieved from original URL will be passed to fallback route
-     * If 'params' === false - all params retrieved from original URL will be passed to fallback route
+     * If 'params' === false - params retrieved from original URL will not be passed to fallback route
      *
      * @param Request $request
      * @param \Closure $next
@@ -48,13 +49,14 @@ class AjaxOnly {
                     ['before' => '{', 'after' => '}']
                 ));
             } else if (!empty($fallback['route'])) {
-                $params = array_get($fallback, 'params', true);
-                if ($params === true) {
+                $passParams = (bool)array_get($fallback, 'use_params', true);
+                $params = [];
+                if ($passParams === true) {
                     $params = $request->route()->parameters();
-                } else if ($params instanceof \Closure) {
-                    $params = call_user_func($params, $request->route()->parameters());
-                } else if ($params === false || !is_array($params)) {
-                    $params = [];
+                }
+                $addParams = array_get($fallback, 'add_params', true);
+                if (is_array($addParams)) {
+                    $params = array_merge($params, $addParams);
                 }
                 return new RedirectResponse(route($fallback['route'], $params));
             } else {

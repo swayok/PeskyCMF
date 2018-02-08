@@ -10,6 +10,7 @@ use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\ApiDocs\CmfApiDocsSection;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\HttpCode;
@@ -65,6 +66,10 @@ class CmfGeneralController extends Controller {
         }
 
         return view(CmfConfig::getPrimary()->$configName)->render();
+    }
+
+    public function redirectToUserProfile() {
+        return CmfConfig::getPrimary()->getRouteName('cmf_profile');
     }
 
     public function getAdminProfile() {

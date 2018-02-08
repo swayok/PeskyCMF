@@ -202,7 +202,7 @@ Route::group(
             'middleware' => AjaxOnly::class,
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_custom_page',
-                'params' => true
+                'use_params' => true
             ],
             'uses' => $apiControllerClass . '@getCustomPageForItem',
         ]);
@@ -216,7 +216,7 @@ Route::group(
             'middleware' => AjaxOnly::class,
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_resource_custom_page',
-                'params' => true
+                'use_params' => true
             ],
             'uses' => $apiControllerClass . '@getCustomPage',
         ]);
@@ -245,7 +245,7 @@ Route::group(
             'uses' => $apiControllerClass . '@getTemplates',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -254,7 +254,7 @@ Route::group(
             'uses' => $apiControllerClass . '@getItemsList',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -263,7 +263,7 @@ Route::group(
             'uses' => $apiControllerClass . '@getOptions',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -272,7 +272,7 @@ Route::group(
             'uses' => $apiControllerClass . '@getItemDefaults',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_add_form',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -281,7 +281,7 @@ Route::group(
             'uses' => $apiControllerClass . '@getCustomData',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -290,7 +290,7 @@ Route::group(
             'uses' => $apiControllerClass . '@deleteBulk',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -299,7 +299,7 @@ Route::group(
             'uses' => $apiControllerClass . '@updateBulk',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -308,7 +308,7 @@ Route::group(
             'uses' => $apiControllerClass . '@getItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_edit_form',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -317,7 +317,7 @@ Route::group(
             'uses' => $apiControllerClass . '@updateItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_edit_form',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -326,7 +326,7 @@ Route::group(
                 'uses' => $apiControllerClass . '@changeItemPosition',
                 'fallback' => [
                     'route' => $routeNamePrefix . 'cmf_items_table',
-                    'params' => true
+                    'use_params' => true
                 ]
             ])
             ->where([
@@ -341,7 +341,7 @@ Route::group(
             'uses' => $apiControllerClass . '@deleteItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'params' => true
+                'use_params' => true
             ]
         ]);
 
@@ -350,7 +350,7 @@ Route::group(
             'uses' => $apiControllerClass . '@addItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_add_form',
-                'params' => true
+                'use_params' => true
             ]
         ]);
     }
