@@ -12,9 +12,11 @@ class RequestProfiling {
     /**
      * @param Request $request
      * @param \Closure $next
-     * @param string $mode - 'all', 'custom'; custom mode means that profiling will be enabled for routes that
-     *      have 'profiler' option with positive value in route's configuration.
-     *      Example: Route::get('/path', [..., 'profiler' => true, ...]);
+     * @param string $routesToProfileByDefault
+     *  - 'all' - profile all routes until route has 'prifiler' === false option (action):
+     *      Route::get('/path', [..., 'profiler' => false, ...]); - profiling for such route will be disabled
+     *  - 'none' - profile only routes that have 'prifiler' === true otion (action):
+     *      Route::get('/path', [..., 'profiler' => true, ...]); - profiling for such route will be enabled
      * @return mixed
      * @throws \LogicException
      * @throws \UnexpectedValueException
@@ -23,8 +25,8 @@ class RequestProfiling {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function handle(Request $request, \Closure $next, $mode = 'all') {
-        if ($mode === 'all' || array_get($request->route()->getAction(), 'profiler')) {
+    public function handle(Request $request, \Closure $next, $routesToProfileByDefault = 'all') {
+        if (array_get($request->route()->getAction(), 'profiler', $routesToProfileByDefault === 'all')) {
             // begin profiling
             PeskyOrmPdoProfiler::init();
             $stat = HttpRequestStat::createForProfiling();
