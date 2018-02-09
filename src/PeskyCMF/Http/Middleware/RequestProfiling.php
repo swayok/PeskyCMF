@@ -18,8 +18,9 @@ class RequestProfiling {
      * Route examples:
      * 1. Use defaults: Route::get('/path', [ 'profiler' => null ]) or just avoid 'profiler' option
      * 2. Enable using defaults: Route::get('/path', [ 'profiler' => true ])
-     * 3. Disable: Route::get('/path', [ 'profiler' => false ]) or Route::get('/path', [ 'profiler' => [] ])
-     * 4. Enable with custom configs: Route::get('/path', [ 'profiler' => ['min_queries' => 10, 'min_duration' => 0.5] ])
+     * 3. Enable always (ignores limitations): Route::get('/path', [ 'profiler' => 'force' ])
+     * 4. Disable: Route::get('/path', [ 'profiler' => false ]) or Route::get('/path', [ 'profiler' => [] ])
+     * 5. Enable with custom configs: Route::get('/path', [ 'profiler' => ['min_queries' => 10, 'min_duration' => 0.5] ])
      *
      * How limits work ('min_queries'/$minDbQueries and 'min_duration'/$minDuration):
      * 1. If profiling contains checkpoints - limits are ignored
@@ -57,7 +58,14 @@ class RequestProfiling {
             $enabled = true;
         } else {
             $enabled = true;
-            $config = [];
+            if ($config === 'force') {
+                $config = [
+                    'min_duration' => 0,
+                    'min_queries' => 0,
+                ];
+            } else {
+                $config = [];
+            }
         }
         if ($enabled) {
             // begin profiling
