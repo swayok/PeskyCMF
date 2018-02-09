@@ -442,6 +442,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     protected function configureSession() {
+        if ($this->app->configurationIsCached()) {
+            return;
+        }
         $config = $this->getAppConfig()->get('session', []);
         $config['path'] = '/' . trim($this->getCmfConfig()->url_prefix(), '/');
         $this->getAppConfig()->set('session', array_merge($config, (array)$this->getCmfConfig()->config('session', [])));
@@ -453,12 +456,16 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
     protected function mergeAuthenticationConfigs() {
         // add guard and provider to configs provided by config/auth.php
+        if ($this->app->configurationIsCached()) {
+            return;
+        }
 
         $cmfAuthConfig = $this->getCmfConfig()->config('auth_guard');
         if (!is_array($cmfAuthConfig)) {
             // custom auth guard name provided
             return;
         }
+
         $config = $this->getAppConfig()->get('auth', [
             'guards' => [],
             'providers' => [],
