@@ -97,7 +97,10 @@ Route::group(
         Route::group(
             [
                 'middleware' => AjaxOnly::class,
-                'fallback' => ['route' => $routeNamePrefix . 'cmf_login']
+                'fallback' => [
+                    'route' => $routeNamePrefix . 'cmf_start_page',
+                    'use_params' => false
+                ]
             ],
             function () use ($generalControllerClass, $routeNamePrefix) {
 
@@ -119,7 +122,7 @@ Route::group(
 
                 Route::get('page/menu/counters', [
                     'as' => $routeNamePrefix . 'cmf_menu_counters_data',
-                    'uses' => $generalControllerClass . '@getMenuCounters'
+                    'uses' => $generalControllerClass . '@getMenuCounters',
                 ]);
 
                 // Admin profile
