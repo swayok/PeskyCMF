@@ -772,7 +772,7 @@ class DataGridColumnFilterConfig {
                 $value = NormalizeValue::normalizeFloat($value);
                 break;
             case static::TYPE_BOOL:
-                $value = NormalizeValue::normalizeBoolean($value, ['f']);
+                $value = NormalizeValue::normalizeBooleanExtended($value, ['f']);
                 break;
         }
         switch ($operator) {
