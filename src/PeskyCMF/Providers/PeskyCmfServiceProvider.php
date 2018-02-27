@@ -55,7 +55,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->initDefaultCmfConfig();
         $this->initPrimaryCmfConfig();
 
-        $this->app->register(LoggingServiceProvider::class);
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
         /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
         $langDetectorProvider = $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
