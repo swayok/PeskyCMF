@@ -4,7 +4,6 @@ namespace PeskyCMF\Providers;
 
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
-use LaravelExtendedErrors\LoggingServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
