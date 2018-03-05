@@ -9,7 +9,7 @@ use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 use Swayok\Utils\StringUtils;
 
-class CmfInstall extends Command {
+class CmfInstallCommand extends Command {
 
     protected $description = 'Install PeskyCMF';
     protected $signature = 'cmf:install {app_subfolder=Admin} {url_prefix=admin} {database_classes_app_subfolder=Db}';
@@ -207,7 +207,7 @@ FILE;
         $fileContents = <<<FILE
 <?php 
 
-use {$namespace}\\DB\\{$groupName}\\{$extendsClass};
+use {$namespace}\\Db\\{$groupName}\\{$extendsClass};
 
 class {$className} extends {$extendsClass} {
 

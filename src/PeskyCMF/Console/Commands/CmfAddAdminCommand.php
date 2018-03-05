@@ -8,7 +8,7 @@ use PeskyORM\Core\DbConnectionsManager;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
 
-class CmfAddAdmin extends Command {
+class CmfAddAdminCommand extends Command {
 
     protected $description = 'Create administrator in DB';
     protected $signature = 'cmf:add-admin {email_or_login} {role=admin} {table=admins} {schema?} {--login : use [login] field instead of [email]}';

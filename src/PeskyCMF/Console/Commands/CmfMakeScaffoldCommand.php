@@ -11,7 +11,7 @@ use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\File;
 use Swayok\Utils\StringUtils;
 
-class CmfMakeScaffold extends Command {
+class CmfMakeScaffoldCommand extends Command {
 
     /**
      * The name and signature of the console command.

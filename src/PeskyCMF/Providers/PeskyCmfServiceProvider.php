@@ -6,9 +6,9 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 use LaravelExtendedErrors\LoggingServiceProvider;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Console\Commands\CmfAddAdmin;
-use PeskyCMF\Console\Commands\CmfInstall;
-use PeskyCMF\Console\Commands\CmfMakeScaffold;
+use PeskyCMF\Console\Commands\CmfAddAdminCommand;
+use PeskyCMF\Console\Commands\CmfInstallCommand;
+use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\Admins\CmfAdminsTable;
 use PeskyCMF\Db\Admins\CmfAdminsTableStructure;
@@ -355,21 +355,21 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
     protected function registerInstallCommand() {
         $this->app->singleton('command.cmf.install', function() {
-            return new CmfInstall();
+            return new CmfInstallCommand();
         });
         $this->commands('command.cmf.install');
     }
 
     protected function registerAddAdminCommand() {
         $this->app->singleton('command.cmf.add-admin', function() {
-            return new CmfAddAdmin();
+            return new CmfAddAdminCommand();
         });
         $this->commands('command.cmf.add-admin');
     }
 
     protected function registerMakeScaffoldCommand() {
         $this->app->singleton('command.cmf.make-scaffold', function() {
-            return new CmfMakeScaffold();
+            return new CmfMakeScaffoldCommand();
         });
         $this->commands('command.cmf.make-scaffold');
     }
