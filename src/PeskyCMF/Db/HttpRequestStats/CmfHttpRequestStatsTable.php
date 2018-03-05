@@ -4,20 +4,20 @@ namespace PeskyCMF\Db\HttpRequestStats;
 
 use App\Db\AbstractTable;
 
-class HttpRequestStatsTable extends AbstractTable {
+class CmfHttpRequestStatsTable extends AbstractTable {
 
     /**
-     * @return HttpRequestStatsTableStructure
+     * @return CmfHttpRequestStatsTableStructure
      */
     public function getTableStructure() {
-        return HttpRequestStatsTableStructure::getInstance();
+        return CmfHttpRequestStatsTableStructure::getInstance();
     }
 
     /**
-     * @return HttpRequestStat
+     * @return CmfHttpRequestStat
      */
     public function newRecord() {
-        return new HttpRequestStat();
+        return new CmfHttpRequestStat();
     }
 
     /**

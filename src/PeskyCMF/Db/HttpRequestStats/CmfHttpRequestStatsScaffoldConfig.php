@@ -6,7 +6,7 @@ use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 
-class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
+class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
 
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = false;
@@ -15,7 +15,7 @@ class HttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
     protected $isDeleteAllowed = true;
     
     static public function getTable() {
-        return HttpRequestStatsTable::getInstance();
+        return CmfHttpRequestStatsTable::getInstance();
     }
     
     static protected function getIconForMenuItem() {

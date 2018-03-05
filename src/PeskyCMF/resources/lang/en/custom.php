@@ -684,7 +684,78 @@ $dictionary = [
                 'counters' => 'Counters',
             ],
         ]
-    ]
+    ],
+    'http_request_logs' => [
+        'menu_title' => 'HTTP requests log',
+        'datagrid' => [
+            'header' => 'HTTP requests',
+            'column' => [
+                'admin_email' => 'Admin E-mail',
+                'url' => 'URL',
+                'http_method' => 'HTTP method',
+                'ip' => 'IP',
+                'filter' => 'Filter code',
+                'section' => 'Section',
+                'response_code' => 'Response code',
+                'response_type' => 'Response type',
+                'request' => 'Request data',
+                'response' => 'Response data',
+                'table' => 'DB table',
+                'item_id' => 'Record ID in DB',
+                'data_before' => 'Data before change',
+                'data_after' => 'Data after change',
+                'created_at' => 'Created at',
+                'responded_at' => 'Responded at',
+                'id' => 'ID',
+                'admin_id' => 'Admin',
+            ],
+            'filter' => [
+                'http_request_logs' => [
+                    'admin_email' => 'Admin E-mail',
+                    'url' => 'URL',
+                    'http_method' => 'HTTP method',
+                    'ip' => 'IP',
+                    'filter' => 'Filter code',
+                    'section' => 'Section',
+                    'response_code' => 'Response code',
+                    'response_type' => 'Response type',
+                    'request' => 'Request data',
+                    'response' => 'Response data',
+                    'table' => 'DB table',
+                    'item_id' => 'Record ID in DB',
+                    'data_before' => 'Data before change',
+                    'data_after' => 'Data after change',
+                    'created_at' => 'Created at',
+                    'responded_at' => 'Responded at',
+                    'id' => 'ID',
+                    'admin_id' => 'Admin',
+                ]
+            ]
+        ],
+        'item_details' => [
+            'header' => 'HTTP request information',
+            'field' => [
+                'admin_email' => 'Admin E-mail',
+                'url' => 'URL',
+                'http_method' => 'HTTP method',
+                'ip' => 'IP',
+                'filter' => 'Filter code',
+                'section' => 'Section',
+                'response_code' => 'Response code',
+                'response_type' => 'Response type',
+                'request' => 'Request data',
+                'response' => 'Response data',
+                'table' => 'DB table',
+                'item_id' => 'Record ID in DB',
+                'data_before' => 'Data before change',
+                'data_after' => 'Data after change',
+                'created_at' => 'Created at',
+                'responded_at' => 'Responded at',
+                'id' => 'ID',
+                'admin_id' => 'Admin',
+            ]
+        ]
+    ],
 ];
 
 $dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);

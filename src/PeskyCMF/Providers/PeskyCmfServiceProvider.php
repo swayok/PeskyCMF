@@ -7,6 +7,8 @@ use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdminCommand;
 use PeskyCMF\Console\Commands\CmfInstallCommand;
+use PeskyCMF\Console\Commands\CmfInstallHttpRequestsLoggingCommand;
+use PeskyCMF\Console\Commands\CmfInstallHttpRequestsProfilingCommand;
 use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\Admins\CmfAdminsTable;
@@ -348,6 +350,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
     protected function registerCommands() {
         $this->registerInstallCommand();
+        $this->registerInstallHttpRequestsLoggingCommand();
+        $this->registerInstallHttpRequestsProfilingCommand();
         $this->registerAddAdminCommand();
         $this->registerMakeScaffoldCommand();
     }
@@ -371,6 +375,20 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             return new CmfMakeScaffoldCommand();
         });
         $this->commands('command.cmf.make-scaffold');
+    }
+
+    protected function registerInstallHttpRequestsLoggingCommand() {
+        $this->app->singleton('command.cmf.install-http-requests-logging', function() {
+            return new CmfInstallHttpRequestsLoggingCommand();
+        });
+        $this->commands('command.cmf.install-http-requests-logging');
+    }
+
+    protected function registerInstallHttpRequestsProfilingCommand() {
+        $this->app->singleton('command.cmf.install-http-requests-profiling', function() {
+            return new CmfInstallHttpRequestsProfilingCommand();
+        });
+        $this->commands('command.cmf.install-http-requests-profiling');
     }
 
     protected function configureTranslations() {

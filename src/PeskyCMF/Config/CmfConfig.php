@@ -598,6 +598,18 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * @param array $excludeItems - list of menu items to exclude
+     * @return array
+     */
+    static protected function getMenuItemsExcept(...$excludeItems) {
+        if (!empty($excludeItems)) {
+            return array_diff_key(static::getInstance()->getMenuItems(), array_flip($excludeItems));
+        } else {
+            return static::getInstance()->getMenuItems();
+        }
+    }
+
+    /**
      * Get menu item config or null if there is no such menu item
      * @param string $resourceName
      * @return array|null

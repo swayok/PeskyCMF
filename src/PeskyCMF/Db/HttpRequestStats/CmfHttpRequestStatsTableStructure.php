@@ -25,7 +25,7 @@ use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
  * @property-read Column    $checkpoints
  * @property-read Column    $counters
  */
-class HttpRequestStatsTableStructure extends CmfDbTableStructure {
+class CmfHttpRequestStatsTableStructure extends CmfDbTableStructure {
 
     use IdColumn;
 

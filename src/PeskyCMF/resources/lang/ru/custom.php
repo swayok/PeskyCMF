@@ -683,7 +683,81 @@ $dictionary = [
                 'counters' => 'Счетчики',
             ],
         ]
-    ]
+    ],
+    'http_request_logs' => [
+        'menu_title' => 'Лог HTTP запросов',
+        'datagrid' => [
+            'header' => 'HTTP запросы',
+            'column' => [
+                'admin_email' => 'E-mail Администратора',
+                'url' => 'URL',
+                'http_method' => 'HTTP method',
+                'ip' => 'IP',
+                'filter' => 'Код лога',
+                'section' => 'Секция',
+                'response_code' => 'Код ответа',
+                'response_type' => 'Тип ответа',
+                'request' => 'Данные запроса',
+                'response' => 'Данные ответа',
+                'table' => 'Таблица БД',
+                'item_id' => 'ID записи в БД',
+                'data_before' => 'Данные до изменения',
+                'data_after' => 'Данные после изменения',
+                'created_at' => 'Создан',
+                'responded_at' => 'Ответ произведен',
+                'id' => 'ID',
+                'admin_id' => 'Администратор',
+                'debug' => 'Данные для отладки',
+            ],
+            'filter' => [
+                'http_request_logs' => [
+                    'admin_email' => 'E-mail Администратора',
+                    'url' => 'URL',
+                    'http_method' => 'HTTP method',
+                    'ip' => 'IP',
+                    'filter' => 'Код лога',
+                    'section' => 'Секция',
+                    'response_code' => 'Код ответа',
+                    'response_type' => 'Тип ответа',
+                    'request' => 'Данные запроса',
+                    'response' => 'Данные ответа',
+                    'table' => 'Таблица БД',
+                    'item_id' => 'ID записи в БД',
+                    'data_before' => 'Данные до изменения',
+                    'data_after' => 'Данные после изменения',
+                    'created_at' => 'Создан',
+                    'responded_at' => 'Ответ произведен',
+                    'id' => 'ID',
+                    'admin_id' => 'Администратор',
+                    'debug' => 'Данные для отладки',
+                ]
+            ]
+        ],
+        'item_details' => [
+            'header' => 'Информация по HTTP запросу',
+            'field' => [
+                'admin_email' => 'E-mail Администратора',
+                'url' => 'URL',
+                'http_method' => 'HTTP method',
+                'ip' => 'IP',
+                'filter' => 'Код лога',
+                'section' => 'Секция',
+                'response_code' => 'Код ответа',
+                'response_type' => 'Тип ответа',
+                'request' => 'Данные запроса',
+                'response' => 'Данные ответа',
+                'table' => 'Таблица БД',
+                'item_id' => 'ID записи в БД',
+                'data_before' => 'Данные до изменения',
+                'data_after' => 'Данные после изменения',
+                'created_at' => 'Создан',
+                'responded_at' => 'Ответ произведен',
+                'id' => 'ID',
+                'admin_id' => 'Администратор',
+                'debug' => 'Данные для отладки',
+            ]
+        ]
+    ],
 ];
 
 $dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);

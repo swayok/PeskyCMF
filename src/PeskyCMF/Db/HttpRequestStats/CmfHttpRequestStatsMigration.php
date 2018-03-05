@@ -5,11 +5,11 @@ namespace PeskyCMF\Db\HttpRequestStats;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
-class HttpRequestStatsMigration extends Migration {
+class CmfHttpRequestStatsMigration extends Migration {
 
     public function up() {
-        if (!\Schema::hasTable(HttpRequestStatsTableStructure::getTableName())) {
-            \Schema::create(HttpRequestStatsTableStructure::getTableName(), function (Blueprint $table) {
+        if (!\Schema::hasTable(CmfHttpRequestStatsTableStructure::getTableName())) {
+            \Schema::create(CmfHttpRequestStatsTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('http_method');
                 $table->string('url');
@@ -44,6 +44,6 @@ class HttpRequestStatsMigration extends Migration {
     }
 
     public function down() {
-        \Schema::dropIfExists(HttpRequestStatsTableStructure::getTableName());
+        \Schema::dropIfExists(CmfHttpRequestStatsTableStructure::getTableName());
     }
 }

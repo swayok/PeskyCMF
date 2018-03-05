@@ -2,14 +2,12 @@
 
 namespace PeskyCMF\Console\Commands;
 
-use Illuminate\Console\Command;
 use PeskyCMF\Providers\PeskyCmfServiceProvider;
 use PeskyORMLaravel\Providers\PeskyOrmServiceProvider;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
-use Swayok\Utils\StringUtils;
 
-class CmfInstallCommand extends Command {
+class CmfInstallCommand extends CmfCommand {
 
     protected $description = 'Install PeskyCMF';
     protected $signature = 'cmf:install {app_subfolder=Admin} {url_prefix=admin} {database_classes_app_subfolder=Db}';
@@ -135,7 +133,7 @@ class CmfInstallCommand extends Command {
 
         // add migrations for admins and settings tables
         foreach (['settings', 'admins'] as $index => $tableName) {
-            $this->addMigrationForTable($tableName, $index, $migrationsPath);
+            $this->addMigrationForTable($tableName, $migrationsPath, strtotime("2014-01-01 0{$index}:00:00"));
         }
 
         $this->extender();
@@ -195,26 +193,4 @@ class AppSettings extends PeskyCmfAppSettings {
 FILE;
     }
 
-    protected function addMigrationForTable($tableName, $index, $migrationsPath, $prefix = 'Cmf', $namespace = 'PeskyCMF') {
-        $filePath = $migrationsPath . "2014_10_12_{$index}00000_create_{$tableName}_table.php";
-        if (File::exist($filePath)) {
-            $this->line('- migration ' . $filePath . ' already exist. skipped.');
-            return;
-        }
-        $groupName = StringUtils::classify($tableName);
-        $className = 'Create' . $groupName . 'Table';
-        $extendsClass = $prefix . $groupName . 'Migration';
-        $fileContents = <<<FILE
-<?php 
-
-use {$namespace}\\Db\\{$groupName}\\{$extendsClass};
-
-class {$className} extends {$extendsClass} {
-
-}
-
-FILE;
-        File::save($filePath, $fileContents, 0664, 0755);
-        $this->line('Added migration ' . $migrationsPath);
-    }
 }

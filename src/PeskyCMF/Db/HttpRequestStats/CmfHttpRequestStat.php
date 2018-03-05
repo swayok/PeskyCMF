@@ -55,7 +55,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @method $this    setCheckpoints($value, $isFromDb = false)
  * @method $this    setCounters($value, $isFromDb = false)
  */
-class HttpRequestStat extends AbstractRecord {
+class CmfHttpRequestStat extends AbstractRecord {
 
     static protected $startedAt;
     static protected $checkpointsStack = [];
@@ -63,14 +63,14 @@ class HttpRequestStat extends AbstractRecord {
     static protected $current;
 
     /**
-     * @return HttpRequestStatsTable
+     * @return CmfHttpRequestStatsTable
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
     static public function getTable() {
-        return HttpRequestStatsTable::getInstance();
+        return CmfHttpRequestStatsTable::getInstance();
     }
 
     /**
@@ -146,7 +146,7 @@ class HttpRequestStat extends AbstractRecord {
             }
             if (!array_has($checkpoints, $path)) {
                 throw new \InvalidArgumentException(
-                    'There is no checkpoint at path "' . $path . '". Use HttpRequestStat::startCheckpoint() before HttpRequestStat::endCheckpoint().'
+                    'There is no checkpoint at path "' . $path . '". Use CmfHttpRequestStat::startCheckpoint() before CmfHttpRequestStat::endCheckpoint().'
                 );
             }
             $checkpoint = array_get($checkpoints, $path);
@@ -278,7 +278,7 @@ class HttpRequestStat extends AbstractRecord {
                 }
             } else {
                 throw new \LogicException(
-                    'All checkpoints must be ended. Possibly you have forgotten to call HttpRequestStat::endCheckpoint() somewhere'
+                    'All checkpoints must be ended. Possibly you have forgotten to call CmfHttpRequestStat::endCheckpoint() somewhere'
                 );
             }
         }

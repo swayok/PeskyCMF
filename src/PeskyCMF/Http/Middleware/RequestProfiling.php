@@ -3,7 +3,7 @@
 namespace PeskyCMF\Http\Middleware;
 
 use Illuminate\Http\Request;
-use PeskyCMF\Db\HttpRequestStats\HttpRequestStat;
+use PeskyCMF\Db\HttpRequestStats\CmfHttpRequestStat;
 use PeskyORM\Profiling\PeskyOrmPdoProfiler;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -70,7 +70,7 @@ class RequestProfiling {
         if ($enabled) {
             // begin profiling
             PeskyOrmPdoProfiler::init();
-            $stat = HttpRequestStat::createForProfiling();
+            $stat = CmfHttpRequestStat::createForProfiling();
             // process request
             $response = $next($request);
             // on HTTP response
