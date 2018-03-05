@@ -229,7 +229,16 @@ $dictionary = [
         'response' => 'Server response on success',
         'errors' => 'Possible errors',
         'download_postman_collection' => 'Download requests collection for Postman',
-        'postman_collection_file_name' => 'postman_collection_for_api_on_:http_host'
+        'postman_collection_file_name' => 'postman_collection_for_api_on_:http_host',
+        'section' => [
+            'no_section' => 'API methods without a group'
+        ],
+        'error' => [
+            'auth_failure' => 'Authentication failure',
+            'access_denied' => 'Access denied',
+            'validation_errors' => 'Invalid data received',
+            'server_error' => 'Critical error on server',
+        ]
     ],
     'pages' => [
         'menu_title' => 'Pages',

@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\ApiDocs;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
 use Ramsey\Uuid\Uuid;
 
@@ -17,7 +18,22 @@ abstract class CmfApiDocsSection {
 
     // override next properties and methods
 
-    public $title = '';
+    /**
+     * You can use simple string or translation path in format: '{api_docs.method.some_name.title}'
+     * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
+     * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
+     * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
+     * @var string
+     */
+    protected $title = '';
+
+    /**
+     * You can use simple string or translation path in format: '{api_docs.method.some_name.description}'
+     * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
+     * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
+     * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
+     * @var string
+     */
     public $description = <<<HTML
 
 HTML;
@@ -33,7 +49,8 @@ HTML;
 
     public $headers = [
         'Accept' => 'application/json',
-        'Authorization' => 'Bearer {{token}}'
+        'Accept-Language' => '{{language}}',
+        'Authorization' => 'Bearer {{auth_token}}'
     ];
     /**
      * List of parameters used inside URL
@@ -70,6 +87,14 @@ HTML;
                 'response' => [
                     'error' => 'item_not_found'
                 ]
+            ]
+            or if you want localized API docs:
+            [
+                'code' => HttpCode::NOT_FOUND,
+                'title' => CmfConfig::transCustom('api_docs.error.item_not_found'),
+                'response' => [
+                    'error' => 'item_not_found'
+                ]
             ],
         */
         return [];
@@ -91,6 +116,9 @@ HTML;
                 'response' => $this->validationErrors
             ]);
         }
+        foreach ($errors as &$error) {
+            $error['title'] = $this->getTranslation($error['title']);
+        }
         return $errors;
     }
 
@@ -98,7 +126,7 @@ HTML;
 
     static protected $authFailError = [
         'code' => HttpCode::UNAUTHORISED,
-        'title' => 'Не удалось авторизовать пользователя',
+        'title' => '{api_docs.error.auth_failure}',
         'response' => [
             'error' => 'Unauthenticated.'
         ]
@@ -106,19 +134,19 @@ HTML;
 
     static protected $accessDeniedError = [
         'code' => HttpCode::FORBIDDEN,
-        'title' => 'Доступ запрещен',
+        'title' => '{api_docs.error.access_denied}',
         'response' => []
     ];
 
     static protected $dataValidationError = [
         'code' => HttpCode::CANNOT_PROCESS,
-        'title' => 'Ошибки валидации данных',
+        'title' => '{api_docs.error.validation_errors}',
         'response' => []
     ];
 
     static protected $serverError = [
         'code' => HttpCode::SERVER_ERROR,
-        'title' => 'Критическая ошибка на стороне сервера',
+        'title' => '{api_docs.error.server_error}',
         'response' => []
     ];
 
@@ -137,6 +165,31 @@ HTML;
                 }
             }
         }
+    }
+
+    /**
+     * Get translation from a string like "{api_docs.method.name.title}" or return original string
+     * @param string $string
+     * @return string
+     */
+    protected function getTranslation($string) {
+        if (preg_match('%^\{(.*)\}$%', $string, $matches)) {
+            return CmfConfig::transCustom($matches[1]);
+        } else {
+            return $string;
+        }
+    }
+
+    public function getTitle() {
+        return $this->getTranslation($this->title);
+    }
+
+    public function getDescription() {
+        return $this->getTranslation($this->description);
+    }
+
+    public function hasDescription() {
+        return trim(preg_replace('%</?[^>]+>%', '', $this->description)) !== '';
     }
 
     public function getUuid() {
@@ -164,7 +217,11 @@ HTML;
                     ['% +%', "%\n\s+%s"],
                     [' ', "\n"],
                     trim(strip_tags(
-                        preg_replace(["%\n+%m", '%</(p|div|li|ul)>|<br>%'], [' ', "\n"], $this->description)
+                        preg_replace(
+                            ["%\n+%m", '%</(p|div|li|ul)>|<br>%'],
+                            [' ', "\n"],
+                            $this->getTitle() . "\n" . $this->getDescription()
+                        )
                     ))
                 ),
                 'header' => [],

@@ -11,6 +11,7 @@ use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
+use Swayok\Utils\Folder;
 use Swayok\Utils\StringUtils;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
 
@@ -1072,7 +1073,63 @@ class CmfConfig extends ConfigsContainer {
      * @return array - key - section name, value - array that contains names of classes that extend CmfApiDocsSection class
      */
     static public function getApiDocsSections() {
-        return static::config('api_docs_class_names', []);
+        $classNames = static::config('api_docs_class_names', []);
+        if (empty($classNames)) {
+            $classNames = static::loadApiDocsSectionsFromFileSystem();
+        }
+        return $classNames;
+    }
+
+    /**
+     * Load api dosc sections from files in
+     * @return array
+     */
+    static protected function loadApiDocsSectionsFromFileSystem() {
+        $folder = self::api_docs_classes_folder();
+        if (!Folder::exist()) {
+            return [];
+        }
+        $ret = [];
+        $classFinder = function ($folderPath, array $files) {
+            $classes = [];
+            foreach ($files as $fileName) {
+                if (preg_match('%\.php$%i', $fileName)) {
+                    $file = fopen($folderPath . DIRECTORY_SEPARATOR . $fileName, 'rb');
+                    $buffer = fread($file, 512);
+                    if (preg_match('%^\s*class\s+(\w+)\s+extends\s+CmfApiDocsSection%im', $buffer, $classMatches)) {
+                        $class = $classMatches[1];
+                        if (preg_match("%[^w]namespace\s+([\w\\\]+).*?class\s+{$class}\s+%is", $buffer, $nsMatches)) {
+                            $namespace = $nsMatches[1];
+                            $classes[] = '\\' . $namespace . '\\' . $class;
+                        }
+                    }
+                }
+            }
+            return $classes;
+        };
+        $folder = Folder::load($folder);
+        list($subFolders, $files) = $folder->read();
+        $withoutSection = $classFinder($folder->pwd(), $files);
+        if (!empty($withoutSection)) {
+            $ret[static::transCustom('api_docs.section.no_section')] = $withoutSection;
+        }
+        foreach ($subFolders as $subFolderName) {
+            if ($subFolderName[0] === '.') {
+                // ignore folders starting with '.' - nothing useful there
+                continue;
+            }
+            $subFolder = Folder::load($folder->pwd() . DIRECTORY_SEPARATOR . $subFolderName);
+            $files = $subFolder->find('.*\.php');
+            $classes = $classFinder($subFolder->pwd(), $files);
+            if (!empty($classes)) {
+                $ret[static::transCustom('api_docs.section.' . snake_case($subFolderName))] = $classes;
+            }
+        }
+        return $ret;
+    }
+
+    static public function api_docs_classes_folder() {
+        return static::config('api_docs_classes_folder') ?: app_path('Api/Docs');
     }
 
     protected $httpRequestsLogger;

@@ -229,7 +229,16 @@ $dictionary = [
         'response' => 'Ответ сервера при успешном выполнении запроса',
         'errors' => 'Ошибки, которые могут возникнуть',
         'download_postman_collection' => 'Скачать коллекцию запросов для Postman',
-        'postman_collection_file_name' => 'postman_collection_for_api_on_:http_host'
+        'postman_collection_file_name' => 'postman_collection_for_api_on_:http_host',
+        'section' => [
+            'no_section' => 'Не сгруппированные методы API'
+        ],
+        'error' => [
+            'auth_failure' => 'Не удалось авторизовать пользователя',
+            'access_denied' => 'Доступ запрещен',
+            'validation_errors' => 'Ошибки валидации данных',
+            'server_error' => 'Критическая ошибка на стороне сервера',
+        ]
     ],
     'pages' => [
         'menu_title' => 'Страницы',
