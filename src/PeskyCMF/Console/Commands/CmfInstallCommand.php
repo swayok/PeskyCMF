@@ -145,6 +145,7 @@ class CmfInstallCommand extends CmfCommand {
             $this->line(' ');
 
             $this->line("'cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
+            $this->line("'app_settings_class' => \\App\\AppSettings::class,");
             $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
             $this->line("'routes_files' => ['{$routesFileRelativePath}'],");
             $this->line("'controllers_namespace' => '{$controllersNamespace}',");
