@@ -34,7 +34,7 @@ abstract class CmfApiDocsSection {
      * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
      * @var string
      */
-    public $description = <<<HTML
+    protected $description = <<<HTML
 
 HTML;
 
@@ -44,7 +44,7 @@ HTML;
      * enough unlike '{url_parameter}' variant)
      * @var string
      */
-    public $url = '/api/example/{url_parameter}/list';
+    protected $url = '/api/example/{url_parameter}/list';
     public $httpMethod = 'GET';
 
     public $headers = [
@@ -196,6 +196,10 @@ HTML;
         return $this->uuid;
     }
 
+    public function getUrl() {
+        return trim((string)$this->url);
+    }
+
     public function getConfigForPostman() {
         $queryParams = [];
         foreach ($this->urlQueryParameters as $name => $info) {
@@ -206,11 +210,12 @@ HTML;
             }
         }
         $queryParams = empty($queryParams) ? '' : '?' . implode('&', $queryParams);
+        $url = $this->getUrl();
         $item = [
-            'name' => $this->url,
+            'name' => $url,
             'request' => [
                 'url' => url(
-                    preg_replace('%\{([^/]+?)\}%', ':$1', $this->url) . $queryParams
+                    preg_replace('%\{([^/]+?)\}%', ':$1', $url) . $queryParams
                 ),
                 'method' => strtoupper($this->httpMethod),
                 'description' => preg_replace(

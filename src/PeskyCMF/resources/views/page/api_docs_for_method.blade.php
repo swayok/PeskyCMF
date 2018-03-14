@@ -2,14 +2,16 @@
 /**
  * @var \PeskyCMF\ApiDocs\CmfApiDocsSection $method
  */
+$url = $method->getUrl();
+$hasUrl = $url !== '';
 ?>
 <div class="panel box box-solid box-default">
     <div class="box-header with-border" style="cursor:pointer" data-toggle="collapse" data-target="#{{ $method->getUuid() }}">
-        @if (trim($method->url) !== '')
+        @if ($hasUrl)
             <div class="col-xs-6 text-bold">{{ $method->getTitle() }}</div>
             <div class="col-xs-6 text-nowrap of-h">
                 <div class="http-method ib" style="width: 65px;">{{ $method->httpMethod }}</div>
-                <span class="url">{{ $method->url }}</span>
+                <span class="url">{{ $url }}</span>
             </div>
         @else
             <div class="col-xs-12 text-bold">{{ $method->getTitle() }}</div>
@@ -17,14 +19,14 @@
     </div>
     <div id="{{ $method->getUuid() }}" class="panel-collapse collapse">
         <div class="box-body">
-            @if(trim($method->url) !== '')
+            @if($hasUrl)
                 <div class="row">
                     <div class="col-xs-12 fs16 fw600">
                         <div class="box box-solid box-default">
                             <div class="box-body">
                                 <span class="http-method">{{ $method->httpMethod }}</span>
                                 <span class="fa fa-long-arrow-right"></span>
-                                <span class="url">{{ $method->url }}</span>
+                                <span class="url">{{ $url }}</span>
                             </div>
                         </div>
                     </div>
