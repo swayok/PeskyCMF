@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
-use PeskyCMF\ApiDocs\CmfApiDocsSection;
+use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
@@ -592,8 +592,8 @@ class CmfGeneralController extends Controller {
             ],
             'item' => [],
         ];
-        foreach (CmfConfig::getPrimary()->getApiDocsSections() as $methodsList) {
-            /** @var CmfApiDocsSection $apiMethodDocs */
+        foreach (CmfConfig::getPrimary()->getApiMethodsDocumentationClasses() as $methodsList) {
+            /** @var CmfApiMethodDocumentation $apiMethodDocs */
             foreach ($methodsList as $apiMethodDocs) {
                 $docsObject = $apiMethodDocs::create();
                 if (trim($docsObject->getUrl()) === '') {

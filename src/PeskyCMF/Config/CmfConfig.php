@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Config;
 
+use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Http\Middleware\ValidateCmfUser;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
@@ -515,21 +516,21 @@ class CmfConfig extends ConfigsContainer {
         return array_merge(
             [
                 [
-                    'label' => self::transCustom('.page.dashboard.menu_title'),
+                    'label' => static::transCustom('.page.dashboard.menu_title'),
                     'url' => routeToCmfPage('dashboard'),
                     'icon' => 'glyphicon glyphicon-dashboard',
                 ],
                 /*[
-                    'label' => self::transCustom('.users.menu_title'),
+                    'label' => static::transCustom('.users.menu_title'),
                     'url' => '/resource/users',
                     'icon' => 'fa fa-group'
                 ],*/
                 /*[
-                    'label' => self::transCustom('.menu.section_utils'),
+                    'label' => static::transCustom('.menu.section_utils'),
                     'icon' => 'glyphicon glyphicon-align-justify',
                     'submenu' => [
                         [
-                            'label' => self::transCustom('.admins.menu_title'),
+                            'label' => static::transCustom('.admins.menu_title'),
                             'url' => '/resource/admins',
                             'icon' => 'glyphicon glyphicon-user'
                         ],
@@ -621,7 +622,7 @@ class CmfConfig extends ConfigsContainer {
 
     /**
      * Menu item for api logs page.
-     * Note: it is not added automatically to menu items - you need to add it manually to self::menu()
+     * Note: it is not added automatically to menu items - you need to add it manually to static::menu()
      * @return array
      */
     static public function getApiDocsMenuItem() {
@@ -647,7 +648,7 @@ class CmfConfig extends ConfigsContainer {
      * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
      * @param array $parameters
      * @param null|string $locale
-     * @return string
+     * @return string|array
      */
     static public function transCustom($path, array $parameters = [], $locale = null) {
         $dict = self::getPrimary()->custom_dictionary_name();
@@ -679,7 +680,7 @@ class CmfConfig extends ConfigsContainer {
      * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
      * @param array $parameters
      * @param null|string $locale
-     * @return string
+     * @return string|array
      */
     static public function transGeneral($path, array $parameters = [], $locale = null) {
         $dict = self::getPrimary()->cmf_general_dictionary_name();
@@ -694,6 +695,23 @@ class CmfConfig extends ConfigsContainer {
             }
         }
         return $trans;
+    }
+
+    /**
+     * Translations for Api Docs
+     * @param string $translationPath
+     * @param array $parameters
+     * @param null $locale
+     * @return string|array
+     */
+    static public function transApiDoc(string $translationPath, array $parameters = [], $locale = null) {
+        if (static::class === self::class) {
+            // redirect CmfConfig::transApiDoc() calls to primary config class
+            return static::getPrimary()->transApiDoc($translationPath, $parameters, $locale);
+        } else {
+            $translationPath = 'api_docs.' . ltrim($translationPath, '.');
+            return static::transCustom($translationPath, $parameters, $locale);
+        }
     }
 
     /**
@@ -1069,23 +1087,26 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Provides sections with list of objects of classes that extend CmfApiDocsSection class to be displayed in api docs section
-     * @return array - key - section name, value - array that contains names of classes that extend CmfApiDocsSection class
+     * Provides sections with list of objects of classes that extend CmfApiMethodDocumentation class to be displayed in api docs section
+     * @return array - key - section name, value - array that contains names of classes that extend CmfApiMethodDocumentation class
      */
-    static public function getApiDocsSections() {
+    static public function getApiMethodsDocumentationClasses() {
         $classNames = static::config('api_docs_class_names', []);
         if (empty($classNames)) {
-            $classNames = static::loadApiDocsSectionsFromFileSystem();
+            $classNames = static::loadApiMethodsDocumentationClassesFromFileSystem();
         }
         return $classNames;
     }
 
     /**
-     * Load api dosc sections from files in
+     * Load api dosc sections from files in static::api_methods_documentation_classes_folder() and its subfolders.
+     * Should be used only when static::config('api_docs_class_names') not provided.
+     * Subfolders names used as API sections.
+     * Collects only classes that extend *ApiMethodDocumentation class or static::api_method_documentation_base_class()
      * @return array
      */
-    static protected function loadApiDocsSectionsFromFileSystem() {
-        $folder = self::api_docs_classes_folder();
+    static protected function loadApiMethodsDocumentationClassesFromFileSystem() {
+        $folder = static::api_methods_documentation_classes_folder();
         if (!Folder::exist()) {
             return [];
         }
@@ -1096,7 +1117,8 @@ class CmfConfig extends ConfigsContainer {
                 if (preg_match('%\.php$%i', $fileName)) {
                     $file = fopen($folderPath . DIRECTORY_SEPARATOR . $fileName, 'rb');
                     $buffer = fread($file, 512);
-                    if (preg_match('%^\s*class\s+(\w+)\s+extends\s+CmfApiDocsSection%im', $buffer, $classMatches)) {
+                    $parentClassName = class_basename(static::api_method_documentation_base_class()) . '|[a-zA-Z0-9_-]+ApiMethodDocumentation';
+                    if (preg_match('%^\s*class\s+(\w+)\s+extends\s+(' . $parentClassName . ')%im', $buffer, $classMatches)) {
                         $class = $classMatches[1];
                         if (preg_match("%[^w]namespace\s+([\w\\\]+).*?class\s+{$class}\s+%is", $buffer, $nsMatches)) {
                             $namespace = $nsMatches[1];
@@ -1111,7 +1133,7 @@ class CmfConfig extends ConfigsContainer {
         list($subFolders, $files) = $folder->read();
         $withoutSection = $classFinder($folder->pwd(), $files);
         if (!empty($withoutSection)) {
-            $ret[static::transCustom('api_docs.section.no_section')] = $withoutSection;
+            $ret[(string)static::transCustom('api_docs.section.no_section')] = $withoutSection;
         }
         foreach ($subFolders as $subFolderName) {
             if ($subFolderName[0] === '.') {
@@ -1122,14 +1144,24 @@ class CmfConfig extends ConfigsContainer {
             $files = $subFolder->find('.*\.php');
             $classes = $classFinder($subFolder->pwd(), $files);
             if (!empty($classes)) {
-                $ret[static::transCustom('api_docs.section.' . snake_case($subFolderName))] = $classes;
+                $ret[(string)static::transApiDoc('section.' . snake_case($subFolderName))] = $classes;
             }
         }
         return $ret;
     }
 
-    static public function api_docs_classes_folder() {
+    /**
+     * @return string
+     */
+    static public function api_methods_documentation_classes_folder() {
         return static::config('api_docs_classes_folder') ?: app_path('Api/Docs');
+    }
+
+    /**
+     * @return string
+     */
+    static public function api_method_documentation_base_class() {
+        return static::config('api_method_documentation_base_class') ?: CmfApiMethodDocumentation::class;
     }
 
     protected $httpRequestsLogger;

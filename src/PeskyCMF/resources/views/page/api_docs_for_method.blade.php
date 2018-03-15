@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\ApiDocs\CmfApiDocsSection $method
+ * @var \PeskyCMF\ApiDocs\CmfApiMethodDocumentation $method
  */
 $url = $method->getUrl();
 $hasUrl = $url !== '';
@@ -115,7 +115,7 @@ $hasUrl = $url !== '';
                 @endif
             </div>
             <div class="row">
-                @php($errors = array_merge($method->getCommonErrors(), $method->getPossibleErrors()))
+                @php($errors = $method->getErrors())
 
                 @if (!empty($method->onSuccess))
                     <div class="@if(empty($errors)) col-xs-12 @else col-xs-6 @endif">

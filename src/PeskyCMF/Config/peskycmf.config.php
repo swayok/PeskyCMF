@@ -214,11 +214,19 @@ return [
     'http_requests_logger_class_name' => null,
 
     /**
-     * List of class names that extend \PeskyCMF\ApiDocs\CmfApiDocsSection class
+     * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation class
+     * Note: there is a possibility to load classes automatically using 'api_docs_classes_folder'. More details
+     * in CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem()
      */
     'api_docs_class_names' => [
 
     ],
+
+    /**
+     * Base class for api method documentation. Used in 'cmf:make-api-method-doc' command
+     * and in CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem()
+     */
+    'api_method_documentation_base_class' => \PeskyCMF\ApiDocs\CmfApiMethodDocumentation::class,
 
     /**
      * Alter umask()

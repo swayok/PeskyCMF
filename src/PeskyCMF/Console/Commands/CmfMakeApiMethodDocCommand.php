@@ -7,12 +7,12 @@ use PeskyCMF\Config\CmfConfig;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 
-class CmfMakeApiMethodDocsCommand extends Command {
+class CmfMakeApiMethodDocCommand extends Command {
 
-    protected $description = 'Create class that extends CmfApiDocsSection class';
+    protected $description = 'Create class that extends CmfApiMethodDocumentation class';
 
-    protected $signature = 'cmf:make-api-method-docs {class_name} {docs_group} 
-                                {folder? : folder path relative to app_path(); default: CmfConfig::getPrimary()->api_docs_classes_folder()}';
+    protected $signature = 'cmf:make-api-method-doc {class_name} {docs_group} 
+                                {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_docs_classes_folder()}';
 
     public function fire() {
         // compatibility with Laravel <= 5.4
@@ -23,7 +23,7 @@ class CmfMakeApiMethodDocsCommand extends Command {
         $className = $this->argument('class_name');
         $folder = $this->argument('folder');
         if (trim($folder) === '') {
-            $folder = CmfConfig::getPrimary()->api_docs_classes_folder();
+            $folder = CmfConfig::getPrimary()->api_methods_documentation_classes_folder();
         } else {
             $folder = app_path($folder);
         }
@@ -38,19 +38,21 @@ class CmfMakeApiMethodDocsCommand extends Command {
         $this->line('Writing class ' .  $namespace . '\\' . $className . ' to file ' . $filePath);
         $namespace = ltrim($namespace, '\\');
         $translationGroup = snake_case(str_ireplace(['ApiDocs', 'ApiDoc'], ['', ''], $className));
+        $baseClass = CmfConfig::getPrimary()->api_method_documentation_base_class();
+        $baseClassName = class_basename($baseClass);
         $fileContents = <<<CLASS
 <?php
 
 namespace {$namespace};
 
-use PeskyCMF\ApiDocs\CmfApiDocsSection;
+use {$baseClass};
 
-class {$className} extends CmfApiDocsSection {
+class {$className} extends {$baseClassName} {
 
-    public \$title = '{api_docs.method.{$translationGroup}.title}';
-    public \$description = '{api_docs.method.{$translationGroup}.description}';
+    protected \$title = '{method.{$translationGroup}.title}';
+    protected \$description = '{method.{$translationGroup}.description}';
 
-    public \$url = '/api/v1/resource/{id}';
+    protected \$url = '/api/v1/resource/{id}';
     public \$httpMethod = 'GET';
 
     public \$headers = [
@@ -68,7 +70,7 @@ class {$className} extends CmfApiDocsSection {
     public \$postParameters = [
 //        'id' => 'int',
     ];
-    public \$validationErrors = [
+    protected \$validationErrors = [
 //        'token' => ['required', 'string'],
 //        'id' => ['required', 'integer', 'min:1']
     ];
@@ -80,11 +82,11 @@ class {$className} extends CmfApiDocsSection {
     /**
      * @return array
      */
-    public function getPossibleErrors() {
+    protected function getPossibleErrors() {
         /* Example:
             [
                 'code' => HttpCode::NOT_FOUND,
-                'title' => \$this->getTranslation('{api_docs.error.item_not_found}'),
+                'title' => '{error.item_not_found}',
                 'response' => [
                     'error' => 'not_found'
                 ]

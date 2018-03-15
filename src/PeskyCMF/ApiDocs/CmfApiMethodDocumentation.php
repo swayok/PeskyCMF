@@ -14,12 +14,12 @@ use Ramsey\Uuid\Uuid;
  * @method onSuccess()
  * @method validationErrors()
  */
-abstract class CmfApiDocsSection {
+abstract class CmfApiMethodDocumentation {
 
     // override next properties and methods
 
     /**
-     * You can use simple string or translation path in format: '{api_docs.method.some_name.title}'
+     * You can use simple string or translation path in format: '{method.some_name.title}'
      * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
      * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
      * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
@@ -28,7 +28,7 @@ abstract class CmfApiDocsSection {
     protected $title = '';
 
     /**
-     * You can use simple string or translation path in format: '{api_docs.method.some_name.description}'
+     * You can use simple string or translation path in format: '{method.some_name.description}'
      * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
      * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
      * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
@@ -67,7 +67,7 @@ HTML;
     public $postParameters = [
 //        'id' => 'int',
     ];
-    public $validationErrors = [
+    protected $validationErrors = [
 //        'token' => ['required', 'string'],
 //        'id' => ['required', 'integer', 'min:1']
     ];
@@ -79,7 +79,7 @@ HTML;
     /**
      * @return array
      */
-    public function getPossibleErrors() {
+    protected function getPossibleErrors() {
         /* Example:
             [
                 'code' => HttpCode::NOT_FOUND,
@@ -91,7 +91,7 @@ HTML;
             or if you want localized API docs:
             [
                 'code' => HttpCode::NOT_FOUND,
-                'title' => CmfConfig::transCustom('api_docs.error.item_not_found'),
+                'title' => CmfConfig::transCustom('error.item_not_found'),
                 'response' => [
                     'error' => 'item_not_found'
                 ]
@@ -105,17 +105,24 @@ HTML;
     /**
      * @return array
      */
-    public function getCommonErrors() {
-        $errors = [
+    protected function getCommonErrors() {
+        return [
             static::$authFailError,
             static::$accessDeniedError,
             static::$serverError,
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrors() {
+        $additionalErrors = [];
         if (count($this->validationErrors)) {
-            $errors[] = array_merge(static::$dataValidationError, [
-                'response' => $this->validationErrors
-            ]);
+            $additionalErrors[] = array_merge(static::$dataValidationError, ['response' => $this->validationErrors]);
         }
+        $errors = array_merge($this->getCommonErrors(), $additionalErrors, $this->getPossibleErrors());
+        // translate titles
         foreach ($errors as &$error) {
             $error['title'] = $this->getTranslation($error['title']);
         }
@@ -126,7 +133,7 @@ HTML;
 
     static protected $authFailError = [
         'code' => HttpCode::UNAUTHORISED,
-        'title' => '{api_docs.error.auth_failure}',
+        'title' => '{error.auth_failure}',
         'response' => [
             'error' => 'Unauthenticated.'
         ]
@@ -134,19 +141,19 @@ HTML;
 
     static protected $accessDeniedError = [
         'code' => HttpCode::FORBIDDEN,
-        'title' => '{api_docs.error.access_denied}',
+        'title' => '{error.access_denied}',
         'response' => []
     ];
 
     static protected $dataValidationError = [
         'code' => HttpCode::CANNOT_PROCESS,
-        'title' => '{api_docs.error.validation_errors}',
+        'title' => '{error.validation_errors}',
         'response' => []
     ];
 
     static protected $serverError = [
         'code' => HttpCode::SERVER_ERROR,
-        'title' => '{api_docs.error.server_error}',
+        'title' => '{error.server_error}',
         'response' => []
     ];
 
@@ -168,13 +175,13 @@ HTML;
     }
 
     /**
-     * Get translation from a string like "{api_docs.method.name.title}" or return original string
+     * Get translation from a string like "{method.name.title}" or return original string
      * @param string $string
      * @return string
      */
     protected function getTranslation($string) {
         if (preg_match('%^\{(.*)\}$%', $string, $matches)) {
-            return CmfConfig::transCustom($matches[1]);
+            return CmfConfig::transApiDoc($matches[1]);
         } else {
             return $string;
         }

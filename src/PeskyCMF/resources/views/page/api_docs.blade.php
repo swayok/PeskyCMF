@@ -16,7 +16,7 @@
     </ol>
 </div>
 <div class="content" id="api-docs">
-    @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->getApiDocsSections() as $header => $methods)
+    @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->getApiMethodsDocumentationClasses() as $header => $methods)
         <div class="row"><div class="col-xs-12">
             <div class="box box-solid box-primary api-docs-section">
                 <div class="box-header">
