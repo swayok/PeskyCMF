@@ -1127,6 +1127,22 @@ class CmfConfig extends ConfigsContainer {
                     }
                 }
             }
+            // sort classes
+            usort($classes, function ($class1, $class2) {
+                /** @var CmfApiMethodDocumentation $class1 */
+                /** @var CmfApiMethodDocumentation $class2 */
+                $pos1 = $class1::getPosition();
+                $pos2 = $class2::getPosition();
+                if ($pos1 === null) {
+                    return $pos2 === null ? 0 : 1;
+                } else if ($pos2 === null) {
+                    return $pos1 === null ? 0 : -1;
+                } else if ($pos1 === $pos2) {
+                    return 0;
+                } else {
+                    return $pos1 > $pos2;
+                }
+            });
             return $classes;
         };
         $folder = Folder::load($folder);

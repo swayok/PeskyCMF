@@ -6,17 +6,16 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
 use Ramsey\Uuid\Uuid;
 
-/**
- * @method headers()
- * @method urlParameters()
- * @method urlQueryParameters()
- * @method postParameters()
- * @method onSuccess()
- * @method validationErrors()
- */
 abstract class CmfApiMethodDocumentation {
 
     // override next properties and methods
+
+    /**
+     * Position of this method within the group.
+     * Used only by CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem().
+     * @var int|null
+     */
+    static protected $position;
 
     /**
      * You can use simple string or translation path in format: '{method.some_name.title}'
@@ -45,9 +44,9 @@ HTML;
      * @var string
      */
     protected $url = '/api/example/{url_parameter}/list';
-    public $httpMethod = 'GET';
+    protected $httpMethod = 'GET';
 
-    public $headers = [
+    protected $headers = [
         'Accept' => 'application/json',
         'Accept-Language' => '{{language}}',
         'Authorization' => 'Bearer {{auth_token}}'
@@ -57,14 +56,14 @@ HTML;
      * For url: '/api/items/{id}/list' 'id' is url parameter (brackets needed only to highlight url parameter)
      * @var array
      */
-    public $urlParameters = [
+    protected $urlParameters = [
 //        'url_parameter' => 'int'
     ];
-    public $urlQueryParameters = [
+    protected $urlQueryParameters = [
 //        '_method' => 'PUT',
 //        'token' => 'string',
     ];
-    public $postParameters = [
+    protected $postParameters = [
 //        'id' => 'int',
     ];
     protected $validationErrors = [
@@ -72,7 +71,7 @@ HTML;
 //        'id' => ['required', 'integer', 'min:1']
     ];
 
-    public $onSuccess = [
+    protected $onSuccess = [
 //        'name' => 'string',
     ];
 
@@ -124,7 +123,7 @@ HTML;
         $errors = array_merge($this->getCommonErrors(), $additionalErrors, $this->getPossibleErrors());
         // translate titles
         foreach ($errors as &$error) {
-            $error['title'] = $this->getTranslation($error['title']);
+            $error['title'] = $this->translate($error['title']);
         }
         return $errors;
     }
@@ -163,36 +162,18 @@ HTML;
 
     public function __construct() {
         $this->uuid = Uuid::uuid4()->toString();
-        // load data from class methods
-        foreach (['headers', 'onSuccess', 'validationErrors', 'postParameters', 'urlQueryParameters', 'urlParameters'] as $field) {
-            if (method_exists($this, $field)) {
-                $this->$field = $this->$field();
-                if (!is_array($this->$field)) {
-                    throw new \UnexpectedValueException(get_class($this) . '->' . $field . '() method must return an array');
-                }
-            }
-        }
     }
 
-    /**
-     * Get translation from a string like "{method.name.title}" or return original string
-     * @param string $string
-     * @return string
-     */
-    protected function getTranslation($string) {
-        if (preg_match('%^\{(.*)\}$%', $string, $matches)) {
-            return CmfConfig::transApiDoc($matches[1]);
-        } else {
-            return $string;
-        }
+    static public function getPosition() {
+        return static::$position;
     }
 
     public function getTitle() {
-        return $this->getTranslation($this->title);
+        return $this->translate($this->title);
     }
 
     public function getDescription() {
-        return $this->getTranslation($this->description);
+        return $this->translate($this->description);
     }
 
     public function hasDescription() {
@@ -207,9 +188,68 @@ HTML;
         return trim((string)$this->url);
     }
 
+    public function getHttpMethod() {
+        return $this->httpMethod;
+    }
+
+    public function getHeaders() {
+        return $this->headers;
+    }
+
+    public function getUrlParameters() {
+        return $this->translateArrayValues($this->urlParameters);
+    }
+
+    public function getUrlQueryParameters() {
+        return $this->translateArrayValues($this->urlQueryParameters);
+    }
+
+    public function getPostParameters() {
+        return $this->translateArrayValues($this->postParameters);
+    }
+
+    public function getValidationErrors() {
+        return $this->translateArrayValues($this->validationErrors);
+    }
+
+    public function getOnSuccessData() {
+        return $this->translateArrayValues($this->onSuccess);
+    }
+
+    /**
+     * Translate blocks like "{method.name.title}" placed inside the $string
+     * @param string $string
+     * @return string
+     */
+    protected function translate($string) {
+        return preg_replace_callback(
+            '%\{([^{}]*)\}%',
+            function ($matches) {
+                return CmfConfig::transApiDoc($matches[1]);
+            },
+            $string
+        );
+    }
+
+    /**
+     * Translate values of the $array recursively
+     * @param array $array
+     * @return array
+     */
+    protected function translateArrayValues(array $array) {
+        foreach ($array as &$value) {
+            if (is_string($value)) {
+                $value = $this->translate($value);
+            } else if (is_array($value)) {
+                $value = $this->translateArrayValues($value);
+            }
+        }
+        return $array;
+    }
+
     public function getConfigForPostman() {
         $queryParams = [];
-        foreach ($this->urlQueryParameters as $name => $info) {
+        foreach ($this->getUrlQueryParameters() as $name => $info) {
             if ($name === '_method') {
                 $queryParams[] = urlencode($name) . '=' . $info;
             } else {
@@ -224,7 +264,7 @@ HTML;
                 'url' => url(
                     preg_replace('%\{([^/]+?)\}%', ':$1', $url) . $queryParams
                 ),
-                'method' => strtoupper($this->httpMethod),
+                'method' => strtoupper($this->getHttpMethod()),
                 'description' => preg_replace(
                     ['% +%', "%\n\s+%s"],
                     [' ', "\n"],
@@ -246,14 +286,14 @@ HTML;
             ],
             'response' => []
         ];
-        foreach ($this->headers as $key => $value) {
+        foreach ($this->getHeaders() as $key => $value) {
             $item['request']['header'][] = [
                 'key' => $key,
                 'value' => $value,
                 'description' => ''
             ];
         }
-        foreach ($this->postParameters as $key => $value) {
+        foreach ($this->getPostParameters() as $key => $value) {
             $item['request']['body']['formdata'][] = [
                 'key' => $key,
                 'value' => ($key === '_method') ? $value : '{{' . $key . '}}',

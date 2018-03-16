@@ -85,11 +85,6 @@ class {$className} extends {$baseClassName} {
     protected \$url = '{$url}';
     public \$httpMethod = '{$httpMethod}';
 
-    public \$headers = [
-        'Accept' => 'application/json',
-        'Accept-Language' => '{{language}}',
-        'Authorization' => 'Bearer {{auth_token}}'
-    ];
 {$urlParams}{$urlQueryParams}{$postParams}
 {$validationErrors}
     
@@ -134,7 +129,10 @@ CLASS;
     protected function arrayToString(array $array, $depth = 0) {
         $ret = "[\n";
         foreach ($array as $key => $value) {
-            $ret .= str_pad('', $depth * 4 + 4, ' ') . "'$key' => ";
+            $ret .= str_pad('', $depth * 4 + 4, ' ');
+            if (!is_int($key)) {
+                $ret .= "'$key' => ";
+            }
             if (is_array($value)) {
                 $ret .= $this->arrayToString($value, $depth + 1);
             } else {
@@ -189,7 +187,7 @@ CLASS;
                     continue;
                 }
                 array_set($params, $parts[0], $parts[1]);
-                array_set($validationErrors, $parts[0], 'required|string');
+                array_set($validationErrors, $parts[0], ['required', 'string']);
                 $this->line('Parameters: ' . $this->arrayToString($params));
             } while (trim($param) !== '');
         }

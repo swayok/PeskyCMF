@@ -4,13 +4,19 @@
  */
 $url = $method->getUrl();
 $hasUrl = $url !== '';
+$headers = $method->getHeaders();
+$urlParams = $method->getUrlParameters();
+$urlQueryParams = $method->getUrlQueryParameters();
+$postParams = $method->getPostParameters();
+$successData = $method->getOnSuccessData();
+$errors = $method->getErrors()
 ?>
 <div class="panel box box-solid box-default">
     <div class="box-header with-border" style="cursor:pointer" data-toggle="collapse" data-target="#{{ $method->getUuid() }}">
         @if ($hasUrl)
             <div class="col-xs-6 text-bold">{{ $method->getTitle() }}</div>
             <div class="col-xs-6 text-nowrap of-h">
-                <div class="http-method ib" style="width: 65px;">{{ $method->httpMethod }}</div>
+                <div class="http-method ib" style="width: 65px;">{{ $method->getHttpMethod() }}</div>
                 <span class="url">{{ $url }}</span>
             </div>
         @else
@@ -24,7 +30,7 @@ $hasUrl = $url !== '';
                     <div class="col-xs-12 fs16 fw600">
                         <div class="box box-solid box-default">
                             <div class="box-body">
-                                <span class="http-method">{{ $method->httpMethod }}</span>
+                                <span class="http-method">{{ $method->getHttpMethod() }}</span>
                                 <span class="fa fa-long-arrow-right"></span>
                                 <span class="url">{{ $url }}</span>
                             </div>
@@ -47,7 +53,7 @@ $hasUrl = $url !== '';
                     </div>
                 </div>
                 @endif
-                @if (!empty($method->headers))
+                @if (!empty($headers))
                 <div class="col-xs-12 col-xl-6">
                     <div class="box box-solid box-default">
                         <div class="box-header">
@@ -56,7 +62,7 @@ $hasUrl = $url !== '';
                             </div>
                         </div>
                         <div class="box-body">
-                            @foreach($method->headers as $header => $value)
+                            @foreach($headers as $header => $value)
                                 <div>{{ $header }}: {{ $value }}</div>
                             @endforeach
                         </div>
@@ -65,7 +71,7 @@ $hasUrl = $url !== '';
                 @endif
             </div>
             <div class="row">
-                @if (!empty($method->urlParameters))
+                @if (!empty($urlParams))
                     <div class="col-xs-12 col-xl-6">
                         <div class="box box-solid box-warning">
                             <div class="box-header">
@@ -74,14 +80,14 @@ $hasUrl = $url !== '';
                                 </div>
                             </div>
                             <div class="box-body ptn pbn">
-                                @foreach($method->urlParameters as $name => $comment)
-                                    <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {{ $comment }}</div>
+                                @foreach($urlParams as $name => $comment)
+                                    <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {!! $comment !!}</div>
                                 @endforeach
                             </div>
                         </div>
                     </div>
                 @endif
-                @if (!empty($method->urlQueryParameters))
+                @if (!empty($urlQueryParams))
                 <div class="col-xs-12 col-xl-6">
                     <div class="box box-solid box-warning">
                         <div class="box-header">
@@ -90,14 +96,14 @@ $hasUrl = $url !== '';
                             </div>
                         </div>
                         <div class="box-body ptn pbn">
-                            @foreach($method->urlQueryParameters as $name => $comment)
-                                <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {{ $comment }}</div>
+                            @foreach($urlQueryParams as $name => $comment)
+                                <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {!! $comment !!}</div>
                             @endforeach
                         </div>
                     </div>
                 </div>
                 @endif
-                @if (!empty($method->postParameters))
+                @if (!empty($postParams))
                 <div class="col-xs-12 col-xl-6">
                     <div class="box box-solid box-info">
                         <div class="box-header">
@@ -106,8 +112,8 @@ $hasUrl = $url !== '';
                             </div>
                         </div>
                         <div class="box-body ptn pbn">
-                            @foreach($method->postParameters as $name => $comment)
-                                <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {{ $comment }}</div>
+                            @foreach($postParams as $name => $comment)
+                                <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {!! $comment !!}</div>
                             @endforeach
                         </div>
                     </div>
@@ -115,9 +121,7 @@ $hasUrl = $url !== '';
                 @endif
             </div>
             <div class="row">
-                @php($errors = $method->getErrors())
-
-                @if (!empty($method->onSuccess))
+                @if (!empty($successData))
                     <div class="@if(empty($errors)) col-xs-12 @else col-xs-6 @endif">
                         <div class="box box-solid box-success">
                             <div class="box-header">
@@ -126,14 +130,14 @@ $hasUrl = $url !== '';
                                 </div>
                             </div>
                             <div class="box-body">
-                                <pre>{{ json_encode($method->onSuccess, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                <pre>{{ json_encode($successData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                             </div>
                         </div>
                     </div>
                 @endif
 
                 @if(!empty($errors))
-                    <div class="@if(empty($method->onSuccess)) col-xs-12 @else col-xs-6 @endif">
+                    <div class="@if(empty($successData)) col-xs-12 @else col-xs-6 @endif">
                         <div class="box box-solid box-danger">
                             <div class="box-header">
                                 <div class="box-title">
