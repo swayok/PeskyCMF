@@ -84,15 +84,15 @@ HTML;
                 'code' => HttpCode::NOT_FOUND,
                 'title' => 'Not found',
                 'response' => [
-                    'error' => 'item_not_found'
+                    'message' => 'item_not_found'
                 ]
             ]
             or if you want localized API docs:
             [
                 'code' => HttpCode::NOT_FOUND,
-                'title' => CmfConfig::transCustom('error.item_not_found'),
+                'title' => '{error.item_not_found}',
                 'response' => [
-                    'error' => 'item_not_found'
+                    'message' => 'item_not_found'
                 ]
             ],
         */
@@ -134,26 +134,32 @@ HTML;
         'code' => HttpCode::UNAUTHORISED,
         'title' => '{error.auth_failure}',
         'response' => [
-            'error' => 'Unauthenticated.'
+            'message' => 'Unauthenticated.'
         ]
     ];
 
     static protected $accessDeniedError = [
         'code' => HttpCode::FORBIDDEN,
         'title' => '{error.access_denied}',
-        'response' => []
+        'response' => [
+            'message' => 'Unauthorized.'
+        ]
     ];
 
     static protected $dataValidationError = [
         'code' => HttpCode::CANNOT_PROCESS,
         'title' => '{error.validation_errors}',
-        'response' => []
+        'response' => [
+            'message' => 'The given data was invalid.',
+        ]
     ];
 
     static protected $serverError = [
         'code' => HttpCode::SERVER_ERROR,
         'title' => '{error.server_error}',
-        'response' => []
+        'response' => [
+            'message' => 'Server error.',
+        ]
     ];
 
     static public function create() {
