@@ -118,7 +118,9 @@ HTML;
     public function getErrors() {
         $additionalErrors = [];
         if (count($this->validationErrors)) {
-            $additionalErrors[] = array_merge(static::$dataValidationError, ['response' => $this->validationErrors]);
+            $error = static::$dataValidationError;
+            array_set($error, 'response.errors', $this->getValidationErrors());
+            $additionalErrors[] = $error;
         }
         $errors = array_merge($this->getCommonErrors(), $additionalErrors, $this->getPossibleErrors());
         // translate titles
@@ -151,6 +153,7 @@ HTML;
         'title' => '{error.validation_errors}',
         'response' => [
             'message' => 'The given data was invalid.',
+            'errors' => []
         ]
     ];
 
