@@ -3,13 +3,12 @@
 namespace PeskyCMF\Db\HttpRequestLogs;
 
 use App\Db\AbstractTable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
-use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyORM\ORM\RecordInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class CmfHttpRequestLogsTable extends AbstractTable {
-
 
     /** @var CmfHttpRequestLog */
     static private $currentLog;
@@ -43,10 +42,6 @@ class CmfHttpRequestLogsTable extends AbstractTable {
 
     /**
      * @return CmfHttpRequestLog
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     static public function getCurrentLog() {
         if (!static::$currentLog) {
@@ -58,35 +53,26 @@ class CmfHttpRequestLogsTable extends AbstractTable {
     /**
      * @param Request $request
      * @return CmfHttpRequestLog
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     static public function logRequest(Request $request) {
         return static::getCurrentLog()->fromRequest($request);
     }
 
     /**
+     * @param Request $request
      * @param Response $response
-     * @param CmfAdmin|null $admin
+     * @param Authenticatable|null $user
      * @return CmfHttpRequestLog
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    static public function logResponse(Request $request, Response $response, CmfAdmin $admin = null) {
-        return static::getCurrentLog()->logResponse($request, $response, $admin);
+    static public function logResponse(Request $request, Response $response, Authenticatable $user = null) {
+        return static::getCurrentLog()->logResponse($request, $response, $user);
     }
 
     /**
      * @param RecordInterface $record
+     * @param array|null $columnsToLog
+     * @param array|null $relationsToLog
      * @return CmfHttpRequestLog
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     static public function logDbRecordBeforeChange(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
         static::$currentLogRecord = $record;
@@ -97,10 +83,6 @@ class CmfHttpRequestLogsTable extends AbstractTable {
 
     /**
      * @return CmfHttpRequestLog
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     static public function logDbRecordAfterChange() {
         return static::getCurrentLog()->logDbRecordAfterChange(static::$currentLogRecord, static::$columnsToLog, static::$relationsToLog);
@@ -109,10 +91,6 @@ class CmfHttpRequestLogsTable extends AbstractTable {
     /**
      * @param RecordInterface $record
      * @return CmfHttpRequestLog
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     static public function logDbRecordUsage(RecordInterface $record) {
         return static::getCurrentLog()->logDbRecordUsage($record);

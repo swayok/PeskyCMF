@@ -3,9 +3,9 @@
 namespace PeskyCMF\Db\HttpRequestLogs;
 
 use App\Db\AbstractRecord;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
@@ -13,8 +13,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @property-read int         $id
- * @property-read null|int    $admin_id
- * @property-read string      $admin_email
+ * @property-read string      $requester_class
+ * @property-read null|int    $requester_id
+ * @property-read string      $requester_info
  * @property-read string      $url
  * @property-read string      $http_method
  * @property-read string      $ip
@@ -45,8 +46,9 @@ use Symfony\Component\HttpFoundation\Response;
  * @property-read int         $responded_at_as_unix_ts
  *
  * @method $this    setId($value, $isFromDb = false)
- * @method $this    setAdminId($value, $isFromDb = false)
- * @method $this    setAdminEmail($value, $isFromDb = false)
+ * @method $this    setRequesterClass($value, $isFromDb = false)
+ * @method $this    setRequesterId($value, $isFromDb = false)
+ * @method $this    setRequesterInfo($value, $isFromDb = false)
  * @method $this    setUrl($value, $isFromDb = false)
  * @method $this    setHttpMethod($value, $isFromDb = false)
  * @method $this    setIp($value, $isFromDb = false)
@@ -87,15 +89,16 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
 
     /**
      * @return CmfHttpRequestLogsTable
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     static public function getTable() {
         return CmfHttpRequestLogsTable::getInstance();
     }
 
+    /**
+     * @param Request $request
+     * @param bool $force - create log forcefully ignoring all restrictions
+     * @return $this
+     */
     public function fromRequest(Request $request, $force = false) {
         if ($this->hasValue('request')) {
             throw new \BadMethodCallException('You should not call this method twice');
@@ -153,7 +156,13 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         });
     }
 
-    public function logResponse(Request $request, Response $response, CmfAdmin $admin = null) {
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param Authenticatable|null $user
+     * @return $this
+     */
+    public function logResponse(Request $request, Response $response, Authenticatable $user = null) {
         if ($this->isAllowed() || ($response->getStatusCode() >= 500)) {
             if (!$this->hasValue('request')) {
                 // server error happened on not loggable request
@@ -163,12 +172,19 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 if ($this->hasValue('response')) {
                     throw new \BadMethodCallException('You should not call this method twice');
                 }
-                if (!empty($admin)) {
+                if (!empty($user)) {
                     $this
-                        ->setAdminId($admin->id)
-                        ->setAdminEmail($admin->email);
+                        ->setRequesterClass(get_class($user))
+                        ->setRequesterId($user->getAuthIdentifier())
+                        ->setRequesterInfo($this->findRequesterInfo($user));
                 } else {
-                    $this->setAdminEmail(array_get($this->request_as_array, 'POST.email', 'unknown@email.here'));
+                    $this->setRequesterInfo(array_get(
+                        $this->request_as_array,
+                        'POST.email',
+                        function () {
+                            return array_get($this->request_as_array, 'POST.login');
+                        }
+                    ));
                 }
                 $this
                     ->setResponse($response->getContent())
@@ -184,15 +200,40 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     }
 
     /**
+     * @param Authenticatable $user
+     * @return null|string
+     */
+    protected function findRequesterInfo(Authenticatable $user) {
+        try {
+            if (!empty($user->email)) {
+                return $user->email;
+            } else if (!empty($user->login)) {
+                return $user->login;
+            } else if (!empty($user->name) || !empty($user->first_name)) {
+                $name = empty($user->name) ? $user->first_name : $user->name;
+                if (!empty($user->surname)) {
+                    $name .= ' ' . $user->surname;
+                }
+                if (!empty($user->last_name)) {
+                    $name .= ' ' . $user->last_name;
+                }
+                return $name;
+            }
+        } catch (\Exception $exception) {
+            \Log::error($exception, [
+                'user class' => get_class($user),
+                'pk value' => $user->getAuthIdentifier()
+            ]);
+        }
+        return null;
+    }
+
+    /**
      * @param RecordInterface $record
      * @param null|string $tableName - for cases when table name differs from record's table name (so-called table name for routes)
      * @param array|null $columnsToLog - list of columns to store within Log
      * @param array|null $relationsToLog - list of loaded relations to store within Log (default: all loaded relations)
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\OrmException
      */
     public function logDbRecordBeforeChange(RecordInterface $record, $tableName = null, array $columnsToLog = null, array $relationsToLog = null) {
         if ($this->isAllowed()) {
@@ -217,10 +258,6 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param array|null $columnsToLog - list of columns to store within Log
      * @param array|null $relationsToLog - list of loaded relations to store within Log (default: all loaded relations)
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\OrmException
      */
     public function logDbRecordAfterChange(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
         if ($this->isAllowed()) {
@@ -242,10 +279,6 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param RecordInterface $record
      * @param null|string $tableName - for cases when table name differs from record's table name (so-called table name for routes)
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\OrmException
      */
     public function logDbRecordUsage(RecordInterface $record, $tableName = null) {
         if ($this->isAllowed()) {
@@ -268,10 +301,6 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
 
     /**
      * @return bool
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\OrmException
      */
     public function isAllowed() {
         return $this->hasValue('request');

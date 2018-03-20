@@ -213,11 +213,15 @@ class CmfHttpRequestStat extends AbstractRecord {
             ->setRoute('/' . ltrim($request->route()->uri(), '/'))
             ->setUrlParams($request->route()->parameters())
             ->setRequestData([
-                'GET' => hidePasswords($request->query()),
-                'POST' => hidePasswords($request->input())
+                'GET' => $this->hidePasswords($request->query()),
+                'POST' => $this->hidePasswords($request->input())
             ]);
         $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
+    }
+
+    protected function hidePasswords(array $data) {
+        return hidePasswords($data);
     }
 
     /**

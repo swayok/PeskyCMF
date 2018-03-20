@@ -10,8 +10,9 @@ use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
 
 /**
  * @property-read Column    $id
- * @property-read Column    $admin_id
- * @property-read Column    $admin_email
+ * @property-read Column    $requester_class
+ * @property-read Column    $requester_id
+ * @property-read Column    $requester_info
  * @property-read Column    $url
  * @property-read Column    $http_method
  * @property-read Column    $ip
@@ -28,12 +29,10 @@ use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
  * @property-read Column    $data_after
  * @property-read Column    $created_at
  * @property-read Column    $responded_at
- * @property-read Relation  $Admin
  */
 class CmfHttpRequestLogsTableStructure extends TableStructure {
 
-    use IdColumn,
-        AdminIdColumn;
+    use IdColumn;
 
     /**
      * @return string
@@ -42,11 +41,17 @@ class CmfHttpRequestLogsTableStructure extends TableStructure {
         return 'http_request_logs';
     }
 
-    private function admin_email() {
+    private function requester_class() {
+        return Column::create(Column::TYPE_STRING);
+    }
+
+    private function requester_id() {
+        return Column::create(Column::TYPE_INT);
+    }
+
+    private function requester_info() {
         return Column::create(Column::TYPE_STRING)
-            ->trimsValue()
-            ->lowercasesValue()
-            ->disallowsNullValues();
+            ->trimsValue();
     }
 
     private function url() {
@@ -75,13 +80,11 @@ class CmfHttpRequestLogsTableStructure extends TableStructure {
     }
 
     private function response_code() {
-        return Column::create(Column::TYPE_INT)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_INT);
     }
 
     private function response_type() {
-        return Column::create(Column::TYPE_STRING)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_STRING);
     }
 
     private function request() {
@@ -90,33 +93,27 @@ class CmfHttpRequestLogsTableStructure extends TableStructure {
     }
 
     private function response() {
-        return Column::create(Column::TYPE_TEXT)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_TEXT);
     }
 
     private function debug() {
-        return Column::create(Column::TYPE_TEXT)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_TEXT);
     }
 
     private function table() {
-        return Column::create(Column::TYPE_STRING)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_STRING);
     }
 
     private function item_id() {
-        return Column::create(Column::TYPE_INT)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_INT);
     }
 
     private function data_before() {
-        return Column::create(Column::TYPE_JSON)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_JSON);
     }
 
     private function data_after() {
-        return Column::create(Column::TYPE_JSON)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_JSON);
     }
 
     private function created_at() {
@@ -125,8 +122,7 @@ class CmfHttpRequestLogsTableStructure extends TableStructure {
     }
 
     private function responded_at() {
-        return Column::create(Column::TYPE_TIMESTAMP_WITH_TZ)
-            ->convertsEmptyStringToNull();
+        return Column::create(Column::TYPE_TIMESTAMP_WITH_TZ);
     }
 
 }

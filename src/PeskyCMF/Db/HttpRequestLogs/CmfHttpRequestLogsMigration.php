@@ -5,7 +5,6 @@ namespace PeskyCMF\Db\HttpRequestLogs;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use PeskyCMF\Db\Admins\CmfAdminsTable;
-use PeskyCMF\Db\Admins\CmfAdminsTableStructure;
 
 class CmfHttpRequestLogsMigration extends Migration {
 
@@ -13,8 +12,9 @@ class CmfHttpRequestLogsMigration extends Migration {
         if (!\Schema::hasTable(CmfHttpRequestLogsTableStructure::getTableName())) {
             \Schema::create(CmfHttpRequestLogsTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
-                $table->integer('admin_id')->unsigned()->nullable();
-                $table->string('admin_email');
+                $table->integer('requester_id')->unsigned()->nullable();
+                $table->string('requester_class')->nullable();
+                $table->string('requester_info')->nullable();
                 $table->string('url', 500);
                 $table->string('http_method', 10);
                 $table->ipAddress('ip');
@@ -36,14 +36,9 @@ class CmfHttpRequestLogsMigration extends Migration {
                 $table->index('response_code');
                 $table->index('section');
                 $table->index('filter');
-                $table->index('admin_id');
-                $table->index('created_at');
+                $table->index('requester_class');
+                $table->index('requester_id');
 
-                $table->foreign('admin_id')
-                    ->references('id')
-                    ->on(CmfAdminsTableStructure::getTableName())
-                    ->onDelete('set null')
-                    ->onUpdate('cascade');
             });
         }
     }
