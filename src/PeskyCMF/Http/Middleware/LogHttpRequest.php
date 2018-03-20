@@ -32,6 +32,9 @@ class LogHttpRequest {
      */
     public function handle($request, \Closure $next, $authGuard = null, $enableByDefault = true, ...$methods) {
         $isAllowed = empty($methods) || preg_match('%' . implode('|', $methods) . '%i', $request->getMethod());
+        // reset logs to allow requests via test cases
+        CmfHttpRequestLogsTable::resetCurrentLog();
+        app()->offsetUnset(ScaffoldLoggerInterface::class);
         if ($isAllowed) {
             $log = CmfHttpRequestLogsTable::logRequest($request, (bool)$enableByDefault);
             app()->instance(ScaffoldLoggerInterface::class, $log);

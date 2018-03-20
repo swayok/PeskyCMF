@@ -3,7 +3,6 @@
 namespace PeskyCMF\Db\HttpRequestLogs;
 
 use App\Db\AbstractTable;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use PeskyORM\ORM\RecordInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,6 +47,13 @@ class CmfHttpRequestLogsTable extends AbstractTable {
             static::$currentLog = static::getInstance()->newRecord();
         }
         return static::$currentLog;
+    }
+
+    static public function resetCurrentLog() {
+        static::$currentLog = null;
+        static::$currentLogRecord = null;
+        static::$columnsToLog = null;
+        static::$relationsToLog = null;
     }
 
     /**
