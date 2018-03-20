@@ -698,7 +698,6 @@ $dictionary = [
         'datagrid' => [
             'header' => 'HTTP запросы',
             'column' => [
-                'admin_email' => 'E-mail Администратора',
                 'url' => 'URL',
                 'http_method' => 'HTTP method',
                 'ip' => 'IP',
@@ -715,12 +714,13 @@ $dictionary = [
                 'created_at' => 'Создан',
                 'responded_at' => 'Ответ произведен',
                 'id' => 'ID',
-                'admin_id' => 'Администратор',
+                'requester_table' => 'Тип пользователя',
+                'requester_id' => 'Пользователь',
+                'requester_info' => 'Данные пользователя',
                 'debug' => 'Данные для отладки',
             ],
             'filter' => [
                 'http_request_logs' => [
-                    'admin_email' => 'E-mail Администратора',
                     'url' => 'URL',
                     'http_method' => 'HTTP method',
                     'ip' => 'IP',
@@ -737,7 +737,9 @@ $dictionary = [
                     'created_at' => 'Создан',
                     'responded_at' => 'Ответ произведен',
                     'id' => 'ID',
-                    'admin_id' => 'Администратор',
+                    'requester_table' => 'Тип пользователя',
+                    'requester_id' => 'ID Пользователя',
+                    'requester_info' => 'Данные пользователя',
                     'debug' => 'Данные для отладки',
                 ]
             ]
@@ -745,7 +747,6 @@ $dictionary = [
         'item_details' => [
             'header' => 'Информация по HTTP запросу',
             'field' => [
-                'admin_email' => 'E-mail Администратора',
                 'url' => 'URL',
                 'http_method' => 'HTTP method',
                 'ip' => 'IP',
@@ -762,8 +763,10 @@ $dictionary = [
                 'created_at' => 'Создан',
                 'responded_at' => 'Ответ произведен',
                 'id' => 'ID',
-                'admin_id' => 'Администратор',
                 'debug' => 'Данные для отладки',
+                'requester_table' => 'Тип пользователя',
+                'requester_id' => 'Пользователь',
+                'requester_info' => 'Данные пользователя',
             ]
         ]
     ],

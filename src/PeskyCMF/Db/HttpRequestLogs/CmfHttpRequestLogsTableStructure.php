@@ -2,15 +2,13 @@
 
 namespace PeskyCMF\Db\HttpRequestLogs;
 
-use PeskyCMF\Db\TableStructureTraits\AdminIdColumn;
 use PeskyORM\ORM\Column;
-use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableStructure;
 use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
 
 /**
  * @property-read Column    $id
- * @property-read Column    $requester_class
+ * @property-read Column    $requester_table
  * @property-read Column    $requester_id
  * @property-read Column    $requester_info
  * @property-read Column    $url
@@ -41,7 +39,7 @@ class CmfHttpRequestLogsTableStructure extends TableStructure {
         return 'http_request_logs';
     }
 
-    private function requester_class() {
+    private function requester_table() {
         return Column::create(Column::TYPE_STRING);
     }
 

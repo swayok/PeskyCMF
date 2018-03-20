@@ -699,7 +699,6 @@ $dictionary = [
         'datagrid' => [
             'header' => 'HTTP requests',
             'column' => [
-                'admin_email' => 'Admin E-mail',
                 'url' => 'URL',
                 'http_method' => 'HTTP method',
                 'ip' => 'IP',
@@ -716,11 +715,12 @@ $dictionary = [
                 'created_at' => 'Created at',
                 'responded_at' => 'Responded at',
                 'id' => 'ID',
-                'admin_id' => 'Admin',
+                'requester_table' => 'User type',
+                'requester_id' => 'User',
+                'requester_info' => 'User info',
             ],
             'filter' => [
                 'http_request_logs' => [
-                    'admin_email' => 'Admin E-mail',
                     'url' => 'URL',
                     'http_method' => 'HTTP method',
                     'ip' => 'IP',
@@ -737,14 +737,15 @@ $dictionary = [
                     'created_at' => 'Created at',
                     'responded_at' => 'Responded at',
                     'id' => 'ID',
-                    'admin_id' => 'Admin',
+                    'requester_table' => 'User type',
+                    'requester_id' => 'User ID',
+                    'requester_info' => 'User info',
                 ]
             ]
         ],
         'item_details' => [
             'header' => 'HTTP request information',
             'field' => [
-                'admin_email' => 'Admin E-mail',
                 'url' => 'URL',
                 'http_method' => 'HTTP method',
                 'ip' => 'IP',
@@ -761,7 +762,9 @@ $dictionary = [
                 'created_at' => 'Created at',
                 'responded_at' => 'Responded at',
                 'id' => 'ID',
-                'admin_id' => 'Admin',
+                'requester_table' => 'User type',
+                'requester_id' => 'User',
+                'requester_info' => 'User info',
             ]
         ]
     ],

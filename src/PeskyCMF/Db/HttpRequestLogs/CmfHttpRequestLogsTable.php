@@ -52,19 +52,20 @@ class CmfHttpRequestLogsTable extends AbstractTable {
 
     /**
      * @param Request $request
+     * @param bool $force - log request even if route has no 'log' action in its config
      * @return CmfHttpRequestLog
      */
-    static public function logRequest(Request $request) {
-        return static::getCurrentLog()->fromRequest($request);
+    static public function logRequest(Request $request, $force = false) {
+        return static::getCurrentLog()->fromRequest($request, $force);
     }
 
     /**
      * @param Request $request
      * @param Response $response
-     * @param Authenticatable|null $user
+     * @param RecordInterface|null $user
      * @return CmfHttpRequestLog
      */
-    static public function logResponse(Request $request, Response $response, Authenticatable $user = null) {
+    static public function logResponse(Request $request, Response $response, RecordInterface $user = null) {
         return static::getCurrentLog()->logResponse($request, $response, $user);
     }
 

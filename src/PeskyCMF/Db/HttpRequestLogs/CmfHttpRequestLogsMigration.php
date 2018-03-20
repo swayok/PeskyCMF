@@ -13,7 +13,7 @@ class CmfHttpRequestLogsMigration extends Migration {
             \Schema::create(CmfHttpRequestLogsTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('requester_id')->unsigned()->nullable();
-                $table->string('requester_class')->nullable();
+                $table->string('requester_table')->nullable();
                 $table->string('requester_info')->nullable();
                 $table->string('url', 500);
                 $table->string('http_method', 10);
@@ -36,7 +36,8 @@ class CmfHttpRequestLogsMigration extends Migration {
                 $table->index('response_code');
                 $table->index('section');
                 $table->index('filter');
-                $table->index('requester_class');
+                $table->index('requester_table');
+                $table->index('requester_info');
                 $table->index('requester_id');
 
             });

@@ -3,7 +3,6 @@
 namespace PeskyCMF\Db\HttpRequestLogs;
 
 use App\Db\AbstractRecord;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
@@ -13,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @property-read int         $id
- * @property-read string      $requester_class
+ * @property-read string      $requester_table
  * @property-read null|int    $requester_id
  * @property-read string      $requester_info
  * @property-read string      $url
@@ -46,7 +45,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @property-read int         $responded_at_as_unix_ts
  *
  * @method $this    setId($value, $isFromDb = false)
- * @method $this    setRequesterClass($value, $isFromDb = false)
+ * @method $this    setRequesterTable($value, $isFromDb = false)
  * @method $this    setRequesterId($value, $isFromDb = false)
  * @method $this    setRequesterInfo($value, $isFromDb = false)
  * @method $this    setUrl($value, $isFromDb = false)
@@ -107,7 +106,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
             $route = $request->route();
             $logName = $this->getLogName($route);
             if (empty($logName)) {
-                if ($force) {
+                if ($force && $logName !== false) {
                     $logName = $route->uri();
                 } else {
                     return $this;
@@ -138,6 +137,10 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         return hidePasswords($data);
     }
 
+    /**
+     * @param Route $route
+     * @return string|null|false
+     */
     protected function getLogName(Route $route) {
         return array_get($route->getAction(), 'log', function () use ($route) {
             if ($route->hasParameter('table_name')) {
@@ -159,10 +162,10 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     /**
      * @param Request $request
      * @param Response $response
-     * @param Authenticatable|null $user
+     * @param RecordInterface $user
      * @return $this
      */
-    public function logResponse(Request $request, Response $response, Authenticatable $user = null) {
+    public function logResponse(Request $request, Response $response, RecordInterface $user = null) {
         if ($this->isAllowed() || ($response->getStatusCode() >= 500)) {
             if (!$this->hasValue('request')) {
                 // server error happened on not loggable request
@@ -172,10 +175,10 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 if ($this->hasValue('response')) {
                     throw new \BadMethodCallException('You should not call this method twice');
                 }
-                if (!empty($user)) {
+                if (!empty($user) && $user->existsInDb()) {
                     $this
-                        ->setRequesterClass(get_class($user))
-                        ->setRequesterId($user->getAuthIdentifier())
+                        ->setRequesterTable($user::getTable()->getTableStructure()->getTableName())
+                        ->setRequesterId($user->getPrimaryKeyValue())
                         ->setRequesterInfo($this->findRequesterInfo($user));
                 } else {
                     $this->setRequesterInfo(array_get(
@@ -200,10 +203,10 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     }
 
     /**
-     * @param Authenticatable $user
+     * @param RecordInterface $user
      * @return null|string
      */
-    protected function findRequesterInfo(Authenticatable $user) {
+    protected function findRequesterInfo(RecordInterface $user) {
         try {
             if (!empty($user->email)) {
                 return $user->email;
