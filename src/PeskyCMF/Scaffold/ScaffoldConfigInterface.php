@@ -76,4 +76,6 @@ interface ScaffoldConfigInterface {
 
     public function getCustomPageForRecord($itemId, $pageName);
 
+    public function performActionForRecord($itemId, $actionName);
+
 }

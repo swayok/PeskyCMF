@@ -127,4 +127,9 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->getCustomPageForRecord($itemId, $pageName);
     }
 
+    public function performActionForItem($resourceName, $itemId, $actionName) {
+        $this->authorize('resource.custom_action_for_item', [$resourceName, $actionName, $itemId]);
+        return $this->getScaffoldConfig()->performActionForRecord($itemId, $actionName);
+    }
+
 }

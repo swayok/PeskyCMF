@@ -348,21 +348,29 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @param string $section - main sections are: 'datagrid.column', 'item_details.field', 'form.input'
      * @param AbstractValueViewer $viewer
-     * @param string $suffix
+     * @param string|array $suffix - pass array here to be used as $parameters but $parameters should be empty
      * @param array $parameters
      * @return string
      */
     public function translateForViewer($section, AbstractValueViewer $viewer, $suffix = '', array $parameters = []) {
+        if (is_array($suffix) && empty($parameters)) {
+            $parameters = $suffix;
+            $suffix = '';
+        }
         return $this->translate($section, rtrim("{$viewer->getNameForTranslation()}_{$suffix}", '_'), $parameters);
     }
 
     /**
      * @param string $section - main sections are: 'form.tooltip'
-     * @param string $suffix
+     * @param string|array $suffix - pass array here to be used as $parameters but $parameters should be empty
      * @param array $parameters
      * @return array|string
      */
     public function translate($section, $suffix = '', array $parameters = []) {
+        if (is_array($suffix) && empty($parameters)) {
+            $parameters = $suffix;
+            $suffix = '';
+        }
         return cmfTransCustom(rtrim(".{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'), $parameters);
     }
 
@@ -621,14 +629,29 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     public function getCustomPage($pageName) {
         return view('cmf::ui.default_page_header', [
-            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined',
+            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in' . static::class . '->getCustomPage()',
         ]);
     }
 
     public function getCustomPageForRecord($itemId, $pageName) {
         return view('cmf::ui.default_page_header', [
-            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined',
+            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in ' . static::class . '->getCustomPageForRecord()',
         ]);
+    }
+
+    /**
+     * Call scaffold's method called $actionName with $itemId argument
+     * @param string $itemId
+     * @param string $actionName
+     * @return $this
+     */
+    public function performActionForRecord($itemId, $actionName) {
+        if (method_exists($this, $actionName)) {
+            return $this->$actionName($itemId);
+        } else {
+            return cmfJsonResponse(HttpCode::NOT_FOUND)
+                ->setMessage('Method [' . static::class . '->' . $actionName . '] is not defined');
+        }
     }
 
 }

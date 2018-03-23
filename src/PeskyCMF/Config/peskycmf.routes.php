@@ -306,6 +306,11 @@ Route::group(
             ]
         ]);
 
+        Route::get('{table_name}/{id}/action/{action}', [
+            'as' => $routeNamePrefix . 'cmf_api_item_custom_action',
+            'uses' => $apiControllerClass . '@performActionForItem',
+        ]);
+
         Route::get('{table_name}/{id}', [
             'as' => $routeNamePrefix . 'cmf_api_get_item',
             'uses' => $apiControllerClass . '@getItem',

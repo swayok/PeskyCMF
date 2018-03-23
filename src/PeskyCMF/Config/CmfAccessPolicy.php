@@ -252,4 +252,11 @@ class CmfAccessPolicy {
             && $this->resource($user, 'item_page:' . $pageName, $table, $recordOrItemIdOrFkValue)
         );
     }
+
+    public function custom_action_for_item($user, $table, $actionName, $recordOrItemIdOrFkValue = null) {
+        return (
+            $this->resource($user, 'details', $table, $recordOrItemIdOrFkValue)
+            && $this->resource($user, 'item_action:' . $actionName, $table, $recordOrItemIdOrFkValue)
+        );
+    }
 }
