@@ -2,7 +2,9 @@ var Utils = {
     bodyClass: false,
     loadedJsFiles: {},
     loadedCssFiles: {},
-    cacheLoadedJsFiles: true
+    cacheLoadedJsFiles: true,
+    modalTpl: null,
+    modalsCount: 0
 };
 
 Utils.configureAppLibs = function () {
@@ -227,6 +229,33 @@ Utils.handleAjaxSuccess = function (json) {
     }
     if (json._reload_user) {
         Utils.getUser(true);
+    }
+    if (json.modal && json.content) {
+        var $modal = Utils.makeModal(json.title || '', json.content, json.footer || '', json.modal);
+        if (json.repeat_action && typeof json.repeat_action === 'function') {
+            $modal.find('.reload-url-button, .reload')
+                .removeClass('hidden')
+                .on('click', function (event) {
+                    event.preventDefault();
+                    $modal
+                        .one('hide.bs.modal', function () {
+                            json.repeat_action();
+                        })
+                        .modal('hide');
+                    return false;
+                });
+        }
+        $(document.body).append($modal);
+        $modal
+            .one('hidden.bs.modal', function () {
+                $modal.remove();
+            })
+            .modal({
+                show: true,
+                backdrop: 'static'
+            })
+            .find('[data-toggle="tooltip"]')
+            .tooltip();
     }
 };
 
@@ -590,4 +619,27 @@ Utils.initDebuggingTools = function () {
             }
         });
     }
+};
+
+/**
+ *
+ * @param {String} title
+ * @param {String} content
+ * @param {String?} footer
+ * @param {String?} size - 'large' or 'small'. Default: 'medium'
+ * @return {jQuery}
+ */
+Utils.makeModal = function (title, content, footer, size) {
+    if (!Utils.modalTpl) {
+        Utils.modalTpl = doT.template($('#modal-template').html());
+    }
+    Utils.modalsCount++;
+    var tplData = {
+        id: 'cmf-custom-modal-' + Utils.modalsCount,
+        title: title,
+        content: content,
+        footer: footer,
+        size: size
+    };
+    return $(Utils.modalTpl(tplData));
 };

@@ -61,46 +61,32 @@
 
     </div>
 
-    @section('empty-modal-content')
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="box-tools pull-right">
-                    <a class="btn btn-box-tool fs13 va-t ptn mt5 reload-url-button" data-modal="1" href=""
-                       data-toggle="tooltip" title="{{ cmfTransGeneral('ui.modal.reload') }}">
-                        <i class="glyphicon glyphicon-refresh"></i>
-                    </a>
-                    <a class="btn btn-box-tool fs13 va-t ptn mt5 open-url-in-new-tab-button" target="_blank" href=""
-                       data-toggle="tooltip" title="{{ cmfTransGeneral('ui.modal.open_in_new_tab') }}">
-                        <i class="glyphicon glyphicon-share"></i>
-                    </a>
-                    <button type="button" data-dismiss="modal" class="btn btn-box-tool va-t pbn ptn mt5"
-                            data-toggle="tooltip" title="{{ cmfTransGeneral('ui.modal.close') }}">
-                        <span class="fs24 lh15">&times;</span>
-                    </button>
+    <script type="text/html" id="modal-template">
+        <div class="modal fade" tabindex="-1" role="dialog" id="@{{= it.id }}">
+            <div class="modal-dialog @{{? it.size === 'large' }} modal-lg @{{?}} @{{? it.size === 'small' }} modal-sm @{{?}}" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="box-tools pull-right">
+                            <a class="btn btn-box-tool fs13 va-t ptn mt5 reload-url-button hidden" href=""
+                               data-toggle="tooltip" title="{{ cmfTransGeneral('ui.modal.reload') }}">
+                                <i class="glyphicon glyphicon-refresh"></i>
+                            </a>
+                            <button type="button" data-dismiss="modal" class="btn btn-box-tool va-t pbn ptn mt5"
+                                    data-toggle="tooltip" title="{{ cmfTransGeneral('ui.modal.close') }}">
+                                <span class="fs24 lh15">&times;</span>
+                            </button>
+                        </div>
+                        <h4 class="modal-title">@{{= it.title || '' }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        @{{= it.content || '' }}
+                    </div>
+                    @{{? it.footer }}
+                    <div class="modal-footer">
+                        @{{= it.footer }}
+                    </div>
+                    @{{?}}
                 </div>
-                <h4 class="modal-title"></h4>
-            </div>
-            <div class="modal-body">
-
-            </div>
-            <div class="modal-footer hidden">
-
-            </div>
-        </div>
-    @endsection
-
-    <script type="text/html" id="modal-normal">
-        <div class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                @yield('empty-modal-content')
-            </div>
-        </div>
-    </script>
-
-    <script type="text/html" id="modal-large">
-        <div class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-lg" role="document">
-                @yield('empty-modal-content')
             </div>
         </div>
     </script>

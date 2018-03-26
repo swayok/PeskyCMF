@@ -348,7 +348,10 @@ var ScaffoldActionsHelper = {
         switch (action) {
             case 'request':
                 Utils.showPreloader($container);
-                ScaffoldActionsHelper.handleRequestAction($el, ScaffoldActionsHelper.onSuccess)
+                ScaffoldActionsHelper
+                    .handleRequestAction($el, ScaffoldActionsHelper.onSuccess, function () {
+                        ScaffoldActionsHelper.handleDataAction(el, container);
+                    })
                     .done(function () {
                         if (isModal) {
                             if ($el.attr('data-close-modal') === '1') {
@@ -382,7 +385,7 @@ var ScaffoldActionsHelper = {
                 break;
         }
     },
-    handleRequestAction: function ($el, onSuccess) {
+    handleRequestAction: function ($el, onSuccess, onRepeat) {
         var url = $el.attr('data-url') || $el.attr('href');
         if (!url || url.length < 2) {
             return $.Deferred().reject();
@@ -418,14 +421,21 @@ var ScaffoldActionsHelper = {
             .done(function (json) {
                 var ret = null;
                 var callback = $el.attr('data-on-success');
-                if (callback) {
-                    if (callback.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
-                        eval('callback = ' + callback);
-                        if (typeof callback === 'function') {
-                            ret = callback(json, $el, function () {
-                                return onSuccess(json);
-                            });
-                        }
+                if (onRepeat) {
+                    if (typeof onRepeat === 'function') {
+                        json.repeat_action = onRepeat;
+                    }
+                } else {
+                    json.repeat_action = function () {
+                        ScaffoldActionsHelper.handleRequestAction($el, onSuccess);
+                    };
+                }
+                if (callback && callback.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
+                    eval('callback = ' + callback);
+                    if (typeof callback === 'function') {
+                        ret = callback(json, $el, function () {
+                            return onSuccess(json);
+                        });
                     }
                 }
                 if (ret !== false) {
@@ -804,31 +814,41 @@ var ScaffoldDataGridHelper = {
                         .on('click', 'a', function () {
                             if ($(this).attr('data-action') === 'request') {
                                 var $el = $(this);
-                                var blockDataGrid = !!$el.attr('data-block-datagrid');
-                                if (blockDataGrid) {
-                                    Utils.showPreloader($tableWrapper);
-                                }
-                                ScaffoldActionsHelper.handleRequestAction($el, function (json) {
-                                        if (
-                                            json.redirect
-                                            && (
-                                                json.redirect === 'back'
-                                                || json.redirect === 'reload'
-                                                || json.redirect === document.location.path
-                                                || json.redirect === document.location.pathname
-                                                || json.redirect === document.location.href
-                                            )
-                                        ) {
-                                            api.ajax.reload(null, false);
-                                            delete json.redirect;
-                                        }
-                                        ScaffoldActionsHelper.onSuccess(json);
-                                    })
-                                    .always(function () {
-                                        if (blockDataGrid) {
-                                            Utils.hidePreloader($tableWrapper);
-                                        }
-                                    });
+                                var handleRequest = function ($el) {
+                                    var blockDataGrid = !!$el.attr('data-block-datagrid');
+                                    if (blockDataGrid) {
+                                        Utils.showPreloader($tableWrapper);
+                                    }
+                                    ScaffoldActionsHelper
+                                        .handleRequestAction(
+                                            $el,
+                                            function (json) {
+                                                if (
+                                                    json.redirect
+                                                    && (
+                                                        json.redirect === 'back'
+                                                        || json.redirect === 'reload'
+                                                        || json.redirect === document.location.path
+                                                        || json.redirect === document.location.pathname
+                                                        || json.redirect === document.location.href
+                                                    )
+                                                ) {
+                                                    api.ajax.reload(null, false);
+                                                    delete json.redirect;
+                                                }
+                                                ScaffoldActionsHelper.onSuccess(json);
+                                            },
+                                            function () {
+                                                handleRequest($el, blockDataGrid);
+                                            }
+                                        )
+                                        .always(function () {
+                                            if (blockDataGrid) {
+                                                Utils.hidePreloader($tableWrapper);
+                                            }
+                                        });
+                                };
+                                handleRequest($el);
                             }
                             $menu.trigger('hide.contextmenu');
                             $menu = null;
@@ -879,31 +899,40 @@ var ScaffoldDataGridHelper = {
                     $el.attr('data-block-datagrid', '1');
                     // no break here!!!
                 case 'request':
-                    var blockDataGrid = !!$el.attr('data-block-datagrid');
-                    if (blockDataGrid) {
-                        Utils.showPreloader($tableWrapper);
-                    }
-                    ScaffoldActionsHelper.handleRequestAction($el, function (json) {
-                            if (
-                                json.redirect
-                                && (
-                                    json.redirect === 'back'
-                                    || json.redirect === 'reload'
-                                    || json.redirect === document.location.path
-                                    || json.redirect === document.location.pathname
-                                    || json.redirect === document.location.href
-                                )
-                            ) {
-                                api.ajax.reload(null, false);
-                                delete json.redirect;
-                            }
-                            ScaffoldActionsHelper.onSuccess(json);
-                        })
-                        .always(function () {
-                            if (blockDataGrid) {
-                                Utils.hidePreloader($tableWrapper);
-                            }
-                        });
+                    var handleRequest = function ($el) {
+                        var blockDataGrid = !!$el.attr('data-block-datagrid');
+                        if (blockDataGrid) {
+                            Utils.showPreloader($tableWrapper);
+                        }
+                        ScaffoldActionsHelper.handleRequestAction(
+                                $el,
+                                function (json) {
+                                    if (
+                                        json.redirect
+                                        && (
+                                            json.redirect === 'back'
+                                            || json.redirect === 'reload'
+                                            || json.redirect === document.location.path
+                                            || json.redirect === document.location.pathname
+                                            || json.redirect === document.location.href
+                                        )
+                                    ) {
+                                        api.ajax.reload(null, false);
+                                        delete json.redirect;
+                                    }
+                                    ScaffoldActionsHelper.onSuccess(json);
+                                },
+                                function () {
+                                    handleRequest($el, blockDataGrid);
+                                }
+                            )
+                            .always(function () {
+                                if (blockDataGrid) {
+                                    Utils.hidePreloader($tableWrapper);
+                                }
+                            });
+                    };
+                    handleRequest($el);
                     break;
             }
             return false;
