@@ -2,6 +2,7 @@
 /**
  * @var string $sectionName
  * @var string $cmfCongigClassName
+ * @var string $configsFileName
  */
 echo "<?php\n";
 ?>
@@ -11,6 +12,14 @@ namespace App\{{ $sectionName }};
 use PeskyCMF\Config\CmfConfig;
 
 class {{ $cmfCongigClassName }} extends CmfConfig {
+
+    /**
+     * File name for this site section in 'configs' folder of project's root directory (without '.php' extension)
+     * Example: 'admin' for config/admin.php;
+     */
+    static protected function configsFileName() {
+        return '{{ $configsFileName }}';
+    }
 
     /**
      * The menu structure of the site.

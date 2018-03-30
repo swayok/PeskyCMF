@@ -149,7 +149,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     protected function getCmfConfig() {
         if ($this->config === null) {
             /** @var CmfConfig|string $className */
-            $className = config('peskycmf.cmf_config', CmfConfig::class);
+            $className = config('peskycmf.default_cmf_config', CmfConfig::class);
             $this->config = $className::getInstance();
         }
         return $this->config;

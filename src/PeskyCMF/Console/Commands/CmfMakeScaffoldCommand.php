@@ -90,15 +90,14 @@ class CmfMakeScaffoldCommand extends Command {
     /**
      * Execute the console command.
      *
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      * @throws \PeskyORM\Exception\OrmException
-     * @throws \UnexpectedValueException
+     * @throws \ReflectionException
+     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      */
     public function handle() {
         $table = $this->getCmfConfigClass()->getTableByUnderscoredName($this->argument('table_name'));
 
-        $namespace = $this->getNamespaceByTable($table);
+        $namespace = $this->getScaffoldsNamespace();
         $className = $this->getScaffoldClassName($table, $this->option('resource'));
 
         $filePath = $this->getFolder($namespace) . $className . '.php';
@@ -114,7 +113,7 @@ class CmfMakeScaffoldCommand extends Command {
         $this->createScaffoldClassFile($table, $namespace, $className, $filePath);
 
 
-        $this->line('Done');
+        $this->line($filePath . ' created');
 
         $columnsTranslations = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
@@ -124,12 +123,6 @@ class CmfMakeScaffoldCommand extends Command {
         $columnsTranslations = implode(",\n                ", $columnsTranslations) . ",";
 
         $this->comment(<<<INFO
-Menu item for CmfConfig:
-[
-    'label' => cmfTransCustom('{$table->getTableStructure()->getTableName()}.menu_title'),
-    'url' => routeToCmfItemsTable('{$table->getTableStructure()->getTableName()}'),
-    'icon' => ''
-],
 
 Translations:
     '{$table->getTableStructure()->getTableName()}' => [
@@ -164,30 +157,64 @@ INFO
 );
     }
 
-    protected function getBaseNamespace() {
+    /**
+     * @return string
+     */
+    protected function getScaffoldsNamespace() {
+        $appSubfolder = str_replace('/', '\\', $this->getCmfConfigClass()->app_subfolder());
+        $scaffoldsSubfolder = str_replace('/', '\\', $this->getScaffoldsFolderName());
+        return 'App\\' . $appSubfolder . '\\' . $scaffoldsSubfolder;
     }
 
-    protected function getNamespaceByTable($table) {
-        $namespace = (new \ReflectionClass($table))->getNamespaceName();
-        return preg_replace('%^PeskyCM[FS]\\\Db\\\%', config('peskyorm.classes_namespace', '\\App\\Db') . '\\', $namespace);
+    /**
+     * @param string $table
+     * @return string
+     * @throws \ReflectionException
+     */
+//    protected function getNamespaceByTable($table) {
+//        $namespace = (new \ReflectionClass($table))->getNamespaceName();
+//        return preg_replace('%^PeskyCM[FS]\\\Db\\\%', config('peskyorm.classes_namespace', '\\App\\Db') . '\\', $namespace);
+//    }
+
+    /**
+     * @return string
+     */
+    protected function getScaffoldsFolderName() {
+        return 'Scaffolds';
     }
 
+    /**
+     * @param string $namespace
+     * @return string
+     */
     protected function getFolder($namespace) {
-        $folder = preg_replace(
-            ['%[\\/]%', '%^App%'],
+        $appSubfolder = str_replace('/', '\\', $this->getCmfConfigClass()->app_subfolder());
+        return static::getBasePathToApp() . DIRECTORY_SEPARATOR . $appSubfolder . DIRECTORY_SEPARATOR . $this->getScaffoldsFolderName() . DIRECTORY_SEPARATOR;
+        /*$folder = preg_replace(
+            ['%[\\/]%', '%^/?App%'],
             [DIRECTORY_SEPARATOR, $this->getBasePathToApp()],
-            $namespace
+            rtrim($namespace, '\\')
         );
-        return $folder . DIRECTORY_SEPARATOR;
+        return $folder . DIRECTORY_SEPARATOR;*/
     }
 
+    /**
+     * @return string
+     */
     protected function getBasePathToApp() {
         return app_path();
     }
 
+    /**
+     * @param TableInterface $table
+     * @param string $namespace
+     * @param string $className
+     * @param string $filePath
+     */
     protected function createScaffoldClassFile(TableInterface $table, $namespace, $className, $filePath) {
         $parentClass = $this->getScaffoldConfigParentClass();
         $parentClassShort = class_basename($parentClass);
+        $tableClass = get_class($table);
         $tableClassShort = class_basename($table);
 
         $contents = <<<VIEW
@@ -196,6 +223,7 @@ INFO
 namespace $namespace;
 
 use {$parentClass};
+use {$tableClass};
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;

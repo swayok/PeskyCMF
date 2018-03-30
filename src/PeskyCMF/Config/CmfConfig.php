@@ -284,6 +284,21 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Url prefix for routes
+     * @return string
+     */
+    static public function app_subfolder() {
+        return static::config('app_subfolder', 'Admin');
+    }
+
+    /**
+     * @return string
+     */
+    static public function getPathToCmfClasses() {
+        return app_path(static::app_subfolder());
+    }
+
+    /**
      * @return string
      */
     static public function recaptcha_private_key() {

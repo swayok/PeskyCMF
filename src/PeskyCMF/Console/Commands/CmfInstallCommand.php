@@ -31,20 +31,6 @@ class CmfInstallCommand extends CmfCommand {
             'dbClassesAppSubfolder' => $this->input->getArgument('database_classes_app_subfolder'),
             'cmfCongigClassName' => $appSubfolder . 'Config'
         ];
-        // copy configs
-        $cmfConfigFilePath = $baseFolderPath . '/' . $dataForViews['cmfCongigClassName'] . '.php';
-        $writeCmfConfigFile = !File::exist($cmfConfigFilePath) || $this->confirm('CmfConfig file ' . $cmfConfigFilePath . ' already exist. Overwrite?');
-        if ($writeCmfConfigFile) {
-            File::load($cmfConfigFilePath, true, 0755, 0644)
-                ->write(\View::file($viewsPath . 'cmf_config.blade.php', $dataForViews)->render());
-        }
-        $routesFileRelativePath = 'routes/' . snake_case($appSubfolder) . '.php';
-        $routesFilePath = base_path($routesFileRelativePath);
-        $writeRoutesFile = !File::exist($routesFilePath) || $this->confirm('Routes file ' . $routesFilePath . ' already exist. Overwrite?');
-        if ($writeRoutesFile) {
-            File::load($routesFilePath, true, 0755, 0644)
-                ->write(\View::file($viewsPath . 'cmf_routes.blade.php', $dataForViews)->render());
-        }
         // copy pages controller
         File::load($baseFolderPath . '/Http/Controllers/PagesController.php', true, 0755, 0644)
             ->write(\View::file($viewsPath . 'pages_controller.blade.php', $dataForViews)->render());
@@ -90,35 +76,66 @@ class CmfInstallCommand extends CmfCommand {
         $appSettingsPath = app_path('AppSettings.php');
         if (!File::exist($appSettingsPath)) {
             File::save($appSettingsPath, $this->getAppSettignsClassContents());
-            $this->line('Added ' . $appSettingsPath);
+            $this->line($appSettingsPath . ' created');
         } else {
             $this->line('- ' . $appSettingsPath . ' already exist. skipped');
         }
 
         // create peskyorm.php in config_path() dir
         $peskyOrmConfigFilePath = config_path('peskyorm.php');
-        $writeOrmConfigFile = !File::exist($peskyOrmConfigFilePath) || $this->confirm('PeskyORM config file ' . $peskyOrmConfigFilePath . ' already exist. Overwrite?');
+        $writeOrmConfigFile = (
+            !File::exist($peskyOrmConfigFilePath)
+            || $this->confirm('PeskyORM config file ' . $peskyOrmConfigFilePath . ' already exist. Overwrite?')
+        );
         if ($writeOrmConfigFile) {
             File::load(__DIR__ . '/../../Config/peskyorm.config.php')->copy($peskyOrmConfigFilePath, true, 0664);
+            $this->line($peskyOrmConfigFilePath . ' created');
         }
         // create peskycmf.php in config_path() dir
-        $peskyCmfConfigFilePath = config_path('peskycmf.php');
-        $writeCmfConfigFile = !File::exist($peskyCmfConfigFilePath) || $this->confirm('PeskyCMF config file ' . $peskyCmfConfigFilePath . ' already exist. Overwrite?');
+        $generalCmfConfigFilePath = config_path('peskycmf.php');
+        if (!File::exist($generalCmfConfigFilePath)) {
+            $configContents = File::contents(__DIR__ . '/../../Config/peskycmf.config.php');
+            $replacements = [
+                "%('default_cmf_config')\s*=>\s*.*%im" => '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,',
+            ];
+            $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
+            File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
+            $this->line($generalCmfConfigFilePath . ' created');
+            unset($configContents);
+        }
+        // create {configFileName}.php in config_path() dir
+        $cmfSectionConfigFileNameWithoutExtension = snake_case($appSubfolder);
+        $cmfSectionConfigFilePath = config_path($cmfSectionConfigFileNameWithoutExtension . '.php');
+        $writeCmfSectionConfigFile = (
+            !File::exist($cmfSectionConfigFilePath)
+            || $this->confirm('CMF section config file ' . $cmfSectionConfigFilePath . ' already exist. Overwrite?')
+        );
+        if (!$writeCmfSectionConfigFile) {
+            if ($this->confirm('Would you like to provide custom name for a cmf section config file?')) {
+                $customConfigFileName = $this->ask('Enter file name without ".php" or emty string to skip');
+                if (trim($customConfigFileName) !== '') {
+                    $cmfSectionConfigFileNameWithoutExtension = $customConfigFileName;
+                    $writeCmfSectionConfigFile = true;
+                    $cmfSectionConfigFilePath = config_path($cmfSectionConfigFileNameWithoutExtension . '.php');
+                }
+            }
+        }
         $updateKeysInConfigs = null;
-        if ($writeCmfConfigFile) {
-            File::load(__DIR__ . '/../../Config/peskycmf.config.php')->copy($peskyCmfConfigFilePath, true, 0664);
+        if ($writeCmfSectionConfigFile) {
+            File::load(__DIR__ . '/../../Config/cmf_section.config.php')->copy($cmfSectionConfigFilePath, true, 0664);
             $updateKeysInConfigs = true;
         }
         if ($updateKeysInConfigs === null) {
-            $updateKeysInConfigs = $this->confirm('Do you wish to update some keys in ' . $peskyCmfConfigFilePath . ' by actual values?');
+            $updateKeysInConfigs = $this->confirm('Do you wish to update some keys in ' . $cmfSectionConfigFilePath . ' by actual values?');
         }
         $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
         $controllersNamespace = 'App\\' . $appSubfolder . '\\Http\\Controllers';
         if ($updateKeysInConfigs) {
-            $configContents = file_get_contents($peskyCmfConfigFilePath);
+            $configContents = file_get_contents($cmfSectionConfigFilePath);
             $replacements = [
                 "%('cmf_config')\s*=>\s*.*%im" => '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,',
                 "%('url_prefix')\s*=>\s*.*%im" => "$1 => '{$dataForViews['urlPrefix']}',",
+                "%('app_subfolder')\s*=>\s*.*%im" => "$1 => '$appSubfolder',",
                 "%('controllers_namespace')\s*=>\s*.*%im" => "$1 => '{$controllersNamespace}',",
                 "%('views_subfolder')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('dictionary')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
@@ -127,8 +144,33 @@ class CmfInstallCommand extends CmfCommand {
                 "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$publicFiles['js']}',\n    ],",
             ];
             $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
-            File::save($peskyCmfConfigFilePath, $configContents, 0664, 0755);
-            $this->line($peskyCmfConfigFilePath . ' updated');
+            File::save($cmfSectionConfigFilePath, $configContents, 0664, 0755);
+            $this->line($cmfSectionConfigFilePath . ' updated');
+        }
+
+        // create CmfConfig for section
+        $cmfConfigFilePath = $baseFolderPath . '/' . $dataForViews['cmfCongigClassName'] . '.php';
+        $writeCmfSectionConfigFile = (
+            !File::exist($cmfConfigFilePath)
+            || $this->confirm('CmfConfig file ' . $cmfConfigFilePath . ' already exist. Overwrite?')
+        );
+        if ($writeCmfSectionConfigFile) {
+            $dataForViews['configsFileName'] = $cmfSectionConfigFileNameWithoutExtension;
+            File::load($cmfConfigFilePath, true, 0755, 0644)
+                ->write(\View::file($viewsPath . 'cmf_config.blade.php', $dataForViews)->render());
+            $this->line($cmfConfigFilePath . ' created');
+        }
+        // create routes file
+        $routesFileRelativePath = 'routes/' . snake_case($appSubfolder) . '.php';
+        $routesFilePath = base_path($routesFileRelativePath);
+        $writeRoutesFile = (
+            !File::exist($routesFilePath)
+            || $this->confirm('Routes file ' . $routesFilePath . ' already exist. Overwrite?')
+        );
+        if ($writeRoutesFile) {
+            File::load($routesFilePath, true, 0755, 0644)
+                ->write(\View::file($viewsPath . 'cmf_routes.blade.php', $dataForViews)->render());
+            $this->line($routesFilePath . ' created');
         }
 
         // add migrations for admins and settings tables
@@ -147,6 +189,7 @@ class CmfInstallCommand extends CmfCommand {
             $this->line("'cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
             $this->line("'app_settings_class' => \\App\\AppSettings::class,");
             $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
+            $this->line("'app_subfolder' => '$appSubfolder',");
             $this->line("'routes_files' => ['{$routesFileRelativePath}'],");
             $this->line("'controllers_namespace' => '{$controllersNamespace}',");
             $this->line("'views_subfolder' => ['{$subfolderName}'],");
