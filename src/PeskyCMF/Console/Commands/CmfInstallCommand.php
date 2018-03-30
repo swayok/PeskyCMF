@@ -102,6 +102,17 @@ class CmfInstallCommand extends CmfCommand {
             File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
             $this->line($generalCmfConfigFilePath . ' created');
             unset($configContents);
+        } else {
+            $configContents = File::contents($generalCmfConfigFilePath);
+            if (preg_match('%(\'default_cmf_config\')\s*=>\s*.{1,2}PeskyCMF.Config.CmfConfig.*%imu', $configContents)) {
+                $configContents = preg_replace(
+                    '%(\'default_cmf_config\')\s*=>\s*.*%im',
+                    '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,',
+                    $configContents
+                );
+                File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
+                $this->line($generalCmfConfigFilePath . ' updated to use ' . $dataForViews['cmfCongigClassName'] . ' as default CMF config');
+            }
         }
         // create {configFileName}.php in config_path() dir
         $cmfSectionConfigFileNameWithoutExtension = snake_case($appSubfolder);
