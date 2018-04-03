@@ -208,16 +208,18 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      */
     protected function findRequesterInfo(RecordInterface $user) {
         try {
-            if (!empty($user->email)) {
+            if ($user::hasColumn('email') && !empty($user->email)) {
                 return $user->email;
-            } else if (!empty($user->login)) {
+            } else if ($user::hasColumn('login') && !empty($user->login)) {
                 return $user->login;
-            } else if (!empty($user->name) || !empty($user->first_name)) {
-                $name = empty($user->name) ? $user->first_name : $user->name;
-                if (!empty($user->surname)) {
+            } else if (
+                ($user::hasColumn('name') && !empty($user->name))
+                || ($user::hasColumn('first_name') && !empty($user->first_name))
+            ) {
+                $name = $user::hasColumn('name') && !empty($user->name) ? $user->name : $user->first_name;
+                if ($user::hasColumn('surname') && !empty($user->surname)) {
                     $name .= ' ' . $user->surname;
-                }
-                if (!empty($user->last_name)) {
+                } else if ($user::hasColumn('last_name') && !empty($user->last_name)) {
                     $name .= ' ' . $user->last_name;
                 }
                 return $name;
@@ -225,7 +227,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         } catch (\Exception $exception) {
             \Log::error($exception, [
                 'user class' => get_class($user),
-                'pk value' => $user->getAuthIdentifier()
+                'pk value' => $user->getPrimaryKeyValue()
             ]);
         }
         return null;
