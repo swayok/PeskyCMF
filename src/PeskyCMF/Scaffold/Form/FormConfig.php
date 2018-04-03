@@ -125,7 +125,7 @@ class FormConfig extends ScaffoldSectionConfig {
             if (is_array($config)) {
                 /** @var array $config */
                 $this->newInputsGroup(is_int($name) ? '' : $name);
-                foreach ($config as $groupInputName => $groupInputConfig) {
+                foreach ((array)$config as $groupInputName => $groupInputConfig) {
                     if (is_int($groupInputName)) {
                         $groupInputName = $groupInputConfig;
                         $groupInputConfig = null;
@@ -284,7 +284,8 @@ class FormConfig extends ScaffoldSectionConfig {
     public function addValueViewer($name, AbstractValueViewer $viewer = null) {
         parent::addValueViewer($name, $viewer);
         if (!$viewer) {
-            $viewer = $this->getValueViewer($name);
+            // make sure viewer exists
+            $this->getValueViewer($name);
         }
         if ($this->currentInputsGroup === null) {
             $this->newInputsGroup('');
@@ -300,6 +301,7 @@ class FormConfig extends ScaffoldSectionConfig {
     protected function collectPresetValidators($isCreation) {
         $validators = [];
         foreach ($this->getFormInputs() as $formInput) {
+            /** @noinspection SlowArrayOperationsInLoopInspection */
             $validators = array_merge($validators, $formInput->getValidators($isCreation));
         }
         return $validators;
@@ -345,7 +347,7 @@ class FormConfig extends ScaffoldSectionConfig {
      */
     public function hasTooltipForInput($inputName) {
         return (
-            $this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip()
+            ($this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip())
             || !empty($this->getTooltipsForInputs()[$inputName])
         );
     }
@@ -434,6 +436,7 @@ class FormConfig extends ScaffoldSectionConfig {
             );
         }
         if (empty($formInput)) {
+            /** @noinspection CallableParameterUseCaseInTypeContextInspection */
             $formInput = $this->hasValueViewer($name) ? $this->getValueViewer($name) : $this->createValueViewer();
         }
         /** @var FormInput $formInput */
@@ -774,6 +777,7 @@ class FormConfig extends ScaffoldSectionConfig {
             return [];
         }
         if (empty($messages)) {
+            /** @noinspection CallableParameterUseCaseInTypeContextInspection */
             $messages = cmfTransCustom('.' . $this->getTable()->getName() . '.form.validation');
         }
         if (!is_array($messages)) {
@@ -788,6 +792,12 @@ class FormConfig extends ScaffoldSectionConfig {
                 $value = 'NULL';
             }
         });
+        // add 'NULL' inserts for all columns registered in table structure to prevent '{{colname}}' parts in validators
+        foreach ($this->getTable()->getTableStructure()->getColumns() as $column) {
+            if (!array_key_exists($column->getName(), $dataForInserts)) {
+                $dataForInserts[$column->getName()] = 'NULL';
+            }
+        }
         foreach ($validators as $key => &$value) {
             if (is_string($value)) {
                 $value = StringUtils::insert($value, $dataForInserts, ['before' => '{{', 'after' => '}}']);
