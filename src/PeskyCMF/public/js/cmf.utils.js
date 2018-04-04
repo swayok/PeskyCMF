@@ -230,8 +230,13 @@ Utils.handleAjaxSuccess = function (json) {
     if (json._reload_user) {
         Utils.getUser(true);
     }
-    if (json.modal && json.content) {
-        var $modal = Utils.makeModal(json.title || '', json.content, json.footer || '', json.modal);
+    if (json.modal && $.isPlainObject(json.modal) && json.modal.content) {
+        var $modal = Utils.makeModal(
+            json.modal.title || '',
+            json.modal.content,
+            json.modal.footer || '',
+            json.modal.size || 'medium'
+        );
         if (json.repeat_action && typeof json.repeat_action === 'function') {
             $modal.find('.reload-url-button, .reload')
                 .removeClass('hidden')
@@ -246,6 +251,7 @@ Utils.handleAjaxSuccess = function (json) {
                 });
         }
         $(document.body).append($modal);
+        // todo: add json.modal.url usage
         $modal
             .one('hidden.bs.modal', function () {
                 $modal.remove();

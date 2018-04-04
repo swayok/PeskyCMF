@@ -726,7 +726,9 @@ abstract class ScaffoldSectionConfig {
          */
         foreach ($toolbarItems as &$item) {
             if (is_object($item)) {
-                if (method_exists($item, 'build')) {
+                if ($item instanceof CmfMenuItem) {
+                    // do nothing
+                } else if (method_exists($item, 'build')) {
                     $item = $item->build();
                 } else if (method_exists($item, '__toString')) {
                     $item = (string) $item;

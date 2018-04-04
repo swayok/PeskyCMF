@@ -232,6 +232,7 @@ class CmfConfig extends ConfigsContainer {
      *      - 'delete' => 'cmf_api_delete_item'
      *      - 'delete_bulk' => 'cmf_api_delete_bulk'
      *      - 'custom_page' => 'cmf_resource_custom_page'
+     *      - 'custom_action' => 'cmf_api_resource_custom_action'
      *      - 'custom_page_for_item' => 'cmf_item_custom_page'
      *      - 'custom_action_for_item' => 'cmf_api_item_custom_action'
      *      For all abilities you will receive $tableName argument and RecordInterface $record or int $itemId argument
@@ -269,6 +270,7 @@ class CmfConfig extends ConfigsContainer {
             'other' => 'others',
             'others' => 'others',
             'custom_page' => 'custom_page',
+            'custom_action' => 'custom_action',
             'custom_page_for_item' => 'custom_page_for_item',
             'custom_action_for_item' => 'custom_action_for_item',
         ]);

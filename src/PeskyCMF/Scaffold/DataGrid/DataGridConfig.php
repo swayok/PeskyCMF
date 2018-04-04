@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold\DataGrid;
 use Exceptions\Data\NotFoundException;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\AbstractValueViewer;
+use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\Core\DbExpr;
@@ -407,7 +408,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
         /** @var array $bulkActionsToolbarItems */
         foreach ($bulkActionsToolbarItems as &$item) {
             if (is_object($item)) {
-                if (method_exists($item, 'build')) {
+                if ($item instanceof CmfMenuItem) {
+                    // do nothing
+                } else if (method_exists($item, 'build')) {
                     $item = $item->build();
                 } else if (method_exists($item, '__toString')) {
                     $item = (string) $item;

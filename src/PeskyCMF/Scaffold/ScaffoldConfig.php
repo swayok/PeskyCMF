@@ -633,6 +633,20 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         ]);
     }
 
+    /**
+     * Call scaffold's method called $actionName without arguments
+     * @param string $actionName
+     * @return $this
+     */
+    public function performAction($actionName) {
+        if (method_exists($this, $actionName)) {
+            return $this->$actionName();
+        } else {
+            return cmfJsonResponse(HttpCode::NOT_FOUND)
+                ->setMessage('Method [' . static::class . '->' . $actionName . '] is not defined');
+        }
+    }
+
     public function getCustomPageForRecord($itemId, $pageName) {
         return view('cmf::ui.default_page_header', [
             'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in ' . static::class . '->getCustomPageForRecord()',

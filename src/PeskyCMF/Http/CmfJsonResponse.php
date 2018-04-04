@@ -10,6 +10,16 @@ class CmfJsonResponse extends JsonResponse {
     static protected $redirectKey = 'redirect';
     static protected $redirectFallbakKey = 'redirect_fallback';
     static protected $errorsKey = 'errors';
+    static protected $modalKey = 'modal';
+    static protected $modalTitleKey = 'title';
+    static protected $modalContentKey = 'content';
+    static protected $modalFooterKey = 'footer';
+    static protected $modalUrlKey = 'url';
+    static protected $modalSizeKey = 'size';
+
+    const MODAL_SIZE_MEDIUM = 'medium';
+    const MODAL_SIZE_SMALL = 'small';
+    const MODAL_SIZE_LARGE = 'large';
 
     /**
      * CmfJsonResponse constructor.
@@ -72,6 +82,32 @@ class CmfJsonResponse extends JsonResponse {
             $data[static::$messageKey] = $message;
         }
         $data[static::$errorsKey] = $errors;
+        return $this->setData($data);
+    }
+
+    /**
+     * @param string $title
+     * @param string $content
+     * @param string $footer
+     * @param null|string $url
+     * @param string $modalSize
+     * @return $this
+     */
+    public function setModalContent($title, $content, $footer = null, $url = null, $modalSize = self::MODAL_SIZE_MEDIUM) {
+        $data = $this->getData(true);
+        $data[static::$modalKey] = [
+            static::$modalTitleKey => (string)$title,
+            static::$modalContentKey => (string)$content,
+        ];
+        if (!empty($footer)) {
+            $data[static::$modalKey][static::$modalFooterKey] = (string)$footer;
+        }
+        if ($modalSize !== self::MODAL_SIZE_MEDIUM) {
+            $data[static::$modalKey][static::$modalSizeKey] = $modalSize;
+        }
+        if (!empty($url)) {
+            $data[static::$modalKey][static::$modalUrlKey] = (string)$url;
+        }
         return $this->setData($data);
     }
 
