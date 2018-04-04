@@ -196,7 +196,10 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                     ->setRespondedAt(static::getTable()->getCurrentTimeDbExpr())
                     ->save();
             } catch (\Exception $exception) {
-                \Log::error($exception);
+                \Log::error($exception, [
+                    'url' => $request->url(),
+                    'data' => $request->all()
+                ]);
             }
         }
         return $this;
