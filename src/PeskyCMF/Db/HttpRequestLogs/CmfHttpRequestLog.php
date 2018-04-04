@@ -8,6 +8,7 @@ use Illuminate\Routing\Route;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
+use Psr\Log\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -127,7 +128,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 ->setSection(array_get($route->getAction(), 'prefix', 'web'))
             ;
         } catch (\Exception $exception) {
-            \Log::error($exception);
+            $this->logException($exception);
             $this->reset();
         }
         return $this;
@@ -196,10 +197,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                     ->setRespondedAt(static::getTable()->getCurrentTimeDbExpr())
                     ->save();
             } catch (\Exception $exception) {
-                \Log::error($exception, [
-                    'url' => $request->url(),
-                    'data' => $request->all()
-                ]);
+                $this->logException($exception);
             }
         }
         return $this;
@@ -228,7 +226,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 return $name;
             }
         } catch (\Exception $exception) {
-            \Log::error($exception, [
+            $this->logException($exception, [
                 'user class' => get_class($user),
                 'pk value' => $user->getPrimaryKeyValue()
             ]);
@@ -255,7 +253,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                     ->logDbRecordUsage($record, $tableName)
                     ->setDataBefore($record->existsInDb() ? $record->toArray($columnsToLog, $relationsToLog ?: ['*']) : []);
             } catch (\Exception $exception) {
-                \Log::error($exception);
+                $this->logException($exception);
             }
         }
         return $this;
@@ -277,7 +275,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 }
                 $this->setDataAfter($record->existsInDb() ? $record->toArray($columnsToLog, $relationsToLog ?: ['*']) : []);
             } catch (\Exception $exception) {
-                \Log::error($exception);
+                $this->logException($exception);
             }
         }
         return $this;
@@ -301,7 +299,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                     $this->setItemId($record->existsInDb() ? $record->getPrimaryKeyValue() : null);
                 }
             } catch (\Exception $exception) {
-                \Log::error($exception);
+                $this->logException($exception);
             }
         }
         return $this;
@@ -312,6 +310,11 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      */
     public function isAllowed() {
         return $this->hasValue('request');
+    }
+
+    protected function logException(\Exception $exception, array $context = []) {
+        $context['exception'] = $exception;
+        \Log::critical($exception->getMessage(), $context);
     }
 
 }

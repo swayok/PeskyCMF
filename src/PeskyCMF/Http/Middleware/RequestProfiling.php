@@ -93,7 +93,7 @@ class RequestProfiling {
                             ->finishAndSave();
                     }
                 } catch (\Exception $exception) {
-                    \Log::error($exception);
+                    $this->logException($exception);
                 }
             }
             // save results to DB
@@ -101,6 +101,11 @@ class RequestProfiling {
         } else {
             return $next($request);
         }
+    }
+
+    protected function logException(\Exception $exception, array $context = []) {
+        $context['exception'] = $exception;
+        \Log::critical($exception->getMessage(), $context);
     }
 
 }
