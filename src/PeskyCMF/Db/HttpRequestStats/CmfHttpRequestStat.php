@@ -23,20 +23,20 @@ use Symfony\Component\HttpFoundation\Response;
  * @property-read bool        $is_cache
  * @property-read string      $url_params
  * @property-read array       $url_params_as_array
- * @property-read object      $url_params_as_object
+ * @property-read \stdClass   $url_params_as_object
  * @property-read string      $sql
  * @property-read array       $sql_as_array
- * @property-read object      $sql_as_object
+ * @property-read \stdClass   $sql_as_object
  * @property-read integer     $http_code
  * @property-read string      $request_data
  * @property-read array       $request_data_as_array
- * @property-read object      $request_data_as_object
+ * @property-read \stdClass   $request_data_as_object
  * @property-read string      $checkpoints
  * @property-read array       $checkpoints_as_array
- * @property-read object      $checkpoints_as_object
+ * @property-read \stdClass   $checkpoints_as_object
  * @property-read string      $counters
  * @property-read array       $counters_as_array
- * @property-read object      $counters_as_object
+ * @property-read \stdClass   $counters_as_object
  *
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setHttpMethod($value, $isFromDb = false)

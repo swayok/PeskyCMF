@@ -25,17 +25,17 @@ use Symfony\Component\HttpFoundation\Response;
  * @property-read null|string $response_type
  * @property-read string      $request
  * @property-read array       $request_as_array
- * @property-read object      $request_as_object
+ * @property-read \stdClass   $request_as_object
  * @property-read null|string $response
  * @property-read null|string $debug
  * @property-read null|string $table
  * @property-read null|int    $item_id
  * @property-read null|string $data_before
  * @property-read array       $data_before_as_array
- * @property-read object      $data_before_as_object
+ * @property-read \stdClass   $data_before_as_object
  * @property-read null|string $data_after
  * @property-read array       $data_after_as_array
- * @property-read object      $data_after_as_object
+ * @property-read \stdClass   $data_after_as_object
  * @property-read string      $created_at
  * @property-read string      $created_at_as_date
  * @property-read string      $created_at_as_time
