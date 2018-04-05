@@ -312,6 +312,7 @@ class FormInput extends RenderableValueViewer {
     /**
      * @param bool $isCreation - true: validators for record creation; false: validators for record update
      * @return array
+     * @throws ValueViewerConfigException
      */
     public function getValidators($isCreation) {
         if (!$this->isLinkedToDbColumn() || $this->hasRelation()) {
@@ -480,6 +481,21 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
+     * Input will be always marked as 'readonly'
+     * @return FormInput
+     */
+    public function setDisabledAlways() {
+        $this->disablersConfigs = [];
+        $this->disablersConfigs[] = function () {
+            return [
+                'force_state' => true,
+                'attribute' => 'disabled'
+            ];
+        };
+        return $this;
+    }
+
+    /**
      * This input should be marked as 'readonly' only when $otherInput has no provided value ($hasValue)
      * Note: can be called several times to add more conditions. Conditions will be preocessed "1 OR 2 OR 3..."
      * If any condition matches - input will be readonly
@@ -529,6 +545,21 @@ class FormInput extends RenderableValueViewer {
      */
     public function setReadonlyWhen($otherInput, $hasValue, $ignoreIfInputIsAbsent = false, $changeValue = null) {
         return $this->addDisablerConfig($otherInput, true, $hasValue, $ignoreIfInputIsAbsent, true, $changeValue);
+    }
+
+    /**
+     * Input will be always marked as 'readonly'
+     * @return FormInput
+     */
+    public function setReadonlyAlways() {
+        $this->disablersConfigs = [];
+        $this->disablersConfigs[] = function () {
+            return [
+                'force_state' => true,
+                'attribute' => 'readonly'
+            ];
+        };
+        return $this;
     }
 
     protected function addDisablerConfig(

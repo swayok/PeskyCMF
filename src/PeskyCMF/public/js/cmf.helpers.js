@@ -75,8 +75,16 @@ FormHelper.initInputPlugins = function (container) {
             $(this).val($(this).val());
         });
     $container
-        .find('input[data-inputmask], textarea[data-inputmask]')
+        .find(
+            'input[data-inputmask], textarea[data-inputmask], ' +
+            'input[data-inputmask-alias], textarea[data-inputmask-alias], ' +
+            'input[data-inputmask-mask], textarea[data-inputmask-mask], ' +
+            'input[data-inputmask-regex], textarea[data-inputmask-regex]'
+        )
         .each(function () {
+            if (!$(this).attr('data-inputmask-rightAlign')) {
+                $(this).attr('data-inputmask-rightAlign', 'false');
+            }
             $(this).inputmask();
             $(this).val($(this).val());
         });
@@ -339,6 +347,12 @@ FormHelper.inputsDisablers.init = function (formSelector, disablers, runDisabler
         var validConditions = [];
         for (var k = 0; k < disablerConfig.conditions.length; k++) {
             var condition = disablerConfig.conditions[k];
+            if (condition.force_state === true) {
+                // always disable/readonly
+                $inputToDisable.prop(condition.attribute || 'disabled', true);
+                validConditions = [];
+                break;
+            }
             var $disablerInput = findInput(condition.disabler_input_name);
             if (!$disablerInput) {
                 if (condition.ignore_if_disabler_input_is_absent) {
