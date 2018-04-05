@@ -449,7 +449,6 @@ class FormInput extends RenderableValueViewer {
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @return $this
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
@@ -473,7 +472,6 @@ class FormInput extends RenderableValueViewer {
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @return $this
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
@@ -500,7 +498,6 @@ class FormInput extends RenderableValueViewer {
      *      - string or bool: change value of this input when it gets "readonly" attribute
      * @return $this
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
@@ -527,7 +524,6 @@ class FormInput extends RenderableValueViewer {
      *      - string or bool: change value of this input when it gets "readonly" attribute
      * @return $this
      * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
