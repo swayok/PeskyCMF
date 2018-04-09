@@ -47,6 +47,9 @@ class FormInput extends RenderableValueViewer {
     /** @var \Closure|null */
     protected $optionsLoader;
 
+    /** @var bool */
+    protected $optionsLoaderAllowsKeywordSearch;
+
     /** @var null|string */
     protected $emptyOptionLabel;
 
@@ -134,10 +137,12 @@ class FormInput extends RenderableValueViewer {
 
     /**
      * @param \Closure $loader = function ($pkValue, FormInput $formInput, FormConfig $formConfig) { return [] }
+     * @param bool $allowKeywordSearch - true: allows autocomplete functionality (search by keywords)
      * @return $this
      */
-    public function setOptionsLoader(\Closure $loader) {
+    public function setOptionsLoader(\Closure $loader, $allowKeywordSearch = false) {
         $this->optionsLoader = $loader;
+        $this->optionsLoaderAllowsKeywordSearch = $allowKeywordSearch;
         return $this;
     }
 

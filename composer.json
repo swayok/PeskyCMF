@@ -54,7 +54,8 @@
         "vitalets/x-editable": "dev-master",
         "kartik-v/bootstrap-fileinput": "~4.4.0",
         "vluzrmos/language-detector": "1.*",
-        "npm-asset/simple-scrollbar": "^0.3-dev"
+        "npm-asset/simple-scrollbar": "^0.3-dev",
+        "bower-asset/ajax-bootstrap-select": "^1.4"
     },
     "suggest": {
         "fxp/composer-asset-plugin": "Required to install bower/npm plugins!; composer global install fxp/composer-asset-plugin",
