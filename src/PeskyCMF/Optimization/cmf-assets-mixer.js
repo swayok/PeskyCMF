@@ -4,6 +4,7 @@ var mixCmfStyles = function (mix) {
         'public/packages/cmf-vendors/bootstrap/switches/css/bootstrap3/bootstrap-switch.css',
         'public/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css',
         'public/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css',
+        'public/packages/cmf-vendors/bootstrap/select/css/ajax-bootstrap-select.css',
         'public/packages/cmf-vendors/bootstrap/fileinput/css/fileinput.min.css',
         'public/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox.css'
     ], 'public/packages/cmf/compiled/css/bootstrap-plugins.min.css');
@@ -31,6 +32,8 @@ var mixCmfScripts = function (mix) {
         'public/packages/cmf-vendors/bootstrap/switches/js/bootstrap-switch.min.js',
         'public/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js',
         'public/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-en_US.min.js',
+        'public/packages/cmf-vendors/bootstrap/select/js/ajax-bootstrap-select.min.js',
+        'public/packages/cmf-vendors/bootstrap/select/js/locale/ajax-bootstrap-select.en-US.min.js',
         'public/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js',
         'public/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js',
         'public/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js',

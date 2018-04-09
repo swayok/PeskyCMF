@@ -18,6 +18,7 @@
         <link href="/packages/cmf-vendors/bootstrap/switches/css/bootstrap3/bootstrap-switch.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/datetimepicker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/select/css/bootstrap-select.css" rel="stylesheet" type="text/css"/>
+        <link href="/packages/cmf-vendors/bootstrap/select/css/ajax-bootstrap-select.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/fileinput/css/fileinput.min.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
         {{-- DO NOT USE THIS CSS AS IT IS!!! it declares css classes globally overwriting normal behavior globally. datepicker will not work anymore for example --}}
@@ -124,6 +125,8 @@
 
         <script src="/packages/cmf-vendors/bootstrap/select/js/bootstrap-select.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-en_US.min.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/select/js/ajax-bootstrap-select.min.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/select/js/locale/ajax-bootstrap-select.en-US.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js" type="text/javascript"></script>
 
         <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>

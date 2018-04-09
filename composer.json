@@ -43,7 +43,8 @@
         "bower-asset/jquery": "3.*",
         "bower-asset/sortablejs": "~1.4",
         "swayok/page.js": "master@dev",
-        "bootstrap-select/bootstrap-select": "*",
+        "bower-asset/bootstrap-select": "*",
+        "bower-asset/ajax-bootstrap-select": "^1.4",
         "mistic100/jquery-querybuilder": "*",
         "grimmlink/toastr": "2.*",
         "moment/moment": "2.*",
@@ -54,8 +55,7 @@
         "vitalets/x-editable": "dev-master",
         "kartik-v/bootstrap-fileinput": "~4.4.0",
         "vluzrmos/language-detector": "1.*",
-        "npm-asset/simple-scrollbar": "^0.3-dev",
-        "bower-asset/ajax-bootstrap-select": "^1.4"
+        "npm-asset/simple-scrollbar": "^0.3-dev"
     },
     "suggest": {
         "fxp/composer-asset-plugin": "Required to install bower/npm plugins!; composer global install fxp/composer-asset-plugin",
