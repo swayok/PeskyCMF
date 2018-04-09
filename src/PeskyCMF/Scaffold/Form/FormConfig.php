@@ -523,9 +523,42 @@ class FormConfig extends ScaffoldSectionConfig {
                 $options[$viewer->getName()] = call_user_func(
                     $viewer->getOptionsLoader(),
                     $pkValue,
+                    '',
                     $viewer,
                     $this
                 );
+            }
+        }
+        return $options;
+    }
+
+    /**
+     * @param string $inputName
+     * @param int|string|null $pkValue - primary key value
+     * @param string|null $keywords - keywords for filtering
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function loadOptionsForInput($inputName, $pkValue, $keywords) {
+        $viewer = $this->getValueViewer($inputName);
+        if ($viewer->hasOptionsLoader()) {
+            $optionsMap = call_user_func(
+                $viewer->getOptionsLoader(),
+                $pkValue,
+                $keywords,
+                $viewer,
+                $this
+            );
+        }
+        $options = [];
+        foreach ($optionsMap as $value => $label) {
+            if (is_array($label)) {
+                $options[] = $label;
+            } else {
+                $options[] = [
+                    'value' => $value,
+                    'text' => $label,
+                ];
             }
         }
         return $options;

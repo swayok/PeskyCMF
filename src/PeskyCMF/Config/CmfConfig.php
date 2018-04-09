@@ -764,6 +764,37 @@ class CmfConfig extends ConfigsContainer {
         Column::setValidationErrorsMessages((array)static::transGeneral('form.message.column_validation_errors') ?: []);
     }
 
+    static protected $localeSuffixMap = [
+        'en' => 'US',
+        'ko' => 'KR',
+        'ja' => 'JP',
+        'cs' => 'CZ',
+        'da' => 'DK',
+        'et' => 'EE',
+        'fa' => 'IR',
+        'kh' => 'KM',
+        'nb' => 'NO',
+        'pt' => 'BR',
+        'sv' => 'SE',
+        'vi' => 'VN',
+        'zh' => 'CN',
+    ];
+    /**
+     * Get locale in format "en_US" or "ru-RU" or "it-it"
+     * @param string $separator
+     * @param bool $lowercased - true: will return "it-it" instead of "it-IT"
+     * @return string
+     */
+    static public function getLocaleWithSuffix($separator = '_', $lowercased = false) {
+        $locale = preg_split('%[-_]%', strtolower(app()->getLocale()));
+        if (count($locale) === 2) {
+            return $locale[0] . $separator . ($lowercased ? $locale[1] : strtoupper($locale[1]));
+        } else {
+            $localeSuffix = isset(static::$localeSuffixMap[$locale[0]]) ? static::$localeSuffixMap[$locale[0]] : $locale[0];
+            return $locale[0] . $separator . ($lowercased ? $localeSuffix : strtoupper($localeSuffix));
+        }
+    }
+
     /**
      * Reset locale to default
      */

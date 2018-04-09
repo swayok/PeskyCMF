@@ -48,7 +48,9 @@ class FormInput extends RenderableValueViewer {
     protected $optionsLoader;
 
     /** @var bool */
-    protected $optionsLoaderAllowsKeywordSearch;
+    protected $enableOptionsFilteringByKeywords;
+    /** @var int */
+    protected $minCharsRequiredToInitOptionsFiltering = 1;
 
     /** @var null|string */
     protected $emptyOptionLabel;
@@ -136,13 +138,22 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
-     * @param \Closure $loader = function ($pkValue, FormInput $formInput, FormConfig $formConfig) { return [] }
-     * @param bool $allowKeywordSearch - true: allows autocomplete functionality (search by keywords)
+     * @param \Closure $loader = function ($pkValue, $keywords, FormInput $formInput, FormConfig $formConfig) { return [] }
      * @return $this
      */
-    public function setOptionsLoader(\Closure $loader, $allowKeywordSearch = false) {
+    public function setOptionsLoader(\Closure $loader) {
         $this->optionsLoader = $loader;
-        $this->optionsLoaderAllowsKeywordSearch = $allowKeywordSearch;
+        return $this;
+    }
+
+    /**
+     * Allows autocomplete functionality (search by keywords) for <select> inputs using options loader
+     * @param int $minCharsToInitFiltering - minimum characters required to initiate ajax request
+     * @return $this
+     */
+    public function enableOptionsFilteringByKeywords($minCharsToInitFiltering = 1) {
+        $this->enableOptionsFilteringByKeywords = true;
+        $this->minCharsRequiredToInitOptionsFiltering = (int)$minCharsToInitFiltering;
         return $this;
     }
 
@@ -158,6 +169,20 @@ class FormInput extends RenderableValueViewer {
      */
     public function hasOptionsLoader() {
         return !empty($this->optionsLoader);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOptionsFilteringEnabled() {
+        return $this->enableOptionsFilteringByKeywords;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMinCharsRequiredToInitOptionsFiltering() {
+        return $this->minCharsRequiredToInitOptionsFiltering;
     }
 
     /**

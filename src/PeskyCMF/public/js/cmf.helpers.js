@@ -33,9 +33,16 @@ FormHelper.initInputPlugins = function (container) {
                     pluginOptions.style = 'input-lg';
                 }
             }
-            $select
-                .selectpicker(pluginOptions)
-                .selectpicker('val', val);
+
+            if ($select.attr('data-abs-ajax-url') || $select.attr('data-abs-ajax')) {
+                pluginOptions.liveSearch = true;
+                $select
+                    .selectpicker(pluginOptions)
+                    .ajaxSelectPicker({ajax: {data: {keywords: '{{{q}}}'}}});
+            } else {
+                $select.selectpicker(pluginOptions);
+            }
+            $select.selectpicker('val', val);
         });
     $container
         .find('input.switch[type="checkbox"]')

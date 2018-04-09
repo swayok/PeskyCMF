@@ -88,6 +88,10 @@ class CmfScaffoldApiController extends Controller {
         return $this->getScaffoldConfig()->getHtmlOptionsForFormInputs();
     }
 
+    public function getOptionsAsJson($resourceName, $inputName) {
+        return $this->getScaffoldConfig()->getJsonOptionsForFormInput($inputName);
+    }
+
     public function addItem() {
         return $this->getScaffoldConfig()->addRecord();
     }

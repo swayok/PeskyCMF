@@ -14,6 +14,20 @@ $rendererConfig
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 $isHidden = (bool)$rendererConfig->getData('isHidden', false);
+if ($valueViewer->isOptionsFilteringEnabled()) {
+    $routeName = \PeskyCMF\Config\CmfConfig::getPrimary()->getRouteName('cmf_api_get_options_as_json');
+    $routeData = [
+        'table_name' => $sectionConfig->getScaffoldConfig()->getResourceName(),
+        'input_name' => $valueViewer->getName(),
+    ];
+    $additionalOptions = implode(' ', [
+        'data-abs-ajax-url="' . route($routeName, $routeData) . '?id={{= it.id || \'\' }}"',
+        'data-abs-ajax-type="GET"',
+        'data-abs-min-length="' . $valueViewer->getMinCharsRequiredToInitOptionsFiltering() . '"'
+    ]);
+    $attributesForCreate .= ' ' . $additionalOptions;
+    $attributesForEdit .= ' ' . $additionalOptions;
+}
 ?>
 
 <div class="form-group <?php echo $isHidden ? 'hidden' : ''; ?>">
@@ -27,7 +41,11 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
             data-value="<?php echo $valueViewer->getDotJsInsertForValue(); ?>"
         <?php endif; ?>
     >
-    <?php if (!$valueViewer->hasOptionsLoader()) : ?>
+    <?php if ($valueViewer->hasOptionsLoader()) : ?>
+        {{? typeof it._options !== undefined && $.isPlainObject(it._options) && typeof it._options['<?php echo $valueViewer->getName(); ?>'] !== undefined }}
+            {{= it._options['<?php echo $valueViewer->getName(); ?>'] }}
+        {{?}}
+    <?php else: ?>
         <?php
             $emptyOption = '<option value="">'. $valueViewer->getEmptyOptionLabel() . '</option>';
             $isEmptyoptionAllowed = !$isMultiple;
@@ -65,10 +83,6 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
                 <option value="<?php echo str_replace('"', '\"', $value) ?>"><?php echo $label; ?></option>
             <?php endforeach; ?>
         <?php endif; ?>
-    <?php else: ?>
-        {{? typeof it._options !== undefined && $.isPlainObject(it._options) && typeof it._options['<?php echo $valueViewer->getName(); ?>'] !== undefined }}
-            {{= it._options['<?php echo $valueViewer->getName(); ?>'] }}
-        {{?}}
     <?php endif; ?>
     </select>
     <?php if ($isMultiple || ($rendererConfig->isRequired() && $valueViewer->hasOptionsLoader())) : ?>

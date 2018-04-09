@@ -261,6 +261,15 @@ Route::group(
             ]
         ]);
 
+        Route::get('{table_name}/service/options/{column_name}.json', [
+            'as' => $routeNamePrefix . 'cmf_api_get_options_as_json',
+            'uses' => $apiControllerClass . '@getOptionsAsJson',
+            'fallback' => [
+                'route' => $routeNamePrefix . 'cmf_items_table',
+                'use_params' => true
+            ]
+        ]);
+
         Route::get('{table_name}/service/options', [
             'as' => $routeNamePrefix . 'cmf_api_get_options',
             'uses' => $apiControllerClass . '@getOptions',

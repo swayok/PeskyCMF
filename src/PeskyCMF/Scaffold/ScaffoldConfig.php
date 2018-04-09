@@ -452,6 +452,22 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return cmfJsonResponse()->setData($columnsOptions);
     }
 
+    public function getJsonOptionsForFormInput($inputName) {
+        if (!$this->isSectionAllowed()) {
+            return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
+        }
+        if (!$this->isEditAllowed() && !$this->isCreateAllowed()) {
+            return $this->makeAccessDeniedReponse($this->getFormConfig()->translateGeneral('message.edit.forbidden'));
+        }
+        $formConfig = $this->getFormConfig();
+        $options = $formConfig->loadOptionsForInput(
+            $inputName,
+            $this->getRequest()->query('id'),
+            $this->getRequest()->query('keywords')
+        );
+        return cmfJsonResponse()->setData($options);
+    }
+
     /**
      * @param array $options
      * @param bool|string $addEmptyOption - false: do not add default empty option | string: add default empty option

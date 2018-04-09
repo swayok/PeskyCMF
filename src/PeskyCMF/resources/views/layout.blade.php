@@ -99,6 +99,9 @@
 
     <script src="/packages/cmf-vendors/jquery3/jquery.min.js" type="text/javascript"></script>
 
+    @php($localeWithSuffixDashed = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('-'))
+    @php($localeWithSuffixUnderscored = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('_'))
+
     @if(!config('peskycmf.assets_are_mixed', false))
         <script src="/packages/cmf-vendors/scrollbar/simple-scrollbar.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
@@ -158,8 +161,9 @@
     <script src="/packages/cmf-vendors/db-query-builder/i18n/query-builder.{{ app()->getLocale() }}.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/moment/locale/{{ app()->getLocale() }}.js" type="text/javascript"></script>
     @if (app()->getLocale() !== 'en')
-        <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-{{ app()->getLocale() }}_{{ strtoupper(app()->getLocale()) }}.js" type="text/javascript"></script>
-        <script src="/packages/cmf-vendors/bootstrap/fileinput/js/locales/{{ app()->getLocale() }}.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-{{ $localeWithSuffixUnderscored }}.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/select/js/locale/ajax-bootstrap-select.{{ $localeWithSuffixDashed }}.min.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/fileinput/js/locales/{{ strtolower(substr(app()->getLocale(), 0, 2)) }}.js" type="text/javascript"></script>
     @endif
 
     @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_js_includes() as $jsPath)
