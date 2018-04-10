@@ -24,6 +24,12 @@
             "PeskyCMF": "/src"
         }
     },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
@@ -59,7 +65,6 @@
         "npm-asset/simple-scrollbar": "0.*"
     },
     "suggest": {
-        "fxp/composer-asset-plugin": "Required to install bower/npm plugins!; composer global install fxp/composer-asset-plugin",
         "swayok/laravel-antihack-tool": "master@dev - active hack protection tool"
     },
     "todo": {
