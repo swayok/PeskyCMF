@@ -44,7 +44,7 @@
         "bower-asset/sortablejs": "~1.4",
         "swayok/page.js": "master@dev",
         "bower-asset/bootstrap-select": "*",
-        "bower-asset/ajax-bootstrap-select": "^1.4",
+        "bower-asset/ajax-bootstrap-select": "*",
         "mistic100/jquery-querybuilder": "*",
         "grimmlink/toastr": "2.*",
         "moment/moment": "2.*",
