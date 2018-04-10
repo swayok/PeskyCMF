@@ -290,9 +290,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/twbs/bootstrap/dist') => public_path('packages/cmf-vendors/bootstrap'),
             base_path('vendor/eonasdan/bootstrap-datetimepicker/build') => public_path('packages/cmf-vendors/bootstrap/datetimepicker'),
             base_path('vendor/nostalgiaz/bootstrap-switch/dist') => public_path('packages/cmf-vendors/bootstrap/switches'),
-            base_path('vendor/bower-asset/bootstrap-select/dist') => public_path('packages/cmf-vendors/bootstrap/select'),
-            base_path('vendor/bower-asset/ajax-bootstrap-select/dist') => public_path('packages/cmf-vendors/bootstrap/select'),
-            base_path('vendor/vitalets/x-editable/dist/bootstrap3-editable') => public_path('packages/cmf-vendors/bootstrap/x-editale'),
+            base_path('vendor/npm-asset/bootstrap-select/dist') => public_path('packages/cmf-vendors/bootstrap/select'),
+            base_path('vendor/npm-asset/ajax-bootstrap-select/dist') => public_path('packages/cmf-vendors/bootstrap/select'),
             base_path('vendor/kartik-v/bootstrap-fileinput/js') => public_path('packages/cmf-vendors/bootstrap/fileinput/js'),
             base_path('vendor/kartik-v/bootstrap-fileinput/css') => public_path('packages/cmf-vendors/bootstrap/fileinput/css'),
             base_path('vendor/kartik-v/bootstrap-fileinput/img') => public_path('packages/cmf-vendors/bootstrap/fileinput/img'),
@@ -302,9 +301,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/driftyco/ionicons/css') => public_path('packages/cmf-vendors/fonticons/ionicons/css'),
             base_path('vendor/driftyco/ionicons/fonts') => public_path('packages/cmf-vendors/fonticons/ionicons/fonts'),
             // jquery
-            base_path('vendor/bower-asset/jquery/dist/jquery.js') => public_path('packages/cmf-vendors/jquery3/jquery.js'),
-            base_path('vendor/bower-asset/jquery/dist/jquery.min.js') => public_path('packages/cmf-vendors/jquery3/jquery.min.js'),
-            base_path('vendor/bower-asset/jquery/dist/jquery.min.map') => public_path('packages/cmf-vendors/jquery3/jquery.min.map'),
+            base_path('vendor/npm-asset/jquery/dist/jquery.js') => public_path('packages/cmf-vendors/jquery3/jquery.js'),
+            base_path('vendor/npm-asset/jquery/dist/jquery.min.js') => public_path('packages/cmf-vendors/jquery3/jquery.min.js'),
+            base_path('vendor/npm-asset/jquery/dist/jquery.min.map') => public_path('packages/cmf-vendors/jquery3/jquery.min.map'),
             base_path('vendor/jquery-form/form/dist') => public_path('packages/cmf-vendors/jquery-form'),
             base_path('vendor/mistic100/jquery-querybuilder/dist') => public_path('packages/cmf-vendors/db-query-builder'),
             // ckeditor - removed due to problems with updates and plugins packs. Currently should be updated manually in packages/cmf-vendors/ckeditor
@@ -329,8 +328,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/robinherbots/jquery.inputmask/dist/jquery.inputmask.bundle.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
-            base_path('vendor/bower-asset/cropper/dist') => public_path('packages/cmf-vendors/cropperjs'),
-            base_path('vendor/bower-asset/sortablejs/Sortable.js') => public_path('packages/cmf-vendors/sortable/Sortable.js'),
+//            base_path('vendor/npm-asset/cropperjs/dist') => public_path('packages/cmf-vendors/cropperjs'),
+            base_path('vendor/npm-asset/sortablejs/Sortable.js') => public_path('packages/cmf-vendors/sortable/Sortable.js'),
             // additions to vendors
             $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
         ], 'public');
