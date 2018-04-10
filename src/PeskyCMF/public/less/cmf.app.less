@@ -1907,6 +1907,11 @@ aside.main-sidebar {
 
 .modal {
 
+    &.in {
+        // fix for chrome (no mouse wheel scrolling after dialog shown)
+        .transform(translateZ(0));
+    }
+
     &.fade .modal-dialog {
         .translate(0, 0);
         .transition-transform(~"0.15s ease-out");
