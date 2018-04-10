@@ -905,4 +905,25 @@ class DataGridConfig extends ScaffoldSectionConfig {
     public function getRendererHelper(FilterConfig $dataGridFilterConfig, TableInterface $table, $tableNameForRoutes) {
         return new DataGridRendererHelper($this, $dataGridFilterConfig, $table, $tableNameForRoutes);
     }
+
+    /**
+     * @param array $record
+     * @param array $virtualColumns
+     * @return array
+     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
+     * @throws \PeskyORM\Exception\InvalidDataException
+     * @throws \PeskyORM\Exception\OrmException
+     */
+    public function prepareRecord(array $record, array $virtualColumns = []) {
+        $data = parent::prepareRecord($record, $virtualColumns);
+        /** @var DataGridColumn $valueViewer */
+        foreach ($this->getValueViewers() as $valueViewer) {
+            if ($valueViewer->hasRelation()) {
+                // add special key for relation column that is not nested into sub object and datatables can find it
+                $path = $valueViewer->getRelation()->getName() . '.' . $valueViewer->getRelationColumn();
+                $data[$valueViewer::convertNameForDataTables($valueViewer->getName())] = array_get($data, $path);
+            }
+        }
+        return $data;
+    }
 }

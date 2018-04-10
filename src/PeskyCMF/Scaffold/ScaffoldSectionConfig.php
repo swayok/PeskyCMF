@@ -439,8 +439,8 @@ abstract class ScaffoldSectionConfig {
      * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function prepareRecord(array $record, array $virtualColumns = []) {
-        /** @noinspection UnnecessaryParenthesesInspection */
         $pkKey = $this->getTable()->getPkColumnName();
+        /** @noinspection UnnecessaryParenthesesInspection */
         $permissionsAndServiceData = [
             '___create_allowed' => $this->isCreateAllowed(),
             '___delete_allowed' => (
