@@ -672,6 +672,7 @@ class FormInput extends RenderableValueViewer {
                     $renderer->setTemplate('cmf::input.hidden');
                     break;
                 case static::TYPE_TEXT:
+                case static::TYPE_MULTILINE:
                     $renderer->setTemplate('cmf::input.textarea');
                     break;
                 case static::TYPE_WYSIWYG:
