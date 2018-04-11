@@ -47,7 +47,8 @@ class ImagesValueCell extends ValueCell {
             ->enableTrustModeForDbData()
             ->fromData($record, true, false);
         $ret = [];
-        foreach ($this->fileConfigsToShow as $configName) {
+        $configsToShow = $this->fileConfigsToShow ?: array_keys($this->getTableColumn()->getImagesGroupsConfigurations());
+        foreach ($configsToShow as $configName) {
             $preparedInfo = [];
             /** @var FileInfo[] $filesForCofing */
             $filesForCofing = $object->getValue($column, $configName);
