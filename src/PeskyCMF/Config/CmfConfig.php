@@ -1158,7 +1158,7 @@ class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static protected function loadApiMethodsDocumentationClassesFromFileSystem() {
-        $folder = static::api_methods_documentation_classes_folder();
+        $folder = static::api_documentation_classes_folder();
         if (!Folder::exist()) {
             return [];
         }
@@ -1221,15 +1221,22 @@ class CmfConfig extends ConfigsContainer {
     /**
      * @return string
      */
-    static public function api_methods_documentation_classes_folder() {
-        return static::config('api_docs_classes_folder') ?: app_path('Api/Docs');
+    static public function api_documentation_classes_folder() {
+        return static::config('api_method_documentation.folder') ?: app_path('Api/Docs');
     }
 
     /**
      * @return string
      */
     static public function api_method_documentation_base_class() {
-        return static::config('api_method_documentation_base_class') ?: CmfApiMethodDocumentation::class;
+        return static::config('api_method_documentation.base_class') ?: CmfApiMethodDocumentation::class;
+    }
+
+    /**
+     * @return string
+     */
+    static public function api_method_documentation_class_name_suffix() {
+        return static::config('api_method_documentation.class_suffix', 'Documentation');
     }
 
     protected $httpRequestsLogger;

@@ -12,7 +12,7 @@ class CmfMakeApiMethodDocCommand extends Command {
     protected $description = 'Create class that extends CmfApiMethodDocumentation class';
 
     protected $signature = 'cmf:make-api-method-doc {class_name} {docs_group} {--auto : automatically set url, http method, translation paths, etc..}
-                                {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_docs_classes_folder()}';
+                                {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_method_documentation_classes_folder()}';
 
     public function fire() {
         // compatibility with Laravel <= 5.4
@@ -20,10 +20,11 @@ class CmfMakeApiMethodDocCommand extends Command {
     }
 
     public function handle() {
-        $className = $this->argument('class_name');
+        $classSuffix = CmfConfig::getPrimary()->api_method_documentation_class_name_suffix();
+        $className = preg_replace('%' . preg_quote($classSuffix, '%') . '$%', '', $this->argument('class_name')) . $classSuffix;
         $folder = $this->argument('folder');
         if (trim($folder) === '') {
-            $folder = CmfConfig::getPrimary()->api_methods_documentation_classes_folder();
+            $folder = CmfConfig::getPrimary()->api_documentation_classes_folder();
         } else {
             $folder = app_path($folder);
         }
@@ -51,7 +52,14 @@ class CmfMakeApiMethodDocCommand extends Command {
         $namespace = ltrim($namespace, '\\');
         $baseClass = CmfConfig::getPrimary()->api_method_documentation_base_class();
         $baseClassName = class_basename($baseClass);
-        $translationSubGroup = snake_case(preg_replace('%(ApiDocs?|(Method)?Documentation)%', '', $className));
+        $classSuffix = CmfConfig::getPrimary()->api_method_documentation_class_name_suffix();
+        $translationSubGroup = snake_case(
+            preg_replace(
+                '%(ApiDocs?|(Method)?(Doc(umentation)?)?|' . preg_quote($classSuffix, '%') . '$)%',
+                '',
+                $className
+            )
+        );
         $docsGroup = $this->argument('docs_group');
         $translationGroup = empty($docsGroup) ? 'method' : snake_case($docsGroup);
         $url = $this->guessUrl($translationGroup === 'method' ? null : $translationGroup, $translationSubGroup);
