@@ -48,7 +48,7 @@
 
         "npm-asset/jquery": "3.*",
         "npm-asset/bootstrap": "3.*",
-        "npm-asset/font-awesome": "*",
+        "npm-asset/font-awesome": "4.*",
         "npm-asset/ionicons": "*",
         "npm-asset/toastr": "2.*",
         "npm-asset/datatables": "1.*",
