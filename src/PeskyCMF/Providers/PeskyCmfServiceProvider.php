@@ -297,8 +297,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/npm-asset/bootstrap-fileinput/css') => public_path('packages/cmf-vendors/bootstrap/fileinput/css'),
             base_path('vendor/npm-asset/bootstrap-fileinput/img') => public_path('packages/cmf-vendors/bootstrap/fileinput/img'),
             // font icons
-            base_path('vendor/npm-asset/font-awesome/css') => public_path('packages/cmf-vendors/fonticons/font-awesome/css'),
-            base_path('vendor/npm-asset/font-awesome/fonts') => public_path('packages/cmf-vendors/fonticons/font-awesome/fonts'),
+//            base_path('vendor/npm-asset/font-awesome/css') => public_path('packages/cmf-vendors/fonticons/font-awesome/css'),
+//            base_path('vendor/npm-asset/font-awesome/fonts') => public_path('packages/cmf-vendors/fonticons/font-awesome/fonts'),
             base_path('vendor/npm-asset/ionicons/dist/css') => public_path('packages/cmf-vendors/fonticons/ionicons/css'),
             base_path('vendor/npm-asset/ionicons/dist/fonts') => public_path('packages/cmf-vendors/fonticons/ionicons/fonts'),
             // jquery
