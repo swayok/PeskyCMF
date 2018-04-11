@@ -21,8 +21,6 @@
         <link href="/packages/cmf-vendors/bootstrap/select/css/ajax-bootstrap-select.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/fileinput/css/fileinput.min.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/bootstrap/awesome-bootstrap-checkbox.css" rel="stylesheet" type="text/css"/>
-        {{-- DO NOT USE THIS CSS AS IT IS!!! it declares css classes globally overwriting normal behavior globally. datepicker will not work anymore for example --}}
-        {{--<link href="/packages/cmf-vendors/bootstrap/x-editale/css/bootstrap-editable.css" rel="stylesheet" type="text/css"/>--}}
 
         <link href="/packages/cmf-vendors/datatables/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf-vendors/datatables/extensions/FixedColumns/css/fixedColumns.bootstrap.min.css" rel="stylesheet" type="text/css"/>
@@ -133,7 +131,6 @@
         <script src="/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js" type="text/javascript"></script>
 
         <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
-        <script src="/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/sortable/Sortable.js" type="text/javascript"></script>
         {{--<script src="/packages/cmf-vendors/cropperjs/cropper.min.js" type="text/javascript"></script>--}}
