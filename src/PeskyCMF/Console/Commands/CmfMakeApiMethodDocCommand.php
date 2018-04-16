@@ -84,6 +84,7 @@ class CmfMakeApiMethodDocCommand extends Command {
 namespace {$namespace};
 
 use {$baseClass};
+use PeskyCMF\ApiDocs\ApiMethodErrorResponseInfo;
 
 class {$className} extends {$baseClassName} {
 
