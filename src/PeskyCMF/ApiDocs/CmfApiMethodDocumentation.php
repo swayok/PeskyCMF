@@ -80,6 +80,15 @@ HTML;
      */
     protected function getPossibleErrors() {
         /* Example:
+            ApiMethodErrorResponseInfo::create()
+                ->setDescription('Not found')
+                ->setHttpCode(HttpCode::NOT_FOUND)
+                ->setResponse([
+                    'message' => 'item_not_found'
+                ])
+
+            OR
+
             [
                 'code' => HttpCode::NOT_FOUND,
                 'title' => 'Not found',
@@ -87,7 +96,16 @@ HTML;
                     'message' => 'item_not_found'
                 ]
             ]
+
             or if you want localized API docs:
+            ApiMethodErrorResponseInfo::create()
+                ->setDescription('{error.item_not_found}')
+                ->setHttpCode(HttpCode::NOT_FOUND)
+                ->setResponse([
+                    'message' => 'item_not_found'
+                ])
+
+            OR
             [
                 'code' => HttpCode::NOT_FOUND,
                 'title' => '{error.item_not_found}',
@@ -125,6 +143,9 @@ HTML;
         $errors = array_merge($this->getCommonErrors(), $additionalErrors, $this->getPossibleErrors());
         // translate titles
         foreach ($errors as &$error) {
+            if ($error instanceof ApiMethodErrorResponseInfo) {
+                $error = $error->toArray();
+            }
             $error['title'] = $this->translate($error['title']);
         }
         return $errors;

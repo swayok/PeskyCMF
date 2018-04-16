@@ -101,17 +101,16 @@ class {$className} extends {$baseClassName} {
     ];
 
     /**
-     * @return array
+     * @return array|ApiMethodErrorResponseInfo[]
      */
     protected function getPossibleErrors() {
         /* Example:
-            [
-                'code' => HttpCode::NOT_FOUND,
-                'title' => '{{$translationGroup}.item_not_found}',
-                'response' => [
-                    'error' => 'not_found'
-                ]
-            ],
+            ApiMethodErrorResponseInfo::create()
+                ->setDescription('{{$translationGroup}.item_not_found}')
+                ->setHttpCode(HttpCode::NOT_FOUND)
+                ->setResponse([
+                    'error' => 'Record not found in DB.'
+                ]),
         */
         return [];
     }
