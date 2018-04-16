@@ -69,7 +69,7 @@ class CmfMakeApiMethodDocCommand extends Command {
             list($url, $httpMethod, $translationGroup) = $this->askQuestions($url, $translationGroup);
             list($urlParams, $urlQueryParams, $postParams, $validationErrors) = $this->askParams($url, $httpMethod);
             if (!in_array($httpMethod, ['GET', 'POST'], true)) {
-                $httpMethod = $httpMethod === 'PUT' ? 'POST' : 'GET';
+                $httpMethod = in_array($httpMethod, ['PUT', 'DELETE'], true) ? 'POST' : 'GET';
             }
         } else {
             $postParams = "    public \$postParameters = [\n        //'key' => 'value',\n    ];\n";
