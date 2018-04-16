@@ -110,7 +110,7 @@ class {$className} extends {$baseClassName} {
                 ->setDescription('{{$translationGroup}.item_not_found}')
                 ->setHttpCode(HttpCode::NOT_FOUND)
                 ->setResponse([
-                    'error' => 'Record not found in DB.'
+                    'message' => 'Record not found in DB.'
                 ]),
         */
         return [];
