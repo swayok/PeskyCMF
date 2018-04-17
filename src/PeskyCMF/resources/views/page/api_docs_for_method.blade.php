@@ -40,7 +40,7 @@ $errors = $method->getErrors()
             @endif
             <div class="row">
                 @if($method->hasDescription())
-                    @if ($method->isMethodDocumentation())
+                    @if (!$method->isMethodDocumentation())
                         <div class="col-xs-12">
                             {!! $method->getDescription() !!}
                         </div>
