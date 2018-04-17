@@ -2,11 +2,12 @@
 
 namespace PeskyCMF\ApiDocs;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\HttpCode;
-use Ramsey\Uuid\Uuid;
 
-abstract class CmfApiMethodDocumentation {
+/**
+ * Extend this class to describe an API method
+ */
+abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
 
     // override next properties and methods
 
@@ -151,8 +152,6 @@ HTML;
         return $errors;
     }
 
-    protected $uuid;
-
     static protected $authFailError = [
         'code' => HttpCode::UNAUTHORISED,
         'title' => '{error.auth_failure}',
@@ -185,34 +184,6 @@ HTML;
             'message' => 'Server error.',
         ]
     ];
-
-    static public function create() {
-        return new static();
-    }
-
-    public function __construct() {
-        $this->uuid = Uuid::uuid4()->toString();
-    }
-
-    static public function getPosition() {
-        return static::$position;
-    }
-
-    public function getTitle() {
-        return $this->translate($this->title);
-    }
-
-    public function getDescription() {
-        return $this->translate($this->description);
-    }
-
-    public function hasDescription() {
-        return trim(preg_replace('%</?[^>]+>%', '', $this->description)) !== '';
-    }
-
-    public function getUuid() {
-        return $this->uuid;
-    }
 
     public function getUrl() {
         return trim((string)$this->url);
@@ -247,21 +218,6 @@ HTML;
     }
 
     /**
-     * Translate blocks like "{method.name.title}" placed inside the $string
-     * @param string $string
-     * @return string
-     */
-    protected function translate($string) {
-        return preg_replace_callback(
-            '%\{([^{}]*)\}%',
-            function ($matches) {
-                return CmfConfig::transApiDoc($matches[1]);
-            },
-            $string
-        );
-    }
-
-    /**
      * Translate values of the $array recursively
      * @param array $array
      * @return array
@@ -275,6 +231,10 @@ HTML;
             }
         }
         return $array;
+    }
+
+    final public function isMethodDocumentation() {
+        return true;
     }
 
     public function getConfigForPostman() {

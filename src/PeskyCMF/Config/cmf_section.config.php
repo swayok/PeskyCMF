@@ -213,18 +213,24 @@ return [
     'http_requests_logger_class_name' => null,
 
     /**
-     * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation class
-     * Note: there is a possibility to load classes automatically using 'api_method_documentation_classes_folder'. More details
+     * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation or \PeskyCMF\ApiDocs\CmfApiDocumentation class
+     * Note: there is a possibility to load classes automatically using 'api_documentation_classes_folder'. More details
      * in CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem()
      */
     'api_docs_class_names' => [
 
     ],
 
-    'api_method_documentation' => [
+    /**
+     * API documentation settings
+     * Linked commands:
+     * @see \PeskyCMF\Console\Commands\CmfMakeApiDocCommand - makes API documentation page class (wiki-like)
+     * @see \PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand - makes API method documentation class
+     */
+    'api_documentation' => [
         /**
-         * Folder under app_path() folder where api docs classes will be stored when using
-         * 'cmf:make-api-method-doc' artisan command. Default: app_path('Api/Docs')
+         * Absolute path to folder where api docs classes will be stored when using
+         * 'cmf:make-api-doc' and 'cmf:make-api-method-doc' artisan command
          */
         'folder' => null,
 
@@ -232,10 +238,11 @@ return [
          * Base class for api method documentation. Used in 'cmf:make-api-method-doc' artisan command
          * and in CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem()
          */
-        'base_class' => \PeskyCMF\ApiDocs\CmfApiMethodDocumentation::class,
+        'base_class_for_method' => \PeskyCMF\ApiDocs\CmfApiMethodDocumentation::class,
 
         /**
-         * Suffix for method documentation class name. Used in 'cmf:make-api-method-doc' artisan command
+         * Suffix for method documentation class name.
+         * Used in 'cmf:make-api-doc' and 'cmf:make-api-method-doc' artisan command
          */
         'class_suffix' => 'Documentation'
     ],
@@ -245,7 +252,7 @@ return [
      * Folder under app_path() folder where api docs classes will be stored when using
      * 'cmf:make-api-method-doc' artisan command
      */
-    'api_method_documentation_classes_folder' => 'Api/Docs',
+    'api_documentation_classes_folder' => 'Api/Docs',
 
     /**
      * Alter umask()

@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \PeskyCMF\ApiDocs\CmfApiMethodDocumentation $method
+ * @var \PeskyCMF\ApiDocs\CmfApiDocumentation $method
  */
 $url = $method->getUrl();
 $hasUrl = $url !== '';
@@ -40,18 +40,24 @@ $errors = $method->getErrors()
             @endif
             <div class="row">
                 @if($method->hasDescription())
-                <div class="col-xs-12 col-xl-6">
-                    <div class="box box-solid box-default">
-                        <div class="box-header">
-                            <div class="box-title">
-                                {{ cmfTransCustom('.api_docs.description') }}
-                            </div>
-                        </div>
-                        <div class="box-body">
+                    @if ($method->isMethodDocumentation())
+                        <div class="col-xs-12">
                             {!! $method->getDescription() !!}
                         </div>
-                    </div>
-                </div>
+                    @else
+                        <div class="col-xs-12 col-xl-6">
+                            <div class="box box-solid box-default">
+                                <div class="box-header">
+                                    <div class="box-title">
+                                        {{ cmfTransCustom('.api_docs.description') }}
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    {!! $method->getDescription() !!}
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 @endif
                 @if (!empty($headers))
                 <div class="col-xs-12 col-xl-6">

@@ -2,57 +2,22 @@
 
 namespace PeskyCMF\Console\Commands;
 
-use Illuminate\Console\Command;
 use PeskyCMF\Config\CmfConfig;
 use Swayok\Utils\File;
-use Swayok\Utils\Folder;
 
-class CmfMakeApiMethodDocCommand extends Command {
+class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
 
     protected $description = 'Create class that extends CmfApiMethodDocumentation class';
 
     protected $signature = 'cmf:make-api-method-doc {class_name} {docs_group} {--auto : automatically set url, http method, translation paths, etc..}
-                                {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_method_documentation_classes_folder()}';
-
-    public function fire() {
-        // compatibility with Laravel <= 5.4
-        $this->handle();
-    }
-
-    public function handle() {
-        $classSuffix = CmfConfig::getPrimary()->api_method_documentation_class_name_suffix();
-        $className = preg_replace('%' . preg_quote($classSuffix, '%') . '$%', '', $this->argument('class_name')) . $classSuffix;
-        $folder = $this->argument('folder');
-        if (trim($folder) === '') {
-            $folder = CmfConfig::getPrimary()->api_documentation_classes_folder();
-        } else {
-            $folder = app_path($folder);
-        }
-        $folder .= DIRECTORY_SEPARATOR . $this->argument('docs_group');
-        $namespace = '\\App' . rtrim(str_ireplace([app_path(), '/'], ['', '\\'], $folder), '\\ ');
-        $folder = Folder::load($folder, true, 0755);
-        $filePath = $folder->pwd() . DIRECTORY_SEPARATOR . $className . '.php';
-        if (File::exist($filePath) && !$this->confirm("File $filePath already exists. Overwrite?")) {
-            $this->line('Cancelled');
-            return;
-        }
-        $this->makeClass($className, $namespace, $filePath);
-    }
-
-    protected function guessUrl($group, $method) {
-        $url = '/api/';
-        if ($group) {
-            $url .= $group . '/';
-        }
-        return $url . $method;
-    }
+                                {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}';
 
     protected function makeClass($className, $namespace, $filePath) {
         $this->line('Writing class ' .  $namespace . '\\' . $className . ' to file ' . $filePath);
         $namespace = ltrim($namespace, '\\');
         $baseClass = CmfConfig::getPrimary()->api_method_documentation_base_class();
         $baseClassName = class_basename($baseClass);
-        $classSuffix = CmfConfig::getPrimary()->api_method_documentation_class_name_suffix();
+        $classSuffix = CmfConfig::getPrimary()->api_documentation_class_name_suffix();
         $translationSubGroup = snake_case(
             preg_replace(
                 '%(ApiDocs?|(Method)?(Doc(umentation)?)?|' . preg_quote($classSuffix, '%') . '$)%',
@@ -125,6 +90,14 @@ CLASS;
         array_set($translations, $translationGroup . '.title', '');
         array_set($translations, $translationGroup . '.description', '');
         $this->line($this->arrayToString($translations));
+    }
+
+    protected function guessUrl($group, $method) {
+        $url = '/api/';
+        if ($group) {
+            $url .= $group . '/';
+        }
+        return $url . $method;
     }
 
     protected function askQuestions($url, $translationGroup) {

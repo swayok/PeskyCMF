@@ -10,7 +10,6 @@ use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\HttpCode;
@@ -592,7 +591,7 @@ class CmfGeneralController extends Controller {
             ],
             'item' => [],
         ];
-        foreach (CmfConfig::getPrimary()->getApiMethodsDocumentationClasses() as $methodsList) {
+        foreach (CmfConfig::getPrimary()->getApiDocumentationClasses() as $methodsList) {
             /** @var CmfApiMethodDocumentation $apiMethodDocs */
             foreach ($methodsList as $apiMethodDocs) {
                 $docsObject = $apiMethodDocs::create();

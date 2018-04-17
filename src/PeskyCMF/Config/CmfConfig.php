@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Config;
 
+use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Http\Middleware\ValidateCmfUser;
 use PeskyCMF\Scaffold\ScaffoldConfig;
@@ -1140,12 +1141,12 @@ class CmfConfig extends ConfigsContainer {
 
     /**
      * Provides sections with list of objects of classes that extend CmfApiMethodDocumentation class to be displayed in api docs section
-     * @return array - key - section name, value - array that contains names of classes that extend CmfApiMethodDocumentation class
+     * @return array - key - section name, value - array that contains names of classes that extend CmfApiDocumentation class
      */
-    static public function getApiMethodsDocumentationClasses() {
+    static public function getApiDocumentationClasses() {
         $classNames = static::config('api_docs_class_names', []);
         if (empty($classNames)) {
-            $classNames = static::loadApiMethodsDocumentationClassesFromFileSystem();
+            $classNames = static::loadApiDocumentationClassesFromFileSystem();
         }
         return $classNames;
     }
@@ -1154,10 +1155,13 @@ class CmfConfig extends ConfigsContainer {
      * Load api dosc sections from files in static::api_methods_documentation_classes_folder() and its subfolders.
      * Should be used only when static::config('api_docs_class_names') not provided.
      * Subfolders names used as API sections.
-     * Collects only classes that extend *ApiMethodDocumentation class or static::api_method_documentation_base_class()
+     * Collects only classes that extend next classes:
+     *  - ApiDocumentation
+     *  - ApiMethodDocumentation
+     *  - static::api_method_documentation_base_class()
      * @return array
      */
-    static protected function loadApiMethodsDocumentationClassesFromFileSystem() {
+    static protected function loadApiDocumentationClassesFromFileSystem() {
         $folder = static::api_documentation_classes_folder();
         if (!Folder::exist()) {
             return [];
@@ -1169,7 +1173,7 @@ class CmfConfig extends ConfigsContainer {
                 if (preg_match('%\.php$%i', $fileName)) {
                     $file = fopen($folderPath . DIRECTORY_SEPARATOR . $fileName, 'rb');
                     $buffer = fread($file, 512);
-                    $parentClassName = class_basename(static::api_method_documentation_base_class()) . '|[a-zA-Z0-9_-]+ApiMethodDocumentation';
+                    $parentClassName = class_basename(static::api_method_documentation_base_class()) . '|[a-zA-Z0-9_-]+ApiMethodDocumentation|CmfApiDocumentation';
                     if (preg_match('%^\s*class\s+(\w+)\s+extends\s+(' . $parentClassName . ')%im', $buffer, $classMatches)) {
                         $class = $classMatches[1];
                         if (preg_match("%[^w]namespace\s+([\w\\\]+).*?class\s+{$class}\s+%is", $buffer, $nsMatches)) {
@@ -1181,8 +1185,8 @@ class CmfConfig extends ConfigsContainer {
             }
             // sort classes
             usort($classes, function ($class1, $class2) {
-                /** @var CmfApiMethodDocumentation $class1 */
-                /** @var CmfApiMethodDocumentation $class2 */
+                /** @var CmfApiDocumentation $class1 */
+                /** @var CmfApiDocumentation $class2 */
                 $pos1 = $class1::getPosition();
                 $pos2 = $class2::getPosition();
                 if ($pos1 === null) {
@@ -1222,21 +1226,21 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function api_documentation_classes_folder() {
-        return static::config('api_method_documentation.folder') ?: app_path('Api/Docs');
+        return static::config('api_documentation.folder') ?: app_path('Api/Docs');
     }
 
     /**
      * @return string
      */
     static public function api_method_documentation_base_class() {
-        return static::config('api_method_documentation.base_class') ?: CmfApiMethodDocumentation::class;
+        return static::config('api_documentation.base_class_for_method') ?: CmfApiMethodDocumentation::class;
     }
 
     /**
      * @return string
      */
-    static public function api_method_documentation_class_name_suffix() {
-        return static::config('api_method_documentation.class_suffix', 'Documentation');
+    static public function api_documentation_class_name_suffix() {
+        return static::config('api_documentation.class_suffix', 'Documentation');
     }
 
     protected $httpRequestsLogger;

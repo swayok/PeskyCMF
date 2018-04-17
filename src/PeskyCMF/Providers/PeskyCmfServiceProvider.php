@@ -9,6 +9,7 @@ use PeskyCMF\Console\Commands\CmfAddAdminCommand;
 use PeskyCMF\Console\Commands\CmfInstallCommand;
 use PeskyCMF\Console\Commands\CmfInstallHttpRequestsLoggingCommand;
 use PeskyCMF\Console\Commands\CmfInstallHttpRequestsProfilingCommand;
+use PeskyCMF\Console\Commands\CmfMakeApiDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
 use PeskyCMF\Db\Admins\CmfAdmin;
@@ -355,7 +356,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->registerInstallHttpRequestsProfilingCommand();
         $this->registerAddAdminCommand();
         $this->registerMakeScaffoldCommand();
-        $this->registerMakeApiMethodDocsCommand();
+        $this->registerMakeApiDocsCommands();
     }
 
     protected function registerInstallCommand() {
@@ -393,7 +394,12 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->commands('command.cmf.install-http-requests-profiling');
     }
 
-    protected function registerMakeApiMethodDocsCommand() {
+    protected function registerMakeApiDocsCommands() {
+        $this->app->singleton('command.cmf.make-api-docs', function() {
+            return new CmfMakeApiDocCommand();
+        });
+        $this->commands('command.cmf.make-api-docs');
+
         $this->app->singleton('command.cmf.make-api-method-docs', function() {
             return new CmfMakeApiMethodDocCommand();
         });
