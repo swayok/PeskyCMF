@@ -47,8 +47,8 @@ trait TaggedCacheForDbSelects {
      * @param bool|null|array|string $cleanRelatedModelsCache -
      *      - array: list of relations to clean
      *      - string: single relation to clean
-     *      - bool: true = clean all relations provided by $this->getRelationsToCleanByDefault(); false - don't clean relations
-     *      - null: if ($this->canCleanRelationsCache() === true) then clean $this->getRelationsToCleanByDefault()
+     *      - bool: true = clean all relations provided by $this->getDefaultRelationsForCacheCleaner(); false - don't clean relations
+     *      - null: if ($this->canCleanRelationsCache() === true) then clean $this->getDefaultRelationsForCacheCleaner()
      *
      * @throws \BadMethodCallException
      * @throws \PeskyORM\Exception\DbConnectionConfigException
