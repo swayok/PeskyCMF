@@ -125,7 +125,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 ->setRequest($requestData)
                 ->setIp($request->ip())
                 ->setFilter($logName)
-                ->setSection(array_get($route->getAction(), 'prefix') ?: 'web')
+                ->setSection($route->getAction('prefix') ?: 'web')
             ;
         } catch (\Exception $exception) {
             $this->logException($exception);
