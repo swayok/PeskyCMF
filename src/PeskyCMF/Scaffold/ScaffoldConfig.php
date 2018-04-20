@@ -142,6 +142,42 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     }
 
     /**
+     * @param array $filters
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlToItemsTable(array $filters = [], $absolute = false) {
+        return routeToCmfItemsTable(static::getResourceName(), $filters, $absolute);
+    }
+
+    /**
+     * @param mixed $itemId
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlToItemDetails($itemId, $absolute = false) {
+        return routeToCmfItemDetails(static::getResourceName(), $itemId, $absolute);
+    }
+
+    /**
+     * @param array $data
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlToItemAddForm(array $data = [], $absolute = false) {
+        return routeToCmfItemAddForm(static::getResourceName(), $data, $absolute);
+    }
+
+    /**
+     * @param mixed $itemId
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlToItemEditForm($itemId, $absolute = false) {
+        return routeToCmfItemEditForm(static::getResourceName(), $itemId, $absolute);
+    }
+
+    /**
      * @return Request
      */
     public function getRequest() {
