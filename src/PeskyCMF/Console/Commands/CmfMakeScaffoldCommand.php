@@ -296,7 +296,7 @@ VIEW;
     protected function makeContainsForItemDetailsViewer(TableInterface $table) {
         $contains = [];
         foreach ($this->getJoinableRelationNames($table) as $relationName) {
-            $contains[] = "'{$relationName}',";
+            $contains[] = "'{$relationName}' => ['*'],";
         }
         return implode('', $contains);
     }
