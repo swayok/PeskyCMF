@@ -12,7 +12,12 @@ use App\Http\Controllers\Controller;
 
 class PagesController extends Controller {
 
+    public function redirectFromStartPage() {
+        return redirect(redirectToCmfPage('dashboard'));
+    }
+
     public function dashboard() {
         return view('cmf::page.dashboard');
     }
+
 }

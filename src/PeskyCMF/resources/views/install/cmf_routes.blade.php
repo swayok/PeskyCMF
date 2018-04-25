@@ -20,9 +20,7 @@ Route::group(
 
         Route::get('/', [
             'as' => 'cmf_start_page',
-            function () {
-                return redirectToCmfPage('dashboard');
-            }
+            'uses' => 'PagesController@redirectFromStartPage',
         ]);
 
         Route::group(

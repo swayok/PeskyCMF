@@ -6,6 +6,7 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdminCommand;
+use PeskyCMF\Console\Commands\CmfAddSectionCommand;
 use PeskyCMF\Console\Commands\CmfInstallCommand;
 use PeskyCMF\Console\Commands\CmfInstallHttpRequestsLoggingCommand;
 use PeskyCMF\Console\Commands\CmfInstallHttpRequestsProfilingCommand;
@@ -352,6 +353,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
     protected function registerCommands() {
         $this->registerInstallCommand();
+        $this->registerAddSectionCommand();
         $this->registerInstallHttpRequestsLoggingCommand();
         $this->registerInstallHttpRequestsProfilingCommand();
         $this->registerAddAdminCommand();
@@ -364,6 +366,13 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             return new CmfInstallCommand();
         });
         $this->commands('command.cmf.install');
+    }
+
+    protected function registerAddSectionCommand() {
+        $this->app->singleton('command.cmf.add-section', function() {
+            return new CmfAddSectionCommand();
+        });
+        $this->commands('command.cmf.add-section');
     }
 
     protected function registerAddAdminCommand() {
