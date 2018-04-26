@@ -10,6 +10,7 @@ use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\HttpCode;
@@ -249,6 +250,7 @@ class CmfGeneralController extends Controller {
             return view(CmfConfig::getPrimary()->replace_password_view(), [
                 'accessKey' => $accessKey,
                 'userId' => $user->getPrimaryKeyValue(),
+                'userLogin' => $user->getValue(CmfConfig::getPrimary()->user_login_column())
             ])->render();
         } else {
             return cmfJsonResponse(HttpCode::FORBIDDEN)
@@ -418,12 +420,16 @@ class CmfGeneralController extends Controller {
     }
 
     public function getAdminInfo() {
+        /** @var CmfAdmin $admin */
         $admin = CmfConfig::getPrimary()->getUser();
         $this->authorize('resource.details', ['cmf_profile', $admin]);
         $adminData = $admin->toArray();
         if (!empty($adminData['role'])) {
             $adminData['_role'] = $admin->role;
-            $role = ($admin->is_superadmin ? 'superadmin' : $admin->role);
+            $role = $admin->role;
+            if ($admin::hasColumn('is_superadmin') && $admin->is_superadmin) {
+                $role = 'superadmin';
+            }
             $adminData['role'] = cmfTransCustom('.admins.role.' . $role);
         }
 

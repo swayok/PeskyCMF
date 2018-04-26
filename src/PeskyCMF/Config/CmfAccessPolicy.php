@@ -98,12 +98,25 @@ class CmfAccessPolicy {
     ];
 
     /**
+     * @param RecordInterface $user
+     * @return mixed
+     */
+    protected function isSuperadmin($user) {
+        if ($user::hasColumn('is_superadmin')) {
+            return $user->getValue('is_superadmin');
+        } else if (!$user::hasColumn('role')) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @param RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $user
      * @param string $pageName
      * @return bool
      */
     public function cmf_page($user, $pageName) {
-        if ($user->is_superadmin) {
+        if ($this->isSuperadmin($user)) {
             return true;
         }
         if (array_key_exists($pageName, static::$cmfPages)) {
@@ -124,7 +137,7 @@ class CmfAccessPolicy {
      * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      */
     protected function resource($user, $ability, $table, $recordOrItemIdOrFkValue = null, array $conditions = []) {
-        if ($user->is_superadmin) {
+        if ($this->isSuperadmin($user)) {
             return true;
         }
         return (
@@ -133,6 +146,12 @@ class CmfAccessPolicy {
         );
     }
 
+    /**
+     * @param string $role
+     * @param string $table
+     * @param string $ability
+     * @return bool
+     */
     protected function roleHasAccessToResource($role, $table, $ability) {
         if (array_key_exists($table, static::$resources)) {
             if (array_key_exists($ability, static::$resources[$table])) {

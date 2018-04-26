@@ -2,6 +2,7 @@
 /**
  * @var $accessKey
  * @var $userId
+ * @var $userLogin
  */
 ?>
 <div class="login-box">
@@ -13,6 +14,9 @@
         <form action="{{ cmfRoute('cmf_replace_password', [$accessKey], false) }}" method="post" id="replace-password-form">
             <input type="hidden" name="_method" value="PUT">
             <input type="hidden" name="id" value="{{ $userId }}">
+            <div class="form-group text-center fs16 fw400">
+                {{ $userLogin }}
+            </div>
             <div class="form-group has-feedback">
                 <input type="password" name="password" required class="form-control"
                     placeholder="{{ cmfTransCustom('.replace_password.password_label') }}">

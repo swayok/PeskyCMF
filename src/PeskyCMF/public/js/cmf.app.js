@@ -70,9 +70,13 @@ $(function () {
         CmfRoutingHelpers.hideContentContainerPreloader();
     });
 
-    page.notFound('*', function (request) {
-        console.error('Route not found', request);
-    });
+    if (CmfConfig.isDebug) {
+        page.notFound('*', function (request) {
+            if (request.path !== '/') {
+                console.warn('Route not found', request);
+            }
+        });
+    }
 
     $(document).on('click', '[data-nav]', function (event) {
         event.preventDefault();

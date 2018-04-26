@@ -1080,7 +1080,11 @@ body.skin-green .main-header > .logo {
 }
 body.skin-black-light .main-header > .logo,
 body.skin-black .main-header > .logo {
-  border-right-width: 0;
+  background-color: #FFFFFF;
+  border-right: 1px solid #d2d6de;
+}
+body.skin-black-light .main-header > .logo {
+  border-bottom: 1px solid #d2d6de;
 }
 body.skin-purple-light .main-header > .logo,
 body.skin-purple .main-header > .logo {

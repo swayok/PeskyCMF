@@ -3,7 +3,6 @@
 namespace PeskyCMF\Config;
 
 use Illuminate\Foundation\Application;
-use Illuminate\Support\MessageBag;
 use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Event\CmfUserAuthenticated;
@@ -1294,7 +1293,13 @@ class CmfConfig extends ConfigsContainer {
             $userId = 'not_authenticated';
             $user = static::getUser();
             if ($user && $user->existsInDb()) {
-                $userId = $user->is_superadmin ? '__superadmin__' : $user->role;
+                if ($user::hasColumn('is_superadmin')) {
+                    $userId = '__superadmin__';
+                } else if ($user::hasColumn('role')) {
+                    $userId = $user->role;
+                } else {
+                    $userId = 'user';
+                }
             }
         }
         return static::url_prefix() . '_templates_' . app()->getLocale() . '_' . $group . '_user_' . $userId;
