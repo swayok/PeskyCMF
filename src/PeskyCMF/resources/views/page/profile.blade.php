@@ -1,7 +1,9 @@
 <?php
 /**
  * @var \PeskyCMF\Db\Admins\CmfAdmin|\PeskyORM\ORM\RecordInterface|\Illuminate\Contracts\Auth\Authenticatable $admin
+ * @var bool|null $canSubmit
  */
+$canSubmit = $canSubmit || $canSubmit === null;
 ?>
 <div class="content-header">
     <h1>
@@ -26,7 +28,6 @@
 <div class="content">
     <div class="row"><div class="col-xs-6 col-xs-offset-3">
         <div class="box box-primary">
-            <?php $canSubmit = \Gate::allows('resource.update', ['cmf_profile', \PeskyCMF\Config\CmfConfig::getPrimary()->getUser()]) ?>
             <form role="form" method="post" action="{{ cmfRoute('cmf_profile', [], false) }}" id="admin-profile-form">
                 <input type="hidden" name="_method" value="PUT">
                 <!-- disable chrome email & password autofill -->

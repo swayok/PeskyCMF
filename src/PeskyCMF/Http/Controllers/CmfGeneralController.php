@@ -75,7 +75,10 @@ class CmfGeneralController extends Controller {
     public function getAdminProfile() {
         $admin = CmfConfig::getPrimary()->getUser();
         $this->authorize('resource.details', ['cmf_profile', $admin]);
-        return view(CmfConfig::getPrimary()->user_profile_view(), ['admin' => $admin]);
+        return view(CmfConfig::getPrimary()->user_profile_view(), [
+            'admin' => $admin,
+            'canSubmit' => \Gate::allows('resource.update', ['cmf_profile', $admin])
+        ]);
     }
 
     public function updateAdminProfile(Request $request) {
