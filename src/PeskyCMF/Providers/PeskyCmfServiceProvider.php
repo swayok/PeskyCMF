@@ -296,7 +296,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
                 });
 
                 // special route for ckeditor config.js file
-                unset($groupConfig['middleware']);
+                $groupConfig['middleware'] = [$this->getUseCmfSectionMiddleware($sectionName)]; //< only 1 needed
                 \Route::group($groupConfig, function () use ($cmfConfig) {
                     \Route::get('ckeditor/config.js', [
                         'as' => $cmfConfig::routes_names_prefix() . 'cmf_ckeditor_config_js',
@@ -316,12 +316,16 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             'prefix' => $cmfConfig::url_prefix(),
             'middleware' => (array)$cmfConfig::config('routes_middleware', ['web']),
         ];
-        array_unshift($config['middleware'], UseCmfSection::class . ':' . $sectionName);
+        array_unshift($config['middleware'], $this->getUseCmfSectionMiddleware($sectionName));
         $namespace = $cmfConfig::config('controllers_namespace');
         if (!empty($namespace)) {
             $config['namespace'] = ltrim($namespace, '\\');
         }
         return $config;
+    }
+
+    protected function getUseCmfSectionMiddleware($sectionName) {
+        return UseCmfSection::class . ':' . $sectionName;
     }
 
     /**
