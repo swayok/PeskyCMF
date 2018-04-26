@@ -24,6 +24,7 @@ class PeskyCmfLanguageDetectorServiceProvider extends LanguageDetectorServicePro
     public function importConfigsFromPeskyCmf(CmfConfig $cmfConfig) {
         $this->defaultLanguage = $cmfConfig::default_locale();
         $this->configsOverride = $cmfConfig::language_detector_configs();
+        $this->detectAndApplyLanguage();
     }
 
     public function boot() {
