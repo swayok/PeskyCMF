@@ -1,12 +1,11 @@
 <?php
 namespace PeskyCMF\Http\Middleware;
 
-use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Event\AdminAuthenticated;
+use PeskyCMF\Event\CmfUserAuthenticated;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
 use PeskyORM\ORM\RecordInterface;
@@ -15,14 +14,7 @@ use Illuminate\Http\Response;
 
 class ValidateCmfUser {
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Request $request
-     * @param  \Closure $next
-     * @return mixed
-     */
-    public function handle(Request $request, Closure $next) {
+    public function handle(Request $request, \Closure $next) {
         //get the admin check closure that should be supplied in the config
         /** @var CmfConfig $configs */
         $configs = CmfConfig::getPrimary();
@@ -51,7 +43,7 @@ class ValidateCmfUser {
         }
         /** @var RecordInterface|Authenticatable $user */
         $user = $configs::getUser();
-        \Event::fire(new AdminAuthenticated($user));
+        \Event::fire(new CmfUserAuthenticated($user));
 
         $response = $next($request);
         if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {

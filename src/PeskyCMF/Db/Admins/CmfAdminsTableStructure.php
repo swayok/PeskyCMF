@@ -112,7 +112,7 @@ class CmfAdminsTableStructure extends CmfDbTableStructure {
         return Relation::create(
                 'parent_id',
                 Relation::BELONGS_TO,
-                app(CmfAdminsTable::class),
+                CmfConfig::getDefault()->users_table(),
                 'id'
             )
             ->setDisplayColumnName(CmfConfig::getDefault()->user_login_column());

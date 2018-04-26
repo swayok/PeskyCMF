@@ -11,6 +11,7 @@ use PeskyCMF\Scaffold\Form\InputRenderer;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 
 class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
@@ -23,10 +24,10 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
     protected $notLoggableRecordColumns = ['password'];
 
     /**
-     * @return CmfAdminsTable
+     * @return CmfAdminsTable|TableInterface
      */
     static public function getTable() {
-        return app(CmfAdminsTable::class);
+        return CmfConfig::getPrimary()->users_table();
     }
 
     static protected function getIconForMenuItem() {

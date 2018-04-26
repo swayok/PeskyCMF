@@ -68,7 +68,7 @@ class CmfGeneralController extends Controller {
     }
 
     public function redirectToUserProfile() {
-        return CmfConfig::getPrimary()->getRouteName('cmf_profile');
+        return redirect()->route(CmfConfig::getPrimary()->getRouteName('cmf_profile'));
     }
 
     public function getAdminProfile() {
@@ -129,7 +129,7 @@ class CmfGeneralController extends Controller {
             $validationRules['timezone'] = 'nullable|exists:pg_timezone_names,name';
             $columnsToUpdate[] = 'timezone';
         }
-        $usersTable = CmfConfig::getPrimary()->users_table_name();
+        $usersTable = CmfConfig::getPrimary()->users_table()->getName();
         $userLoginCol = CmfConfig::getPrimary()->user_login_column();
         if ($admin::hasColumn('email')) {
             if ($userLoginCol === 'email') {

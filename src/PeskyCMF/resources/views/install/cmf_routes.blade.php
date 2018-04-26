@@ -16,10 +16,10 @@ Route::group(
     [
         'middleware' => $cmfConfig::middleware_for_routes_that_require_authentication()
     ],
-    function () {
+    function () use ($cmfConfig) {
 
         Route::get('/', [
-            'as' => 'cmf_start_page',
+            'as' => $cmfConfig::getRouteName('cmf_start_page')
             'uses' => 'PagesController@redirectFromStartPage',
         ]);
 

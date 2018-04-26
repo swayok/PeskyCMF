@@ -119,6 +119,9 @@ class CmfAccessPolicy {
      * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue
      * @param array $conditions
      * @return bool
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \ReflectionException
+     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      */
     protected function resource($user, $ability, $table, $recordOrItemIdOrFkValue = null, array $conditions = []) {
         if ($user->is_superadmin) {
@@ -148,6 +151,9 @@ class CmfAccessPolicy {
      * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue
      * @param array $conditions
      * @return bool
+     * @throws \PeskyORM\Exception\OrmException
+     * @throws \ReflectionException
+     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      */
     protected function userHasAccessToRecord($user, $tableName, $ability, $recordOrItemIdOrFkValue = null, array $conditions = []) {
         if (
@@ -158,7 +164,7 @@ class CmfAccessPolicy {
                 || in_array($user->role, (array)static::$resourcesWithOwnershipValidation[$tableName][$ability], true)
             )
         ) {
-            $table = CmfConfig::getDefault()->getTableByUnderscoredName($tableName);
+            $table = CmfConfig::getPrimary()->getTableByUnderscoredName($tableName);
             $ownerColumn = array_get(static::$ownerColumnForTable, $tableName, 'admin_id');
             if (!$table->getTableStructure()->hasColumn($ownerColumn)) {
                 return true;

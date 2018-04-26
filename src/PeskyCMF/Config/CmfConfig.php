@@ -2,9 +2,15 @@
 
 namespace PeskyCMF\Config;
 
+use Illuminate\Foundation\Application;
+use Illuminate\Support\MessageBag;
 use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
+use PeskyCMF\Event\CmfUserAuthenticated;
 use PeskyCMF\Http\Middleware\ValidateCmfUser;
+use PeskyCMF\Listeners\CmfUserAuthenticatedEventListener;
+use PeskyCMF\PeskyCmfAppSettings;
+use PeskyCMF\Providers\PeskyCmfLanguageDetectorServiceProvider;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
@@ -16,6 +22,7 @@ use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\Folder;
 use Swayok\Utils\StringUtils;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
+use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 class CmfConfig extends ConfigsContainer {
 
@@ -151,13 +158,12 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Table name where admins/users stored
-     * @return string
+     * @return TableInterface
      */
-    static public function users_table_name() {
-        /** @var RecordInterface $userObjectClass */
-        $userObjectClass = static::user_record_class();
-        return $userObjectClass::getTable()->getName();
+    static public function users_table() {
+        /** @var RecordInterface $recordClass */
+        $recordClass = static::user_record_class();
+        return $recordClass::getTable();
     }
 
     /**
@@ -207,75 +213,6 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function cmf_user_acceess_policy_class() {
         return static::config('acceess_policy_class', CmfAccessPolicy::class);
-    }
-
-    /**
-     * In this method you should place authorisation gates and policies according to Laravel's docs:
-     * https://laravel.com/docs/5.4/authorization
-     * Predefined authorisation tests are available for:
-     * 1. Resources (scaffolds) - use
-     *      Gate::resource('resource', 'AdminAccessPolicy', [
-     *          'view' => 'view',
-     *          'details' => 'details',
-     *          'create' => 'create',
-     *          'update' => 'update',
-     *          'delete' => 'delete',
-     *          'update_bulk' => 'update_bulk',
-     *          'delete_bulk' => 'delete_bulk',
-     *      ]);
-     *      or Gate::define('resource.{ability}', \Closure) to provide rules for some resource.
-     *      List of abilities used in scaffolds:
-     *      - 'view' is used for routes named 'cmf_api_get_items' and 'cmf_api_get_templates',
-     *      - 'details' => 'cmf_api_get_item',
-     *      - 'create' => 'cmf_api_create_item',
-     *      - 'update' => 'cmf_api_update_item'
-     *      - 'update_bulk' => 'cmf_api_edit_bulk'
-     *      - 'delete' => 'cmf_api_delete_item'
-     *      - 'delete_bulk' => 'cmf_api_delete_bulk'
-     *      - 'custom_page' => 'cmf_resource_custom_page'
-     *      - 'custom_action' => 'cmf_api_resource_custom_action'
-     *      - 'custom_page_for_item' => 'cmf_item_custom_page'
-     *      - 'custom_action_for_item' => 'cmf_api_item_custom_action'
-     *      For all abilities you will receive $tableName argument and RecordInterface $record or int $itemId argument
-     *      for 'details', 'update' and 'delete' abilities.
-     *      For KeyValueScaffoldConfig for 'update' ability you will receive $fkValue instead of $itemId/$record.
-     *      For 'update_bulk' and 'delete_bulk' you will receive $conditions array.
-     *      Note that $tableName passed to abilities is the name of the DB table used in routes and may differ from
-     *      the real name of the table provided in TableStructure.
-     *      For example: you have 2 resources named 'pages' and 'elements'. Both refer to PagesTable class but
-     *      different ScaffoldConfig classes (PagesScaffoldConfig and ElementsScafoldConfig respectively).
-     *      In this case $tableName will be 'pages' for PagesScaffoldConfig and 'elements' for ElementsScafoldConfig.
-     *      Note: If you forbid 'view' ability - you will forbid everything else
-     *      Note: there is no predefined authorization for routes based on 'cmf_item_custom_page'. You need to add it
-     *      manually to controller's action that handles that custom page
-     * 2. CMF Pages - use Gate::define('cmf_page', 'AdminAccessPolicy@cmf_page')
-     *      Abilities will receive $pageName argument - it will contain the value of the {page} property in route
-     *      called 'cmf_page' (url is '/{prefix}/page/{page}' by default)
-     * 3. Admin profile update - Gate::define('profile.update', \Closure);
-     *
-     * For any other routes where you resolve authorisation by yourself - feel free to use any naming you want
-     *
-     * @param string $policyName
-     */
-    static public function configureAuthorizationGatesAndPolicies($policyName = 'CmfAccessPolicy') {
-        app()->singleton($policyName, static::cmf_user_acceess_policy_class());
-        \Gate::resource('resource', $policyName, [
-            'view' => 'view',
-            'details' => 'details',
-            'create' => 'create',
-            'update' => 'update',
-            'edit' => 'edit',
-            'delete' => 'delete',
-            'update_bulk' => 'update_bulk',
-            'delete_bulk' => 'delete_bulk',
-            'other' => 'others',
-            'others' => 'others',
-            'custom_page' => 'custom_page',
-            'custom_action' => 'custom_action',
-            'custom_page_for_item' => 'custom_page_for_item',
-            'custom_action_for_item' => 'custom_action_for_item',
-        ]);
-        \Gate::define('cmf_page', $policyName . '@cmf_page');
     }
 
     /**
@@ -382,7 +319,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function routes_names_prefix() {
-        return '';
+        return static::url_prefix();
     }
 
     /**
@@ -1369,6 +1306,171 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function makeUtilityKey($keySuffix) {
         return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_' . $keySuffix;
+    }
+
+    /**
+     * @param Application $app
+     */
+    public function initSection($app) {
+        static::_protect();
+        static::useAsPrimary();
+        $appSettingsClass = static::config('app_settings_class');
+        if (!empty($appSettingsClass)) {
+            $app->singleton(PeskyCmfAppSettings::class, function () use ($appSettingsClass) {
+                return $appSettingsClass;
+            });
+        }
+
+        /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
+        $langDetectorProvider = $app->register(PeskyCmfLanguageDetectorServiceProvider::class);
+        $app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
+        $langDetectorProvider->importConfigsFromPeskyCmf($this);
+
+        /** @var \Illuminate\Config\Repository $appConfigs */
+        $appConfigs = $app['config'];
+
+        if (!$app->configurationIsCached()) {
+            // configure session
+            $config = $appConfigs->get('session', []);
+            $config['path'] = '/' . trim(static::url_prefix(), '/');
+            $appConfigs->set('session', array_merge($config, (array)static::config('session', [])));
+            // configure auth
+            $this->configureAuth($appConfigs);
+        }
+
+
+        if (static::config('file_access_mask') !== null) {
+            umask(static::config('file_access_mask'));
+        }
+        \Event::listen(CmfUserAuthenticated::class, CmfUserAuthenticatedEventListener::class);
+        $this->registerScaffoldConfigsFromConfigFile();
+    }
+
+    /**
+     * Register resource name to ScaffoldConfig class mappings
+     * @throws \UnexpectedValueException
+     */
+    protected function registerScaffoldConfigsFromConfigFile() {
+        /** @var ScaffoldConfig[] $resources */
+        $resources = (array)static::config('resources', []);
+        foreach ($resources as $scaffoldConfig) {
+            static::registerScaffoldConfigForResource($scaffoldConfig::getResourceName(), $scaffoldConfig);
+        }
+    }
+
+    /**
+     * @param \Illuminate\Config\Repository $appConfigs
+     */
+    protected function configureAuth($appConfigs) {
+        // merge cmf guard and provider with configs in config/auth.php
+        $cmfAuthConfig = static::config('auth_guard');
+        if (!is_array($cmfAuthConfig)) {
+            // custom auth guard name provided
+            return;
+        }
+
+        $config = $appConfigs->get('auth', [
+            'guards' => [],
+            'providers' => [],
+        ]);
+
+        $guardName = static::auth_guard_name();
+        if (array_key_exists($guardName, $config['guards'])) {
+            throw new \UnexpectedValueException('There is already an auth guard with name "' . $guardName . '"');
+        }
+        $provider = array_get($cmfAuthConfig, 'provider');
+        if (is_array($provider)) {
+            $providerName = array_get($provider, 'name', $guardName);
+            if (empty($provider['model'])) {
+                $provider['model'] = static::user_record_class();
+            }
+        } else {
+            $providerName = $provider;
+            $provider = null;
+        }
+        if (array_key_exists($providerName, $config['providers'])) {
+            throw new \UnexpectedValueException('There is already an auth provider with name "' . $guardName . '"');
+        }
+        $config['guards'][$guardName] = [
+            'driver' => array_get($cmfAuthConfig, 'driver', 'session'),
+            'provider' => $providerName,
+        ];
+        if (!empty($provider)) {
+            $config['providers'][$providerName] = $provider;
+        }
+
+        $appConfigs->set('auth', $config);
+        $this->configureAuthorizationGatesAndPolicies();
+        \Auth::shouldUse(static::auth_guard_name());
+    }
+
+    /**
+     * In this method you should place authorisation gates and policies according to Laravel's docs:
+     * https://laravel.com/docs/5.4/authorization
+     * Predefined authorisation tests are available for:
+     * 1. Resources (scaffolds) - use
+     *      Gate::resource('resource', 'AdminAccessPolicy', [
+     *          'view' => 'view',
+     *          'details' => 'details',
+     *          'create' => 'create',
+     *          'update' => 'update',
+     *          'delete' => 'delete',
+     *          'update_bulk' => 'update_bulk',
+     *          'delete_bulk' => 'delete_bulk',
+     *      ]);
+     *      or Gate::define('resource.{ability}', \Closure) to provide rules for some resource.
+     *      List of abilities used in scaffolds:
+     *      - 'view' is used for routes named 'cmf_api_get_items' and 'cmf_api_get_templates',
+     *      - 'details' => 'cmf_api_get_item',
+     *      - 'create' => 'cmf_api_create_item',
+     *      - 'update' => 'cmf_api_update_item'
+     *      - 'update_bulk' => 'cmf_api_edit_bulk'
+     *      - 'delete' => 'cmf_api_delete_item'
+     *      - 'delete_bulk' => 'cmf_api_delete_bulk'
+     *      - 'custom_page' => 'cmf_resource_custom_page'
+     *      - 'custom_action' => 'cmf_api_resource_custom_action'
+     *      - 'custom_page_for_item' => 'cmf_item_custom_page'
+     *      - 'custom_action_for_item' => 'cmf_api_item_custom_action'
+     *      For all abilities you will receive $tableName argument and RecordInterface $record or int $itemId argument
+     *      for 'details', 'update' and 'delete' abilities.
+     *      For KeyValueScaffoldConfig for 'update' ability you will receive $fkValue instead of $itemId/$record.
+     *      For 'update_bulk' and 'delete_bulk' you will receive $conditions array.
+     *      Note that $tableName passed to abilities is the name of the DB table used in routes and may differ from
+     *      the real name of the table provided in TableStructure.
+     *      For example: you have 2 resources named 'pages' and 'elements'. Both refer to PagesTable class but
+     *      different ScaffoldConfig classes (PagesScaffoldConfig and ElementsScafoldConfig respectively).
+     *      In this case $tableName will be 'pages' for PagesScaffoldConfig and 'elements' for ElementsScafoldConfig.
+     *      Note: If you forbid 'view' ability - you will forbid everything else
+     *      Note: there is no predefined authorization for routes based on 'cmf_item_custom_page'. You need to add it
+     *      manually to controller's action that handles that custom page
+     * 2. CMF Pages - use Gate::define('cmf_page', 'AdminAccessPolicy@cmf_page')
+     *      Abilities will receive $pageName argument - it will contain the value of the {page} property in route
+     *      called 'cmf_page' (url is '/{prefix}/page/{page}' by default)
+     * 3. Admin profile update - Gate::define('profile.update', \Closure);
+     *
+     * For any other routes where you resolve authorisation by yourself - feel free to use any naming you want
+     *
+     * @param string $policyName
+     */
+    public function configureAuthorizationGatesAndPolicies($policyName = 'CmfAccessPolicy') {
+        app()->singleton($policyName, static::cmf_user_acceess_policy_class());
+        \Gate::resource('resource', $policyName, [
+            'view' => 'view',
+            'details' => 'details',
+            'create' => 'create',
+            'update' => 'update',
+            'edit' => 'edit',
+            'delete' => 'delete',
+            'update_bulk' => 'update_bulk',
+            'delete_bulk' => 'delete_bulk',
+            'other' => 'others',
+            'others' => 'others',
+            'custom_page' => 'custom_page',
+            'custom_action' => 'custom_action',
+            'custom_page_for_item' => 'custom_page_for_item',
+            'custom_action_for_item' => 'custom_action_for_item',
+        ]);
+        \Gate::define('cmf_page', $policyName . '@cmf_page');
     }
 
 }

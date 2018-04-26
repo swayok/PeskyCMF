@@ -13,19 +13,14 @@ use PeskyCMF\Console\Commands\CmfInstallHttpRequestsProfilingCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
-use PeskyCMF\Db\Admins\CmfAdmin;
-use PeskyCMF\Db\Admins\CmfAdminsTable;
-use PeskyCMF\Db\Admins\CmfAdminsTableStructure;
-use PeskyCMF\Event\AdminAuthenticated;
-use PeskyCMF\Listeners\AdminAuthenticatedEventListener;
+use PeskyCMF\Facades\PeskyCmf;
+use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\PeskyCmfAppSettings;
-use PeskyCMF\Scaffold\ScaffoldConfig;
-use PeskyORM\ORM\RecordInterface;
+use PeskyCMF\PeskyCmfManager;
 use PeskyORM\ORM\TableInterface;
 use PeskyORM\ORM\TableStructureInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
-use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 use Illuminate\Foundation\Application;
 
 /**
@@ -33,37 +28,16 @@ use Illuminate\Foundation\Application;
  */
 class PeskyCmfServiceProvider extends ServiceProvider {
 
-    /**
-     * @var PeskyCmfLanguageDetectorServiceProvider
-     */
-    protected $langDetectorProvider;
-
-    /**
-     * @var CmfConfig
-     */
-    private $config;
-
-    /**
-     * @var PeskyCmfAppSettings
-     */
-    private $appSettings;
-
-    /**
-     * @var null|bool
-     */
-    private $fitsRequestUri = null;
-
     public function register() {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
 
-        $this->initDefaultCmfConfig();
-        $this->initPrimaryCmfConfig();
+        $this->app->singleton(PeskyCmfManager::class, function ($app) {
+            return new PeskyCmfManager($app);
+        });
 
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
-        /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
-        $langDetectorProvider = $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
-        $this->app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
         AliasLoader::getInstance()->alias('LanguageDetector', LanguageDetector::class);
+        AliasLoader::getInstance()->alias('PeskyCmf', PeskyCmf::class);
 
         if ($this->app->environment() === 'local') {
             if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
@@ -76,13 +50,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
         $this->registerCommands();
 
-        if ($this->fitsRequestUri()) {
-            $this->registerDbClasses();
-            $langDetectorProvider->importConfigsFromPeskyCmf($this->getCmfConfig());
-        }
-
-        $this->app->singleton(PeskyCmfAppSettings::class, function () {
-            return $this->getAppSettings();
+        $this->app->singleton(PeskyCmfAppSettings::class, function ($app) {
+            /** @var PeskyCmfManager $cmfManager */
+            $cmfManager = $app[PeskyCmfManager::class];
+            return $cmfManager->getCmfConfigForSection()->config('app_settings_class') ?: PeskyCmfAppSettings::class;
         });
     }
 
@@ -104,41 +75,12 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->configureTranslations();
         $this->configureViews();
 
-        if ($this->fitsRequestUri()) {
-            $this->declareRoutes();
-            $this->mergeAuthenticationConfigs();
-            if ($this->getCmfConfig()->config('file_access_mask') !== null) {
-                umask($this->getCmfConfig()->config('file_access_mask'));
-            }
-            $this->configureSession();
-            $this->configureEventListeners();
-            $this->configureAuthorizationGatesAndPolicies();
-            $this->configureDefaultAuthGuard();
-            $this->registerScaffoldConfigs();
-        }
-
-
-    }
-
-    /**
-     * @return int
-     */
-    protected function fitsRequestUri() {
-        if ($this->fitsRequestUri === null) {
-            if ($this->runningInConsole()) {
-                $this->fitsRequestUri = true;
-            } else {
-                $prefix = trim($this->getCmfConfig()->url_prefix(), '/');
-                $this->fitsRequestUri = preg_match("%^/{$prefix}(/|$)%", array_get($_SERVER, 'REQUEST_URI', '/')) > 0;
-            }
-            $this->app->offsetSet('is_peskycmf_section', $this->fitsRequestUri);
-        }
-        return $this->fitsRequestUri;
+        $this->declareRoutesForAllCmfSections();
     }
 
     /**
      * Overwrite this method in your custom service provider if you do want or do not want to run
-     * section-specific methods in register() and boot() methods
+     * console-specific methods in register() and boot() methods
      * @return bool
      */
     protected function runningInConsole() {
@@ -146,127 +88,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     /**
-     * @return CmfConfig
-     */
-    protected function getCmfConfig() {
-        if ($this->config === null) {
-            /** @var CmfConfig|string $className */
-            $className = config('peskycmf.default_cmf_config', CmfConfig::class);
-            $this->config = $className::getInstance();
-        }
-        return $this->config;
-    }
-
-    /**
-     * @return CmfConfig|null - return null if your CmfConfig should not be default
-     */
-    protected function initDefaultCmfConfig() {
-        return $this->getCmfConfig()->useAsDefault();
-    }
-
-    /**
-     * @return CmfConfig|null - return null if your CmfConfig should not be default
-     */
-    protected function initPrimaryCmfConfig() {
-        $this->app->singleton(CmfConfig::class, function () {
-            return $this->getCmfConfig();
-        });
-        return $this->getCmfConfig()->useAsPrimary();
-    }
-
-    /**
-     * @return PeskyCmfAppSettings
-     */
-    protected function getAppSettings() {
-        if ($this->appSettings === null) {
-            /** @var PeskyCmfAppSettings $appSettingsClass */
-            $appSettingsClass = $this->getCmfConfig()->config('app_settings_class') ?: PeskyCmfAppSettings::class;
-            $this->appSettings = $appSettingsClass::getInstance();
-        }
-        return $this->appSettings;
-    }
-
-    /**
      * @return ParameterBag
      */
-    protected function getAppConfig() {
+    protected function getAppConfigs() {
         return $this->app['config'];
-    }
-
-    /**
-     * Register DB classes used in CMF/CMS in app's service container
-     */
-    protected function registerDbClasses() {
-        if (!$this->app->bound(CmfAdmin::class)) {
-            /** @var RecordInterface $userRecordClass */
-            $userRecordClass = $this->getCmfConfig()->user_record_class();
-            $this->registerClassNameSingleton(CmfAdmin::class, $userRecordClass);
-            $this->registerClassInstanceSingleton(CmfAdminsTable::class, $userRecordClass::getTable());
-            $this->registerClassInstanceSingleton(
-                CmfAdminsTableStructure::class,
-                $userRecordClass::getTable()->getTableStructure()
-            );
-        }
-    }
-
-    /**
-     * Register resource name to ScaffoldConfig class mappings
-     * @throws \UnexpectedValueException
-     */
-    protected function registerScaffoldConfigs() {
-        $cmfConfig = $this->getCmfConfig();
-        /** @var ScaffoldConfig $scaffoldConfigClass */
-        foreach ($this->getScaffoldConfigs() as $resourceName => $scaffoldConfigClass) {
-            $cmfConfig::registerScaffoldConfigForResource($resourceName, $scaffoldConfigClass);
-        }
-    }
-
-    /**
-     * @return array
-     */
-    protected function getScaffoldConfigs() {
-        /** @var ScaffoldConfig[] $resources */
-        $resources = (array)$this->getCmfConfig()->config('resources', []);
-        $normalized = [];
-        foreach ($resources as $scaffoldConfig) {
-            $normalized[$scaffoldConfig::getResourceName()] = $scaffoldConfig;
-        }
-        return $normalized;
-    }
-
-    /**
-     * Used to register DB Record class names (Records are not singletons but class name is a singleton)
-     * @param string $singletonName - singleton name in app's service container (should be a class name)
-     * @param null|string $className - maps singleton to this class. When null - $singletonName is used as $className.
-     *      Singleton will return a class name, not an instance of class
-     */
-    protected function registerClassNameSingleton($singletonName, $className = null) {
-        if (empty($className)) {
-            $className = $singletonName;
-        }
-        $this->app->singleton($singletonName, function () use ($className) {
-            // note: do not create record here or you will possibly encounter infinite loop because this class may be
-            // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
-            return $className;
-        });
-    }
-
-    /**
-     * Used to register DB Table or DB TableStructure singleton instances
-     * @param string $singletonName - singleton name in app's service container (should be a class name)
-     * @param null|string|TableInterface|TableStructureInterface $classNameOrInstance - map this class/TableInterface
-     *      to a singleton. When null - $singletonName is used as $className. Singleton will return an instance of class
-     */
-    protected function registerClassInstanceSingleton($singletonName, $classNameOrInstance = null) {
-        if (empty($classNameOrInstance)) {
-            $classNameOrInstance = $singletonName;
-        }
-        $this->app->singleton($singletonName, function () use ($classNameOrInstance) {
-            /** @var TableInterface|TableStructureInterface $classNameOrInstance */
-            return is_string($classNameOrInstance)
-                ? $classNameOrInstance::getInstance()
-                : $classNameOrInstance;
-        });
     }
 
     protected function configurePublishes() {
@@ -425,43 +250,60 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'cmf');
     }
 
-    protected function declareRoutes() {
-        $cmfConfig = $this->getCmfConfig();
-        $groupConfig = $this->getRoutesGroupConfig();
-        if (!$this->app->routesAreCached()) {
-            // custom routes
-            $files = (array)$cmfConfig::config('routes_files', []);
-            if (count($files) > 0) {
-                foreach ($files as $filePath) {
-                    \Route::group($groupConfig, function () use ($filePath, $cmfConfig) {
-                        // warning! $cmfConfig may be used inside included file
-                        include base_path($filePath);
+    /**
+     * @return CmfConfig[]
+     */
+    protected function getAvailableCmfConfigs() {
+        $cmfConfigsClasses = $this->getAppConfigs()->get('peskycmf.cmf_configs');
+        $configs = [];
+        /** @var CmfConfig $className */
+        foreach ($cmfConfigsClasses as $sectionName => $className) {
+            if (class_exists($className) && is_subclass_of($className, CmfConfig::class)) {
+                $configs[$sectionName] = $className::getInstance();
+            }
+        }
+        return $configs;
+    }
+
+    protected function declareRoutesForAllCmfSections() {
+        foreach ($this->getAvailableCmfConfigs() as $sectionName => $cmfConfig) {
+            if (!$this->app->routesAreCached()) {
+                $groupConfig = $this->getRoutesGroupConfig($cmfConfig, $sectionName);
+                // custom routes
+                $files = (array)$cmfConfig::config('routes_files', []);
+                if (count($files) > 0) {
+                    foreach ($files as $filePath) {
+                        \Route::group($groupConfig, function () use ($filePath, $cmfConfig) {
+                            // warning! $cmfConfig may be used inside included file
+                            include base_path($filePath);
+                        });
+                    }
+                }
+
+                unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
+                if (!\Route::has($cmfConfig::getRouteName('cmf_start_page'))) {
+                    \Route::group($groupConfig, function () use ($cmfConfig) {
+                        \Route::get('/', [
+                            'uses' => $cmfConfig::cmf_general_controller_class() . '@redirectToUserProfile',
+                            'as' => $cmfConfig::getRouteName('cmf_start_page'),
+                        ]);
                     });
                 }
-            }
-            if (!\Route::has($cmfConfig::getRouteName('cmf_start_page'))) {
+
                 \Route::group($groupConfig, function () use ($cmfConfig) {
-                    \Route::get('/', [
-                        'uses' => $cmfConfig::cmf_general_controller_class() . '@redirectToUserProfile',
-                        'as' => $cmfConfig::getRouteName('cmf_start_page')
+                    // warning! $cmfConfig may be used inside included file
+                    include $this->getCmfRoutesFilePath();
+                });
+
+                // special route for ckeditor config.js file
+                unset($groupConfig['middleware']);
+                \Route::group($groupConfig, function () use ($cmfConfig) {
+                    \Route::get('ckeditor/config.js', [
+                        'as' => $cmfConfig::routes_names_prefix() . 'cmf_ckeditor_config_js',
+                        'uses' => $cmfConfig::cmf_general_controller_class() . '@getCkeditorConfigJs',
                     ]);
                 });
             }
-
-            unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
-            \Route::group($groupConfig, function () use ($cmfConfig) {
-                // warning! $cmfConfig may be used inside included file
-                include $this->getCmfRoutesFilePath();
-            });
-
-            // special route for ckeditor config.js file
-            unset($groupConfig['middleware']);
-            \Route::group($groupConfig, function () use ($cmfConfig) {
-                \Route::get('ckeditor/config.js', [
-                    'as' => $cmfConfig::routes_names_prefix() . 'cmf_ckeditor_config_js',
-                    'uses' => $cmfConfig::cmf_general_controller_class() . '@getCkeditorConfigJs',
-                ]);
-            });
         }
     }
 
@@ -469,82 +311,52 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         return __DIR__ . '/../Config/peskycmf.routes.php';
     }
 
-    protected function getRoutesGroupConfig() {
+    protected function getRoutesGroupConfig(CmfConfig $cmfConfig, $sectionName) {
         $config = [
-            'prefix' => $this->getCmfConfig()->url_prefix(),
-            'middleware' => (array)$this->getCmfConfig()->config('routes_middleware', ['web']),
+            'prefix' => $cmfConfig::url_prefix(),
+            'middleware' => (array)$cmfConfig::config('routes_middleware', ['web']),
         ];
-        $namespace = $this->getCmfConfig()->config('controllers_namespace');
+        array_unshift($config['middleware'], UseCmfSection::class . ':' . $sectionName);
+        $namespace = $cmfConfig::config('controllers_namespace');
         if (!empty($namespace)) {
             $config['namespace'] = ltrim($namespace, '\\');
         }
         return $config;
     }
 
-    protected function configureSession() {
-        if ($this->app->configurationIsCached()) {
-            return;
+    /**
+     * Used to register DB Record class names (Records are not singletons but class name is a singleton)
+     * @param string $singletonName - singleton name in app's service container (should be a class name)
+     * @param null|string $className - maps singleton to this class. When null - $singletonName is used as $className.
+     *      Singleton will return a class name, not an instance of class
+     */
+    protected function registerClassNameSingleton($singletonName, $className = null) {
+        if (empty($className)) {
+            $className = $singletonName;
         }
-        $config = $this->getAppConfig()->get('session', []);
-        $config['path'] = '/' . trim($this->getCmfConfig()->url_prefix(), '/');
-        $this->getAppConfig()->set('session', array_merge($config, (array)$this->getCmfConfig()->config('session', [])));
+        $this->app->singleton($singletonName, function () use ($className) {
+            // note: do not create record here or you will possibly encounter infinite loop because this class may be
+            // used in TableStructure via app(NameTableStructure) (for example to get default value, etc)
+            return $className;
+        });
     }
 
-    protected function configureEventListeners() {
-        \Event::listen(AdminAuthenticated::class, AdminAuthenticatedEventListener::class);
-    }
-
-    protected function mergeAuthenticationConfigs() {
-        // add guard and provider to configs provided by config/auth.php
-        if ($this->app->configurationIsCached()) {
-            return;
+    /**
+     * Used to register DB Table or DB TableStructure singleton instances
+     * @param string $singletonName - singleton name in app's service container (should be a class name)
+     * @param null|string|TableInterface|TableStructureInterface $classNameOrInstance - map this class/TableInterface
+     *      to a singleton. When null - $singletonName is used as $className. Singleton will return an instance of class
+     */
+    protected function registerClassInstanceSingleton($singletonName, $classNameOrInstance = null) {
+        if (empty($classNameOrInstance)) {
+            $classNameOrInstance = $singletonName;
         }
-
-        $cmfAuthConfig = $this->getCmfConfig()->config('auth_guard');
-        if (!is_array($cmfAuthConfig)) {
-            // custom auth guard name provided
-            return;
-        }
-
-        $config = $this->getAppConfig()->get('auth', [
-            'guards' => [],
-            'providers' => [],
-        ]);
-
-        $guardName = $this->getCmfConfig()->auth_guard_name();
-        if (array_key_exists($guardName, $config['guards'])) {
-            throw new \UnexpectedValueException('There is already an auth guard with name "' . $guardName . '"');
-        }
-        $provider = array_get($cmfAuthConfig, 'provider');
-        if (is_array($provider)) {
-            $providerName = array_get($provider, 'name', $guardName);
-            if (empty($provider['model'])) {
-                $provider['model'] = app(CmfAdmin::class);
-            }
-        } else {
-            $providerName = $provider;
-            $provider = null;
-        }
-        if (array_key_exists($providerName, $config['providers'])) {
-            throw new \UnexpectedValueException('There is already an auth provider with name "' . $guardName . '"');
-        }
-        $config['guards'][$guardName] = [
-            'driver' => array_get($cmfAuthConfig, 'driver', 'session'),
-            'provider' => $providerName,
-        ];
-        if (!empty($provider)) {
-            $config['providers'][$providerName] = $provider;
-        }
-
-        $this->getAppConfig()->set('auth', $config);
-    }
-
-    protected function configureDefaultAuthGuard() {
-        \Auth::shouldUse($this->getCmfConfig()->auth_guard_name());
-    }
-
-    protected function configureAuthorizationGatesAndPolicies($policyName = 'CmfAccessPolicy') {
-        $this->getCmfConfig()->configureAuthorizationGatesAndPolicies($policyName);
+        $this->app->singleton($singletonName, function () use ($classNameOrInstance) {
+            /** @var TableInterface|TableStructureInterface $classNameOrInstance */
+            return is_string($classNameOrInstance)
+                ? $classNameOrInstance::getInstance()
+                : $classNameOrInstance;
+        });
     }
 
 }
