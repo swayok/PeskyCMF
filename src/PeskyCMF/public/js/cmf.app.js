@@ -37,7 +37,7 @@ $(function () {
 
     page.route('/login', CmfRouteChange.authorizationPage);
     page.route('/forgot_password', CmfRouteChange.authorizationPage);
-    page.route('/replace_password', CmfRouteChange.authorizationPage);
+    page.route('/replace_password/:uid*', CmfRouteChange.authorizationPage);
     page.route('/logout', CmfRouteChange.logout, CmfRoutingHelpers.routeHandled);
     page.route('/page/:uri*', CmfRouteChange.showPage);
 
@@ -68,6 +68,10 @@ $(function () {
     page.error('*', function (request) {
         request.errorHandled = false;
         CmfRoutingHelpers.hideContentContainerPreloader();
+    });
+
+    page.notFound('*', function (request) {
+        console.error('Route not found', request);
     });
 
     $(document).on('click', '[data-nav]', function (event) {

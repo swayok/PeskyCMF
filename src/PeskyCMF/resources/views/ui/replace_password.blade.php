@@ -7,7 +7,7 @@
 <div class="login-box">
     <div class="login-logo">
         {!! \PeskyCMF\Config\CmfConfig::getPrimary()->login_logo() !!}
-        <b>{!! cmfTransCustom('.replace_password.header') !!}</b>
+        <div><b>{!! cmfTransCustom('.replace_password.header') !!}</b></div>
     </div>
     <div class="login-box-body" id="replace-password-form-container">
         <form action="{{ cmfRoute('cmf_replace_password', [$accessKey], false) }}" method="post" id="replace-password-form">

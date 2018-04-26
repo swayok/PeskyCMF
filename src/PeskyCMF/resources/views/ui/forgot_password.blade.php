@@ -1,7 +1,7 @@
 <div class="login-box">
     <div class="login-logo">
         {!! \PeskyCMF\Config\CmfConfig::getPrimary()->login_logo() !!}
-        <b>{!! cmfTransCustom('.forgot_password.header') !!}</b>
+        <div><b>{!! cmfTransCustom('.forgot_password.header') !!}</b></div>
     </div>
     <div class="login-box-body" id="forgot-password-form-container">
         <form action="{{ cmfRoute('cmf_forgot_password', [], false) }}" method="post" id="forgot-password-form">

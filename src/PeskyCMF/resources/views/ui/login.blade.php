@@ -4,7 +4,7 @@ $loginInputName = \PeskyCMF\Config\CmfConfig::getPrimary()->user_login_column();
 <div class="login-box">
     <div class="login-logo">
         {!! \PeskyCMF\Config\CmfConfig::getPrimary()->login_logo() !!}
-        <b>{!! cmfTransCustom('.login_form.header') !!}</b>
+        <div><b>{!! cmfTransCustom('.login_form.header') !!}</b></div>
     </div>
     <div class="login-box-body" id="login-form-container">
         <form action="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->login_page_url() }}" method="post" id="login-form">
