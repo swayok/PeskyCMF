@@ -69,11 +69,11 @@ trait DataValidationHelper {
     protected function extractInputFromRules($data, array $rules) {
         $keys = collect($rules)->keys()->map(function ($rule) {
             return explode('.', $rule)[0];
-        });
+        })->unique()->toArray();
         if (!($data instanceof Request)) {
             $data = collect($data);
         }
-        return $data->only($keys)->unique()->toArray();
+        return $data->only($keys);
     }
 
     protected function getValidationErrorsResponseMessage() {
