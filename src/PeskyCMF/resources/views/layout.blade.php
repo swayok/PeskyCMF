@@ -3,7 +3,7 @@
 @php($scriptsVersion = '2.2.9')
 <head>
     <meta charset="UTF-8">
-    <title>@section('page-title') {{ \PeskyCMF\Config\CmfConfig::getPrimary()->default_page_title() }} @show</title>
+    <title>@section('page-title') {{ cmfConfig()->default_page_title() }} @show</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 
@@ -29,7 +29,7 @@
         {{--<link href="/packages/cmf-vendors/cropperjs/cropper.css" rel="stylesheet" type="text/css"/>--}}
 
         <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
-        <link href="/packages/adminlte/css/skins/{{ \PeskyCMF\Config\CmfConfig::getPrimary()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
+        <link href="/packages/adminlte/css/skins/{{ cmfConfig()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
 
         <link href="/packages/cmf-vendors/db-query-builder/css/query-builder.default.css" rel="stylesheet" type="text/css"/>
 
@@ -39,14 +39,14 @@
         <link href="/packages/cmf/compiled/css/bootstrap-plugins.min.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf/compiled/css/libs.min.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
         <link href="/packages/adminlte/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
-        <link href="/packages/adminlte/css/skins/{{ \PeskyCMF\Config\CmfConfig::getPrimary()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
+        <link href="/packages/adminlte/css/skins/{{ cmfConfig()->ui_skin() }}.min.css" rel="stylesheet" type="text/css"/>
         <link href="/packages/cmf/compiled/css/cmf.min.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
     @endif
 
     <link href="/packages/cmf-vendors/fonticons/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf-vendors/fonticons/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
 
-    @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_css_includes() as $cssPath)
+    @foreach(cmfConfig()->layout_css_includes() as $cssPath)
         <link href="{{ $cssPath }}" rel="stylesheet" type="text/css"/>
     @endforeach
 
@@ -55,7 +55,7 @@
 
 </head>
 
-<body class="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->ui_skin() }}" data-locale="{{ app()->getLocale() }}">
+<body class="{{ cmfConfig()->ui_skin() }}" data-locale="{{ app()->getLocale() }}">
     <div class="wrapper has-preloader loading" id="page-wrapper">
 
     </div>
@@ -91,8 +91,8 @@
     </script>
 
     <script type="application/javascript">
-        var CmfSettings = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_settings(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
-        var AppData = {!! json_encode(\PeskyCMF\Config\CmfConfig::getPrimary()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
+        var CmfSettings = {!! json_encode(cmfConfig()->js_app_settings(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
+        var AppData = {!! json_encode(cmfConfig()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
     <script src="/packages/cmf-vendors/jquery3/jquery.min.js" type="text/javascript"></script>
@@ -150,7 +150,7 @@
         <script src="/packages/cmf/compiled/js/cmf.min.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
     @endif
 
-    @if (\PeskyCMF\Config\CmfConfig::getPrimary()->config('optimize_ui_templates.enabled', false))
+    @if (cmfConfig()->config('optimize_ui_templates.enabled', false))
         <script src="{{ cmfRoute('cmf_cached_templates_js', ['_' => time()]) }}" type="text/javascript"></script>
     @endif
 
@@ -163,18 +163,18 @@
         <script src="/packages/cmf-vendors/bootstrap/fileinput/js/locales/{{ strtolower(substr(app()->getLocale(), 0, 2)) }}.js" type="text/javascript"></script>
     @endif
 
-    @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_js_includes() as $jsPath)
+    @foreach(cmfConfig()->layout_js_includes() as $jsPath)
         <script src="{!! $jsPath !!}" type="text/javascript"></script>
     @endforeach
 
-    @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->layout_js_code_blocks() as $jsCode)
+    @foreach(cmfConfig()->layout_js_code_blocks() as $jsCode)
         {!! $jsCode !!}
     @endforeach
 
     @yield('js')
     @yield('js2')
 
-    <?php $message = Session::pull(\PeskyCMF\Config\CmfConfig::getPrimary()->session_message_key(), false); ?>
+    <?php $message = Session::pull(cmfConfig()->session_message_key(), false); ?>
     @if (!empty($message) && (is_string($message) || (is_array($message) && !empty($message['message']))))
         <script type="application/javascript">
             <?php $type = is_string($message) || empty($message['type']) || !in_array($message['type'], ['success', 'info', 'warning', 'error']) ? 'info' : $message['type'] ?>

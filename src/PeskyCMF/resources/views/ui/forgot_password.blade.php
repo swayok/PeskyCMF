@@ -1,6 +1,6 @@
 <div class="login-box">
     <div class="login-logo">
-        {!! \PeskyCMF\Config\CmfConfig::getPrimary()->login_logo() !!}
+        {!! cmfConfig()->login_logo() !!}
         <div><b>{!! cmfTransCustom('.forgot_password.header') !!}</b></div>
     </div>
     <div class="login-box-body" id="forgot-password-form-container">
@@ -11,7 +11,7 @@
                 <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
             </div>
             <div class="login-submit text-right">
-                <a class="btn btn-default btn-flat pull-left" href="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->login_page_url() }}">
+                <a class="btn btn-default btn-flat pull-left" href="{{ cmfConfig()->login_page_url() }}">
                     {{ cmfTransGeneral('.action.back') }}
                 </a>
                 <button type="submit" class="btn btn-primary btn-flat">

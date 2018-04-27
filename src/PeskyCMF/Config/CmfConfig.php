@@ -5,6 +5,7 @@ namespace PeskyCMF\Config;
 use Illuminate\Foundation\Application;
 use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
+use PeskyCMF\Db\Admins\CmfAdminsTable;
 use PeskyCMF\Event\CmfUserAuthenticated;
 use PeskyCMF\Http\Middleware\ValidateCmfUser;
 use PeskyCMF\Listeners\CmfUserAuthenticatedEventListener;
@@ -23,11 +24,11 @@ use Swayok\Utils\StringUtils;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
-class CmfConfig extends ConfigsContainer {
+abstract class CmfConfig extends ConfigsContainer {
 
     static private $instances = [];
 
-    protected function __construct() {
+    protected final function __construct() {
         self::$instances[get_class($this)] = $this;
         if (!array_key_exists(__CLASS__, self::$instances)) {
             $this->useAsPrimary();
@@ -44,31 +45,34 @@ class CmfConfig extends ConfigsContainer {
      * Use this object as default config
      * Note: this is used in *Record, *Table, and *TableStructure DB classes of CMS
      */
-    public function useAsDefault() {
+    public final function useAsDefault() {
         self::$instances['default'] = $this;
     }
 
     /**
      * Get CmfConfig marked as default one (or primary config if default one not provided)
-     * @return $this
+     * @return CmfConfig
      */
-    static public function getDefault() {
-        return array_key_exists('default', self::$instances) ? self::$instances['default'] : self::getInstance();
+    static final public function getDefault() {
+        return isset(self::$instances['default']) ? self::$instances['default'] : self::getPrimary();
     }
 
     /**
      * Use this object as primary config
      * Note: this object will be returned when you call CmfConfig::getInstance() instead of CustomConfig::getInstance()
      */
-    public function useAsPrimary() {
+    public final function useAsPrimary() {
         self::$instances[__CLASS__] = $this;
     }
 
     /**
-     * @return $this
+     * @return CmfConfig
      */
-    static public function getPrimary() {
-        return self::getInstance();
+    static final public function getPrimary() {
+        if (!isset(self::$instances[__CLASS__])) {
+            throw new \BadMethodCallException('Primary CMF Config is not specified');
+        }
+        return self::$instances[__CLASS__];
     }
 
     /**
@@ -76,7 +80,7 @@ class CmfConfig extends ConfigsContainer {
      * Note: method excluded from toArray() results but key "config_instance" added instead of it
      * @return $this
      */
-    static public function getInstance() {
+    static final public function getInstance() {
         $class = get_called_class();
         if (!array_key_exists($class, self::$instances)) {
             self::$instances[$class] = new $class;
@@ -98,7 +102,7 @@ class CmfConfig extends ConfigsContainer {
      * @return mixed
      */
     static public function config($key, $default = null) {
-        return config(static::configsFileName() . '.' . $key, $default);
+        return config(static::getInstance()->configsFileName() . '.' . $key, $default);
     }
 
     static public function cmf_routes_config_files() {
@@ -157,7 +161,7 @@ class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @return TableInterface
+     * @return TableInterface|CmfAdminsTable
      */
     static public function users_table() {
         /** @var RecordInterface $recordClass */
@@ -609,7 +613,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string|array
      */
     static public function transCustom($path, array $parameters = [], $locale = null) {
-        $dict = self::getPrimary()->custom_dictionary_name();
+        $dict = static::getInstance()->custom_dictionary_name();
         $path = '.' . ltrim($path, '.');
         $primaryPath = $dict . $path;
         $trans = trans($primaryPath, $parameters, $locale);
@@ -641,7 +645,7 @@ class CmfConfig extends ConfigsContainer {
      * @return string|array
      */
     static public function transGeneral($path, array $parameters = [], $locale = null) {
-        $dict = self::getPrimary()->cmf_general_dictionary_name();
+        $dict = static::getInstance()->cmf_general_dictionary_name();
         $path = '.' . ltrim($path, '.');
         $primaryPath = $dict . $path;
         $trans = trans($primaryPath, $parameters, $locale);
@@ -665,7 +669,7 @@ class CmfConfig extends ConfigsContainer {
     static public function transApiDoc(string $translationPath, array $parameters = [], $locale = null) {
         if (static::class === self::class) {
             // redirect CmfConfig::transApiDoc() calls to primary config class
-            return static::getPrimary()->transApiDoc($translationPath, $parameters, $locale);
+            return self::getPrimary()->transApiDoc($translationPath, $parameters, $locale);
         } else {
             $translationPath = 'api_docs.' . ltrim($translationPath, '.');
             return static::transCustom($translationPath, $parameters, $locale);
@@ -736,7 +740,6 @@ class CmfConfig extends ConfigsContainer {
      * Reset locale to default
      */
     static public function resetLocale() {
-        static::_protect();
         static::setLocale(\LanguageDetector::getDriver()->detect());
     }
 
@@ -1003,9 +1006,9 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function getTableByUnderscoredName($tableName) {
         if (!array_key_exists($tableName, static::getInstance()->tables)) {
-            if (array_key_exists($tableName, self::getInstance()->resources)) {
+            if (array_key_exists($tableName, static::getInstance()->resources)) {
                 /** @var ScaffoldConfigInterface $scaffoldConfigClass */
-                $scaffoldConfigClass = self::getInstance()->resources[$tableName];
+                $scaffoldConfigClass = static::getInstance()->resources[$tableName];
                 $table = $scaffoldConfigClass::getTable();
             } else {
                 /** @var ClassBuilder $builderClass */
@@ -1317,8 +1320,7 @@ class CmfConfig extends ConfigsContainer {
      * @param Application $app
      */
     public function initSection($app) {
-        static::_protect();
-        static::useAsPrimary();
+        $this->useAsPrimary();
         $appSettingsClass = static::config('app_settings_class');
         if (!empty($appSettingsClass)) {
             $app->singleton(PeskyCmfAppSettings::class, function () use ($appSettingsClass) {

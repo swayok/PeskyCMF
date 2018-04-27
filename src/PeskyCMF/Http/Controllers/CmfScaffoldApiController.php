@@ -2,15 +2,10 @@
 
 namespace PeskyCMF\Http\Controllers;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Routing\Controller;
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\ORM\TableInterface;
 
-class CmfScaffoldApiController extends Controller {
-
-    use AuthorizesRequests;
+class CmfScaffoldApiController extends CmfController {
 
     protected $requestedResourceName;
     protected $table;
@@ -34,7 +29,7 @@ class CmfScaffoldApiController extends Controller {
      */
     public function getScaffoldConfig() {
         if ($this->scaffoldConfig === null) {
-            $cmfConfig = CmfConfig::getPrimary();
+            $cmfConfig = static::getCmfConfig();
             $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getRequestedResourceName());
             if ($customScaffoldConfig instanceof ScaffoldConfig) {
                 $this->scaffoldConfig = $customScaffoldConfig;
@@ -55,7 +50,7 @@ class CmfScaffoldApiController extends Controller {
      */
     public function getRequestedResourceName() {
         if ($this->requestedResourceName === null) {
-            $tableName = CmfConfig::getPrimary()->getResourceNameFromCurrentRoute();
+            $tableName = static::getCmfConfig()->getResourceNameFromCurrentRoute();
             if (empty($tableName)) {
                 abort(404, 'Table name not found in route');
             }

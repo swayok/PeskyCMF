@@ -11,7 +11,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
     </h1>
     <ol class="breadcrumb">
         <li>
-            <a href="#" data-nav="back" data-default-url="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url() }}">
+            <a href="#" data-nav="back" data-default-url="{{ cmfConfig()->home_page_url() }}">
                 <i class="glyphicon fa fa-reply"></i>
                 {{ cmfTransGeneral('.action.back') }}
             </a>
@@ -37,7 +37,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                 <input type="password" class="hidden" formnovalidate disabled>
                 <!-- end of autofill disabler -->
                 <div class="box-body">
-                    <?php $loginColumn = \PeskyCMF\Config\CmfConfig::getPrimary()->user_login_column(); ?>
+                    <?php $loginColumn = cmfConfig()->user_login_column(); ?>
                     @if ($loginColumn !== 'email')
                         <div class="form-group">
                             <label for="{{ $loginColumn }}-input">{{ cmfTransCustom('.page.profile.input.' . $loginColumn) }}*</label>
@@ -70,7 +70,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                             <label for="language-input">{{ cmfTransCustom('.page.profile.input.language') }}</label>
                             <select class="form-control" data-value="{{ $admin->language }}" name="language" id="language-input"
                                     required="required" @if(!$canSubmit) disabled @endif>
-                                @foreach(\PeskyCMF\Config\CmfConfig::getPrimary()->locales() as $lang)
+                                @foreach(cmfConfig()->locales() as $lang)
                                     <option value="{{ $lang }}">{{ cmfTransCustom('.language.' . $lang) }}</option>
                                 @endforeach
                             </select>
@@ -86,7 +86,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                     data-live-search-placeholder="{{ cmfTransCustom('.page.profile.input.timezone_search') }}">
                                 <?php
                                     /** @var \PeskyORM\ORM\RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $userClass */
-                                    $userClass = \PeskyCMF\Config\CmfConfig::getPrimary()->user_record_class();
+                                    $userClass = cmfConfig()->user_record_class();
                                     $usersTable = $userClass::getTable();
                                 ?>
                                 <?php if (!$isRequired) ?>
@@ -106,7 +106,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                 <div class="box-footer">
                     <div class="row">
                         <div class="col-xs-6">
-                            <a class="btn btn-default" href="#" data-nav="back" data-default-url="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url() }}">
+                            <a class="btn btn-default" href="#" data-nav="back" data-default-url="{{ cmfConfig()->home_page_url() }}">
                                 {{ cmfTransGeneral('.form.toolbar.cancel') }}
                             </a>
                         </div>

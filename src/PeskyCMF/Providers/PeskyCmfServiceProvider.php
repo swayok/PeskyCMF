@@ -31,6 +31,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     public function register() {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
 
+        $this->setDefaultCmfConfig();
+
         $this->app->singleton(PeskyCmfManager::class, function ($app) {
             return new PeskyCmfManager($app);
         });
@@ -361,6 +363,17 @@ class PeskyCmfServiceProvider extends ServiceProvider {
                 ? $classNameOrInstance::getInstance()
                 : $classNameOrInstance;
         });
+    }
+
+    protected function setDefaultCmfConfig() {
+        $defaultConfig = $this->getAppConfigs()->get('peskycmf.default_cmf_config');
+        if ($defaultConfig) {
+            /** @var CmfConfig $className */
+            $className = $this->getAppConfigs()->get('peskycmf.cmf_configs.' . $defaultConfig);
+            if (!empty($className)) {
+                $className::getInstance()->useAsDefault();
+            }
+        }
     }
 
 }

@@ -20,12 +20,19 @@ class CmfMakeApiDocCommand extends Command {
         $this->handle();
     }
 
+    /**
+     * @return CmfConfig
+     */
+    protected function getCmfConfig() {
+        return CmfConfig::getPrimary();
+    }
+
     public function handle() {
-        $classSuffix = CmfConfig::getPrimary()->api_documentation_class_name_suffix();
+        $classSuffix = $this->getCmfConfig()->api_documentation_class_name_suffix();
         $className = preg_replace('%' . preg_quote($classSuffix, '%') . '$%', '', $this->argument('class_name')) . $classSuffix;
         $folder = $this->argument('folder');
         if (trim($folder) === '') {
-            $folder = CmfConfig::getPrimary()->api_documentation_classes_folder();
+            $folder = $this->getCmfConfig()->api_documentation_classes_folder();
         } else {
             $folder = app_path($folder);
         }
@@ -45,7 +52,7 @@ class CmfMakeApiDocCommand extends Command {
         $namespace = ltrim($namespace, '\\');
         $baseClass = CmfApiDocumentation::class;
         $baseClassName = class_basename($baseClass);
-        $classSuffix = CmfConfig::getPrimary()->api_documentation_class_name_suffix();
+        $classSuffix = $this->getCmfConfig()->api_documentation_class_name_suffix();
         $translationSubGroup = snake_case(
             preg_replace(
                 '%(ApiDocs?|(Method)?(Doc(umentation)?)?|' . preg_quote($classSuffix, '%') . '$)%',

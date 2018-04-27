@@ -87,9 +87,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /** @var array */
     protected $additionalViewsForTemplate = [];
 
-    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfigConfig) {
-        parent::__construct($table, $scaffoldConfigConfig);
-        $this->recordsPerPage = CmfConfig::getPrimary()->rows_per_page();
+    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
+        parent::__construct($table, $scaffoldConfig);
+        $this->recordsPerPage = $scaffoldConfig::getCmfConfig()->rows_per_page();
         $this->setOrderBy($table->getPkColumnName());
     }
 

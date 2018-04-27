@@ -1,15 +1,15 @@
 <aside class="main-sidebar">
     <section class="sidebar">
-        @include(\PeskyCMF\Config\CmfConfig::getPrimary()->sidebar_admin_info_view())
-        @include(\PeskyCMF\Config\CmfConfig::getPrimary()->menu_view())
+        @include(cmfConfig()->sidebar_admin_info_view())
+        @include(cmfConfig()->menu_view())
     </section>
 </aside>
 
 <header class="main-header">
     <a href="javascript:void(0)" class="sidebar-toggle visible-xs" data-toggle="push-menu" role="button"></a>
-    <a href="{{ \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url() }}" class="logo">
+    <a href="{{ cmfConfig()->home_page_url() }}" class="logo">
         <span class="logo-lg">
-            {!! \PeskyCMF\Config\CmfConfig::getPrimary()->sidebar_logo() !!}
+            {!! cmfConfig()->sidebar_logo() !!}
         </span>
     </a>
 </header>
@@ -18,7 +18,7 @@
 
 </div>
 
-@include(\PeskyCMF\Config\CmfConfig::getPrimary()->footer_view())
+@include(cmfConfig()->footer_view())
 
 <script type="application/javascript">
     $(document).ready(function () {

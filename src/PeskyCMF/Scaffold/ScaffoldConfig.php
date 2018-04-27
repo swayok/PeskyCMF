@@ -87,7 +87,14 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         if ($this->viewsBaseTranslationKey === null) {
             $this->viewsBaseTranslationKey = static::getResourceName();
         }
-        $this->setLogger(CmfConfig::getPrimary()->getHttpRequestsLogger());
+        $this->setLogger(static::getCmfConfig()->getHttpRequestsLogger());
+    }
+
+    /**
+     * @return CmfConfig
+     */
+    static public function getCmfConfig() {
+        return CmfConfig::getPrimary();
     }
 
     /**
@@ -429,7 +436,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
         }
         return view(
-            CmfConfig::getPrimary()->scaffold_templates_view_for_normal_table(),
+            static::getCmfConfig()->scaffold_templates_view_for_normal_table(),
             array_merge(
                 $this->getConfigsForTemplatesRendering(),
                 ['tableNameForRoutes' => static::getResourceName()]

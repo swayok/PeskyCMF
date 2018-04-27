@@ -33,7 +33,6 @@ $dictionary = [
         'button_label' => 'Сохранить',
         'invalid_access_key' => 'Неправильный или просроченный ключ доступа к странице',
         'password_replaced' => 'Новый пароль сохранен',
-        'failed_to_save' => 'Не удалось сохранить новый пароль',
     ],
     'user' => [
         'profile_label' => 'Профиль',

@@ -15,7 +15,7 @@ $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAtt
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 $isHidden = (bool)$rendererConfig->getData('isHidden', false);
 if ($valueViewer->isOptionsFilteringEnabled()) {
-    $routeName = \PeskyCMF\Config\CmfConfig::getPrimary()->getRouteName('cmf_api_get_options_as_json');
+    $routeName = cmfConfig()->getRouteName('cmf_api_get_options_as_json');
     $routeData = [
         'table_name' => $sectionConfig->getScaffoldConfig()->getResourceName(),
         'input_name' => $valueViewer->getName(),

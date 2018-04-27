@@ -442,7 +442,7 @@ class DataGridRendererHelper {
      */
     public function getDataTablesConfig() {
         $dataTablesConfig = array_replace(
-            CmfConfig::getPrimary()->data_tables_config(),
+            $this->dataGridConfig->getScaffoldConfig()->getCmfConfig()->data_tables_config(),
             $this->dataGridConfig->getAdditionalDataTablesConfig(),
             [
                 'resourceName' => $this->tableNameForRoutes,

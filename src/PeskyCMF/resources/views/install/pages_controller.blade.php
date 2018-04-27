@@ -8,9 +8,9 @@ echo "<?php\n";
 
 namespace App\{{ $sectionName }}\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use PeskyCMF\Http\Controllers\CmfController;
 
-class PagesController extends Controller {
+class PagesController extends CmfController {
 
     public function redirectFromStartPage() {
         return redirectToCmfPage('dashboard');

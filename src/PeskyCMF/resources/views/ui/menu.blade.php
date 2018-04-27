@@ -3,7 +3,7 @@
 </ul>
 <div id="main-sidebar-menu-scrollable-container" ss-container>
     <ul class="sidebar-menu tree" data-widget="tree" id="common-menu">
-        @foreach (\PeskyCMF\Config\CmfConfig::getPrimary()->menu() as $info)
+        @foreach (cmfConfig()->menu() as $info)
             @if (empty($info))
                 @continue
             @endif

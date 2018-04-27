@@ -33,7 +33,6 @@ $dictionary = [
         'button_label' => 'Save',
         'invalid_access_key' => 'Access key to this page is invalid or outdated',
         'password_replaced' => 'New password saved',
-        'failed_to_save' => 'Failed to save new password',
     ],
     'user' => [
         'profile_label' => 'Profile',

@@ -111,6 +111,13 @@ class CmfAccessPolicy {
     }
 
     /**
+     * @return CmfConfig
+     */
+    protected function getCmfConfig() {
+        return CmfConfig::getPrimary();
+    }
+
+    /**
      * @param RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $user
      * @param string $pageName
      * @return bool
@@ -183,7 +190,7 @@ class CmfAccessPolicy {
                 || in_array($user->role, (array)static::$resourcesWithOwnershipValidation[$tableName][$ability], true)
             )
         ) {
-            $table = CmfConfig::getPrimary()->getTableByUnderscoredName($tableName);
+            $table = $this->getCmfConfig()->getTableByUnderscoredName($tableName);
             $ownerColumn = array_get(static::$ownerColumnForTable, $tableName, 'admin_id');
             if (!$table->getTableStructure()->hasColumn($ownerColumn)) {
                 return true;

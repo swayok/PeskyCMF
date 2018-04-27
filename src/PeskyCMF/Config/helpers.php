@@ -4,6 +4,16 @@ if (!defined('DOTJS_INSERT_REGEXP_FOR_ROUTES')) {
     define('DOTJS_INSERT_REGEXP_FOR_ROUTES', '(\{\{\s*=.*?\}\}|\{\s*=.*?\})');
 }
 
+if (!function_exists('cmfConfig')) {
+
+    /**
+     * @return \PeskyCMF\Config\CmfConfig
+     */
+    function cmfConfig() {
+        return \PeskyCMF\Config\CmfConfig::getPrimary();
+    }
+}
+
 if (!function_exists('cmfRoute')) {
     /**
      * @param string $routeName
@@ -14,7 +24,7 @@ if (!function_exists('cmfRoute')) {
      */
     function cmfRoute($routeName, array $parameters = [], $absolute = false, $cmfConfig = null) {
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         return route($cmfConfig::getRouteName($routeName), $parameters, $absolute);
     }
@@ -47,7 +57,7 @@ if (!function_exists('cmfRouteTpl')) {
             $replaces[$parameters[$name]] = "{{= {$dotJsVarPrefix}{$tplName} }}";
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $url = route($cmfConfig::getRouteName($routeName), $parameters, $absolute);
         return str_replace(array_keys($replaces), array_values($replaces), $url);
@@ -67,7 +77,7 @@ if (!function_exists('routeToCmfPage')) {
             return null;
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         return route($cmfConfig::getRouteName('cmf_page'), array_merge(['page' => $pageId], $queryArgs), $absolute);
     }
@@ -118,7 +128,7 @@ if (!function_exists('routeToCmfItemsTable')) {
             }
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $url = route($cmfConfig::getRouteName('cmf_items_table'), $params, $absolute);
         return str_replace(array_keys($replaces), array_values($replaces), $url);
@@ -138,7 +148,7 @@ if (!function_exists('routeToCmfTableCustomData')) {
             return null;
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         return route(
             $cmfConfig::getRouteName('cmf_api_get_custom_data'),
@@ -162,7 +172,7 @@ if (!function_exists('routeToCmfItemAddForm')) {
             return null;
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $params = ['table_name' => $tableName];
         $replaces = [];
@@ -199,7 +209,7 @@ if (!function_exists('routeToCmfItemEditForm')) {
             return null;
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
         $url = route($cmfConfig::getRouteName('cmf_item_edit_form'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
@@ -220,7 +230,7 @@ if (!function_exists('routeToCmfItemCloneForm')) {
             return null;
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
         $url = route($cmfConfig::getRouteName('cmf_item_clone_form'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
@@ -241,7 +251,7 @@ if (!function_exists('routeToCmfItemDetails')) {
             return null;
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
         $url = route($cmfConfig::getRouteName('cmf_item_details'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
@@ -262,7 +272,7 @@ if (!function_exists('routeToCmfItemDelete')) {
             return null;
         }
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
         $url = route($cmfConfig::getRouteName('cmf_api_delete_item'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
@@ -282,7 +292,7 @@ if (!function_exists('routeToCmfResourceCustomPage')) {
      */
     function routeToCmfResourceCustomPage($tableName, $pageId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $queryArgsEscaped = [];
         $replaces = [];
@@ -325,7 +335,7 @@ if (!function_exists('routeToCmfItemCustomPage')) {
      */
     function routeToCmfItemCustomPage($tableName, $itemId, $pageId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
         $queryArgsEscaped = [];
@@ -370,7 +380,7 @@ if (!function_exists('routeToCmfItemCustomAction')) {
      */
     function routeToCmfItemCustomAction($tableName, $itemId, $actionId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
         $queryArgsEscaped = [];
@@ -415,7 +425,7 @@ if (!function_exists('routeToCmfResourceCustomAction')) {
      */
     function routeToCmfResourceCustomAction($tableName, $actionId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
         if (!$cmfConfig) {
-            $cmfConfig = \PeskyCMF\Config\CmfConfig::getPrimary();
+            $cmfConfig = cmfConfig();
         }
         $queryArgsEscaped = [];
         $replaces = [];
@@ -543,7 +553,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
             $message = cmfTransGeneral('.message.http404');
         }
         if (empty($fallbackUrl)) {
-            $fallbackUrl = \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url();
+            $fallbackUrl = cmfConfig()->home_page_url();
         }
         return cmfJsonResponse(\PeskyCMF\HttpCode::NOT_FOUND)
             ->setMessage($message)
@@ -564,7 +574,7 @@ if (!function_exists('cmfRedirectResponseWithMessage')) {
                 ->setMessage($message)
                 ->setRedirect($url);
         } else {
-            return Redirect::to($url)->with(\PeskyCMF\Config\CmfConfig::getPrimary()->session_message_key(), [
+            return Redirect::to($url)->with(cmfConfig()->session_message_key(), [
                 'message' => $message,
                 'type' => $type
             ]);
@@ -670,7 +680,7 @@ if (!function_exists('pickLocalization')) {
      * @return string|null
      */
     function pickLocalization(array $translations, $default = null) {
-        $langCodes = [app()->getLocale(), \PeskyCMF\Config\CmfConfig::getPrimary()->default_locale()];
+        $langCodes = [app()->getLocale(), cmfConfig()->default_locale()];
         foreach ($langCodes as $langCode) {
             if (
                 array_key_exists($langCode, $translations)

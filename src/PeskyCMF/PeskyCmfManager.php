@@ -11,8 +11,6 @@ class PeskyCmfManager {
     protected $currentCmfSectionName;
     /** @var CmfConfig */
     protected $currentCmfConfig;
-    /** @var CmfConfig */
-    protected $defaultCmfConfig;
     /** @var Application */
     protected $app;
     /** @var \Closure[] */
@@ -23,10 +21,6 @@ class PeskyCmfManager {
      */
     public function __construct($app) {
         $this->app = $app;
-        if ($this->config('default_cmf_config')) {
-            $this->defaultCmfConfig = $this->getCmfConfigForSection();
-            $this->defaultCmfConfig->useAsDefault();
-        }
     }
 
     protected function config($key) {
@@ -51,7 +45,7 @@ class PeskyCmfManager {
      * @return CmfConfig|null
      */
     public function getDefaultCmfConfig() {
-        return $this->defaultCmfConfig;
+        return CmfConfig::getDefault();
     }
 
     /**

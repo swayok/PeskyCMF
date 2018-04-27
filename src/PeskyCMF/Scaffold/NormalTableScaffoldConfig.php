@@ -211,7 +211,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         );
         $errors = $formConfig->validateDataForCreate($data);
         if (count($errors) !== 0) {
-            return $this->sendValidationErrorsResponse($errors);
+            return $this->makeValidationErrorsJsonResponse($errors);
         }
         unset($data[$table->getPkColumnName()]);
         if ($formConfig->hasBeforeSaveCallback()) {
@@ -223,7 +223,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 // revalidate
                 $errors = $formConfig->validateDataForCreate($data, [], true);
                 if (count($errors) !== 0) {
-                    return $this->sendValidationErrorsResponse($errors);
+                    return $this->makeValidationErrorsJsonResponse($errors);
                 }
             }
         }
@@ -242,7 +242,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
                 }
-                return $this->sendValidationErrorsResponse($exc->getErrors());
+                return $this->makeValidationErrorsJsonResponse($exc->getErrors());
             } catch (\Exception $exc) {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
@@ -273,7 +273,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         );
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {
-            return $this->sendValidationErrorsResponse($errors);
+            return $this->makeValidationErrorsJsonResponse($errors);
         }
         if (!$this->getRequest()->input($table->getPkColumnName())) {
             return $this->makeRecordNotFoundResponse($table);
@@ -300,7 +300,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 // revalidate
                 $errors = $formConfig->validateDataForEdit($data, [], true);
                 if (count($errors) !== 0) {
-                    return $this->sendValidationErrorsResponse($errors);
+                    return $this->makeValidationErrorsJsonResponse($errors);
                 }
             }
         }
@@ -318,7 +318,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
                 }
-                return $this->sendValidationErrorsResponse($exc->getErrors());
+                return $this->makeValidationErrorsJsonResponse($exc->getErrors());
             } catch (\Exception $exc) {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
@@ -417,7 +417,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $errors = $formConfig->validateDataForBulkEdit($data);
         if (count($errors) !== 0) {
-            return $this->sendValidationErrorsResponse($errors);
+            return $this->makeValidationErrorsJsonResponse($errors);
         }
         if ($formConfig->hasBeforeBulkEditDataSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeBulkEditDataSaveCallback(), $data, $formConfig);
@@ -428,7 +428,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 // revalidate
                 $errors = $formConfig->validateDataForBulkEdit($data, [], true);
                 if (count($errors) !== 0) {
-                    return $this->sendValidationErrorsResponse($errors);
+                    return $this->makeValidationErrorsJsonResponse($errors);
                 }
             }
         }
@@ -531,13 +531,13 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $idsField = $inputNamePrefix . 'ids';
         $conditionsField = $inputNamePrefix . 'conditions';
         if ($this->getRequest()->has($idsField)) {
-            $this->validate($this->getRequest()->input(), [
+            $this->validate($this->getRequest(), [
                 $idsField => 'required|array',
                 $idsField . '.*' => 'integer|min:1'
             ]);
             $conditions[static::getTable()->getPkColumnName()] = $this->getRequest()->input($idsField);
         } else if ($this->getRequest()->has($conditionsField)) {
-            $this->validate($this->getRequest()->input(), [
+            $this->validate($this->getRequest(), [
                 $conditionsField => 'string|regex:%^[\{\[].*[\}\]]$%s',
             ]);
             $encodedConditions = $this->getRequest()->input($conditionsField) !== ''

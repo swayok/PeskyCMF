@@ -4,7 +4,6 @@ namespace PeskyCMF\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use PeskyCMF\HttpCode;
 use PeskyCMF\Traits\DataValidationHelper;
 
 class ValidateData {
@@ -38,9 +37,9 @@ class ValidateData {
                     $messages = [];
                 }
             }
-            $response = $this->validate($request->all(), $actionInfo['validate'], $messages);
-            if ($response !== true) {
-                return $response;
+            $errors = $this->validateAndReturnErrors($request, $actionInfo['validate'], $messages);
+            if (!empty($errors)) {
+                return $this->makeValidationErrorsJsonResponse($errors);
             }
         }
         return $next($request);

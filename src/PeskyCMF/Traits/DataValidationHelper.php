@@ -2,7 +2,8 @@
 
 namespace PeskyCMF\Traits;
 
-use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use PeskyCMF\HttpCode;
@@ -11,35 +12,68 @@ use Swayok\Utils\Set;
 trait DataValidationHelper {
 
     /**
-     * Validate data and throw ValidationException if it is invalid
-     * @param array $data
+     * Get a validation factory instance.
+     *
+     * @return \Illuminate\Contracts\Validation\Factory
+     */
+    protected function getValidationFactory() {
+        return app(Factory::class);
+    }
+
+    /**
+     * Validate data and throw ValidationException if it is invalid or return validated data
+     * @param array|Request $dataOrRequest
      * @param array $rules
      * @param array $messages
      * @param array $customAttributes
+     * @return array - data from request filtered by rules keys
      * @throws ValidationException
      */
-    protected function validate(array $data, array $rules, array $messages = array(), array $customAttributes = array()) {
-        $errors = $this->validateWithoutHalt($data, $rules, $messages, $customAttributes);
-        if ($errors !== true) {
+    public function validate($dataOrRequest, array $rules, array $messages = [], array $customAttributes = []) {
+        $errors = $this->validateAndReturnErrors($dataOrRequest, $rules, $messages, $customAttributes);
+        if (!empty($errors)) {
             $this->throwValidationErrorsResponse($errors);
         }
+
+        return $this->extractInputFromRules($dataOrRequest, $rules);
     }
 
     /**
      * Validate data and returm errors array if it is invalid
-     * @param array $data
+     * @param array|Request $dataOrRequest
      * @param array $rules
      * @param array $messages
      * @param array $customAttributes
-     * @return array|bool
+     * @return array - errors
      */
-    protected function validateWithoutHalt(array $data, array $rules, array $messages = array(), array $customAttributes = array()) {
+    public function validateAndReturnErrors($dataOrRequest, array $rules, array $messages = [], array $customAttributes = []) {
         $messages = Set::flatten($messages);
-        $validator = \Validator::make($data, $rules, $messages, $customAttributes);
+        if ($dataOrRequest instanceof Request) {
+            $dataOrRequest = $dataOrRequest->all();
+        }
+        $validator = $this->getValidationFactory()->make($dataOrRequest, $rules, $messages, $customAttributes);
         if ($validator->fails()) {
             return $validator->getMessageBag()->toArray();
         }
-        return true;
+
+        return [];
+    }
+
+    /**
+     * Get the request input based on the given validation rules.
+     *
+     * @param array|Request $data
+     * @param array $rules
+     * @return array
+     */
+    protected function extractInputFromRules($data, array $rules) {
+        $keys = collect($rules)->keys()->map(function ($rule) {
+            return explode('.', $rule)[0];
+        });
+        if (!($data instanceof Request)) {
+            $data = collect($data);
+        }
+        return $data->only($keys)->unique()->toArray();
     }
 
     protected function getValidationErrorsResponseMessage() {
@@ -50,7 +84,7 @@ trait DataValidationHelper {
      * @param array $errors
      * @return Response
      */
-    protected function sendValidationErrorsResponse(array $errors) {
+    public function makeValidationErrorsJsonResponse(array $errors) {
         return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::CANNOT_PROCESS);
     }
 
@@ -58,16 +92,17 @@ trait DataValidationHelper {
      * @param array $errors
      * @throws ValidationException
      */
-    protected function throwValidationErrorsResponse(array $errors) {
-        throw new ValidationException(\Validator::make([], []), $this->sendValidationErrorsResponse());
+    public function throwValidationErrorsResponse(array $errors) {
+        throw new ValidationException(\Validator::make([], []), $this->makeValidationErrorsJsonResponse($errors));
     }
 
-    protected function prepareDataForValidationErrorsResponse(array $errors) {
+    public function prepareDataForValidationErrorsResponse(array $errors) {
         $message = array_get($errors, '_message', $this->getValidationErrorsResponseMessage());
         unset($errors['_message']);
+
         return [
             '_message' => $message,
-            'errors' => static::fixValidationErrorsKeys($errors)
+            'errors' => static::fixValidationErrorsKeys($errors),
         ];
     }
 
@@ -88,6 +123,7 @@ trait DataValidationHelper {
                 unset($errors[$key]);
             }
         }
+
         return $errors;
     }
 

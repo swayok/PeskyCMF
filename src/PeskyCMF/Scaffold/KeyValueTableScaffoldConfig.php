@@ -55,7 +55,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
     public function renderTemplates() {
         return view(
-            CmfConfig::getPrimary()->scaffold_templates_view_for_key_value_table(),
+            static::getCmfConfig()->scaffold_templates_view_for_key_value_table(),
             array_merge(
                 $this->getConfigsForTemplatesRendering(),
                 ['tableNameForRoutes' => static::getResourceName()]
@@ -121,7 +121,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         );
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {
-            return $this->sendValidationErrorsResponse($errors);
+            return $this->makeValidationErrorsJsonResponse($errors);
         }
         if ($formConfig->hasBeforeSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
@@ -132,7 +132,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
                 // revalidate
                 $errors = $formConfig->validateDataForEdit($data, [], true);
                 if (count($errors) !== 0) {
-                    return $this->sendValidationErrorsResponse($errors);
+                    return $this->makeValidationErrorsJsonResponse($errors);
                 }
             }
         }
@@ -176,7 +176,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
                 if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                 }
-                return $this->sendValidationErrorsResponse($exc->getErrors());
+                return $this->makeValidationErrorsJsonResponse($exc->getErrors());
             } catch (\Exception $exc) {
                 if ($table::inTransaction()) {
                     $table::rollBackTransaction();

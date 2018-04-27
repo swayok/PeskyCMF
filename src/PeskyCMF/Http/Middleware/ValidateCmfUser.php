@@ -16,18 +16,18 @@ class ValidateCmfUser {
 
     public function handle(Request $request, \Closure $next) {
         //get the admin check closure that should be supplied in the config
-        /** @var CmfConfig $configs */
-        $configs = CmfConfig::getPrimary();
+        /** @var CmfConfig $cmfConfig */
+        $cmfConfig = CmfConfig::getPrimary();
         //if this is a simple false value, send the user to the login redirect
-        $authResponse = $configs::getAuth()->check();
+        $authResponse = $cmfConfig::getAuth()->check();
         if (!$authResponse) {
-            $loginUrl = $configs::login_page_url();
+            $loginUrl = $cmfConfig::login_page_url();
             $currentUrl = $request->url();
             if ($request->ajax()) {
-                \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
+                \Session::put($cmfConfig::session_redirect_key(), $currentUrl);
                 return response()->json(['redirect_with_reload' => $loginUrl], HttpCode::UNAUTHORISED);
             } else {
-                return redirect()->guest($loginUrl)->with(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
+                return redirect()->guest($loginUrl)->with($cmfConfig::session_redirect_key(), $currentUrl);
             }
         } else if (is_a($authResponse, JsonResponse::class) || is_a($authResponse, Response::class)) {
             return $authResponse;
@@ -35,20 +35,20 @@ class ValidateCmfUser {
             $currentUrl = $request->url();
             /** @var RedirectResponse $authResponse */
             if ($request->ajax()) {
-                \Session::put(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
+                \Session::put($cmfConfig::session_redirect_key(), $currentUrl);
                 return response()->json(['redirect' => $authResponse->getTargetUrl()], HttpCode::UNAUTHORISED);
             } else {
-                return $authResponse->with(CmfConfig::getPrimary()->session_redirect_key(), $currentUrl);
+                return $authResponse->with($cmfConfig::session_redirect_key(), $currentUrl);
             }
         }
         /** @var RecordInterface|Authenticatable $user */
-        $user = $configs::getUser();
+        $user = $cmfConfig::getUser();
         \Event::fire(new CmfUserAuthenticated($user));
 
         $response = $next($request);
         if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
-            $fallbackUrl = $configs::login_page_url();
-            $message = $configs::transGeneral('.message.access_denied');
+            $fallbackUrl = $cmfConfig::login_page_url();
+            $message = $cmfConfig::transGeneral('.message.access_denied');
             $response = $request->ajax()
                 ? CmfJsonResponse::create([], HttpCode::FORBIDDEN)
                     ->setMessage($message)

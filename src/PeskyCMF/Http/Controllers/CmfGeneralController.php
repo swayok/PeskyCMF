@@ -7,9 +7,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
-use Illuminate\Routing\Controller;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
@@ -24,7 +22,7 @@ use Swayok\Utils\Folder;
 use Swayok\Utils\Set;
 use Swayok\Utils\ValidateValue;
 
-class CmfGeneralController extends Controller {
+class CmfGeneralController extends CmfController {
 
     use DataValidationHelper,
         AuthorizesRequests;
@@ -40,49 +38,49 @@ class CmfGeneralController extends Controller {
             return response()->json([], 404);
         }
 
-        return view(CmfConfig::getPrimary()->layout_view());
+        return view(static::getCmfConfig()->layout_view());
     }
 
     public function getPage(Request $request, $name) {
         if ($request->ajax()) {
             $this->authorize('cmf_page', [$name]);
             if (
-                !\View::exists(CmfConfig::getPrimary()->custom_views_prefix() . 'page.' . $name)
+                !\View::exists(static::getCmfConfig()->custom_views_prefix() . 'page.' . $name)
                 && \View::exists('cmf::page.' . $name)
             ) {
                 return view('cmf::page.' . $name)->render();
             }
-            return view(CmfConfig::getPrimary()->custom_views_prefix() . 'page.' . $name)->render();
+            return view(static::getCmfConfig()->custom_views_prefix() . 'page.' . $name)->render();
         } else {
-            return view(CmfConfig::getPrimary()->layout_view())->render();
+            return view(static::getCmfConfig()->layout_view())->render();
         }
     }
 
     public function getUiView($viewName) {
         $configName = $viewName . '_view';
-        $configs = CmfConfig::getPrimary();
+        $configs = static::getCmfConfig();
         if (!method_exists($configs, $configName)) {
             abort(HttpCode::NOT_FOUND, "Config [$configName] not defined");
         }
 
-        return view(CmfConfig::getPrimary()->$configName)->render();
+        return view(static::getCmfConfig()->$configName)->render();
     }
 
     public function redirectToUserProfile() {
-        return redirect()->route(CmfConfig::getPrimary()->getRouteName('cmf_profile'));
+        return redirect()->route(static::getCmfConfig()->getRouteName('cmf_profile'));
     }
 
     public function getAdminProfile() {
-        $admin = CmfConfig::getPrimary()->getUser();
+        $admin = static::getCmfConfig()->getUser();
         $this->authorize('resource.details', ['cmf_profile', $admin]);
-        return view(CmfConfig::getPrimary()->user_profile_view(), [
+        return view(static::getCmfConfig()->user_profile_view(), [
             'admin' => $admin,
             'canSubmit' => \Gate::allows('resource.update', ['cmf_profile', $admin])
         ]);
     }
 
     public function updateAdminProfile(Request $request) {
-        $admin = CmfConfig::getPrimary()->getUser();
+        $admin = static::getCmfConfig()->getUser();
         $this->authorize('resource.update', ['cmf_profile', $admin]);
         $updates = $this->validateAndGetAdminProfileUpdates($request, $admin);
         if (!is_array($updates)) {
@@ -122,7 +120,7 @@ class CmfGeneralController extends Controller {
         ];
         $columnsToUpdate = [];
         if ($admin::hasColumn('language')) {
-            $validationRules['language'] = 'required|in:' . implode(',', CmfConfig::getPrimary()->locales());
+            $validationRules['language'] = 'required|in:' . implode(',', static::getCmfConfig()->locales());
             $columnsToUpdate[] = 'language';
         }
         if ($admin::hasColumn('name')) {
@@ -133,8 +131,8 @@ class CmfGeneralController extends Controller {
             $validationRules['timezone'] = 'nullable|exists:pg_timezone_names,name';
             $columnsToUpdate[] = 'timezone';
         }
-        $usersTable = CmfConfig::getPrimary()->users_table()->getName();
-        $userLoginCol = CmfConfig::getPrimary()->user_login_column();
+        $usersTable = static::getCmfConfig()->users_table()->getName();
+        $userLoginCol = static::getCmfConfig()->user_login_column();
         if ($admin::hasColumn('email')) {
             if ($userLoginCol === 'email') {
                 $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->getAuthIdentifier()},id";
@@ -147,7 +145,7 @@ class CmfGeneralController extends Controller {
             $validationRules[$userLoginCol] = "required|regex:%^[a-zA-Z0-9_@.-]+$%is|min:4|unique:$usersTable,$userLoginCol,{$admin->getAuthIdentifier()},id";
             $columnsToUpdate[] = $userLoginCol;
         }
-        foreach (CmfConfig::getPrimary()->additional_user_profile_fields() as $columnName => $rules) {
+        foreach (static::getCmfConfig()->additional_user_profile_fields() as $columnName => $rules) {
             if (is_int($columnName)) {
                 $columnName = $rules;
             } else {
@@ -179,14 +177,14 @@ class CmfGeneralController extends Controller {
 
     protected function getDataForBasicUiView() {
         return [
-            'urlPrefix' => '/' . CmfConfig::getPrimary()->url_prefix(),
+            'urlPrefix' => '/' . static::getCmfConfig()->url_prefix(),
         ];
     }
 
     public function getBasicUiView() {
         $viewData = $this->getDataForBasicUiView();
 
-        return view(CmfConfig::getPrimary()->ui_view(), $viewData)->render();
+        return view(static::getCmfConfig()->ui_view(), $viewData)->render();
     }
 
     /**
@@ -194,7 +192,7 @@ class CmfGeneralController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function switchLocale($locale = null) {
-        CmfConfig::getPrimary()->setLocale($locale);
+        static::getCmfConfig()->setLocale($locale);
 
         return \Redirect::back();
     }
@@ -202,8 +200,8 @@ class CmfGeneralController extends Controller {
     public function getLogin(Request $request) {
         if ($request->ajax()) {
             return response()->json([], 404);
-        } else if (!CmfConfig::getPrimary()->getAuth()->check()) {
-            return view(CmfConfig::getPrimary()->layout_view())->render();
+        } else if (!static::getCmfConfig()->getAuth()->check()) {
+            return view(static::getCmfConfig()->layout_view())->render();
         } else {
             return \Redirect::to($this->getIntendedUrl());
         }
@@ -213,7 +211,7 @@ class CmfGeneralController extends Controller {
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (empty($user)) {
             return cmfRedirectResponseWithMessage(
-                CmfConfig::getPrimary()->login_page_url(),
+                static::getCmfConfig()->login_page_url(),
                 cmfTransCustom('.replace_password.invalid_access_key'),
                 'error'
             );
@@ -234,38 +232,38 @@ class CmfGeneralController extends Controller {
      */
     protected function getUserFromPasswordRecoveryAccessKey($accessKey) {
         /** @var ResetsPasswordsViaAccessKey $userClass */
-        $userClass = CmfConfig::getPrimary()->user_record_class();
+        $userClass = static::getCmfConfig()->user_record_class();
 
         return $userClass::loadFromPasswordRecoveryAccessKey($accessKey);
     }
 
     public function getLoginTpl() {
-        return view(CmfConfig::getPrimary()->login_view())->render();
+        return view(static::getCmfConfig()->login_view())->render();
     }
 
     public function getForgotPasswordTpl() {
-        return view(CmfConfig::getPrimary()->forgot_password_view())->render();
+        return view(static::getCmfConfig()->forgot_password_view())->render();
     }
 
     public function getReplacePasswordTpl($accessKey) {
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (!empty($user)) {
-            return view(CmfConfig::getPrimary()->replace_password_view(), [
+            return view(static::getCmfConfig()->replace_password_view(), [
                 'accessKey' => $accessKey,
                 'userId' => $user->getPrimaryKeyValue(),
-                'userLogin' => $user->getValue(CmfConfig::getPrimary()->user_login_column())
+                'userLogin' => $user->getValue(static::getCmfConfig()->user_login_column())
             ])->render();
         } else {
             return cmfJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(cmfTransCustom('.replace_password.invalid_access_key'))
-                ->setRedirect(CmfConfig::getPrimary()->login_page_url());
+                ->setRedirect(static::getCmfConfig()->login_page_url());
         }
     }
 
     private function getIntendedUrl() {
-        $intendedUrl = session()->pull(CmfConfig::getPrimary()->session_redirect_key(), false);
+        $intendedUrl = session()->pull(static::getCmfConfig()->session_redirect_key(), false);
         if (!$intendedUrl) {
-            return CmfConfig::getPrimary()->home_page_url();
+            return static::getCmfConfig()->home_page_url();
         } else {
             if (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
                 return routeToCmfItemsTable($matches[1]);
@@ -288,16 +286,16 @@ class CmfGeneralController extends Controller {
     }
 
     public function doLogin(Request $request) {
-        $userLoginColumn = CmfConfig::getPrimary()->user_login_column();
-        $this->validate($request->input(), [
+        $userLoginColumn = static::getCmfConfig()->user_login_column();
+        $data = $this->validate($request, [
             $userLoginColumn => 'required' . ($userLoginColumn === 'email' ? '|email' : ''),
             'password' => 'required',
         ]);
         $credentials = [
-            DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($request->input($userLoginColumn)) . '``)'),
-            'password' => $request->input('password'),
+            DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($data[$userLoginColumn]) . '``)'),
+            'password' => $data['password'],
         ];
-        if (!CmfConfig::getPrimary()->getAuth()->attempt($credentials)) {
+        if (!static::getCmfConfig()->getAuth()->attempt($credentials)) {
             return cmfJsonResponse(HttpCode::INVALID)
                 ->setMessage(cmfTransCustom('.login_form.login_failed'));
         } else {
@@ -306,13 +304,13 @@ class CmfGeneralController extends Controller {
     }
 
     public function sendPasswordReplacingInstructions(Request $request) {
-        $this->validate($request->input(), [
+        $data = $this->validate($request, [
             'email' => 'required|email',
         ]);
-        $email = strtolower(trim($request->input('email')));
-        if (CmfConfig::getPrimary()->getAuth()->once(['email' => $email])) {
+        $email = strtolower(trim($data['email']));
+        if (static::getCmfConfig()->getAuth()->once(['email' => $email])) {
             /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $user */
-            $user = CmfConfig::getPrimary()->getAuth()->getLastAttempted();
+            $user = static::getCmfConfig()->getAuth()->getLastAttempted();
             if (!method_exists($user, 'getPasswordRecoveryAccessKey')) {
                 throw new \BadMethodCallException(
                     'Class ' . get_class($user) . ' does not support password recovery. You should add ' .
@@ -324,8 +322,8 @@ class CmfGeneralController extends Controller {
                 'user' => $user->toArrayWithoutFiles(),
             ];
             $subject = cmfTransCustom('.forgot_password.email_subject');
-            $from = CmfConfig::getPrimary()->system_email_address();
-            $view = CmfConfig::getPrimary()->password_recovery_email_view();
+            $from = static::getCmfConfig()->system_email_address();
+            $view = static::getCmfConfig()->password_recovery_email_view();
             \Mail::send($view, $data, function (Message $message) use ($from, $email, $subject) {
                 $message
                     ->from($from)
@@ -336,38 +334,35 @@ class CmfGeneralController extends Controller {
 
         return cmfJsonResponse()
             ->setMessage(cmfTransCustom('.forgot_password.instructions_sent'))
-            ->setRedirect(CmfConfig::getPrimary()->login_page_url());
+            ->setRedirect(static::getCmfConfig()->login_page_url());
     }
 
     public function replacePassword(Request $request, $accessKey) {
-        $this->validate($request->input(), [
+        $data = $this->validate($request, [
             'id' => 'required|integer|min:1',
             'password' => 'required|min:6',
             'password_confirm' => 'required|min:6|same:password',
         ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
-        if (!empty($user) && $user->getPrimaryKeyValue() !== $request->input('id')) {
+        if (!empty($user) && $user->getPrimaryKeyValue() !== $data['id']) {
             /** @var CmfDbRecord $user */
-            $user->begin()->updateValue('password', $request->input('password'), false);
-            if ($user->commit()) {
-                return cmfJsonResponse()
-                    ->setMessage(cmfTransCustom('.replace_password.password_replaced'))
-                    ->setRedirect(CmfConfig::getPrimary()->login_page_url());
-            } else {
-                return cmfJsonResponse(HttpCode::SERVER_ERROR)
-                    ->setMessage(cmfTransCustom('.replace_password.failed_to_save'));
-            }
+            $user
+                ->begin()
+                ->updateValue('password', $data['password'], false)
+                ->commit();
+            return cmfJsonResponse()
+                ->setMessage(cmfTransCustom('.replace_password.password_replaced'))
+                ->setRedirect(static::getCmfConfig()->login_page_url());
         } else {
             return cmfJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(cmfTransCustom('.replace_password.invalid_access_key'))
-                ->setRedirect(CmfConfig::getPrimary()->login_page_url());
+                ->setRedirect(static::getCmfConfig()->login_page_url());
         }
     }
 
     public function loginAs($otherUserId) {
         $this->authorize('cmf_page', ['login_as']);
-        $cmfConfig = CmfConfig::getPrimary();
-        $currentUser = $cmfConfig::getUser();
+        $currentUser = static::getUser();
         $currentUserId = $currentUser->getAuthIdentifier();
         if ($currentUserId === $otherUserId || $currentUserId === (int)$otherUserId) {
             return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
@@ -379,13 +374,14 @@ class CmfGeneralController extends Controller {
                 ->setMessage(cmfTransCustom('admins.login_as.no_auth_token'));
         }
         /** @var \PeskyCMF\Db\Admins\CmfAdmin|RecordInterface $otherUser */
-        $otherUser = $cmfConfig::getAuth()->loginUsingId($otherUserId);
+        $otherUser = static::getAuthGuard()->loginUsingId($otherUserId);
         if (!is_object($otherUser)) {
-            // Warning: do not use $cmfConfig::getAuth()->login($currentUser) - it might fail
-            $cmfConfig::getAuth()->loginUsingId($currentUserId, false);
+            // Warning: do not use Auth->login($currentUser) - it might fail
+            static::getAuthGuard()->loginUsingId($currentUserId, false);
             return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
                 ->setMessage(cmfTransCustom('admins.login_as.fail', ['id' => $otherUserId]));
         }
+        $cmfConfig = static::getCmfConfig();
         \Session::put([
             $this->originalUserFromLoginAsActionSessionKey => [
                 'id' => $currentUserId,
@@ -402,21 +398,21 @@ class CmfGeneralController extends Controller {
     }
 
     public function logout() {
-        $cmfConfig = CmfConfig::getPrimary();
+        $cmfConfig = static::getCmfConfig();
         if (\Session::has($this->originalUserFromLoginAsActionSessionKey)) {
             // logout to original account after 'login_as'
             $userInfo = \Session::pull($this->originalUserFromLoginAsActionSessionKey);
-            $user = $cmfConfig::getAuth()->getProvider()->retrieveByToken(
+            $user = static::getAuthGuard()->getProvider()->retrieveByToken(
                 array_get($userInfo, 'id', -1),
                 array_get($userInfo, 'token', -1)
             );
             if ($user) {
-                // Warning: do not use $cmfConfig::getAuth()->login($user) - it will fail to login previous user
-                $cmfConfig::getAuth()->loginUsingId($user->getAuthIdentifier(), false);
+                // Warning: do not use Auth->login($user) - it will fail to login previous user
+                static::getAuthGuard()->loginUsingId($user->getAuthIdentifier(), false);
                 return \Redirect::to(array_get($userInfo, 'url') ?: $cmfConfig::login_page_url(true));
             }
         }
-        $cmfConfig::getAuth()->logout();
+        static::getAuthGuard()->logout();
         \Session::invalidate();
         $cmfConfig::resetLocale();
         return \Redirect::to($cmfConfig::login_page_url(true));
@@ -424,7 +420,7 @@ class CmfGeneralController extends Controller {
 
     public function getAdminInfo() {
         /** @var CmfAdmin $admin */
-        $admin = CmfConfig::getPrimary()->getUser();
+        $admin = static::getCmfConfig()->getUser();
         $this->authorize('resource.details', ['cmf_profile', $admin]);
         $adminData = $admin->toArray();
         if (!empty($adminData['role'])) {
@@ -440,9 +436,9 @@ class CmfGeneralController extends Controller {
     }
 
     public function getMenuCounters() {
-        $admin = CmfConfig::getPrimary()->getUser();
+        $admin = static::getCmfConfig()->getUser();
         $this->authorize('resource.details', ['cmf_profile', $admin]);
-        return cmfJsonResponse()->setData(CmfConfig::getPrimary()->getValuesForMenuItemsCounters());
+        return cmfJsonResponse()->setData(static::getCmfConfig()->getValuesForMenuItemsCounters());
     }
 
     public function cleanCache() {
@@ -452,7 +448,7 @@ class CmfGeneralController extends Controller {
     public function getCkeditorConfigJs() {
         return view(
             'cmf::ui.ckeditor_config',
-            ['configs' => CmfConfig::getPrimary()->ckeditor_config()]
+            ['configs' => static::getCmfConfig()->ckeditor_config()]
         )->render();
     }
 
@@ -471,12 +467,12 @@ class CmfGeneralController extends Controller {
     }
 
     protected function validateImageUpload(Request $request) {
-        $errors = $this->validateWithoutHalt($request->all(), [
+        $errors = $this->validateAndReturnErrors($request->all(), [
             'CKEditorFuncNum' => 'required|int',
             'CKEditor' => 'required|string',
             'upload' => 'required|image|mimes:jpeg,png,gif,svg|between:1,5064',
         ]);
-        if (is_array($errors)) {
+        if (!empty($errors)) {
             $ret = [];
             /** @var array $errors */
             foreach ($errors as $param => $errorsForParam) {
@@ -495,7 +491,7 @@ class CmfGeneralController extends Controller {
         } else {
             return cmfTransGeneral('.ckeditor.fileupload.cannot_detect_table_and_field', ['editor_name' => $editorId]);
         }
-        $scaffoldConfig = CmfConfig::getPrimary()->getScaffoldConfig($tableName);
+        $scaffoldConfig = static::getCmfConfig()->getScaffoldConfig($tableName);
         $columns = $scaffoldConfig->getFormConfig()->getValueViewers();
         if (array_key_exists($columnName, $columns)) {
             $column = $columns[$columnName];
@@ -600,7 +596,7 @@ class CmfGeneralController extends Controller {
             ],
             'item' => [],
         ];
-        foreach (CmfConfig::getPrimary()->getApiDocumentationClasses() as $methodsList) {
+        foreach (static::getCmfConfig()->getApiDocumentationClasses() as $methodsList) {
             /** @var CmfApiMethodDocumentation $apiMethodDocs */
             foreach ($methodsList as $apiMethodDocs) {
                 $docsObject = $apiMethodDocs::create();
@@ -620,8 +616,8 @@ class CmfGeneralController extends Controller {
         return view(
             'cmf::ui.cached_templates',
             [
-                'pages' => CmfConfig::getPrimary()->getCachedPagesTemplates(),
-                'resources' => CmfConfig::getPrimary()->getCachedResourcesTemplates()
+                'pages' => static::getCmfConfig()->getCachedPagesTemplates(),
+                'resources' => static::getCmfConfig()->getCachedResourcesTemplates()
             ]
         )->render();
     }

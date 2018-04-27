@@ -14,7 +14,8 @@ class RecaptchaServiceProvider extends ServiceProvider {
                 return false;
             }
             // accept duplicate submits for some time
-            $isValid = \Session::get(CmfConfig::getPrimary()->url_prefix() . '-recaptcha', null);
+            $cmfConfig = CmfConfig::getPrimary();
+            $isValid = \Session::get($cmfConfig::url_prefix() . '-recaptcha', null);
             if (
                 $isValid === null
                 || !is_array($isValid)
@@ -23,12 +24,12 @@ class RecaptchaServiceProvider extends ServiceProvider {
                 || $isValid['key'] !== $value
                 || $isValid['expires_at'] < time()
             ) {
-                $isValid = static::valdate(CmfConfig::getPrimary()->recaptcha_private_key(), $value, request()->getClientIp());
+                $isValid = static::valdate($cmfConfig::recaptcha_private_key(), $value, request()->getClientIp());
             }
             if (!empty($isValid) && is_array($isValid)) {
                 $isValid['key'] = $value;
                 $isValid['expires_at'] = time() + 120;
-                \Session::put(CmfConfig::getPrimary()->url_prefix() . '-recaptcha', $isValid);
+                \Session::put($cmfConfig::url_prefix() . '-recaptcha', $isValid);
                 return true;
             }
             return false;

@@ -187,7 +187,7 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
 <div id="data-grid-tpl">
     <?php echo view('cmf::ui.default_page_header', [
         'header' => $dataGridConfig->translate(null, 'header'),
-        'defaultBackUrl' => \PeskyCMF\Config\CmfConfig::getPrimary()->home_page_url(),
+        'defaultBackUrl' => cmfConfig()->home_page_url(),
     ])->render(); ?>
     <div class="content">
         <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">
