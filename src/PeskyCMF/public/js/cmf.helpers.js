@@ -677,20 +677,23 @@ AdminUI.updateUserInfo = function (userInfo) {
     var container = $(AdminUI.userInfoContainer);
     if (!AdminUI.userInfoTpl) {
         container.addClass('fading fade-out').width();
-        Utils.makeTemplateFromText(
-                $(AdminUI.userInfoTplSelector).html(),
-                'User Info block template'
-            )
-            .done(function (template) {
-                AdminUI.userInfoTpl = template;
-                container.html(AdminUI.userInfoTpl(userInfo)).removeClass('fade-out');
-                $(document).on('change:user', function (event, userInfo) {
-                    AdminUI.updateUserInfo(userInfo);
+        var $tpl = $(AdminUI.userInfoTplSelector);
+        if ($tpl.length) {
+            Utils.makeTemplateFromText(
+                    $tpl.html(),
+                    'User Info block template'
+                )
+                .done(function (template) {
+                    AdminUI.userInfoTpl = template;
+                    container.html(AdminUI.userInfoTpl(userInfo)).removeClass('fade-out');
+                    $(document).on('change:user', function (event, userInfo) {
+                        AdminUI.updateUserInfo(userInfo);
+                    });
+                })
+                .fail(function (error) {
+                    throw error;
                 });
-            })
-            .fail(function (error) {
-                throw error;
-            });
+        }
     } else {
         container.html(AdminUI.userInfoTpl(userInfo)).removeClass('fade-out');
     }

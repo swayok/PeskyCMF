@@ -12,7 +12,9 @@
             {!! cmfConfig()->sidebar_logo() !!}
         </span>
     </a>
+    @include(cmfConfig()->top_navbar_view())
 </header>
+
 
 <div class="content-wrapper" id="section-content">
 

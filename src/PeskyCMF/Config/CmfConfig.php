@@ -424,6 +424,10 @@ abstract class CmfConfig extends ConfigsContainer {
         return 'cmf::scaffold.templates';
     }
 
+    static public function top_navbar_view() {
+        return 'cmf::ui.top_navbar';
+    }
+
     /**
      * View that shows show admin info in sidebar
      * @return string
