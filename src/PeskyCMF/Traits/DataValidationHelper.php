@@ -3,6 +3,7 @@
 namespace PeskyCMF\Traits;
 
 use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
@@ -76,13 +77,16 @@ trait DataValidationHelper {
         return $data->only($keys);
     }
 
+    /**
+     * @return string
+     */
     protected function getValidationErrorsResponseMessage() {
         return cmfTransGeneral('.message.invalid_data_received');
     }
 
     /**
      * @param array $errors
-     * @return Response
+     * @return Response|JsonResponse
      */
     public function makeValidationErrorsJsonResponse(array $errors) {
         return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::CANNOT_PROCESS);
@@ -96,6 +100,10 @@ trait DataValidationHelper {
         throw new ValidationException(\Validator::make([], []), $this->makeValidationErrorsJsonResponse($errors));
     }
 
+    /**
+     * @param array $errors
+     * @return array
+     */
     public function prepareDataForValidationErrorsResponse(array $errors) {
         $message = array_get($errors, '_message', $this->getValidationErrorsResponseMessage());
         unset($errors['_message']);

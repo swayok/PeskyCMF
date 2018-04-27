@@ -169,7 +169,7 @@ class CmfGeneralController extends CmfController {
             $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
         }
         if (count($errors) > 0) {
-            return cmfJsonResponseForValidationErrors($errors);
+            return $this->makeValidationErrorsJsonResponse($errors);
         }
 
         return $request->only($columnsToUpdate);
