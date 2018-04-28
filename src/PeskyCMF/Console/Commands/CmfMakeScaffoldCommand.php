@@ -57,12 +57,13 @@ class CmfMakeScaffoldCommand extends Command {
                         'Class ' . $class . ' provided through option --cmf-config-class does not exist'
                     );
                 }
-                $this->cmfConfigClass = new $class();
-                if (!($this->cmfConfigClass instanceof CmfConfig)) {
+                if (!is_subclass_of($class, CmfConfig::class)) {
                     throw new \InvalidArgumentException(
-                        'Class ' . $class . ' provided through option --cmf-config-class must be instance of CmfConfig class'
+                        'Class ' . $class . ' provided through option --cmf-config-class must extend CmfConfig class'
                     );
                 }
+                /** @var CmfConfig $class */
+                $this->cmfConfigClass = $class::getInstance();
             } else {
                 $this->cmfConfigClass = CmfConfig::getDefault();
                 if (get_class($this->cmfConfigClass) === CmfConfig::class) {
