@@ -31,8 +31,8 @@ $(function () {
         CmfRoutingHelpers.pageExitTransition(prevRequest, currentRequest);
     });
 
-    if (typeof CustomRoutes !== 'undefined' && typeof CustomRoutes.init === 'function') {
-        CustomRoutes.init();
+    if (typeof CmfApp !== 'undefined' && typeof CmfApp.addRoutes === 'function') {
+        CmfApp.addRoutes();
     }
 
     page.route('/login', CmfRouteChange.authorizationPage);
@@ -98,16 +98,16 @@ $(function () {
         return false;
     });
 
-    if (typeof CustomApp !== 'undefined' && typeof CustomApp.beforeStart === 'function') {
-        CustomApp.beforeStart();
+    if (typeof CmfApp !== 'undefined' && typeof CmfApp.beforeStart === 'function') {
+        CmfApp.beforeStart();
     }
 
     page.start({
         decodeURLQuery: true
     });
 
-    if (typeof CustomApp !== 'undefined' && typeof CustomApp.afterStart === 'function') {
-        CustomApp.afterStart();
+    if (typeof CmfApp !== 'undefined' && typeof CmfApp.afterStart === 'function') {
+        CmfApp.afterStart();
     }
 
 });

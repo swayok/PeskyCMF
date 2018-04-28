@@ -116,14 +116,38 @@ FILE;
     protected function createJsCssLessFiles($dataForViews) {
         $relativePathToPublicFiles = '/packages/' . $dataForViews['urlPrefix'] . '/';
         $publicFiles = [
-            'js' => $relativePathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js',
-            'css' => $relativePathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css',
-            'less' => $relativePathToPublicFiles . 'less/' . $dataForViews['urlPrefix'] . '.custom.less',
+            $relativePathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js' => $this->getCustomJsFileContents(),
+            $relativePathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css' => '',
+            $relativePathToPublicFiles . 'less/' . $dataForViews['urlPrefix'] . '.custom.less' => '',
         ];
-        foreach ($publicFiles as $relativePath) {
-            File::save(public_path($relativePath), '', 0664, 0755);
+        foreach ($publicFiles as $relativePath => $contents) {
+            File::save(public_path($relativePath), $contents, 0664, 0755);
         }
         return $publicFiles;
+    }
+
+    protected function getCustomJsFileContents() {
+        return <<<JS
+var CmfApp = {};
+
+/* Declare custom routes using page.route()
+CmfApp.addRoutes = function () {
+    
+};
+*/
+
+/* Do something before application is started by page.start()
+CmfApp.beforeStart = function () {
+    
+};
+*/
+
+/* Do something after application is started by page.start()
+CmfApp.afterStart = function () {
+    
+};
+*/
+JS;
     }
 
     protected function createMigrations() {
