@@ -1110,6 +1110,7 @@ body[data-section="resource:table"] {
 
 .main-header {
     position: relative;
+    border-bottom-width: 0 !important;
 
     a.sidebar-toggle {
         position: absolute;
@@ -1124,7 +1125,6 @@ body[data-section="resource:table"] {
     }
 
     > .logo {
-
         body.skin-blue-light &,
         body.skin-blue & {
             background-color: #367fa9;
@@ -1142,7 +1142,10 @@ body[data-section="resource:table"] {
         }
 
         body.skin-black-light & {
-            border-bottom: 1px solid #d2d6de;
+            position: relative;
+            box-shadow: 0 0 0 1px #d2d6de;
+            border-right-width: 0;
+            margin-left: -1px;
         }
 
         body.skin-purple-light &,
@@ -1160,6 +1163,10 @@ body[data-section="resource:table"] {
             background-color: #e08e0b;
         }
 
+    }
+
+    > .navbar {
+        border-bottom: 1px solid #d2d6de;
     }
 }
 
@@ -1786,8 +1793,9 @@ aside.main-sidebar {
     }
 }
 
-@import "../../../../../../almasaeed2010/adminlte/build/less/datepicker";
-@import "../../../../../../almasaeed2010/adminlte/build/less/select2";
+// use lessc --include-path=$ContentRoot$ where $ContentRoot$ is path to project root folder
+@import "/vendor/almasaeed2010/adminlte/build/less/datepicker";
+@import "/vendor/almasaeed2010/adminlte/build/less/select2";
 
 .select2-container--default {
 
