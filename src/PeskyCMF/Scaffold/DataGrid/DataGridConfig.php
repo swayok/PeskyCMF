@@ -86,6 +86,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $isMultiRowSelectionColumnFixed = true;
     /** @var array */
     protected $additionalViewsForTemplate = [];
+    /** @var DataGridRendererHelper|null */
+    protected $rendererHelper;
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         parent::__construct($table, $scaffoldConfig);
@@ -897,13 +899,13 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param FilterConfig $dataGridFilterConfig
-     * @param TableInterface $table
-     * @param string $tableNameForRoutes
      * @return DataGridRendererHelper
      */
-    public function getRendererHelper(FilterConfig $dataGridFilterConfig, TableInterface $table, $tableNameForRoutes) {
-        return new DataGridRendererHelper($this, $dataGridFilterConfig, $table, $tableNameForRoutes);
+    public function getRendererHelper() {
+        if (empty($this->rendererHelper)) {
+            $this->rendererHelper = new DataGridRendererHelper($this);
+        }
+        return $this->rendererHelper;
     }
 
     /**

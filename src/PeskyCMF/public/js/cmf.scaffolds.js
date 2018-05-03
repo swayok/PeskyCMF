@@ -1607,15 +1607,17 @@ var DataGridSearchHelper = {
 };
 
 var ScaffoldFormHelper = {
-    loadOptions: function (resourceName, itemId) {
+    loadOptions: function (resourceName, itemId, ignoreCache) {
         var deferred = $.Deferred();
         var query = itemId ? '?id=' + itemId : '';
         var cacheKey = resourceName + (itemId ? '' : String(itemId));
         if (
-            ScaffoldsManager.cacheTemplates
+            ignoreCache
+            || !ScaffoldsManager.cacheTemplates
             || !CmfCache.selectOptions[cacheKey]
             || CmfCache.selectOptionsTs[cacheKey] + 30000 < Date.now()
         ) {
+            console.log(CmfCache.selectOptions[cacheKey]);
             $.ajax({
                 url: ScaffoldsManager.getResourceBaseUrl(resourceName) + '/service/options' + query,
                 method: 'GET',

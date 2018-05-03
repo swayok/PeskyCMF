@@ -5,7 +5,7 @@
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig
  * @var \PeskyCMF\Scaffold\DataGrid\FilterConfig $dataGridFilterConfig
  */
-$helper = $dataGridConfig->getRendererHelper($dataGridFilterConfig, $table, $tableNameForRoutes);
+$helper = $dataGridConfig->getRendererHelper();
 $dataGridId = $helper->getId();
 $gridColumnsConfigs = $helper->getSortedColumnConfigs();
 

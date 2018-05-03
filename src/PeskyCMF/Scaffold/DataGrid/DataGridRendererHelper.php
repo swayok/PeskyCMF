@@ -32,20 +32,12 @@ class DataGridRendererHelper {
     /**
      * DataGridRendererHelper constructor.
      * @param DataGridConfig $dataGridConfig
-     * @param FilterConfig $dataGridFilterConfig
-     * @param TableInterface $table
-     * @param string $tableNameForRoutes
      */
-    public function __construct(
-        DataGridConfig $dataGridConfig,
-        FilterConfig $dataGridFilterConfig,
-        TableInterface $table,
-        $tableNameForRoutes
-    ) {
+    public function __construct(DataGridConfig $dataGridConfig) {
         $this->dataGridConfig = $dataGridConfig;
-        $this->dataGridFilterConfig = $dataGridFilterConfig;
-        $this->table = $table;
-        $this->tableNameForRoutes = $tableNameForRoutes;
+        $this->dataGridFilterConfig = $dataGridConfig->getScaffoldConfig()->getDataGridFilterConfig();
+        $this->table = $dataGridConfig->getScaffoldConfig()->getTable();
+        $this->tableNameForRoutes = $dataGridConfig->getScaffoldConfig()->getResourceName();
     }
 
     /**
