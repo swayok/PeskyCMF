@@ -635,6 +635,9 @@ div.dataTables_wrapper table.dataTable tbody tr td.select-checkbox:before {
 div.dataTables_wrapper table.dataTable tbody a:hover {
   text-decoration: underline;
 }
+div.dataTables_wrapper table.dataTable tbody a:hover.btn {
+  text-decoration: none;
+}
 div.dataTables_wrapper .row-actions-container {
   position: absolute;
   height: 0;
