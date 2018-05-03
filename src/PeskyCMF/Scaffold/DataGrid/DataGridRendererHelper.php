@@ -4,6 +4,8 @@ namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
+use PeskyCMF\Scaffold\MenuItem\CmfRedirectMenuItem;
+use PeskyCMF\Scaffold\MenuItem\CmfRequestMenuItem;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
@@ -345,6 +347,43 @@ class DataGridRendererHelper {
     }
 
     /**
+     * @param string $actionKey - one of 'edit', 'delete', 'clode', 'details' or key from $this->dataGridConfig->getRowActions()
+     * @param bool $render - render row action if it is an object or not
+     * @return CmfRedirectMenuItem|CmfRequestMenuItem|Tag|string
+     */
+    public function getRowActionDotJsTemplate($actionKey, $render = true) {
+        switch ($actionKey) {
+            case 'details':
+                $rowAction = $this->dataGridConfig->getItemDetailsMenuItem('actions');
+                return $render ? $rowAction->renderAsIcon('row-action item-details') : $rowAction;
+            case 'edit':
+                $rowAction = $this->dataGridConfig->getItemEditMenuItem('actions');
+                return $render ? $rowAction->renderAsIcon('row-action item-edit') : $rowAction;
+            case 'clone':
+                $rowAction = $this->dataGridConfig->getItemCloneMenuItem('actions');
+                return $render ? $rowAction->renderAsIcon('row-action item-clone') : $rowAction;
+            case 'delete':
+                $rowAction = $this->dataGridConfig->getItemDeleteMenuItem('actions');
+                return $render ? $rowAction->renderAsIcon('row-action item-delete') : $rowAction;
+            default:
+                $customActions = $this->dataGridConfig->getRowActions();
+                if (!isset($customActions[$actionKey])) {
+                    throw new \InvalidArgumentException('Unknown row action key: ' . $actionKey);
+                }
+                $rowAction = $customActions[$actionKey];
+                if (!$render) {
+                    return $rowAction;
+                } else if ($rowAction instanceof Tag) {
+                    return $rowAction->build();
+                } else if ($rowAction instanceof CmfMenuItem) {
+                    return $rowAction->renderAsButton();
+                } else {
+                    return $rowAction;
+                }
+        }
+    }
+
+    /**
      * @return string
      * @throws \InvalidArgumentException
      */
@@ -368,9 +407,7 @@ class DataGridRendererHelper {
         }
 
         if ($this->dataGridConfig->isDetailsViewerAllowed()) {
-            $rowAction = $this->dataGridConfig
-                ->getItemDetailsMenuItem('actions')
-                ->renderAsIcon('row-action item-details');
+            $rowAction = $this->getRowActionDotJsTemplate('details', true);
             if (array_key_exists('details', $rowActions)) {
                 $rowActions['details'] = $rowAction;
             } else {
@@ -378,9 +415,7 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isEditAllowed()) {
-            $rowAction = $this->dataGridConfig
-                ->getItemEditMenuItem('actions')
-                ->renderAsIcon('row-action item-edit');
+            $rowAction = $this->getRowActionDotJsTemplate('edit', true);
             if (array_key_exists('edit', $rowActions)) {
                 $rowActions['edit'] = $rowAction;
             } else {
@@ -388,9 +423,7 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isCloningAllowed()) {
-            $rowAction = $this->dataGridConfig
-                ->getItemCloneMenuItem('actions')
-                ->renderAsIcon('row-action item-clone');
+            $rowAction = $this->getRowActionDotJsTemplate('clone', true);
             if (array_key_exists('clone', $rowActions)) {
                 $rowActions['clone'] = $rowAction;
             } else {
@@ -398,9 +431,7 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isDeleteAllowed()) {
-            $rowAction = $this->dataGridConfig
-                ->getItemDeleteMenuItem('actions')
-                ->renderAsIcon('row-action item-delete');
+            $rowAction = $this->getRowActionDotJsTemplate('delete', true);
             if (array_key_exists('delete', $rowActions)) {
                 $rowActions['delete'] = $rowAction;
             } else {
