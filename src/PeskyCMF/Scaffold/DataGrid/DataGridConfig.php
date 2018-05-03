@@ -889,7 +889,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @throws \InvalidArgumentException
      */
     public function setAdditionalViewsForTemplate($views) {
-        if (!is_array($views) || !($views instanceof \Closure)) {
+        if (!is_array($views) && !($views instanceof \Closure)) {
             throw new \InvalidArgumentException('$views argument must be an array or \Closure');
         }
         $this->additionalViewsForTemplate = $views;
