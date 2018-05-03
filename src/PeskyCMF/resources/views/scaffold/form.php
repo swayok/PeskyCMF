@@ -70,12 +70,14 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                     <button type="submit" class="btn <?php echo $ifCreate; ?>btn-primary<?php echo $else; ?>btn-success<?php echo $endIf; ?>">
                         <?php echo $formConfig->translateGeneral('toolbar.submit'); ?>
                     </button>
-                    <?php echo $ifCreate; ?>
-                        <input type="submit" class="btn btn-primary" name="create_another" value="+1" data-toggle="tooltip"
-                               title="<?php echo $formConfig->translateGeneral('toolbar.submit_and_add_another'); ?>">
-                    <?php echo $else; ?>
-                        <?php echo $formConfig->getItemCloneMenuItem()->renderAsIcon('btn btn-success', false) ?>
-                    <?php echo $endIf; ?>
+                    <?php if (!$formConfig->getScaffoldConfig() instanceof \PeskyCMF\Scaffold\KeyValueTableScaffoldConfig): ?>
+                        <?php echo $ifCreate; ?>
+                            <input type="submit" class="btn btn-primary" name="create_another" value="+1" data-toggle="tooltip"
+                                   title="<?php echo $formConfig->translateGeneral('toolbar.submit_and_add_another'); ?>">
+                        <?php echo $else; ?>
+                            <?php echo $formConfig->getItemCloneMenuItem()->renderAsIcon('btn btn-success', false) ?>
+                        <?php echo $endIf; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
