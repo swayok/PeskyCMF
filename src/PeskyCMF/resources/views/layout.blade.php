@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-@php($scriptsVersion = '2.2.9')
+@php($scriptsVersion = '2.2.10')
 <head>
     <meta charset="UTF-8">
     <title>@section('page-title') {{ cmfConfig()->default_page_title() }} @show</title>

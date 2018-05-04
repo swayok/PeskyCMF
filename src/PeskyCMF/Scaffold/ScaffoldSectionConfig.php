@@ -960,13 +960,21 @@ abstract class ScaffoldSectionConfig {
     }
 
     /**
-     * NOTES for data grids:
+     * For data grids:
      * - JS function will be called instead of ScaffoldDataGridHelper.init()
-     * - JS function will receive 3 arguments: dataGridSelector, dataTablesConfig
+     * - JS function will receive 2 arguments: dataGridSelector, dataTablesConfig
      * - You may want to call ScaffoldDataGridHelper.init(dataGridSelector, dataTablesConfig) in this
      *   function to continue normal initialization
      * - Function MUST return DataTables object
-     * @param string $jsFunctionName
+     * For forms:
+     * - JS function will be called before default form init (see FormHelper.initForm)
+     * - JS function will receive 3 arguments: $form, $formContainer, onSubmitSuccess
+     * - JS function context is form's DOM element
+     * - If JS function returns false - default init will not proceed
+     * For item details viewer:
+     * - JS function will be called after data was loaded and content rendered
+     * - JS function will receive 1 argument depending on situation: $content or $modal
+     * @param string $jsFunctionName - name of existing JS function without braces, for example: 'initSomething' or 'SomeVar.init'
      * @return $this
      * @throws \InvalidArgumentException
      */

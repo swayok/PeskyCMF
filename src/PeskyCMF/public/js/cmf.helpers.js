@@ -135,7 +135,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
         if (customInitiator.match(/^[a-zA-Z0-9_.$()\[\]]+$/) !== null) {
             eval('customInitiator = ' + customInitiator);
             if (typeof customInitiator === 'function') {
-                ret = customInitiator.call(form, form, container, onSubmitSuccess);
+                ret = customInitiator.call(form, $form, $container, onSubmitSuccess);
             }
         }
         if (ret === false) {
