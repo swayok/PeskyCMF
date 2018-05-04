@@ -1617,7 +1617,6 @@ var ScaffoldFormHelper = {
             || !CmfCache.selectOptions[cacheKey]
             || CmfCache.selectOptionsTs[cacheKey] + 30000 < Date.now()
         ) {
-            console.log(CmfCache.selectOptions[cacheKey]);
             $.ajax({
                 url: ScaffoldsManager.getResourceBaseUrl(resourceName) + '/service/options' + query,
                 method: 'GET',
