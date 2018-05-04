@@ -98,6 +98,13 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     }
 
     /**
+     * @return \App\Db\Admins\Admin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Admins\CmfAdmin|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
+     */
+    static public function getUser() {
+        return static::getCmfConfig()->getUser();
+    }
+
+    /**
      * @return string
      */
     static public function getResourceName() {
