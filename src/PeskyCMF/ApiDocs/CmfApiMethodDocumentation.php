@@ -149,6 +149,9 @@ HTML;
             }
             $error['title'] = $this->translate($error['title']);
         }
+        usort($errors, function ($err1, $err2) {
+            return (int)array_get($err1, 'code', 0) <=> (int)array_get($err2, 'code', 0);
+        });
         return $errors;
     }
 
