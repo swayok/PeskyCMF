@@ -534,6 +534,7 @@ Utils.getTitleFromContent = function ($content) {
 
 Utils.initDebuggingTools = function () {
     if (CmfConfig.isDebug) {
+        $(document.body).addClass('debug');
         var $opener = $('<button type="button" class="btn btn-xs btn-default">&nbsp;</button>')
             .css({
                 width: '14px',
