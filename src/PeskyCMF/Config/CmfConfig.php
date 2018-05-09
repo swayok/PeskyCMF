@@ -7,6 +7,7 @@ use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Db\Admins\CmfAdminsTable;
 use PeskyCMF\Event\CmfUserAuthenticated;
+use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\Http\Middleware\ValidateCmfUser;
 use PeskyCMF\Listeners\CmfUserAuthenticatedEventListener;
 use PeskyCMF\PeskyCmfAppSettings;
@@ -1321,58 +1322,79 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @param Application $app
+     * @param string $sectionName - cmf section name
      */
-    public function initSection($app) {
-        $this->useAsPrimary();
-        $appSettingsClass = static::config('app_settings_class');
-        if (!empty($appSettingsClass)) {
-            $app->singleton(PeskyCmfAppSettings::class, function () use ($appSettingsClass) {
-                return $appSettingsClass;
+    public function declareRoutes($sectionName) {
+        $cmfConfig = $this;
+        $groupConfig = [
+            'prefix' => static::url_prefix(),
+            'middleware' => (array)static::config('routes_middleware', ['web']),
+        ];
+        $cmfSectionSelectorMiddleware = $this->getUseCmfSectionMiddleware($sectionName);
+        array_unshift($groupConfig['middleware'], $cmfSectionSelectorMiddleware);
+        $namespace = static::config('controllers_namespace');
+        if (!empty($namespace)) {
+            $groupConfig['namespace'] = ltrim($namespace, '\\');
+        }
+        // custom routes
+        $files = (array)static::config('routes_files', []);
+        if (count($files) > 0) {
+            foreach ($files as $filePath) {
+                \Route::group($groupConfig, function () use ($filePath, $cmfConfig) {
+                    // warning! $cmfConfig may be used inside included file
+                    include base_path($filePath);
+                });
+            }
+        }
+
+        unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
+        if (!\Route::has(static::getRouteName('cmf_start_page'))) {
+            \Route::group($groupConfig, function () {
+                \Route::get('/', [
+                    'uses' => static::cmf_general_controller_class() . '@redirectToUserProfile',
+                    'as' => static::getRouteName('cmf_start_page'),
+                ]);
             });
         }
 
-        /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
-        $langDetectorProvider = $app->register(PeskyCmfLanguageDetectorServiceProvider::class);
-        $app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
-        $langDetectorProvider->importConfigsFromPeskyCmf($this);
+        \Route::group($groupConfig, function () use ($cmfConfig) {
+            // warning! $cmfConfig may be used inside included file
+            include __DIR__ . '/peskycmf.routes.php';
+        });
 
-        /** @var \Illuminate\Config\Repository $appConfigs */
-        $appConfigs = $app['config'];
-
-        if (!$app->configurationIsCached()) {
-            // configure session
-            $config = $appConfigs->get('session', []);
-            $config['path'] = '/' . trim(static::url_prefix(), '/');
-            $appConfigs->set('session', array_merge($config, (array)static::config('session', [])));
-            // configure auth
-            $this->configureAuth($appConfigs);
-        }
-
-
-        if (static::config('file_access_mask') !== null) {
-            umask(static::config('file_access_mask'));
-        }
-        \Event::listen(CmfUserAuthenticated::class, CmfUserAuthenticatedEventListener::class);
-        $this->registerScaffoldConfigsFromConfigFile();
+        // special route for ckeditor config.js file
+        $groupConfig['middleware'] = [$cmfSectionSelectorMiddleware]; //< only 1 needed
+        \Route::group($groupConfig, function () use ($cmfConfig) {
+            \Route::get('ckeditor/config.js', [
+                'as' => $cmfConfig::routes_names_prefix() . 'cmf_ckeditor_config_js',
+                'uses' => $cmfConfig::cmf_general_controller_class() . '@getCkeditorConfigJs',
+            ]);
+        });
     }
 
     /**
-     * Register resource name to ScaffoldConfig class mappings
-     * @throws \UnexpectedValueException
+     * Get middleware that will tell system whick CMF section to use
+     * @param string $sectionName
+     * @return string
      */
-    protected function registerScaffoldConfigsFromConfigFile() {
-        /** @var ScaffoldConfig[] $resources */
-        $resources = (array)static::config('resources', []);
-        foreach ($resources as $scaffoldConfig) {
-            static::registerScaffoldConfigForResource($scaffoldConfig::getResourceName(), $scaffoldConfig);
-        }
+    protected function getUseCmfSectionMiddleware($sectionName) {
+        return UseCmfSection::class . ':' . $sectionName;
+    }
+
+    /**
+     * @param Application $app
+     */
+    public function updateAppConfigs($app) {
+        /** @var \Illuminate\Config\Repository $appConfigs */
+        $appConfigs = $app['config'];
+        // add auth guard but do not select it as primary
+        $this->addAuthGuardConfigToAppConfigs($appConfigs);
     }
 
     /**
      * @param \Illuminate\Config\Repository $appConfigs
      */
-    protected function configureAuth($appConfigs) {
+    protected function addAuthGuardConfigToAppConfigs($appConfigs) {
         // merge cmf guard and provider with configs in config/auth.php
         $cmfAuthConfig = static::config('auth_guard');
         if (!is_array($cmfAuthConfig)) {
@@ -1411,8 +1433,58 @@ abstract class CmfConfig extends ConfigsContainer {
         }
 
         $appConfigs->set('auth', $config);
+    }
+
+    /**
+     * @param Application $app
+     */
+    public function initSection($app) {
+        $this->useAsPrimary();
+        $appSettingsClass = static::config('app_settings_class');
+        if (!empty($appSettingsClass)) {
+            $app->singleton(PeskyCmfAppSettings::class, function () use ($appSettingsClass) {
+                return $appSettingsClass;
+            });
+        }
+
+        /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
+        $langDetectorProvider = $app->register(PeskyCmfLanguageDetectorServiceProvider::class);
+        $app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
+        $langDetectorProvider->importConfigsFromPeskyCmf($this);
+
+        // configure session and auth
+        $this->configureSession($app);
         $this->configureAuthorizationGatesAndPolicies();
         \Auth::shouldUse(static::auth_guard_name());
+
+        if (static::config('file_access_mask') !== null) {
+            umask(static::config('file_access_mask'));
+        }
+        \Event::listen(CmfUserAuthenticated::class, CmfUserAuthenticatedEventListener::class);
+        $this->registerScaffoldConfigsFromConfigFile();
+    }
+
+    /**
+     * @param Application $app
+     */
+    protected function configureSession($app) {
+        /** @var \Illuminate\Config\Repository $appConfigs */
+        $appConfigs = $app['config'];
+        $config = $appConfigs->get('session', []);
+        $config['path'] = '/' . trim(static::url_prefix(), '/');
+        $appConfigs->set('session', array_merge($config, (array)static::config('session', [])));
+    }
+
+    /**
+     * Register resource name to ScaffoldConfig class mappings
+     * @throws \UnexpectedValueException
+     */
+    protected function registerScaffoldConfigsFromConfigFile() {
+        /** @var ScaffoldConfig[] $resources */
+        $resources = (array)static::config('resources', []);
+        foreach ($resources as $scaffoldConfig) {
+            static::registerScaffoldConfigForResource($scaffoldConfig::getResourceName(), $scaffoldConfig);
+        }
     }
 
     /**
