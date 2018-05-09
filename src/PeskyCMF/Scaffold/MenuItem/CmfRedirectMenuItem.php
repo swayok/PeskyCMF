@@ -6,6 +6,15 @@ use Swayok\Html\Tag;
 
 class CmfRedirectMenuItem extends CmfMenuItem {
 
+    protected $openOnNewTab = false;
+
+    /**
+     * @return $this
+     */
+    public function openOnNewTab() {
+        $this->openOnNewTab = true;
+        return $this;
+    }
 
     /**
      * Render menu item as <a>
@@ -19,6 +28,7 @@ class CmfRedirectMenuItem extends CmfMenuItem {
                     ->setClass($this->getButtonClasses() . ' ' . $this->makeConditionalDisabledAttribute())
                     ->setHref($this->getUrl())
                     ->setTitle($this->getTooltip())
+                    ->setTarget($this->openOnNewTab ? '_blank' : null)
                     ->setDataAttr('toggle', $this->hasTooltip() ? 'tooltip' : null)
                     ->setDataAttr('position', $this->hasTooltip() ? $this->getTooltipPosition() : null)
                     ->build()
@@ -41,6 +51,7 @@ class CmfRedirectMenuItem extends CmfMenuItem {
                     ->setClass($additionalClasses)
                     ->setHref($this->getUrl())
                     ->setTitle($this->getTooltipOrTitle())
+                    ->setTarget($this->openOnNewTab ? '_blank' : null)
                     ->setDataAttr('toggle', $this->hasTooltipOrTitle() ? 'tooltip' : null)
                     ->setDataAttr('position', $this->hasTooltipOrTitle() ? $this->getTooltipPosition() : null)
                     ->build()
@@ -59,6 +70,7 @@ class CmfRedirectMenuItem extends CmfMenuItem {
             $link = Tag::a($this->makeIcon(true) . ' ' . $this->getTitle())
                 ->setHref($this->getUrl())
                 ->setTitle($this->getTooltip())
+                ->setTarget($this->openOnNewTab ? '_blank' : null)
                 ->setDataAttr('toggle', $this->hasTooltip() ? 'tooltip' : null)
                 ->setDataAttr('position', $this->hasTooltip() ? $this->getTooltipPosition() : null)
                 ->build();
