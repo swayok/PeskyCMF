@@ -411,6 +411,9 @@ var ScaffoldActionsHelper = {
                 }
             }
         }
+        if (typeof(onSuccess) !== 'function') {
+            onSuccess = function () {};
+        }
         return $.ajax({
                 url: url,
                 data: data,
