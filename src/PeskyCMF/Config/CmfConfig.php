@@ -145,6 +145,23 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * @param string $email
+     * @return bool
+     */
+    static public function loginOnceUsingEmail($email) {
+        $usersTablestructure = static::users_table()->getTableStructure();
+        $colName = null;
+        if ($usersTablestructure::hasColumn('email')) {
+            $colName = 'email';
+        } else if ($usersTablestructure::getColumn(static::user_login_column())->getType() === Column::TYPE_EMAIL) {
+            $colName = static::user_login_column();
+        } else {
+            throw new \BadMethodCallException('There is no known email column to use');
+        }
+        return static::getAuth()->once([$colName => $email]);
+    }
+
+    /**
      * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|\App\Db\Admins\Admin|null
      */
     static public function getUser() {

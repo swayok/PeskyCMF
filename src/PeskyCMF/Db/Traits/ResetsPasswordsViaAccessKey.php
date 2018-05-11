@@ -11,20 +11,13 @@ trait ResetsPasswordsViaAccessKey {
 
     /**
      * @return string
-     * @throws \PeskyORM\Exception\RecordNotFoundException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PDOException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \Illuminate\Contracts\Encryption\EncryptException
      */
     public function getPasswordRecoveryAccessKey() {
         /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
+        $expiresInMinutes = (int)config('auth.passwords.' . \Auth::getDefaultDriver() . '.expire', 60);
         $data = [
             'account_id' => $this->getPrimaryKeyValue(),
-            'expires_at' => time() + config('auth.passwords.' . \Auth::getDefaultDriver() . 'expire', 60) * 60,
+            'expires_at' => (new \DateTime('now', new \DateTimeZone('UTC')))->getTimestamp() + $expiresInMinutes * 60,
         ];
         $this->reload(); //< needed to exclude situation with outdated data
         foreach ($this->getAdditionalColumnsForPasswordRecoveryAccessKey() as $columnName) {
@@ -50,7 +43,6 @@ trait ResetsPasswordsViaAccessKey {
      * @return CmfDbRecord|bool - false = failed to parse access key, validate data or load user
      * @throws \UnexpectedValueException
      * @throws \PeskyORM\Exception\OrmException
-     * @throws \PeskyORM\Exception\InvalidDataException
      * @throws \PDOException
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
@@ -65,19 +57,20 @@ trait ResetsPasswordsViaAccessKey {
             return false;
         }
         $data = json_decode($data, true);
+        $now = new \DateTime('now', new \DateTimeZone('UTC'));
         if (
             empty($data)
             || !is_array($data)
             || empty($data['account_id'])
             || empty($data['expires_at'])
-            || $data['expires_at'] < time()
+            || $data['expires_at'] < $now->getTimestamp()
         ) {
             return false;
         }
         /** @var ResetsPasswordsViaAccessKey|CmfDbRecord $user */
         $user = static::newEmptyRecord();
         $conditions = [
-            $user->getPrimaryKeyColumnName() => $data['account_id'],
+            $user::getPrimaryKeyColumnName() => $data['account_id'],
         ];
         foreach ($user->getAdditionalColumnsForPasswordRecoveryAccessKey() as $columnName) {
             if (empty($data[$columnName])) {

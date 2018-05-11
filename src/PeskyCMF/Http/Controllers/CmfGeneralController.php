@@ -308,7 +308,7 @@ class CmfGeneralController extends CmfController {
             'email' => 'required|email',
         ]);
         $email = strtolower(trim($data['email']));
-        if (static::getCmfConfig()->getAuth()->once(['email' => $email])) {
+        if (static::getCmfConfig()->loginOnceUsingEmail($email)) {
             /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $user */
             $user = static::getCmfConfig()->getAuth()->getLastAttempted();
             if (!method_exists($user, 'getPasswordRecoveryAccessKey')) {
@@ -318,7 +318,7 @@ class CmfGeneralController extends CmfController {
                 );
             }
             $data = [
-                'url' => cmfRoute('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
+                'url' => cmfRoute('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()], true),
                 'user' => $user->toArrayWithoutFiles(),
             ];
             $subject = cmfTransCustom('.forgot_password.email_subject');

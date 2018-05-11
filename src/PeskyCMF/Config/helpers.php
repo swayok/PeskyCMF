@@ -70,10 +70,11 @@ if (!function_exists('routeToCmfPage')) {
      * @param array $queryArgs
      * @param bool $absolute
      * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
      * @return string
      */
-    function routeToCmfPage($pageId, array $queryArgs = [], $absolute = false, $cmfConfig = null) {
-        if (Gate::denies('cmf_page', [$pageId])) {
+    function routeToCmfPage($pageId, array $queryArgs = [], $absolute = false, $cmfConfig = null, $ignoreAccessPolicy = false) {
+        if (!$ignoreAccessPolicy && Gate::denies('cmf_page', [$pageId])) {
             return null;
         }
         if (!$cmfConfig) {
@@ -108,10 +109,11 @@ if (!function_exists('routeToCmfItemsTable')) {
      *      Note: Operator is 'equals' (col1 = val1). Multiple filters joined by 'AND' (col1 = val1 AND col2 = val2)
      * @param bool $absolute
      * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
      * @return string
      */
-    function routeToCmfItemsTable($tableName, array $filters = [], $absolute = false, $cmfConfig = null) {
-        if (Gate::denies('resource.view', [$tableName])) {
+    function routeToCmfItemsTable($tableName, array $filters = [], $absolute = false, $cmfConfig = null, $ignoreAccessPolicy = false) {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.view', [$tableName])) {
             return null;
         }
         $params = ['table_name' => $tableName];
@@ -141,10 +143,11 @@ if (!function_exists('routeToCmfTableCustomData')) {
      * @param string $dataId - identifier of data to be returned. For example: 'special_options'
      * @param bool $absolute
      * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
      * @return string
      */
-    function routeToCmfTableCustomData($tableName, $dataId, $absolute = false, $cmfConfig = null) {
-        if (Gate::denies('resource.view', [$tableName])) {
+    function routeToCmfTableCustomData($tableName, $dataId, $absolute = false, $cmfConfig = null, $ignoreAccessPolicy = false) {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.view', [$tableName])) {
             return null;
         }
         if (!$cmfConfig) {
@@ -165,10 +168,11 @@ if (!function_exists('routeToCmfItemAddForm')) {
      *       as values in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
      * @return string
      */
-    function routeToCmfItemAddForm($tableName, array $data = [], $absolute = false, $cmfConfig = null) {
-        if (Gate::denies('resource.create', [$tableName])) {
+    function routeToCmfItemAddForm($tableName, array $data = [], $absolute = false, $cmfConfig = null, $ignoreAccessPolicy = false) {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.create', [$tableName])) {
             return null;
         }
         if (!$cmfConfig) {
@@ -202,10 +206,11 @@ if (!function_exists('routeToCmfItemEditForm')) {
      * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
      * @return string
      */
-    function routeToCmfItemEditForm($tableName, $itemId, $absolute = false, $cmfConfig = null) {
-        if (Gate::denies('resource.update', [$tableName, $itemId])) {
+    function routeToCmfItemEditForm($tableName, $itemId, $absolute = false, $cmfConfig = null, $ignoreAccessPolicy = false) {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.update', [$tableName, $itemId])) {
             return null;
         }
         if (!$cmfConfig) {
@@ -223,10 +228,11 @@ if (!function_exists('routeToCmfItemCloneForm')) {
      * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
      * @return string
      */
-    function routeToCmfItemCloneForm($tableName, $itemId, $absolute = false, $cmfConfig = null) {
-        if (Gate::denies('resource.create', [$tableName, $itemId])) {
+    function routeToCmfItemCloneForm($tableName, $itemId, $absolute = false, $cmfConfig = null, $ignoreAccessPolicy = false) {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.create', [$tableName, $itemId])) {
             return null;
         }
         if (!$cmfConfig) {
@@ -244,10 +250,11 @@ if (!function_exists('routeToCmfItemDetails')) {
      * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
      * @return string
      */
-    function routeToCmfItemDetails($tableName, $itemId, $absolute = false, $cmfConfig = null) {
-        if (Gate::denies('resource.details', [$tableName, $itemId])) {
+    function routeToCmfItemDetails($tableName, $itemId, $absolute = false, $cmfConfig = null, $ignoreAccessPolicy = false) {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.details', [$tableName, $itemId])) {
             return null;
         }
         if (!$cmfConfig) {
@@ -265,10 +272,11 @@ if (!function_exists('routeToCmfItemDelete')) {
      * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|\PeskyCMF\Config\CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
      * @return string
      */
-    function routeToCmfItemDelete($tableName, $itemId, $absolute = false, $cmfConfig = null) {
-        if (Gate::denies('resource.delete', [$tableName, $itemId])) {
+    function routeToCmfItemDelete($tableName, $itemId, $absolute = false, $cmfConfig = null, $ignoreAccessPolicy = false) {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.delete', [$tableName, $itemId])) {
             return null;
         }
         if (!$cmfConfig) {
