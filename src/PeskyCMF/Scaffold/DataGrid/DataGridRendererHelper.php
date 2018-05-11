@@ -483,7 +483,7 @@ class DataGridRendererHelper {
             $dataTablesConfig['order'] = [
                 [
                     $this->dataGridConfig->getValueViewer($this->dataGridConfig->getOrderBy())->getPosition(),
-                    $this->dataGridConfig->getOrderDirection()
+                    preg_replace('%^\s*(asc|desc).*$%i', '$1', $this->dataGridConfig->getOrderDirection())
                 ]
             ];
         }

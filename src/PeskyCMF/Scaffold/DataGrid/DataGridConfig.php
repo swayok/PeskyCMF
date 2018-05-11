@@ -3,7 +3,6 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use Exceptions\Data\NotFoundException;
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\ScaffoldConfig;
@@ -45,6 +44,19 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $orderDirection = self::ORDER_ASC;
     const ORDER_ASC = 'asc';
     const ORDER_DESC = 'desc';
+    const ORDER_ASC_NULLS_FIRST = 'asc nulls first';
+    const ORDER_ASC_NULLS_LAST = 'asc nulls last';
+    const ORDER_DESC_NULLS_FIRST = 'desc nulls first';
+    const ORDER_DESC_NULLS_LAST = 'desc nulls last';
+
+    static protected $orderOptions = [
+        self::ORDER_ASC,
+        self::ORDER_DESC,
+        self::ORDER_ASC_NULLS_FIRST,
+        self::ORDER_ASC_NULLS_LAST,
+        self::ORDER_DESC_NULLS_FIRST,
+        self::ORDER_DESC_NULLS_LAST,
+    ];
     /**
      * Add a checkboxes column to datagrid so user can select several rows and perform bulk-actions
      * @var bool
@@ -257,7 +269,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     /**
      * @param string $orderBy
-     * @param null $direction
+     * @param null $direction - 'asc', 'desc', 'asc nulls first' or 'desc nulls last' in any case
      * @return $this
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
@@ -286,10 +298,13 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @throws \InvalidArgumentException
      */
     public function setOrderDirection($orderDirection) {
-        if (!in_array(strtolower($orderDirection), array(self::ORDER_ASC, self::ORDER_DESC), true)) {
-            throw new \InvalidArgumentException("Invalid order direction [$orderDirection]. Expected 'asc' or 'desc'");
+        $orderDirection = strtolower($orderDirection);
+        if (!in_array($orderDirection, static::$orderOptions, true)) {
+            throw new \InvalidArgumentException(
+                "Invalid order direction [$orderDirection]. Expected one of: " . implode(', ', static::$orderOptions)
+            );
         }
-        $this->orderDirection = strtolower($orderDirection);
+        $this->orderDirection = $orderDirection;
         return $this;
     }
 

@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use PeskyCMF\HttpCode;
+use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyORM\Core\DbExpr;
@@ -41,9 +42,12 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             $parentPkValue = $request->get('parent');
             $conditions[$dataGridConfig->getColumnNameForNestedView()] = empty($parentPkValue) ? null : $parentPkValue;
         }
+        $defaultOrderByColumn = $dataGridConfig->getOrderBy();
+        $defaultOrderByDirection = $dataGridConfig->getOrderDirection();
+        $defaultDirectionWithNulls = stripos($defaultOrderByDirection, ' nulls ') !== false;
         $order = $request->query('order', [[
-            'column' => $dataGridConfig->getOrderBy(),
-            'dir' => $dataGridConfig->getOrderDirection()
+            'column' => $defaultOrderByColumn,
+            'dir' => $defaultOrderByDirection
         ]]);
         $columns = $request->query('columns', array());
         /** @var array $order */
@@ -58,6 +62,12 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     if (AbstractValueViewer::isComplexViewerName($config['column'])) {
                         list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($config['column']);
                         $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$config['dir']}", false);
+                    } else if (
+                        $defaultDirectionWithNulls
+                        && $config['column'] === $defaultOrderByColumn
+                        && stripos($defaultOrderByDirection, $config['dir']) !== false
+                    ) {
+                        $conditions['ORDER'][$config['column']] = $defaultOrderByDirection;
                     } else {
                         $conditions['ORDER'][$config['column']] = $config['dir'];
                     }
