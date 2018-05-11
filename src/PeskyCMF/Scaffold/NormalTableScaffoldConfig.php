@@ -5,13 +5,14 @@ namespace PeskyCMF\Scaffold;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use PeskyCMF\HttpCode;
-use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Exception\DbException;
 use PeskyORM\Exception\InvalidDataException;
+use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\RecordValueHelpers;
 use PeskyORM\ORM\TableInterface;
 use PeskyORMLaravel\Db\Column\RecordPositionColumn;
 
@@ -320,7 +321,10 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             try {
                 $this->logDbRecordBeforeChange($object, static::getResourceName());
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
+                $relationsData = array_intersect_key($dataToSave, $object::getRelations());
+                $dataToSave = array_diff_key($dataToSave, $relationsData);
                 $object->begin()->updateValues($dataToSave)->commit(['*'], true);
+                $this->updateRelatedRecords($object, $relationsData);
                 $ret = $this->afterDataSaved($data, $object, false, $table, $formConfig);
                 $this->logDbRecordAfterChange($object);
                 return $ret;
@@ -343,6 +347,88 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
         }
         throw new \BadMethodCallException('There is no data to save');
+    }
+
+    /**
+     * @param Record $object
+     * @param array $updatesForRelations
+     * @throws InvalidDataException
+     * @throws \PeskyORM\Exception\InvalidTableColumnConfigException
+     * @throws \PeskyORM\Exception\OrmException
+     */
+    protected function updateRelatedRecords(Record $object, array $updatesForRelations) {
+        foreach ($updatesForRelations as $relationName => $relationUpdates) {
+            $relation = $object::getRelation($relationName);
+            if ($relation->getType() === $relation::HAS_ONE) {
+                $relatedRecord = $object->getRelatedRecord($relationName, true);
+                $relationPk = RecordValueHelpers::normalizeValue(
+                    array_get($relationUpdates, $relatedRecord::getPrimaryKeyColumnName()),
+                    $relatedRecord::getPrimaryKeyColumn()->getType()
+                );
+                unset($relationUpdates[$relatedRecord::getPrimaryKeyColumnName()]);
+                $relationUpdates[$relation->getForeignColumnName()] = $object->getPrimaryKeyValue();
+                if ($relatedRecord->existsInDb()) {
+                    if ($relationPk && $relationPk === $relatedRecord->getPrimaryKeyValue()) {
+                        // same related record - just update
+                        $relatedRecord->begin()->updateValues($relationUpdates, true)->commit();
+                        continue;
+                    } else if (!$relationPk || $relationPk !== $relatedRecord->getPrimaryKeyValue()) {
+                        // related record changed - unset existing and proceed to attach new one
+                        $relatedRecord
+                            ->begin()
+                            ->updateValue($relation->getForeignColumnName(), null, false)
+                            ->commit();
+                        $object->unsetRelatedRecord($relationName);
+                        $relatedRecord->reset();
+                    }
+                }
+                // attach new related record
+                if ($relationPk) {
+                    // related record already exists in DB but may belong to other record or to none - reattach it
+                    $relatedRecord->reset()->fromPrimaryKey($relationPk);
+                    unset($relationUpdates[$relatedRecord::getPrimaryKeyColumnName()]);
+                    $relatedRecord->begin()->updateValues($relationUpdates, false)->commit();
+                } else {
+                    // create new related record and attach it
+                    $relatedRecord->reset()->updateValues($relationUpdates, false)->save();
+                }
+            } else if ($relation->getType() === $relation::BELONGS_TO) {
+                $relatedRecord = $object->getRelatedRecord($relationName, true);
+                $relationPk = RecordValueHelpers::normalizeValue(
+                    array_get($relationUpdates, $relatedRecord::getPrimaryKeyColumnName()),
+                    $relatedRecord::getPrimaryKeyColumn()->getType()
+                );
+                unset($relationUpdates[$relatedRecord::getPrimaryKeyColumnName()]);
+                if ($relatedRecord->existsInDb()) {
+                    if (!$relationPk) {
+                        $relationPk = $relatedRecord->getPrimaryKeyValue();
+                    }
+                    if ($relationPk === $relatedRecord->getPrimaryKeyValue()) {
+                        // just update
+                        $relatedRecord->begin()->updateValues($relationUpdates)->commit();
+                        continue;
+                    } else {
+                        // related record changed - unset relation and continue to attach new 1
+                        $object->unsetRelatedRecord($relationName);
+                    }
+                }
+                $relatedRecord->reset();
+                if (!$relationPk) {
+                    // create new related record
+                    $relatedRecord->updateValues($relationUpdates)->save();
+                    $relationPk = $relatedRecord->getPrimaryKeyValue();
+                } else {
+                    // read existing related record from db and update it
+                    $relatedRecord->reset()->fromPrimaryKey($relationPk);
+                    $relatedRecord->begin()->updateValues($relationUpdates)->commit();
+                }
+                // attach new related record to this object
+                $object->begin()->updateValue($relation->getLocalColumnName(), $relationPk, false)->commit();
+            } else {
+                // has many relations should work normally this way
+                $object->begin()->updateRelatedRecord($relationName, $relationUpdates, false)->commit();
+            }
+        }
     }
 
     /**
