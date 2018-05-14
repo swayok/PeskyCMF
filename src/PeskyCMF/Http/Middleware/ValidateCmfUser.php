@@ -22,12 +22,11 @@ class ValidateCmfUser {
         $authResponse = $cmfConfig::getAuth()->check();
         if (!$authResponse) {
             $loginUrl = $cmfConfig::login_page_url();
-            $currentUrl = $request->url();
+            \Session::put($cmfConfig::session_redirect_key(), $request->url());
             if ($request->ajax()) {
-                \Session::put($cmfConfig::session_redirect_key(), $currentUrl);
                 return response()->json(['redirect_with_reload' => $loginUrl], HttpCode::UNAUTHORISED);
             } else {
-                return redirect()->guest($loginUrl)->with($cmfConfig::session_redirect_key(), $currentUrl);
+                return redirect($loginUrl);
             }
         } else if (is_a($authResponse, JsonResponse::class) || is_a($authResponse, Response::class)) {
             return $authResponse;
