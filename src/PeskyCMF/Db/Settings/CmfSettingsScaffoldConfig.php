@@ -50,7 +50,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
             ->setWidth(50)
             ->setShowAsDialog(false);
         /** @var PeskyCmfAppSettings $appSettings */
-        $appSettings = app(PeskyCmfAppSettings::class);
+        $appSettings = static::getCmfConfig()->getAppSettings();
         $appSettings::configureScaffoldFormConfig($formConfig);
         $formConfig
             ->setValidators(function () use ($appSettings) {
@@ -81,9 +81,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
     }
 
     public function getRecordValues($ownerRecordId = null) {
-        /** @var PeskyCmfAppSettings $appSettings */
-        $appSettings = app(PeskyCmfAppSettings::class);
-        $settings = $appSettings::getAllValues(true);
+        $settings = static::getCmfConfig()->getAppSettings()->getAllValues(true);
         $settings[static::getTable()->getPkColumnName()] = 0;
         return cmfJsonResponse()->setData($this->getFormConfig()->prepareRecord($settings));
     }

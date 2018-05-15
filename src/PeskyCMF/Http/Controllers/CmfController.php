@@ -13,7 +13,7 @@ class CmfController extends Controller {
         AuthorizesRequests;
 
     static public function getAuthGuard() {
-        return static::getCmfConfig()->getAuth();
+        return static::getCmfConfig()->getAuthGuard();
     }
 
     /**

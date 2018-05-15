@@ -30,7 +30,7 @@ Route::group(
 
 Route::get('login', [
     'as' => $routeNamePrefix . 'cmf_login',
-    'uses' => $generalControllerClass . '@getLogin'
+    'uses' => $generalControllerClass . '@loadJsApp'
 ]);
 
 Route::get('logout', [
@@ -75,7 +75,7 @@ Route::get('forgot_password', [
 
 Route::get('replace_password/{access_key}', [
     'as' => $routeNamePrefix . 'cmf_replace_password',
-    'uses' => $generalControllerClass . '@getReplacePassword'
+    'uses' => $generalControllerClass . '@loadJsApp'
 ]);
 
 \Route::get('ui/templates.js', [

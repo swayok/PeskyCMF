@@ -8,6 +8,7 @@ class CmfJsonResponse extends JsonResponse {
 
     static protected $messageKey = '_message';
     static protected $redirectKey = 'redirect';
+    static protected $forcedRedirectKey = 'redirect_with_reload';
     static protected $redirectFallbakKey = 'redirect_fallback';
     static protected $errorsKey = 'errors';
     static protected $modalKey = 'modal';
@@ -53,6 +54,17 @@ class CmfJsonResponse extends JsonResponse {
         if (!empty($fallbackUrl)) {
             $data[static::$redirectFallbakKey] = $fallbackUrl;
         }
+        return $this->setData($data);
+    }
+
+    /**
+     * Redirect using document.location instead of JS router
+     * @param string $url
+     * @return $this
+     */
+    public function setForcedRedirect($url) {
+        $data = $this->getData(true);
+        $data[static::$forcedRedirectKey] = $url;
         return $this->setData($data);
     }
 

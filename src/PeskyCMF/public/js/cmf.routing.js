@@ -166,7 +166,6 @@ var CmfRouteChange = {
 };
 
 CmfRouteChange.authorizationPage = function (request) {
-    console.log(request);
     if (request.hasSubRequest()) {
         request.removeSubRequest();
         request.saveState();

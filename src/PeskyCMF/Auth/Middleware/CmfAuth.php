@@ -13,11 +13,11 @@ class CmfAuth {
     public function handle(Request $request, \Closure $next) {
         /** @var CmfConfig $cmfConfig */
         $cmfConfig = CmfConfig::getPrimary();
-        if (!$cmfConfig::getAuth()->check()) {
+        if (!$cmfConfig::getAuthGuard()->check()) {
             $loginUrl = $cmfConfig::login_page_url();
-            \Session::put($cmfConfig::session_redirect_key(), $request->url());
+            $cmfConfig::getAuthModule()->saveIntendedUrl($request->url());
             return $request->ajax()
-                ? response()->json(['redirect_with_reload' => $loginUrl], HttpCode::UNAUTHORISED)
+                ? cmfJsonResponse(HttpCode::UNAUTHORISED)->setForcedRedirect($loginUrl)
                 : redirect($loginUrl);
         } else {
             /** @var RecordInterface|Authenticatable $user */

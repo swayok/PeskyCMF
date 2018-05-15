@@ -163,7 +163,8 @@ Utils.requireFiles = function (jsFiles, cssFiles) {
  * @param {Deferred|null} deferredToRejectWithError - reject this deferred with Error object and good message
  */
 Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
-    if (typeof deferredToRejectWithError === 'object' && typeof deferredToRejectWithError.reject === 'function') {
+    var isRejectableDeferred = typeof deferredToRejectWithError === 'object' && typeof deferredToRejectWithError.reject === 'function';
+    if (xhr.status >= 400 && isRejectableDeferred) {
         deferredToRejectWithError.reject(
             new Error(
                 this.url + ': ' + xhr.statusText + '; Response: ' + xhr.responseText,
@@ -177,8 +178,14 @@ Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
             document.location = json.redirect_with_reload;
         } else if (json.redirect) {
             if (json.redirect === 'back') {
+                if (isRejectableDeferred) {
+                    deferredToRejectWithError.reject();
+                }
                 page.back(json.redirect_fallback);
             } else if (json.redirect[0] === '/') {
+                if (isRejectableDeferred) {
+                    deferredToRejectWithError.reject();
+                }
                 page.show(json.redirect);
             } else {
                 document.location = json.redirect;
@@ -194,9 +201,15 @@ Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
     var url = this.url || null;
     if (xhr.status === 0) {
         toastr.error('Request to ' + url + ' failed. Reason: no internet connection');
+        if (isRejectableDeferred) {
+            deferredToRejectWithError.reject();
+        }
         return;
     } else if (xhr.status === 200 && xhr.responseText === '') {
         toastr.info('Empty response from ' + url + '. Possibly debug session was stopped.');
+        if (isRejectableDeferred) {
+            deferredToRejectWithError.reject();
+        }
         return;
     }
     CmfConfig.getDebugDialog().showDebug(

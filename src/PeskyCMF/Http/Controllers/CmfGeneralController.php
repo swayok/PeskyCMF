@@ -1,4 +1,5 @@
 <?php
+/** @noinspection ExceptionsAnnotatingAndHandlingInspection */
 
 namespace PeskyCMF\Http\Controllers;
 
@@ -6,15 +7,11 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Mail\Message;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Db\Admins\CmfAdmin;
-use PeskyCMF\Db\CmfDbRecord;
-use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Traits\DataValidationHelper;
-use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
 use Ramsey\Uuid\Uuid;
@@ -197,167 +194,32 @@ class CmfGeneralController extends CmfController {
         return \Redirect::back();
     }
 
-    public function getLogin(Request $request) {
-        if ($request->ajax()) {
-            return response()->json([], 404);
-        } else if (!static::getCmfConfig()->getAuth()->check()) {
-            return view(static::getCmfConfig()->layout_view())->render();
-        } else {
-            return \Redirect::to($this->getIntendedUrl());
-        }
-    }
-
-    public function getReplacePassword(Request $request, $accessKey) {
-        $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
-        if (empty($user)) {
-            return cmfRedirectResponseWithMessage(
-                static::getCmfConfig()->login_page_url(),
-                cmfTransCustom('.replace_password.invalid_access_key'),
-                'error'
-            );
-        }
-
-        return $this->loadJsApp($request);
-    }
-
-    /**
-     * @param $accessKey
-     * @return bool|CmfDbRecord
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PDOException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    protected function getUserFromPasswordRecoveryAccessKey($accessKey) {
-        /** @var ResetsPasswordsViaAccessKey $userClass */
-        $userClass = static::getCmfConfig()->user_record_class();
-
-        return $userClass::loadFromPasswordRecoveryAccessKey($accessKey);
-    }
-
     public function getLoginTpl() {
-        return view(static::getCmfConfig()->login_view())->render();
+        if (static::getCmfConfig()->getUser()) {
+            return cmfJsonResponse(HttpCode::MOVED_TEMPORARILY)
+                ->setForcedRedirect(static::getCmfConfig()->getAuthModule()->getIntendedUrl());
+        }
+        return static::getCmfConfig()->getAuthModule()->renderLoginPageView();
     }
 
     public function getForgotPasswordTpl() {
-        return view(static::getCmfConfig()->forgot_password_view())->render();
+        return static::getCmfConfig()->getAuthModule()->renderForgotPasswordPageView();
     }
 
     public function getReplacePasswordTpl($accessKey) {
-        $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
-        if (!empty($user)) {
-            return view(static::getCmfConfig()->replace_password_view(), [
-                'accessKey' => $accessKey,
-                'userId' => $user->getPrimaryKeyValue(),
-                'userLogin' => $user->getValue(static::getCmfConfig()->user_login_column())
-            ])->render();
-        } else {
-            return cmfJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(cmfTransCustom('.replace_password.invalid_access_key'))
-                ->setRedirect(static::getCmfConfig()->login_page_url());
-        }
-    }
-
-    private function getIntendedUrl() {
-        $intendedUrl = session()->pull(static::getCmfConfig()->session_redirect_key(), false);
-        if (!$intendedUrl) {
-            return static::getCmfConfig()->home_page_url();
-        } else {
-            if (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
-                return routeToCmfItemsTable($matches[1]);
-            } else if (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
-                return routeToCmfItemsTable($matches[1]);
-            } else if (preg_match('%/api/([^/]+?)/([^/?]+?)/?(?:\?details=(\d)|$)%i', $intendedUrl, $matches)) {
-                if (!empty($matches[3]) && $matches[3] === '1') {
-                    return routeToCmfItemDetails($matches[1], $matches[2]);
-                } else {
-                    return routeToCmfItemEditForm($matches[1], $matches[2]);
-                }
-            } else if (preg_match('%/api/([^/]+?)%i', $intendedUrl, $matches)) {
-                return routeToCmfItemsTable($matches[1]);
-            } else if (preg_match('%/page/([^/]+)\.html$%i', $intendedUrl, $matches)) {
-                return routeToCmfPage($matches[1]);
-            } else {
-                return $intendedUrl;
-            }
-        }
+        return static::getCmfConfig()->getAuthModule()->renderReplacePasswordPageView($accessKey);
     }
 
     public function doLogin(Request $request) {
-        $userLoginColumn = static::getCmfConfig()->user_login_column();
-        $data = $this->validate($request, [
-            $userLoginColumn => 'required' . ($userLoginColumn === 'email' ? '|email' : ''),
-            'password' => 'required',
-        ]);
-        $credentials = [
-            DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($data[$userLoginColumn]) . '``)'),
-            'password' => $data['password'],
-        ];
-        if (!static::getCmfConfig()->getAuth()->attempt($credentials)) {
-            return cmfJsonResponse(HttpCode::INVALID)
-                ->setMessage(cmfTransCustom('.login_form.login_failed'));
-        } else {
-            return cmfJsonResponse()->setRedirect($this->getIntendedUrl());
-        }
+        return static::getCmfConfig()->getAuthModule()->processUserLoginRequest($request);
     }
 
     public function sendPasswordReplacingInstructions(Request $request) {
-        $data = $this->validate($request, [
-            'email' => 'required|email',
-        ]);
-        $email = strtolower(trim($data['email']));
-        if (static::getCmfConfig()->loginOnceUsingEmail($email)) {
-            /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $user */
-            $user = static::getCmfConfig()->getAuth()->getLastAttempted();
-            if (!method_exists($user, 'getPasswordRecoveryAccessKey')) {
-                throw new \BadMethodCallException(
-                    'Class ' . get_class($user) . ' does not support password recovery. You should add ' .
-                    ResetsPasswordsViaAccessKey::class . ' trait to specified class to enable this functionality'
-                );
-            }
-            $data = [
-                'url' => cmfRoute('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()], true),
-                'user' => $user->toArrayWithoutFiles(),
-            ];
-            $subject = cmfTransCustom('.forgot_password.email_subject');
-            $from = static::getCmfConfig()->system_email_address();
-            $view = static::getCmfConfig()->password_recovery_email_view();
-            \Mail::send($view, $data, function (Message $message) use ($from, $email, $subject) {
-                $message
-                    ->from($from)
-                    ->to($email)
-                    ->subject($subject);
-            });
-        }
-
-        return cmfJsonResponse()
-            ->setMessage(cmfTransCustom('.forgot_password.instructions_sent'))
-            ->setRedirect(static::getCmfConfig()->login_page_url());
+        return static::getCmfConfig()->getAuthModule()->startPasswordRecoveryProcess($request);
     }
 
     public function replacePassword(Request $request, $accessKey) {
-        $data = $this->validate($request, [
-            'id' => 'required|integer|min:1',
-            'password' => 'required|min:6',
-            'password_confirm' => 'required|min:6|same:password',
-        ]);
-        $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
-        if (!empty($user) && $user->getPrimaryKeyValue() !== $data['id']) {
-            /** @var CmfDbRecord $user */
-            $user
-                ->begin()
-                ->updateValue('password', $data['password'], false)
-                ->commit();
-            return cmfJsonResponse()
-                ->setMessage(cmfTransCustom('.replace_password.password_replaced'))
-                ->setRedirect(static::getCmfConfig()->login_page_url());
-        } else {
-            return cmfJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(cmfTransCustom('.replace_password.invalid_access_key'))
-                ->setRedirect(static::getCmfConfig()->login_page_url());
-        }
+        return static::getCmfConfig()->getAuthModule()->finishPasswordRecoveryProcess($request, $accessKey);
     }
 
     public function loginAs($otherUserId) {
