@@ -712,11 +712,11 @@ if (!function_exists('setting')) {
      * @return mixed|\PeskyCMF\PeskyCmfAppSettings|\App\AppSettings
      */
     function setting($name = null, $default = null) {
-        $class = app(\PeskyCMF\PeskyCmfAppSettings::class);
+        $appSettings = app(\PeskyCMF\PeskyCmfAppSettings::class);
         if ($name === null) {
-            return $class::getInstance();
+            return $appSettings;
         } else {
-            return $class::$name($default);
+            return $appSettings::$name($default);
         }
     }
 }

@@ -1457,12 +1457,6 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     public function initSection($app) {
         $this->useAsPrimary();
-        $appSettingsClass = static::config('app_settings_class');
-        if (!empty($appSettingsClass)) {
-            $app->singleton(PeskyCmfAppSettings::class, function () use ($appSettingsClass) {
-                return $appSettingsClass;
-            });
-        }
 
         /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
         $langDetectorProvider = $app->register(PeskyCmfLanguageDetectorServiceProvider::class);

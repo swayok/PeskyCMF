@@ -14,7 +14,6 @@ use PeskyCMF\Console\Commands\CmfMakeApiDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
 use PeskyCMF\Facades\PeskyCmf;
-use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\PeskyCmfManager;
 use PeskyORM\ORM\TableInterface;
@@ -52,10 +51,10 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 
         $this->registerCommands();
 
-        $this->app->singleton(PeskyCmfAppSettings::class, function ($app) {
-            /** @var PeskyCmfManager $cmfManager */
-            $cmfManager = $app[PeskyCmfManager::class];
-            return $cmfManager->getCmfConfigForSection()->config('app_settings_class') ?: PeskyCmfAppSettings::class;
+        $this->app->singleton(PeskyCmfAppSettings::class, function () {
+            /** @var PeskyCmfAppSettings $appSettingsClass */
+            $appSettingsClass = $this->getAppConfigs()->get('peskycmf.app_settings_class') ?: PeskyCmfAppSettings::class;
+            return $appSettingsClass::getInstance();
         });
     }
 
