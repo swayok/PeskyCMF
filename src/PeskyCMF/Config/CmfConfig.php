@@ -8,7 +8,7 @@ use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Db\Admins\CmfAdminsTable;
 use PeskyCMF\Event\CmfUserAuthenticated;
 use PeskyCMF\Http\Middleware\UseCmfSection;
-use PeskyCMF\Http\Middleware\CmfAuth;
+use PeskyCMF\Auth\Middleware\CmfAuth;
 use PeskyCMF\Listeners\CmfUserAuthenticatedEventListener;
 use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Providers\PeskyCmfLanguageDetectorServiceProvider;
@@ -131,8 +131,8 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function auth_guard_name() {
-        return static::config('auth_guard.name', function () {
-            $config = static::config('auth_guard');
+        return static::config('auth.guard.name', function () {
+            $config = static::config('auth.guard');
             return is_string($config) ? $config : 'admin';
         });
     }
@@ -173,7 +173,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function user_record_class() {
-        return static::config('user_record_class', function () {
+        return static::config('auth.user_record_class', function () {
             throw new \UnexpectedValueException('You need to provide a DB Record class for users');
         });
     }
@@ -191,7 +191,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function user_login_column() {
-        return static::config('user_login_column', 'email');
+        return static::config('auth.user_login_column', 'email');
     }
 
     /**
@@ -233,7 +233,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function cmf_user_acceess_policy_class() {
-        return static::config('acceess_policy_class', CmfAccessPolicy::class);
+        return static::config('auth.acceess_policy_class', CmfAccessPolicy::class);
     }
 
     /**
@@ -364,7 +364,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function middleware_for_routes_that_require_authentication() {
-        return static::config('routes_auth_middleware', [CmfAuth::class]);
+        return static::config('auth.middleware', [CmfAuth::class]);
     }
 
     /**
@@ -392,7 +392,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return bool
      */
     static public function is_password_restore_allowed() {
-        return static::config('is_password_restore_allowed', true);
+        return static::config('auth.is_password_restore_allowed', true);
     }
 
     /**
@@ -784,7 +784,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function roles_list() {
-        return static::config('roles', ['admin']);
+        return static::config('auth.roles', ['admin']);
     }
 
     /**
@@ -793,7 +793,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function default_role() {
-        return static::config('default_role', 'admin');
+        return static::config('auth.default_role', 'admin');
     }
 
     /**
@@ -1413,7 +1413,7 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     protected function addAuthGuardConfigToAppConfigs($appConfigs) {
         // merge cmf guard and provider with configs in config/auth.php
-        $cmfAuthConfig = static::config('auth_guard');
+        $cmfAuthConfig = static::config('auth.guard');
         if (!is_array($cmfAuthConfig)) {
             // custom auth guard name provided
             return;

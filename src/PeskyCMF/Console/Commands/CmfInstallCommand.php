@@ -254,7 +254,6 @@ JS;
         if ($updateKeysInConfigs) {
             $configContents = file_get_contents($cmfSectionConfigFilePath);
             $replacements = [
-                "%('cmf_config')\s*=>\s*.*%im" => '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,',
                 "%('url_prefix')\s*=>\s*.*%im" => "$1 => '{$dataForViews['urlPrefix']}',",
                 "%('app_subfolder')\s*=>\s*.*%im" => "$1 => '$appSubfolder',",
                 "%('controllers_namespace')\s*=>\s*.*%im" => "$1 => '{$controllersNamespace}',",
@@ -271,8 +270,13 @@ JS;
             $this->line("Update next keys in 'configs/peskycmf.php' file to activate created files:");
             $this->line(' ');
 
-            $this->line("'cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
+            $this->line("'default_cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
+            $this->line("'cmf_configs' => ['cmf' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . "::class,\n]");
             $this->line("'app_settings_class' => \\App\\AppSettings::class,");
+
+            $this->line("Update next keys in '$cmfSectionConfigFilePath' file to activate created files:");
+            $this->line(' ');
+
             $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
             $this->line("'app_subfolder' => '$appSubfolder',");
             $this->line("'routes_files' => ['{$routesFileRelativePath}'],");

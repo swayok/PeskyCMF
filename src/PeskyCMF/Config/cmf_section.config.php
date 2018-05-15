@@ -3,11 +3,6 @@
 return [
 
     /**
-     * Application settings helper class
-     */
-    'app_settings_class' => \PeskyCMF\PeskyCmfAppSettings::class,
-
-    /**
      * Prefix used to separate cmf-based site section from other site sections,
      * Example: for prefix "admin" urrl will look like http://localhost/admin
      * You can use '/' inside prefix but it is not tested wel enough to be sure it works correctly
@@ -19,6 +14,70 @@ return [
      * Full path will be: app_path(config('{config_name}.app_subfolder'))
      */
     'app_subfolder' => 'Admin',
+
+    'auth' => [
+        /**
+         * Class that handles every aspect of authorisation and authentication process
+         */
+        'module' => \PeskyCMF\Auth\CmfAuthModule::class,
+
+        /**
+         * Auth Guard configuration.
+         * Notes:
+         * - you can use string as 'auth_guard_config' or 'auth_guard_config.provider' to use
+         *   guard or provider decalred in config/auth.php
+         * - use RecordInterface object with Authenticatable interface/trait as 'auth_guard_config.provider.model'
+         */
+        'guard' => [
+            'name' => 'cmf',
+            'driver' => 'session',
+            'provider' => [
+                'driver' => 'peskyorm',
+                'model' => null
+            ]
+        ],
+
+        /**
+         * DB Record class for users
+         * For CMS use \PeskyCMF\Db\Admins\CmfAdmin::class
+         */
+        'user_record_class' => \PeskyCMF\Db\Admins\CmfAdmin::class,
+
+        /**
+         * Column that is used as user's identifier
+         * Usually: 'email' or 'login'
+         */
+        'user_login_column' => 'email',
+
+        /**
+         * Access policy to use for authorisation
+         */
+        'acceess_policy_class' => \PeskyCMF\Auth\CmfAccessPolicy::class,
+
+        /**
+         * Enable/disable password restoration
+         */
+        'is_password_restore_allowed' => true,
+
+        /**
+         * List of roles
+         */
+        'roles' => [
+            'admin'
+        ],
+
+        /**
+         * Default role for user
+         */
+        'default_role' => 'admin',
+
+        /**
+         * List of middleware for cmf routes and routes provided in 'routes_files' that require user to be authenticated
+         */
+        'middleware' => [
+            \PeskyCMF\Auth\Middleware\CmfAuth::class
+        ],
+    ],
 
     /**
      * Path to files with custom routes for this section
@@ -35,13 +94,6 @@ return [
      */
     'routes_middleware' => [
         'web'
-    ],
-
-    /**
-     * List of middleware for cmf routes and routes provided in 'routes_files' that require user to be authenticated
-     */
-    'routes_auth_middleware' => [
-        \PeskyCMF\Http\Middleware\CmfAuth::class
     ],
 
     /**
@@ -112,47 +164,9 @@ return [
     ],
 
     /**
-     * Auth Guard configuration.
-     * Notes:
-     * - you can use string as 'auth_guard_config' or 'auth_guard_config.provider' to use
-     *   guard or provider decalred in config/auth.php
-     * - use RecordInterface object with Authenticatable interface/trait as 'auth_guard_config.provider.model'
-     */
-    'auth_guard' => [
-        'name' => 'cmf',
-        'driver' => 'session',
-        'provider' => [
-            'driver' => 'peskyorm',
-            'model' => null
-        ]
-    ],
-
-    /**
-     * DB Record class for users
-     * For CMS use \PeskyCMF\Db\Admins\CmfAdmin::class
-     */
-    'user_record_class' => \PeskyCMF\Db\Admins\CmfAdmin::class,
-
-    /**
-     * Column that is used as user's identifier
-     * Usually: 'email' or 'login'
-     */
-    'user_login_column' => 'email',
-
-    /**
-     * Access policy to use for authorisation
-     */
-    'acceess_policy_class' => \PeskyCMF\Config\CmfAccessPolicy::class,
-
-    /**
      * Skin for UI. See skins provided by AdminLTE template
      */
     'ui_skin' => 'skin-blue',
-
-    /**
-     * Enable/disable password restoration
-     */
-    'is_password_restore_allowed' => true,
 
     /**
      * Dictionary to use for section's scaffolds (CmfConfig::transCustom())
@@ -173,18 +187,6 @@ return [
     'locales' => [
         'en'
     ],
-
-    /**
-     * List of roles
-     */
-    'roles' => [
-        'admin'
-    ],
-
-    /**
-     * Default role for user
-     */
-    'default_role' => 'admin',
 
     /**
      * HTML code

@@ -1,5 +1,5 @@
 <?php
-namespace PeskyCMF\Http\Middleware;
+namespace PeskyCMF\Auth\Middleware;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;

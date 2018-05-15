@@ -11,5 +11,10 @@ return [
      */
     'cmf_configs' => [
         'default' => \App\Admin\AdminConfig::class
-    ]
+    ],
+
+    /**
+     * Application settings helper class
+     */
+    'app_settings_class' => \PeskyCMF\PeskyCmfAppSettings::class,
 ];
