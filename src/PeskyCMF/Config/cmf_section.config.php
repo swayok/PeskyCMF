@@ -41,7 +41,7 @@ return [
      * List of middleware for cmf routes and routes provided in 'routes_files' that require user to be authenticated
      */
     'routes_auth_middleware' => [
-        \PeskyCMF\Http\Middleware\ValidateCmfUser::class
+        \PeskyCMF\Http\Middleware\CmfAuth::class
     ],
 
     /**

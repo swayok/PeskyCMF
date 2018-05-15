@@ -8,7 +8,7 @@ use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Db\Admins\CmfAdminsTable;
 use PeskyCMF\Event\CmfUserAuthenticated;
 use PeskyCMF\Http\Middleware\UseCmfSection;
-use PeskyCMF\Http\Middleware\ValidateCmfUser;
+use PeskyCMF\Http\Middleware\CmfAuth;
 use PeskyCMF\Listeners\CmfUserAuthenticatedEventListener;
 use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Providers\PeskyCmfLanguageDetectorServiceProvider;
@@ -364,7 +364,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array
      */
     static public function middleware_for_routes_that_require_authentication() {
-        return static::config('routes_auth_middleware', [ValidateCmfUser::class]);
+        return static::config('routes_auth_middleware', [CmfAuth::class]);
     }
 
     /**
