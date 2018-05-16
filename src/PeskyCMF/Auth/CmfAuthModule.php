@@ -49,7 +49,7 @@ class CmfAuthModule {
         $authGuardName = $this->getAuthGuardName();
         \Auth::shouldUse($authGuardName);
         $this->authGuard = \Auth::guard($authGuardName);
-        $this->addAuthEventListener();
+        $this->listenForUserAuthenticationEvents();
     }
 
     /**
@@ -226,6 +226,9 @@ class CmfAuthModule {
         return cmfJsonResponse(HttpCode::NOT_FOUND);
     }
 
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\PeskyCMF\Http\CmfJsonResponse
+     */
     public function processLogoutRequest() {
         $loginPageUrl = $this->getLoginPageUrl(true);
         if (\Session::has($this->originalUserFromLoginAsActionSessionKey)) {
@@ -579,7 +582,7 @@ class CmfAuthModule {
         \Gate::define('cmf_page', $this->authPolicyName . '@cmf_page');
     }
 
-    protected function addAuthEventListener() {
+    protected function listenForUserAuthenticationEvents() {
         \Event::listen(CmfUserAuthenticated::class, CmfUserAuthenticatedEventListener::class);
     }
 
