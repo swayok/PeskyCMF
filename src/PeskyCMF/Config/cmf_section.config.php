@@ -77,6 +77,11 @@ return [
         'middleware' => [
             \PeskyCMF\Auth\Middleware\CmfAuth::class
         ],
+
+        /**
+         * HTML code
+         */
+        'login_logo' => null,
     ],
 
     /**
@@ -187,11 +192,6 @@ return [
     'locales' => [
         'en'
     ],
-
-    /**
-     * HTML code
-     */
-    'login_logo' => null,
 
     /**
      * HTML code

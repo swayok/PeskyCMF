@@ -2,5 +2,6 @@
 /**
  * @var array $user
  * @var string $url
+ * @var \PeskyCMF\Config\CmfConfig $cmfConfigClass
  */
-echo cmfTransCustom('.forgot_password.email_content', ['url' => $url] + \Swayok\Utils\Set::flatten($user));
+echo $cmfConfigClass::transCustom('forgot_password.email_content', ['url' => $url] + \Swayok\Utils\Set::flatten($user));

@@ -7,11 +7,8 @@ use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Auth\CmfAccessPolicy;
 use PeskyCMF\Auth\CmfAuthModule;
-use PeskyCMF\Db\Admins\CmfAdminsTable;
-use PeskyCMF\Event\CmfUserAuthenticated;
-use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\Auth\Middleware\CmfAuth;
-use PeskyCMF\Listeners\CmfUserAuthenticatedEventListener;
+use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Providers\PeskyCmfLanguageDetectorServiceProvider;
 use PeskyCMF\Scaffold\ScaffoldConfig;
@@ -19,7 +16,6 @@ use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Column;
-use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\Folder;
@@ -129,17 +125,6 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Set Auth guard to use
-     * @return string
-     */
-    static public function auth_guard_name() {
-        return static::config('auth.guard.name', function () {
-            $config = static::config('auth.guard');
-            return is_string($config) ? $config : 'admin';
-        });
-    }
-
-    /**
      * @return PeskyCmfAppSettings|\App\AppSettings
      */
     static public function getAppSettings() {
@@ -168,55 +153,6 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Class name of user db object
-     * @return string
-     */
-    static public function user_record_class() {
-        return static::config('auth.user_record_class', function () {
-            throw new \UnexpectedValueException('You need to provide a DB Record class for users');
-        });
-    }
-
-    /**
-     * @return TableInterface|CmfAdminsTable
-     */
-    static public function users_table() {
-        /** @var RecordInterface $recordClass */
-        $recordClass = static::user_record_class();
-        return $recordClass::getTable();
-    }
-
-    /**
-     * @return string
-     */
-    static public function user_login_column() {
-        return static::config('auth.user_login_column', 'email');
-    }
-
-    /**
-     * @return string
-     */
-    static public function user_profile_view() {
-        return 'cmf::page.profile';
-    }
-
-    /**
-     * Additional user profile fields and validators
-     * Format: ['filed1' => 'validation rules', 'field2', ...]
-     * @return array
-     */
-    static public function additional_user_profile_fields() {
-        return [];
-    }
-
-    /**
-     * @return string
-     */
-    static public function password_recovery_email_view() {
-        return 'cmf::emails.password_restore_instructions';
-    }
-
-    /**
      * Email address used in "From" header for emails sent to users
      * @return string
      * @throws \UnexpectedValueException
@@ -225,14 +161,6 @@ abstract class CmfConfig extends ConfigsContainer {
         return static::config('system_email_address', function () {
             return 'noreply@' . request()->getHost();
         });
-    }
-
-    /**
-     * Usera access policy class to use in CMF
-     * @return string
-     */
-    static public function cmf_user_acceess_policy_class() {
-        return static::config('auth.acceess_policy_class', CmfAccessPolicy::class);
     }
 
     /**
@@ -351,19 +279,19 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * Note: placed here to avoid problems with auth module constructor when registering routes for all cmf sections
+     * @return array
+     */
+    static public function auth_middleware() {
+        return (array)static::config('auth.middleware', [CmfAuth::class]);
+    }
+
+    /**
      * Basic set of middlewares for scaffold api controller
      * @return array
      */
     static public function middleware_for_cmf_scaffold_api_controller() {
         return [];
-    }
-
-    /**
-     * Middleware to be added to routes that require user authentication
-     * @return array
-     */
-    static public function middleware_for_routes_that_require_authentication() {
-        return static::config('auth.middleware', [CmfAuth::class]);
     }
 
     /**
@@ -376,38 +304,6 @@ abstract class CmfConfig extends ConfigsContainer {
 
     static public function ui_skin() {
         return static::config('ui_skin', 'skin-blue');
-    }
-
-    /**
-     * View for CMF login form
-     * @return string
-     */
-    static public function login_view() {
-        return 'cmf::ui.login';
-    }
-
-    /**
-     * Enable/disable password restore link in login form
-     * @return bool
-     */
-    static public function is_password_restore_allowed() {
-        return static::config('auth.is_password_restore_allowed', true);
-    }
-
-    /**
-     * View for CMF forgot password form
-     * @return string
-     */
-    static public function forgot_password_view() {
-        return 'cmf::ui.forgot_password';
-    }
-
-    /**
-     * View for CMF replace password form
-     * @return string
-     */
-    static public function replace_password_view() {
-        return 'cmf::ui.replace_password';
     }
 
     /**
@@ -772,23 +668,6 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * List of roles for CMF
-     * @return array
-     */
-    static public function roles_list() {
-        return static::config('auth.roles', ['admin']);
-    }
-
-    /**
-     * Default admin role
-     * Used in admins table config and admin creation
-     * @return string
-     */
-    static public function default_role() {
-        return static::config('auth.default_role', 'admin');
-    }
-
-    /**
      * Start page URL of CMS section
      *
      * @param bool $absolute
@@ -799,39 +678,11 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Login page URL of CMS section
-     *
-     * @param bool $absolute
-     * @return string
-     */
-    static public function login_page_url($absolute = false) {
-        return route(static::getRouteName('cmf_login'), [], $absolute);
-    }
-
-    /**
-     * The logout route is the path where Administrator will send the user when they click the logout link
-     *
-     * @param bool $absolute
-     * @return string
-     */
-    static public function logout_page_url($absolute = false) {
-        return route(static::getRouteName('cmf_logout'), [], $absolute);
-    }
-
-    /**
      * How much rows to display in data tables
      * @return int
      */
     static public function rows_per_page() {
         return 25;
-    }
-
-    /**
-     * Logo image for login and restore password pages
-     * @return string
-     */
-    static public function login_logo() {
-        return static::config('login_logo') ?: '<img src="/packages/cmf/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
     }
 
     /**
@@ -1289,7 +1140,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static protected function getCacheKeyForOptimizedUiTemplatesBasedOnUserId($group) {
-        if (static::cmf_user_acceess_policy_class() === CmfAccessPolicy::class) {
+        if (static::getAuthModule()->getAccessPolicyClassName() === CmfAccessPolicy::class) {
             $userId = 'any';
         } else {
             $user = static::getUser();
@@ -1304,7 +1155,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static protected function getCacheKeyForOptimizedUiTemplatesBasedOnUserRole($group) {
-        if (static::cmf_user_acceess_policy_class() === CmfAccessPolicy::class) {
+        if (static::getAuthModule()->getAccessPolicyClassName() === CmfAccessPolicy::class) {
             $userId = 'any';
         } else {
             $userId = 'not_authenticated';
@@ -1416,7 +1267,7 @@ abstract class CmfConfig extends ConfigsContainer {
             'providers' => [],
         ]);
 
-        $guardName = static::auth_guard_name();
+        $guardName = array_get($cmfAuthConfig, 'name') ?: static::url_prefix();
         if (array_key_exists($guardName, $config['guards'])) {
             throw new \UnexpectedValueException('There is already an auth guard with name "' . $guardName . '"');
         }
@@ -1424,7 +1275,9 @@ abstract class CmfConfig extends ConfigsContainer {
         if (is_array($provider)) {
             $providerName = array_get($provider, 'name', $guardName);
             if (empty($provider['model'])) {
-                $provider['model'] = static::user_record_class();
+                $provider['model'] = static::config('auth.user_record_class', function () {
+                    throw new \UnexpectedValueException('You need to provide a DB Record class for users');
+                });
             }
         } else {
             $providerName = $provider;
@@ -1450,6 +1303,16 @@ abstract class CmfConfig extends ConfigsContainer {
     public function initSection($app) {
         $this->useAsPrimary();
 
+        // init auth module
+        /** @var CmfAuthModule $cmfAuthModuleClass */
+        $cmfAuthModuleClass = static::config('auth.module');
+        /** @var CmfAuthModule $authModule */
+        $authModule = new $cmfAuthModuleClass($this);
+        $app->singleton(CmfAuthModule::class, function () use ($authModule) {
+            return $authModule;
+        });
+        $authModule->init();
+
         /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
         $langDetectorProvider = $app->register(PeskyCmfLanguageDetectorServiceProvider::class);
         $app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
@@ -1457,16 +1320,6 @@ abstract class CmfConfig extends ConfigsContainer {
 
         // configure session
         $this->configureSession($app);
-
-        // init auth module
-        /** @var CmfAuthModule $cmfAuthModuleClass */
-        $cmfAuthModuleClass = static::config('auth.module');
-        /** @var CmfAuthModule $authModule */
-        $authModule = $cmfAuthModuleClass::getInstance();
-        $app->singleton(CmfAuthModule::class, function () use ($authModule) {
-            return $authModule;
-        });
-        $authModule->init();
 
         if (static::config('file_access_mask') !== null) {
             umask(static::config('file_access_mask'));

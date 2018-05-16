@@ -3,28 +3,21 @@
 
 namespace PeskyCMF\Http\Controllers;
 
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
-use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Traits\DataValidationHelper;
-use PeskyORM\ORM\Record;
-use PeskyORM\ORM\RecordInterface;
 use Ramsey\Uuid\Uuid;
 use Swayok\Utils\Folder;
-use Swayok\Utils\Set;
 use Swayok\Utils\ValidateValue;
 
 class CmfGeneralController extends CmfController {
 
     use DataValidationHelper,
         AuthorizesRequests;
-
-    protected $originalUserFromLoginAsActionSessionKey = '__original_user';
 
     public function __construct() {
 
@@ -67,109 +60,12 @@ class CmfGeneralController extends CmfController {
         return redirect()->route(static::getCmfConfig()->getRouteName('cmf_profile'));
     }
 
-    public function getAdminProfile() {
-        $admin = static::getCmfConfig()->getUser();
-        $this->authorize('resource.details', ['cmf_profile', $admin]);
-        return view(static::getCmfConfig()->user_profile_view(), [
-            'admin' => $admin,
-            'canSubmit' => \Gate::allows('resource.update', ['cmf_profile', $admin])
-        ]);
+    public function renderUserProfileView() {
+        return static::getCmfConfig()->getAuthModule()->renderUserProfilePageView();
     }
 
-    public function updateAdminProfile(Request $request) {
-        $admin = static::getCmfConfig()->getUser();
-        $this->authorize('resource.update', ['cmf_profile', $admin]);
-        $updates = $this->validateAndGetAdminProfileUpdates($request, $admin);
-        if (!is_array($updates)) {
-            return $updates;
-        } else {
-            $admin
-                ->begin()
-                ->updateValues($updates);
-            if (!empty(trim($request->input('new_password')))) {
-                $admin->setPassword($request->input('new_password'));
-            }
-            if ($admin->commit()) {
-                return cmfJsonResponse()
-                    ->setMessage(cmfTransCustom('.page.profile.saved'))
-                    ->reloadPage();
-            } else {
-                return cmfJsonResponse(HttpCode::SERVER_ERROR)
-                    ->setMessage(cmfTransGeneral('.form.failed_to_save_resource_data'))
-                    ->reloadPage();
-            }
-        }
-    }
-
-    /**
-     * @param Request $request
-     * @param Record|Authenticatable $admin
-     * @return array|\Illuminate\Http\JsonResponse
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    protected function validateAndGetAdminProfileUpdates(Request $request, Record $admin) {
-        $validationRules = [
-            'old_password' => 'required',
-            'new_password' => 'nullable|min:6',
-        ];
-        $columnsToUpdate = [];
-        if ($admin::hasColumn('language')) {
-            $validationRules['language'] = 'required|in:' . implode(',', static::getCmfConfig()->locales());
-            $columnsToUpdate[] = 'language';
-        }
-        if ($admin::hasColumn('name')) {
-            $validationRules['name'] = 'nullable|max:200';
-            $columnsToUpdate[] = 'name';
-        }
-        if ($admin::hasColumn('timezone')) {
-            $validationRules['timezone'] = 'nullable|exists:pg_timezone_names,name';
-            $columnsToUpdate[] = 'timezone';
-        }
-        $usersTable = static::getCmfConfig()->users_table()->getName();
-        $userLoginCol = static::getCmfConfig()->user_login_column();
-        if ($admin::hasColumn('email')) {
-            if ($userLoginCol === 'email') {
-                $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->getAuthIdentifier()},id";
-            } else {
-                $validationRules['email'] = 'nullable|email';
-            }
-            $columnsToUpdate[] = 'email';
-        }
-        if ($userLoginCol !== 'email') {
-            $validationRules[$userLoginCol] = "required|regex:%^[a-zA-Z0-9_@.-]+$%is|min:4|unique:$usersTable,$userLoginCol,{$admin->getAuthIdentifier()},id";
-            $columnsToUpdate[] = $userLoginCol;
-        }
-        foreach (static::getCmfConfig()->additional_user_profile_fields() as $columnName => $rules) {
-            if (is_int($columnName)) {
-                $columnName = $rules;
-            } else {
-                $validationRules[$columnName] = $rules;
-            }
-            $columnsToUpdate[] = $columnName;
-        }
-        $validator = \Validator::make(
-            $request->all(),
-            $validationRules,
-            Set::flatten(cmfTransCustom('.page.profile.errors'))
-        );
-        $errors = [];
-        if ($validator->fails()) {
-            $errors = $validator->getMessageBag()->toArray();
-        } else if (method_exists($admin, 'checkPassword')) {
-            if (!$admin->checkPassword($request->input('old_password'))) {
-                $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
-            }
-        } else if (!\Hash::check($request->input('old_password'), $admin->getAuthPassword())) {
-            $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
-        }
-        if (count($errors) > 0) {
-            return $this->makeValidationErrorsJsonResponse($errors);
-        }
-
-        return $request->only($columnsToUpdate);
+    public function updateUserProfile(Request $request) {
+        return static::getCmfConfig()->getAuthModule()->processUserProfileUpdateRequest($request);
     }
 
     protected function getDataForBasicUiView() {
@@ -195,111 +91,52 @@ class CmfGeneralController extends CmfController {
     }
 
     public function getLoginTpl() {
-        if (static::getCmfConfig()->getUser()) {
-            return cmfJsonResponse(HttpCode::MOVED_TEMPORARILY)
-                ->setForcedRedirect(static::getCmfConfig()->getAuthModule()->getIntendedUrl());
-        }
-        return static::getCmfConfig()->getAuthModule()->renderLoginPageView();
-    }
-
-    public function getForgotPasswordTpl() {
-        return static::getCmfConfig()->getAuthModule()->renderForgotPasswordPageView();
-    }
-
-    public function getReplacePasswordTpl($accessKey) {
-        return static::getCmfConfig()->getAuthModule()->renderReplacePasswordPageView($accessKey);
+        return static::getCmfConfig()->getAuthModule()->renderUserLoginPageView();
     }
 
     public function doLogin(Request $request) {
         return static::getCmfConfig()->getAuthModule()->processUserLoginRequest($request);
     }
 
+    public function getRegistrationTpl() {
+        return static::getCmfConfig()->getAuthModule()->renderUserRegistrationPageView();
+    }
+
+    public function doRegister(Request $request) {
+        return static::getCmfConfig()->getAuthModule()->processUserRegistrationRequest($request);
+    }
+
+    public function getForgotPasswordTpl() {
+        return static::getCmfConfig()->getAuthModule()->renderForgotPasswordPageView();
+    }
+
     public function sendPasswordReplacingInstructions(Request $request) {
         return static::getCmfConfig()->getAuthModule()->startPasswordRecoveryProcess($request);
+    }
+
+    public function getReplacePasswordTpl($accessKey) {
+        return static::getCmfConfig()->getAuthModule()->renderReplaceUserPasswordPageView($accessKey);
     }
 
     public function replacePassword(Request $request, $accessKey) {
         return static::getCmfConfig()->getAuthModule()->finishPasswordRecoveryProcess($request, $accessKey);
     }
 
-    public function loginAs($otherUserId) {
-        $this->authorize('cmf_page', ['login_as']);
-        $currentUser = static::getUser();
-        $currentUserId = $currentUser->getAuthIdentifier();
-        if ($currentUserId === $otherUserId || $currentUserId === (int)$otherUserId) {
-            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
-                ->setMessage(cmfTransCustom('admins.login_as.same_user'));
-        }
-        $token = $currentUser->getRememberToken();
-        if (!$token) {
-            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
-                ->setMessage(cmfTransCustom('admins.login_as.no_auth_token'));
-        }
-        /** @var \PeskyCMF\Db\Admins\CmfAdmin|RecordInterface $otherUser */
-        $otherUser = static::getAuthGuard()->loginUsingId($otherUserId);
-        if (!is_object($otherUser)) {
-            // Warning: do not use Auth->login($currentUser) - it might fail
-            static::getAuthGuard()->loginUsingId($currentUserId, false);
-            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
-                ->setMessage(cmfTransCustom('admins.login_as.fail', ['id' => $otherUserId]));
-        }
-        $cmfConfig = static::getCmfConfig();
-        \Session::put([
-            $this->originalUserFromLoginAsActionSessionKey => [
-                'id' => $currentUserId,
-                'token' => $token,
-                'url' => \URL::previous($cmfConfig::home_page_url(true)),
-            ],
-            $cmfConfig::session_message_key() => cmfTransCustom(
-                'admins.login_as.success',
-                ['user' => $otherUser->getValue($cmfConfig::user_login_column())]
-            )
-        ]);
-        return cmfJsonResponse()
-            ->setRedirect($cmfConfig::home_page_url());
+    public function loginAsOtherUser($otherUserId) {
+        return static::getCmfConfig()->getAuthModule()->processLoginAsOtherUserRequest($otherUserId);
     }
 
     public function logout() {
-        $cmfConfig = static::getCmfConfig();
-        if (\Session::has($this->originalUserFromLoginAsActionSessionKey)) {
-            // logout to original account after 'login_as'
-            $userInfo = \Session::pull($this->originalUserFromLoginAsActionSessionKey);
-            $user = static::getAuthGuard()->getProvider()->retrieveByToken(
-                array_get($userInfo, 'id', -1),
-                array_get($userInfo, 'token', -1)
-            );
-            if ($user) {
-                // Warning: do not use Auth->login($user) - it will fail to login previous user
-                static::getAuthGuard()->loginUsingId($user->getAuthIdentifier(), false);
-                return \Redirect::to(array_get($userInfo, 'url') ?: $cmfConfig::login_page_url(true));
-            }
-        }
-        static::getAuthGuard()->logout();
-        \Session::invalidate();
-        $cmfConfig::resetLocale();
-        return \Redirect::to($cmfConfig::login_page_url(true));
+        return static::getCmfConfig()->getAuthModule()->processLogoutRequest();
     }
 
-    public function getAdminInfo() {
-        /** @var CmfAdmin $admin */
-        $admin = static::getCmfConfig()->getUser();
-        $this->authorize('resource.details', ['cmf_profile', $admin]);
-        $adminData = $admin->toArray();
-        if (!empty($adminData['role'])) {
-            $adminData['_role'] = $admin->role;
-            $role = $admin->role;
-            if ($admin::hasColumn('is_superadmin') && $admin->is_superadmin) {
-                $role = 'superadmin';
-            }
-            $adminData['role'] = cmfTransCustom('.admins.role.' . $role);
-        }
-
-        return cmfJsonResponse()->setData($adminData);
+    public function getUserProfileData() {
+        return cmfJsonResponse()->setData(static::getCmfConfig()->getAuthModule()->getDataForUserProfileForm());
     }
 
     public function getMenuCounters() {
-        $admin = static::getCmfConfig()->getUser();
-        $this->authorize('resource.details', ['cmf_profile', $admin]);
+        $user = static::getCmfConfig()->getUser();
+        $this->authorize('resource.details', ['cmf_profile', $user]);
         return cmfJsonResponse()->setData(static::getCmfConfig()->getValuesForMenuItemsCounters());
     }
 

@@ -8,7 +8,7 @@
                 <i class="fa fa-fw fa-user"></i>{{ cmfTransCustom('.user.profile_label') }}
             </a>
         <?php endif; ?>
-        <a href="{{ cmfConfig()->logout_page_url() }}">
+        <a href="{{ cmfConfig()->getAuthModule()->getLogoutPageUrl() }}">
             <i class="fa fa-fw fa-sign-out"></i>{{ cmfTransCustom('.user.logout_label') }}
         </a>
     </div>
@@ -18,7 +18,7 @@
     <div class="user-name">
         @{{? it.name && it.name.length }}@{{= it.name }}@{{??}}<?php echo '{{= it.role || "' . cmfTransCustom('.admins.role.admin') . '" }}' ?>@{{?}}
     </div>
-    <div class="user-{{ cmfConfig()->user_login_column() }}">
-        <?php echo '{{= it.' . cmfConfig()->user_login_column() . ' }}'; ?>
+    <div class="user-{{ cmfConfig()->getAuthModule()->getUserLoginColumnName() }}">
+        <?php echo '{{= it.' . cmfConfig()->getAuthModule()->getUserLoginColumnName() . ' }}'; ?>
     </div>
 </script>

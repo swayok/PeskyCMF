@@ -53,7 +53,7 @@ class CmfAdminsTableStructure extends CmfDbTableStructure {
             ->trimsValue()
             ->lowercasesValue()
             ->uniqueValues();
-        if (CmfConfig::getDefault()->user_login_column() === 'email') {
+        if ($this->getCmfConfig()->getAuthModule()->getUserLoginColumnName() === 'email') {
             $column->disallowsNullValues();
         }
         return $column;
@@ -65,7 +65,7 @@ class CmfAdminsTableStructure extends CmfDbTableStructure {
             ->trimsValue()
             ->lowercasesValue()
             ->uniqueValues();
-        if (CmfConfig::getDefault()->user_login_column() === 'login') {
+        if ($this->getCmfConfig()->getAuthModule()->getUserLoginColumnName() === 'login') {
             $column->disallowsNullValues();
         }
         return $column;
@@ -93,14 +93,14 @@ class CmfAdminsTableStructure extends CmfDbTableStructure {
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
-            ->setDefaultValue(CmfConfig::getDefault()->default_role());
+            ->setDefaultValue($this->getCmfConfig()->getAuthModule()->getDefaultUserRole());
     }
 
     private function language() {
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
-            ->setDefaultValue(CmfConfig::getDefault()->default_locale());
+            ->setDefaultValue($this->getCmfConfig()->default_locale());
     }
 
     private function timezone() {
@@ -112,10 +112,14 @@ class CmfAdminsTableStructure extends CmfDbTableStructure {
         return Relation::create(
                 'parent_id',
                 Relation::BELONGS_TO,
-                CmfConfig::getDefault()->users_table(),
+                $this->getCmfConfig()->getAuthModule()->getUsersTable(),
                 'id'
             )
-            ->setDisplayColumnName(CmfConfig::getDefault()->user_login_column());
+            ->setDisplayColumnName($this->getCmfConfig()->getAuthModule()->getUserLoginColumnName());
+    }
+
+    public function getCmfConfig() {
+        return CmfConfig::getDefault();
     }
 
 }

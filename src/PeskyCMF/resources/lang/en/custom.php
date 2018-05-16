@@ -137,7 +137,7 @@ $dictionary = [
             'menu_title' => 'Home'
         ],
         'profile' => [
-            'header' => 'Administrator profile',
+            'header' => 'Account settings',
             'input' => [
                 'email' => 'E-mail',
                 'new_password' => 'New password',
@@ -148,7 +148,7 @@ $dictionary = [
                 'no_timezone' => '[Not selected]',
                 'timezone_search' => 'Search by time zone name',
             ],
-            'saved' => 'Administrator profile updated',
+            'saved' => 'Account settings saved',
             'errors' => [
                 'new_password' => [
                     'min' => 'Minimum password length is :max symbols'

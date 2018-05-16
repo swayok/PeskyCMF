@@ -13,23 +13,41 @@ $generalControllerClass = $cmfConfig::cmf_general_controller_class();
 Route::group(
     [
         'middleware' => AjaxOnly::class,
-        'fallback' => ['route' => $routeNamePrefix . 'cmf_login']
     ],
-    function () use ($generalControllerClass) {
+    function () use ($routeNamePrefix, $generalControllerClass) {
         Route::get('login.html', [
             'uses' => $generalControllerClass . '@getLoginTpl',
-            'log' => 'cmf.login'
+            'log' => 'cmf.login',
+            'fallback' => ['route' => $routeNamePrefix . 'cmf_login']
         ]);
 
         Route::post('login', [
             'uses' => $generalControllerClass . '@doLogin',
-            'log' => 'cmf.login'
+            'log' => 'cmf.login',
+            'fallback' => ['route' => $routeNamePrefix . 'cmf_login']
+        ]);
+
+        Route::get('register.html', [
+            'uses' => $generalControllerClass . '@getRegistrationTpl',
+            'log' => 'cmf.registration',
+            'fallback' => ['route' => $routeNamePrefix . 'cmf_register']
+        ]);
+
+        Route::post('register', [
+            'uses' => $generalControllerClass . '@doRegister',
+            'log' => 'cmf.registration',
+            'fallback' => ['route' => $routeNamePrefix . 'cmf_register']
         ]);
     }
 );
 
 Route::get('login', [
     'as' => $routeNamePrefix . 'cmf_login',
+    'uses' => $generalControllerClass . '@loadJsApp'
+]);
+
+Route::get('register', [
+    'as' => $routeNamePrefix . 'cmf_register',
     'uses' => $generalControllerClass . '@loadJsApp'
 ]);
 
@@ -85,7 +103,7 @@ Route::get('replace_password/{access_key}', [
 
 Route::group(
     [
-        'middleware' => $cmfConfig::middleware_for_routes_that_require_authentication()
+        'middleware' => $cmfConfig::auth_middleware()
     ],
     function () use ($generalControllerClass, $routeNamePrefix) {
 
@@ -106,7 +124,7 @@ Route::group(
 
                 Route::get('service/login/as/{id}', [
                     'as' => $routeNamePrefix . 'cmf_login_as_other_admin',
-                    'uses' => $generalControllerClass . '@loginAs',
+                    'uses' => $generalControllerClass . '@loginAsOtherUser',
                     'log' => 'cmf.service_login_as'
                 ]);
 
@@ -128,17 +146,17 @@ Route::group(
                 // Admin profile
                 Route::get('page/profile/data', [
                     'as' => $routeNamePrefix . 'cmf_profile_data',
-                    'uses' => $generalControllerClass . '@getAdminInfo'
+                    'uses' => $generalControllerClass . '@getUserProfileData'
                 ]);
 
                 Route::get('page/profile.html', [
-                    'uses' => $generalControllerClass . '@getAdminProfile',
+                    'uses' => $generalControllerClass . '@renderUserProfileView',
                     'log' => 'cmf.profile'
                 ]);
 
                 Route::put('page/profile', [
                     'as' => $routeNamePrefix . 'cmf_profile',
-                    'uses' => $generalControllerClass . '@updateAdminProfile',
+                    'uses' => $generalControllerClass . '@updateUserProfile',
                     'log' => 'cmf.profile'
                 ]);
 
@@ -173,7 +191,7 @@ Route::pattern('table_name', '[a-z]+([_a-z0-9]*[a-z0-9])?');
 Route::group(
     [
         'prefix' => 'resource',
-        'middleware' => $cmfConfig::middleware_for_routes_that_require_authentication()
+        'middleware' => $cmfConfig::auth_middleware()
     ],
     function () use ($apiControllerClass, $generalControllerClass, $routeNamePrefix) {
         Route::get('{table_name}', [
@@ -237,7 +255,7 @@ Route::group(
         'prefix' => 'api',
         'middleware' => array_unique(array_merge(
             [AjaxOnly::class],
-            $cmfConfig::middleware_for_routes_that_require_authentication(),
+            $cmfConfig::auth_middleware(),
             $cmfConfig::middleware_for_cmf_scaffold_api_controller()
         ))
     ],

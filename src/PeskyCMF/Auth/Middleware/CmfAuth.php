@@ -13,8 +13,8 @@ class CmfAuth {
     public function handle(Request $request, \Closure $next) {
         /** @var CmfConfig $cmfConfig */
         $cmfConfig = CmfConfig::getPrimary();
+        $loginUrl = $cmfConfig::getAuthModule()->getLoginPageUrl();
         if (!$cmfConfig::getAuthGuard()->check()) {
-            $loginUrl = $cmfConfig::login_page_url();
             $cmfConfig::getAuthModule()->saveIntendedUrl($request->url());
             return $request->ajax()
                 ? cmfJsonResponse(HttpCode::UNAUTHORISED)->setForcedRedirect($loginUrl)
@@ -25,11 +25,10 @@ class CmfAuth {
 
             $response = $next($request);
             if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
-                $fallbackUrl = $cmfConfig::login_page_url();
                 $message = $cmfConfig::transGeneral('.message.access_denied');
                 $response = $request->ajax()
-                    ? cmfJsonResponse(HttpCode::FORBIDDEN)->setMessage($message)->goBack($fallbackUrl)
-                    : cmfRedirectResponseWithMessage($fallbackUrl, $message);
+                    ? cmfJsonResponse(HttpCode::FORBIDDEN)->setMessage($message)->goBack($loginUrl)
+                    : cmfRedirectResponseWithMessage($loginUrl, $message);
             }
             return $response;
         }

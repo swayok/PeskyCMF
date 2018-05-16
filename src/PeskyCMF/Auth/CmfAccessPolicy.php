@@ -3,6 +3,7 @@
 namespace PeskyCMF\Auth;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
+use PeskyCMF\Config\CmfConfig;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
@@ -101,13 +102,19 @@ class CmfAccessPolicy {
      * @param RecordInterface $user
      * @return mixed
      */
-    protected function isSuperadmin($user) {
+    protected function isSuperadmin(RecordInterface $user) {
         if ($user::hasColumn('is_superadmin')) {
             return $user->getValue('is_superadmin');
-        } else if (!$user::hasColumn('role')) {
-            return true;
         }
         return false;
+    }
+
+    /**
+     * @param RecordInterface $user
+     * @return mixed
+     */
+    protected function getUserRole(RecordInterface $user) {
+        return $user::hasColumn('role') ? $user->role : 'admin';
     }
 
     /**
@@ -127,9 +134,9 @@ class CmfAccessPolicy {
             return true;
         }
         if (array_key_exists($pageName, static::$cmfPages)) {
-            return static::$cmfPages[$pageName] === true || in_array($user->role, (array)static::$cmfPages[$pageName], true);
+            return static::$cmfPages[$pageName] === true || in_array($this->getUserRole($user), (array)static::$cmfPages[$pageName], true);
         }
-        return $this->getAccessFromDefaults($user->role, 'cmf_page');
+        return $this->getAccessFromDefaults($this->getUserRole($user), 'cmf_page');
     }
 
     /**
@@ -148,7 +155,7 @@ class CmfAccessPolicy {
             return true;
         }
         return (
-            $this->roleHasAccessToResource($user->role, $table, $ability)
+            $this->roleHasAccessToResource($this->getUserRole($user), $table, $ability)
             && $this->userHasAccessToRecord($user, $table, $ability, $recordOrItemIdOrFkValue, $conditions)
         );
     }
@@ -187,7 +194,7 @@ class CmfAccessPolicy {
             && array_key_exists($ability, static::$resourcesWithOwnershipValidation[$tableName])
             && (
                 static::$resourcesWithOwnershipValidation[$tableName][$ability] === true
-                || in_array($user->role, (array)static::$resourcesWithOwnershipValidation[$tableName][$ability], true)
+                || in_array($this->getUserRole($user), (array)static::$resourcesWithOwnershipValidation[$tableName][$ability], true)
             )
         ) {
             $table = $this->getCmfConfig()->getTableByUnderscoredName($tableName);

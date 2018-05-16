@@ -220,7 +220,9 @@ Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
 
 Utils.handleAjaxSuccess = function (json) {
     try {
-        if (json.redirect) {
+        if (json.redirect_with_reload) {
+            document.location = json.redirect_with_reload;
+        } else if (json.redirect) {
             switch (json.redirect) {
                 case 'back':
                     page.back(json.redirect_fallback);
