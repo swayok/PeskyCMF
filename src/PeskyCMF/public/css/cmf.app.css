@@ -806,6 +806,7 @@ div.dataTables_wrapper .filter-toolbar ul.dropdown-menu a.disabled .label {
 }
 body[data-section="resource:table"] .content-wrapper {
   background-color: #FFFFFF;
+  min-height: calc(100vh - 51px) !important;
 }
 body[data-section="resource:table"] .section-content-wrapper .content-header {
   height: 50px;

@@ -1145,19 +1145,19 @@ a[disabled] {
 }
 /* Default Borders */
 .br-a {
-  border: 1px solid #eeeeee !important;
+  border: 1px solid #EEE !important;
 }
 .br-l {
-  border-left: 1px solid #eeeeee !important;
+  border-left: 1px solid #EEE !important;
 }
 .br-r {
-  border-right: 1px solid #eeeeee !important;
+  border-right: 1px solid #EEE !important;
 }
 .br-t {
-  border-top: 1px solid #eeeeee !important;
+  border-top: 1px solid #EEE !important;
 }
 .br-b {
-  border-bottom: 1px solid #eeeeee !important;
+  border-bottom: 1px solid #EEE !important;
 }
 /* Border Style */
 .br-dashed {
@@ -1222,19 +1222,19 @@ a[disabled] {
 /*Border Colors Generate contextual modifier classes for colorizing the alert.
 */
 .br-white {
-  border-color: #ffffff !important;
+  border-color: #FFF !important;
 }
 .br-lighter {
-  border-color: #eeeeee !important;
+  border-color: #EEE !important;
 }
 .br-light {
-  border-color: #e7e7e7 !important;
+  border-color: #E7E7E7 !important;
 }
 .br-grey {
   border-color: #d9d9d9 !important;
 }
 .br-greyer {
-  border-color: #cccccc !important;
+  border-color: #CCC !important;
 }
 .br-tp-top {
   border-top-color: rgba(0, 0, 0, 0.1);
@@ -1652,3 +1652,4 @@ on tables, feel free to add more*/
     display: none !important;
   }
 }
+/*# sourceMappingURL=helpers.css.map */
