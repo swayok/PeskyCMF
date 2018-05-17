@@ -50,7 +50,7 @@
         <link href="{{ $cssPath }}" rel="stylesheet" type="text/css"/>
     @endforeach
 
-    @stack('css')
+    @stack('styles')
 
 </head>
 
@@ -170,7 +170,9 @@
         {!! $jsCode !!}
     @endforeach
 
-    @stack('js')
+    @stack('scripts')
+    
+    @stack('jscode')
 
     <?php $message = Session::pull(cmfConfig()->session_message_key(), false); ?>
     @if (!empty($message) && (is_string($message) || (is_array($message) && !empty($message['message']))))
