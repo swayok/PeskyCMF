@@ -254,6 +254,16 @@ class CmfAuthModule {
     }
 
     /**
+     * Logout current user, invalidate session and reset locale
+     */
+    public function logoutCurrentUser() {
+        $this->getAuthGuard()->logout();
+        \Session::remove($this->originalUserFromLoginAsActionSessionKey);
+        \Session::invalidate();
+        $this->getCmfConfig()->resetLocale();
+    }
+
+    /**
      * @param $otherUserId
      * @return \PeskyCMF\Http\CmfJsonResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
@@ -705,16 +715,6 @@ class CmfAuthModule {
      */
     protected function getCustomUserProfileFieldsAndValidators() {
         return [];
-    }
-
-    /**
-     * Logout current user, invalidate session and reset locale
-     */
-    protected function logoutCurrentUser() {
-        $this->getAuthGuard()->logout();
-        \Session::remove($this->originalUserFromLoginAsActionSessionKey);
-        \Session::invalidate();
-        $this->getCmfConfig()->resetLocale();
     }
 
 }
