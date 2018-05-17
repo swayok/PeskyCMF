@@ -115,15 +115,18 @@ FILE;
 
     protected function createJsCssLessFiles($dataForViews) {
         $relativePathToPublicFiles = '/packages/' . $dataForViews['urlPrefix'] . '/';
-        $publicFiles = [
-            $relativePathToPublicFiles . 'js/' . $dataForViews['urlPrefix'] . '.custom.js' => $this->getCustomJsFileContents(),
-            $relativePathToPublicFiles . 'css/' . $dataForViews['urlPrefix'] . '.custom.css' => '',
-            $relativePathToPublicFiles . 'less/' . $dataForViews['urlPrefix'] . '.custom.less' => '',
+        $publicFilesContents = [
+            'js' => $this->getCustomJsFileContents(),
+            'css' => '',
+            'less' => '',
         ];
-        foreach ($publicFiles as $relativePath => $contents) {
+        $createdFilesByType = [];
+        foreach ($publicFilesContents as $type => $contents) {
+            $relativePath = $relativePathToPublicFiles . $type . '/' . $dataForViews['urlPrefix'] . '.custom.' . $type;
             File::save(public_path($relativePath), $contents, 0664, 0755);
+            $createdFilesByType[$type] = $relativePath;
         }
-        return $publicFiles;
+        return $createdFilesByType;
     }
 
     protected function getCustomJsFileContents() {
