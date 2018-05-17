@@ -127,7 +127,7 @@ class CmfGeneralController extends CmfController {
     }
 
     public function logout() {
-        return static::getCmfConfig()->getAuthModule()->processLogoutRequest();
+        return static::getCmfConfig()->getAuthModule()->processUserLogoutRequest();
     }
 
     public function getUserProfileData() {

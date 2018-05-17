@@ -171,7 +171,7 @@
     @endforeach
 
     @stack('scripts')
-    
+
     @stack('jscode')
 
     <?php $message = Session::pull(cmfConfig()->session_message_key(), false); ?>

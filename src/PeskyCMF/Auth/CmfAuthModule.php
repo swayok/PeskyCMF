@@ -229,7 +229,7 @@ class CmfAuthModule {
     /**
      * @return \Illuminate\Http\RedirectResponse|\PeskyCMF\Http\CmfJsonResponse
      */
-    public function processLogoutRequest() {
+    public function processUserLogoutRequest() {
         $loginPageUrl = $this->getLoginPageUrl(true);
         if (\Session::has($this->originalUserFromLoginAsActionSessionKey)) {
             // logout to original account after 'login_as'
