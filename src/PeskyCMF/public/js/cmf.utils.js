@@ -418,9 +418,10 @@ Utils.makeTemplateFromText = function (text, clarification) {
  * @param {string} url
  * @param {bool?} cache - save to cache or not (default: no)
  * @param {bool?} isTemplate - is loaded HTML is a dotJS template or not (default: no)
+ * @param {string?} urlQuery - attach this to page's url
  * @return {string|function} - depends on isTemplate argument
  */
-Utils.downloadHtml = function (url, cache, isTemplate) {
+Utils.downloadHtml = function (url, cache, isTemplate, urlQuery) {
     var deferred = $.Deferred();
     if (!url || !url.length) {
         console.warn('Empty url received in Utils.downloadHtml()');
@@ -429,6 +430,9 @@ Utils.downloadHtml = function (url, cache, isTemplate) {
         return deferred.promise();
     }
     url = (url[0] === '/' || url.match(/^https?:/) !== null ? url : CmfConfig.rootUrl + '/' + url).replace(/\.html$/i, '') + '.html';
+    if (typeof urlQuery === 'string' && urlQuery.length > 1) {
+        url += (urlQuery[0] === '?') ? urlQuery : '?' + urlQuery;
+    }
     if (!cache || !CmfCache.views[url]) {
         $.ajax({
             url: url,

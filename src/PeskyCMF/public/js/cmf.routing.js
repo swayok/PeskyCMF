@@ -171,7 +171,7 @@ CmfRouteChange.authorizationPage = function (request) {
         request.saveState();
     }
     return $.when(
-            Utils.downloadHtml(request.pathname, true, false),
+            Utils.downloadHtml(request.pathname, true, false, request.querystring),
             AdminUI.destroyUI()
         )
         .done(function (html) {
@@ -214,7 +214,7 @@ CmfRouteChange.showPage = function (request) {
         return;
     }
     return $.when(
-            Utils.downloadHtml(request.pathname, false, false),
+            Utils.downloadHtml(request.pathname, false, false, request.querystring),
             AdminUI.showUI()
         )
         .done(function (html) {
@@ -254,7 +254,7 @@ CmfRouteChange.scaffoldResourceCustomPage = function (request) {
         isModal = true;
     }
     return $.when(
-            Utils.downloadHtml(request.pathname, false, false),
+            Utils.downloadHtml(request.pathname, false, false, request.querystring),
             AdminUI.showUI()
         )
         .done(function (html) {
