@@ -38,9 +38,12 @@ class CmfJsonResponse extends JsonResponse {
      * @return $this
      */
     public function setMessage($message) {
-        $data = $this->getData(true);
-        $data[static::$messageKey] = $message;
-        return $this->setData($data);
+        if (!empty($message)) {
+            $data = $this->getData(true);
+            $data[static::$messageKey] = $message;
+            $this->setData($data);
+        }
+        return $this;
     }
 
     /**
