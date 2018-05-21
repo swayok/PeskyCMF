@@ -212,10 +212,14 @@ Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
         }
         return;
     }
-    CmfConfig.getDebugDialog().showDebug(
-        'HTTP Error ' + xhr.status + ' ' + xhr.statusText,
-        xhr.responseText
-    );
+    if (xhr.responseText.length === 0) {
+        toastr.error('HTTP Error ' + xhr.status + ' ' + xhr.statusText);
+    } else {
+        CmfConfig.getDebugDialog().showDebug(
+            'HTTP Error ' + xhr.status + ' ' + xhr.statusText,
+            xhr.responseText
+        );
+    }
 };
 
 Utils.handleAjaxSuccess = function (json) {
