@@ -46,28 +46,26 @@
         "swayok/page.js": "master@dev",
         "mistic100/jquery-querybuilder": "2.*",
 
-        "npm-asset/jquery": "3.*",
-        "npm-asset/bootstrap": "3.*",
-        "npm-asset/ionicons": "4.*",
-        "npm-asset/toastr": "2.*",
-        "npm-asset/datatables": "1.*",
-        "npm-asset/sortablejs": "1.*",
-        "npm-asset/bootstrap-switch": "3.*",
-        "npm-asset/eonasdan-bootstrap-datetimepicker": "4.*",
-        "npm-asset/bootstrap-select": "1.*",
-        "npm-asset/ajax-bootstrap-select": "1.*",
-        "npm-asset/moment": "2.*",
-        "npm-asset/jquery-form": "4.*",
-        "npm-asset/select2": "4.*",
-        "npm-asset/inputmask": "3.*",
-        "npm-asset/bootstrap-fileinput": "4.4.*",
-        "npm-asset/simple-scrollbar": "0.*"
+        "bower-asset/jquery": "3.*",
+        "bower-asset/bootstrap": "3.*",
+        "bower-asset/toastr": "2.*",
+        "bower-asset/datatables": "1.*",
+        "bower-asset/sortablejs": "1.*",
+        "bower-asset/bootstrap-switch": "3.*",
+        "bower-asset/eonasdan-bootstrap-datetimepicker": "4.*",
+        "bower-asset/bootstrap-select": "1.*",
+        "bower-asset/ajax-bootstrap-select": "1.*",
+        "bower-asset/moment": "2.*",
+        "bower-asset/jquery-form": "4.*",
+        "bower-asset/select2": "4.*",
+        "bower-asset/inputmask": "3.*",
+        "bower-asset/bootstrap-fileinput": "4.4.*",
+        "bower-asset/simple-scrollbar": "0.*"
     },
     "suggest": {
         "swayok/laravel-antihack-tool": "master@dev - active hack protection tool"
     },
     "todo": {
-        "npm-asset/cropperjs": "1.*",
-        "npm-asset/jquery-cropper": "1.*"
+        "bower-asset/cropperjs": "1.*"
     }
 }
