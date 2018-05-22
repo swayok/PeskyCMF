@@ -145,7 +145,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/bower-asset/simple-scrollbar/simple-scrollbar.css') => public_path('packages/cmf-vendors/scrollbar/simple-scrollbar.css'),
             base_path('vendor/bower-asset/simple-scrollbar/simple-scrollbar.js') => public_path('packages/cmf-vendors/scrollbar/simple-scrollbar.js'),
             base_path('vendor/bower-asset/datatables/media') => public_path('packages/cmf-vendors/datatables'),
-            base_path('vendor/bower-asset/toastr/build') => public_path('packages/cmf-vendors/toastr'),
+            base_path('vendor/bower-asset/toastr') => public_path('packages/cmf-vendors/toastr'),
             base_path('vendor/bower-asset/moment/moment.js') => public_path('packages/cmf-vendors/moment/moment.js'),
             base_path('vendor/bower-asset/moment/min/moment.min.js') => public_path('packages/cmf-vendors/moment/moment.min.js'),
             base_path('vendor/bower-asset/moment/locale') => public_path('packages/cmf-vendors/moment/locale'),
