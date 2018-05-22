@@ -21,18 +21,22 @@ var DebugDialog = function () {
         if (!content) {
             content = '';
         }
-        if (content.length > 3 && content[0] === '{' && content[content.length - 1] === '}') {
+        console.log(content);
+        if (!$.isPlainObject(content) && content.length > 3 && content[0] === '{' && content[content.length - 1] === '}') {
             try {
                 var json = JSON.parse(content);
-                content = '<html><head></head><body><pre style="white-space: pre-wrap;">'
-                    + JSON.stringify(json, null, 3)
-                    + '</pre></body></html>';
+                content = json;
             } catch (ignore) {}
         }
-        if (!content.match(/^\s*<(html|!doctype)/i)) {
+        if ($.isPlainObject(content)) {
+            content = '<html><head></head><body><pre style="white-space: pre-wrap;">'
+                + JSON.stringify(content, null, 3).replace(/\\\\/g, '\\').replace(/\\["']/g, '"').replace(/\\n/g, "\n")
+                + '</pre></body></html>';
+        } else if (!content.match(/^\s*<(html|!doctype)/i)) {
             content = content.replace(/^([\s\S]*?)((?:<!doctype[^>]*>)?\s*<html[\s\S]*?<body[^>]*>)/i, '$2$1', content);
         }
         content = content.replace(/<(\/?script[^>]*)>/i, '&lt;$1&gt;');
+        console.log(content);
         $.extend(model, {
             isVisible: true,
             title: title,

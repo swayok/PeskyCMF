@@ -217,7 +217,7 @@ Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
     } else {
         CmfConfig.getDebugDialog().showDebug(
             'HTTP Error ' + xhr.status + ' ' + xhr.statusText,
-            xhr.responseText
+            json ? json : xhr.responseText
         );
     }
 };
