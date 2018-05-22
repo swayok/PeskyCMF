@@ -4,6 +4,7 @@ namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\PeskyCmfManager;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\Column;
@@ -21,6 +22,7 @@ class CmfMakeScaffoldCommand extends Command {
     protected $signature = 'cmf:make-scaffold {table_name}'
                             . ' {--resource= : name of resource if it differs from table_name}'
                             . ' {--cmf-config-class= : full class name to a class that extends CmfConfig}'
+                            . ' {--cmf-section= : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}'
                             . ' {--class-name= : short scaffold class name}'
                             . ' {--keyvalue : table is key-value storage}';
 
@@ -65,11 +67,18 @@ class CmfMakeScaffoldCommand extends Command {
                 /** @var CmfConfig $class */
                 $this->cmfConfigClass = $class::getInstance();
             } else {
-                $this->cmfConfigClass = CmfConfig::getDefault();
-                if (get_class($this->cmfConfigClass) === CmfConfig::class) {
-                    throw new \InvalidArgumentException(
-                        'Child class for CmfConfig was not found. You need to provide it through --cmf-config-class option '
-                    );
+                $sectionName = $this->option('cmf-section');
+                if ($sectionName) {
+                    /** @var PeskyCmfManager $peskyCmfManager */
+                    $peskyCmfManager = app(PeskyCmfManager::class);
+                    $this->cmfConfigClass = $peskyCmfManager->getCmfConfigForSection($sectionName);
+                } else {
+                    $this->cmfConfigClass = CmfConfig::getDefault();
+                    if (get_class($this->cmfConfigClass) === CmfConfig::class) {
+                        throw new \InvalidArgumentException(
+                            'Child class for CmfConfig was not found. You need to provide it through --cmf-config-class option '
+                        );
+                    }
                 }
             }
         }
