@@ -278,6 +278,12 @@ class DataGridConfig extends ScaffoldSectionConfig {
         if (!($orderBy instanceof DbExpr) && !$this->getTable()->getTableStructure()->hasColumn($orderBy)) {
             throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$orderBy]");
         }
+        if ($orderBy instanceof DbExpr) {
+            $orderBy->setWrapInBrackets(false);
+            if (empty($direction)) {
+                $this->orderDirection = null;
+            }
+        }
         if (!empty($direction)) {
             $this->setOrderDirection($direction);
         }
