@@ -177,6 +177,7 @@ class CmfAuthModule {
             }
             $user->commit();
             return cmfJsonResponse()
+                ->setData(['_reload_user' => true])
                 ->setMessage(cmfTransCustom('page.profile.saved'))
                 ->reloadPage();
         }
