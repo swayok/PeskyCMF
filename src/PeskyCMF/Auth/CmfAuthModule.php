@@ -175,15 +175,10 @@ class CmfAuthModule {
             if (!empty(trim($request->input('new_password')))) {
                 $user->setPassword($request->input('new_password'));
             }
-            if ($user->commit()) {
-                return cmfJsonResponse()
-                    ->setMessage(cmfTransCustom('page.profile.saved'))
-                    ->reloadPage();
-            } else {
-                return cmfJsonResponse(HttpCode::SERVER_ERROR)
-                    ->setMessage(cmfTransGeneral('form.failed_to_save_resource_data'))
-                    ->reloadPage();
-            }
+            $user->commit();
+            return cmfJsonResponse()
+                ->setMessage(cmfTransCustom('page.profile.saved'))
+                ->reloadPage();
         }
     }
 
