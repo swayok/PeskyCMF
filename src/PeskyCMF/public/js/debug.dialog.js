@@ -21,7 +21,6 @@ var DebugDialog = function () {
         if (!content) {
             content = '';
         }
-        console.log(content);
         if (!$.isPlainObject(content) && content.length > 3 && content[0] === '{' && content[content.length - 1] === '}') {
             try {
                 var json = JSON.parse(content);
@@ -36,7 +35,6 @@ var DebugDialog = function () {
             content = content.replace(/^([\s\S]*?)((?:<!doctype[^>]*>)?\s*<html[\s\S]*?<body[^>]*>)/i, '$2$1', content);
         }
         content = content.replace(/<(\/?script[^>]*)>/i, '&lt;$1&gt;');
-        console.log(content);
         $.extend(model, {
             isVisible: true,
             title: title,
