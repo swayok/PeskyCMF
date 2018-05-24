@@ -4,6 +4,9 @@ namespace PeskyCMF\Http;
 
 use Illuminate\Http\JsonResponse;
 
+/**
+ * @method CmfJsonResponse setData($data = [])
+ */
 class CmfJsonResponse extends JsonResponse {
 
     static protected $messageKey = '_message';
@@ -31,6 +34,16 @@ class CmfJsonResponse extends JsonResponse {
      */
     public function __construct(array $data = null, $status = 200, array $headers = [], $options = 0) {
         parent::__construct($data === null ? [] : $data, $status, $headers, $options);
+    }
+
+    /**
+     * @param array $additionalData
+     * @return CmfJsonResponse
+     */
+    public function addData(array $additionalData) {
+        $data = $this->getData(true);
+        $data = array_merge($data, $additionalData);
+        return $this->setData($data);
     }
 
     /**
