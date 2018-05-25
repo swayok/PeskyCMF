@@ -317,6 +317,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             $className = $this->getAppConfigs()->get('peskycmf.cmf_configs.' . $defaultConfig);
             if (!empty($className)) {
                 $className::getInstance()->useAsDefault();
+                $this->app->singleton(CmfConfig::class, function () {
+                    return CmfConfig::getDefault();
+                });
             }
         }
     }
