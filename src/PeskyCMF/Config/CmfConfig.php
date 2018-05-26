@@ -948,7 +948,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array - key - section name, value - array that contains names of classes that extend CmfApiDocumentation class
      */
     static public function getApiDocumentationClasses() {
-        $classNames = static::config('api_docs_class_names', []);
+        $classNames = static::config('api_documentation.classes', []);
         if (empty($classNames)) {
             $classNames = static::loadApiDocumentationClassesFromFileSystem();
         }

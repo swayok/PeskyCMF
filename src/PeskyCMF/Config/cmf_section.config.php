@@ -215,21 +215,22 @@ return [
     'http_requests_logger_class_name' => null,
 
     /**
-     * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation or \PeskyCMF\ApiDocs\CmfApiDocumentation class
-     * Note: there is a possibility to load classes automatically using 'api_documentation_classes_folder'. More details
-     * in CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem()
-     */
-    'api_docs_class_names' => [
-
-    ],
-
-    /**
      * API documentation settings
      * Linked commands:
      * @see \PeskyCMF\Console\Commands\CmfMakeApiDocCommand - makes API documentation page class (wiki-like)
      * @see \PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand - makes API method documentation class
      */
     'api_documentation' => [
+
+        /**
+         * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation or \PeskyCMF\ApiDocs\CmfApiDocumentation class
+         * Note: there is a possibility to load classes automatically using 'api_documentation_classes_folder'. More details
+         * in CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem()
+         */
+        'classes' => [
+
+        ],
+
         /**
          * Absolute path to folder where api docs classes will be stored when using
          * 'cmf:make-api-doc' and 'cmf:make-api-method-doc' artisan command
@@ -248,13 +249,6 @@ return [
          */
         'class_suffix' => 'Documentation'
     ],
-
-
-    /**
-     * Folder under app_path() folder where api docs classes will be stored when using
-     * 'cmf:make-api-method-doc' artisan command
-     */
-    'api_documentation_classes_folder' => 'Api/Docs',
 
     /**
      * Alter umask()
