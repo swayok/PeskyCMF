@@ -165,6 +165,26 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     }
 
     /**
+     * @param string $actionId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlCustomAction($actionId, array $queryArgs = [], $absolute = false) {
+        return routeToCmfResourceCustomAction(static::getResourceName(), $actionId, $queryArgs, $absolute);
+    }
+
+    /**
+     * @param string $pageId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlCustomPage($pageId, array $queryArgs = [], $absolute = false) {
+        return routeToCmfResourceCustomPage(static::getResourceName(), $pageId, $queryArgs, $absolute);
+    }
+
+    /**
      * @param mixed $itemId
      * @param bool $absolute
      * @return string
@@ -189,6 +209,28 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      */
     static public function getUrlToItemEditForm($itemId, $absolute = false) {
         return routeToCmfItemEditForm(static::getResourceName(), $itemId, $absolute);
+    }
+
+    /**
+     * @param mixed $itemId
+     * @param string $actionId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlToItemCustomAction($itemId, $actionId, array $queryArgs = [], $absolute = false) {
+        return routeToCmfItemCustomAction(static::getResourceName(), $itemId, $actionId, $queryArgs, $absolute);
+    }
+
+    /**
+     * @param mixed $itemId
+     * @param string $pageId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlToItemCustomPage($itemId, $pageId, array $queryArgs = [], $absolute = false) {
+        return routeToCmfItemCustomPage(static::getResourceName(), $itemId, $pageId, $queryArgs, $absolute);
     }
 
     /**
