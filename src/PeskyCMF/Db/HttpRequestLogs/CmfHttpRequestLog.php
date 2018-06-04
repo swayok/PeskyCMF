@@ -8,7 +8,7 @@ use Illuminate\Routing\Route;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
-use Psr\Log\InvalidArgumentException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -114,9 +114,30 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 }
             }
 
+            $files = array_map(function ($file) {
+                if ($file instanceof UploadedFile) {
+                    return [
+                        'name' => $file->getClientOriginalName(),
+                        'path' => $file->getPathname(),
+                        'size' => $file->getSize(),
+                        'type' => $file->getMimeType(),
+                        'error' => $file->getError(),
+                        'error_message' => $file->getError() !== 0 ? $file->getErrorMessage() : ''
+                    ];
+                } else if ($file instanceof \SplFileInfo) {
+                    return [
+                        'name' => $file->getPathname(),
+                        'size' => $file->getSize(),
+                        'type' => $file->getType()
+                    ];
+                } else {
+                    return $file;
+                }
+            }, $request->file());
             $requestData = [
                 'GET' => $this->hidePasswords($request->query()),
-                'POST' => $this->hidePasswords($request->input()),
+                'POST' => $this->hidePasswords($request->post()),
+                'FILES' => $files,
                 'SERVER' => array_intersect_key($request->server(), array_flip(static::$serverDataKeys))
             ];
             $this
