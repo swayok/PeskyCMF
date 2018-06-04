@@ -97,6 +97,19 @@ class CmfHttpRequestLogsTable extends AbstractTable {
 
     /**
      * @param RecordInterface $record
+     * @param array|null $columnsToLog
+     * @param array|null $relationsToLog
+     * @return CmfHttpRequestLog
+     */
+    static public function logDbRecordCreation(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
+        static::$currentLogRecord = $record;
+        static::$columnsToLog = $columnsToLog;
+        static::$relationsToLog = $relationsToLog;
+        return static::getCurrentLog()->logDbRecordAfterChange($record, $columnsToLog, $relationsToLog);
+    }
+
+    /**
+     * @param RecordInterface $record
      * @return CmfHttpRequestLog
      */
     static public function logDbRecordUsage(RecordInterface $record) {
