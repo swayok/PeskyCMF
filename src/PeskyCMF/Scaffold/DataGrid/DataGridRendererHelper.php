@@ -389,7 +389,7 @@ class DataGridRendererHelper {
             if ($rowAction instanceof Tag) {
                 $rowAction = $rowAction->build();
             } else if ($rowAction instanceof CmfMenuItem) {
-                $rowAction = $rowAction->renderAsButton();
+                $rowAction = $rowAction->renderAsIcon('row-action');
             }
             if (is_string($key)) {
                 $rowActions[$key] = $rowAction;
