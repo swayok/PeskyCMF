@@ -117,7 +117,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
 
             $files = array_map(function ($file) {
                 if ($file instanceof UploadedFile) {
-                    $fileExists = File::exist($file->getPathname());
+                    $fileExists = !empty($file->getPathname()) && File::exist($file->getPathname());
                     return [
                         'name' => $file->getClientOriginalName(),
                         'path' => $file->getPathname(),
@@ -127,7 +127,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                         'error_message' => $file->getError() !== 0 ? $file->getErrorMessage() : ''
                     ];
                 } else if ($file instanceof \SplFileInfo) {
-                    $fileExists = File::exist($file->getPathname());
+                    $fileExists = !empty($file->getPathname()) && File::exist($file->getPathname());
                     return [
                         'name' => $file->getPathname(),
                         'size' => $fileExists ? $file->getSize() : -1,
