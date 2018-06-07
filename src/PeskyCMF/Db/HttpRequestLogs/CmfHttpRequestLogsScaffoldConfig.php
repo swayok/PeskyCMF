@@ -112,7 +112,8 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig {
                         }
                         return $valueViewer->doDefaultValueConversionByType(htmlentities($value), $valueViewer::TYPE_MULTILINE, $record);
                     }),
-                'debug',
+                'debug' => ValueCell::create()
+                    ->setType(ValueCell::TYPE_MULTILINE),
             ]);
     }
 

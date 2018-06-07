@@ -116,4 +116,13 @@ class CmfHttpRequestLogsTable extends AbstractTable {
         return static::getCurrentLog()->logDbRecordUsage($record);
     }
 
+    /**
+     * @param string $key
+     * @param mixed $value - no objects supported!!
+     * @return CmfHttpRequestLog
+     */
+    static public function addDebugData($key, $value) {
+        return static::getCurrentLog()->addDebugData($key, $value);
+    }
+
 }

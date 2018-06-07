@@ -8,6 +8,7 @@ use Illuminate\Routing\Route;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
+use Swayok\Utils\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -116,19 +117,23 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
 
             $files = array_map(function ($file) {
                 if ($file instanceof UploadedFile) {
+                    $fileExists = File::exist($file->getPathname());
                     return [
                         'name' => $file->getClientOriginalName(),
                         'path' => $file->getPathname(),
-                        'size' => $file->getSize(),
-                        'type' => $file->getMimeType(),
+                        'size' => $fileExists ? $file->getSize() : -1,
+                        'type' => $fileExists ? $file->getMimeType() : null,
                         'error' => $file->getError(),
                         'error_message' => $file->getError() !== 0 ? $file->getErrorMessage() : ''
                     ];
                 } else if ($file instanceof \SplFileInfo) {
+                    $fileExists = File::exist($file->getPathname());
                     return [
                         'name' => $file->getPathname(),
-                        'size' => $file->getSize(),
-                        'type' => $file->getType()
+                        'size' => $fileExists ? $file->getSize() : -1,
+                        'type' => $fileExists ? $file->getType() : null,
+                        'error' => $fileExists ? 0 : -1,
+                        'error_message' => $fileExists ? 'File not exists' : '',
                     ];
                 } else {
                     return $file;
@@ -336,6 +341,24 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     protected function logException(\Exception $exception, array $context = []) {
         $context['exception'] = $exception;
         \Log::critical($exception->getMessage(), $context);
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value - no objects supported!!
+     * @return $this
+     */
+    public function addDebugData($key, $value) {
+        if ($this->isAllowed()) {
+            try {
+                $debug = $this->hasValue('debug') ? $this->debug : '';
+                $debug .= $key . ': ' . json_encode($value, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n";
+                $this->setDebug($debug);
+            } catch (\Exception $exception) {
+                $this->logException($exception);
+            }
+        }
+        return $this;
     }
 
 }
