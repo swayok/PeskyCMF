@@ -140,6 +140,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 }
             }, $request->file());
             $requestData = [
+                'HEADERS' => $request->header(),
                 'GET' => $this->hidePasswords($request->query()),
                 'POST' => $this->hidePasswords($request->post()),
                 'FILES' => $files,
