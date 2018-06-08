@@ -9,6 +9,7 @@ use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
 use Swayok\Utils\File;
+use Swayok\Utils\Set;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -140,10 +141,15 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 }
             }, $request->file());
             $requestData = [
-                'HEADERS' => array_flatten($request->header()),
                 'GET' => $this->hidePasswords($request->query()),
                 'POST' => $this->hidePasswords($request->post()),
                 'FILES' => $files,
+                'HEADERS' => array_map(function ($value) {
+                    if (is_array($value) && count($value) === 1 && isset($value[0])) {
+                        return $value[0];
+                    }
+                    return $value;
+                }, $request->header()),
                 'SERVER' => array_intersect_key($request->server(), array_flip(static::$serverDataKeys))
             ];
             $this
