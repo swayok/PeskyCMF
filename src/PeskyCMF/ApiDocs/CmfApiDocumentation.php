@@ -65,11 +65,11 @@ HTML;
     }
 
     public function getDescription() {
-        return $this->translate($this->description);
+        return $this->description ? $this->translate($this->description) : '';
     }
 
     public function hasDescription() {
-        return trim(preg_replace('%</?[^>]+>%', '', $this->description)) !== '';
+        return trim(preg_replace('%</?[^>]+>%', '', $this->getDescription())) !== '';
     }
 
     public function getUuid() {
