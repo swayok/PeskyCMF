@@ -6,7 +6,6 @@ use Illuminate\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
-use PeskyCMF\Auth\Middleware\CmfAuth;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
@@ -567,7 +566,7 @@ class CmfAuthModule {
      *
      * @param string $policyName
      */
-    protected function configureAuthorizationGatesAndPolicies() {
+    public function configureAuthorizationGatesAndPolicies() {
         app()->singleton($this->authPolicyName, $this->getAccessPolicyClassName());
         \Gate::resource('resource', $this->authPolicyName, [
             'view' => 'view',
@@ -588,7 +587,7 @@ class CmfAuthModule {
         \Gate::define('cmf_page', $this->authPolicyName . '@cmf_page');
     }
 
-    protected function listenForUserAuthenticationEvents() {
+    public function listenForUserAuthenticationEvents() {
         \Event::listen(CmfUserAuthenticated::class, CmfUserAuthenticatedEventListener::class);
     }
 
