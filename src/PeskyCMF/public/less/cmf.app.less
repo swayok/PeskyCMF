@@ -1945,17 +1945,22 @@ aside.main-sidebar {
         .translate(0, 0);
     }*/
 
-    .item-details-modal-content {
+    .datagrid-modal-items-navigation {
+        position: fixed;
+        top: 0;
+        z-index: 1;
+        left: -50px;
+        right: -50px;
+        height: 100%;
 
         button.prev-item,
         button.next-item {
             position: absolute;
-            top: 50%;
             color: #FFFFFF;
             background-color: transparent;
             border-width: 0;
             font-size: 30px;
-            ._fade-to(0.4);
+            ._fade-to(0.7);
             outline: 0 none !important;
             text-shadow:
                 -1px -1px 3px rgba(0, 0, 0, 0.30),
@@ -1963,7 +1968,15 @@ aside.main-sidebar {
                 -1px 1px 5px rgba(0, 0, 0, 0.30),
                 1px 1px 5px rgba(0, 0, 0, 0.30);
 
-            .transition(opacity 0.2s linear);
+            .transition(opacity 0.15s linear);
+
+            &.top {
+                top: 5px
+            }
+
+            &.bottom {
+                bottom: 5px;
+            }
 
             &:hover {
                 ._fade-in;
@@ -1976,13 +1989,23 @@ aside.main-sidebar {
         }
 
         .prev-item {
-            left: -50px;
+            left: 0;
         }
 
         .next-item {
-            right: -50px;
+            right: 0;
         }
     }
+
+    .modal-content {
+        z-index: 2;
+    }
+
+    //.item-details-modal-content {
+    //    position: relative;
+    //
+    //
+    //}
 
     .item-form-modal-content {
         @creation-color: rgba(60, 141, 188, 1);

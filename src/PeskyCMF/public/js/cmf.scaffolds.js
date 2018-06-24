@@ -1770,6 +1770,9 @@ var ScaffoldFormHelper = {
                             }
                             api.rows().deselect();
                             api.ajax.reload(null, resetDataGridPagination);
+                        })
+                        .on('shown.bs.modal', function () {
+                            $('body').addClass('modal-open');
                         });
                     })
                     .modal({

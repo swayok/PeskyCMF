@@ -279,6 +279,9 @@ Utils.handleAjaxSuccess = function (json) {
                 show: true,
                 backdrop: 'static'
             })
+            .on('shown.bs.modal', function () {
+                $('body').addClass('modal-open');
+            })
             .find('[data-toggle="tooltip"]')
             .tooltip();
     }

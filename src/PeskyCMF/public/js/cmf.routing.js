@@ -24,7 +24,7 @@ var CmfRoutingHelpers = {
         if (CmfRoutingHelpers.$currentContent && CmfRoutingHelpers.$currentContent.hasClass('modal')) {
             CmfRoutingHelpers.$currentContent
                 .data('closed-automatically', '1')
-                .on('hidden.bs.modal', function () {
+                .one('hidden.bs.modal', function () {
                     deferred.resolve();
                 })
                 .modal('hide');
@@ -150,6 +150,9 @@ var CmfRoutingHelpers = {
                 CmfRoutingHelpers.$currentContent = $modal;
                 CmfRoutingHelpers.setCurrentContentContainer($modal.find('.modal-dialog'));
                 Utils.updatePageTitleFromH1($modal);
+            })
+            .on('shown.bs.modal', function () {
+                $('body').addClass('modal-open');
             });
         $(document.body).append($modal);
         deferred.resolve($modal);
