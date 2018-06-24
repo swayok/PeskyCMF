@@ -333,7 +333,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{table_name}/action/{action}', [
+        Route::any('{table_name}/action/{action}', [
             'as' => $routeNamePrefix . 'cmf_api_resource_custom_action',
             'uses' => $apiControllerClass . '@performAction',
             'fallback' => [
@@ -342,7 +342,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{table_name}/{id}/action/{action}', [
+        Route::any('{table_name}/{id}/action/{action}', [
             'as' => $routeNamePrefix . 'cmf_api_item_custom_action',
             'uses' => $apiControllerClass . '@performActionForItem',
             'fallback' => [

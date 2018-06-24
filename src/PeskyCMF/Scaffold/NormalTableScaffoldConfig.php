@@ -426,7 +426,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $object->begin()->updateValue($relation->getLocalColumnName(), $relationPk, false)->commit();
             } else {
                 // has many relations should work normally this way
-                $object->begin()->updateRelatedRecord($relationName, $relationUpdates, false)->commit();
+                $object->begin()->updateRelatedRecord($relationName, $relationUpdates, false)->commit([$relationName], true);
             }
         }
     }
