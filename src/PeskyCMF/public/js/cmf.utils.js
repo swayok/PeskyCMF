@@ -249,7 +249,7 @@ Utils.handleAjaxSuccess = function (json) {
     if (json._reload_user) {
         Utils.getUser(true);
     }
-    if (json.modal && $.isPlainObject(json.modal) && json.modal.content) {
+    if (json.modal && $.isPlainObject(json.modal) && (typeof json.modal.content !== 'undefined')) {
         var $modal = Utils.makeModal(
             json.modal.title || '',
             json.modal.content,
