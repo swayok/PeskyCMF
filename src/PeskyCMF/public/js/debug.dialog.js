@@ -27,7 +27,7 @@ var DebugDialog = function () {
                 content = json;
             } catch (ignore) {}
         }
-        if ($.isPlainObject(content)) {
+        if (typeof content !== 'string') {
             content = '<html><head></head><body><pre style="white-space: pre-wrap;">'
                 + JSON.stringify(content, null, 3).replace(/\\\\/g, '\\').replace(/\\["']/g, '"').replace(/\\n/g, "\n")
                 + '</pre></body></html>';
