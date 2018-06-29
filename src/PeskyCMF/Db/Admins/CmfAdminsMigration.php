@@ -21,16 +21,13 @@ class CmfAdminsMigration extends Migration {
                 $table->boolean('is_active')->default(true);
                 $table->string('role', 50)->default(CmfAdminsTableStructure::getColumn('role')->getDefaultValueAsIs());
                 $table->char('language', 2)->default(CmfAdminsTableStructure::getColumn('language')->getDefaultValueAsIs());
-                $currentTimestamp = \DB::raw(CmfAdminsTable::quoteDbExpr(CmfAdminsTable::getCurrentTimeDbExpr()->setWrapInBrackets(false)));
-                $table->timestampTz('created_at')->default($currentTimestamp);
-                $table->timestampTz('updated_at')->default($currentTimestamp);
+                $table->timestampTz('created_at')->default(\DB::raw('NOW()'));
+                $table->timestampTz('updated_at')->default(\DB::raw('NOW()'));
                 $table->string('timezone')->nullable();
                 $table->rememberToken();
 
                 $table->index('parent_id');
-                $table->index('password');
-                $table->index('created_at');
-                $table->index('updated_at');
+                $table->index('is_active');
                 $table->unique('email');
                 $table->unique('login');
 
