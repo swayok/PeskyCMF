@@ -200,6 +200,7 @@ abstract class ScaffoldSectionConfig {
     protected function setValueViewers(array $viewers) {
         /** @var AbstractValueViewer|null $config */
         foreach ($viewers as $name => $config) {
+            $valueConverter = null;
             if (is_int($name)) {
                 $name = $config;
                 $config = null;

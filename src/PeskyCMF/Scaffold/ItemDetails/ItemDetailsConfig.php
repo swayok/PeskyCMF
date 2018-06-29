@@ -106,6 +106,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     public function setValueViewers(array $valueCells) {
         /** @var AbstractValueViewer|null $config */
         foreach ($valueCells as $name => $config) {
+            $valueConverter = null;
             if (is_array($config)) {
                 /** @var array $config */
                 $this->newRowsGroup(is_int($name) ? '' : $name);
@@ -121,8 +122,14 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
                 if (is_int($name)) {
                     $name = $config;
                     $config = null;
+                } else if ($config instanceof \Closure) {
+                    $valueConverter = $config;
+                    $config = null;
                 }
                 $this->addValueViewer($name, $config);
+                if (!empty($valueConverter)) {
+                    $this->getValueViewer($name)->setValueConverter($valueConverter);
+                }
             }
         }
         return $this;
