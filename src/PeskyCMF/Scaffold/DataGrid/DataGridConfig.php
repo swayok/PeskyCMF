@@ -109,15 +109,15 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     /**
      * Alias for setValueViewers
-     * @param array $formInputs
+     * @param array $datagridColumns
      * @return $this
      * @throws \UnexpectedValueException
      * @throws \BadMethodCallException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws \InvalidArgumentException
      */
-    public function setColumns(array $formInputs) {
-        return $this->setValueViewers($formInputs);
+    public function setColumns(array $datagridColumns) {
+        return $this->setValueViewers($datagridColumns);
     }
 
     /**

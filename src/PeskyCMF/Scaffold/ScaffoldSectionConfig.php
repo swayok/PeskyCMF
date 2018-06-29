@@ -203,8 +203,14 @@ abstract class ScaffoldSectionConfig {
             if (is_int($name)) {
                 $name = $config;
                 $config = null;
+            } else if ($config instanceof \Closure) {
+                $valueConverter = $config;
+                $config = null;
             }
             $this->addValueViewer($name, $config);
+            if (!empty($valueConverter)) {
+                $this->getValueViewer($name)->setValueConverter($valueConverter);
+            }
         }
         return $this;
     }
