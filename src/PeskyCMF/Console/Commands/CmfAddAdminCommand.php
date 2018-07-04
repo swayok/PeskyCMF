@@ -11,7 +11,12 @@ use PeskyORM\Core\Utils;
 class CmfAddAdminCommand extends Command {
 
     protected $description = 'Create administrator in DB';
-    protected $signature = 'cmf:add-admin {email_or_login} {role=admin} {table=admins} {schema?} {--login : use [login] field instead of [email]}';
+    protected $signature = 'cmf:add-admin 
+        {email_or_login} 
+        {role=admin} 
+        {table=admins} 
+        {schema?} 
+        {--login : use [login] field instead of [email]}';
 
     public function fire() {
         // compatibility with Laravel <= 5.4

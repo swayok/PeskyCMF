@@ -2,15 +2,17 @@
 
 namespace PeskyCMF\Console\Commands;
 
-use PeskyCMF\Config\CmfConfig;
 use Swayok\Utils\File;
 
 class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
 
     protected $description = 'Create class that extends CmfApiMethodDocumentation class';
 
-    protected $signature = 'cmf:make-api-method-doc {class_name} {docs_group} {--auto : automatically set url, http method, translation paths, etc..}
-                                {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}';
+    protected $signature = 'cmf:make-api-method-doc 
+        {class_name} 
+        {docs_group}
+        {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}
+        {--auto : automatically set url, http method, translation paths, etc..}';
 
     protected function makeClass($className, $namespace, $filePath) {
         $this->line('Writing class ' .  $namespace . '\\' . $className . ' to file ' . $filePath);

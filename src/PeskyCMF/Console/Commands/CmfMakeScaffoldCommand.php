@@ -19,12 +19,13 @@ class CmfMakeScaffoldCommand extends Command {
      *
      * @var string
      */
-    protected $signature = 'cmf:make-scaffold {table_name}'
-                            . ' {--resource= : name of resource if it differs from table_name}'
-                            . ' {--cmf-config-class= : full class name to a class that extends CmfConfig}'
-                            . ' {--cmf-section= : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}'
-                            . ' {--class-name= : short scaffold class name}'
-                            . ' {--keyvalue : table is key-value storage}';
+    protected $signature = 'cmf:make-scaffold
+        {table_name}
+        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}
+        {--resource= : name of resource if it differs from table_name}
+        {--cmf-config-class= : full class name to a class that extends CmfConfig}
+        {--class-name= : short scaffold class name}
+        {--keyvalue : table is key-value storage}';
 
     /**
      * The console command description.
@@ -67,8 +68,8 @@ class CmfMakeScaffoldCommand extends Command {
                 /** @var CmfConfig $class */
                 $this->cmfConfigClass = $class::getInstance();
             } else {
-                $sectionName = $this->option('cmf-section');
-                if ($sectionName) {
+                $sectionName = $this->argument('cmf-section');
+                if (!empty($sectionName)) {
                     /** @var PeskyCmfManager $peskyCmfManager */
                     $peskyCmfManager = app(PeskyCmfManager::class);
                     $this->cmfConfigClass = $peskyCmfManager->getCmfConfigForSection($sectionName);

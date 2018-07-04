@@ -12,8 +12,10 @@ class CmfMakeApiDocCommand extends Command {
 
     protected $description = 'Create class that extends CmfApiDocumentation class';
 
-    protected $signature = 'cmf:make-api-doc {class_name} {docs_group}
-                                {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}';
+    protected $signature = 'cmf:make-api-doc 
+        {class_name} 
+        {docs_group}
+        {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}';
 
     public function fire() {
         // compatibility with Laravel <= 5.4

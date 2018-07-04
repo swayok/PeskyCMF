@@ -10,7 +10,10 @@ use Swayok\Utils\Folder;
 class CmfInstallCommand extends CmfCommand {
 
     protected $description = 'Install PeskyCMF';
-    protected $signature = 'cmf:install {app_subfolder=Admin} {url_prefix=admin} {database_classes_app_subfolder=Db}';
+    protected $signature = 'cmf:install 
+        {app_subfolder=Admin} 
+        {url_prefix=admin} 
+        {database_classes_app_subfolder=Db}';
 
     public function fire() {
         // compatibility with Laravel <= 5.4
