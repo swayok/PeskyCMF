@@ -9,6 +9,8 @@ $keysLabel = $valueViewer->getKeysLabel();
 $valuesLabel = $valueViewer->getValuesLabel();
 $defaultId = $valueViewer->getDefaultId();
 $inputName = $valueViewer->getName(true);
+$hasKeysOptions = $valueViewer->hasKeysOptions();
+$keysOptions = $hasKeysOptions ? $valueViewer->getKeysOptions() : [];
 ?>
 
 <div id="<?php echo $defaultId; ?>-container">
@@ -18,8 +20,19 @@ $inputName = $valueViewer->getName(true);
     <script type="text/html" id="<?php echo $defaultId ?>-row-tpl">
         <tr>
             <td class="key form-group">
-                <input type="text" name="<?php echo $inputName; ?>[{{= it.index }}][key]" class="form-control input-sm"
-                id="<?php echo $defaultId; ?>-{{= it.index }}-key" value="{{= it.key || '' }}">
+                <?php if ($hasKeysOptions): ?>
+                    <select name="<?php echo $inputName; ?>[{{= it.index }}][key]" class="form-control input-sm"
+                    id="<?php echo $defaultId; ?>-{{= it.index }}-key">
+                        <?php foreach ($keysOptions as $optionValue => $optionLabel): ?>
+                            <option value="<?php echo $optionValue ?>" {{? it.key === '<?php echo $optionValue ?>' }}selected{{?}}>
+                                <?php echo $optionLabel ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php else: ?>
+                    <input type="text" name="<?php echo $inputName; ?>[{{= it.index }}][key]" class="form-control input-sm"
+                    id="<?php echo $defaultId; ?>-{{= it.index }}-key" value="{{= it.key || '' }}">
+                <?php endif; ?>
             </td>
             <td class="value form-group">
                 <input type="text" name="<?php echo $inputName; ?>[{{= it.index }}][value]" class="form-control input-sm"

@@ -8,6 +8,8 @@ class KeyValueSetFormInput extends FormInput {
     protected $maxValuesCount = 0; //< 0 = infinite
     /** @var string */
     protected $keysLabel;
+    /** @var \Closure|null */
+    protected $keysOptions;
     /** @var string */
     protected $valuesLabel;
     /** @var string */
@@ -61,6 +63,38 @@ class KeyValueSetFormInput extends FormInput {
     public function setKeysLabel($keysLabel) {
         $this->keysLabel = (string)$keysLabel;
         return $this;
+    }
+
+    /**
+     * @param \Closure $options
+     * @return $this
+     */
+    public function setKeysOptions(\Closure $options) {
+        $this->keysOptions = $options;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasKeysOptions() {
+        return !empty($this->keysOptions);
+    }
+
+    /**
+     * @return array|mixed
+     * @throws \BadMethodCallException
+     * @throws \UnexpectedValueException
+     */
+    public function getKeysOptions() {
+        if (!$this->keysOptions) {
+            throw new \BadMethodCallException('Key options closure is not set. Maybe you have missed hasKeysOptions() method call.');
+        }
+        $options = value($this->keysOptions);
+        if (!is_array($options)) {
+            throw new \UnexpectedValueException('Keys options closure must return an array');
+        }
+        return $options;
     }
 
     /**
@@ -151,10 +185,11 @@ class KeyValueSetFormInput extends FormInput {
     }
 
     public function getValidators($isCreation) {
+        $allowedValues = $this->hasKeysOptions() ? '|in:' . implode(',', array_keys($this->getKeysOptions())) : '';
         return [
             $this->getName() => 'array|min:' . $this->getMinValuesCount() . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
             $this->getName() . '.*' => 'array',
-            $this->getName() . '.*.key' => 'required|string',
+            $this->getName() . '.*.key' => 'required|string' . $allowedValues,
             $this->getName() . '.*.value' => 'required'
         ];
     }

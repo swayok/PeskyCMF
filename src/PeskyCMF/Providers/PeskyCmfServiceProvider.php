@@ -21,6 +21,7 @@ use PeskyORM\ORM\TableStructureInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 use Illuminate\Foundation\Application;
+use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 /**
  * @property Application $app
@@ -39,6 +40,11 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
         AliasLoader::getInstance()->alias('LanguageDetector', LanguageDetector::class);
         AliasLoader::getInstance()->alias('PeskyCmf', PeskyCmf::class);
+
+        if ($this->runningInConsole()) {
+            $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
+            $this->app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
+        }
 
         if ($this->app->environment() === 'local') {
             if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
