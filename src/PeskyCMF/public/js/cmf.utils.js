@@ -676,3 +676,21 @@ Utils.makeModal = function (title, content, footer, size) {
     };
     return $(Utils.modalTpl(tplData));
 };
+
+Utils.copyToClipboardFrom = function (element, message) {
+    var $el = $(element);
+    if (!$el.length) {
+        return;
+    }
+    var range = document.createRange();
+    range.selectNodeContents($el[0]);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('copy');
+    sel.removeAllRanges();
+    if (message && message.length) {
+        toastr.success(message.replace(/:text/g, $el.text()));
+    }
+    return false;
+};
