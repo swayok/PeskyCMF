@@ -751,7 +751,7 @@ if (!function_exists('pickLocalizationFromJson')) {
      */
     function pickLocalizationFromJson($translationsJson, $default = null, $isAssociativeArray = true) {
         $translations = json_decode($translationsJson, true);
-        return pickLocalization($translations, $default, $isAssociativeArray);
+        return is_array($translations) ? $default : pickLocalization($translations, $default, $isAssociativeArray);
     }
 
 }
