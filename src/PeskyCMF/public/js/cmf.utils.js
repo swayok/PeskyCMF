@@ -690,7 +690,7 @@ Utils.copyToClipboardFrom = function (element, message) {
     document.execCommand('copy');
     sel.removeAllRanges();
     if (message && message.length) {
-        toastr.success(message.replace(/:text/g, $el.text()));
+        toastr.info(message.replace(/:text/g, $el.text()));
     }
     return false;
 };
