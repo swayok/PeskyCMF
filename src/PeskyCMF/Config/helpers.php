@@ -698,20 +698,38 @@ if (!function_exists('formatSeconds')) {
 if (!function_exists('pickLocalization')) {
     /**
      * Pick correct localization strings from specially formatted array. Useful for localizations stored in DB
-     * @param array $translations - format: ['lang1_code' => 'translation1', 'lang2_code' => 'translation2', ...]
+     * @param array $translations
+     *      - associative array format ($isAssociativeArray = true): ['lang1_code' => 'translation1', 'lang2_code' => 'translation2', ...]
+     *      - indexed array format ($isAssociativeArray = false): [ ['key' => 'lang1_code', 'value' => 'translation1'], ...]
      * @param null|string $default - default value to return when there is no translation for app()->getLocale()
      *      language and for CmfConfig::getPrimary()->default_locale()
+     * @param bool $isAssociativeArray
+     *      - true: $translations keys = language codes, values = translations;
+     *      - false: $translations values = arrays with 2 keys: 'key' and 'value';
      * @return string|null
      */
-    function pickLocalization(array $translations, $default = null) {
+    function pickLocalization(array $translations, $default = null, $isAssociativeArray = true) {
         $langCodes = [app()->getLocale(), cmfConfig()->default_locale()];
         foreach ($langCodes as $langCode) {
-            if (
-                array_key_exists($langCode, $translations)
-                && is_string($translations[$langCode])
-                && trim($translations[$langCode]) !== ''
-            ) {
-                return $translations[$langCode];
+            if ($isAssociativeArray) {
+                if (
+                    array_key_exists($langCode, $translations)
+                    && is_string($translations[$langCode])
+                    && trim($translations[$langCode]) !== ''
+                ) {
+                    return $translations[$langCode];
+                }
+            } else {
+                foreach ($translations as $translation) {
+                    if (
+                        isset($translation['key'])
+                        && $translation['key'] === $langCode
+                        && !empty($translation['value'])
+                        && trim($translation['value']) !== ''
+                    ) {
+                        return $translation['value'];
+                    }
+                }
             }
         }
         return $default;
@@ -725,11 +743,15 @@ if (!function_exists('pickLocalizationFromJson')) {
      * @param string $translationsJson - format: '{"lang1_code": "translation1", "lang2_code": "translation2", ...}'
      * @param null|string $default - default value to return when there is no translation for app()->getLocale()
      *      language and for CmfConfig::getPrimary()->default_locale()
+     * @param bool $isAssociativeArray
+     *      - true: $translations keys = language codes, values = translations;
+     *      - false: $translations values = arrays with 2 keys: 'key' and 'value';
+     * @see pickLocalization()
      * @return string|null
      */
-    function pickLocalizationFromJson($translationsJson, $default = null) {
+    function pickLocalizationFromJson($translationsJson, $default = null, $isAssociativeArray = true) {
         $translations = json_decode($translationsJson, true);
-        return pickLocalization($translations, $default);
+        return pickLocalization($translations, $default, $isAssociativeArray);
     }
 
 }
