@@ -729,19 +729,7 @@ if (!function_exists('pickLocalizationFromJson')) {
      */
     function pickLocalizationFromJson($translationsJson, $default = null) {
         $translations = json_decode($translationsJson, true);
-        if (is_array($translations)) {
-            $langCodes = [app()->getLocale(), cmfConfig()->default_locale()];
-            foreach ($langCodes as $langCode) {
-                if (
-                    array_key_exists($langCode, $translations)
-                    && is_string($translations[$langCode])
-                    && trim($translations[$langCode]) !== ''
-                ) {
-                    return $translations[$langCode];
-                }
-            }
-        }
-        return $default;
+        return pickLocalization($translations, $default);
     }
 
 }
