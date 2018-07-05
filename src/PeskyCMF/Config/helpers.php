@@ -750,7 +750,7 @@ if (!function_exists('pickLocalizationFromJson')) {
      * @return string|null
      */
     function pickLocalizationFromJson($translationsJson, $default = null, $isAssociativeArray = true) {
-        $translations = json_decode($translationsJson, true);
+        $translations = is_array($translationsJson) ? $translationsJson : json_decode($translationsJson, true);
         return is_array($translations) ? $default : pickLocalization($translations, $default, $isAssociativeArray);
     }
 
