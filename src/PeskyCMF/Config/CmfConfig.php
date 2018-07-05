@@ -120,7 +120,7 @@ abstract class CmfConfig extends ConfigsContainer {
             'cookie' => true,
             'cookie_name' => static::makeUtilityKey('locale'),
             'cookie_encrypt' => true,
-            'languages' => static::locales(),
+            'languages' => static::locales_for_language_detector(),
         ];
     }
 
@@ -603,11 +603,19 @@ abstract class CmfConfig extends ConfigsContainer {
 
     /**
      * Supported locales for CMF
+     * @return array - each value is locale code (usually 2 chars: en, ru; rarely - 5 chars: ru_RU, en_US)
+     */
+    static public function locales() {
+        return array_unique(array_values(static::config('locales', ['en'])));
+    }
+
+    /**
+     * Supported locales for CMF
      * Note: you can redirect locales using key as locale to redirect from and value as locale to redirect to
      * For details see: https://github.com/vluzrmos/laravel-language-detector
      * @return array
      */
-    static public function locales() {
+    static public function locales_for_language_detector() {
         return static::config('locales', ['en']);
     }
 
