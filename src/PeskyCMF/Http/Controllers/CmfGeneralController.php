@@ -34,13 +34,16 @@ class CmfGeneralController extends CmfController {
     public function getPage(Request $request, $name) {
         if ($request->ajax()) {
             $this->authorize('cmf_page', [$name]);
-            if (
-                !\View::exists(static::getCmfConfig()->custom_views_prefix() . 'page.' . $name)
-                && \View::exists('cmf::page.' . $name)
-            ) {
+            $altName = str_replace('-', '_', $name);
+            $viewsPrefix = static::getCmfConfig()->custom_views_prefix();
+            if (\View::exists($viewsPrefix . 'page.' . $name)) {
+                // default
+            } else if ($altName !== $name && \View::exists($viewsPrefix . 'page.' . $altName)) {
+                return view($viewsPrefix . 'page.' . $altName)->render();
+            } else if (\View::exists('cmf::page.' . $name)) {
                 return view('cmf::page.' . $name)->render();
             }
-            return view(static::getCmfConfig()->custom_views_prefix() . 'page.' . $name)->render();
+            return view($viewsPrefix . 'page.' . $name)->render();
         } else {
             return view(static::getCmfConfig()->layout_view())->render();
         }
