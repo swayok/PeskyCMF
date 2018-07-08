@@ -216,6 +216,27 @@ if (!function_exists('routeToCmfItemAddForm')) {
     }
 }
 
+if (!function_exists('cmfRouteWithPossibleItemIdDotJsInsert')) {
+    /**
+     * @param string $route
+     * @param string|int|float $itemId
+     * @param array $parameters
+     * @param bool $absolute
+     * @return mixed|string
+     */
+    function cmfRouteWithPossibleItemIdDotJsInsert($route, $itemId, array $parameters, $absolute = false) {
+        if (preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId)) {
+            $parameters['id'] = '__dotjs_item_id_insert__';
+            $url = route($route, $parameters, $absolute);
+            $itemId = '{{' . trim($itemId, '{}') . '}}'; //< normalize inserts like '{= it.id }'
+            return str_replace('__dotjs_item_id_insert__', $itemId, $url);
+        } else {
+            $parameters['id'] = $itemId;
+            return route($route, $parameters, $absolute);
+        }
+    }
+}
+
 if (!function_exists('routeToCmfItemEditForm')) {
     /**
      * @param string $tableName
@@ -232,9 +253,12 @@ if (!function_exists('routeToCmfItemEditForm')) {
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
-        $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
-        $url = route($cmfConfig::getRouteName('cmf_item_edit_form'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
-        return str_replace('__dotjs_item_id_insert__', $itemId, $url);
+        return cmfRouteWithPossibleItemIdDotJsInsert(
+            $cmfConfig::getRouteName('cmf_item_edit_form'),
+            $itemId,
+            ['table_name' => $tableName],
+            $absolute
+        );
     }
 }
 
@@ -254,9 +278,12 @@ if (!function_exists('routeToCmfItemCloneForm')) {
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
-        $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
-        $url = route($cmfConfig::getRouteName('cmf_item_clone_form'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
-        return str_replace('__dotjs_item_id_insert__', $itemId, $url);
+        return cmfRouteWithPossibleItemIdDotJsInsert(
+            $cmfConfig::getRouteName('cmf_item_clone_form'),
+            $itemId,
+            ['table_name' => $tableName],
+            $absolute
+        );
     }
 }
 
@@ -276,9 +303,12 @@ if (!function_exists('routeToCmfItemDetails')) {
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
-        $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
-        $url = route($cmfConfig::getRouteName('cmf_item_details'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
-        return str_replace('__dotjs_item_id_insert__', $itemId, $url);
+        return cmfRouteWithPossibleItemIdDotJsInsert(
+            $cmfConfig::getRouteName('cmf_item_details'),
+            $itemId,
+            ['table_name' => $tableName],
+            $absolute
+        );
     }
 }
 
@@ -298,9 +328,12 @@ if (!function_exists('routeToCmfItemDelete')) {
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
-        $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
-        $url = route($cmfConfig::getRouteName('cmf_api_delete_item'), ['table_name' => $tableName, 'id' => $itemDotJs], $absolute);
-        return str_replace('__dotjs_item_id_insert__', $itemId, $url);
+        return cmfRouteWithPossibleItemIdDotJsInsert(
+            $cmfConfig::getRouteName('cmf_api_delete_item'),
+            $itemId,
+            ['table_name' => $tableName],
+            $absolute
+        );
     }
 }
 
@@ -361,7 +394,11 @@ if (!function_exists('routeToCmfItemCustomPage')) {
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
-        $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
+        $itemDotJs = $itemId;
+        if (preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId)) {
+            $itemDotJs = '__dotjs_item_id_insert__';
+            $itemId = '{{' . trim($itemId, '{} ') . '}}';
+        }
         $queryArgsEscaped = [];
         $replaces = [];
         if (!empty($queryArgs)) {
@@ -406,7 +443,11 @@ if (!function_exists('routeToCmfItemCustomAction')) {
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
-        $itemDotJs = preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId) ? '__dotjs_item_id_insert__' : $itemId;
+        $itemDotJs = $itemId;
+        if (preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId)) {
+            $itemDotJs = '__dotjs_item_id_insert__';
+            $itemId = '{{' . trim($itemId, '{} ') . '}}';
+        }
         $queryArgsEscaped = [];
         $replaces = [];
         if (!empty($queryArgs)) {
