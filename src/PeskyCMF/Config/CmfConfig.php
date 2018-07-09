@@ -630,6 +630,13 @@ abstract class CmfConfig extends ConfigsContainer {
         Column::setValidationErrorsMessages((array)static::transGeneral('form.message.column_validation_errors') ?: []);
     }
 
+    /**
+     * @return string - 2 chars lowercases
+     */
+    static public function getShortLocale() {
+        return strtolower(substr(app()->getLocale(), 0, 2));
+    }
+
     static protected $localeSuffixMap = [
         'en' => 'US',
         'ko' => 'KR',

@@ -97,6 +97,10 @@ class FormInput extends RenderableValueViewer {
         }
     }
 
+    protected function getNameForDisablers() {
+        return $this->getName(true);
+    }
+
     /**
      * Make default html id for input using $formInputName
      * @param string $formInputName
@@ -633,7 +637,7 @@ class FormInput extends RenderableValueViewer {
     public function getDisablersConfigs() {
         if (!array_key_exists('input_name', $this->disablersConfigs)) {
             $ret = [
-                'input_name' => $this->getName(true),
+                'input_name' => $this->getNameForDisablers(),
                 'conditions' => [],
             ];
             foreach ($this->disablersConfigs as $closure) {

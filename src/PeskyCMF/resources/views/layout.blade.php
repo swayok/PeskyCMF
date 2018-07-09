@@ -54,7 +54,8 @@
 
 </head>
 
-<body class="{{ cmfConfig()->ui_skin() }}" data-locale="{{ app()->getLocale() }}">
+@php($localeShort = \PeskyCMF\Config\CmfConfig::getShortLocale())
+<body class="{{ cmfConfig()->ui_skin() }}" data-locale="{{ $localeShort }}">
     <div class="wrapper has-preloader loading" id="page-wrapper">
 
     </div>
@@ -154,12 +155,12 @@
     @endif
 
     <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/db-query-builder/i18n/query-builder.{{ app()->getLocale() }}.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/moment/locale/{{ app()->getLocale() }}.js" type="text/javascript"></script>
-    @if (app()->getLocale() !== 'en')
+    <script src="/packages/cmf-vendors/db-query-builder/i18n/query-builder.{{ $localeShort }}.js" type="text/javascript"></script>
+    <script src="/packages/cmf-vendors/moment/locale/{{ $localeShort }}.js" type="text/javascript"></script>
+    @if ($localeShort !== 'en')
         <script src="/packages/cmf-vendors/bootstrap/select/js/i18n/defaults-{{ $localeWithSuffixUnderscored }}.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/select/js/locale/ajax-bootstrap-select.{{ $localeWithSuffixDashed }}.min.js" type="text/javascript"></script>
-        <script src="/packages/cmf-vendors/bootstrap/fileinput/js/locales/{{ strtolower(substr(app()->getLocale(), 0, 2)) }}.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/fileinput/js/locales/{{ strtolower(substr($localeShort, 0, 2)) }}.js" type="text/javascript"></script>
     @endif
 
     @foreach(cmfConfig()->layout_js_includes() as $jsPath)

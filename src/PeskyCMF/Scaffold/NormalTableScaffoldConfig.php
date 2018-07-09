@@ -254,7 +254,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $table::rollBackTransaction();
                 }
                 return $this->makeValidationErrorsJsonResponse($exc->getErrors());
-            } catch (\Exception $exc) {
+            } catch (\Throwable $exc) {
                 if ($table->inTransaction()) {
                     $table::rollBackTransaction();
                 }
