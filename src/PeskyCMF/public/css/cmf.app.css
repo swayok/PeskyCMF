@@ -2066,4 +2066,16 @@ aside.main-sidebar .sidebar-menu li .badge {
   margin-top: -10px;
   color: #777;
 }
+.image-previews-container {
+  text-align: center;
+}
+.image-previews-container .image-preview {
+  text-align: center;
+}
+.image-previews-container .image-preview img {
+  max-height: 200px;
+}
+.image-previews-container .image-preview .image-preview-label {
+  margin: 0 0 5px 0;
+}
 /*# sourceMappingURL=cmf.app.css.map */

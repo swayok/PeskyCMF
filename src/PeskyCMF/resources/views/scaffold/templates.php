@@ -34,6 +34,8 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
 
 <!-- itemForm end -->
 
+<?php if ($dataGridConfig->isBulkItemsEditingAllowed()): ?>
+
 <!-- bulkEditForm start -->
 
 <?php echo view(
@@ -41,6 +43,8 @@ $data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
     $data,
     $formConfig->getAdditionalDataForTemplate()
 )->render(); ?>
+
+<?php endif; ?>
 
 <!-- bulkEditForm end -->
 
