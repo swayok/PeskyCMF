@@ -59,14 +59,14 @@ class CmfInstallCommand extends CmfCommand {
     }
 
     /**
-     * Used in CmsInstall
+     * To be used in subclasses
      */
     protected function extender() {
 
     }
 
     protected function outro() {
-        $this->line('Remeber to perform next steps to activate cms:');
+        $this->line('Remeber to perform next steps to activate CMF:');
         $this->line('1. Add ' . PeskyCmfServiceProvider::class . ' to you app.providers config');
         $this->line('2. Remove ' . PeskyOrmServiceProvider::class . ' from you app.providers config');
         $this->line('3. Run "php artisan vendor:publish --tag=config" to add vendor configs to you "config" folder');

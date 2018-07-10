@@ -10,9 +10,6 @@ class CmfAddSectionCommand extends CmfInstallCommand {
         {url_prefix} 
         {database_classes_app_subfolder=Db}';
 
-    /**
-     * Used in CmsInstall
-     */
     protected function extender() {
 
     }

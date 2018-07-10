@@ -192,7 +192,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                     return InputRenderer::create('cmf::input/hidden');
                 })->setValueConverter(function ($value, Column $columnConfig, array $record) {
                     if (empty($value) && empty($record['id'])) {
-                        return \Auth::guard()->user()->getAuthIdentifier();
+                        return static::getUser()->id;
                     } else {
                         return $value;
                     }

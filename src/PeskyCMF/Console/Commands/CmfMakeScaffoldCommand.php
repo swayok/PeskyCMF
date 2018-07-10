@@ -371,7 +371,7 @@ VIEW;
 '{$column->getName()}' => FormInput::create()
                     ->setType(FormInput::TYPE_HIDDEN)
                     ->setSubmittedValueModifier(function () {
-                        return \Auth::guard()->user()->getAuthIdentifier();
+                        return static::getUser()->id;
                     }),
 VIEW;
 
