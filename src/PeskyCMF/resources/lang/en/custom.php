@@ -239,7 +239,7 @@ $dictionary = [
             'server_error' => 'Critical error on server',
         ]
     ],
-    'pages' => [
+    'cms_pages' => [
         'menu_title' => 'Pages',
         'types' => [
             'page' => 'Page',
@@ -410,7 +410,7 @@ $dictionary = [
             ]
         ]
     ],
-    'texts' => [
+    'cms_texts' => [
         'menu_title' => 'Texts for pages',
         'datagrid' => [
             'header' => 'Texts for pages',
@@ -497,7 +497,7 @@ $dictionary = [
             ]
         ]
     ],
-    'news' => [
+    'cms_news' => [
         'menu_title' => 'News',
         'datagrid' => [
             'header' => 'News',
@@ -510,7 +510,7 @@ $dictionary = [
             'header' => 'News item details',
         ]
     ],
-    'shop_categories' => [
+    'cms_shop_categories' => [
         'menu_title' => 'Shop categories',
         'datagrid' => [
             'header' => 'Shop categories',
@@ -523,7 +523,7 @@ $dictionary = [
             'header' => 'Shop category details',
         ]
     ],
-    'shop_items' => [
+    'cms_shop_items' => [
         'menu_title' => 'Shop items',
         'datagrid' => [
             'header' => 'Shop items',
@@ -536,7 +536,7 @@ $dictionary = [
             'header' => 'Shop item details',
         ]
     ],
-    'text_elements' => [
+    'cms_text_elements' => [
         'menu_title' => 'Text blocks',
         'datagrid' => [
             'header' => 'Text blocks',
@@ -549,7 +549,7 @@ $dictionary = [
             'header' => 'Text block details',
         ]
     ],
-    'menus' => [
+    'cms_menus' => [
         'menu_title' => 'Menus',
         'datagrid' => [
             'header' => 'Menus',
@@ -572,7 +572,7 @@ $dictionary = [
             ]
         ]
     ],
-    'redirects' => [
+    'cms_redirects' => [
         'menu_title' => 'Redirects',
         'datagrid' => [
             'header' => 'Redirects',
@@ -769,10 +769,10 @@ $dictionary = [
     ],
 ];
 
-$dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);
-$dictionary['shop_categories'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_categories']);
-$dictionary['shop_items'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_items']);
-$dictionary['text_elements'] = array_replace_recursive($dictionary['pages'], $dictionary['text_elements']);
-$dictionary['menus'] = array_replace_recursive($dictionary['pages'], $dictionary['menus']);
+$dictionary['cms_news'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_news']);
+$dictionary['cms_shop_categories'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_shop_categories']);
+$dictionary['cms_shop_items'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_shop_items']);
+$dictionary['cms_text_elements'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_text_elements']);
+$dictionary['cms_menus'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_menus']);
 
 return $dictionary;

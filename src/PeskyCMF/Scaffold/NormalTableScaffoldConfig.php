@@ -95,7 +95,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                         $columnsToSelect[] = $colName;
                     }
                 } else {
-                    $virtualColumns[] = implode('.', $colName);
+                    $virtualColumns[] = implode('.', (array)$colName);
                 }
             } else {
                 throw new \UnexpectedValueException(
