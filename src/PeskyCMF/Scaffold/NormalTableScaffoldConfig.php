@@ -28,7 +28,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $conditions = [
             'LIMIT' => (int)$request->query('length', $dataGridConfig->getRecordsPerPage()),
             'OFFSET' => (int)$request->query('start', 0),
-            'ORDER' => []
+            'ORDER' => [],
         ];
         $conditions = array_merge($dataGridConfig->getSpecialConditions(), $conditions);
         $searchInfo = $request->query('search');
@@ -48,7 +48,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $defaultDirectionWithNulls = stripos($defaultOrderByDirection, ' nulls ') !== false;
         $order = $request->query('order', [[
             'column' => $defaultOrderByColumn,
-            'dir' => $defaultOrderByDirection
+            'dir' => $defaultOrderByDirection,
         ]]);
         $columns = $request->query('columns', array());
         /** @var array $order */
@@ -216,8 +216,15 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse($formConfig->translate('message.create.forbidden'));
         }
         $table = static::getTable();
+        $expectedFields = [];
+        /** @var FormInput $valueViewer */
+        foreach ($formConfig->getValueViewers() as $valueViewer) {
+            if ($valueViewer->isShownOnCreate()) {
+                $expectedFields[] = $valueViewer->getName();
+            }
+        }
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            $this->getRequest()->only(array_keys($formConfig->getValueViewers())),
+            $this->getRequest()->only($expectedFields),
             true
         );
         $errors = $formConfig->validateDataForCreate($data);
@@ -276,7 +283,13 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden'));
         }
         $table = static::getTable();
-        $expectedFields = array_keys($formConfig->getValueViewers());
+        $expectedFields = [];
+        /** @var FormInput $valueViewer */
+        foreach ($formConfig->getValueViewers() as $valueViewer) {
+            if ($valueViewer->isShownOnEdit()) {
+                $expectedFields[] = $valueViewer->getName();
+            }
+        }
         $expectedFields[] = $table->getPkColumnName();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
             $this->getRequest()->only($expectedFields),
@@ -629,7 +642,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if ($this->getRequest()->has($idsField)) {
             $this->validate($this->getRequest(), [
                 $idsField => 'required|array',
-                $idsField . '.*' => 'integer|min:1'
+                $idsField . '.*' => 'integer|min:1',
             ]);
             $conditions[static::getTable()->getPkColumnName()] = $this->getRequest()->input($idsField);
         } else if ($this->getRequest()->has($conditionsField)) {
@@ -714,7 +727,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             [
                 $columnName . ($isAscending ? ' <=' : ' >=') => $position1,
                 $table::getPkColumnName() . ' !=' => [$otherId, $movedRecord->getPrimaryKeyValue()],
-                'ORDER' => [$columnName => 'ASC']
+                'ORDER' => [$columnName => 'ASC'],
             ]
         );
         $increment = $columnConfig instanceof RecordPositionColumn ? $columnConfig->getIncrement() : 100;
@@ -733,7 +746,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             $table::update(
                 [$columnName => DbExpr::create("`{$columnName}` + ``{$increment}`` + ``{$increment}``")],
                 [
-                    $columnName . '>=' => max($position1, $position2)
+                    $columnName . '>=' => max($position1, $position2),
                 ]
             );
             $newPosition = max($position1, $position2) + $increment;

@@ -302,6 +302,9 @@ class FormConfig extends ScaffoldSectionConfig {
         $validators = [];
         foreach ($this->getFormInputs() as $formInput) {
             /** @noinspection SlowArrayOperationsInLoopInspection */
+            if (($isCreation && !$formInput->isShownOnCreate()) || (!$isCreation && !$formInput->isShownOnEdit())) {
+                continue; //< input not shown
+            }
             $validators = array_merge($validators, $formInput->getValidators($isCreation));
         }
         return $validators;
@@ -734,6 +737,7 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @param array $data
      * @param bool $isCreation
+     * @param bool $isBulkEdit
      * @return array
      * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws \InvalidArgumentException
@@ -743,6 +747,9 @@ class FormConfig extends ScaffoldSectionConfig {
         /** @var FormInput[] $inputs */
         $inputs = $isBulkEdit ? $this->getBulkEditableColumns() : $this->getFormInputs();
         foreach ($inputs as $inputName => $formInput) {
+            if (($isCreation && !$formInput->isShownOnCreate()) || (!$isCreation && !$formInput->isShownOnEdit())) {
+                continue;
+            }
             if (!$isBulkEdit || array_has($data, $inputName)) {
                 array_set($data, $inputName, $formInput->modifySubmitedValueBeforeValidation(array_get($data, $inputName, ''), $data));
             }
