@@ -3,7 +3,6 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
@@ -20,6 +19,7 @@ class FormConfig extends ScaffoldSectionConfig {
     protected $bulkEditingTemplate = 'cmf::scaffold.bulk_edit_form';
 
     protected $allowRelationsInValueViewers = true;
+    protected $allowComplexValueViewerNames = true;
 
     /**
      * Fields list that can be edited in bulk (for many records at once)
@@ -379,7 +379,7 @@ class FormConfig extends ScaffoldSectionConfig {
                 || $formInput->getRelation()->getType() !== Relation::HAS_MANY
             )
         ) {
-            $this->configureRendererByColumnConfig($renderer, $formInput->getTableColumn());
+            $this->configureRendererByColumnConfig($renderer, $formInput);
         }
         if ($formInput->hasDefaultRendererConfigurator()) {
             call_user_func($formInput->getDefaultRendererConfigurator(), $renderer, $formInput);
@@ -392,8 +392,12 @@ class FormConfig extends ScaffoldSectionConfig {
      * @throws \BadMethodCallException
      * @throws \UnexpectedValueException
      */
-    protected function configureRendererByColumnConfig(ValueRenderer $renderer, Column $columnConfig) {
-        $renderer->setIsRequired($columnConfig->isValueRequiredToBeNotEmpty());
+    protected function configureRendererByColumnConfig(ValueRenderer $renderer, FormInput $formInput) {
+        if ($formInput::isComplexViewerName($formInput->getName())) {
+            $renderer->setIsRequired(false);
+        } else {
+            $renderer->setIsRequired($formInput->getTableColumn()->isValueRequiredToBeNotEmpty());
+        }
     }
 
     /**
@@ -749,6 +753,9 @@ class FormConfig extends ScaffoldSectionConfig {
         foreach ($inputs as $inputName => $formInput) {
             if (($isCreation && !$formInput->isShownOnCreate()) || (!$isCreation && !$formInput->isShownOnEdit())) {
                 continue;
+            }
+            if ($formInput::isComplexViewerName($inputName)) {
+                $inputName = implode('.', $formInput::splitComplexViewerName($inputName));
             }
             if (!$isBulkEdit || array_has($data, $inputName)) {
                 array_set($data, $inputName, $formInput->modifySubmitedValueBeforeValidation(array_get($data, $inputName, ''), $data));

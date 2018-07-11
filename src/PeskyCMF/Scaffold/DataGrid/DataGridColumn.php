@@ -86,6 +86,20 @@ class DataGridColumn extends RenderableValueViewer {
         return $this;
     }
 
+    public function setType($type) {
+        switch ($type) {
+            case static::TYPE_TEXT:
+            case static::TYPE_MULTILINE:
+            case static::TYPE_JSON:
+            case static::TYPE_JSONB:
+            case static::TYPE_LINK:
+            case static::TYPE_IMAGE:
+                $this->setIsSortable(false);
+                break;
+        }
+        return parent::setType($type);
+    }
+
     /**
      * @param string $width - 100, 100px, 25%. No units means that width is in pixels: 100 == 100px
      * @return $this

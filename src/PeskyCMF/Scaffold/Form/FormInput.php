@@ -86,7 +86,11 @@ class FormInput extends RenderableValueViewer {
      */
     public function getName($forHtmlInput = false) {
         if ($forHtmlInput) {
-            $nameParts = explode('.', $this->getName());
+            $name = $this->getName();
+            if (static::isComplexViewerName($name)) {
+                $name = implode('.', static::splitComplexViewerName($name));
+            }
+            $nameParts = explode('.', $name);
             if (count($nameParts) > 1) {
                 return $nameParts[0] . '[' . implode('][', array_slice($nameParts, 1)) . ']';
             } else {

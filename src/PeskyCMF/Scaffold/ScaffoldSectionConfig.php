@@ -518,7 +518,33 @@ abstract class ScaffoldSectionConfig {
             }
         }
         foreach ($valueViewers as $key => $valueViewer) {
-            if (
+            if ($valueViewer->isLinkedToDbColumn() && $valueViewer::isComplexViewerName($key)) {
+                $colName = $valueViewer->getTableColumn()->getName();
+                if (!array_has($recordWithBackup, $colName) && array_has($record, $colName)) {
+                    $value = array_get($record, $colName);
+                    if (is_string($value) && mb_strlen($value) >= 2) {
+                        $value = json_decode($value, true);
+                    }
+                    array_set($recordWithBackup, $colName, $value);
+                    array_set($recordWithBackup, '__' . $colName, $value);
+
+                }
+                if (
+                    method_exists($valueViewer, 'convertValue')
+                    && (
+                        !method_exists($valueViewer, 'isVisible')
+                        || $valueViewer->isVisible()
+                    )
+                ) {
+                    $key = implode('.', $valueViewer::splitComplexViewerName($key));
+                    $convertedValue = $valueViewer->convertValue(array_get($recordWithBackup, $key), $record);
+                    if ($valueViewer instanceof DataGridColumn) {
+                        array_set($recordWithBackup, $valueViewer::convertNameForDataTables($key), $convertedValue);
+                    } else {
+                        array_set($recordWithBackup, $key, $convertedValue);
+                    }
+                }
+            } else if (
                 !$valueViewer->isLinkedToDbColumn()
                 && !array_key_exists($key, $recordWithBackup)
                 && method_exists($valueViewer, 'convertValue')

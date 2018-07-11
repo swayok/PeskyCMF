@@ -239,9 +239,9 @@ $dictionary = [
             'server_error' => 'Критическая ошибка на стороне сервера',
         ]
     ],
-    'pages' => [
+    'cms_pages' => [
         'menu_title' => 'Страницы',
-        'types' => [
+        'type' => [
             'page' => 'Страница',
             'news' => 'Новость',
             'category' => 'Категория',
@@ -292,13 +292,6 @@ $dictionary = [
                     'updated_at' => 'Изменена',
                     'publish_at' => 'Дата публикации',
                 ],
-                'primary_text' => [
-                    'id' => 'ID текста',
-                    'title' => 'Заголовок страницы',
-                    'browser_title' => 'Заголовок браузера',
-                    'menu_title' => 'Название в меню',
-                    'content' => 'Текcт страницы',
-                ],
                 'parent' => [
                     'id' => 'ID родительской страницы',
                     'url_alias' => 'Относительный URL родительской страницы',
@@ -334,7 +327,7 @@ $dictionary = [
                 'text_id' => 'Тексты для страницы',
                 'publish_at' => 'Дата публикации',
                 'title' => 'Название (используется только в административной панели)',
-                'Texts' => [
+                'texts' => [
                     'title' => 'Полное название',
                     'menu_title' => 'Короткое название (для меню)',
                     'browser_title' => 'Заголовок браузера',
@@ -393,7 +386,7 @@ $dictionary = [
                 'text_id' => 'Тексты для страницы',
                 'publish_at' => 'Дата публикации',
                 'title' => 'Название',
-                'Texts' => [
+                'texts' => [
                     'id' => 'ID',
                     'title' => 'Полное название',
                     'language' => 'Язык',
@@ -408,93 +401,7 @@ $dictionary = [
             ]
         ]
     ],
-    'texts' => [
-        'menu_title' => 'Тексты для страниц',
-        'datagrid' => [
-            'header' => 'Тексты для страниц',
-            'column' => [
-                'id' => 'ID',
-                'parent_id' => 'Перевод для',
-                'language' => 'Язык текстов',
-                'title' => 'Полное название',
-                'menu_title' => 'Короткое название (для меню)',
-                'browser_title' => 'Заголовок браузера',
-                'comment' => 'Комментарий',
-                'content' => 'Текcт',
-                'meta_description' => 'Meta-description',
-                'meta_keywords' => 'Meta-keywords',
-                'custom_info' => 'Доп. информация',
-                'admin_id' => 'Последний редактор',
-                'created_at' => 'Создана',
-                'updated_at' => 'Изменена'
-            ],
-            'filter' => [
-                'cms_texts' => [
-                    'id' => 'ID',
-                    'parent_id' => 'Перевод для',
-                    'language' => 'Язык текстов',
-                    'title' => 'Полное название',
-                    'menu_title' => 'Короткое название (для меню)',
-                    'browser_title' => 'Заголовок браузера',
-                    'comment' => 'Комментарий',
-                    'content' => 'Текcт',
-                    'meta_description' => 'Meta-description',
-                    'meta_keywords' => 'Meta-keywords',
-                    'custom_info' => 'Доп. информация',
-                    'created_at' => 'Создана',
-                    'updated_at' => 'Изменена',
-                    'admin_id' => 'Последний редактор'
-                ]
-            ]
-        ],
-        'form' => [
-            'header_create' => 'Добавление текстов для страницы',
-            'header_edit' => 'Редактирование текстов для страницы',
-            'tab' => [
-                'general' => 'Общее',
-                'content' => 'Текст',
-            ],
-            'input' => [
-                'id' => 'ID',
-                'is_translation' => 'Перевод существующих текстов?',
-                'parent_id' => 'Перевод для текстов',
-                'language' => 'Язык текстов',
-                'title' => 'Полное название',
-                'menu_title' => 'Короткое название (для меню)',
-                'browser_title' => 'Заголовок браузера',
-                'comment' => 'Комментарий к редактированию текста',
-                'content' => 'Текcт',
-                'meta_description' => 'Meta-description',
-                'meta_keywords' => 'Meta-keywords',
-                'custom_info' => 'Доп. информация',
-                'created_at' => 'Создана',
-                'updated_at' => 'Изменена',
-            ],
-            'validation' => [
-                'unique_language_within_parent_id' => 'Перевод для текста ":parent_title" на указанный язык уже <a href=":url" data-toggle="tooltip" title="Загрузить перевод">существует</a>'
-            ]
-        ],
-        'item_details' => [
-            'header' => 'Тексты для страницы',
-            'field' => [
-                'id' => 'ID',
-                'parent_id' => 'Перевод для текстов',
-                'language' => 'Язык текстов',
-                'title' => 'Полное название',
-                'menu_title' => 'Короткое название (для меню)',
-                'browser_title' => 'Заголовок браузера',
-                'comment' => 'Комментарий',
-                'content' => 'Текcт',
-                'meta_description' => 'Meta-description',
-                'meta_keywords' => 'Meta-keywords',
-                'custom_info' => 'Доп. информация',
-                'created_at' => 'Создана',
-                'updated_at' => 'Изменена',
-                'admin_id' => 'Последний редактор'
-            ]
-        ]
-    ],
-    'news' => [
+    'cms_news' => [
         'menu_title' => 'Новости',
         'datagrid' => [
             'header' => 'Новости',
@@ -507,7 +414,7 @@ $dictionary = [
             'header' => 'Просмотр новости',
         ]
     ],
-    'shop_categories' => [
+    'cms_shop_categories' => [
         'menu_title' => 'Магазин: категории',
         'datagrid' => [
             'header' => 'Магазин: категории',
@@ -520,7 +427,7 @@ $dictionary = [
             'header' => 'Просмотр категории магазина',
         ]
     ],
-    'shop_items' => [
+    'cms_shop_items' => [
         'menu_title' => 'Магазин: товары',
         'datagrid' => [
             'header' => 'Магазин: товары',
@@ -533,7 +440,7 @@ $dictionary = [
             'header' => 'Просмотр товара в магазине',
         ]
     ],
-    'text_elements' => [
+    'cms_text_elements' => [
         'menu_title' => 'Текстовые блоки',
         'datagrid' => [
             'header' => 'Текстовые блоки',
@@ -546,7 +453,7 @@ $dictionary = [
             'header' => 'Просмотр текстового блока',
         ]
     ],
-    'menus' => [
+    'cms_menus' => [
         'menu_title' => 'Меню',
         'datagrid' => [
             'header' => 'Меню',
@@ -569,13 +476,14 @@ $dictionary = [
             ]
         ]
     ],
-    'redirects' => [
+    'cms_redirects' => [
         'menu_title' => 'Перенаправления',
         'datagrid' => [
             'header' => 'Перенаправления',
             'column' => [
                 'page_id' => 'Конечная страница',
-                'relative_url' => 'Исходный URL',
+                'from_url' => 'Исходный URL',
+                'to_url' => 'Конечный URL',
                 'is_permanent' => 'Постоянное?',
                 'id' => 'ID',
                 'admin_id' => 'Создатель',
@@ -583,9 +491,10 @@ $dictionary = [
                 'updated_at' => 'Изменено',
             ],
             'filter' => [
-                'redirects' => [
+                'cms_redirects' => [
                     'page_id' => 'Конечная страница',
-                    'relative_url' => 'Исходный URL',
+                    'from_url' => 'Исходный URL',
+                    'to_url' => 'Конечный URL',
                     'is_permanent' => 'Постоянное?',
                     'id' => 'ID',
                     'admin_id' => 'Создатель',
@@ -603,7 +512,8 @@ $dictionary = [
             'header_edit' => 'Редактирование перенаправления',
             'input' => [
                 'page_id' => 'Конечная страница',
-                'relative_url' => 'Исходный URL',
+                'from_url' => 'Исходный URL',
+                'to_url' => 'Конечный URL',
                 'is_permanent' => 'Постоянное?',
                 'id' => 'ID',
                 'admin_id' => 'Создатель',
@@ -616,12 +526,16 @@ $dictionary = [
                     'item' => 'Товары'
                 ]
             ],
+            'tooltip' => [
+                'to_url' => 'Если указана Конечная страница - поле должно быть пустым!'
+            ]
         ],
         'item_details' => [
             'header' => 'Информация о перенаправлении',
             'field' => [
                 'page_id' => 'Конечная страница',
-                'relative_url' => 'Исходный URL',
+                'from_url' => 'Исходный URL',
+                'to_url' => 'Конечный URL',
                 'is_permanent' => 'Постоянное?',
                 'id' => 'ID',
                 'admin_id' => 'Создатель',
@@ -771,10 +685,10 @@ $dictionary = [
     ],
 ];
 
-$dictionary['news'] = array_replace_recursive($dictionary['pages'], $dictionary['news']);
-$dictionary['shop_categories'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_categories']);
-$dictionary['shop_items'] = array_replace_recursive($dictionary['pages'], $dictionary['shop_items']);
-$dictionary['text_elements'] = array_replace_recursive($dictionary['pages'], $dictionary['text_elements']);
-$dictionary['menus'] = array_replace_recursive($dictionary['pages'], $dictionary['menus']);
+$dictionary['cms_news'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_news']);
+$dictionary['cms_shop_categories'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_shop_categories']);
+$dictionary['cms_shop_items'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_shop_items']);
+$dictionary['cms_text_elements'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_text_elements']);
+$dictionary['cms_menus'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_menus']);
 
 return $dictionary;

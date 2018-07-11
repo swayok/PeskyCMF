@@ -241,7 +241,7 @@ $dictionary = [
     ],
     'cms_pages' => [
         'menu_title' => 'Pages',
-        'types' => [
+        'type' => [
             'page' => 'Page',
             'news' => 'News item',
             'category' => 'Category',
@@ -334,7 +334,7 @@ $dictionary = [
                 'images' => 'Images',
                 'title' => 'Title (used only in administration panel)',
                 'publish at' => 'Publishing date',
-                'Texts' => [
+                'texts' => [
                     'title' => 'Full title',
                     'menu_title' => 'Short title (for menus)',
                     'browser_title' => 'Browser title',
@@ -394,7 +394,7 @@ $dictionary = [
                 'parent_id' => 'Parent page',
                 'title' => 'Title',
                 'publish at' => 'Publishing date',
-                'Texts' => [
+                'texts' => [
                     'id' => 'ID',
                     'title' => 'Full title',
                     'language' => 'Language',
@@ -407,93 +407,6 @@ $dictionary = [
                     'custom_info' => 'Additional info',
                     'admin_id' => 'Last modifier',
                 ],
-            ]
-        ]
-    ],
-    'cms_texts' => [
-        'menu_title' => 'Texts for pages',
-        'datagrid' => [
-            'header' => 'Texts for pages',
-            'column' => [
-                'id' => 'ID',
-                'parent_id' => 'Translation for',
-                'language' => 'Language',
-                'title' => 'Full title',
-                'menu_title' => 'Short title (for menus)',
-                'browser_title' => 'Browser title',
-                'comment' => 'Comment',
-                'content' => 'Text',
-                'meta_description' => 'Meta-description',
-                'meta_keywords' => 'Meta-keywords',
-                'custom_info' => 'Info',
-                'admin_id' => 'Last modifier',
-                'created_at' => 'Created',
-                'updated_at' => 'Updated',
-            ],
-            'filter' => [
-                'texts' => [
-                    'id' => 'ID',
-                    'parent_id' => 'Translation for',
-                    'language' => 'Language',
-                    'title' => 'Full title',
-                    'menu_title' => 'Short title (for menus)',
-                    'browser_title' => 'Browser title',
-                    'comment' => 'Comment',
-                    'content' => 'Text',
-                    'meta_description' => 'Meta-description',
-                    'meta_keywords' => 'Meta-keywords',
-                    'custom_info' => 'Info',
-                    'admin_id' => 'Last modifier',
-                    'created_at' => 'Created',
-                    'updated_at' => 'Updated',
-                ]
-            ]
-        ],
-        'form' => [
-            'header_create' => 'Texts for pages: creation',
-            'header_edit' => 'Texts for pages: editing',
-            'tab' => [
-                'general' => 'General',
-                'content' => 'Text',
-            ],
-            'input' => [
-                'id' => 'ID',
-                'is_translation' => 'Is translation of existing texts?',
-                'parent_id' => 'Translation for',
-                'language' => 'Language',
-                'title' => 'Full title',
-                'menu_title' => 'Short title (for menus)',
-                'browser_title' => 'Browser title',
-                'comment' => 'Comment for text editing',
-                'content' => 'Text',
-                'meta_description' => 'Meta-description',
-                'meta_keywords' => 'Meta-keywords',
-                'custom_info' => 'Additional info',
-                'admin_id' => 'Last modifier',
-                'created_at' => 'Created',
-                'updated_at' => 'Updated',
-            ],
-            'validation' => [
-                'unique_language_within_parent_id' => 'Translation for ":parent_title" texts already <a href=":url" data-toggle="tooltip" title="Загрузить перевод">exists</a> for selected language',
-            ]
-        ],
-        'item_details' => [
-            'header' => 'Texts for page: details',
-            'field' => [
-                'id' => 'ID',
-                'parent_id' => 'Translation for',
-                'language' => 'Language',
-                'title' => 'Full title',
-                'menu_title' => 'Short title (for menus)',
-                'browser_title' => 'Browser title',
-                'comment' => 'Comment for text editing',
-                'content' => 'Text',
-                'meta_description' => 'Meta-description',
-                'meta_keywords' => 'Meta-keywords',
-                'custom_info' => 'Additional info',
-                'admin_id' => 'Last modifier',
-                'created_at' => 'Created',
-                'updated_at' => 'Updated',
             ]
         ]
     ],
@@ -578,6 +491,8 @@ $dictionary = [
             'header' => 'Redirects',
             'column' => [
                 'relative_url' => 'Redirect from',
+                'from_url' => 'Redirect from',
+                'to_url' => 'Redirect to',
                 'page_id' => 'Redirect to page',
                 'is_permanent' => 'Is permanent?',
                 'id' => 'ID',
@@ -586,9 +501,10 @@ $dictionary = [
                 'updated_at' => 'Updated',
             ],
             'filter' => [
-                'redirects' => [
+                'cms_redirects' => [
                     'page_id' => 'Target page ID',
-                    'relative_url' => 'Redirect from URL',
+                    'from_url' => 'Redirect from URL',
+                    'to_url' => 'Redirect to URL',
                     'is_permanent' => 'Is permanent?',
                     'id' => 'ID',
                     'admin_id' => 'Last modifier',
@@ -605,7 +521,8 @@ $dictionary = [
             'header_create' => 'Redirect creation',
             'header_edit' => 'Redirect editing',
             'input' => [
-                'relative_url' => 'Redirect from URL',
+                'from_url' => 'Redirect from URL',
+                'to_url' => 'Redirect to URL',
                 'page_id' => 'Redirect to page',
                 'is_permanent' => 'Is permanent?',
                 'id' => 'ID',
@@ -619,11 +536,15 @@ $dictionary = [
                     'item' => 'Shop items'
                 ]
             ],
+            'tooltip' => [
+                'to_url' => 'This input must be empty when Redirect to page selected'
+            ]
         ],
         'item_details' => [
             'header' => 'Redirect details',
             'field' => [
-                'relative_url' => 'Redirect from URL',
+                'from_url' => 'Redirect from URL',
+                'to_url' => 'Redirect to URL',
                 'page_id' => 'Redirect to page',
                 'is_permanent' => 'Is permanent?',
                 'id' => 'ID',

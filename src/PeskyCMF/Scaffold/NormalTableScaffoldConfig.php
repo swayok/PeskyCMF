@@ -165,17 +165,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
-        $dbColumns = static::getTable()->getTableStructure()->getColumns();
         $columnsToSelect = $sectionConfig->getAdditionalColumnsToSelect();
-        foreach (array_keys($sectionConfig->getViewersLinkedToDbColumns(false)) as $colName) {
-            if (array_key_exists($colName, $dbColumns)) {
-                if ($dbColumns[$colName]->isItExistsInDb()) {
-                    $columnsToSelect[] = $colName;
-                }
-            } else {
-                throw new \UnexpectedValueException(
-                    "Column '{$colName}' does not exist in " . get_class(static::getTable()->getTableStructure())
-                );
+        /** @var RenderableValueViewer $valueViewer */
+        foreach ($sectionConfig->getViewersLinkedToDbColumns(false) as $valueViewer) {
+            if ($valueViewer->getTableColumn()->isItExistsInDb()) {
+                $columnsToSelect[] = $valueViewer->getTableColumn()->getName();
             }
         }
         if (!$object->fromDb($conditions, array_unique($columnsToSelect), array_keys($relationsToRead))->existsInDb()) {
@@ -216,22 +210,15 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse($formConfig->translate('message.create.forbidden'));
         }
         $table = static::getTable();
-        $expectedFields = [];
-        /** @var FormInput $valueViewer */
-        foreach ($formConfig->getValueViewers() as $valueViewer) {
-            if ($valueViewer->isShownOnCreate()) {
-                $expectedFields[] = $valueViewer->getName();
-            }
-        }
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            $this->getRequest()->only($expectedFields),
+            $this->getFilteredIncomingData($formConfig, true),
             true
         );
+        unset($data[$table->getPkColumnName()]);
         $errors = $formConfig->validateDataForCreate($data);
         if (count($errors) !== 0) {
             return $this->makeValidationErrorsJsonResponse($errors);
         }
-        unset($data[$table->getPkColumnName()]);
         if ($formConfig->hasBeforeSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeSaveCallback(), true, $data, $formConfig);
             if (empty($data)) {
@@ -283,16 +270,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden'));
         }
         $table = static::getTable();
-        $expectedFields = [];
-        /** @var FormInput $valueViewer */
-        foreach ($formConfig->getValueViewers() as $valueViewer) {
-            if ($valueViewer->isShownOnEdit()) {
-                $expectedFields[] = $valueViewer->getName();
-            }
-        }
-        $expectedFields[] = $table->getPkColumnName();
         $data = $formConfig->modifyIncomingDataBeforeValidation(
-            $this->getRequest()->only($expectedFields),
+            $this->getFilteredIncomingData($formConfig, false),
             false
         );
         $errors = $formConfig->validateDataForEdit($data);
@@ -360,6 +339,26 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
         }
         throw new \BadMethodCallException('There is no data to save');
+    }
+
+    protected function getFilteredIncomingData(FormConfig $formConfig, bool $isCreation): array {
+        $expectedDataKeys = [];
+        /** @var FormInput $valueViewer */
+        foreach ($formConfig->getValueViewers() as $valueViewer) {
+            if (($isCreation && $valueViewer->isShownOnCreate()) || (!$isCreation && $valueViewer->isShownOnEdit())) {
+                if ($valueViewer::isComplexViewerName($valueViewer->getName())) {
+                    list($colName, ) = $valueViewer::splitComplexViewerName($valueViewer->getName());
+                    $expectedDataKeys[] = $colName;
+                } else {
+                    $expectedDataKeys[] = $valueViewer->getName();
+                }
+            }
+        }
+        if (!$isCreation) {
+            $expectedDataKeys[] = static::getTable()->getPkColumnName();
+        }
+
+        return $this->getRequest()->only($expectedDataKeys);
     }
 
     /**
