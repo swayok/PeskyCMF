@@ -97,7 +97,7 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
                     /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $actionsValueViewer */
                     $actionsValueViewer = $gridColumnsConfigs[$dataGridConfig::ROW_ACTIONS_COLUMN_NAME];
                 ?>
-                <?php if ($actionsValueViewer->getPosition() === (int)$dataGridConfig->isAllowedMultiRowSelection()): ?>
+                <?php if ($dataGridConfig->isRowActionsColumnFixed()): ?>
                     fixedColumns++;
                 <?php endif; ?>
 

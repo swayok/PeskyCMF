@@ -644,8 +644,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param bool $isFixed
      * @return $this
      */
-    public function setIsRowActionsColumnFixed($isFixed) {
-        $this->isRowActionsColumnFixed = (bool)$isFixed;
+    public function setIsRowActionsColumnFixed(bool $isFixed) {
+        $this->isRowActionsColumnFixed = $isFixed;
         return $this;
     }
 
@@ -653,8 +653,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param bool $isEnabled
      * @return $this
      */
-    public function setIsContextMenuEnabled($isEnabled) {
-        $this->isContextMenuEnabled = (bool)$isEnabled;
+    public function setIsContextMenuEnabled(bool $isEnabled) {
+        $this->isContextMenuEnabled = $isEnabled;
         return $this;
     }
 
