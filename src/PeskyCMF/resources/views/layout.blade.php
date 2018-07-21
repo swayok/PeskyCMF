@@ -44,7 +44,6 @@
     @endif
 
     <link href="/packages/cmf-vendors/fonticons/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf-vendors/fonticons/ionicons/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
 
     @foreach(cmfConfig()->layout_css_includes() as $cssPath)
         <link href="{{ $cssPath }}" rel="stylesheet" type="text/css"/>

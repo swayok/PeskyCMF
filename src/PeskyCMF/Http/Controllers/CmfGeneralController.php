@@ -43,7 +43,8 @@ class CmfGeneralController extends CmfController {
             } else if (\View::exists('cmf::page.' . $name)) {
                 return view('cmf::page.' . $name)->render();
             }
-            return view($viewsPrefix . 'page.' . $name)->render();
+            $isModal = (bool)$request->query('modal', false);
+            return view($viewsPrefix . 'page.' . $name, ['isModal' => $isModal])->render();
         } else {
             return view(static::getCmfConfig()->layout_view())->render();
         }

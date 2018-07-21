@@ -660,15 +660,16 @@ Utils.initDebuggingTools = function () {
  * @param {String} content
  * @param {String?} footer
  * @param {String?} size - 'large' or 'small'. Default: 'medium'
+ * @param {String?} id - modal ID
  * @return {jQuery}
  */
-Utils.makeModal = function (title, content, footer, size) {
+Utils.makeModal = function (title, content, footer, size, id) {
     if (!Utils.modalTpl) {
         Utils.modalTpl = doT.template($('#modal-template').html());
     }
     Utils.modalsCount++;
     var tplData = {
-        id: 'cmf-custom-modal-' + Utils.modalsCount,
+        id: id || ('cmf-custom-modal-' + Utils.modalsCount),
         title: title,
         content: content,
         footer: footer,

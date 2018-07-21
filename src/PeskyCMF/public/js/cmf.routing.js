@@ -161,6 +161,41 @@ var CmfRoutingHelpers = {
     closeCurrentModalAndReloadDataGrid: function () {
         CmfRoutingHelpers.hideModals();
         ScaffoldDataGridHelper.reloadCurrentDataGrid();
+    },
+    renderModalFromHtml: function (request, html, modalId, modalSize, allowReload) {
+        // get modal template by size
+        if (!modalSize) {
+            modalSize = 'large';
+        }
+        var $content = CmfRoutingHelpers.wrapContent(html);
+        var title = Utils.getTitleFromContent($content);
+        $content.find('.content-header').remove();
+        $content.find('h1').remove();
+        if ($content.find('.content').length) {
+            $content = $content.find('.content').removeClass('content');
+        }
+        var $modal = Utils.makeModal(
+            title,
+            $content[0].outerHTML,
+            null,
+            modalSize,
+            modalId + 'modal'
+        );
+        if (allowReload) {
+            $modal.find('.reload-url-button').removeClass('hidden');
+        }
+        CmfRoutingHelpers
+            .initModalAndContent($modal, request)
+            .done(function () {
+                $modal
+                    .find('.reload-url-button, .open-url-in-new-tab-button')
+                        .attr('href', request.makeUrlToUseItInParentRequest())
+                        .attr('data-modal', modalSize);
+                ScaffoldActionsHelper.initActions($modal);
+                $modal.modal('show');
+                $(document.body).attr('data-modal-opened', '1');
+            });
+        CmfRoutingHelpers.hideContentContainerPreloader();
     }
 };
 
@@ -210,22 +245,48 @@ CmfRouteChange.showPage = function (request) {
             'page'
         );
     };
+
     if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
         switchBodyClass();
         Utils.updatePageTitleFromH1(Utils.getContentContainer());
         return;
     }
+
+    var isModal = request.isSubRequest();
+    var modalSize = 'large';
+    if (request.env().is_click && request.env().target && $(request.env().target).attr('data-modal')) {
+        isModal = true;
+        var maybeModalSize = $(request.env().target).attr('data-modal');
+        if (maybeModalSize === 'small' || maybeModalSize === 'medium') {
+            modalSize = maybeModalSize;
+        }
+    }
+
+    var queryString = request.querystring;
+    if (isModal) {
+        if (queryString && queryString.length > 1) {
+            queryString += '&modal=1'
+        } else {
+            queryString = 'modal=1'
+        }
+    }
+
     return $.when(
-            Utils.downloadHtml(request.pathname, false, false, request.querystring),
+            Utils.downloadHtml(request.pathname, false, false, queryString),
             AdminUI.showUI()
         )
         .done(function (html) {
-            CmfRoutingHelpers
-                .setCurrentContent(html, Utils.getContentContainer())
-                .done(function () {
-                    switchBodyClass();
-                });
+            if (!isModal) {
+                CmfRoutingHelpers
+                    .setCurrentContent(html, Utils.getContentContainer())
+                    .done(function () {
+                        switchBodyClass();
+                    });
+            } else {
+                var modalId = 'page-' + request.params.page;
+                CmfRoutingHelpers.renderModalFromHtml(request, html, modalId, modalSize, true);
+            }
             CmfRoutingHelpers.routeHandled(request);
         });
 };
@@ -245,19 +306,35 @@ CmfRouteChange.scaffoldResourceCustomPage = function (request) {
             );
         }
     };
+
     if (request.env().is_restore || (request.env().is_history && request.hasSamePathAs(page.previousRequest()))) {
         CmfRoutingHelpers.routeHandled(request);
         switchBodyClass();
         Utils.updatePageTitleFromH1(Utils.getContentContainer());
         return;
     }
+
     var isModal = request.isSubRequest();
     var modalSize = 'large';
     if (request.env().is_click && request.env().target && $(request.env().target).attr('data-modal')) {
         isModal = true;
+        var maybeModalSize = $(request.env().target).attr('data-modal');
+        if (maybeModalSize === 'small' || maybeModalSize === 'medium') {
+            modalSize = maybeModalSize;
+        }
     }
+
+    var queryString = request.querystring;
+    if (isModal) {
+        if (queryString && queryString.length > 1) {
+            queryString += '&modal=1'
+        } else {
+            queryString = 'modal=1'
+        }
+    }
+
     return $.when(
-            Utils.downloadHtml(request.pathname, false, false, request.querystring),
+            Utils.downloadHtml(request.pathname, false, false, queryString),
             AdminUI.showUI()
         )
         .done(function (html) {
@@ -268,33 +345,12 @@ CmfRouteChange.scaffoldResourceCustomPage = function (request) {
                         switchBodyClass();
                     });
             } else {
-                var $modal = $($('#modal-' + modalSize).html());
-                var $content = CmfRoutingHelpers.wrapContent(html);
-                $modal
-                    .attr('id', ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource) + '-page-' + request.params.page + '-modal')
-                    .find('.modal-title')
-                    .text(Utils.getTitleFromContent($content));
-                if ($content.find('.content').length) {
-                    $content = $content.find('.content').removeClass('content');
-                } else {
-                    $content.find('.content-header').remove();
-                    $content.find('h1').remove();
+                var modalId = ScaffoldActionsHelper.makeResourceBodyClass(request.params.resource);
+                if (request.params.id) {
+                    modalId += '-item';
                 }
-                $modal
-                    .find('.modal-body')
-                    .html('')
-                    .append($content);
-                CmfRoutingHelpers
-                    .initModalAndContent($modal, request)
-                    .done(function () {
-                        $modal
-                            .find('.reload-url-button, .open-url-in-new-tab-button')
-                            .attr('href', request.makeUrlToUseItInParentRequest());
-                        ScaffoldActionsHelper.initActions($modal);
-                        $modal.modal('show');
-                        $(document.body).attr('data-modal-opened', '1');
-                    });
-                CmfRoutingHelpers.hideContentContainerPreloader();
+                modalId += '-page-' + request.params.page;
+                CmfRoutingHelpers.renderModalFromHtml(request, html, modalId, modalSize, true);
             }
             CmfRoutingHelpers.routeHandled(request);
         });
