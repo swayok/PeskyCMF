@@ -170,6 +170,21 @@
         {!! $jsCode !!}
     @endforeach
 
+    <script type="application/javascript">
+        // fix for CKEditor modal inside bootstrap modal
+        $.fn.modal.Constructor.prototype.enforceFocus = function() {
+            var modal = this;
+            $(document).on('focusin.modal', function (e) {
+                if (modal.$element[0] !== e.target && !modal.$element.has(e.target).length
+                    && !$(e.target.parentNode).hasClass('cke_dialog_ui_input_select')
+                    && !$(e.target.parentNode).hasClass('cke_dialog_ui_input_textarea')
+                    && !$(e.target.parentNode).hasClass('cke_dialog_ui_input_text')) {
+                    modal.$element.focus()
+                }
+            });
+        };
+    </script>
+
     @stack('scripts')
 
     @stack('jscode')
