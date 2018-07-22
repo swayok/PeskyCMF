@@ -1162,6 +1162,13 @@ body.skin-black-light aside.main-sidebar .sidebar .sidebar-menu > li > a,
 body.skin-black-light aside.main-sidebar .sidebar .sidebar-menu > li.active > a {
   font-weight: 500;
 }
+body.skin-black-light aside.main-sidebar .sidebar .treeview-menu li.active > a {
+  font-weight: 500;
+  color: #666;
+}
+body.skin-black-light aside.main-sidebar .sidebar .treeview-menu li.active > a:hover {
+  color: #000;
+}
 body.skin-blue aside.main-sidebar .sidebar a,
 body.skin-green aside.main-sidebar .sidebar a,
 body.skin-purple aside.main-sidebar .sidebar a,
