@@ -235,7 +235,7 @@ class CmfGeneralController extends Controller {
             } else if (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
                 return route('cmf_items_table', [$matches[1]]);
             } else if (preg_match('%/api/([^/]+?)/([^/]+?)/?(?:details=(\d)|$)%i', $intendedUrl, $matches)) {
-                if ($matches[3] === '1') {
+                if (isset($matches[3]) && $matches[3] === '1') {
                     return route('cmf_item_details', [$matches[1], $matches[2]]);
                 } else {
                     return route('cmf_item_edit_form', [$matches[1], $matches[2]]);
