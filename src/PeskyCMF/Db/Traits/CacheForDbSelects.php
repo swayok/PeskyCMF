@@ -711,7 +711,7 @@ trait CacheForDbSelects {
             if (!empty($ret[$this->getPkColumnName()])) {
                 $ids = $ret[$this->getPkColumnName()];
             } else if (!empty($ret[0]) && !empty($ret[0][$this->getPkColumnName()])) {
-                $ids = Set::extract('/' . $ret[$this->getPkColumnName()]);
+                $ids = Set::extract('/' . $this->getPkColumnName(), $ret);
             } else if (!empty($conditionsAndOptions[$this->getPkColumnName()])) {
                 $ids = $conditionsAndOptions[$this->getPkColumnName()];
             }
