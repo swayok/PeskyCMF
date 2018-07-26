@@ -1070,7 +1070,7 @@ abstract class ScaffoldSectionConfig {
      * @return CmfRedirectMenuItem
      */
     public function getItemEditMenuItem($section = 'toolbar') {
-        return CmfMenuItem::redirect(routeToCmfItemEditForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'))
+        return CmfMenuItem::redirect(routeToCmfItemEditForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}', false, null, true))
             ->setTitle($this->translateGeneral($section . '.edit_item'))
             ->setIconClasses('glyphicon glyphicon-edit')
             ->setIconColorClass('text-green')
@@ -1086,7 +1086,7 @@ abstract class ScaffoldSectionConfig {
      * @return CmfRedirectMenuItem
      */
     public function getItemCloneMenuItem($section = 'toolbar') {
-        return CmfMenuItem::redirect(routeToCmfItemCloneForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'))
+        return CmfMenuItem::redirect(routeToCmfItemCloneForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}', false, null, true))
             ->setTitle($this->translateGeneral($section . '.clone_item'))
             ->setIconClasses('fa fa-copy')
             ->setIconColorClass('text-primary')
@@ -1102,7 +1102,7 @@ abstract class ScaffoldSectionConfig {
      * @return CmfRedirectMenuItem
      */
     public function getItemCreateMenuItem($section = 'toolbar') {
-        return CmfMenuItem::redirect(routeToCmfItemAddForm($this->getScaffoldConfig()->getResourceName()))
+        return CmfMenuItem::redirect(routeToCmfItemAddForm($this->getScaffoldConfig()->getResourceName(), [], false, null, true))
             ->setTitle($this->translateGeneral($section . '.create_item'))
             ->setIconClasses('fa fa-file-o')
             ->setIconColorClass('text-primary')
@@ -1119,7 +1119,7 @@ abstract class ScaffoldSectionConfig {
      * @return CmfRedirectMenuItem
      */
     public function getItemDetailsMenuItem($section = 'toolbar') {
-        return CmfMenuItem::redirect(routeToCmfItemDetails($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'))
+        return CmfMenuItem::redirect(routeToCmfItemDetails($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}', false, null, true))
             ->setTitle($this->translateGeneral($section . '.view_item'))
             ->setIconClasses('glyphicon glyphicon-info-sign')
             ->setIconColorClass('text-light-blue')
@@ -1135,7 +1135,7 @@ abstract class ScaffoldSectionConfig {
      * @return CmfRequestMenuItem
      */
     public function getItemDeleteMenuItem($section = 'toolbar') {
-        return CmfMenuItem::request(routeToCmfItemDelete($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}'), 'delete')
+        return CmfMenuItem::request(routeToCmfItemDelete($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}', false, null, true), 'delete')
             ->setTitle($this->translateGeneral($section . '.delete_item'))
             ->setIconClasses('glyphicon glyphicon-trash')
             ->setIconColorClass('text-red')
