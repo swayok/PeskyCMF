@@ -10,17 +10,23 @@ use PeskyORM\ORM\Column;
 trait ResetsPasswordsViaAccessKey {
 
     /**
+     * @param int|null $expiresIn - minutes until expiration. Default: config('auth.passwords.' . \Auth::getDefaultDriver() . '.expire', 60)
+     * @param array|null $additionalColumns - additional columns to encode. Default: $this->getAdditionalColumnsForPasswordRecoveryAccessKey()
      * @return string
      */
-    public function getPasswordRecoveryAccessKey() {
+    public function getPasswordRecoveryAccessKey(?int $expiresIn = null, ?array $additionalColumns = null) {
         /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
-        $expiresInMinutes = (int)config('auth.passwords.' . \Auth::getDefaultDriver() . '.expire', 60);
+        $expiresInMinutes = $expiresIn > 0 ? $expiresIn : (int)config('auth.passwords.' . \Auth::getDefaultDriver() . '.expire', 60);
         $data = [
             'account_id' => $this->getPrimaryKeyValue(),
             'expires_at' => (new \DateTime('now', new \DateTimeZone('UTC')))->getTimestamp() + $expiresInMinutes * 60,
         ];
         $this->reload(); //< needed to exclude situation with outdated data
-        foreach ($this->getAdditionalColumnsForPasswordRecoveryAccessKey() as $columnName) {
+        if ($additionalColumns === null) {
+            $additionalColumns = $this->getAdditionalColumnsForPasswordRecoveryAccessKey();
+        }
+        $data['added_keys'] = $additionalColumns;
+        foreach ($additionalColumns as $columnName) {
             $data[$columnName] = $this->getValue($columnName);
         }
         return \Crypt::encrypt(json_encode($data));
@@ -47,7 +53,7 @@ trait ResetsPasswordsViaAccessKey {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static public function loadFromPasswordRecoveryAccessKey($accessKey) {
+    static public function loadFromPasswordRecoveryAccessKey(string $accessKey) {
         try {
             $data = \Crypt::decrypt($accessKey);
         } catch (DecryptException $exc) {
@@ -61,6 +67,8 @@ trait ResetsPasswordsViaAccessKey {
         if (
             empty($data)
             || !is_array($data)
+            || !isset($data['added_keys'])
+            || !is_array($data['added_keys'])
             || empty($data['account_id'])
             || empty($data['expires_at'])
             || $data['expires_at'] < $now->getTimestamp()
@@ -72,8 +80,9 @@ trait ResetsPasswordsViaAccessKey {
         $conditions = [
             $user::getPrimaryKeyColumnName() => $data['account_id'],
         ];
-        foreach ($user->getAdditionalColumnsForPasswordRecoveryAccessKey() as $columnName) {
-            if (empty($data[$columnName])) {
+        $additionalColumns = $data['added_keys'];
+        foreach ($additionalColumns as $columnName) {
+            if (!array_key_exists($columnName, $data)) {
                 return false;
             }
             $fieldType = $user::getColumn($columnName)->getType();
