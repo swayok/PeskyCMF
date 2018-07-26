@@ -198,8 +198,15 @@ class CmfAccessPolicy {
             )
         ) {
             $table = $this->getCmfConfig()->getTableByUnderscoredName($tableName);
-            $ownerColumn = array_get(static::$ownerColumnForTable, $tableName, 'admin_id');
-            if (!$table->getTableStructure()->hasColumn($ownerColumn)) {
+            $ownerColumn = array_get(static::$ownerColumnForTable, $tableName, function () use ($table) {
+                if ($table->getTableStructure()->hasColumn('user_id')) {
+                    return 'user_id';
+                } else if ($table->getTableStructure()->hasColumn('admin_id')) {
+                    return 'admin_id';
+                }
+                return null;
+            });
+            if (!$ownerColumn || !$table->getTableStructure()->hasColumn($ownerColumn)) {
                 return true;
             }
             if ($recordOrItemIdOrFkValue === null) {
