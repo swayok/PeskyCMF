@@ -212,7 +212,7 @@ Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
         }
         return;
     }
-    if (xhr.responseText.length === 0 || !CmfConfig) {
+    if (xhr.responseText.length === 0 || typeof CmfConfig === 'undefined') {
         toastr.error('HTTP Error ' + xhr.status + ' ' + xhr.statusText);
     } else {
         CmfConfig.getDebugDialog().showDebug(
