@@ -227,15 +227,28 @@ Utils.handleAjaxSuccess = function (json) {
         if (json.redirect_with_reload) {
             document.location = json.redirect_with_reload;
         } else if (json.redirect) {
+            var hasPageJsRouter = typeof page !== 'undefined' && typeof page.show === 'function';
             switch (json.redirect) {
                 case 'back':
-                    page.back(json.redirect_fallback);
+                    if (hasPageJsRouter) {
+                        page.back(json.redirect_fallback);
+                    } else {
+                        document.location = json.redirect_fallback || '/';
+                    }
                     break;
                 case 'reload':
-                    page.reload();
+                    if (hasPageJsRouter) {
+                        page.reload();
+                    } else {
+                        document.location.reload();
+                    }
                     break;
                 default:
-                    page.show(json.redirect, null, true, true, {env: {is_ajax_response: true}});
+                    if (hasPageJsRouter) {
+                        page.show(json.redirect, null, true, true, {env: {is_ajax_response: true}});
+                    } else {
+                        document.location = json.redirect;
+                    }
             }
         }
     } catch (exc) {
