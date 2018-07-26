@@ -82,7 +82,6 @@ class CmfAccessPolicy {
      */
     static protected $cmfPages = [
         'login_as' => false, //< everyone except user with is_superadmin = true
-        'others' => true
     ];
 
     /**
