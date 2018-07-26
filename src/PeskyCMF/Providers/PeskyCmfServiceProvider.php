@@ -116,8 +116,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             // AdminLTE
             base_path('vendor/almasaeed2010/adminlte/dist/js/adminlte.js') => public_path('packages/adminlte/js/app.js'),
             base_path('vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js') => public_path('packages/adminlte/js/app.min.js'),
-            base_path('vendor/almasaeed2010/adminlte/dist/img/boxed-bg.jpg') => public_path('packages/adminlte/img/boxed-bg.jpg'),
-            base_path('vendor/almasaeed2010/adminlte/dist/img/boxed-bg.png') => public_path('packages/adminlte/img/boxed-bg.png'),
             base_path('vendor/almasaeed2010/adminlte/dist/css/alt/AdminLTE-without-plugins.css') => public_path('packages/adminlte/css/AdminLTE.css'),
             base_path('vendor/almasaeed2010/adminlte/dist/css/alt/AdminLTE-without-plugins.min.css') => public_path('packages/adminlte/css/AdminLTE.min.css'),
             base_path('vendor/almasaeed2010/adminlte/dist/css/skins') => public_path('packages/adminlte/css/skins'),
