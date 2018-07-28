@@ -46,16 +46,25 @@ class LogHttpRequest {
             }
         }
         $response = $next($request);
-        // do not wrap into if ($isAllowed) {} or you will lose server errors logging
-        try {
-            if ($response instanceof Response && $response->getStatusCode() === HttpCode::UNAUTHORISED) {
-                $user = null;
-            } else {
-                $user = \Auth::guard($authGuard ?: null)->user();
+        if ($response instanceof Response) {
+            if (!$isAllowed && $response->getStatusCode() >= 400) {
+                // now we can wrap into if ($isAllowed) {} and will not lose server errors logging
+                $isAllowed = true;
             }
-            CmfHttpRequestLogsTable::logResponse($request, $response, $user);
-        } catch (\Throwable $exception) {
-            \Log::error($exception);
+            if ($isAllowed) {
+                try {
+                    if ($response->getStatusCode() === HttpCode::UNAUTHORISED) {
+                        $user = null;
+                    } else {
+                        $user = \Auth::guard($authGuard ?: null)->user();
+                    }
+                    CmfHttpRequestLogsTable::logResponse($request, $response, $user);
+                } catch (\Throwable $exception) {
+                    \Log::error($exception);
+                }
+            }
+        } else {
+            \Log::error('LogHttpRequest: cannot log this response (not a Symfony response)', ['response' => $response]);
         }
         return $response;
     }

@@ -159,7 +159,8 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 ->setIp($request->ip())
                 ->setFilter($logName)
                 ->setSection($route->getAction('prefix') ?: 'web')
-            ;
+                ->save();
+            $this->begin(); //< to start collecting changes untill logResponse() is called
         } catch (\Exception $exception) {
             $this->logException($exception);
             $this->reset();
@@ -206,7 +207,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 $this->fromRequest($request, true);
             }
             try {
-                if ($this->hasValue('response')) {
+                if ($this->hasValue('response') && !empty($this->response)) {
                     throw new \BadMethodCallException('You should not call this method twice');
                 }
                 if (!empty($user) && $user->existsInDb()) {
@@ -228,7 +229,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                     ->setResponseCode($response->getStatusCode())
                     ->setResponseType(strtolower(preg_replace('%(Response|Cmf)%', '', class_basename($response))) ?: 'text')
                     ->setRespondedAt(static::getTable()->getCurrentTimeDbExpr())
-                    ->save();
+                    ->commit();
             } catch (\Exception $exception) {
                 $this->logException($exception);
             }
