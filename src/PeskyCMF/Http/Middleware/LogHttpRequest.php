@@ -4,7 +4,9 @@ namespace PeskyCMF\Http\Middleware;
 
 use Illuminate\Http\Request;
 use PeskyCMF\Db\HttpRequestLogs\CmfHttpRequestLogsTable;
+use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class LogHttpRequest {
 
@@ -46,7 +48,12 @@ class LogHttpRequest {
         $response = $next($request);
         // do not wrap into if ($isAllowed) {} or you will lose server errors logging
         try {
-            CmfHttpRequestLogsTable::logResponse($request, $response, \Auth::guard($authGuard ?: null)->user());
+            if ($response instanceof Response && $response->getStatusCode() === HttpCode::UNAUTHORISED) {
+                $user = null;
+            } else {
+                $user = \Auth::guard($authGuard ?: null)->user();
+            }
+            CmfHttpRequestLogsTable::logResponse($request, $response, $user);
         } catch (\Throwable $exception) {
             \Log::error($exception);
         }
