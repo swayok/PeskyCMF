@@ -36,12 +36,20 @@ class LogHttpRequest {
         CmfHttpRequestLogsTable::resetCurrentLog();
         app()->offsetUnset(ScaffoldLoggerInterface::class);
         if ($isAllowed) {
-            $log = CmfHttpRequestLogsTable::logRequest($request, (bool)$enableByDefault);
-            app()->instance(ScaffoldLoggerInterface::class, $log);
+            try {
+                $log = CmfHttpRequestLogsTable::logRequest($request, (bool)$enableByDefault);
+                app()->instance(ScaffoldLoggerInterface::class, $log);
+            } catch (\Throwable $exception) {
+                \Log::error($exception);
+            }
         }
         $response = $next($request);
         // do not wrap into if ($isAllowed) {} or you will lose server errors logging
-        CmfHttpRequestLogsTable::logResponse($request, $response, \Auth::guard($authGuard ?: null)->user());
+        try {
+            CmfHttpRequestLogsTable::logResponse($request, $response, \Auth::guard($authGuard ?: null)->user());
+        } catch (\Throwable $exception) {
+            \Log::error($exception);
+        }
         return $response;
     }
 
