@@ -638,6 +638,7 @@ $dictionary = [
                 'requester_table' => 'User type',
                 'requester_id' => 'User',
                 'requester_info' => 'User info',
+                'debug' => 'Debug data',
             ],
             'filter' => [
                 'http_request_logs' => [
@@ -660,6 +661,7 @@ $dictionary = [
                     'requester_table' => 'User type',
                     'requester_id' => 'User ID',
                     'requester_info' => 'User info',
+                    'debug' => 'Debug data',
                 ]
             ]
         ],
@@ -685,6 +687,7 @@ $dictionary = [
                 'requester_table' => 'User type',
                 'requester_id' => 'User',
                 'requester_info' => 'User info',
+                'debug' => 'Debug data',
             ]
         ]
     ],
