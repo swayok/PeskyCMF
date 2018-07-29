@@ -9,7 +9,7 @@
             @endif
             @php($info = value($info))
             @if (!empty($info['submenu']))
-                <li class="treeview">
+                <li class="treeview @if(!empty($info['open'])) menu-open @endif ">
                     <a href="@if (empty($info['url']))javascript: void(0)@else{{ $info['url'] }}@endif"
                     @if (!empty($info['id'])) id="{{ $info['id'] }}" @endif
                     @if (!empty($info['class'])) class="{{ $info['class'] }}" @endif>
@@ -17,7 +17,7 @@
                         <span>{!! trans($info['label']) !!}</span>
                         <i class="fa fa-angle-left pull-right"></i>
                     </a>
-                    <ul class="treeview-menu">
+                    <ul class="treeview-menu" @if(!empty($info['open'])) style="display: block" @endif>
                         @foreach ($info['submenu'] as $subItem)
                             @if (empty($subItem['url']))
                                 @continue

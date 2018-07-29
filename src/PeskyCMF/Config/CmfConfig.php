@@ -370,6 +370,7 @@ abstract class CmfConfig extends ConfigsContainer {
      *         array(
      *              'label' => 'label',
      *              'icon' => 'icon',
+     *              'open' => false,
      *              'submenu' => array(...)
      *         ),
      *    )
