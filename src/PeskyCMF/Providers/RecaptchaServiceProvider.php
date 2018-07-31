@@ -9,6 +9,7 @@ use Swayok\Utils\Curl;
 class RecaptchaServiceProvider extends ServiceProvider {
 
     public function boot() {
+        // validator usage: ['g-recaptcha-response' => 'required|string|recaptcha']
         \Validator::extend('recaptcha', function ($attribute, $value, $parameters) {
             if (empty($value)) {
                 return false;
@@ -24,7 +25,7 @@ class RecaptchaServiceProvider extends ServiceProvider {
                 || $isValid['key'] !== $value
                 || $isValid['expires_at'] < time()
             ) {
-                $isValid = static::valdate($cmfConfig::recaptcha_private_key(), $value, request()->getClientIp());
+                $isValid = static::validate($cmfConfig::recaptcha_private_key(), $value, request()->getClientIp());
             }
             if (!empty($isValid) && is_array($isValid)) {
                 $isValid['key'] = $value;
@@ -48,7 +49,7 @@ class RecaptchaServiceProvider extends ServiceProvider {
      * - false: invalid or failed to validate
      * - array: ['success' => bool, 'challenge_ts' => string, 'host_name' => string]
      */
-    static public function valdate($secret, $answer, $clientIp = null) {
+    static public function validate($secret, $answer, $clientIp = null) {
         $data = [
             'secret' => $secret,
             'response' => $answer,

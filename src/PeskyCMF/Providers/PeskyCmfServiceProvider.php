@@ -38,6 +38,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         });
 
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
+        $this->app->register(RecaptchaServiceProvider::class);
         AliasLoader::getInstance()->alias('LanguageDetector', LanguageDetector::class);
         AliasLoader::getInstance()->alias('PeskyCmf', PeskyCmf::class);
 

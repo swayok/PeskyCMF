@@ -187,10 +187,21 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    static public function recaptcha_private_key() {
-        return config('app.recaptcha_private_key');
+    static public function recaptcha_private_key(): ?string {
+        return config('services.recaptcha.private_key');
+    }
+
+    /**
+     * @return string|null
+     */
+    static public function recaptcha_public_key(): ?string {
+        return config('services.recaptcha.public_key');
+    }
+
+    static public function recaptcha_js_file(): string {
+        return 'https://www.google.com/recaptcha/api.js?hl=' . static::getShortLocale();
     }
 
     /**

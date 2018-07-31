@@ -4,6 +4,9 @@
  */
 $cmfConfig = $authModule->getCmfConfig();
 ?>
+<script type="application/javascript">
+    Utils.requireFiles(['{{ $cmfConfig::recaptcha_js_file() }}']);
+</script>
 <div class="login-box">
     <div class="login-logo">
         {!! $authModule->getLoginPageLogo() !!}
@@ -16,6 +19,11 @@ $cmfConfig = $authModule->getCmfConfig();
                     placeholder="{{ $cmfConfig::transCustom('.forgot_password.email_label') }}">
                 <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
             </div>
+            @if ($authModule->isRecaptchaAvailable())
+                <div class="form-group text-center">
+                    <div class="g-recaptcha ib" data-sitekey="{{ $cmfConfig::recaptcha_public_key() }}"></div>
+                </div>
+            @endif
             <div class="login-submit text-right">
                 <a class="btn btn-default btn-flat pull-left" href="{{ $authModule->getLoginPageUrl() }}">
                     {{ $cmfConfig::transGeneral('.action.back') }}

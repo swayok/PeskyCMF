@@ -163,6 +163,9 @@ class CmfAuthModule {
         $validationRules = [
             'password' => 'required|string|min:6|confirmed',
         ];
+        if ($this->isRecaptchaAvailable()) {
+            $validationRules['g-recaptcha-response'] = 'required|string|recaptcha';
+        }
         $columnsToSave = [];
         $tableStricture = $this->getUsersTable()->getTableStructure();
         if ($tableStricture::hasColumn('name')) {
@@ -385,9 +388,13 @@ class CmfAuthModule {
         if (!$this->isPasswordRestoreAllowed()) {
             return cmfJsonResponse(HttpCode::NOT_FOUND);
         }
-        $data = $this->validate($request, [
+        $validators = [
             'email' => 'required|email',
-        ]);
+        ];
+        if ($this->isRecaptchaAvailable()) {
+            $validators['g-recaptcha-response'] = 'required|string|recaptcha';
+        }
+        $data = $this->validate($request, $validators);
         $email = strtolower(trim($data['email']));
         if ($this->loginOnceUsingEmail($email)) {
             /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $user */
@@ -822,6 +829,10 @@ class CmfAuthModule {
      */
     protected function afterRegistration(RecordInterface $user) {
 
+    }
+
+    public function isRecaptchaAvailable():bool {
+        return !empty($this->getCmfConfig()->recaptcha_public_key());
     }
 
 }

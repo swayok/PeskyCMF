@@ -43,6 +43,9 @@ $dictionary = [
                 'min' => 'Lugin must contain at least :min symbols',
                 'unique' => 'Entered login already in use',
             ],
+            'g-recaptcha-response' => [
+                'required' => 'Prove that you\'re not a robot',
+            ]
         ]
     ],
     'forgot_password' => [
