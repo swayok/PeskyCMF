@@ -181,7 +181,7 @@ class CmfAuthModule {
         }
         $columnsToSave = array_keys($validationRules);
         if ($this->isRecaptchaAvailable()) {
-            $validationRules['g-recaptcha-response'] = 'required|string|recaptcha';
+            $validationRules['g-recaptcha-response'] = 'recaptcha';
         }
         foreach ($this->getCustomRegistrationFieldsAndValidators() as $columnName => $rules) {
             if (is_int($columnName)) {
@@ -397,7 +397,7 @@ class CmfAuthModule {
             'email' => 'required|email',
         ];
         if ($this->isRecaptchaAvailable()) {
-            $validators['g-recaptcha-response'] = 'required|string|recaptcha';
+            $validators['g-recaptcha-response'] = 'recaptcha';
         }
         $data = $this->validate($request, $validators);
         $email = strtolower(trim($data['email']));

@@ -9,7 +9,9 @@ use Swayok\Utils\Curl;
 class RecaptchaServiceProvider extends ServiceProvider {
 
     public function boot() {
-        // validator usage: ['g-recaptcha-response' => 'required|string|recaptcha']
+        // validator usage: ['g-recaptcha-response' => 'recaptcha']
+        // Note that 'required|string' may be omitted.
+        // Error translation is: 'validation.recaptcha'
         \Validator::extend('recaptcha', function ($attribute, $value, $parameters) {
             if (empty($value)) {
                 return false;
