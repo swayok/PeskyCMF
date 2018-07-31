@@ -15,7 +15,35 @@ $dictionary = [
         'password_label' => 'Password',
         'button_label' => 'Log in',
         'forgot_password_label' => 'Forgot password?',
+        'registration_label' => 'Create account',
         'login_failed' => 'Invalid E-mail or password',
+    ],
+    'registration_form' => [
+        'header' => 'Registration',
+        'email_label' => 'E-mail',
+        'login_label' => 'Login',
+        'name_label' => 'Name',
+        'password_label' => 'Password',
+        'password_confirmation_label' => 'Repeat password',
+        'button_label' => 'Create account',
+        'login_to_account_label' => 'Login to account',
+        'errors' => [
+            'password' => [
+                'min' => 'Minimum password length is :max symbols',
+                'confirmed' => 'Passwords do not match'
+            ],
+            'email' => [
+                'required' => 'Enter E-mail address',
+                'email' => 'Enter valid E-mail address',
+                'unique' => 'Entered E-mail address already in use'
+            ],
+            'login' => [
+                'required' => 'Enter login',
+                'regex' => 'Login may only contain latin letters, digits, "_", "-", "@", "."',
+                'min' => 'Lugin must contain at least :min symbols',
+                'unique' => 'Entered login already in use',
+            ],
+        ]
     ],
     'forgot_password' => [
         'header' => 'Password restoration',
@@ -160,13 +188,13 @@ $dictionary = [
                 'email' => [
                     'required' => 'Enter E-mail address',
                     'email' => 'Enter valid E-mail address',
-                    'unique' => 'Entered E-mail address already in use by another Administrator'
+                    'unique' => 'Entered E-mail address already in use'
                 ],
                 'login' => [
                     'required' => 'Enter login',
                     'regex' => 'Login may only contain latin letters, digits, "_", "-", "@", "."',
                     'min' => 'Lugin must contain at least :min symbols',
-                    'unique' => 'Entered login already in use by another Administrator',
+                    'unique' => 'Entered login already in use',
                 ],
                 'language' => [
                     'required' => 'Select language',

@@ -23,11 +23,11 @@ $loginInputName = $authModule->getUserLoginColumnName();
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
             <div class="row login-submit">
-                <div class="col-xs-8 forgot-password">
-                    @if ($authModule->isPasswordRestoreAllowed())
-                        <a href="{{ cmfRoute('cmf_forgot_password', [], false, $cmfConfig) }}">{{ $cmfConfig::transCustom('.login_form.forgot_password_label') }}</a>
-                    @endif
-                </div>
+                @if ($authModule->isPasswordRestoreAllowed())
+                    <div class="col-xs-8 forgot-password">
+                            <a href="{{ cmfRoute('cmf_forgot_password', [], false, $cmfConfig) }}">{{ $cmfConfig::transCustom('.login_form.forgot_password_label') }}</a>
+                    </div>
+                @endif
                 <div class="col-xs-4">
                     <button type="submit" class="btn btn-primary btn-block btn-flat">
                         {{ $cmfConfig::transCustom('.login_form.button_label') }}
@@ -36,4 +36,9 @@ $loginInputName = $authModule->getUserLoginColumnName();
             </div>
         </form>
     </div>
+    @if ($authModule->isRegistrationAllowed())
+        <div class="text-center mt20 register">
+            <a href="{{ cmfRoute('cmf_register', [], false, $cmfConfig) }}">{{ $cmfConfig::transCustom('.login_form.registration_label') }}</a>
+        </div>
+    @endif
 </div>

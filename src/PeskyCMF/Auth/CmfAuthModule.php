@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Auth;
 
+use App\Db\Users\User;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Event\CmfUserAuthenticated;
+use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Listeners\CmfUserAuthenticatedEventListener;
 use PeskyCMF\Traits\DataValidationHelper;
@@ -34,6 +36,7 @@ class CmfAuthModule {
     protected $forgotPasswordPageViewPath = 'cmf::ui.forgot_password';
     protected $replacePasswordPageViewPath = 'cmf::ui.replace_password';
     protected $userProfilePageViewPath = 'cmf::page.profile';
+    protected $registrationPageViewPath = 'cmf::ui.registration';
     // emails views
     protected $passwordRevoceryEmailViewPath = 'cmf::emails.password_restore_instructions';
     // html elements
@@ -110,11 +113,93 @@ class CmfAuthModule {
     }
 
     /**
-     * To be implemented manually
+     * Enable/disable password restore link in login form
+     * @return bool
+     */
+    public function isRegistrationAllowed() {
+        return $this->getCmfConfig()->config('auth.is_registration_allowed', true);
+    }
+
+    /**
      * @return \PeskyCMF\Http\CmfJsonResponse
      */
     public function renderUserRegistrationPageView() {
-        return cmfJsonResponse(HttpCode::NOT_FOUND);
+        if (!$this->isRegistrationAllowed()) {
+            return cmfJsonResponse(HttpCode::NOT_FOUND);
+        }
+        return view($this->registrationPageViewPath, [
+            'authModule' => $this,
+        ])->render();
+    }
+
+    /**
+     * @param Request $request
+     * @return \PeskyCMF\Http\CmfJsonResponse
+     */
+    public function processUserRegistrationRequest(Request $request) {
+        if (!$this->isRegistrationAllowed()) {
+            return cmfJsonResponse(HttpCode::NOT_FOUND);
+        }
+        $dataOrResponse = $this->validateAndGetDataForRegistration($request);
+        if (!is_array($dataOrResponse)) {
+            return $dataOrResponse;
+        } else {
+            $user = $this->getUsersTable()->newRecord();
+            $user->fromData($dataOrResponse, false);
+            $this->addCustomRegistrationData($user);
+            $user->save();
+            $this->afterRegistration($user);
+            $this->getAuthGuard()->login($user, true);
+            return cmfJsonResponse()
+                ->setForcedRedirect($this->getCmfConfig()->home_page_url());
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return array|CmfJsonResponse
+     */
+    protected function validateAndGetDataForRegistration(Request $request) {
+        $validationRules = [
+            'password' => 'required|string|min:6|confirmed',
+        ];
+        $columnsToSave = [];
+        $tableStricture = $this->getUsersTable()->getTableStructure();
+        if ($tableStricture::hasColumn('name')) {
+            $validationRules['name'] = 'nullable|max:200';
+            $columnsToSave[] = 'name';
+        }
+        $usersTable = $tableStricture::getTableName();
+        $userLoginCol = $this->getUserLoginColumnName();
+        if ($tableStricture::hasColumn('email')) {
+            if ($userLoginCol === 'email') {
+                $validationRules['email'] = "required|email|unique:{$usersTable},email";
+            } else {
+                $validationRules['email'] = 'nullable|email';
+            }
+            $columnsToSave[] = 'email';
+        }
+        if ($userLoginCol !== 'email') {
+            $validationRules[$userLoginCol] = "required|regex:%^[a-zA-Z0-9_@.-]+$%is|min:4|unique:$usersTable,$userLoginCol";
+            $columnsToSave[] = $userLoginCol;
+        }
+        foreach ($this->getCustomRegistrationFieldsAndValidators() as $columnName => $rules) {
+            if (is_int($columnName)) {
+                $columnName = $rules;
+            } else {
+                $validationRules[$columnName] = $rules;
+            }
+            $columnsToSave[] = $columnName;
+        }
+        $validator = \Validator::make(
+            $request->all(),
+            $validationRules,
+            Set::flatten((array)cmfTransCustom('.registration_form.errors'))
+        );
+        if ($validator->fails()) {
+            return $this->makeValidationErrorsJsonResponse($validator->getMessageBag()->toArray());
+        }
+        return $request->only($columnsToSave);
     }
 
     /**
@@ -213,15 +298,6 @@ class CmfAuthModule {
     }
 
     /**
-     * To be implemented manually
-     * @param Request $request
-     * @return \PeskyCMF\Http\CmfJsonResponse
-     */
-    public function processUserRegistrationRequest(Request $request) {
-        return cmfJsonResponse(HttpCode::NOT_FOUND);
-    }
-
-    /**
      * @return \Illuminate\Http\RedirectResponse|\PeskyCMF\Http\CmfJsonResponse
      */
     public function processUserLogoutRequest() {
@@ -306,6 +382,9 @@ class CmfAuthModule {
      * @throws \Illuminate\Validation\ValidationException
      */
     public function startPasswordRecoveryProcess(Request $request) {
+        if (!$this->isPasswordRestoreAllowed()) {
+            return cmfJsonResponse(HttpCode::NOT_FOUND);
+        }
         $data = $this->validate($request, [
             'email' => 'required|email',
         ]);
@@ -337,6 +416,9 @@ class CmfAuthModule {
      * @throws \PeskyORM\Exception\OrmException
      */
     public function finishPasswordRecoveryProcess(Request $request, $accessKey) {
+        if (!$this->isPasswordRestoreAllowed()) {
+            return cmfJsonResponse(HttpCode::NOT_FOUND);
+        }
         $data = $this->validate($request, [
             'id' => 'required|integer|min:1',
             'password' => 'required|min:6',
@@ -376,6 +458,9 @@ class CmfAuthModule {
      * @throws \Throwable
      */
     public function renderReplaceUserPasswordPageView($accessKey) {
+        if (!$this->isPasswordRestoreAllowed()) {
+            return cmfJsonResponse(HttpCode::NOT_FOUND);
+        }
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (!empty($user)) {
             return view($this->replacePasswordPageViewPath, [
@@ -684,7 +769,7 @@ class CmfAuthModule {
         $validator = \Validator::make(
             $request->all(),
             $validationRules,
-            Set::flatten(cmfTransCustom('.page.profile.errors'))
+            Set::flatten((array)cmfTransCustom('.page.profile.errors'))
         );
         $errors = [];
         if ($validator->fails()) {
@@ -708,8 +793,35 @@ class CmfAuthModule {
      * Format: ['filed1' => 'validation rules', 'field2', ...]
      * @return array
      */
-    protected function getCustomUserProfileFieldsAndValidators() {
+    protected function getCustomUserProfileFieldsAndValidators(): array {
         return [];
+    }
+
+    /**
+     * Additional user profile fields and validators
+     * Format: ['filed1' => 'validation rules', 'field2', ...]
+     * @return array
+     */
+    protected function getCustomRegistrationFieldsAndValidators(): array {
+        return [];
+    }
+
+    /**
+     * Additional non-editable data to save into user record.
+     * For example: role, language
+     * @param RecordInterface $user - user record with submitted data already set
+     */
+    protected function addCustomRegistrationData(RecordInterface $user) {
+
+    }
+
+    /**
+     * Additional actions after user's account created.
+     * For example: send confirmation email
+     * @param RecordInterface $user
+     */
+    protected function afterRegistration(RecordInterface $user) {
+
     }
 
 }

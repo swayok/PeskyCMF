@@ -60,6 +60,11 @@ return [
         'is_password_restore_allowed' => true,
 
         /**
+         * Enable/disable registration
+         */
+        'is_registration_allowed' => true,
+
+        /**
          * List of roles
          */
         'roles' => [

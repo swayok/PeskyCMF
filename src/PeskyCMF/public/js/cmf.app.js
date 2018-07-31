@@ -36,6 +36,7 @@ $(function () {
     }
 
     page.route('/login', CmfRouteChange.authorizationPage);
+    page.route('/register', CmfRouteChange.authorizationPage);
     page.route('/forgot_password', CmfRouteChange.authorizationPage);
     page.route('/replace_password/:uid*', CmfRouteChange.authorizationPage);
     page.route('/logout', CmfRouteChange.logout, CmfRoutingHelpers.routeHandled);
