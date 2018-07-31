@@ -163,14 +163,9 @@ class CmfAuthModule {
         $validationRules = [
             'password' => 'required|string|min:6|confirmed',
         ];
-        if ($this->isRecaptchaAvailable()) {
-            $validationRules['g-recaptcha-response'] = 'required|string|recaptcha';
-        }
-        $columnsToSave = [];
         $tableStricture = $this->getUsersTable()->getTableStructure();
         if ($tableStricture::hasColumn('name')) {
             $validationRules['name'] = 'nullable|max:200';
-            $columnsToSave[] = 'name';
         }
         $usersTable = $tableStricture::getTableName();
         $userLoginCol = $this->getUserLoginColumnName();
@@ -180,11 +175,13 @@ class CmfAuthModule {
             } else {
                 $validationRules['email'] = 'nullable|email';
             }
-            $columnsToSave[] = 'email';
         }
         if ($userLoginCol !== 'email') {
             $validationRules[$userLoginCol] = "required|regex:%^[a-zA-Z0-9_@.-]+$%is|min:4|unique:$usersTable,$userLoginCol";
-            $columnsToSave[] = $userLoginCol;
+        }
+        $columnsToSave = array_keys($validationRules);
+        if ($this->isRecaptchaAvailable()) {
+            $validationRules['g-recaptcha-response'] = 'required|string|recaptcha';
         }
         foreach ($this->getCustomRegistrationFieldsAndValidators() as $columnName => $rules) {
             if (is_int($columnName)) {
