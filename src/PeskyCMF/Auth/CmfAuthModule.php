@@ -256,6 +256,7 @@ class CmfAuthModule {
         if (!is_array($updatesOrResponse)) {
             return $updatesOrResponse;
         } else {
+            $oldEmail = $user::hasColumn('email') ? $user->email : null;
             $user
                 ->begin()
                 ->updateValues($updatesOrResponse);
@@ -263,6 +264,13 @@ class CmfAuthModule {
                 $user->setPassword($request->input('new_password'));
             }
             $user->commit();
+            if (
+                isset($updatesOrResponse['email'])
+                && $user::hasColumn('email')
+                && strtolower(trim($oldEmail)) !== strtolower(trim($updatesOrResponse['email']))
+            ) {
+                $this->onUserEmailAddressChange($user, $oldEmail);
+            }
             return cmfJsonResponse()
                 ->setData(['_reload_user' => true])
                 ->setMessage(cmfTransCustom('page.profile.saved'))
@@ -795,6 +803,10 @@ class CmfAuthModule {
         return $request->only($columnsToUpdate);
     }
 
+    public function isRecaptchaAvailable():bool {
+        return !empty($this->getCmfConfig()->recaptcha_public_key());
+    }
+
     /**
      * Additional user profile fields and validators
      * Format: ['filed1' => 'validation rules', 'field2', ...]
@@ -831,8 +843,14 @@ class CmfAuthModule {
 
     }
 
-    public function isRecaptchaAvailable():bool {
-        return !empty($this->getCmfConfig()->recaptcha_public_key());
+    /**
+     * Called when user have changed his emails address.
+     * Here you can modify email confirmation status and send confirmation email
+     * @param RecordInterface $user
+     * @param string $oldEmail
+     */
+    protected function onUserEmailAddressChange(RecordInterface $user, ?string $oldEmail) {
+
     }
 
 }
