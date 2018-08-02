@@ -22,6 +22,10 @@ html > .modal-backdrop,
 body > .modal-backdrop {
   display: none !important;
 }
+.login-page,
+.register-page {
+  background-color: #eaeef6;
+}
 pre.json-text {
   white-space: pre-wrap;
 }
