@@ -15,7 +15,7 @@ $dictionary = [
         'password_label' => 'Password',
         'button_label' => 'Log in',
         'forgot_password_label' => 'Forgot password?',
-        'registration_label' => 'Create account',
+        'registration_label' => 'Create an account',
         'login_failed' => 'Invalid E-mail or password',
     ],
     'registration_form' => [
@@ -25,7 +25,7 @@ $dictionary = [
         'name_label' => 'Name',
         'password_label' => 'Password',
         'password_confirmation_label' => 'Confirm password',
-        'button_label' => 'Create account',
+        'button_label' => 'Create an account',
         'login_to_account_label' => 'Login to account',
         'errors' => [
             'password' => [
