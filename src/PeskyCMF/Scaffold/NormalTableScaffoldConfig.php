@@ -207,7 +207,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
     public function addRecord() {
         $formConfig = $this->getFormConfig();
         if (!$this->isCreateAllowed()) {
-            return $this->makeAccessDeniedReponse($formConfig->translate('message.create.forbidden'));
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.create.forbidden'));
         }
         $table = static::getTable();
         $data = $formConfig->modifyIncomingDataBeforeValidation(

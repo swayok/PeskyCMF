@@ -36,18 +36,26 @@ class CmfGeneralController extends CmfController {
             $this->authorize('cmf_page', [$name]);
             $altName = str_replace('-', '_', $name);
             $viewsPrefix = static::getCmfConfig()->custom_views_prefix();
-            if (\View::exists($viewsPrefix . 'page.' . $name)) {
-                // default
-            } else if ($altName !== $name && \View::exists($viewsPrefix . 'page.' . $altName)) {
-                return view($viewsPrefix . 'page.' . $altName)->render();
-            } else if (\View::exists('cmf::page.' . $name)) {
-                return view('cmf::page.' . $name)->render();
-            }
             $isModal = (bool)$request->query('modal', false);
-            return view($viewsPrefix . 'page.' . $name, ['isModal' => $isModal])->render();
+            $primaryView = $viewsPrefix . 'page.' . $name;
+            if (\View::exists($primaryView)) {
+                return view($primaryView, ['isModal' => $isModal])->render();
+            } else if ($altName !== $name && \View::exists($viewsPrefix . 'page.' . $altName)) {
+                return view($viewsPrefix . 'page.' . $altName, ['isModal' => $isModal])->render();
+            } else if (\View::exists('cmf::page.' . $name)) {
+                return view('cmf::page.' . $name, ['isModal' => $isModal])->render();
+            }
+            return $this->pageViewNotFoundResponse($request, $name, $primaryView);
         } else {
             return view(static::getCmfConfig()->layout_view())->render();
         }
+    }
+
+    protected function pageViewNotFoundResponse(Request $request, $pageName, $primaryView) {
+        return cmfJsonResponseForHttp404(
+            static::getCmfConfig()->home_page_url(),
+            'View file not found at ' . $primaryView
+        );
     }
 
     public function getUiView($viewName) {
