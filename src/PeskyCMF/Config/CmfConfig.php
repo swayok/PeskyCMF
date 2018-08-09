@@ -921,9 +921,9 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * @return ClassBuilder
+     * @return ClassBuilder|string
      */
-    static protected function getDbClassesBuilderClass(): ClassBuilder {
+    static protected function getDbClassesBuilderClass(): string {
         return config('peskyorm.class_builder');
     }
 
