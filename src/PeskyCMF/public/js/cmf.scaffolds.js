@@ -1752,9 +1752,10 @@ var ScaffoldFormHelper = {
                         $bulkEditModal.remove();
                     })
                     .on('show.bs.modal', function () {
-                        $bulkEditForm.on('submit', function () {
-                            return isFormSubmitAllowed();
-                        });
+                        $bulkEditForm
+                            .on('submit', function () {
+                                return isFormSubmitAllowed();
+                            });
                         ScaffoldFormHelper.initForm($bulkEditForm, function (json, $form, $container) {
                             if (json._message) {
                                 toastr.success(json._message);
@@ -1770,10 +1771,10 @@ var ScaffoldFormHelper = {
                             }
                             api.rows().deselect();
                             api.ajax.reload(null, resetDataGridPagination);
-                        })
-                        .on('shown.bs.modal', function () {
-                            $('body').addClass('modal-open');
                         });
+                    })
+                    .on('shown.bs.modal', function () {
+                        $('body').addClass('modal-open');
                     })
                     .modal({
                         backdrop: 'static',
