@@ -35,6 +35,8 @@ var mixCmfScripts = function (mix) {
         'public/packages/cmf-vendors/bootstrap/select/js/ajax-bootstrap-select.min.js',
         'public/packages/cmf-vendors/bootstrap/select/js/locale/ajax-bootstrap-select.en-US.min.js',
         'public/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js',
+        'public/packages/cmf-vendors/bootstrap/fileinput/js/plugins/piexif.min.js',
+        'public/packages/cmf-vendors/bootstrap/fileinput/js/plugins/purify.min.js',
         'public/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js',
         'public/packages/cmf-vendors/bootstrap/x-editale/js/bootstrap-editable.min.js',
         'public/packages/cmf-vendors/bootstrap/context-menu.min.js'

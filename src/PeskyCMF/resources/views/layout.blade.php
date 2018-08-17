@@ -128,6 +128,8 @@
         <script src="/packages/cmf-vendors/bootstrap/select/js/ajax-bootstrap-select.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/select/js/locale/ajax-bootstrap-select.en-US.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/bootstrap/fileinput/js/fileinput.min.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/fileinput/js/plugins/piexif.min.js" type="text/javascript"></script>
+        <script src="/packages/cmf-vendors/bootstrap/fileinput/js/plugins/purify.min.js" type="text/javascript"></script>
 
         <script src="/packages/cmf-vendors/bootstrap/datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
         <script src="/packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js" type="text/javascript"></script>
