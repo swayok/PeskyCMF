@@ -3,7 +3,6 @@
 namespace PeskyCMF\Scaffold;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
@@ -15,6 +14,7 @@ use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\RecordValueHelpers;
 use PeskyORM\ORM\TableInterface;
 use PeskyORMLaravel\Db\Column\RecordPositionColumn;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
 
@@ -149,7 +149,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeRecordNotFoundResponse($table);
         }
         $conditions = $sectionConfig->getSpecialConditions();
-        $conditions[$table->getPkColumnName()] = $id;
+        $conditions[$table::getPkColumnName()] = $id;
         $relationsToRead = [];
         if ($id !== null) {
             foreach ($sectionConfig->getRelationsToRead() as $relationName => $columns) {
@@ -214,7 +214,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             $this->getFilteredIncomingData($formConfig, true),
             true
         );
-        unset($data[$table->getPkColumnName()]);
+        unset($data[$table::getPkColumnName()]);
         $errors = $formConfig->validateDataForCreate($data);
         if (count($errors) !== 0) {
             return $this->makeValidationErrorsJsonResponse($errors);
@@ -232,24 +232,31 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
-        unset($data[$table->getPkColumnName()]); //< to be 100% sure =)
+        unset($data[$table::getPkColumnName()]); //< to be 100% sure =)
         if (!empty($data)) {
-            $table::beginTransaction();
             try {
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
-                $object = $table->newRecord()->fromData($dataToSave, false);
-                $this->logDbRecordBeforeChange($object, static::getResourceName());
-                $object->save(['*'], true);
-                $ret = $this->afterDataSaved($data, $object, true, $table, $formConfig);
-                $this->logDbRecordAfterChange($object);
+                $record = $table->newRecord()->fromData($dataToSave, false);
+                $this->logDbRecordBeforeChange($record, static::getResourceName());
+                $table::beginTransaction();
+                $response = $this->doRecordSave($record, true);
+                if ($response) {
+                    if ($table::inTransaction()) {
+                        $table::commitTransaction();
+                    }
+                    $this->logDbRecordAfterChange($record);
+                    return $response;
+                }
+                $ret = $this->afterDataSaved($data, $record, true, $table, $formConfig);
+                $this->logDbRecordAfterChange($record);
                 return $ret;
             } catch (InvalidDataException $exc) {
-                if ($table->inTransaction()) {
+                if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                 }
                 return $this->makeValidationErrorsJsonResponse($exc->getErrors());
             } catch (\Throwable $exc) {
-                if ($table->inTransaction()) {
+                if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                 }
                 throw $exc;
@@ -257,7 +264,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                     /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                    throw new DbException('Transaction was not closed');
+                    throw new DbException('Transaction was not closed. Check if afterDataSaved method called and transaction is closed within it.');
                 }
             }
         }
@@ -278,20 +285,20 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (count($errors) !== 0) {
             return $this->makeValidationErrorsJsonResponse($errors);
         }
-        if (!$this->getRequest()->input($table->getPkColumnName())) {
+        if (!$this->getRequest()->input($table::getPkColumnName())) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        $id = $this->getRequest()->input($table->getPkColumnName());
-        $object = $table->newRecord();
-        if (count($object::getPrimaryKeyColumn()->validateValue($id)) > 0) {
+        $id = $this->getRequest()->input($table::getPkColumnName());
+        $record = $table->newRecord();
+        if (count($record::getPrimaryKeyColumn()->validateValue($id)) > 0) {
             return $this->makeRecordNotFoundResponse($table);
         }
         $conditions = $formConfig->getSpecialConditions();
-        $conditions[$table->getPkColumnName()] = $id;
-        if (!$object->fromDb($conditions)->existsInDb()) {
+        $conditions[$table::getPkColumnName()] = $id;
+        if (!$record->fromDb($conditions)->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        if (!$this->isRecordEditAllowed($object->toArrayWithoutFiles())) {
+        if (!$this->isRecordEditAllowed($record->toArrayWithoutFiles())) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden_for_record'));
         }
         if ($formConfig->hasBeforeSaveCallback()) {
@@ -307,26 +314,34 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 }
             }
         }
-        unset($data[$table->getPkColumnName()]);
+        unset($data[$table::getPkColumnName()]);
         if (!empty($data)) {
-            $table::beginTransaction();
             try {
-                $this->logDbRecordBeforeChange($object, static::getResourceName());
+                $this->logDbRecordBeforeChange($record, static::getResourceName());
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
-                $relationsData = array_intersect_key($dataToSave, $object::getRelations());
+                $relationsData = array_intersect_key($dataToSave, $record::getRelations());
                 $dataToSave = array_diff_key($dataToSave, $relationsData);
-                $object->begin()->updateValues($dataToSave)->commit(['*'], true);
-                $this->updateRelatedRecords($object, $relationsData);
-                $ret = $this->afterDataSaved($data, $object, false, $table, $formConfig);
-                $this->logDbRecordAfterChange($object);
+                $record->begin()->updateValues($dataToSave);
+                $table::beginTransaction();
+                $response = $this->doRecordSave($record, false);
+                if ($response instanceof Response) {
+                    if ($table::inTransaction()) {
+                        $table::commitTransaction();
+                    }
+                    $this->logDbRecordAfterChange($record);
+                    return $response;
+                }
+                $this->updateRelatedRecords($record, $relationsData);
+                $ret = $this->afterDataSaved($data, $record, false, $table, $formConfig);
+                $this->logDbRecordAfterChange($record);
                 return $ret;
             } catch (InvalidDataException $exc) {
-                if ($table->inTransaction()) {
+                if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                 }
                 return $this->makeValidationErrorsJsonResponse($exc->getErrors());
             } catch (\Exception $exc) {
-                if ($table->inTransaction()) {
+                if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                 }
                 throw $exc;
@@ -334,11 +349,26 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 if ($table::inTransaction()) {
                     $table::rollBackTransaction();
                     /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                    throw new DbException('Transaction was not closed');
+                    throw new DbException('Transaction was not closed. Check if afterDataSaved method called and transaction is closed within it.');
                 }
             }
         }
         throw new \BadMethodCallException('There is no data to save');
+    }
+
+    /**
+     * You may return instance of Response to immediately finish request (for example when validation error happens)
+     * @param RecordInterface $record
+     * @param bool $isCreation
+     * @return null|Response
+     */
+    protected function doRecordSave(RecordInterface $record, bool $isCreation): ?Response {
+        if ($isCreation) {
+            $record->save(['*'], true);
+        } else {
+            $record->commit(['*'], true);
+        }
+        return null;
     }
 
     protected function getFilteredIncomingData(FormConfig $formConfig, bool $isCreation): array {
@@ -548,7 +578,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('bulk_edit.message.forbidden'));
         }
         $table::beginTransaction();
-        $updatedCount = $table->update($data, $conditions);
+        $updatedCount = $table::update($data, $conditions);
         if ($formConfig->hasAfterBulkEditDataAfterSaveCallback()) {
             $success = call_user_func($formConfig->getAfterBulkEditDataAfterSaveCallback(), $data);
             if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
@@ -579,25 +609,39 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden'));
         }
         $table = static::getTable();
-        $object = $table->newRecord();
-        if (count($object::getPrimaryKeyColumn()->validateValue($id)) > 0) {
+        $record = $table->newRecord();
+        if (count($record::getPrimaryKeyColumn()->validateValue($id)) > 0) {
             return $this->makeRecordNotFoundResponse($table);
         }
         $formConfig = $this->getFormConfig();
         $conditions = $formConfig->getSpecialConditions();
-        $conditions[$table->getPkColumnName()] = $id;
-        if (!$object->fromDb($conditions)->existsInDb()) {
+        $conditions[$table::getPkColumnName()] = $id;
+        if (!$record->fromDb($conditions)->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
-        if (!$this->isRecordDeleteAllowed($object->toArrayWithoutFiles())) {
+        if (!$this->isRecordDeleteAllowed($record->toArrayWithoutFiles())) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden_for_record'));
         }
-        $this->logDbRecordBeforeChange($object, static::getResourceName());
-        $object->delete();
-        $this->logDbRecordAfterChange($object);
+        $this->logDbRecordBeforeChange($record, static::getResourceName());
+        $response = $this->doRecordDelete($record);
+        $this->logDbRecordAfterChange($record);
+        if ($response instanceof Response) {
+            return $response;
+        }
+
         return cmfJsonResponse()
             ->setMessage($this->translateGeneral('message.delete.success'))
             ->goBack(routeToCmfItemsTable(static::getResourceName()));
+    }
+
+    /**
+     * You may return instance of Response to immediately finish request (for example when validation error happens)
+     * @param RecordInterface $record
+     * @return null|Response
+     */
+    protected function doRecordDelete(RecordInterface $record): ?Response {
+        $record->delete();
+        return null;
     }
 
     public function deleteBulkOfRecords() {
@@ -695,13 +739,13 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $columnConfig = static::getTable()->getTableStructure()->getColumn($columnName);
         $movedRecord = $table::getInstance()
             ->newRecord()
-            ->fromDb(array_merge($specialConditions, [$table->getPkColumnName() => $id]));
+            ->fromDb(array_merge($specialConditions, [$table::getPkColumnName() => $id]));
         if (!$movedRecord->existsInDb()) {
             return $this->makeRecordNotFoundResponse($table);
         }
         $position1 = $table::selectValue(
             DbExpr::create("`$columnName`"),
-            array_merge($specialConditions, [$table->getPkColumnName() => $otherId])
+            array_merge($specialConditions, [$table::getPkColumnName() => $otherId])
         );
         if ($position1 === null) {
             // this value must be present to continue
