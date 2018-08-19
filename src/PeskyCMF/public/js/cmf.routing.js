@@ -162,22 +162,24 @@ var CmfRoutingHelpers = {
         CmfRoutingHelpers.hideModals();
         ScaffoldDataGridHelper.reloadCurrentDataGrid();
     },
-    renderModalFromHtml: function (request, html, modalId, modalSize, allowReload) {
-        // get modal template by size
-        if (!modalSize) {
-            modalSize = 'large';
-        }
+    renderModalFromHtml: function (request, html, modalId, defaultModalSize, allowReload) {
         var $content = CmfRoutingHelpers.wrapContent(html);
+        var $footer = $content.find('.modal-footer').remove();
         var title = Utils.getTitleFromContent($content);
         $content.find('.content-header').remove();
         $content.find('h1').remove();
+        var modalSize = null;
         if ($content.find('.content').length) {
             $content = $content.find('.content').removeClass('content');
+            modalSize = $content.attr('data-modal-size');
+        }
+        if (!modalSize) {
+            modalSize = defaultModalSize || 'large';
         }
         var $modal = Utils.makeModal(
             title,
             $content[0].outerHTML,
-            null,
+            $footer.length ? $footer.html() : null,
             modalSize,
             modalId + 'modal'
         );
@@ -190,7 +192,7 @@ var CmfRoutingHelpers = {
                 $modal
                     .find('.reload-url-button, .open-url-in-new-tab-button')
                         .attr('href', request.makeUrlToUseItInParentRequest())
-                        .attr('data-modal', modalSize);
+                        .attr('data-modal', '1');
                 ScaffoldActionsHelper.initActions($modal);
                 $modal.modal('show');
                 $(document.body).attr('data-modal-opened', '1');
@@ -254,21 +256,16 @@ CmfRouteChange.showPage = function (request) {
     }
 
     var isModal = request.isSubRequest();
-    var modalSize = 'large';
-    if (request.env().is_click && request.env().target && $(request.env().target).attr('data-modal')) {
+    if (!isModal && request.env().is_click && request.env().target && $(request.env().target).attr('data-modal')) {
         isModal = true;
-        var maybeModalSize = $(request.env().target).attr('data-modal');
-        if (maybeModalSize === 'small' || maybeModalSize === 'medium') {
-            modalSize = maybeModalSize;
-        }
     }
 
     var queryString = request.querystring;
     if (isModal) {
         if (queryString && queryString.length > 1) {
-            queryString += '&modal=1'
+            queryString += '&modal=1';
         } else {
-            queryString = 'modal=1'
+            queryString = 'modal=1';
         }
     }
 
@@ -285,7 +282,7 @@ CmfRouteChange.showPage = function (request) {
                     });
             } else {
                 var modalId = 'page-' + request.params.page;
-                CmfRoutingHelpers.renderModalFromHtml(request, html, modalId, modalSize, true);
+                CmfRoutingHelpers.renderModalFromHtml(request, html, modalId, 'large', true);
             }
             CmfRoutingHelpers.routeHandled(request);
         });
@@ -315,13 +312,8 @@ CmfRouteChange.scaffoldResourceCustomPage = function (request) {
     }
 
     var isModal = request.isSubRequest();
-    var modalSize = 'large';
-    if (request.env().is_click && request.env().target && $(request.env().target).attr('data-modal')) {
+    if (!isModal && request.env().is_click && request.env().target && $(request.env().target).attr('data-modal')) {
         isModal = true;
-        var maybeModalSize = $(request.env().target).attr('data-modal');
-        if (maybeModalSize === 'small' || maybeModalSize === 'medium') {
-            modalSize = maybeModalSize;
-        }
     }
 
     var queryString = request.querystring;
@@ -350,7 +342,7 @@ CmfRouteChange.scaffoldResourceCustomPage = function (request) {
                     modalId += '-item';
                 }
                 modalId += '-page-' + request.params.page;
-                CmfRoutingHelpers.renderModalFromHtml(request, html, modalId, modalSize, true);
+                CmfRoutingHelpers.renderModalFromHtml(request, html, modalId, 'large', true);
             }
             CmfRoutingHelpers.routeHandled(request);
         });
