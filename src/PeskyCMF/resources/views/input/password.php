@@ -27,10 +27,7 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes(array_merge($attributes, 
 <?php endif; ?>
 
 <!-- disable chrome email & password autofill -->
-<input type="text" name="login" class="hidden" formnovalidate disabled>
-<input type="password" class="hidden" formnovalidate disabled>
-<input type="text" name="email" class="hidden" formnovalidate value="test@test.com" disabled>
-<input type="password" class="hidden" formnovalidate disabled>
+<?php include __DIR__ . '/antiautocomplete.php'; ?>
 <!-- end of autofill disabler -->
 <div class="form-group">
     <label for="<?php echo $attributes['id']; ?>"><?php echo $fieldConfig->getLabel(); ?></label>
