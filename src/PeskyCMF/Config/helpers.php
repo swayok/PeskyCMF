@@ -132,24 +132,18 @@ if (!function_exists('routeToCmfItemsTable')) {
         if (!$ignoreAccessPolicy && Gate::denies('resource.view', [$tableName])) {
             return null;
         }
-        $params = ['table_name' => $tableName];
-        $replaces = [];
+        $params = [
+            'table_name' => $tableName,
+        ];
+        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($filters);
         if (!empty($filters)) {
-            $params['filter'] = json_encode($filters, JSON_UNESCAPED_UNICODE);
-            if (preg_match_all('%' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '%s', $params['filter'], $matches) > 0) {
-                // there are dotJs inserts inside filters
-                foreach ($matches[1] as $i => $dotJsInsert) {
-                    $replace = '__dotjs_' . (string)$i . '_insert__';
-                    $replaces[$replace] = '{{' . trim($matches[$i][0], '{} ') . '}}';
-                    $params['filter'] = str_replace($matches[$i][0], $replace, $params['filter']);
-                }
-            }
+            $params['filter'] = $replaces['data'];
         }
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
         $url = route($cmfConfig::getRouteName('cmf_items_table'), $params, $absolute);
-        return str_replace(array_keys($replaces), array_values($replaces), $url);
+        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
     }
 }
 
@@ -206,7 +200,7 @@ if (!function_exists('routeToCmfItemAddForm')) {
                 );
             }
             if (!is_array($value) && preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $value, $matches)) {
-                $value = '__dotjs_' . (string)(count($replaces) + 1) . '_insert__';
+                $value = '__dotjs_' . (count($replaces) + 1) . '_insert__';
                 $replaces[$value] = '{{' . trim($matches[0], '{} ') . '}}';
             }
             $params[$key] = $value;
@@ -340,7 +334,6 @@ if (!function_exists('routeToCmfItemDelete')) {
 if (!function_exists('routeToCmfResourceCustomPage')) {
     /**
      * @param string $tableName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param string $pageId
      * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
@@ -351,32 +344,16 @@ if (!function_exists('routeToCmfResourceCustomPage')) {
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
-        $queryArgsEscaped = [];
-        $replaces = [];
-        if (!empty($queryArgs)) {
-            $json = json_encode($queryArgs, JSON_UNESCAPED_UNICODE);
-            if (preg_match_all('%' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '%s', $json, $matches) > 0) {
-                // there are dotJs inserts inside filters
-                foreach ($matches[1] as $i => $dotJsInsert) {
-                    $replace = '__dotjs_' . (string)$i . '_insert__';
-                    $replaces[$replace] = '{{' . trim($matches[$i][0], '{} ') . '}}';
-                    $json = str_replace($replaces[$replace], $replace, $json);
-                }
-                $queryArgsEscaped = json_decode($json, true);
-            }
-        }
+        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
         $url = route(
             $cmfConfig::getRouteName('cmf_resource_custom_page'),
             array_merge(
                 ['table_name' => $tableName, 'page' => $pageId],
-                $queryArgsEscaped
+                $replaces['data']
             ),
             $absolute
         );
-        if (!empty($replaces)) {
-            $url = str_replace(array_keys($replaces), array_values($replaces), $url);
-        }
-        return $url;
+        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
     }
 }
 
@@ -399,33 +376,17 @@ if (!function_exists('routeToCmfItemCustomPage')) {
             $itemDotJs = '__dotjs_item_id_insert__';
             $itemId = '{{' . trim($itemId, '{} ') . '}}';
         }
-        $queryArgsEscaped = [];
-        $replaces = [];
-        if (!empty($queryArgs)) {
-            $json = json_encode($queryArgs, JSON_UNESCAPED_UNICODE);
-            if (preg_match_all('%' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '%s', $json, $matches) > 0) {
-                // there are dotJs inserts inside filters
-                foreach ($matches[1] as $i => $dotJsInsert) {
-                    $replace = '__dotjs_' . (string)$i . '_insert__';
-                    $replaces[$replace] = '{{' . trim($matches[$i][0], '{} ') . '}}';
-                    $json = str_replace($replaces[$replace], $replace, $json);
-                }
-                $queryArgsEscaped = json_decode($json, true);
-            }
-        }
+        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
         $url = route(
             $cmfConfig::getRouteName('cmf_item_custom_page'),
             array_merge(
                 ['table_name' => $tableName, 'id' => $itemDotJs, 'page' => $pageId],
-                $queryArgsEscaped
+                $replaces['data']
             ),
             $absolute
         );
         $url = str_replace('__dotjs_item_id_insert__', $itemId, $url);
-        if (!empty($replaces)) {
-            $url = str_replace(array_keys($replaces), array_values($replaces), $url);
-        }
-        return $url;
+        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
     }
 }
 
@@ -448,40 +409,23 @@ if (!function_exists('routeToCmfItemCustomAction')) {
             $itemDotJs = '__dotjs_item_id_insert__';
             $itemId = '{{' . trim($itemId, '{} ') . '}}';
         }
-        $queryArgsEscaped = [];
-        $replaces = [];
-        if (!empty($queryArgs)) {
-            $json = json_encode($queryArgs, JSON_UNESCAPED_UNICODE);
-            if (preg_match_all('%' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '%s', $json, $matches) > 0) {
-                // there are dotJs inserts inside filters
-                foreach ($matches[1] as $i => $dotJsInsert) {
-                    $replace = '__dotjs_' . (string)$i . '_insert__';
-                    $replaces[$replace] = '{{' . trim($matches[$i][0], '{} ') . '}}';
-                    $json = str_replace($replaces[$replace], $replace, $json);
-                }
-                $queryArgsEscaped = json_decode($json, true);
-            }
-        }
+        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
         $url = route(
             $cmfConfig::getRouteName('cmf_api_item_custom_action'),
             array_merge(
                 ['table_name' => $tableName, 'id' => $itemDotJs, 'action' => $actionId],
-                $queryArgsEscaped
+                $replaces['data']
             ),
             $absolute
         );
         $url = str_replace('__dotjs_item_id_insert__', $itemId, $url);
-        if (!empty($replaces)) {
-            $url = str_replace(array_keys($replaces), array_values($replaces), $url);
-        }
-        return $url;
+        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
     }
 }
 
 if (!function_exists('routeToCmfResourceCustomAction')) {
     /**
      * @param string $tableName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param string $actionId
      * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
@@ -492,28 +436,46 @@ if (!function_exists('routeToCmfResourceCustomAction')) {
         if (!$cmfConfig) {
             $cmfConfig = cmfConfig();
         }
-        $queryArgsEscaped = [];
-        $replaces = [];
-        if (!empty($queryArgs)) {
-            $json = json_encode($queryArgs, JSON_UNESCAPED_UNICODE);
-            if (preg_match_all('%' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '%s', $json, $matches) > 0) {
-                // there are dotJs inserts inside filters
-                foreach ($matches[1] as $i => $dotJsInsert) {
-                    $replace = '__dotjs_' . (string)$i . '_insert__';
-                    $replaces[$replace] = '{{' . trim($matches[$i][0], '{} ') . '}}';
-                    $json = str_replace($replaces[$replace], $replace, $json);
-                }
-                $queryArgsEscaped = json_decode($json, true);
-            }
-        }
+        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
         $url = route(
             $cmfConfig::getRouteName('cmf_api_resource_custom_action'),
             array_merge(
                 ['table_name' => $tableName, 'action' => $actionId],
-                $queryArgsEscaped
+                $replaces['data']
             ),
             $absolute
         );
+        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
+    }
+}
+
+if (!function_exists('replaceDotJsInstertsInArrayValuesByUrlSafeInserts')) {
+
+    /**
+     * @param array $data - array with values that contain dotJs insterts
+     * @return array - ['replaces' => $replaces, 'data' => $escapedData]
+     */
+    function replaceDotJsInstertsInArrayValuesByUrlSafeInserts(array $data): array {
+        $ret = ['replaces' => [], 'data' => $data];
+        if (!empty($data)) {
+            $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+            if (preg_match_all('%' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '%s', $json, $matches) > 0) {
+                // there are dotJs inserts inside filters
+                foreach ($matches[1] as $i => $dotJsInsert) {
+                    $replace = '__dotjs_' . $i . '_insert__';
+                    $ret['replaces'][$replace] = '{{' . trim($matches[$i][0], '{} ') . '}}';
+                    $json = str_replace($ret['replaces'][$replace], $replace, $json);
+                }
+                $ret['data'] = json_decode($json, true);
+            }
+        }
+        return $ret;
+    }
+}
+
+if (!function_exists('replaceUrlSafeInsertsInUrlByDotJsInsterts')) {
+
+    function replaceUrlSafeInsertsInUrlByDotJsInsterts(string $url, array $replaces): string {
         if (!empty($replaces)) {
             $url = str_replace(array_keys($replaces), array_values($replaces), $url);
         }

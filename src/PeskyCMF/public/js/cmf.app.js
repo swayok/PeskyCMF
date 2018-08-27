@@ -59,7 +59,8 @@ $(function () {
     page.route('/resource/:resource/page/:page', CmfRouteChange.scaffoldResourceCustomPage);
     page.route('/resource/:resource/:id/page/:page', CmfRouteChange.scaffoldResourceCustomPage);
 
-    page.route('*', function () {
+    page.route('*', function (request) {
+        $(document.body).trigger('change.page', {request: request});
         if (CmfRoutingHelpers.$currentContentContainer) {
             CmfRoutingHelpers.$currentContentContainer
                 .find('[data-toggle="tooltip"]')
