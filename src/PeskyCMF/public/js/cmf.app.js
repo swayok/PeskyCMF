@@ -1,8 +1,17 @@
 $(function () {
 
-    fixAdminLte();
+    var cmfApp = typeof CmfApp !== 'undefined' ? CmfApp : {};
 
-    extendRouter();
+    if (typeof cmfApp.fixAdminLte === 'function') {
+        cmfApp.fixAdminLte();
+    } else {
+        $('body').layout('fix');
+        $('body [data-toggle="tooltip"]').tooltip();
+    }
+
+    if (typeof cmfApp.extendRouter === 'function') {
+        cmfApp.extendRouter();
+    }
 
     if (typeof CmfSettings === 'object') {
         // import localization strings
@@ -31,8 +40,8 @@ $(function () {
         CmfRoutingHelpers.pageExitTransition(prevRequest, currentRequest);
     });
 
-    if (typeof CmfApp !== 'undefined' && typeof CmfApp.addRoutes === 'function') {
-        CmfApp.addRoutes();
+    if (typeof cmfApp.addRoutes === 'function') {
+        cmfApp.addRoutes();
     }
 
     page.route('/login', CmfRouteChange.authorizationPage);
@@ -99,25 +108,60 @@ $(function () {
         return false;
     });
 
-    if (typeof CmfApp !== 'undefined' && typeof CmfApp.beforeStart === 'function') {
-        CmfApp.beforeStart();
+    if (typeof cmfApp.beforeStart === 'function') {
+        cmfApp.beforeStart();
     }
 
     page.start({
         decodeURLQuery: true
     });
 
-    if (typeof CmfApp !== 'undefined' && typeof CmfApp.afterStart === 'function') {
-        CmfApp.afterStart();
+    if (typeof cmfApp.afterStart === 'function') {
+        cmfApp.afterStart();
+    }
+
+    console.log(CmfConfig);
+    if (CmfConfig.enablePing) {
+        var pingInterval = setInterval(function () {
+            $.ajax({
+                    url: CmfConfig.rootUrl + '/ping',
+                    method: 'POST',
+                    data: {
+                        url: page.currentUrl().replace(/[?#].*/g)
+                    },
+                    type: 'json'
+                })
+                .done(function (json) {
+                    Utils.handleAjaxSuccess(json);
+                })
+                .fail(function (xhr) {
+                    if (xhr.status === 404) {
+                        clearInterval(pingInterval);
+                    } else if (xhr.status === 401) {
+                        // not authorized
+                        toastr.error(CmfConfig.getLocalizationString(
+                            'error.session_timed_out',
+                            'Your session has timed out. Page will be reloaded in 5 seconds.'
+                        ));
+                        setTimeout(function () {
+                            document.location.reload(true);
+                        }, 5000);
+                        Utils.showPreloader($(document.body));
+                        clearInterval(pingInterval);
+                    } else if (xhr.status === 419) {
+                        // CSRF token missmatch or session expired
+                        toastr.error(CmfConfig.getLocalizationString(
+                            'error.csrf_token_missmatch',
+                            'Your session has timed out. Page will be reloaded in 5 seconds.'
+                        ));
+                        setTimeout(function () {
+                            document.location.reload(true);
+                        }, 5000);
+                        Utils.showPreloader($(document.body));
+                        clearInterval(pingInterval);
+                    }
+                });
+        }, CmfConfig.pingInterval);
     }
 
 });
-
-function fixAdminLte() {
-    $('body').layout('fix');
-    $('body [data-toggle="tooltip"]').tooltip();
-}
-
-function extendRouter() {
-
-}

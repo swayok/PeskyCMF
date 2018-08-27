@@ -47,6 +47,10 @@ return [
             ],
             'file_uploader' => [
                 'no_file' => 'File not selected yet'
+            ],
+            'error' => [
+                'csrf_token_missmatch' => 'Your session has timed out. Page will be reloaded in 5 seconds.',
+                'session_timed_out' => 'Your session has timed out. Page will be reloaded in 5 seconds.',
             ]
         ]
     ],

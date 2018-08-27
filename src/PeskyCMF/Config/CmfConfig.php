@@ -808,6 +808,7 @@ abstract class CmfConfig extends ConfigsContainer {
         return [
             'isDebug' => config('app.debug'),
             'rootUrl' => '/' . trim(static::url_prefix(), '/'),
+            'enablePing' => false,
             'uiUrl' => cmfRoute('cmf_main_ui', [], false, static::getInstance()),
             'userDataUrl' => cmfRoute('cmf_profile_data', [], false, static::getInstance()),
             'menuCountersDataUrl' => cmfRoute('cmf_menu_counters_data', [], false, static::getInstance()),
@@ -1254,12 +1255,22 @@ abstract class CmfConfig extends ConfigsContainer {
 
         // special route for ckeditor config.js file
         $groupConfig['middleware'] = [$cmfSectionSelectorMiddleware]; //< only 1 needed
-        \Route::group($groupConfig, function () use ($cmfConfig) {
+        \Route::group($groupConfig, function () {
             \Route::get('ckeditor/config.js', [
-                'as' => $cmfConfig::routes_names_prefix() . 'cmf_ckeditor_config_js',
-                'uses' => $cmfConfig::cmf_general_controller_class() . '@getCkeditorConfigJs',
+                'uses' => static::cmf_general_controller_class() . '@getCkeditorConfigJs',
+                'as' => static::getRouteName('cmf_ckeditor_config_js'),
             ]);
         });
+
+        $groupConfig['middleware'] = ['web', $cmfSectionSelectorMiddleware];
+        if (array_get(static::js_app_settings(), 'enablePing', false)) {
+            \Route::group($groupConfig, function () {
+                \Route::post('/ping', [
+                    'uses' => static::cmf_general_controller_class() . '@ping',
+                    'as' => static::getRouteName('ping'),
+                ]);
+            });
+        }
     }
 
     /**

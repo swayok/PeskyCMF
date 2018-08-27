@@ -6,13 +6,18 @@ namespace PeskyCMF\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Routing\Pipeline;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
+use PeskyCMF\Auth\Middleware\CmfAuth;
+use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Traits\DataValidationHelper;
 use Ramsey\Uuid\Uuid;
 use Swayok\Utils\Folder;
 use Swayok\Utils\ValidateValue;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CmfGeneralController extends CmfController {
 
@@ -100,6 +105,31 @@ class CmfGeneralController extends CmfController {
         static::getCmfConfig()->setLocale($locale);
 
         return \Redirect::back();
+    }
+
+    public function ping(Request $request) {
+        $url = $request->input('url');
+        $request = Request::create($url, 'GET');
+        try {
+            $route = \Route::getRoutes()->match($request);
+            $authClasses = [
+                preg_quote(\Illuminate\Auth\Middleware\Authenticate::class, '%'),
+                preg_quote(CmfAuth::class, '%'),
+            ];
+            $regexp = '%^(auth(:|$)|' . implode('|', $authClasses) . ')%';
+            foreach (\Route::gatherRouteMiddleware($route) as $middleware) {
+                if (preg_match($regexp, $middleware)) {
+                    // route requires auth
+                    if (!static::getCmfConfig()->getAuthGuard()->check()) {
+                        return cmfJsonResponse(HttpCode::UNAUTHORISED);
+                    }
+                    break;
+                }
+            }
+        } catch (NotFoundHttpException $exc) {
+
+        }
+        return cmfJsonResponse();
     }
 
     public function getLoginTpl() {

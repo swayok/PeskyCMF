@@ -153,6 +153,12 @@ CmfApp.afterStart = function () {
     
 };
 */
+
+/* Extend functionality of the router
+CmfApp.extendRouter = function () {
+    
+};
+*/
 JS;
     }
 

@@ -172,6 +172,18 @@ Utils.handleAjaxError = function (xhr, deferredToRejectWithError) {
             )
         );
     }
+    if (xhr.status === 419) {
+        // CSRF token missmatch or session expired
+        toastr.error(CmfConfig.getLocalizationString(
+            'error.csrf_token_missmatch',
+            'Your session has timed out. Page will be reloaded in 5 seconds.'
+        ));
+        setTimeout(function () {
+            document.location.reload(true);
+        }, 5000);
+        Utils.showPreloader($(document.body));
+        return;
+    }
     var json = Utils.convertXhrResponseToJsonIfPossible(xhr);
     if (json) {
         if (json.redirect_with_reload) {

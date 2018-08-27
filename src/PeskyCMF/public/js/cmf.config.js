@@ -1,5 +1,7 @@
 var CmfConfig = {
     isDebug: false,
+    enablePing: false,      //< enables ajax requests to server in order to track session or csrf token timeouts
+    pingInterval: 20000,
     debugDialog: null,
     defaultPageTitle: '',
     pageTitleAddition: '',
@@ -36,6 +38,21 @@ var CmfConfig = {
     },
     getLocalizationStringsForComponent: function (componentName) {
         return (componentName && !!CmfCache.localization[componentName]) ? CmfCache.localization[componentName] : {};
+    },
+    getLocalizationString: function (path, defaultValue) {
+        if (!path || typeof path !== 'string') {
+            return 'Invalid localization path. String expected.';
+        }
+        var parts = path.split('.');
+        var pointer = CmfCache.localization;
+        for (var i = 0; i < parts.length; i++) {
+            if ($.isPlainObject(pointer) && pointer.hasOwnProperty(parts[i])) {
+                pointer = pointer[parts[i]];
+            } else {
+                return defaultValue || path;
+            }
+        }
+        return pointer;
     }
 };
 
