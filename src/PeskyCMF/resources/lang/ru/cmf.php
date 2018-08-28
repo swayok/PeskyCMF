@@ -187,6 +187,16 @@ return [
             'delete_filtered' => '<span class="label label-danger">:count</span> Удалить отфильтрованные',
             'edit_filtered' => '<span class="label label-primary">:count</span> Редактировать отфильтрованные',
             'message' => [
+                'dropdown_label' => 'Массовые действия',
+                'delete_selected' => '<span class="label label-danger">:count</span> Удалить выбранные',
+                'edit_selected' => '<span class="label label-primary">:count</span> Редактировать выбранные',
+                'delete_filtered' => '<span class="label label-danger">:count</span> Удалить отфильтрованные',
+                'edit_filtered' => '<span class="label label-primary">:count</span> Редактировать отфильтрованные',
+                'forbidden' => 'Массовое удаление объектов запрещено для этого раздела',
+                    'delete_selected_confirm' => 'Подтвердите удаление выбранных объектов',
+                    'delete_filtered_confirm' => 'Подтвердите удаление отфильтрованных объектов',
+                    'success' => 'Объектов удалено: :count',
+                    'nothing_deleted' => 'Не удалено ни одного объекта',
                 'delete_bulk' => [
                     'forbidden' => 'Массовое удаление объектов запрещено для этого раздела',
                     'delete_selected_confirm' => 'Подтвердите удаление выбранных объектов',

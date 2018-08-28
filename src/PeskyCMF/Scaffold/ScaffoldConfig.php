@@ -475,7 +475,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     public function translateGeneral($path, array $parameters = []) {
         $text = $this->translate($path, '', $parameters);
         if (preg_match('%\.' . preg_quote($path, '%') . '$%', $text)) {
-            $text = cmfTransGeneral($path);
+            $text = cmfTransGeneral($path, $parameters);
         }
         return $text;
     }
