@@ -15,6 +15,7 @@ var CmfRoutingHelpers = {
     },
     cleanupHangedElementsInBody: function () {
         $('body > .tooltip, body > .bs-container.bootstrap-select').remove();
+        $('body > div > .g-recaptcha-bubble-arrow').parent().remove();
     },
     cleanupHangedElementsInContentWrapper: function () {
         Utils.getContentContainer().find('.tooltip, .bs-container.bootstrap-select').remove();

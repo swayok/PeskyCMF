@@ -121,6 +121,10 @@ FormHelper.setValuesFromDataAttributes = function (container) {
 
 FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
     var $form = $(form);
+    if (!$form.length) {
+        console.error('Passed $form argument is not a valid element or selector', $form);
+        return;
+    }
     var $container = $(container);
     if (!options) {
         options = {}
@@ -129,6 +133,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
         isJson: true,
         clearForm: true,
         onValidationErrors: null,
+        onResponse: null,
         beforeSubmit: null
     }, options);
     var customInitiator = $form.attr('data-initiator');
@@ -141,7 +146,9 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             }
         }
         if (ret === false) {
-            return $form;
+            // notify that form was initiated
+            $form.trigger('ready.cmfform');
+            return;
         }
     }
     // set values
@@ -170,6 +177,9 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
             } else {
                 FormHelper.handleAjaxErrors($form, xhr, this);
             }
+            if (typeof options.onResponse === 'function') {
+                options.onResponse($form, $container);
+            }
         },
         success: function (data) {
             if ($.isFunction(onSubmitSuccess)) {
@@ -180,11 +190,13 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
                     Utils.handleAjaxSuccess(data);
                 }
             }
+            if (typeof options.onResponse === 'function') {
+                options.onResponse($form, $container);
+            }
         }
     });
     // notify that form was initiated
     $form.trigger('ready.cmfform');
-    return $form;
 };
 
 FormHelper.removeAllFormMessagesAndErrors = function ($form) {
