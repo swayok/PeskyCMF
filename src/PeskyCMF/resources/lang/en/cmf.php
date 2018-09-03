@@ -187,6 +187,15 @@ return [
             'delete_filtered' => '<span class="label label-danger">:count</span> Delete filtered',
             'edit_filtered' => '<span class="label label-primary">:count</span> Edit filtered ',
             'message' => [
+                'delete_selected' => '<span class="label label-danger">:count</span> Удалить выбранные',
+                'edit_selected' => '<span class="label label-primary">:count</span> Редактировать выбранные',
+                'delete_filtered' => '<span class="label label-danger">:count</span> Удалить отфильтрованные',
+                'edit_filtered' => '<span class="label label-primary">:count</span> Редактировать отфильтрованные',
+                'forbidden' => 'It is forbidden to delete bulk of Items from this section',
+                'delete_selected_confirm' => 'Confirm selected Items delete action',
+                'delete_filtered_confirm' => 'Confirm filtered Items delete action',
+                'success' => 'Items deleted: :count',
+                'nothing_deleted' => 'No items deleted',
                 'delete_bulk' => [
                     'forbidden' => 'It is forbidden to delete bulk of Items from this section',
                     'delete_selected_confirm' => 'Confirm selected Items delete action',
