@@ -97,6 +97,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         $files = static::getCmfConfig()->routes_config_files();
         if (count($files) > 0) {
             \Route::group($groupConfig, function () use ($files) {
+                $cmfConfig = static::getCmfConfig(); //< required for routes in included files
                 foreach ($files as $filePath) {
                     include $filePath;
                 }
@@ -106,6 +107,7 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
         if (count($files) > 0) {
             unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
             \Route::group($groupConfig, function () use ($files) {
+                $cmfConfig = static::getCmfConfig(); //< required for routes in included files
                 foreach ($files as $filePath) {
                     include $filePath;
                 }
