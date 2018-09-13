@@ -126,14 +126,8 @@ abstract class PeskyCmfSiteLoader extends AppSiteLoader {
     }
 
     static public function configurePublicFilesRoutes() {
-        \Route::get('packages/cmf/{file_path}', function ($filePath) {
-            $filePath = __DIR__ . '/public/' . $filePath;
-            if (File::exist($filePath)) {
-                return response(File::contents(), 200, ['Content-Type' => File::load()->mime()]);
-            } else {
-                return response('File not found');
-            }
-        })->where(['file_path' => '(js|css|img)\/.+\.[a-z0-9]+$']);
+        \Route::get('packages/cmf/{file_path}', 'PeskyCMF\Http\Controllers\CmfGeneralController@serveCmfPublicFiles')
+            ->where(['file_path' => '(js|css|img)\/.+\.[a-z0-9]+$']);
     }
 
     static public function getDefaultLocale() {

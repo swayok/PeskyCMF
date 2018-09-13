@@ -18,6 +18,7 @@ use PeskyORM\DbExpr;
 use PeskyORM\DbModel;
 use PeskyORM\DbObject;
 use Redirect;
+use Swayok\Utils\File;
 use Swayok\Utils\Set;
 
 class CmfGeneralController extends Controller {
@@ -41,6 +42,10 @@ class CmfGeneralController extends Controller {
         } else {
             return view(CmfConfig::getInstance()->layout_view())->render();
         }
+    }
+
+    public function getAboutCmfPage() {
+        return view('cmf::page.about');
     }
 
     public function getUiView($viewName) {
@@ -347,6 +352,21 @@ class CmfGeneralController extends Controller {
 
     public function cleanCache() {
         \Cache::flush();
+    }
+
+    public function handlerForRouteNotFound() {
+        return view('cmf::ui.default_page_header', [
+            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined',
+        ]);
+    }
+
+    public function serveCmfPublicFiles($filePath) {
+        $filePath = __DIR__ . '/public/' . $filePath;
+        if (File::exist($filePath)) {
+            return response(File::contents(), 200, ['Content-Type' => File::load()->mime()]);
+        } else {
+            return response('File not found');
+        }
     }
 
 }

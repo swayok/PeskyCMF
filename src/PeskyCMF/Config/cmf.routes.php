@@ -103,9 +103,9 @@ Route::group(
                 ]);
 
                 // Custom Pages
-                Route::get('page/about.html', function () {
-                    return view('cmf::page.about');
-                });
+                Route::get('page/about.html', [
+                    'uses' => CmfConfig::getInstance()->cmf_general_controller_class() . '@getAboutCmfPage'
+                ]);
 
                 Route::get('page/{page}.html', [
                     'uses' => CmfConfig::getInstance()->cmf_general_controller_class() . '@getPage'
@@ -166,11 +166,7 @@ Route::group(
                 'route' => 'cmf_item_custom_page',
                 'params' => true
             ],
-            'uses' => function () {
-                return view('cmf::ui.default_page_header', [
-                    'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined',
-                ]);
-            }
+            'uses' => CmfConfig::getInstance()->cmf_general_controller_class() . '@handlerForRouteNotFound',
         ]);
 
         Route::get('{table_name}/{id}/page/{page}', [
