@@ -2,9 +2,13 @@
 /**
  * @var CmfConfig $cmfConfig
  */
-
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\Middleware\AjaxOnly;
+
+if (empty($cmfConfig)) {
+    $cmfConfig = CmfConfig::getInstance();
+}
+
 
 Route::group(
     [
