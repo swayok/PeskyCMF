@@ -121,7 +121,6 @@ $(function () {
         cmfApp.afterStart();
     }
 
-    console.log(CmfConfig);
     if (CmfConfig.enablePing) {
         var pingInterval = setInterval(function () {
             $.ajax({
