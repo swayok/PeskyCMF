@@ -95,11 +95,13 @@ class CmfScaffoldApiController extends Controller {
     public function getItem(Request $request, $tableName, $id = null) {
         $isItemDetails = (bool)$request->query('details', false);
         $model = $this->getModel();
-        if (!$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
+        if ($isItemDetails && !$this->getScaffoldConfig()->isDetailsViewerAllowed()) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
-                ->setMessage(CmfConfig::transBase(
-                    '.action.' . ($isItemDetails ? 'item_details' : 'edit') . '.forbidden'
-                ))
+                ->setMessage(CmfConfig::transBase('.action.item_details.forbidden'))
+                ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
+        } else if (!$isItemDetails && !$this->getScaffoldConfig()->isEditAllowed()) {
+            return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
+                ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
                 ->goBack(route('cmf_items_table', [$this->getTableNameForRoutes()]));
         }
         $object = $model::getOwnDbObject();
