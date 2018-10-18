@@ -25,6 +25,7 @@ class PeskyOrmServiceProvider extends ServiceProvider {
             DbConnectionConfig::create()
                 ->setDriver($driver)
                 ->setHost(config("database.connections.$driver.host"))
+                ->setPort(config("database.connections.$driver.port"))
                 ->setDbName(config("database.connections.$driver.database"))
                 ->setUserName(config("database.connections.$driver.username"))
                 ->setPassword(config("database.connections.$driver.password"))
