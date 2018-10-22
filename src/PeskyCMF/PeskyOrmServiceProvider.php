@@ -20,15 +20,15 @@ class PeskyOrmServiceProvider extends ServiceProvider {
      * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function boot() {
-        $driver = config('database.default');
+        $connection = config('database.default');
         CmfDbModel::setDbConnectionConfig(
             DbConnectionConfig::create()
-                ->setDriver($driver)
-                ->setHost(config("database.connections.$driver.host"))
-                ->setPort(config("database.connections.$driver.port"))
-                ->setDbName(config("database.connections.$driver.database"))
-                ->setUserName(config("database.connections.$driver.username"))
-                ->setPassword(config("database.connections.$driver.password"))
+                ->setDriver(config("database.connections.$connection.driver"))
+                ->setHost(config("database.connections.$connection.host"))
+                ->setPort(config("database.connections.$connection.port"))
+                ->setDbName(config("database.connections.$connection.database"))
+                ->setUserName(config("database.connections.$connection.username"))
+                ->setPassword(config("database.connections.$connection.password"))
         );
         DbColumnConfig::registerType('password', DbColumnConfig::DB_TYPE_VARCHAR, PasswordField::class);
 
