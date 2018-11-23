@@ -26,7 +26,7 @@ abstract class CmfDbObject extends DbObject {
     /**
      * @param array $values
      * @param bool|false $withLabels
-     * @param string $translationsPath
+     * @param string|null $translationsPath - null: will use value as label
      * @param bool|false $asValueLabelPair
      * @return array
      */
@@ -36,7 +36,11 @@ abstract class CmfDbObject extends DbObject {
         }
         $options = array();
         foreach ($values as $value) {
-            $label = trans($translationsPath . $value);
+            if ($translationsPath === null) {
+                $label = $value;
+            } else {
+                $label = trans($translationsPath . $value);
+            }
             if ($asValueLabelPair) {
                 $options[$value] = $label;
             } else {
