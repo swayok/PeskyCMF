@@ -281,7 +281,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function routes_names_prefix(): string {
-        return static::url_prefix();
+        return static::url_prefix() . '/';
     }
 
     /**
@@ -290,6 +290,16 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function getRouteName($routeAlias): string {
         return static::routes_names_prefix() . $routeAlias;
+    }
+
+    /**
+     * @param string $routeName
+     * @param array $parameters
+     * @param bool $absolute
+     * @return string
+     */
+    static public function route(string $routeName, array $parameters = [], bool $absolute = false): string {
+        return route(static::getRouteName($routeName), $parameters, $absolute);
     }
 
     /**
@@ -709,7 +719,7 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return string
      */
     static public function home_page_url($absolute = false): string {
-        return route(static::getRouteName('cmf_start_page'), [], $absolute);
+        return static::route('cmf_start_page', [], $absolute);
     }
 
     /**
@@ -786,8 +796,8 @@ abstract class CmfConfig extends ConfigsContainer {
             'forceEnterMode' => true,
             'removeDialogTabs' => 'image:advanced',
             'extraPlugins' => 'uploadimage',
-            'filebrowserImageUploadUrl' => route(static::getRouteName('cmf_ckeditor_upload_image'), ['_token' => csrf_token()]),
-            'uploadUrl' => route(static::getRouteName('cmf_ckeditor_upload_image'), ['_token' => csrf_token()]),
+            'filebrowserImageUploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
+            'uploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
             'contentsCss' => static::css_files_for_wysiwyg_editor(),
         ];
     }
@@ -809,9 +819,9 @@ abstract class CmfConfig extends ConfigsContainer {
             'isDebug' => config('app.debug'),
             'rootUrl' => '/' . trim(static::url_prefix(), '/'),
             'enablePing' => false,
-            'uiUrl' => cmfRoute('cmf_main_ui', [], false, static::getInstance()),
-            'userDataUrl' => cmfRoute('cmf_profile_data', [], false, static::getInstance()),
-            'menuCountersDataUrl' => cmfRoute('cmf_menu_counters_data', [], false, static::getInstance()),
+            'uiUrl' => static::route('cmf_main_ui', [], false),
+            'userDataUrl' => static::route('cmf_profile_data', [], false),
+            'menuCountersDataUrl' => static::route('cmf_menu_counters_data', [], false),
             'defaultPageTitle' => static::default_page_title(),
             'pageTitleAddition' => static::page_title_addition(),
             'localizationStrings' => static::transGeneral('ui.js_component')
@@ -1111,12 +1121,12 @@ abstract class CmfConfig extends ConfigsContainer {
                 $controller = new $generalControllerClass();
                 if (static::getUser()) {
                     return [
-                        route(static::getRouteName('cmf_main_ui'), [], false) => $controller->getBasicUiView(),
+                        static::route('cmf_main_ui', [], false) => $controller->getBasicUiView(),
                     ];
                 } else {
                     return [
-                        route(static::getRouteName('cmf_login'), [], false) . '.html' => $controller->getLoginTpl(),
-                        route(static::getRouteName('cmf_forgot_password'), [], false) . '.html' => $controller->getForgotPasswordTpl(),
+                        static::route('cmf_login', [], false) . '.html' => $controller->getLoginTpl(),
+                        static::route('cmf_forgot_password', [], false) . '.html' => $controller->getForgotPasswordTpl(),
                     ];
                 }
             }
@@ -1261,16 +1271,6 @@ abstract class CmfConfig extends ConfigsContainer {
                 'as' => static::getRouteName('cmf_ckeditor_config_js'),
             ]);
         });
-
-        $groupConfig['middleware'] = ['web', $cmfSectionSelectorMiddleware];
-        if (array_get(static::js_app_settings(), 'enablePing', false)) {
-            \Route::group($groupConfig, function () {
-                \Route::post('/ping', [
-                    'uses' => static::cmf_general_controller_class() . '@ping',
-                    'as' => static::getRouteName('ping'),
-                ]);
-            });
-        }
     }
 
     /**
