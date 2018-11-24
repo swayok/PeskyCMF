@@ -40,32 +40,21 @@
         "swayok/peskyorm": "v2.x-dev",
         "swayok/peskyorm-laravel": "master@dev",
         "swayok/html-tag-helper": "master@dev",
-        "vluzrmos/language-detector": "1.*",
-
-        "almasaeed2010/adminlte": "2.4.*",
-        "swayok/page.js": "master@dev",
-        "mistic100/jquery-querybuilder": "2.*",
-
-        "bower-asset/jquery": "3.*",
-        "bower-asset/bootstrap": "3.*",
-        "bower-asset/toastr": "2.*",
-        "bower-asset/datatables": "1.*",
-        "bower-asset/sortablejs": "1.*",
-        "bower-asset/bootstrap-switch": "3.*",
-        "bower-asset/eonasdan-bootstrap-datetimepicker": "4.*",
-        "bower-asset/bootstrap-select": "1.*",
-        "bower-asset/ajax-bootstrap-select": "1.*",
-        "bower-asset/moment": "2.*",
-        "bower-asset/jquery-form": "4.*",
-        "bower-asset/select2": "4.*",
-        "bower-asset/inputmask": "3.*",
-        "bower-asset/bootstrap-fileinput": "4.4.*",
-        "bower-asset/simple-scrollbar": "0.*"
+        "vluzrmos/language-detector": "1.*"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "npm run prod"
+        ],
+        "post-update-cmd": [
+            "npm run dev"
+        ]
     },
     "suggest": {
-        "swayok/laravel-antihack-tool": "master@dev - active hack protection tool"
+        "swayok/laravel-antihack-tool": "master@dev - active hack protection tool",
+        "npm or yarn": "Install node.js and yarn"
     },
     "todo": {
         "bower-asset/cropperjs": "1.*"
     }
-}
+},

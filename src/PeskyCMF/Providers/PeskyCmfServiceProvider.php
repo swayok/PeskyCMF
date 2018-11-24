@@ -3,6 +3,7 @@
 namespace PeskyCMF\Providers;
 
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdminCommand;
@@ -20,7 +21,6 @@ use PeskyORM\ORM\TableInterface;
 use PeskyORM\ORM\TableStructureInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
-use Illuminate\Foundation\Application;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 /**
@@ -107,7 +107,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             return ;
         }
         $cmfPublicDir = __DIR__ . '/..';
-        $this->publishes([
+        /*$this->publishes([
             // cmf
             $cmfPublicDir . '/public/css' => public_path('packages/cmf/css'),
             $cmfPublicDir . '/public/js' => public_path('packages/cmf/js'),
@@ -163,7 +163,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/bower-asset/sortablejs/Sortable.js') => public_path('packages/cmf-vendors/sortable/Sortable.js'),
             // additions to vendors
             $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
-        ], 'public');
+        ], 'public');*/
 
         $this->publishes([
             $this->getConfigFilePath() => config_path('peskycmf.php'),

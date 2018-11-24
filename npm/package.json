@@ -1,0 +1,40 @@
+{
+    "name": "peskycmf-dependencies",
+    "version": "2.0.0",
+    "description": "Libs and plugins required for PeskyCMF. Add \"peskycmf-dependencies\": \"file:vendor/swayok/peskycmf/npm\" to dependencies",
+    "keywords": ["PeskyCMF"],
+    "homepage": "https://github.com/swayok/PeskyCMF",
+    "bugs": "https://github.com/swayok/PeskyCMF/issues",
+    "private": true,
+    "license": "MIT",
+    "author": {
+        "name": "Filippov Alexander"
+    },
+    "dependencies": {
+        "admin-lte": "^2.4.8",
+        "ajax-bootstrap-select": "^1.4.4",
+        "bootstrap": "^3.3.7",
+        "bootstrap-fileinput": "^4.5.1",
+        "bootstrap-select": "^1.13.3",
+        "bootstrap-switch": "^3.3.4",
+        "datatables": "^1.10.18",
+        "eonasdan-bootstrap-datetimepicker": "^4.17.47",
+        "inputmask": "^4.0.3",
+        "jquery": "^3.3.1",
+        "jquery-form": "^4.2.2",
+        "jQuery-QueryBuilder": "^2.5.2",
+        "moment": "^2.22.2",
+        "page-on-promises": "^2.0.0",
+        "select2": "^4.0.6-rc.1",
+        "simple-scrollbar": "^0.4.0",
+        "sortablejs": "^1.7.0",
+        "toastr": "^2.1.4"
+    },
+    "directories": {
+        "lib": "../src/PeskyCMF/public"
+    },
+    "repository": {
+        "type" : "git",
+        "url" : "https://github.com/swayok/PeskyCMF"
+    }
+}
