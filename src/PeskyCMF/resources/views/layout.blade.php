@@ -17,10 +17,10 @@
     <link href="/assets/cmf/css/adminlte/AdminLTE{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
     <link href="/assets/cmf/css/adminlte/skins/{{ cmfConfig()->ui_skin() }}{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
 
-    <link href="/assets/cmf/css/bootstrap-plugins{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-    <link href="/assets/cmf/css/libs{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ mix('/assets/cmf/css/bootstrap-plugins.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ mix('/assets/cmf/css/libs.css') }}" rel="stylesheet" type="text/css"/>
     <link href="/assets/cmf/css/fonts/Roboto/roboto.css" rel="stylesheet" type="text/css"/>
-    <link href="/assets/cmf/css/cmf{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ mix('/assets/cmf/css/cmf.css') }}" rel="stylesheet" type="text/css"/>
 
     <link href="/assets/cmf/font-awesome/css/font-awesome{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
 
@@ -78,11 +78,11 @@
     @php($localeWithSuffixDashed = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('-'))
     @php($localeWithSuffixUnderscored = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('_'))
 
-    <script src="/assets/cmf/js/libs{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/assets/cmf/js/bootstrap-and-plugins{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/assets/cmf/js/datatables-and-plugins{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/assets/cmf/js/jquery-plugins{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/assets/cmf/js/cmf{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="{{ mix('/assets/cmf/js/libs.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/assets/cmf/js/bootstrap-and-plugins.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/assets/cmf/js/datatables-and-plugins.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/assets/cmf/js/jquery-plugins.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/assets/cmf/js/cmf.js') }}" type="text/javascript"></script>
 
     @if (cmfConfig()->config('optimize_ui_templates.enabled', false))
         <script src="{{ cmfRoute('cmf_cached_templates_js', ['_' => time()]) }}" type="text/javascript"></script>
@@ -90,7 +90,7 @@
 
     <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
 
-    <script src="/assets/cmf/js/localizations.{{ $localeWithSuffixDashed }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="{{ mix("/assets/cmf/js/localizations.{$localeWithSuffixDashed}.js") }}" type="text/javascript"></script>
 
     @foreach(cmfConfig()->layout_js_includes() as $jsPath)
         <script src="{!! $jsPath !!}" type="text/javascript"></script>
