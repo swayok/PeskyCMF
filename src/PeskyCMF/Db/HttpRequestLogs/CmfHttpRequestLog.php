@@ -9,7 +9,6 @@ use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
 use Swayok\Utils\File;
-use Swayok\Utils\Set;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -89,6 +88,11 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         'REQUEST_TIME',
     ];
 
+    /** @var \Closure|null */
+    protected $responseContentMinifier;
+    /** @var \Closure|null */
+    protected $requestDataMinifier;
+
     /**
      * @return CmfHttpRequestLogsTable
      */
@@ -141,8 +145,8 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 }
             }, $request->file());
             $requestData = [
-                'GET' => $this->hidePasswords($request->query()),
-                'POST' => $this->hidePasswords($request->post()),
+                'GET' => $this->getMinifiedRequestData($this->hidePasswords($request->query())),
+                'POST' => $this->getMinifiedRequestData($this->hidePasswords($request->post())),
                 'FILES' => $files,
                 'HEADERS' => array_map(function ($value) {
                     if (is_array($value) && count($value) === 1 && isset($value[0])) {
@@ -173,6 +177,39 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     }
 
     /**
+     * Set minifier closure to reduce size of request data to be logged.
+     * Useful for heavy requests that contain lots of data or heavy data like files.
+     * @param \Closure $minifier - function (array $data) { return $$data; }
+     * @return $this
+     */
+    public function setRequestDataMinifier(\Closure $minifier) {
+        $this->requestDataMinifier = $minifier;
+        return $this;
+    }
+
+    protected function getMinifiedRequestData(array $data) {
+        if ($this->responseContentMinifier !== null) {
+            try {
+                return call_user_func($this->requestDataMinifier, $data);
+            } catch (\Throwable $exception) {
+                $this->logException($exception);
+                // proceed to default version
+            }
+        }
+        if (!empty($data)) {
+            $maxSize = (int)config('peskycmf.http_request_logs.max_request_value_size', 0);
+            if ($maxSize > 0) {
+                array_walk_recursive($data, function (&$value) use ($maxSize) {
+                    if (is_string($value) && mb_strlen($value) > $maxSize) {
+                        $value = mb_substr($value, 0, $maxSize) . '...( value length limit reached )';
+                    }
+                });
+            }
+        }
+        return $data;
+    }
+
+    /**
      * @param Route $route
      * @return string|null|false
      */
@@ -192,6 +229,32 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
             }
             return null;
         });
+    }
+
+    /**
+     * Set minifier closure to reduce size of response content to be logged.
+     * @param \Closure $minifier - function (Request $request) { return $content; }
+     * @return $this
+     */
+    public function setResponseContentMinifier(\Closure $minifier) {
+        $this->responseContentMinifier = $minifier;
+        return $this;
+    }
+
+    protected function getMinifiedResponseContent(Response $response) {
+        if ($this->responseContentMinifier !== null) {
+            try {
+                return call_user_func($this->responseContentMinifier, $response);
+            } catch (\Throwable $exception) {
+                $this->logException($exception);
+                // proceed to default version
+            }
+        }
+        $responseContent = $response->getContent();
+        $maxSize = (int)config('peskycmf.http_request_logs.max_response_size', 3145728);
+        return $maxSize > 0 && mb_strlen($responseContent) > $maxSize
+            ? mb_substr($responseContent, 0, $maxSize) . ' ( value length limit reached )'
+            : $responseContent;
     }
 
     /**
@@ -224,8 +287,9 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                         }
                     ));
                 }
+
                 $this
-                    ->setResponse($response->getContent())
+                    ->setResponse($this->getMinifiedResponseContent($response))
                     ->setResponseCode($response->getStatusCode())
                     ->setResponseType(strtolower(preg_replace('%(Response|Cmf)%', '', class_basename($response))) ?: 'text')
                     ->setRespondedAt(static::getTable()->getCurrentTimeDbExpr())
