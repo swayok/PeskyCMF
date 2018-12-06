@@ -12,17 +12,17 @@
 
     @yield('html-head')
 
-    <link href="/assets/cmf/css/bootstrap/bootstrap{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/bootstrap/bootstrap{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
 
-    <link href="/assets/cmf/css/adminlte/AdminLTE{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
-    <link href="/assets/cmf/css/adminlte/skins/{{ cmfConfig()->ui_skin() }}{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/adminlte/AdminLTE{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/adminlte/skins/{{ cmfConfig()->ui_skin() }}{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
 
-    <link href="{{ mix('/assets/cmf/css/bootstrap-plugins.css') }}" rel="stylesheet" type="text/css"/>
-    <link href="{{ mix('/assets/cmf/css/libs.css') }}" rel="stylesheet" type="text/css"/>
-    <link href="/assets/cmf/css/fonts/Roboto/roboto.css" rel="stylesheet" type="text/css"/>
-    <link href="{{ mix('/assets/cmf/css/cmf.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ mix('/packages/cmf/css/bootstrap-plugins.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ mix('/packages/cmf/css/libs.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/fonts/Roboto/roboto.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ mix('/packages/cmf/css/cmf.css') }}" rel="stylesheet" type="text/css"/>
 
-    <link href="/assets/cmf/font-awesome/css/font-awesome{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/font-awesome/css/font-awesome{{ $scriptsMinificationSuffix }}.css" rel="stylesheet" type="text/css"/>
 
     @foreach(cmfConfig()->layout_css_includes() as $cssPath)
         <link href="{{ $cssPath }}" rel="stylesheet" type="text/css"/>
@@ -73,16 +73,16 @@
         var AppData = {!! json_encode(cmfConfig()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
-    <script src="/assets/cmf/js/jquery{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/jquery{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
 
     @php($localeWithSuffixDashed = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('-'))
     @php($localeWithSuffixUnderscored = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('_'))
 
-    <script src="{{ mix('/assets/cmf/js/libs.js') }}" type="text/javascript"></script>
-    <script src="{{ mix('/assets/cmf/js/bootstrap-and-plugins.js') }}" type="text/javascript"></script>
-    <script src="{{ mix('/assets/cmf/js/datatables-and-plugins.js') }}" type="text/javascript"></script>
-    <script src="{{ mix('/assets/cmf/js/jquery-plugins.js') }}" type="text/javascript"></script>
-    <script src="{{ mix('/assets/cmf/js/cmf.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/packages/cmf/js/libs.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/packages/cmf/js/bootstrap-and-plugins.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/packages/cmf/js/datatables-and-plugins.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/packages/cmf/js/jquery-plugins.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('/packages/cmf/js/cmf.js') }}" type="text/javascript"></script>
 
     @if (cmfConfig()->config('optimize_ui_templates.enabled', false))
         <script src="{{ cmfRoute('cmf_cached_templates_js', ['_' => time()]) }}" type="text/javascript"></script>
@@ -90,7 +90,7 @@
 
     <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
 
-    <script src="{{ mix("/assets/cmf/js/localizations.{$localeWithSuffixDashed}.js") }}" type="text/javascript"></script>
+    <script src="{{ mix("/packages/cmf/js/localizations.{$localeWithSuffixDashed}.js") }}" type="text/javascript"></script>
 
     @foreach(cmfConfig()->layout_js_includes() as $jsPath)
         <script src="{!! $jsPath !!}" type="text/javascript"></script>

@@ -1,12 +1,12 @@
 [
     {
-        "output": "public/assets/cmf/js/jquery.js",
+        "output": "public/packages/cmf/js/jquery.js",
         "files": [
             "node_modules/jquery/dist/jquery.js"
         ]
     },
     {
-        "output": "public/assets/cmf/js/bootstrap-and-plugins.js",
+        "output": "public/packages/cmf/js/bootstrap-and-plugins.js",
         "files": [
             "node_modules/bootstrap/dist/js/bootstrap.js",
             "node_modules/bootstrap-switch/dist/js/bootstrap-switch.js",
@@ -19,7 +19,7 @@
         ]
     },
     {
-        "output": "public/assets/cmf/js/datatables-and-plugins.js",
+        "output": "public/packages/cmf/js/datatables-and-plugins.js",
         "files": [
             "node_modules/datatables/media/js/jquery.dataTables.js",
             "node_modules/datatables.net-bs/js/dataTables.bootstrap.js",
@@ -28,7 +28,7 @@
         ]
     },
     {
-        "output": "public/assets/cmf/js/jquery-plugins.js",
+        "output": "public/packages/cmf/js/jquery-plugins.js",
         "files": [
             "node_modules/jquery-extendext/jQuery.extendext.js",
             "node_modules/jQuery-QueryBuilder/dist/js/query-builder.js",
@@ -39,7 +39,7 @@
         ]
     },
     {
-        "output": "public/assets/cmf/js/libs.js",
+        "output": "public/packages/cmf/js/libs.js",
         "files": [
             "node_modules/simple-scrollbar/simple-scrollbar.js",
             "node_modules/peskycmf-dependencies/src/cmf-vendors/modernizr.custom.js",
@@ -56,7 +56,7 @@
         ]
     },
     {
-        "output": "public/assets/cmf/js/cmf.js",
+        "output": "public/packages/cmf/js/cmf.js",
         "files": [
             "node_modules/admin-lte/dist/js/adminlte.js",
             "node_modules/page-on-promises/page.js",

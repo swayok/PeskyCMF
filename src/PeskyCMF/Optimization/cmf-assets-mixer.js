@@ -39,7 +39,7 @@ const mixCmfPluginsLocalizationScripts = function (mix, localeShort, localeWithS
         {
             regexp: /{{ localeWithSuffixDashed }}/g,
             replace: localeWithSuffixDashed
-        },
+        }
     ];
     // update file paths with locales
     for (let fileIndex in localizationScripts.files) {
@@ -77,5 +77,6 @@ module.exports = {
         publishFiles(mix);
         mixCmfStyles(mix);
         mixCmfScripts(mix);
+        mixCmfPluginsLocalizationScripts(mix, 'en', 'en_US', 'en-US');
     }
 };

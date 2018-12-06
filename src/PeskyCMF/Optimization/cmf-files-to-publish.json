@@ -2,10 +2,10 @@
     "files": {
     },
     "folders": {
-        "node_modules/admin-lte/dist/css": "public/assets/cmf/css/adminlte",
-        "node_modules/bootstrap/dist/css": "public/assets/cmf/css/bootstrap",
-        "node_modules/peskycmf-dependencies/src/cmf-vendors/fonticons/font-awesome": "public/assets/cmf/font-awesome",
-        "node_modules/peskycmf-dependencies/src/css/fonts": "public/assets/cmf/css/fonts",
-        "node_modules/bootstrap/dist/fonts": "public/assets/cmf/css/fonts"
+        "node_modules/admin-lte/dist/css": "public/packages/cmf/css/adminlte",
+        "node_modules/bootstrap/dist/css": "public/packages/cmf/css/bootstrap",
+        "node_modules/peskycmf-dependencies/src/cmf-vendors/fonticons/font-awesome": "public/packages/cmf/font-awesome",
+        "node_modules/peskycmf-dependencies/src/css/fonts": "public/packages/cmf/css/fonts",
+        "node_modules/bootstrap/dist/fonts": "public/packages/cmf/css/fonts"
     }
 }

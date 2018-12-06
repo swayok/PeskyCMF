@@ -1,6 +1,6 @@
 [
     {
-        "output": "public/assets/cmf/css/bootstrap-plugins.css",
+        "output": "public/packages/cmf/css/bootstrap-plugins.css",
         "files": [
             "node_modules/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css",
             "node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css",
@@ -11,7 +11,7 @@
         ]
     },
     {
-        "output": "public/assets/cmf/css/libs.css",
+        "output": "public/packages/cmf/css/libs.css",
         "files": [
             "node_modules/simple-scrollbar/simple-scrollbar.css",
             "node_modules/datatables.net-bs/css/dataTables.bootstrap.css",
@@ -22,7 +22,7 @@
         ]
     },
     {
-        "output": "public/assets/cmf/css/cmf.css",
+        "output": "public/packages/cmf/css/cmf.css",
         "files": [
             "node_modules/peskycmf-dependencies/src/css/helpers.css",
             "node_modules/peskycmf-dependencies/src/css/cmf.app.css"
