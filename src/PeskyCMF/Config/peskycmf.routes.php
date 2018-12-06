@@ -57,6 +57,11 @@ Route::get('logout', [
     'log' => 'cmf.logout'
 ]);
 
+\Route::post('/ping', [
+    'as' => $routeNamePrefix . 'ping',
+    'uses' => $generalControllerClass . '@ping'
+]);
+
 Route::group(
     [
         'middleware' => AjaxOnly::class,

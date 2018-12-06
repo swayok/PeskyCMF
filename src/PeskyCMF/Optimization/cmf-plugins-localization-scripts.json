@@ -1,0 +1,10 @@
+{
+    "output": "public/assets/cmf/js/localizations.{{ localeWithSuffixDashed }}.js",
+    "files": [
+        "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.{{ localeShort }}.js",
+        "node_modules/moment/locale/{{ localeShort }}.js",
+        "node_modules/bootstrap-select/dist/js/i18n/defaults-{{ localeWithSuffixUnderscored }}.js",
+        "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.{{ localeWithSuffixDashed }}.min.js",
+        "node_modules/bootstrap-fileinput/js/locales/{{ localeShort }}.js"
+    ]
+}
