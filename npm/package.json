@@ -2,13 +2,24 @@
     "name": "peskycmf-dependencies",
     "version": "2.0.0",
     "description": "Libs and plugins required for PeskyCMF. Add \"peskycmf-dependencies\": \"file:vendor/swayok/peskycmf/npm\" to dependencies",
-    "keywords": ["PeskyCMF"],
+    "keywords": [
+        "PeskyCMF"
+    ],
     "homepage": "https://github.com/swayok/PeskyCMF",
     "bugs": "https://github.com/swayok/PeskyCMF/issues",
     "private": true,
     "license": "MIT",
     "author": {
         "name": "Filippov Alexander"
+    },
+    "scripts": {
+        "dev": "npm run development",
+        "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "watch": "npm run development -- --watch",
+        "watch-poll": "npm run watch -- --watch-poll",
+        "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "prod": "npm run production",
+        "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
     },
     "dependencies": {
         "admin-lte": "^2.4.8",
@@ -30,11 +41,13 @@
         "sortablejs": "^1.7.0",
         "toastr": "^2.1.4"
     },
-    "directories": {
-        "lib": "../src/PeskyCMF/public"
+    "devDependencies": {
+        "axios": "^0.18",
+        "cross-env": "^5.1",
+        "laravel-mix": "^2.0"
     },
     "repository": {
-        "type" : "git",
-        "url" : "https://github.com/swayok/PeskyCMF"
+        "type": "git",
+        "url": "https://github.com/swayok/PeskyCMF"
     }
 }

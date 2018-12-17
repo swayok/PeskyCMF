@@ -1,2 +1,5 @@
 /src/PeskyCMF/public/compiled
 /npm/node_modules
+/npm/package-lock.json
+/npm/mix.js.map
+/npm/mix-manifest.json

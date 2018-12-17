@@ -106,13 +106,19 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         if (!$this->runningInConsole()) {
             return ;
         }
-        $cmfPublicDir = __DIR__ . '/..';
+        $cmfLibDir = __DIR__ . '/..';
+        // publish cmf assets (minified)
+        $cmfNpmDistDir = $cmfLibDir . '/../../npm/dist';
+        $this->publishes([
+            $cmfNpmDistDir => public_path('packages/cmf')
+        ], 'public');
+
         /*$this->publishes([
             // cmf
-            $cmfPublicDir . '/public/css' => public_path('packages/cmf/css'),
-            $cmfPublicDir . '/public/js' => public_path('packages/cmf/js'),
-            $cmfPublicDir . '/public/less' => public_path('packages/cmf/less'),
-            $cmfPublicDir . '/public/img' => public_path('packages/cmf/img'),
+            $cmfLibDir . '/public/css' => public_path('packages/cmf/css'),
+            $cmfLibDir . '/public/js' => public_path('packages/cmf/js'),
+            $cmfLibDir . '/public/less' => public_path('packages/cmf/less'),
+            $cmfLibDir . '/public/img' => public_path('packages/cmf/img'),
             base_path('vendor/swayok/page.js/page.js') => public_path('packages/cmf-vendors/router/page.js'),
             // AdminLTE
             base_path('vendor/almasaeed2010/adminlte/dist/js/adminlte.js') => public_path('packages/adminlte/js/app.js'),
@@ -162,13 +168,13 @@ class PeskyCmfServiceProvider extends ServiceProvider {
 //            base_path('vendor/bower-asset/cropperjs/dist') => public_path('packages/cmf-vendors/cropperjs'),
             base_path('vendor/bower-asset/sortablejs/Sortable.js') => public_path('packages/cmf-vendors/sortable/Sortable.js'),
             // additions to vendors
-            $cmfPublicDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
+            $cmfLibDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
         ], 'public');*/
 
         $this->publishes([
             $this->getConfigFilePath() => config_path('peskycmf.php'),
             $this->getOrmConfigFilePath() => config_path('peskyorm.php'),
-            $cmfPublicDir . '/Config/ru_validation_translations.php' => resource_path('lang/ru/validation.php'),
+            $cmfLibDir . '/Config/ru_validation_translations.php' => resource_path('lang/ru/validation.php'),
         ], 'config');
     }
 
