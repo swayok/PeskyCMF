@@ -69,11 +69,21 @@ class CmfHttpRequestLogsTable extends AbstractTable {
     /**
      * Minify request data.
      * Useful for heavy requests that contain lots of data or heavy data like files.
-     * @param \Closure $minifier - function (array $data) { return $$data; }
+     * @param \Closure $minifier - function (array $data) { return $data; }
      * @return CmfHttpRequestLog
      */
     static public function setRequestDataMinifier(\Closure $minifier) {
         return static::getCurrentLog()->setRequestDataMinifier($minifier);
+    }
+
+    /**
+     * Register request data minifier that may be used by during request logging via
+     * route's 'log_data_minifier' action.
+     * @param string $name
+     * @param \Closure $minifier
+     */
+    static public function registerRequestDataMinifier(string $name, \Closure $minifier) {
+        static::getCurrentLog()->registerRequestDataMinifier($name, $minifier);
     }
 
     /**

@@ -69,6 +69,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterface {
 
+    /** @var \Closure[] */
+    protected static $requestDataMinifiers = [];
+
     static private $serverDataKeys = [
         'HTTP_USER_AGENT',
         'REQUEST_URI',
@@ -101,11 +104,22 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     }
 
     /**
+     * Register request data minifier that may be used by during request logging via
+     * route's 'log_data_minifier' action.
+     * @param string $name
+     * @param \Closure $minifier
+     */
+    static public function registerRequestDataMinifier(string $name, \Closure $minifier) {
+        static::$requestDataMinifiers[$name] = $minifier;
+    }
+
+    /**
      * @param Request $request
+     * @param bool $enabledByDefault - create log even when log name not provided via route's 'log' action
      * @param bool $force - create log forcefully ignoring all restrictions
      * @return $this
      */
-    public function fromRequest(Request $request, $force = false) {
+    public function fromRequest(Request $request, bool $enabledByDefault = false, bool $force = false) {
         if ($this->hasValue('request')) {
             throw new \BadMethodCallException('You should not call this method twice');
         }
@@ -113,10 +127,17 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
             $route = $request->route();
             $logName = $this->getLogName($route);
             if (empty($logName)) {
-                if ($force && $logName !== false) {
+                // Situations:
+                // = false: do not log unless $force is true
+                // = null or empty string: could not get name using route params or 'log' action,
+                //      will use request URI as $logName when $enabledByDefault is true
+                if ($force) {
                     $logName = $route->uri();
-                } else {
+                } else if ($logName === false || !$enabledByDefault) {
+                    // do not log
                     return $this;
+                } else {
+                    $logName = $route->uri();
                 }
             }
 
@@ -144,6 +165,15 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                     return $file;
                 }
             }, $request->file());
+
+            // set data minifier from rotute's 'log_data_minifier' action if provided and registered
+            if (!$this->requestDataMinifier) {
+                $requestMinifierName = array_get($route->getAction(), 'log_data_minifier');
+                if (!empty($requestMinifierName) && isset(static::$requestDataMinifiers[$requestMinifierName])) {
+                    $this->setRequestDataMinifier(static::$requestDataMinifiers[$requestMinifierName]);
+                }
+            }
+
             $requestData = [
                 'GET' => $this->getMinifiedRequestData($this->hidePasswords($request->query())),
                 'POST' => $this->getMinifiedRequestData($this->hidePasswords($request->post())),
@@ -179,7 +209,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     /**
      * Set minifier closure to reduce size of request data to be logged.
      * Useful for heavy requests that contain lots of data or heavy data like files.
-     * @param \Closure $minifier - function (array $data) { return $$data; }
+     * @param \Closure $minifier - function (array $data) { return $data; }
      * @return $this
      */
     public function setRequestDataMinifier(\Closure $minifier) {
@@ -188,7 +218,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     }
 
     protected function getMinifiedRequestData(array $data) {
-        if ($this->responseContentMinifier !== null) {
+        if ($this->requestDataMinifier !== null) {
             try {
                 return call_user_func($this->requestDataMinifier, $data);
             } catch (\Throwable $exception) {
@@ -267,7 +297,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         if ($this->isAllowed() || ($response->getStatusCode() >= 500)) {
             if (!$this->hasValue('request')) {
                 // server error happened on not loggable request
-                $this->fromRequest($request, true);
+                $this->fromRequest($request, true, true);
             }
             try {
                 if ($this->hasValue('response') && !empty($this->response)) {

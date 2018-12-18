@@ -59,7 +59,8 @@ Route::get('logout', [
 
 \Route::post('/ping', [
     'as' => $routeNamePrefix . 'ping',
-    'uses' => $generalControllerClass . '@ping'
+    'uses' => $generalControllerClass . '@ping',
+    'log' => false
 ]);
 
 Route::group(
@@ -146,6 +147,7 @@ Route::group(
                 Route::get('page/menu/counters', [
                     'as' => $routeNamePrefix . 'cmf_menu_counters_data',
                     'uses' => $generalControllerClass . '@getMenuCounters',
+                    'log' => false
                 ]);
 
                 // Admin profile
