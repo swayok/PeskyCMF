@@ -12,15 +12,15 @@
 
     @yield('html-head')
 
-    <link href="/packages/cmf/css/bootstrap/bootstrap{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/bootstrap/bootstrap.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
 
-    <link href="/packages/cmf/css/adminlte/AdminLTE{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/adminlte/skins/{{ cmfConfig()->ui_skin() }}{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/adminlte/AdminLTE.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/adminlte/skins/{{ cmfConfig()->ui_skin() }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
 
-    <link href="/packages/cmf/css/bootstrap-plugins{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/libs{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/bootstrap-plugins.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/libs.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
     <link href="/packages/cmf/css/fonts/Roboto/roboto.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/cmf{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    <link href="/packages/cmf/css/cmf.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
 
     <link href="/packages/cmf/font-awesome/css/font-awesome{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
 
@@ -73,16 +73,17 @@
         var AppData = {!! json_encode(cmfConfig()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
-    <script src="/packages/cmf/js/jquery{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/jquery.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
 
     @php($localeWithSuffixDashed = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('-'))
     @php($localeWithSuffixUnderscored = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('_'))
 
-    <script src="/packages/cmf/js/libs{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/bootstrap-and-plugins{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/datatables-and-plugins{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/jquery-plugins{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/libs.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/bootstrap-and-plugins.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/datatables-and-plugins.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/jquery-plugins.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.core.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/cmf.app.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
 
     @if (cmfConfig()->config('optimize_ui_templates.enabled', false))
         <script src="{{ cmfRoute('cmf_cached_templates_js', ['_' => time()]) }}" type="text/javascript"></script>
@@ -90,7 +91,7 @@
 
     <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
 
-    <script src="/packages/cmf/js/locale/{{ $localeWithSuffixUnderscored }}{{ $scriptsMinificationSuffix }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    <script src="/packages/cmf/js/locale/{{ $localeWithSuffixUnderscored }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
 
     @foreach(cmfConfig()->layout_js_includes() as $jsPath)
         <script src="{!! $jsPath !!}" type="text/javascript"></script>

@@ -110,7 +110,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         // publish cmf assets (minified)
         $cmfNpmDistDir = $cmfLibDir . '/../../npm/dist';
         $this->publishes([
-            $cmfNpmDistDir => public_path('packages/cmf')
+            $cmfNpmDistDir . ($this->app->environment() === 'production' ? '/min' : '/packed') => public_path('packages/cmf')
         ], 'public');
 
         /*$this->publishes([

@@ -1,31 +1,31 @@
 [
     {
-        "output": "dist/css/bootstrap-plugins.css",
+        "output": "css/bootstrap-plugins.css",
         "files": [
             "node_modules/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css",
             "node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css",
             "node_modules/bootstrap-select/dist/css/bootstrap-select.css",
             "node_modules/ajax-bootstrap-select/dist/css/ajax-bootstrap-select.css",
             "node_modules/bootstrap-fileinput/css/fileinput.css",
-            "node_modules/peskycmf-dependencies/src/cmf-vendors/bootstrap/awesome-bootstrap-checkbox.css"
+            "src/cmf-vendors/bootstrap/awesome-bootstrap-checkbox.css"
         ]
     },
     {
-        "output": "dist/css/libs.css",
+        "output": "css/libs.css",
         "files": [
             "node_modules/simple-scrollbar/simple-scrollbar.css",
             "node_modules/datatables.net-bs/css/dataTables.bootstrap.css",
-            "node_modules/peskycmf-dependencies/src/cmf-vendors/datatables/extensions/FixedColumns/css/fixedColumns.bootstrap.css",
+            "src/cmf-vendors/datatables/extensions/FixedColumns/css/fixedColumns.bootstrap.css",
             "node_modules/select2/dist/css/select2.css",
             "node_modules/toastr/build/toastr.css",
             "node_modules/jQuery-QueryBuilder/dist/css/query-builder.default.css"
         ]
     },
     {
-        "output": "dist/css/cmf.css",
+        "output": "css/cmf.css",
         "files": [
-            "node_modules/peskycmf-dependencies/src/css/helpers.css",
-            "node_modules/peskycmf-dependencies/src/css/cmf.app.css"
+            "src/css/helpers.css",
+            "src/css/cmf.app.css"
         ]
     }
 ]

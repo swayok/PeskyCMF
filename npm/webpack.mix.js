@@ -1,4 +1,3 @@
-let mix = require('laravel-mix');
 let path = require('path');
 
 /*
@@ -14,6 +13,4 @@ let path = require('path');
 
 let cmfMixer = require(path.join(__dirname, '/config/cmf-assets-mixer'));
 
-cmfMixer.mixCmfAssets(mix);
-
-//todo: add cmfMixer.mixCmfPluginsLocalizationScripts() for all available locales
+cmfMixer.mixCmfAssets();

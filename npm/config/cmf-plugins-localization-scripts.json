@@ -1,24 +1,24 @@
 {
     "af": {
-        "output": "dist/js/locale/af.js",
+        "output": "js/locale/af.js",
         "files": [
             "node_modules/moment/locale/af.js"
         ]
     },
     "af_AF": {
-        "output": "dist/js/locale/af_AF.js",
+        "output": "js/locale/af_AF.js",
         "files": [
             "node_modules/moment/locale/af.js"
         ]
     },
     "am_ET": {
-        "output": "dist/js/locale/am_ET.js",
+        "output": "js/locale/am_ET.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-am_ET.js"
         ]
     },
     "ar": {
-        "output": "dist/js/locale/ar.js",
+        "output": "js/locale/ar.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
@@ -27,7 +27,7 @@
         ]
     },
     "ar_AR": {
-        "output": "dist/js/locale/ar_AR.js",
+        "output": "js/locale/ar_AR.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
@@ -36,7 +36,7 @@
         ]
     },
     "ar_DZ": {
-        "output": "dist/js/locale/ar_DZ.js",
+        "output": "js/locale/ar_DZ.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
@@ -45,7 +45,7 @@
         ]
     },
     "ar_KW": {
-        "output": "dist/js/locale/ar_KW.js",
+        "output": "js/locale/ar_KW.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
@@ -54,7 +54,7 @@
         ]
     },
     "ar_LY": {
-        "output": "dist/js/locale/ar_LY.js",
+        "output": "js/locale/ar_LY.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
@@ -63,7 +63,7 @@
         ]
     },
     "ar_MA": {
-        "output": "dist/js/locale/ar_MA.js",
+        "output": "js/locale/ar_MA.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
@@ -72,7 +72,7 @@
         ]
     },
     "ar_SA": {
-        "output": "dist/js/locale/ar_SA.js",
+        "output": "js/locale/ar_SA.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
@@ -81,7 +81,7 @@
         ]
     },
     "ar_TN": {
-        "output": "dist/js/locale/ar_TN.js",
+        "output": "js/locale/ar_TN.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
@@ -90,7 +90,7 @@
         ]
     },
     "az": {
-        "output": "dist/js/locale/az.js",
+        "output": "js/locale/az.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.az.js",
             "node_modules/bootstrap-fileinput/js/locales/az.js",
@@ -98,7 +98,7 @@
         ]
     },
     "az_AZ": {
-        "output": "dist/js/locale/az_AZ.js",
+        "output": "js/locale/az_AZ.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.az.js",
             "node_modules/bootstrap-fileinput/js/locales/az.js",
@@ -106,19 +106,19 @@
         ]
     },
     "be": {
-        "output": "dist/js/locale/be.js",
+        "output": "js/locale/be.js",
         "files": [
             "node_modules/moment/locale/be.js"
         ]
     },
     "be_BE": {
-        "output": "dist/js/locale/be_BE.js",
+        "output": "js/locale/be_BE.js",
         "files": [
             "node_modules/moment/locale/be.js"
         ]
     },
     "bg": {
-        "output": "dist/js/locale/bg.js",
+        "output": "js/locale/bg.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.bg.js",
             "node_modules/bootstrap-fileinput/js/locales/bg.js",
@@ -127,7 +127,7 @@
         ]
     },
     "bg_BG": {
-        "output": "dist/js/locale/bg_BG.js",
+        "output": "js/locale/bg_BG.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.bg.js",
             "node_modules/bootstrap-fileinput/js/locales/bg.js",
@@ -136,93 +136,93 @@
         ]
     },
     "bm": {
-        "output": "dist/js/locale/bm.js",
+        "output": "js/locale/bm.js",
         "files": [
             "node_modules/moment/locale/bm.js"
         ]
     },
     "bm_BM": {
-        "output": "dist/js/locale/bm_BM.js",
+        "output": "js/locale/bm_BM.js",
         "files": [
             "node_modules/moment/locale/bm.js"
         ]
     },
     "bn": {
-        "output": "dist/js/locale/bn.js",
+        "output": "js/locale/bn.js",
         "files": [
             "node_modules/moment/locale/bn.js"
         ]
     },
     "bn_BN": {
-        "output": "dist/js/locale/bn_BN.js",
+        "output": "js/locale/bn_BN.js",
         "files": [
             "node_modules/moment/locale/bn.js"
         ]
     },
     "bo": {
-        "output": "dist/js/locale/bo.js",
+        "output": "js/locale/bo.js",
         "files": [
             "node_modules/moment/locale/bo.js"
         ]
     },
     "bo_BO": {
-        "output": "dist/js/locale/bo_BO.js",
+        "output": "js/locale/bo_BO.js",
         "files": [
             "node_modules/moment/locale/bo.js"
         ]
     },
     "br": {
-        "output": "dist/js/locale/br.js",
+        "output": "js/locale/br.js",
         "files": [
             "node_modules/moment/locale/br.js"
         ]
     },
     "br_BR": {
-        "output": "dist/js/locale/br_BR.js",
+        "output": "js/locale/br_BR.js",
         "files": [
             "node_modules/moment/locale/br.js"
         ]
     },
     "bs": {
-        "output": "dist/js/locale/bs.js",
+        "output": "js/locale/bs.js",
         "files": [
             "node_modules/moment/locale/bs.js"
         ]
     },
     "bs_BS": {
-        "output": "dist/js/locale/bs_BS.js",
+        "output": "js/locale/bs_BS.js",
         "files": [
             "node_modules/moment/locale/bs.js"
         ]
     },
     "ca": {
-        "output": "dist/js/locale/ca.js",
+        "output": "js/locale/ca.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/ca.js",
             "node_modules/moment/locale/ca.js"
         ]
     },
     "ca_CA": {
-        "output": "dist/js/locale/ca_CA.js",
+        "output": "js/locale/ca_CA.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/ca.js",
             "node_modules/moment/locale/ca.js"
         ]
     },
     "cr": {
-        "output": "dist/js/locale/cr.js",
+        "output": "js/locale/cr.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/cr.js"
         ]
     },
     "cr_CR": {
-        "output": "dist/js/locale/cr_CR.js",
+        "output": "js/locale/cr_CR.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/cr.js"
         ]
     },
     "cs": {
-        "output": "dist/js/locale/cs.js",
+        "output": "js/locale/cs.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.cs.js",
@@ -231,7 +231,7 @@
         ]
     },
     "cs_CS": {
-        "output": "dist/js/locale/cs_CS.js",
+        "output": "js/locale/cs_CS.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.cs.js",
@@ -240,7 +240,7 @@
         ]
     },
     "cs_CZ": {
-        "output": "dist/js/locale/cs_CZ.js",
+        "output": "js/locale/cs_CZ.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.cs.js",
@@ -249,31 +249,31 @@
         ]
     },
     "cv": {
-        "output": "dist/js/locale/cv.js",
+        "output": "js/locale/cv.js",
         "files": [
             "node_modules/moment/locale/cv.js"
         ]
     },
     "cv_CV": {
-        "output": "dist/js/locale/cv_CV.js",
+        "output": "js/locale/cv_CV.js",
         "files": [
             "node_modules/moment/locale/cv.js"
         ]
     },
     "cy": {
-        "output": "dist/js/locale/cy.js",
+        "output": "js/locale/cy.js",
         "files": [
             "node_modules/moment/locale/cy.js"
         ]
     },
     "cy_CY": {
-        "output": "dist/js/locale/cy_CY.js",
+        "output": "js/locale/cy_CY.js",
         "files": [
             "node_modules/moment/locale/cy.js"
         ]
     },
     "da": {
-        "output": "dist/js/locale/da.js",
+        "output": "js/locale/da.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-da_DK.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.da.js",
@@ -282,7 +282,7 @@
         ]
     },
     "da_DA": {
-        "output": "dist/js/locale/da_DA.js",
+        "output": "js/locale/da_DA.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-da_DK.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.da.js",
@@ -291,7 +291,7 @@
         ]
     },
     "da_DK": {
-        "output": "dist/js/locale/da_DK.js",
+        "output": "js/locale/da_DK.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-da_DK.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.da.js",
@@ -300,7 +300,7 @@
         ]
     },
     "de": {
-        "output": "dist/js/locale/de.js",
+        "output": "js/locale/de.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.de.js",
             "node_modules/bootstrap-fileinput/js/locales/de.js",
@@ -310,7 +310,7 @@
         ]
     },
     "de_AT": {
-        "output": "dist/js/locale/de_AT.js",
+        "output": "js/locale/de_AT.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.de.js",
             "node_modules/bootstrap-fileinput/js/locales/de.js",
@@ -320,7 +320,7 @@
         ]
     },
     "de_CH": {
-        "output": "dist/js/locale/de_CH.js",
+        "output": "js/locale/de_CH.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.de.js",
             "node_modules/bootstrap-fileinput/js/locales/de.js",
@@ -330,7 +330,7 @@
         ]
     },
     "de_DE": {
-        "output": "dist/js/locale/de_DE.js",
+        "output": "js/locale/de_DE.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.de.js",
             "node_modules/bootstrap-fileinput/js/locales/de.js",
@@ -340,19 +340,19 @@
         ]
     },
     "dv": {
-        "output": "dist/js/locale/dv.js",
+        "output": "js/locale/dv.js",
         "files": [
             "node_modules/moment/locale/dv.js"
         ]
     },
     "dv_DV": {
-        "output": "dist/js/locale/dv_DV.js",
+        "output": "js/locale/dv_DV.js",
         "files": [
             "node_modules/moment/locale/dv.js"
         ]
     },
     "el": {
-        "output": "dist/js/locale/el.js",
+        "output": "js/locale/el.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.el.js",
             "node_modules/bootstrap-fileinput/js/locales/el.js",
@@ -360,7 +360,7 @@
         ]
     },
     "el_EL": {
-        "output": "dist/js/locale/el_EL.js",
+        "output": "js/locale/el_EL.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.el.js",
             "node_modules/bootstrap-fileinput/js/locales/el.js",
@@ -368,7 +368,7 @@
         ]
     },
     "en": {
-        "output": "dist/js/locale/en.js",
+        "output": "js/locale/en.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -376,7 +376,7 @@
         ]
     },
     "en_AU": {
-        "output": "dist/js/locale/en_AU.js",
+        "output": "js/locale/en_AU.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -385,7 +385,7 @@
         ]
     },
     "en_CA": {
-        "output": "dist/js/locale/en_CA.js",
+        "output": "js/locale/en_CA.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -394,7 +394,7 @@
         ]
     },
     "en_EN": {
-        "output": "dist/js/locale/en_EN.js",
+        "output": "js/locale/en_EN.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -402,7 +402,7 @@
         ]
     },
     "en_GB": {
-        "output": "dist/js/locale/en_GB.js",
+        "output": "js/locale/en_GB.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -411,7 +411,7 @@
         ]
     },
     "en_IE": {
-        "output": "dist/js/locale/en_IE.js",
+        "output": "js/locale/en_IE.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -420,7 +420,7 @@
         ]
     },
     "en_IL": {
-        "output": "dist/js/locale/en_IL.js",
+        "output": "js/locale/en_IL.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -429,7 +429,7 @@
         ]
     },
     "en_NZ": {
-        "output": "dist/js/locale/en_NZ.js",
+        "output": "js/locale/en_NZ.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -438,7 +438,7 @@
         ]
     },
     "en_US": {
-        "output": "dist/js/locale/en_US.js",
+        "output": "js/locale/en_US.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
@@ -446,19 +446,19 @@
         ]
     },
     "eo": {
-        "output": "dist/js/locale/eo.js",
+        "output": "js/locale/eo.js",
         "files": [
             "node_modules/moment/locale/eo.js"
         ]
     },
     "eo_EO": {
-        "output": "dist/js/locale/eo_EO.js",
+        "output": "js/locale/eo_EO.js",
         "files": [
             "node_modules/moment/locale/eo.js"
         ]
     },
     "es": {
-        "output": "dist/js/locale/es.js",
+        "output": "js/locale/es.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
@@ -468,7 +468,7 @@
         ]
     },
     "es_CL": {
-        "output": "dist/js/locale/es_CL.js",
+        "output": "js/locale/es_CL.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
@@ -478,7 +478,7 @@
         ]
     },
     "es_DO": {
-        "output": "dist/js/locale/es_DO.js",
+        "output": "js/locale/es_DO.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
@@ -488,7 +488,7 @@
         ]
     },
     "es_ES": {
-        "output": "dist/js/locale/es_ES.js",
+        "output": "js/locale/es_ES.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
@@ -498,7 +498,7 @@
         ]
     },
     "es_US": {
-        "output": "dist/js/locale/es_US.js",
+        "output": "js/locale/es_US.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
@@ -508,7 +508,7 @@
         ]
     },
     "et": {
-        "output": "dist/js/locale/et.js",
+        "output": "js/locale/et.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-et_EE.js",
             "node_modules/bootstrap-fileinput/js/locales/et.js",
@@ -516,7 +516,7 @@
         ]
     },
     "et_EE": {
-        "output": "dist/js/locale/et_EE.js",
+        "output": "js/locale/et_EE.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-et_EE.js",
             "node_modules/bootstrap-fileinput/js/locales/et.js",
@@ -524,7 +524,7 @@
         ]
     },
     "et_ET": {
-        "output": "dist/js/locale/et_ET.js",
+        "output": "js/locale/et_ET.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-et_EE.js",
             "node_modules/bootstrap-fileinput/js/locales/et.js",
@@ -532,19 +532,19 @@
         ]
     },
     "eu": {
-        "output": "dist/js/locale/eu.js",
+        "output": "js/locale/eu.js",
         "files": [
             "node_modules/moment/locale/eu.js"
         ]
     },
     "eu_EU": {
-        "output": "dist/js/locale/eu_EU.js",
+        "output": "js/locale/eu_EU.js",
         "files": [
             "node_modules/moment/locale/eu.js"
         ]
     },
     "fa": {
-        "output": "dist/js/locale/fa.js",
+        "output": "js/locale/fa.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fa_IR.js",
             "node_modules/bootstrap-fileinput/js/locales/fa.js",
@@ -552,7 +552,7 @@
         ]
     },
     "fa_FA": {
-        "output": "dist/js/locale/fa_FA.js",
+        "output": "js/locale/fa_FA.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fa_IR.js",
             "node_modules/bootstrap-fileinput/js/locales/fa.js",
@@ -560,7 +560,7 @@
         ]
     },
     "fa_IR": {
-        "output": "dist/js/locale/fa_IR.js",
+        "output": "js/locale/fa_IR.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fa_IR.js",
             "node_modules/bootstrap-fileinput/js/locales/fa.js",
@@ -568,7 +568,7 @@
         ]
     },
     "fi": {
-        "output": "dist/js/locale/fi.js",
+        "output": "js/locale/fi.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/fi.js",
             "node_modules/moment/locale/fi.js",
@@ -576,7 +576,7 @@
         ]
     },
     "fi_FI": {
-        "output": "dist/js/locale/fi_FI.js",
+        "output": "js/locale/fi_FI.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/fi.js",
             "node_modules/moment/locale/fi.js",
@@ -584,19 +584,19 @@
         ]
     },
     "fo": {
-        "output": "dist/js/locale/fo.js",
+        "output": "js/locale/fo.js",
         "files": [
             "node_modules/moment/locale/fo.js"
         ]
     },
     "fo_FO": {
-        "output": "dist/js/locale/fo_FO.js",
+        "output": "js/locale/fo_FO.js",
         "files": [
             "node_modules/moment/locale/fo.js"
         ]
     },
     "fr": {
-        "output": "dist/js/locale/fr.js",
+        "output": "js/locale/fr.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.fr.js",
             "node_modules/bootstrap-fileinput/js/locales/fr.js",
@@ -606,7 +606,7 @@
         ]
     },
     "fr_CA": {
-        "output": "dist/js/locale/fr_CA.js",
+        "output": "js/locale/fr_CA.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.fr.js",
             "node_modules/bootstrap-fileinput/js/locales/fr.js",
@@ -616,7 +616,7 @@
         ]
     },
     "fr_CH": {
-        "output": "dist/js/locale/fr_CH.js",
+        "output": "js/locale/fr_CH.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.fr.js",
             "node_modules/bootstrap-fileinput/js/locales/fr.js",
@@ -626,7 +626,7 @@
         ]
     },
     "fr_FR": {
-        "output": "dist/js/locale/fr_FR.js",
+        "output": "js/locale/fr_FR.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.fr.js",
             "node_modules/bootstrap-fileinput/js/locales/fr.js",
@@ -636,57 +636,57 @@
         ]
     },
     "fy": {
-        "output": "dist/js/locale/fy.js",
+        "output": "js/locale/fy.js",
         "files": [
             "node_modules/moment/locale/fy.js"
         ]
     },
     "fy_FY": {
-        "output": "dist/js/locale/fy_FY.js",
+        "output": "js/locale/fy_FY.js",
         "files": [
             "node_modules/moment/locale/fy.js"
         ]
     },
     "gd": {
-        "output": "dist/js/locale/gd.js",
+        "output": "js/locale/gd.js",
         "files": [
             "node_modules/moment/locale/gd.js"
         ]
     },
     "gd_GD": {
-        "output": "dist/js/locale/gd_GD.js",
+        "output": "js/locale/gd_GD.js",
         "files": [
             "node_modules/moment/locale/gd.js"
         ]
     },
     "gl": {
-        "output": "dist/js/locale/gl.js",
+        "output": "js/locale/gl.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/gl.js",
             "node_modules/moment/locale/gl.js"
         ]
     },
     "gl_GL": {
-        "output": "dist/js/locale/gl_GL.js",
+        "output": "js/locale/gl_GL.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/gl.js",
             "node_modules/moment/locale/gl.js"
         ]
     },
     "gu": {
-        "output": "dist/js/locale/gu.js",
+        "output": "js/locale/gu.js",
         "files": [
             "node_modules/moment/locale/gu.js"
         ]
     },
     "gu_GU": {
-        "output": "dist/js/locale/gu_GU.js",
+        "output": "js/locale/gu_GU.js",
         "files": [
             "node_modules/moment/locale/gu.js"
         ]
     },
     "he": {
-        "output": "dist/js/locale/he.js",
+        "output": "js/locale/he.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.he.js",
             "node_modules/bootstrap-fileinput/js/locales/he.js",
@@ -694,7 +694,7 @@
         ]
     },
     "he_HE": {
-        "output": "dist/js/locale/he_HE.js",
+        "output": "js/locale/he_HE.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.he.js",
             "node_modules/bootstrap-fileinput/js/locales/he.js",
@@ -702,33 +702,33 @@
         ]
     },
     "hi": {
-        "output": "dist/js/locale/hi.js",
+        "output": "js/locale/hi.js",
         "files": [
             "node_modules/moment/locale/hi.js"
         ]
     },
     "hi_HI": {
-        "output": "dist/js/locale/hi_HI.js",
+        "output": "js/locale/hi_HI.js",
         "files": [
             "node_modules/moment/locale/hi.js"
         ]
     },
     "hr": {
-        "output": "dist/js/locale/hr.js",
+        "output": "js/locale/hr.js",
         "files": [
             "node_modules/moment/locale/hr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-hr_HR.js"
         ]
     },
     "hr_HR": {
-        "output": "dist/js/locale/hr_HR.js",
+        "output": "js/locale/hr_HR.js",
         "files": [
             "node_modules/moment/locale/hr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-hr_HR.js"
         ]
     },
     "hu": {
-        "output": "dist/js/locale/hu.js",
+        "output": "js/locale/hu.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/hu.js",
             "node_modules/moment/locale/hu.js",
@@ -736,7 +736,7 @@
         ]
     },
     "hu_HU": {
-        "output": "dist/js/locale/hu_HU.js",
+        "output": "js/locale/hu_HU.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/hu.js",
             "node_modules/moment/locale/hu.js",
@@ -744,13 +744,13 @@
         ]
     },
     "hy_AM": {
-        "output": "dist/js/locale/hy_AM.js",
+        "output": "js/locale/hy_AM.js",
         "files": [
             "node_modules/moment/locale/hy-am.js"
         ]
     },
     "id": {
-        "output": "dist/js/locale/id.js",
+        "output": "js/locale/id.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/id.js",
             "node_modules/moment/locale/id.js",
@@ -758,7 +758,7 @@
         ]
     },
     "id_ID": {
-        "output": "dist/js/locale/id_ID.js",
+        "output": "js/locale/id_ID.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/id.js",
             "node_modules/moment/locale/id.js",
@@ -766,19 +766,19 @@
         ]
     },
     "is": {
-        "output": "dist/js/locale/is.js",
+        "output": "js/locale/is.js",
         "files": [
             "node_modules/moment/locale/is.js"
         ]
     },
     "is_IS": {
-        "output": "dist/js/locale/is_IS.js",
+        "output": "js/locale/is_IS.js",
         "files": [
             "node_modules/moment/locale/is.js"
         ]
     },
     "it": {
-        "output": "dist/js/locale/it.js",
+        "output": "js/locale/it.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.it.js",
             "node_modules/bootstrap-fileinput/js/locales/it.js",
@@ -788,7 +788,7 @@
         ]
     },
     "it_IT": {
-        "output": "dist/js/locale/it_IT.js",
+        "output": "js/locale/it_IT.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.it.js",
             "node_modules/bootstrap-fileinput/js/locales/it.js",
@@ -798,7 +798,7 @@
         ]
     },
     "ja": {
-        "output": "dist/js/locale/ja.js",
+        "output": "js/locale/ja.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ja_JP.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ja-JP.js",
@@ -807,7 +807,7 @@
         ]
     },
     "ja_JA": {
-        "output": "dist/js/locale/ja_JA.js",
+        "output": "js/locale/ja_JA.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ja_JP.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ja-JP.js",
@@ -816,7 +816,7 @@
         ]
     },
     "ja_JP": {
-        "output": "dist/js/locale/ja_JP.js",
+        "output": "js/locale/ja_JP.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ja_JP.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ja-JP.js",
@@ -825,75 +825,75 @@
         ]
     },
     "jv": {
-        "output": "dist/js/locale/jv.js",
+        "output": "js/locale/jv.js",
         "files": [
             "node_modules/moment/locale/jv.js"
         ]
     },
     "jv_JV": {
-        "output": "dist/js/locale/jv_JV.js",
+        "output": "js/locale/jv_JV.js",
         "files": [
             "node_modules/moment/locale/jv.js"
         ]
     },
     "ka": {
-        "output": "dist/js/locale/ka.js",
+        "output": "js/locale/ka.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/ka.js",
             "node_modules/moment/locale/ka.js"
         ]
     },
     "ka_KA": {
-        "output": "dist/js/locale/ka_KA.js",
+        "output": "js/locale/ka_KA.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/ka.js",
             "node_modules/moment/locale/ka.js"
         ]
     },
     "kh_KM": {
-        "output": "dist/js/locale/kh_KM.js",
+        "output": "js/locale/kh_KM.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-kh_KM.js"
         ]
     },
     "kk": {
-        "output": "dist/js/locale/kk.js",
+        "output": "js/locale/kk.js",
         "files": [
             "node_modules/moment/locale/kk.js"
         ]
     },
     "kk_KK": {
-        "output": "dist/js/locale/kk_KK.js",
+        "output": "js/locale/kk_KK.js",
         "files": [
             "node_modules/moment/locale/kk.js"
         ]
     },
     "km": {
-        "output": "dist/js/locale/km.js",
+        "output": "js/locale/km.js",
         "files": [
             "node_modules/moment/locale/km.js"
         ]
     },
     "km_KM": {
-        "output": "dist/js/locale/km_KM.js",
+        "output": "js/locale/km_KM.js",
         "files": [
             "node_modules/moment/locale/km.js"
         ]
     },
     "kn": {
-        "output": "dist/js/locale/kn.js",
+        "output": "js/locale/kn.js",
         "files": [
             "node_modules/moment/locale/kn.js"
         ]
     },
     "kn_KN": {
-        "output": "dist/js/locale/kn_KN.js",
+        "output": "js/locale/kn_KN.js",
         "files": [
             "node_modules/moment/locale/kn.js"
         ]
     },
     "ko": {
-        "output": "dist/js/locale/ko.js",
+        "output": "js/locale/ko.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ko_KR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ko-KR.js",
@@ -901,7 +901,7 @@
         ]
     },
     "ko_KO": {
-        "output": "dist/js/locale/ko_KO.js",
+        "output": "js/locale/ko_KO.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ko_KR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ko-KR.js",
@@ -909,7 +909,7 @@
         ]
     },
     "ko_KR": {
-        "output": "dist/js/locale/ko_KR.js",
+        "output": "js/locale/ko_KR.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ko_KR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ko-KR.js",
@@ -917,79 +917,79 @@
         ]
     },
     "kr": {
-        "output": "dist/js/locale/kr.js",
+        "output": "js/locale/kr.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/kr.js"
         ]
     },
     "kr_KR": {
-        "output": "dist/js/locale/kr_KR.js",
+        "output": "js/locale/kr_KR.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/kr.js"
         ]
     },
     "ku": {
-        "output": "dist/js/locale/ku.js",
+        "output": "js/locale/ku.js",
         "files": [
             "node_modules/moment/locale/ku.js"
         ]
     },
     "ku_KU": {
-        "output": "dist/js/locale/ku_KU.js",
+        "output": "js/locale/ku_KU.js",
         "files": [
             "node_modules/moment/locale/ku.js"
         ]
     },
     "ky": {
-        "output": "dist/js/locale/ky.js",
+        "output": "js/locale/ky.js",
         "files": [
             "node_modules/moment/locale/ky.js"
         ]
     },
     "ky_KY": {
-        "output": "dist/js/locale/ky_KY.js",
+        "output": "js/locale/ky_KY.js",
         "files": [
             "node_modules/moment/locale/ky.js"
         ]
     },
     "kz": {
-        "output": "dist/js/locale/kz.js",
+        "output": "js/locale/kz.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/kz.js"
         ]
     },
     "kz_KZ": {
-        "output": "dist/js/locale/kz_KZ.js",
+        "output": "js/locale/kz_KZ.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/kz.js"
         ]
     },
     "lb": {
-        "output": "dist/js/locale/lb.js",
+        "output": "js/locale/lb.js",
         "files": [
             "node_modules/moment/locale/lb.js"
         ]
     },
     "lb_LB": {
-        "output": "dist/js/locale/lb_LB.js",
+        "output": "js/locale/lb_LB.js",
         "files": [
             "node_modules/moment/locale/lb.js"
         ]
     },
     "lo": {
-        "output": "dist/js/locale/lo.js",
+        "output": "js/locale/lo.js",
         "files": [
             "node_modules/moment/locale/lo.js"
         ]
     },
     "lo_LO": {
-        "output": "dist/js/locale/lo_LO.js",
+        "output": "js/locale/lo_LO.js",
         "files": [
             "node_modules/moment/locale/lo.js"
         ]
     },
     "lt": {
-        "output": "dist/js/locale/lt.js",
+        "output": "js/locale/lt.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/lt.js",
             "node_modules/moment/locale/lt.js",
@@ -997,7 +997,7 @@
         ]
     },
     "lt_LT": {
-        "output": "dist/js/locale/lt_LT.js",
+        "output": "js/locale/lt_LT.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/lt.js",
             "node_modules/moment/locale/lt.js",
@@ -1005,168 +1005,168 @@
         ]
     },
     "lv": {
-        "output": "dist/js/locale/lv.js",
+        "output": "js/locale/lv.js",
         "files": [
             "node_modules/moment/locale/lv.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-lv_LV.js"
         ]
     },
     "lv_LV": {
-        "output": "dist/js/locale/lv_LV.js",
+        "output": "js/locale/lv_LV.js",
         "files": [
             "node_modules/moment/locale/lv.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-lv_LV.js"
         ]
     },
     "me": {
-        "output": "dist/js/locale/me.js",
+        "output": "js/locale/me.js",
         "files": [
             "node_modules/moment/locale/me.js"
         ]
     },
     "me_ME": {
-        "output": "dist/js/locale/me_ME.js",
+        "output": "js/locale/me_ME.js",
         "files": [
             "node_modules/moment/locale/me.js"
         ]
     },
     "mi": {
-        "output": "dist/js/locale/mi.js",
+        "output": "js/locale/mi.js",
         "files": [
             "node_modules/moment/locale/mi.js"
         ]
     },
     "mi_MI": {
-        "output": "dist/js/locale/mi_MI.js",
+        "output": "js/locale/mi_MI.js",
         "files": [
             "node_modules/moment/locale/mi.js"
         ]
     },
     "mk": {
-        "output": "dist/js/locale/mk.js",
+        "output": "js/locale/mk.js",
         "files": [
             "node_modules/moment/locale/mk.js"
         ]
     },
     "mk_MK": {
-        "output": "dist/js/locale/mk_MK.js",
+        "output": "js/locale/mk_MK.js",
         "files": [
             "node_modules/moment/locale/mk.js"
         ]
     },
     "ml": {
-        "output": "dist/js/locale/ml.js",
+        "output": "js/locale/ml.js",
         "files": [
             "node_modules/moment/locale/ml.js"
         ]
     },
     "ml_ML": {
-        "output": "dist/js/locale/ml_ML.js",
+        "output": "js/locale/ml_ML.js",
         "files": [
             "node_modules/moment/locale/ml.js"
         ]
     },
     "mn": {
-        "output": "dist/js/locale/mn.js",
+        "output": "js/locale/mn.js",
         "files": [
             "node_modules/moment/locale/mn.js"
         ]
     },
     "mn_MN": {
-        "output": "dist/js/locale/mn_MN.js",
+        "output": "js/locale/mn_MN.js",
         "files": [
             "node_modules/moment/locale/mn.js"
         ]
     },
     "mr": {
-        "output": "dist/js/locale/mr.js",
+        "output": "js/locale/mr.js",
         "files": [
             "node_modules/moment/locale/mr.js"
         ]
     },
     "mr_MR": {
-        "output": "dist/js/locale/mr_MR.js",
+        "output": "js/locale/mr_MR.js",
         "files": [
             "node_modules/moment/locale/mr.js"
         ]
     },
     "ms": {
-        "output": "dist/js/locale/ms.js",
+        "output": "js/locale/ms.js",
         "files": [
             "node_modules/moment/locale/ms.js"
         ]
     },
     "ms_MS": {
-        "output": "dist/js/locale/ms_MS.js",
+        "output": "js/locale/ms_MS.js",
         "files": [
             "node_modules/moment/locale/ms.js"
         ]
     },
     "ms_MY": {
-        "output": "dist/js/locale/ms_MY.js",
+        "output": "js/locale/ms_MY.js",
         "files": [
             "node_modules/moment/locale/ms-my.js"
         ]
     },
     "mt": {
-        "output": "dist/js/locale/mt.js",
+        "output": "js/locale/mt.js",
         "files": [
             "node_modules/moment/locale/mt.js"
         ]
     },
     "mt_MT": {
-        "output": "dist/js/locale/mt_MT.js",
+        "output": "js/locale/mt_MT.js",
         "files": [
             "node_modules/moment/locale/mt.js"
         ]
     },
     "my": {
-        "output": "dist/js/locale/my.js",
+        "output": "js/locale/my.js",
         "files": [
             "node_modules/moment/locale/my.js"
         ]
     },
     "my_MY": {
-        "output": "dist/js/locale/my_MY.js",
+        "output": "js/locale/my_MY.js",
         "files": [
             "node_modules/moment/locale/my.js"
         ]
     },
     "nb": {
-        "output": "dist/js/locale/nb.js",
+        "output": "js/locale/nb.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nb_NO.js",
             "node_modules/moment/locale/nb.js"
         ]
     },
     "nb_NB": {
-        "output": "dist/js/locale/nb_NB.js",
+        "output": "js/locale/nb_NB.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nb_NO.js",
             "node_modules/moment/locale/nb.js"
         ]
     },
     "nb_NO": {
-        "output": "dist/js/locale/nb_NO.js",
+        "output": "js/locale/nb_NO.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nb_NO.js",
             "node_modules/moment/locale/nb.js"
         ]
     },
     "ne": {
-        "output": "dist/js/locale/ne.js",
+        "output": "js/locale/ne.js",
         "files": [
             "node_modules/moment/locale/ne.js"
         ]
     },
     "ne_NE": {
-        "output": "dist/js/locale/ne_NE.js",
+        "output": "js/locale/ne_NE.js",
         "files": [
             "node_modules/moment/locale/ne.js"
         ]
     },
     "nl": {
-        "output": "dist/js/locale/nl.js",
+        "output": "js/locale/nl.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.nl.js",
             "node_modules/bootstrap-fileinput/js/locales/nl.js",
@@ -1176,7 +1176,7 @@
         ]
     },
     "nl_BE": {
-        "output": "dist/js/locale/nl_BE.js",
+        "output": "js/locale/nl_BE.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.nl.js",
             "node_modules/bootstrap-fileinput/js/locales/nl.js",
@@ -1186,7 +1186,7 @@
         ]
     },
     "nl_NL": {
-        "output": "dist/js/locale/nl_NL.js",
+        "output": "js/locale/nl_NL.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.nl.js",
             "node_modules/bootstrap-fileinput/js/locales/nl.js",
@@ -1196,39 +1196,39 @@
         ]
     },
     "nn": {
-        "output": "dist/js/locale/nn.js",
+        "output": "js/locale/nn.js",
         "files": [
             "node_modules/moment/locale/nn.js"
         ]
     },
     "nn_NN": {
-        "output": "dist/js/locale/nn_NN.js",
+        "output": "js/locale/nn_NN.js",
         "files": [
             "node_modules/moment/locale/nn.js"
         ]
     },
     "no": {
-        "output": "dist/js/locale/no.js",
+        "output": "js/locale/no.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.no.js",
             "node_modules/bootstrap-fileinput/js/locales/no.js"
         ]
     },
     "no_NO": {
-        "output": "dist/js/locale/no_NO.js",
+        "output": "js/locale/no_NO.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.no.js",
             "node_modules/bootstrap-fileinput/js/locales/no.js"
         ]
     },
     "pa_IN": {
-        "output": "dist/js/locale/pa_IN.js",
+        "output": "js/locale/pa_IN.js",
         "files": [
             "node_modules/moment/locale/pa-in.js"
         ]
     },
     "pl": {
-        "output": "dist/js/locale/pl.js",
+        "output": "js/locale/pl.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.pl.js",
             "node_modules/bootstrap-fileinput/js/locales/pl.js",
@@ -1238,7 +1238,7 @@
         ]
     },
     "pl_PL": {
-        "output": "dist/js/locale/pl_PL.js",
+        "output": "js/locale/pl_PL.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.pl.js",
             "node_modules/bootstrap-fileinput/js/locales/pl.js",
@@ -1248,7 +1248,7 @@
         ]
     },
     "pt": {
-        "output": "dist/js/locale/pt.js",
+        "output": "js/locale/pt.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/pt.js",
             "node_modules/moment/locale/pt.js",
@@ -1257,7 +1257,7 @@
         ]
     },
     "pt_BR": {
-        "output": "dist/js/locale/pt_BR.js",
+        "output": "js/locale/pt_BR.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/pt.js",
             "node_modules/moment/locale/pt-br.js",
@@ -1266,7 +1266,7 @@
         ]
     },
     "pt_PT": {
-        "output": "dist/js/locale/pt_PT.js",
+        "output": "js/locale/pt_PT.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/pt.js",
             "node_modules/moment/locale/pt.js",
@@ -1275,7 +1275,7 @@
         ]
     },
     "ro": {
-        "output": "dist/js/locale/ro.js",
+        "output": "js/locale/ro.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ro.js",
             "node_modules/bootstrap-fileinput/js/locales/ro.js",
@@ -1284,7 +1284,7 @@
         ]
     },
     "ro_RO": {
-        "output": "dist/js/locale/ro_RO.js",
+        "output": "js/locale/ro_RO.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ro.js",
             "node_modules/bootstrap-fileinput/js/locales/ro.js",
@@ -1293,7 +1293,7 @@
         ]
     },
     "ru": {
-        "output": "dist/js/locale/ru.js",
+        "output": "js/locale/ru.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ru.js",
             "node_modules/bootstrap-fileinput/js/locales/ru.js",
@@ -1303,7 +1303,7 @@
         ]
     },
     "ru_RU": {
-        "output": "dist/js/locale/ru_RU.js",
+        "output": "js/locale/ru_RU.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ru.js",
             "node_modules/bootstrap-fileinput/js/locales/ru.js",
@@ -1313,43 +1313,43 @@
         ]
     },
     "sd": {
-        "output": "dist/js/locale/sd.js",
+        "output": "js/locale/sd.js",
         "files": [
             "node_modules/moment/locale/sd.js"
         ]
     },
     "sd_SD": {
-        "output": "dist/js/locale/sd_SD.js",
+        "output": "js/locale/sd_SD.js",
         "files": [
             "node_modules/moment/locale/sd.js"
         ]
     },
     "se": {
-        "output": "dist/js/locale/se.js",
+        "output": "js/locale/se.js",
         "files": [
             "node_modules/moment/locale/se.js"
         ]
     },
     "se_SE": {
-        "output": "dist/js/locale/se_SE.js",
+        "output": "js/locale/se_SE.js",
         "files": [
             "node_modules/moment/locale/se.js"
         ]
     },
     "si": {
-        "output": "dist/js/locale/si.js",
+        "output": "js/locale/si.js",
         "files": [
             "node_modules/moment/locale/si.js"
         ]
     },
     "si_SI": {
-        "output": "dist/js/locale/si_SI.js",
+        "output": "js/locale/si_SI.js",
         "files": [
             "node_modules/moment/locale/si.js"
         ]
     },
     "sk": {
-        "output": "dist/js/locale/sk.js",
+        "output": "js/locale/sk.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/sk.js",
             "node_modules/moment/locale/sk.js",
@@ -1357,7 +1357,7 @@
         ]
     },
     "sk_SK": {
-        "output": "dist/js/locale/sk_SK.js",
+        "output": "js/locale/sk_SK.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/sk.js",
             "node_modules/moment/locale/sk.js",
@@ -1365,7 +1365,7 @@
         ]
     },
     "sl": {
-        "output": "dist/js/locale/sl.js",
+        "output": "js/locale/sl.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sl_SI.js",
             "node_modules/bootstrap-fileinput/js/locales/sl.js",
@@ -1373,7 +1373,7 @@
         ]
     },
     "sl_SI": {
-        "output": "dist/js/locale/sl_SI.js",
+        "output": "js/locale/sl_SI.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sl_SI.js",
             "node_modules/bootstrap-fileinput/js/locales/sl.js",
@@ -1381,7 +1381,7 @@
         ]
     },
     "sl_SL": {
-        "output": "dist/js/locale/sl_SL.js",
+        "output": "js/locale/sl_SL.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sl_SI.js",
             "node_modules/bootstrap-fileinput/js/locales/sl.js",
@@ -1389,51 +1389,51 @@
         ]
     },
     "sq": {
-        "output": "dist/js/locale/sq.js",
+        "output": "js/locale/sq.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.sq.js",
             "node_modules/moment/locale/sq.js"
         ]
     },
     "sq_SQ": {
-        "output": "dist/js/locale/sq_SQ.js",
+        "output": "js/locale/sq_SQ.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.sq.js",
             "node_modules/moment/locale/sq.js"
         ]
     },
     "sr": {
-        "output": "dist/js/locale/sr.js",
+        "output": "js/locale/sr.js",
         "files": [
             "node_modules/moment/locale/sr.js"
         ]
     },
     "sr_CYRL": {
-        "output": "dist/js/locale/sr_CYRL.js",
+        "output": "js/locale/sr_CYRL.js",
         "files": [
             "node_modules/moment/locale/sr-cyrl.js"
         ]
     },
     "sr_SR": {
-        "output": "dist/js/locale/sr_SR.js",
+        "output": "js/locale/sr_SR.js",
         "files": [
             "node_modules/moment/locale/sr.js"
         ]
     },
     "ss": {
-        "output": "dist/js/locale/ss.js",
+        "output": "js/locale/ss.js",
         "files": [
             "node_modules/moment/locale/ss.js"
         ]
     },
     "ss_SS": {
-        "output": "dist/js/locale/ss_SS.js",
+        "output": "js/locale/ss_SS.js",
         "files": [
             "node_modules/moment/locale/ss.js"
         ]
     },
     "sv": {
-        "output": "dist/js/locale/sv.js",
+        "output": "js/locale/sv.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sv_SE.js",
             "node_modules/bootstrap-fileinput/js/locales/sv.js",
@@ -1441,7 +1441,7 @@
         ]
     },
     "sv_SE": {
-        "output": "dist/js/locale/sv_SE.js",
+        "output": "js/locale/sv_SE.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sv_SE.js",
             "node_modules/bootstrap-fileinput/js/locales/sv.js",
@@ -1449,7 +1449,7 @@
         ]
     },
     "sv_SV": {
-        "output": "dist/js/locale/sv_SV.js",
+        "output": "js/locale/sv_SV.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sv_SE.js",
             "node_modules/bootstrap-fileinput/js/locales/sv.js",
@@ -1457,75 +1457,75 @@
         ]
     },
     "sw": {
-        "output": "dist/js/locale/sw.js",
+        "output": "js/locale/sw.js",
         "files": [
             "node_modules/moment/locale/sw.js"
         ]
     },
     "sw_SW": {
-        "output": "dist/js/locale/sw_SW.js",
+        "output": "js/locale/sw_SW.js",
         "files": [
             "node_modules/moment/locale/sw.js"
         ]
     },
     "ta": {
-        "output": "dist/js/locale/ta.js",
+        "output": "js/locale/ta.js",
         "files": [
             "node_modules/moment/locale/ta.js"
         ]
     },
     "ta_TA": {
-        "output": "dist/js/locale/ta_TA.js",
+        "output": "js/locale/ta_TA.js",
         "files": [
             "node_modules/moment/locale/ta.js"
         ]
     },
     "te": {
-        "output": "dist/js/locale/te.js",
+        "output": "js/locale/te.js",
         "files": [
             "node_modules/moment/locale/te.js"
         ]
     },
     "te_TE": {
-        "output": "dist/js/locale/te_TE.js",
+        "output": "js/locale/te_TE.js",
         "files": [
             "node_modules/moment/locale/te.js"
         ]
     },
     "tg": {
-        "output": "dist/js/locale/tg.js",
+        "output": "js/locale/tg.js",
         "files": [
             "node_modules/moment/locale/tg.js"
         ]
     },
     "tg_TG": {
-        "output": "dist/js/locale/tg_TG.js",
+        "output": "js/locale/tg_TG.js",
         "files": [
             "node_modules/moment/locale/tg.js"
         ]
     },
     "th": {
-        "output": "dist/js/locale/th.js",
+        "output": "js/locale/th.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/th.js",
             "node_modules/moment/locale/th.js"
         ]
     },
     "th_TH": {
-        "output": "dist/js/locale/th_TH.js",
+        "output": "js/locale/th_TH.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/th.js",
             "node_modules/moment/locale/th.js"
         ]
     },
     "tl_PH": {
-        "output": "dist/js/locale/tl_PH.js",
+        "output": "js/locale/tl_PH.js",
         "files": [
             "node_modules/moment/locale/tl-ph.js"
         ]
     },
     "tr": {
-        "output": "dist/js/locale/tr.js",
+        "output": "js/locale/tr.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.tr.js",
             "node_modules/bootstrap-fileinput/js/locales/tr.js",
@@ -1535,7 +1535,7 @@
         ]
     },
     "tr_TR": {
-        "output": "dist/js/locale/tr_TR.js",
+        "output": "js/locale/tr_TR.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.tr.js",
             "node_modules/bootstrap-fileinput/js/locales/tr.js",
@@ -1545,71 +1545,71 @@
         ]
     },
     "ua": {
-        "output": "dist/js/locale/ua.js",
+        "output": "js/locale/ua.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ua.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ua_UA.js"
         ]
     },
     "ua_UA": {
-        "output": "dist/js/locale/ua_UA.js",
+        "output": "js/locale/ua_UA.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ua.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ua_UA.js"
         ]
     },
     "ug_CN": {
-        "output": "dist/js/locale/ug_CN.js",
+        "output": "js/locale/ug_CN.js",
         "files": [
             "node_modules/moment/locale/ug-cn.js"
         ]
     },
     "uk": {
-        "output": "dist/js/locale/uk.js",
+        "output": "js/locale/uk.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/uk.js",
             "node_modules/moment/locale/uk.js"
         ]
     },
     "uk_UK": {
-        "output": "dist/js/locale/uk_UK.js",
+        "output": "js/locale/uk_UK.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/uk.js",
             "node_modules/moment/locale/uk.js"
         ]
     },
     "ur": {
-        "output": "dist/js/locale/ur.js",
+        "output": "js/locale/ur.js",
         "files": [
             "node_modules/moment/locale/ur.js"
         ]
     },
     "ur_UR": {
-        "output": "dist/js/locale/ur_UR.js",
+        "output": "js/locale/ur_UR.js",
         "files": [
             "node_modules/moment/locale/ur.js"
         ]
     },
     "uz": {
-        "output": "dist/js/locale/uz.js",
+        "output": "js/locale/uz.js",
         "files": [
             "node_modules/moment/locale/uz.js"
         ]
     },
     "uz_LATN": {
-        "output": "dist/js/locale/uz_LATN.js",
+        "output": "js/locale/uz_LATN.js",
         "files": [
             "node_modules/moment/locale/uz-latn.js"
         ]
     },
     "uz_UZ": {
-        "output": "dist/js/locale/uz_UZ.js",
+        "output": "js/locale/uz_UZ.js",
         "files": [
             "node_modules/moment/locale/uz.js"
         ]
     },
     "vi": {
-        "output": "dist/js/locale/vi.js",
+        "output": "js/locale/vi.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-vi_VN.js",
             "node_modules/bootstrap-fileinput/js/locales/vi.js",
@@ -1617,7 +1617,7 @@
         ]
     },
     "vi_VI": {
-        "output": "dist/js/locale/vi_VI.js",
+        "output": "js/locale/vi_VI.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-vi_VN.js",
             "node_modules/bootstrap-fileinput/js/locales/vi.js",
@@ -1625,7 +1625,7 @@
         ]
     },
     "vi_VN": {
-        "output": "dist/js/locale/vi_VN.js",
+        "output": "js/locale/vi_VN.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-vi_VN.js",
             "node_modules/bootstrap-fileinput/js/locales/vi.js",
@@ -1633,19 +1633,19 @@
         ]
     },
     "yo": {
-        "output": "dist/js/locale/yo.js",
+        "output": "js/locale/yo.js",
         "files": [
             "node_modules/moment/locale/yo.js"
         ]
     },
     "yo_YO": {
-        "output": "dist/js/locale/yo_YO.js",
+        "output": "js/locale/yo_YO.js",
         "files": [
             "node_modules/moment/locale/yo.js"
         ]
     },
     "zh": {
-        "output": "dist/js/locale/zh.js",
+        "output": "js/locale/zh.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/zh.js",
             "node_modules/moment/locale/zh-cn.js",
@@ -1653,7 +1653,7 @@
         ]
     },
     "zh_CN": {
-        "output": "dist/js/locale/zh_CN.js",
+        "output": "js/locale/zh_CN.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/zh.js",
             "node_modules/moment/locale/zh-cn.js",
@@ -1661,7 +1661,7 @@
         ]
     },
     "zh_HK": {
-        "output": "dist/js/locale/zh_HK.js",
+        "output": "js/locale/zh_HK.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/zh.js",
             "node_modules/moment/locale/zh-hk.js",
@@ -1669,7 +1669,7 @@
         ]
     },
     "zh_TW": {
-        "output": "dist/js/locale/zh_TW.js",
+        "output": "js/locale/zh_TW.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/zh.js",
             "node_modules/moment/locale/zh-tw.js",
@@ -1677,7 +1677,7 @@
         ]
     },
     "zh_ZH": {
-        "output": "dist/js/locale/zh_ZH.js",
+        "output": "js/locale/zh_ZH.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/zh.js",
             "node_modules/moment/locale/zh-cn.js",
