@@ -144,7 +144,7 @@ abstract class CmfConfig extends ConfigsContainer {
     /**
      * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|\App\Db\Admins\Admin|null
      */
-    static public function getUser(): RecordInterface {
+    static public function getUser(): ?RecordInterface {
         return static::getAuthModule()->getUser();
     }
 
