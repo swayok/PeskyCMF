@@ -2,13 +2,15 @@
     "af": {
         "output": "js/locale/af.js",
         "files": [
-            "node_modules/moment/locale/af.js"
+            "node_modules/moment/locale/af.js",
+            "node_modules/select2/dist/js/i18n/af.js"
         ]
     },
     "af_AF": {
         "output": "js/locale/af_AF.js",
         "files": [
-            "node_modules/moment/locale/af.js"
+            "node_modules/moment/locale/af.js",
+            "node_modules/select2/dist/js/i18n/af.js"
         ]
     },
     "am_ET": {
@@ -23,6 +25,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
             "node_modules/moment/locale/ar.js",
+            "node_modules/select2/dist/js/i18n/ar.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ar_AR.js"
         ]
     },
@@ -32,6 +35,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
             "node_modules/moment/locale/ar.js",
+            "node_modules/select2/dist/js/i18n/ar.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ar_AR.js"
         ]
     },
@@ -41,6 +45,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
             "node_modules/moment/locale/ar-dz.js",
+            "node_modules/select2/dist/js/i18n/ar.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ar_AR.js"
         ]
     },
@@ -50,6 +55,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
             "node_modules/moment/locale/ar-kw.js",
+            "node_modules/select2/dist/js/i18n/ar.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ar_AR.js"
         ]
     },
@@ -59,6 +65,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
             "node_modules/moment/locale/ar-ly.js",
+            "node_modules/select2/dist/js/i18n/ar.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ar_AR.js"
         ]
     },
@@ -68,6 +75,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
             "node_modules/moment/locale/ar-ma.js",
+            "node_modules/select2/dist/js/i18n/ar.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ar_AR.js"
         ]
     },
@@ -77,6 +85,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
             "node_modules/moment/locale/ar-sa.js",
+            "node_modules/select2/dist/js/i18n/ar.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ar_AR.js"
         ]
     },
@@ -86,6 +95,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ar.js",
             "node_modules/bootstrap-fileinput/js/locales/ar.js",
             "node_modules/moment/locale/ar-tn.js",
+            "node_modules/select2/dist/js/i18n/ar.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ar_AR.js"
         ]
     },
@@ -94,7 +104,8 @@
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.az.js",
             "node_modules/bootstrap-fileinput/js/locales/az.js",
-            "node_modules/moment/locale/az.js"
+            "node_modules/moment/locale/az.js",
+            "node_modules/select2/dist/js/i18n/az.js"
         ]
     },
     "az_AZ": {
@@ -102,7 +113,8 @@
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.az.js",
             "node_modules/bootstrap-fileinput/js/locales/az.js",
-            "node_modules/moment/locale/az.js"
+            "node_modules/moment/locale/az.js",
+            "node_modules/select2/dist/js/i18n/az.js"
         ]
     },
     "be": {
@@ -123,6 +135,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.bg.js",
             "node_modules/bootstrap-fileinput/js/locales/bg.js",
             "node_modules/moment/locale/bg.js",
+            "node_modules/select2/dist/js/i18n/bg.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-bg_BG.js"
         ]
     },
@@ -132,6 +145,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.bg.js",
             "node_modules/bootstrap-fileinput/js/locales/bg.js",
             "node_modules/moment/locale/bg.js",
+            "node_modules/select2/dist/js/i18n/bg.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-bg_BG.js"
         ]
     },
@@ -186,27 +200,31 @@
     "bs": {
         "output": "js/locale/bs.js",
         "files": [
-            "node_modules/moment/locale/bs.js"
+            "node_modules/moment/locale/bs.js",
+            "node_modules/select2/dist/js/i18n/bs.js"
         ]
     },
     "bs_BS": {
         "output": "js/locale/bs_BS.js",
         "files": [
-            "node_modules/moment/locale/bs.js"
+            "node_modules/moment/locale/bs.js",
+            "node_modules/select2/dist/js/i18n/bs.js"
         ]
     },
     "ca": {
         "output": "js/locale/ca.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/ca.js",
-            "node_modules/moment/locale/ca.js"
+            "node_modules/moment/locale/ca.js",
+            "node_modules/select2/dist/js/i18n/ca.js"
         ]
     },
     "ca_CA": {
         "output": "js/locale/ca_CA.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/ca.js",
-            "node_modules/moment/locale/ca.js"
+            "node_modules/moment/locale/ca.js",
+            "node_modules/select2/dist/js/i18n/ca.js"
         ]
     },
     "cr": {
@@ -224,28 +242,29 @@
     "cs": {
         "output": "js/locale/cs.js",
         "files": [
-            "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.cs.js",
             "node_modules/bootstrap-fileinput/js/locales/cs.js",
-            "node_modules/moment/locale/cs.js"
+            "node_modules/moment/locale/cs.js",
+            "node_modules/select2/dist/js/i18n/cs.js"
         ]
     },
     "cs_CS": {
         "output": "js/locale/cs_CS.js",
         "files": [
-            "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.cs.js",
             "node_modules/bootstrap-fileinput/js/locales/cs.js",
-            "node_modules/moment/locale/cs.js"
+            "node_modules/moment/locale/cs.js",
+            "node_modules/select2/dist/js/i18n/cs.js"
         ]
     },
     "cs_CZ": {
         "output": "js/locale/cs_CZ.js",
         "files": [
-            "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.cs.js",
             "node_modules/bootstrap-fileinput/js/locales/cs.js",
-            "node_modules/moment/locale/cs.js"
+            "node_modules/moment/locale/cs.js",
+            "node_modules/select2/dist/js/i18n/cs.js",
+            "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js"
         ]
     },
     "cv": {
@@ -275,28 +294,29 @@
     "da": {
         "output": "js/locale/da.js",
         "files": [
-            "node_modules/bootstrap-select/dist/js/i18n/defaults-da_DK.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.da.js",
             "node_modules/bootstrap-fileinput/js/locales/da.js",
-            "node_modules/moment/locale/da.js"
+            "node_modules/moment/locale/da.js",
+            "node_modules/select2/dist/js/i18n/da.js"
         ]
     },
     "da_DA": {
         "output": "js/locale/da_DA.js",
         "files": [
-            "node_modules/bootstrap-select/dist/js/i18n/defaults-da_DK.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.da.js",
             "node_modules/bootstrap-fileinput/js/locales/da.js",
-            "node_modules/moment/locale/da.js"
+            "node_modules/moment/locale/da.js",
+            "node_modules/select2/dist/js/i18n/da.js"
         ]
     },
     "da_DK": {
         "output": "js/locale/da_DK.js",
         "files": [
-            "node_modules/bootstrap-select/dist/js/i18n/defaults-da_DK.js",
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.da.js",
             "node_modules/bootstrap-fileinput/js/locales/da.js",
-            "node_modules/moment/locale/da.js"
+            "node_modules/moment/locale/da.js",
+            "node_modules/select2/dist/js/i18n/da.js",
+            "node_modules/bootstrap-select/dist/js/i18n/defaults-da_DK.js"
         ]
     },
     "de": {
@@ -305,6 +325,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.de.js",
             "node_modules/bootstrap-fileinput/js/locales/de.js",
             "node_modules/moment/locale/de.js",
+            "node_modules/select2/dist/js/i18n/de.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-de_DE.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.de-DE.js"
         ]
@@ -315,6 +336,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.de.js",
             "node_modules/bootstrap-fileinput/js/locales/de.js",
             "node_modules/moment/locale/de-at.js",
+            "node_modules/select2/dist/js/i18n/de.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-de_DE.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.de-DE.js"
         ]
@@ -325,6 +347,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.de.js",
             "node_modules/bootstrap-fileinput/js/locales/de.js",
             "node_modules/moment/locale/de-ch.js",
+            "node_modules/select2/dist/js/i18n/de.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-de_DE.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.de-DE.js"
         ]
@@ -335,6 +358,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.de.js",
             "node_modules/bootstrap-fileinput/js/locales/de.js",
             "node_modules/moment/locale/de.js",
+            "node_modules/select2/dist/js/i18n/de.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-de_DE.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.de-DE.js"
         ]
@@ -356,7 +380,8 @@
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.el.js",
             "node_modules/bootstrap-fileinput/js/locales/el.js",
-            "node_modules/moment/locale/el.js"
+            "node_modules/moment/locale/el.js",
+            "node_modules/select2/dist/js/i18n/el.js"
         ]
     },
     "el_EL": {
@@ -364,13 +389,15 @@
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.el.js",
             "node_modules/bootstrap-fileinput/js/locales/el.js",
-            "node_modules/moment/locale/el.js"
+            "node_modules/moment/locale/el.js",
+            "node_modules/select2/dist/js/i18n/el.js"
         ]
     },
     "en": {
         "output": "js/locale/en.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js"
         ]
@@ -379,6 +406,7 @@
         "output": "js/locale/en_AU.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js",
             "node_modules/moment/locale/en-au.js"
@@ -388,6 +416,7 @@
         "output": "js/locale/en_CA.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js",
             "node_modules/moment/locale/en-ca.js"
@@ -397,6 +426,7 @@
         "output": "js/locale/en_EN.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js"
         ]
@@ -405,6 +435,7 @@
         "output": "js/locale/en_GB.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js",
             "node_modules/moment/locale/en-gb.js"
@@ -414,6 +445,7 @@
         "output": "js/locale/en_IE.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js",
             "node_modules/moment/locale/en-ie.js"
@@ -423,6 +455,7 @@
         "output": "js/locale/en_IL.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js",
             "node_modules/moment/locale/en-il.js"
@@ -432,6 +465,7 @@
         "output": "js/locale/en_NZ.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js",
             "node_modules/moment/locale/en-nz.js"
@@ -441,6 +475,7 @@
         "output": "js/locale/en_US.js",
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+            "node_modules/select2/dist/js/i18n/en.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js"
         ]
@@ -463,6 +498,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
             "node_modules/moment/locale/es.js",
+            "node_modules/select2/dist/js/i18n/es.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-es_ES.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.es-ES.js"
         ]
@@ -473,6 +509,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
             "node_modules/moment/locale/es.js",
+            "node_modules/select2/dist/js/i18n/es.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-es_CL.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.es-ES.js"
         ]
@@ -483,6 +520,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
             "node_modules/moment/locale/es-do.js",
+            "node_modules/select2/dist/js/i18n/es.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-es_ES.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.es-ES.js"
         ]
@@ -493,6 +531,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
             "node_modules/moment/locale/es.js",
+            "node_modules/select2/dist/js/i18n/es.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-es_ES.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.es-ES.js"
         ]
@@ -503,6 +542,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.es.js",
             "node_modules/bootstrap-fileinput/js/locales/es.js",
             "node_modules/moment/locale/es-us.js",
+            "node_modules/select2/dist/js/i18n/es.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-es_ES.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.es-ES.js"
         ]
@@ -512,7 +552,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-et_EE.js",
             "node_modules/bootstrap-fileinput/js/locales/et.js",
-            "node_modules/moment/locale/et.js"
+            "node_modules/moment/locale/et.js",
+            "node_modules/select2/dist/js/i18n/et.js"
         ]
     },
     "et_EE": {
@@ -520,7 +561,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-et_EE.js",
             "node_modules/bootstrap-fileinput/js/locales/et.js",
-            "node_modules/moment/locale/et.js"
+            "node_modules/moment/locale/et.js",
+            "node_modules/select2/dist/js/i18n/et.js"
         ]
     },
     "et_ET": {
@@ -528,19 +570,22 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-et_EE.js",
             "node_modules/bootstrap-fileinput/js/locales/et.js",
-            "node_modules/moment/locale/et.js"
+            "node_modules/moment/locale/et.js",
+            "node_modules/select2/dist/js/i18n/et.js"
         ]
     },
     "eu": {
         "output": "js/locale/eu.js",
         "files": [
-            "node_modules/moment/locale/eu.js"
+            "node_modules/moment/locale/eu.js",
+            "node_modules/select2/dist/js/i18n/eu.js"
         ]
     },
     "eu_EU": {
         "output": "js/locale/eu_EU.js",
         "files": [
-            "node_modules/moment/locale/eu.js"
+            "node_modules/moment/locale/eu.js",
+            "node_modules/select2/dist/js/i18n/eu.js"
         ]
     },
     "fa": {
@@ -548,7 +593,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fa_IR.js",
             "node_modules/bootstrap-fileinput/js/locales/fa.js",
-            "node_modules/moment/locale/fa.js"
+            "node_modules/moment/locale/fa.js",
+            "node_modules/select2/dist/js/i18n/fa.js"
         ]
     },
     "fa_FA": {
@@ -556,7 +602,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fa_IR.js",
             "node_modules/bootstrap-fileinput/js/locales/fa.js",
-            "node_modules/moment/locale/fa.js"
+            "node_modules/moment/locale/fa.js",
+            "node_modules/select2/dist/js/i18n/fa.js"
         ]
     },
     "fa_IR": {
@@ -564,7 +611,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fa_IR.js",
             "node_modules/bootstrap-fileinput/js/locales/fa.js",
-            "node_modules/moment/locale/fa.js"
+            "node_modules/moment/locale/fa.js",
+            "node_modules/select2/dist/js/i18n/fa.js"
         ]
     },
     "fi": {
@@ -572,6 +620,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/fi.js",
             "node_modules/moment/locale/fi.js",
+            "node_modules/select2/dist/js/i18n/fi.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fi_FI.js"
         ]
     },
@@ -580,6 +629,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/fi.js",
             "node_modules/moment/locale/fi.js",
+            "node_modules/select2/dist/js/i18n/fi.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fi_FI.js"
         ]
     },
@@ -601,6 +651,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.fr.js",
             "node_modules/bootstrap-fileinput/js/locales/fr.js",
             "node_modules/moment/locale/fr.js",
+            "node_modules/select2/dist/js/i18n/fr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fr_FR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.fr-FR.js"
         ]
@@ -611,6 +662,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.fr.js",
             "node_modules/bootstrap-fileinput/js/locales/fr.js",
             "node_modules/moment/locale/fr-ca.js",
+            "node_modules/select2/dist/js/i18n/fr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fr_FR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.fr-FR.js"
         ]
@@ -621,6 +673,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.fr.js",
             "node_modules/bootstrap-fileinput/js/locales/fr.js",
             "node_modules/moment/locale/fr-ch.js",
+            "node_modules/select2/dist/js/i18n/fr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fr_FR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.fr-FR.js"
         ]
@@ -631,6 +684,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.fr.js",
             "node_modules/bootstrap-fileinput/js/locales/fr.js",
             "node_modules/moment/locale/fr.js",
+            "node_modules/select2/dist/js/i18n/fr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-fr_FR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.fr-FR.js"
         ]
@@ -663,14 +717,16 @@
         "output": "js/locale/gl.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/gl.js",
-            "node_modules/moment/locale/gl.js"
+            "node_modules/moment/locale/gl.js",
+            "node_modules/select2/dist/js/i18n/gl.js"
         ]
     },
     "gl_GL": {
         "output": "js/locale/gl_GL.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/gl.js",
-            "node_modules/moment/locale/gl.js"
+            "node_modules/moment/locale/gl.js",
+            "node_modules/select2/dist/js/i18n/gl.js"
         ]
     },
     "gu": {
@@ -690,7 +746,8 @@
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.he.js",
             "node_modules/bootstrap-fileinput/js/locales/he.js",
-            "node_modules/moment/locale/he.js"
+            "node_modules/moment/locale/he.js",
+            "node_modules/select2/dist/js/i18n/he.js"
         ]
     },
     "he_HE": {
@@ -698,25 +755,29 @@
         "files": [
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.he.js",
             "node_modules/bootstrap-fileinput/js/locales/he.js",
-            "node_modules/moment/locale/he.js"
+            "node_modules/moment/locale/he.js",
+            "node_modules/select2/dist/js/i18n/he.js"
         ]
     },
     "hi": {
         "output": "js/locale/hi.js",
         "files": [
-            "node_modules/moment/locale/hi.js"
+            "node_modules/moment/locale/hi.js",
+            "node_modules/select2/dist/js/i18n/hi.js"
         ]
     },
     "hi_HI": {
         "output": "js/locale/hi_HI.js",
         "files": [
-            "node_modules/moment/locale/hi.js"
+            "node_modules/moment/locale/hi.js",
+            "node_modules/select2/dist/js/i18n/hi.js"
         ]
     },
     "hr": {
         "output": "js/locale/hr.js",
         "files": [
             "node_modules/moment/locale/hr.js",
+            "node_modules/select2/dist/js/i18n/hr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-hr_HR.js"
         ]
     },
@@ -724,6 +785,7 @@
         "output": "js/locale/hr_HR.js",
         "files": [
             "node_modules/moment/locale/hr.js",
+            "node_modules/select2/dist/js/i18n/hr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-hr_HR.js"
         ]
     },
@@ -732,6 +794,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/hu.js",
             "node_modules/moment/locale/hu.js",
+            "node_modules/select2/dist/js/i18n/hu.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-hu_HU.js"
         ]
     },
@@ -740,13 +803,29 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/hu.js",
             "node_modules/moment/locale/hu.js",
+            "node_modules/select2/dist/js/i18n/hu.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-hu_HU.js"
+        ]
+    },
+    "hy": {
+        "output": "js/locale/hy.js",
+        "files": [
+            "node_modules/moment/locale/hy-am.js",
+            "node_modules/select2/dist/js/i18n/hy.js"
         ]
     },
     "hy_AM": {
         "output": "js/locale/hy_AM.js",
         "files": [
-            "node_modules/moment/locale/hy-am.js"
+            "node_modules/moment/locale/hy-am.js",
+            "node_modules/select2/dist/js/i18n/hy.js"
+        ]
+    },
+    "hy_HY": {
+        "output": "js/locale/hy_HY.js",
+        "files": [
+            "node_modules/moment/locale/hy-am.js",
+            "node_modules/select2/dist/js/i18n/hy.js"
         ]
     },
     "id": {
@@ -754,6 +833,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/id.js",
             "node_modules/moment/locale/id.js",
+            "node_modules/select2/dist/js/i18n/id.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-id_ID.js"
         ]
     },
@@ -762,19 +842,22 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/id.js",
             "node_modules/moment/locale/id.js",
+            "node_modules/select2/dist/js/i18n/id.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-id_ID.js"
         ]
     },
     "is": {
         "output": "js/locale/is.js",
         "files": [
-            "node_modules/moment/locale/is.js"
+            "node_modules/moment/locale/is.js",
+            "node_modules/select2/dist/js/i18n/is.js"
         ]
     },
     "is_IS": {
         "output": "js/locale/is_IS.js",
         "files": [
-            "node_modules/moment/locale/is.js"
+            "node_modules/moment/locale/is.js",
+            "node_modules/select2/dist/js/i18n/is.js"
         ]
     },
     "it": {
@@ -783,6 +866,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.it.js",
             "node_modules/bootstrap-fileinput/js/locales/it.js",
             "node_modules/moment/locale/it.js",
+            "node_modules/select2/dist/js/i18n/it.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-it_IT.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.it-IT.js"
         ]
@@ -793,6 +877,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.it.js",
             "node_modules/bootstrap-fileinput/js/locales/it.js",
             "node_modules/moment/locale/it.js",
+            "node_modules/select2/dist/js/i18n/it.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-it_IT.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.it-IT.js"
         ]
@@ -803,7 +888,8 @@
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ja_JP.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ja-JP.js",
             "node_modules/bootstrap-fileinput/js/locales/ja.js",
-            "node_modules/moment/locale/ja.js"
+            "node_modules/moment/locale/ja.js",
+            "node_modules/select2/dist/js/i18n/ja.js"
         ]
     },
     "ja_JA": {
@@ -812,7 +898,8 @@
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ja_JP.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ja-JP.js",
             "node_modules/bootstrap-fileinput/js/locales/ja.js",
-            "node_modules/moment/locale/ja.js"
+            "node_modules/moment/locale/ja.js",
+            "node_modules/select2/dist/js/i18n/ja.js"
         ]
     },
     "ja_JP": {
@@ -821,7 +908,8 @@
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ja_JP.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ja-JP.js",
             "node_modules/bootstrap-fileinput/js/locales/ja.js",
-            "node_modules/moment/locale/ja.js"
+            "node_modules/moment/locale/ja.js",
+            "node_modules/select2/dist/js/i18n/ja.js"
         ]
     },
     "jv": {
@@ -871,13 +959,15 @@
     "km": {
         "output": "js/locale/km.js",
         "files": [
-            "node_modules/moment/locale/km.js"
+            "node_modules/moment/locale/km.js",
+            "node_modules/select2/dist/js/i18n/km.js"
         ]
     },
     "km_KM": {
         "output": "js/locale/km_KM.js",
         "files": [
-            "node_modules/moment/locale/km.js"
+            "node_modules/moment/locale/km.js",
+            "node_modules/select2/dist/js/i18n/km.js"
         ]
     },
     "kn": {
@@ -897,7 +987,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ko_KR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ko-KR.js",
-            "node_modules/moment/locale/ko.js"
+            "node_modules/moment/locale/ko.js",
+            "node_modules/select2/dist/js/i18n/ko.js"
         ]
     },
     "ko_KO": {
@@ -905,7 +996,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ko_KR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ko-KR.js",
-            "node_modules/moment/locale/ko.js"
+            "node_modules/moment/locale/ko.js",
+            "node_modules/select2/dist/js/i18n/ko.js"
         ]
     },
     "ko_KR": {
@@ -913,7 +1005,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ko_KR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ko-KR.js",
-            "node_modules/moment/locale/ko.js"
+            "node_modules/moment/locale/ko.js",
+            "node_modules/select2/dist/js/i18n/ko.js"
         ]
     },
     "kr": {
@@ -993,6 +1086,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/lt.js",
             "node_modules/moment/locale/lt.js",
+            "node_modules/select2/dist/js/i18n/lt.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-lt_LT.js"
         ]
     },
@@ -1001,6 +1095,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/lt.js",
             "node_modules/moment/locale/lt.js",
+            "node_modules/select2/dist/js/i18n/lt.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-lt_LT.js"
         ]
     },
@@ -1008,6 +1103,7 @@
         "output": "js/locale/lv.js",
         "files": [
             "node_modules/moment/locale/lv.js",
+            "node_modules/select2/dist/js/i18n/lv.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-lv_LV.js"
         ]
     },
@@ -1015,6 +1111,7 @@
         "output": "js/locale/lv_LV.js",
         "files": [
             "node_modules/moment/locale/lv.js",
+            "node_modules/select2/dist/js/i18n/lv.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-lv_LV.js"
         ]
     },
@@ -1045,13 +1142,15 @@
     "mk": {
         "output": "js/locale/mk.js",
         "files": [
-            "node_modules/moment/locale/mk.js"
+            "node_modules/moment/locale/mk.js",
+            "node_modules/select2/dist/js/i18n/mk.js"
         ]
     },
     "mk_MK": {
         "output": "js/locale/mk_MK.js",
         "files": [
-            "node_modules/moment/locale/mk.js"
+            "node_modules/moment/locale/mk.js",
+            "node_modules/select2/dist/js/i18n/mk.js"
         ]
     },
     "ml": {
@@ -1093,19 +1192,22 @@
     "ms": {
         "output": "js/locale/ms.js",
         "files": [
-            "node_modules/moment/locale/ms.js"
+            "node_modules/moment/locale/ms.js",
+            "node_modules/select2/dist/js/i18n/ms.js"
         ]
     },
     "ms_MS": {
         "output": "js/locale/ms_MS.js",
         "files": [
-            "node_modules/moment/locale/ms.js"
+            "node_modules/moment/locale/ms.js",
+            "node_modules/select2/dist/js/i18n/ms.js"
         ]
     },
     "ms_MY": {
         "output": "js/locale/ms_MY.js",
         "files": [
-            "node_modules/moment/locale/ms-my.js"
+            "node_modules/moment/locale/ms-my.js",
+            "node_modules/select2/dist/js/i18n/ms.js"
         ]
     },
     "mt": {
@@ -1136,21 +1238,24 @@
         "output": "js/locale/nb.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nb_NO.js",
-            "node_modules/moment/locale/nb.js"
+            "node_modules/moment/locale/nb.js",
+            "node_modules/select2/dist/js/i18n/nb.js"
         ]
     },
     "nb_NB": {
         "output": "js/locale/nb_NB.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nb_NO.js",
-            "node_modules/moment/locale/nb.js"
+            "node_modules/moment/locale/nb.js",
+            "node_modules/select2/dist/js/i18n/nb.js"
         ]
     },
     "nb_NO": {
         "output": "js/locale/nb_NO.js",
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nb_NO.js",
-            "node_modules/moment/locale/nb.js"
+            "node_modules/moment/locale/nb.js",
+            "node_modules/select2/dist/js/i18n/nb.js"
         ]
     },
     "ne": {
@@ -1171,6 +1276,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.nl.js",
             "node_modules/bootstrap-fileinput/js/locales/nl.js",
             "node_modules/moment/locale/nl.js",
+            "node_modules/select2/dist/js/i18n/nl.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nl_NL.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.nl-NL.js"
         ]
@@ -1181,6 +1287,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.nl.js",
             "node_modules/bootstrap-fileinput/js/locales/nl.js",
             "node_modules/moment/locale/nl-be.js",
+            "node_modules/select2/dist/js/i18n/nl.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nl_NL.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.nl-NL.js"
         ]
@@ -1191,6 +1298,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.nl.js",
             "node_modules/bootstrap-fileinput/js/locales/nl.js",
             "node_modules/moment/locale/nl.js",
+            "node_modules/select2/dist/js/i18n/nl.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-nl_NL.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.nl-NL.js"
         ]
@@ -1233,6 +1341,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.pl.js",
             "node_modules/bootstrap-fileinput/js/locales/pl.js",
             "node_modules/moment/locale/pl.js",
+            "node_modules/select2/dist/js/i18n/pl.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-pl_PL.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.pl-PL.js"
         ]
@@ -1243,8 +1352,21 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.pl.js",
             "node_modules/bootstrap-fileinput/js/locales/pl.js",
             "node_modules/moment/locale/pl.js",
+            "node_modules/select2/dist/js/i18n/pl.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-pl_PL.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.pl-PL.js"
+        ]
+    },
+    "ps": {
+        "output": "js/locale/ps.js",
+        "files": [
+            "node_modules/select2/dist/js/i18n/ps.js"
+        ]
+    },
+    "ps_PS": {
+        "output": "js/locale/ps_PS.js",
+        "files": [
+            "node_modules/select2/dist/js/i18n/ps.js"
         ]
     },
     "pt": {
@@ -1252,6 +1374,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/pt.js",
             "node_modules/moment/locale/pt.js",
+            "node_modules/select2/dist/js/i18n/pt.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-pt_BR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.pt-BR.js"
         ]
@@ -1261,6 +1384,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/pt.js",
             "node_modules/moment/locale/pt-br.js",
+            "node_modules/select2/dist/js/i18n/pt.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-pt_BR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.pt-BR.js"
         ]
@@ -1270,6 +1394,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/pt.js",
             "node_modules/moment/locale/pt.js",
+            "node_modules/select2/dist/js/i18n/pt.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-pt_PT.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.pt-BR.js"
         ]
@@ -1280,6 +1405,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ro.js",
             "node_modules/bootstrap-fileinput/js/locales/ro.js",
             "node_modules/moment/locale/ro.js",
+            "node_modules/select2/dist/js/i18n/ro.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ro_RO.js"
         ]
     },
@@ -1289,6 +1415,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ro.js",
             "node_modules/bootstrap-fileinput/js/locales/ro.js",
             "node_modules/moment/locale/ro.js",
+            "node_modules/select2/dist/js/i18n/ro.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ro_RO.js"
         ]
     },
@@ -1298,6 +1425,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ru.js",
             "node_modules/bootstrap-fileinput/js/locales/ru.js",
             "node_modules/moment/locale/ru.js",
+            "node_modules/select2/dist/js/i18n/ru.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ru_RU.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ru-RU.js"
         ]
@@ -1308,6 +1436,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.ru.js",
             "node_modules/bootstrap-fileinput/js/locales/ru.js",
             "node_modules/moment/locale/ru.js",
+            "node_modules/select2/dist/js/i18n/ru.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-ru_RU.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.ru-RU.js"
         ]
@@ -1353,6 +1482,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/sk.js",
             "node_modules/moment/locale/sk.js",
+            "node_modules/select2/dist/js/i18n/sk.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sk_SK.js"
         ]
     },
@@ -1361,6 +1491,7 @@
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/sk.js",
             "node_modules/moment/locale/sk.js",
+            "node_modules/select2/dist/js/i18n/sk.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sk_SK.js"
         ]
     },
@@ -1369,7 +1500,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sl_SI.js",
             "node_modules/bootstrap-fileinput/js/locales/sl.js",
-            "node_modules/moment/locale/sl.js"
+            "node_modules/moment/locale/sl.js",
+            "node_modules/select2/dist/js/i18n/sl.js"
         ]
     },
     "sl_SI": {
@@ -1377,7 +1509,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sl_SI.js",
             "node_modules/bootstrap-fileinput/js/locales/sl.js",
-            "node_modules/moment/locale/sl.js"
+            "node_modules/moment/locale/sl.js",
+            "node_modules/select2/dist/js/i18n/sl.js"
         ]
     },
     "sl_SL": {
@@ -1385,7 +1518,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sl_SI.js",
             "node_modules/bootstrap-fileinput/js/locales/sl.js",
-            "node_modules/moment/locale/sl.js"
+            "node_modules/moment/locale/sl.js",
+            "node_modules/select2/dist/js/i18n/sl.js"
         ]
     },
     "sq": {
@@ -1405,19 +1539,22 @@
     "sr": {
         "output": "js/locale/sr.js",
         "files": [
-            "node_modules/moment/locale/sr.js"
+            "node_modules/moment/locale/sr.js",
+            "node_modules/select2/dist/js/i18n/sr.js"
         ]
     },
     "sr_CYRL": {
         "output": "js/locale/sr_CYRL.js",
         "files": [
-            "node_modules/moment/locale/sr-cyrl.js"
+            "node_modules/moment/locale/sr-cyrl.js",
+            "node_modules/select2/dist/js/i18n/sr.js"
         ]
     },
     "sr_SR": {
         "output": "js/locale/sr_SR.js",
         "files": [
-            "node_modules/moment/locale/sr.js"
+            "node_modules/moment/locale/sr.js",
+            "node_modules/select2/dist/js/i18n/sr.js"
         ]
     },
     "ss": {
@@ -1437,7 +1574,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sv_SE.js",
             "node_modules/bootstrap-fileinput/js/locales/sv.js",
-            "node_modules/moment/locale/sv.js"
+            "node_modules/moment/locale/sv.js",
+            "node_modules/select2/dist/js/i18n/sv.js"
         ]
     },
     "sv_SE": {
@@ -1445,7 +1583,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sv_SE.js",
             "node_modules/bootstrap-fileinput/js/locales/sv.js",
-            "node_modules/moment/locale/sv.js"
+            "node_modules/moment/locale/sv.js",
+            "node_modules/select2/dist/js/i18n/sv.js"
         ]
     },
     "sv_SV": {
@@ -1453,7 +1592,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-sv_SE.js",
             "node_modules/bootstrap-fileinput/js/locales/sv.js",
-            "node_modules/moment/locale/sv.js"
+            "node_modules/moment/locale/sv.js",
+            "node_modules/select2/dist/js/i18n/sv.js"
         ]
     },
     "sw": {
@@ -1508,14 +1648,28 @@
         "output": "js/locale/th.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/th.js",
-            "node_modules/moment/locale/th.js"
+            "node_modules/moment/locale/th.js",
+            "node_modules/select2/dist/js/i18n/th.js"
         ]
     },
     "th_TH": {
         "output": "js/locale/th_TH.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/th.js",
-            "node_modules/moment/locale/th.js"
+            "node_modules/moment/locale/th.js",
+            "node_modules/select2/dist/js/i18n/th.js"
+        ]
+    },
+    "tk": {
+        "output": "js/locale/tk.js",
+        "files": [
+            "node_modules/select2/dist/js/i18n/tk.js"
+        ]
+    },
+    "tk_TK": {
+        "output": "js/locale/tk_TK.js",
+        "files": [
+            "node_modules/select2/dist/js/i18n/tk.js"
         ]
     },
     "tl_PH": {
@@ -1530,6 +1684,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.tr.js",
             "node_modules/bootstrap-fileinput/js/locales/tr.js",
             "node_modules/moment/locale/tr.js",
+            "node_modules/select2/dist/js/i18n/tr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-tr_TR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.tr-TR.js"
         ]
@@ -1540,6 +1695,7 @@
             "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.tr.js",
             "node_modules/bootstrap-fileinput/js/locales/tr.js",
             "node_modules/moment/locale/tr.js",
+            "node_modules/select2/dist/js/i18n/tr.js",
             "node_modules/bootstrap-select/dist/js/i18n/defaults-tr_TR.js",
             "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.tr-TR.js"
         ]
@@ -1568,14 +1724,16 @@
         "output": "js/locale/uk.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/uk.js",
-            "node_modules/moment/locale/uk.js"
+            "node_modules/moment/locale/uk.js",
+            "node_modules/select2/dist/js/i18n/uk.js"
         ]
     },
     "uk_UK": {
         "output": "js/locale/uk_UK.js",
         "files": [
             "node_modules/bootstrap-fileinput/js/locales/uk.js",
-            "node_modules/moment/locale/uk.js"
+            "node_modules/moment/locale/uk.js",
+            "node_modules/select2/dist/js/i18n/uk.js"
         ]
     },
     "ur": {
@@ -1613,7 +1771,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-vi_VN.js",
             "node_modules/bootstrap-fileinput/js/locales/vi.js",
-            "node_modules/moment/locale/vi.js"
+            "node_modules/moment/locale/vi.js",
+            "node_modules/select2/dist/js/i18n/vi.js"
         ]
     },
     "vi_VI": {
@@ -1621,7 +1780,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-vi_VN.js",
             "node_modules/bootstrap-fileinput/js/locales/vi.js",
-            "node_modules/moment/locale/vi.js"
+            "node_modules/moment/locale/vi.js",
+            "node_modules/select2/dist/js/i18n/vi.js"
         ]
     },
     "vi_VN": {
@@ -1629,7 +1789,8 @@
         "files": [
             "node_modules/bootstrap-select/dist/js/i18n/defaults-vi_VN.js",
             "node_modules/bootstrap-fileinput/js/locales/vi.js",
-            "node_modules/moment/locale/vi.js"
+            "node_modules/moment/locale/vi.js",
+            "node_modules/select2/dist/js/i18n/vi.js"
         ]
     },
     "yo": {

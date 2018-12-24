@@ -59,19 +59,20 @@ var CmfFileUploads = {
     }
 };
 
-CmfFileUploads.initFileUploaders = function (data, isImages) {
+CmfFileUploads.initFileUploaders = function (data, isImages, additionalPluginOptions) {
     for (var filesGroupName in data.configs) {
-        CmfFileUploads.initFileUploader(data, filesGroupName, isImages);
+        CmfFileUploads.initFileUploader(data, filesGroupName, isImages, additionalPluginOptions);
     }
 };
 
-CmfFileUploads.initFileUploader = function (data, filesGroupName, isImages) {
+CmfFileUploads.initFileUploader = function (data, filesGroupName, isImages, additionalPluginOptions) {
     var fileConfig = data.configs[filesGroupName];
     var isSingleFile = fileConfig.max_files_count === 1;
     fileConfig.defaultPluginOptions = $.extend(
         {layoutTemplates: {}},
         CmfFileUploads.baseUploaderOptions,
         isImages ? CmfFileUploads.imageUploaderOptions : CmfFileUploads.fileUploaderOptions,
+        ($.isPlainObject(additionalPluginOptions) ? additionalPluginOptions : {}),
         {
             allowedFileExtensions: fileConfig.allowed_extensions,
             minFileCount: 0,

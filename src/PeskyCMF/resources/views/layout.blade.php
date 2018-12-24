@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-@php($scriptsVersion = '2.3.1')
+@php($scriptsVersion = '2.3.2')
 @php($scriptsMinificationSuffix = config('app.debug') ? '' : '.min')
 <head>
     <meta charset="UTF-8">

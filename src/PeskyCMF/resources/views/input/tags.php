@@ -25,29 +25,25 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
 </div>
 
 <script type="application/javascript">
-    Utils.requireFiles('/packages/cmf-vendors/select2/js/select2.full.min.js')
-        .done(function () {
-            Utils.requireFiles('/packages/cmf-vendors/select2/js/i18n/<?php echo app()->getLocale(); ?>.js')
-                .done(function () {
-                    var $select = $('#<?php echo $rendererConfig->getAttribute('id'); ?>');
-                    var tags = $select.attr('data-value');
-                    try {
-                        tags = JSON.parse(tags);
-                    } catch (exc) {
-                        console.log(exc);
-                    }
-                    if (!tags || !$.isArray(tags)) {
-                        console.log('Invalid json for tags input (array expected): ' + tags);
-                        tags = [];
-                    }
-                    for (var i = 0; i < tags.length; i++) {
-                        $select.append('<option value="' + tags[i] + '" selected>' + tags[i] + '</option>');
-                    }
-                    $select.select2({
-                        tags: true,
-                        width: '100%',
-                        selectOnClose: true
-                    });
-                });
+    $(function () {
+        var $select = $('#<?php echo $rendererConfig->getAttribute('id'); ?>');
+        var tags = $select.attr('data-value');
+        try {
+            tags = JSON.parse(tags);
+        } catch (exc) {
+            console.log(exc);
+        }
+        if (!tags || !$.isArray(tags)) {
+            console.log('Invalid json for tags input (array expected): ' + tags);
+            tags = [];
+        }
+        for (var i = 0; i < tags.length; i++) {
+            $select.append('<option value="' + tags[i] + '" selected>' + tags[i] + '</option>');
+        }
+        $select.select2({
+            tags: true,
+            width: '100%',
+            selectOnClose: true
         });
+    });
 </script>

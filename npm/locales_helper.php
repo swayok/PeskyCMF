@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../../../autoload.php';
+
+use Illuminate\Support\Arr;
 use Swayok\Utils\Folder;
 
 $folders = [
@@ -8,10 +11,11 @@ $folders = [
     'node_modules/moment/locale/' => '%^([a-zA-Z]{2})(?:-([a-zA-Z]{2,}))?.js%',
     'node_modules/bootstrap-select/dist/js/i18n/' => '%^defaults-([a-zA-Z]{2})_([a-zA-Z]{2,}).js%',
     'node_modules/ajax-bootstrap-select/dist/js/locale/' => '%^ajax-bootstrap-select.([a-zA-Z]{2})-([a-zA-Z]{2,}).js%',
+    'node_modules/select2/dist/js/i18n/' => '%^([a-zA-Z]{2}).js%',
 ];
 $locales = [];
 foreach ($folders as $folderPath => $fileNameRegex) {
-    $absolutePath = base_path('vendor/swayok/peskycmf/npm/' . $folderPath);
+    $absolutePath = __DIR__ . '/' . $folderPath;
     $folder = Folder::load($absolutePath);
     if (!$folder->exists()) {
         echo 'Folder ' . str_replace('/', DIRECTORY_SEPARATOR, $absolutePath) . ' not found';
@@ -41,12 +45,17 @@ foreach ($folders as $folderPath => $fileNameRegex) {
 }
 // make configs
 $cmfMixerConfigs = [];
-$outputDir = 'dist/js/locale/';
+$outputDir = 'js/locale/';
 $defaultSuffixes = [
     'en' => 'US',
     'pt' => 'BR',
     'zh' => 'CN'
 ];
+
+function array_get($array, $key, $default = null) {
+    return Arr::get($array, $key, $default);
+}
+
 foreach ($locales as $locale => $details) {
     $localeWithDefaultSuffix = $locale . '_' . strtoupper(isset($defaultSuffixes[$locale]) ? $defaultSuffixes[$locale] : $locale);
     $baseFiles = array_merge(
@@ -63,6 +72,7 @@ foreach ($locales as $locale => $details) {
         ]
     ));
     if (count($differentLocales) === 1 && count($baseFiles) < 4) {
+        /** @noinspection SlowArrayOperationsInLoopInspection */
         $baseFiles = array_merge($details['versions'][$differentLocales[0]], $baseFiles);
     }
     foreach ($details['versions'] as $localeVersion => $localeVersionFiles) {

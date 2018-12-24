@@ -16,6 +16,30 @@ class FileFormInput extends FormInput {
     /** @var string */
     protected $view = 'cmf::input.file_uploader';
 
+    protected $jsPluginOptions = [];
+
+    /**
+     * Disable uploading preview for this input
+     * @return $this
+     */
+    public function disablePreview() {
+        $this->jsPluginOptions['showPreview'] = false;
+        return $this;
+    }
+
+    /**
+     * @param array $options
+     * @return $this
+     */
+    public function setJsPluginOptions(array $options) {
+        $this->jsPluginOptions = $options;
+        return $this;
+    }
+
+    public function getJsPluginOptions(): array {
+        return $this->jsPluginOptions;
+    }
+
     /**
      * @return string
      */

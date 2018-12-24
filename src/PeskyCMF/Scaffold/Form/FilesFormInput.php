@@ -3,8 +3,8 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyORMLaravel\Db\Column\FilesColumn;
-use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
 use PeskyORMLaravel\Db\Column\Utils\FileInfo;
+use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
 use PeskyORMLaravel\Db\Column\Utils\ImagesGroupConfig;
 
 /**
@@ -17,6 +17,30 @@ class FilesFormInput extends FormInput {
 
     /** @var null|array|\Closure */
     protected $fileConfigsToUse;
+
+    protected $jsPluginOptions = [];
+
+    /**
+     * Disable uploading preview for this input
+     * @return $this
+     */
+    public function disablePreview() {
+        $this->jsPluginOptions['showPreview'] = false;
+        return $this;
+    }
+
+    /**
+     * @param array $options
+     * @return $this
+     */
+    public function setJsPluginOptions(array $options) {
+        $this->jsPluginOptions = $options;
+        return $this;
+    }
+
+    public function getJsPluginOptions(): array {
+        return $this->jsPluginOptions;
+    }
 
     /**
      * @return string

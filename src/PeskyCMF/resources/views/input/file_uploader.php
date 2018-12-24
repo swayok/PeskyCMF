@@ -52,14 +52,17 @@ $isImages = $column->isItAnImage();
 
 <script type="application/javascript">
     $(function () {
-        Utils.requireFiles(['/packages/cmf/js/inputs/cmf.fileuploads.js']).done(function () {
-            var data = {
-                files: <?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode') ?>,
-                configs: <?php echo json_encode($configNameToInputId); ?>,
-                is_cloning: {{= !!it._is_cloning }},
-                is_in_modal: {{= !!it.__modal }}
-            };
-            CmfFileUploads.initFileUploader(data, '<?php echo $configName; ?>', <?php echo $isImages ? 'true' : 'false'; ?>);
-        });
+        var data = {
+            files: <?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode') ?>,
+            configs: <?php echo json_encode($configNameToInputId); ?>,
+            is_cloning: {{= !!it._is_cloning }},
+            is_in_modal: {{= !!it.__modal }}
+        };
+        CmfFileUploads.initFileUploader(
+            data,
+            '<?php echo $configName; ?>',
+            <?php echo $isImages ? 'true' : 'false'; ?>,
+            <?php echo json_encode($valueViewer->getJsPluginOptions()); ?>
+        );
     });
 </script>
