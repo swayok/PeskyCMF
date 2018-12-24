@@ -9,6 +9,7 @@
         "node_modules/bootstrap/dist/fonts": "css/fonts",
         "src/cmf-vendors/fonticons/font-awesome": "font-awesome",
         "src/css/fonts": "css/fonts",
-        "src/img": "img"
+        "src/img": "img",
+        "node_modules/bootstrap-fileinput/img": "img"
     }
 }
