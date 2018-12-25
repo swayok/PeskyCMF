@@ -59,12 +59,6 @@ class PeskyCmfAppSettings {
      * setting name as key;
      * @param FormConfig $scaffold
      * @return FormConfig
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
-     * @throws \UnexpectedValueException
      */
     static public function configureScaffoldFormConfig(FormConfig $scaffold) {
         return $scaffold
@@ -168,12 +162,6 @@ class PeskyCmfAppSettings {
     /**
      * @param bool $ignoreCache
      * @return array
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PDOException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     static public function getAllValues($ignoreCache = false) {
         $settings = static::getTable()->getValuesForForeignKey(null, $ignoreCache, true);
@@ -206,14 +194,6 @@ class PeskyCmfAppSettings {
      * @param mixed $value
      * @param bool $validate
      * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PDOException
-     * @throws \PeskyORM\Exception\DbException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PeskyORM\Exception\InvalidTableColumnConfigException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PeskyORM\Exception\RecordNotFoundException
-     * @throws \UnexpectedValueException
      */
     static public function update($key, $value, $validate = true) {
         $data = [$key => $value];
@@ -235,11 +215,6 @@ class PeskyCmfAppSettings {
 
     /**
      * @param string $key
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
-     * @throws \PDOException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \UnexpectedValueException
      */
     static public function delete($key) {
         static::getTable()->delete([static::getTable()->getKeysColumnName() => $key]);
