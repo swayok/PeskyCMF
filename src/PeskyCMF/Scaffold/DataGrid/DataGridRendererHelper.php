@@ -3,6 +3,7 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\MenuItem\CmfBulkActionMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRedirectMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRequestMenuItem;
@@ -182,12 +183,17 @@ class DataGridRendererHelper {
         $bulkActions = [];
         $placeFirst = [];
         if ($this->dataGridConfig->isAllowedMultiRowSelection()) {
+            /** @noinspection StaticInvocationViaThisInspection */
             $pkName = $this->table->getPkColumnName();
             foreach ($this->dataGridConfig->getBulkActionsToolbarItems() as $key => $bulkAction) {
                 if ($bulkAction instanceof Tag) {
                     $bulkAction = $bulkAction->build();
                 } else if ($bulkAction instanceof CmfMenuItem) {
-                    $bulkAction = $bulkAction->renderAsButton();
+                    /** @var CmfBulkActionMenuItem $bulkAction */
+                    if (empty($bulkAction->getPrimaryKeyColumnName())) {
+                        $bulkAction->setPrimaryKeyColumnName($pkName);
+                    }
+                    $bulkAction = $bulkAction->renderAsBootstrapDropdownMenuItem();
                 }
                 if (is_string($key)) {
                     $bulkActions[$key] = $bulkAction;

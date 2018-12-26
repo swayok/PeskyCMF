@@ -457,53 +457,87 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * Array may contain only strings, Tag class instances, or any object with build() or __toString() method
      * Examples:
      * - call some url via ajax passing all selected ids and then run "callback(json)"
-        * Tag::a()
-            * ->setContent(trans('path.to.translation'))
-            * //^ you can use ':count' in label to insert selected items count
-            * ->setDataAttr('action', 'bulk-selected')
-            * ->setDataAttr('confirm', trans('path.to.translation'))
-            * //^ confirm action before sending request to server
-            * ->setDataAttr('url', cmfRoute('route', [], false))
-            * ->setDataAttr('method', 'delete')
-            * //^ can be 'post', 'put', 'delete' depending on action type
-            * ->setDataAttr('id-field', 'id')
-            * //^ id field name to use to get rows ids, default: 'id'
-            * ->setDataAttr('on-success', 'callbackFuncitonName')
-            * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-            * ->setDataAttr('response-type', 'json')
-            * //^ one of: json, html, xml. Default: 'json'
-            * ->setHref('javascript: void(0)');
+        CmfRequestMenuItem::bulkActionOnSelectedRows(static::getUrlCustomAction('bulk_action_name'), 'delete')
+            // use ':count' in setTitle() to insert selected items count
+            ->setTitle('<span class="label label-primary">:count</span> ' . $this->translate('datagrid.bulk_action.action_name'))
+            ->setTooltip($this->translate('datagrid.bulk_action.action_name_tooltip'))
+            // ask user to confirm action
+            ->setConfirm($this->translate('datagrid.bulk_action.action_name_confirmation'))
+            // use this when you need to receive data from column other then primary key (default: current table's primary key column name)
+            ->setPrimaryKeyColumnName('parent_id')
+            // one of: json, html, xml. Default: 'json' (may be useful for your custom response handler)
+            ->setResponseDataType('json')
+            // set custom response handler function.
+            // callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            // It will receive 3 args: data, $link, defaultOnSuccessCallback
+            ->setOnSuccess('callbackFuncitonName');
+     * or
+        Tag::li(
+            Tag::a()
+                ->setContent(trans('path.to.translation'))
+                //^ you can use ':count' in label to insert selected items count
+                ->setDataAttr('action', 'bulk-selected')
+                ->setDataAttr('confirm', trans('path.to.translation'))
+                //^ confirm action before sending request to server
+                ->setDataAttr('url', cmfRoute('route', [], false))
+                ->setDataAttr('method', 'delete')
+                //^ can be 'post', 'put', 'delete' depending on action type
+                ->setDataAttr('id-field', 'id')
+                //^ id field name to use to get rows ids, default: 'id'
+                ->setDataAttr('on-success', 'callbackFuncitonName')
+                //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+                //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+                ->setDataAttr('response-type', 'json')
+                //^ one of: json, html, xml. Default: 'json'
+                ->setHref('javascript: void(0)');
+        )
      * Values will be received in the 'ids' key of the request as array
      * - call some url via ajax passing filter conditions and then run "callback(json)"
-        * Tag::a()
-            * ->setContent(trans('path.to.translation'))
-            * //^ you can use ':count' in label to insert filtered items count
-            * ->setDataAttr('action', 'bulk-filtered')
-            * ->setDataAttr('confirm', trans('path.to.translation'))
-            * //^ confirm action before sending request to server
-            * ->setDataAttr('url', cmfRoute('route', [], false))
-            * ->setDataAttr('method', 'put')
-            * //^ can be 'post', 'put', 'delete' depending on action type
-            * ->setDataAttr('on-success', 'callbackFuncitonName')
-            * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-            * ->setDataAttr('response-type', 'json')
-            * //^ one of: json, html, xml. Default: 'json'
-            * ->setHref('javascript: void(0)');
+        CmfRequestMenuItem::bulkActionOnFilteredRows(static::getUrlCustomAction('bulk_action_name'), 'put')
+            // use ':count' in setTitle() to insert selected items count
+            ->setTitle('<span class="label label-primary">:count</span> ' . $this->translate('datagrid.bulk_action.action_name'))
+            ->setTooltip($this->translate('datagrid.bulk_action.action_name_tooltip'))
+            // ask user to confirm action
+            ->setConfirm($this->translate('datagrid.bulk_action.action_name_confirmation'))
+            // one of: json, html, xml. Default: 'json' (may be useful for your custom response handler)
+            ->setResponseDataType('json')
+            // set custom response handler function.
+            // callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+            // It will receive 3 args: data, $link, defaultOnSuccessCallback
+            ->setOnSuccess('callbackFuncitonName');
+     * or
+        Tag::li(
+            Tag::a()
+                ->setContent(trans('path.to.translation'))
+                //^ you can use ':count' in label to insert filtered items count
+                ->setDataAttr('action', 'bulk-filtered')
+                ->setDataAttr('confirm', trans('path.to.translation'))
+                //^ confirm action before sending request to server
+                ->setDataAttr('url', cmfRoute('route', [], false))
+                ->setDataAttr('method', 'put')
+                //^ can be 'post', 'put', 'delete' depending on action type
+                ->setDataAttr('on-success', 'callbackFuncitonName')
+                //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+                //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+                ->setDataAttr('response-type', 'json')
+                //^ one of: json, html, xml. Default: 'json'
+                ->setHref('javascript: void(0)');
+        )
      * - bulk actions with custom on-click handler
-        * Tag::button()
-            * ->setContent(trans('path.to.translation'))
-            * //^ you can use ':count' in label to insert selected items count or filtered items count
-            * //^ depending on 'data-type' attribute
-            * ->setClass('btn btn-success')
-            * ->setDataAttr('type', 'bulk-selected')
-            * //^ 'bulk-selected' or 'bulk-filtered'
-            * ->setDataAttr('url', cmfRoute('route', [], false))
-            * ->setDataAttr('id-field', 'id')
-            * //^ id field name to use to get rows ids, default: 'id'
-            * ->setOnClick('someFunction(this)')
-            * //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
+        Tag::li(
+            Tag::button()
+                ->setContent(trans('path.to.translation'))
+                //^ you can use ':count' in label to insert selected items count or filtered items count
+                //^ depending on 'data-type' attribute
+                ->setClass('btn btn-success')
+                ->setDataAttr('type', 'bulk-selected')
+                //^ 'bulk-selected' or 'bulk-filtered'
+                ->setDataAttr('url', cmfRoute('route', [], false))
+                ->setDataAttr('id-field', 'id')
+                //^ id field name to use to get rows ids, default: 'id'
+                ->setOnClick('someFunction(this)')
+                //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
+        )
      * Conditions will be received in the 'conditions' key of the request as JSON string
      * @return $this
      */
@@ -516,13 +550,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param array $records
      * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
      * @return array
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PDOException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function prepareRecords(array $records, array $virtualColumns = []) {
         foreach ($records as $idx => &$record) {
