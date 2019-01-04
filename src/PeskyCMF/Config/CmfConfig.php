@@ -1442,9 +1442,12 @@ abstract class CmfConfig extends ConfigsContainer {
     protected function configureSession($app) {
         /** @var \Illuminate\Config\Repository $appConfigs */
         $appConfigs = $app['config'];
-        $config = $appConfigs->get('session', []);
-        $config['path'] = '/' . trim(static::url_prefix(), '/');
-        $appConfigs->set('session', array_merge($config, (array)static::config('session', [])));
+        $config = array_merge(
+            $appConfigs->get('session'),
+            ['path' => '/' . trim(static::url_prefix(), '/')],
+            (array)static::config('session', [])
+        );
+        $appConfigs->set('session', $config);
     }
 
     /**
