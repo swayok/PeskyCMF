@@ -19,6 +19,7 @@ include __DIR__ . '/textarea.php';
 
 <script type="application/javascript">
     $(function () {
+        window.CKEDITOR_BASEPATH = '/packages/cmf/raw/ckeditor/';
         Utils.requireFiles(['/packages/cmf/raw/ckeditor/ckeditor.js'])
             .done(function () {
                 Utils.requireFiles([
