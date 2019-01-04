@@ -19,6 +19,19 @@ return [
     'app_settings_class' => \PeskyCMF\PeskyCmfAppSettings::class,
 
     /**
+     * Which versions of .js and .css files to include into layout
+     * Modes: null, false, true, 'min', 'packed', 'core', 'all'
+     * - 'min', null, false:    use minified versions of all files
+     * - 'packed':              use packed but not minified versions of all files
+     * - 'src-core':            use source files only for cmf-related files while all libs will be 'packed'
+     * - 'src':                 use source files for all files including cmf-related files and all libs
+     *
+     * After changing a value to 'src-*' you need to republish files using
+     * php artisan vendor:publish --tag=public --force
+     */
+    'assets' => env('CMF_ASSETS') ?: 'min',
+
+    /**
      * Configs related to CmfHttpRequestLog class
      */
     'http_request_logs' => [

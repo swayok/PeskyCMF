@@ -289,5 +289,13 @@ return [
     'optimize_ui_templates' => [
         'enabled' => env('PESKYCMF_OPTIMIZE_UI_TEMPLATES', false),
         'timeout' => 0
-    ]
+    ],
+
+    /**
+     * Enable/disable periodical pinging in order to
+     * prolong session or detect if session or auth expired.
+     * Set interval > 0 to enable pinging.
+     * Interval metrics is in seconds.
+     */
+    'ping_interval' => 0,
 ];

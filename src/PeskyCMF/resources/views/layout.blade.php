@@ -1,10 +1,16 @@
+<?php
+/**
+ * @var \PeskyCMF\Config\CmfConfig $cmfConfig
+ */
+?>
 <!DOCTYPE html>
 <html>
-@php($scriptsVersion = '2.3.2')
+@php($scriptsVersion = '2.3.3')
 @php($scriptsMinificationSuffix = config('app.debug') ? '' : '.min')
+@php($layoutFiles = $cmfConfig::layout_cmf_core_includes())
 <head>
     <meta charset="UTF-8">
-    <title>@section('page-title') {{ cmfConfig()->default_page_title() }} @show</title>
+    <title>@section('page-title') {{ $cmfConfig::default_page_title() }} @show</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 
@@ -12,28 +18,30 @@
 
     @yield('html-head')
 
-    <link href="/packages/cmf/css/bootstrap/bootstrap.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+    @foreach($layoutFiles['css'] as $cssPath)
+        @if (is_array($cssPath))
+            @foreach($cssPath as $filePath)
+                <link href="{!! $filePath !!}?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+            @endforeach
+        @else
+            <link href="{!! $cssPath !!}?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
+        @endif
+    @endforeach
 
-    <link href="/packages/cmf/css/adminlte/AdminLTE.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/adminlte/skins/{{ cmfConfig()->ui_skin() }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-
-    <link href="/packages/cmf/css/bootstrap-plugins.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/libs.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/fonts/Roboto/roboto.css" rel="stylesheet" type="text/css"/>
-    <link href="/packages/cmf/css/cmf.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-
-    <link href="/packages/cmf/font-awesome/css/font-awesome{{ $scriptsMinificationSuffix }}.css?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
-
-    @foreach(cmfConfig()->layout_css_includes() as $cssPath)
-        <link href="{{ $cssPath }}" rel="stylesheet" type="text/css"/>
+    @foreach($cmfConfig::layout_css_includes() as $cssPath)
+        <link href="{!! $cssPath !!}" rel="stylesheet" type="text/css"/>
     @endforeach
 
     @stack('styles')
 
+    @foreach($layoutFiles['js-head'] as $jsPath)
+        <script src="{!! $jsPath !!}" type="text/javascript"></script>
+    @endforeach
+
 </head>
 
-@php($localeShort = \PeskyCMF\Config\CmfConfig::getShortLocale())
-<body class="{{ cmfConfig()->ui_skin() }}" data-locale="{{ $localeShort }}">
+@php($localeShort = $cmfConfig::getShortLocale())
+<body class="{{ $cmfConfig::ui_skin() }}" data-locale="{{ $localeShort }}">
     <div class="wrapper has-preloader loading" id="page-wrapper">
 
     </div>
@@ -69,40 +77,34 @@
     </script>
 
     <script type="application/javascript">
-        var CmfSettings = {!! json_encode(cmfConfig()->js_app_settings(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
-        var AppData = {!! json_encode(cmfConfig()->js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
+        var CmfSettings = {!! json_encode($cmfConfig::js_app_settings(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
+        var AppData = {!! json_encode($cmfConfig::js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
-    <script src="/packages/cmf/js/jquery.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
+    @foreach($layoutFiles['js'] as $jsPath)
+        @if (is_array($jsPath))
+            @foreach($jsPath as $filePath)
+                <script src="{!! $filePath !!}?v={{ $scriptsVersion }}" type="text/javascript"></script>
+            @endforeach
+        @else
+            <script src="{!! $jsPath !!}?v={{ $scriptsVersion }}" type="text/javascript"></script>
+        @endif
+    @endforeach
 
-    @php($localeWithSuffixDashed = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('-'))
-    @php($localeWithSuffixUnderscored = \PeskyCMF\Config\CmfConfig::getLocaleWithSuffix('_'))
-
-    <script src="/packages/cmf/js/libs.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/bootstrap-and-plugins.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/datatables-and-plugins.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/jquery-plugins.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.core.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-    <script src="/packages/cmf/js/cmf.app.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-
-    @if (cmfConfig()->config('optimize_ui_templates.enabled', false))
+    @if ($cmfConfig::config('optimize_ui_templates.enabled', false))
         <script src="{{ cmfRoute('cmf_cached_templates_js', ['_' => time()]) }}" type="text/javascript"></script>
     @endif
 
-    <script src="{{ cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) }}" type="text/javascript"></script>
-
-    <script src="/packages/cmf/js/locale/{{ $localeWithSuffixUnderscored }}.js?v={{ $scriptsVersion }}" type="text/javascript"></script>
-
-    @foreach(cmfConfig()->layout_js_includes() as $jsPath)
+    @foreach($cmfConfig::layout_js_includes() as $jsPath)
         <script src="{!! $jsPath !!}" type="text/javascript"></script>
     @endforeach
 
-    @foreach(cmfConfig()->layout_js_code_blocks() as $jsCode)
+    @foreach($cmfConfig::layout_js_code_blocks() as $jsCode)
         {!! $jsCode !!}
     @endforeach
 
     <script type="application/javascript">
-        // fix for CKEditor modal inside bootstrap modal
+        // fix for CKEditor textarea inside bootstrap modal
         $.fn.modal.Constructor.prototype.enforceFocus = function() {
             var modal = this;
             $(document).on('focusin.modal', function (e) {
@@ -120,7 +122,7 @@
 
     @stack('jscode')
 
-    <?php $message = Session::pull(cmfConfig()->session_message_key(), false); ?>
+    <?php $message = Session::pull($cmfConfig::session_message_key(), false); ?>
     @if (!empty($message) && (is_string($message) || (is_array($message) && !empty($message['message']))))
         <script type="application/javascript">
             <?php $type = is_string($message) || empty($message['type']) || !in_array($message['type'], ['success', 'info', 'warning', 'error']) ? 'info' : $message['type'] ?>

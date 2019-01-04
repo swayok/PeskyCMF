@@ -109,67 +109,15 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $cmfLibDir = __DIR__ . '/..';
         // publish cmf assets (minified)
         $cmfNpmDistDir = $cmfLibDir . '/../../npm/dist';
-        $this->publishes([
-            $cmfNpmDistDir . ($this->app->environment() === 'production' ? '/min' : '/packed') => public_path('packages/cmf')
-        ], 'public');
-
-        /*$this->publishes([
-            // cmf
-            $cmfLibDir . '/public/css' => public_path('packages/cmf/css'),
-            $cmfLibDir . '/public/js' => public_path('packages/cmf/js'),
-            $cmfLibDir . '/public/less' => public_path('packages/cmf/less'),
-            $cmfLibDir . '/public/img' => public_path('packages/cmf/img'),
-            base_path('vendor/swayok/page.js/page.js') => public_path('packages/cmf-vendors/router/page.js'),
-            // AdminLTE
-            base_path('vendor/almasaeed2010/adminlte/dist/js/adminlte.js') => public_path('packages/adminlte/js/app.js'),
-            base_path('vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js') => public_path('packages/adminlte/js/app.min.js'),
-            base_path('vendor/almasaeed2010/adminlte/dist/css/alt/AdminLTE-without-plugins.css') => public_path('packages/adminlte/css/AdminLTE.css'),
-            base_path('vendor/almasaeed2010/adminlte/dist/css/alt/AdminLTE-without-plugins.min.css') => public_path('packages/adminlte/css/AdminLTE.min.css'),
-            base_path('vendor/almasaeed2010/adminlte/dist/css/skins') => public_path('packages/adminlte/css/skins'),
-            // bootstrap
-            base_path('vendor/bower-asset/bootstrap/dist') => public_path('packages/cmf-vendors/bootstrap'),
-            base_path('vendor/bower-asset/eonasdan-bootstrap-datetimepicker/build') => public_path('packages/cmf-vendors/bootstrap/datetimepicker'),
-            base_path('vendor/bower-asset/bootstrap-switch/dist') => public_path('packages/cmf-vendors/bootstrap/switches'),
-            base_path('vendor/bower-asset/bootstrap-select/dist') => public_path('packages/cmf-vendors/bootstrap/select'),
-            base_path('vendor/bower-asset/ajax-bootstrap-select/dist') => public_path('packages/cmf-vendors/bootstrap/select'),
-            base_path('vendor/bower-asset/bootstrap-fileinput/js') => public_path('packages/cmf-vendors/bootstrap/fileinput/js'),
-            base_path('vendor/bower-asset/bootstrap-fileinput/css') => public_path('packages/cmf-vendors/bootstrap/fileinput/css'),
-            base_path('vendor/bower-asset/bootstrap-fileinput/img') => public_path('packages/cmf-vendors/bootstrap/fileinput/img'),
-            // font icons
-//            base_path('vendor/bower-asset/font-awesome/css') => public_path('packages/cmf-vendors/fonticons/font-awesome/css'),
-//            base_path('vendor/bower-asset/font-awesome/fonts') => public_path('packages/cmf-vendors/fonticons/font-awesome/fonts'),
-            // jquery
-            base_path('vendor/mistic100/jquery-querybuilder/dist') => public_path('packages/cmf-vendors/db-query-builder'),
-            base_path('vendor/bower-asset/jquery/dist/jquery.js') => public_path('packages/cmf-vendors/jquery3/jquery.js'),
-            base_path('vendor/bower-asset/jquery/dist/jquery.min.js') => public_path('packages/cmf-vendors/jquery3/jquery.min.js'),
-            base_path('vendor/bower-asset/jquery/dist/jquery.min.map') => public_path('packages/cmf-vendors/jquery3/jquery.min.map'),
-            base_path('vendor/bower-asset/jquery-form/dist') => public_path('packages/cmf-vendors/jquery-form'),
-            // ckeditor - removed due to problems with updates and plugins packs. Currently should be updated manually in packages/cmf-vendors/ckeditor
-//            base_path('vendor/ckeditor/ckeditor/ckeditor.js') => public_path('packages/cmf-vendors/ckeditor/ckeditor.js'),
-//            base_path('vendor/ckeditor/ckeditor/styles.js') => public_path('packages/cmf-vendors/ckeditor/styles.js'),
-//            base_path('vendor/ckeditor/ckeditor/contents.css') => public_path('packages/cmf-vendors/ckeditor/contents.css'),
-//            base_path('vendor/ckeditor/ckeditor/adapters') => public_path('packages/cmf-vendors/ckeditor/adapters'),
-//            base_path('vendor/ckeditor/ckeditor/lang') => public_path('packages/cmf-vendors/ckeditor/lang'),
-//            base_path('vendor/ckeditor/ckeditor/plugins') => public_path('packages/cmf-vendors/ckeditor/plugins'),
-//            base_path('vendor/ckeditor/ckeditor/skins') => public_path('packages/cmf-vendors/ckeditor/skins'),
-            // libs
-            base_path('vendor/bower-asset/simple-scrollbar/simple-scrollbar.css') => public_path('packages/cmf-vendors/scrollbar/simple-scrollbar.css'),
-            base_path('vendor/bower-asset/simple-scrollbar/simple-scrollbar.js') => public_path('packages/cmf-vendors/scrollbar/simple-scrollbar.js'),
-            base_path('vendor/bower-asset/datatables/media') => public_path('packages/cmf-vendors/datatables'),
-            base_path('vendor/bower-asset/toastr') => public_path('packages/cmf-vendors/toastr'),
-            base_path('vendor/bower-asset/moment/moment.js') => public_path('packages/cmf-vendors/moment/moment.js'),
-            base_path('vendor/bower-asset/moment/min/moment.min.js') => public_path('packages/cmf-vendors/moment/moment.min.js'),
-            base_path('vendor/bower-asset/moment/locale') => public_path('packages/cmf-vendors/moment/locale'),
-            base_path('vendor/bower-asset/moment/locale/en-gb.js') => public_path('packages/cmf-vendors/moment/locale/en.js'),
-            base_path('vendor/bower-asset/select2/dist') => public_path('packages/cmf-vendors/select2'),
-            base_path('vendor/bower-asset/inputmask/dist/jquery.inputmask.bundle.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.js'),
-            base_path('vendor/bower-asset/inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
-            base_path('vendor/bower-asset/inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
-//            base_path('vendor/bower-asset/cropperjs/dist') => public_path('packages/cmf-vendors/cropperjs'),
-            base_path('vendor/bower-asset/sortablejs/Sortable.js') => public_path('packages/cmf-vendors/sortable/Sortable.js'),
-            // additions to vendors
-            $cmfLibDir . '/public/cmf-vendors' => public_path('packages/cmf-vendors'),
-        ], 'public');*/
+        $cmfAssets = [
+            $cmfNpmDistDir . '/min' => public_path('packages/cmf/min'),
+            $cmfNpmDistDir . '/packed' => public_path('packages/cmf/packed'),
+            $cmfNpmDistDir . '/raw' => public_path('packages/cmf/raw'),
+        ];
+        if (stripos(config('peskycmf.assets'), 'src') === 0) {
+            $cmfAssets[$cmfNpmDistDir . '/src'] = public_path('packages/cmf/src');
+        }
+        $this->publishes($cmfAssets, 'public');
 
         $this->publishes([
             $this->getConfigFilePath() => config_path('peskycmf.php'),

@@ -5,6 +5,7 @@ namespace PeskyCMF\Config;
 use App\AppSettings;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Application;
+use Illuminate\View\View;
 use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Auth\CmfAccessPolicy;
@@ -21,6 +22,7 @@ use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
+use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 use Swayok\Utils\StringUtils;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
@@ -216,6 +218,66 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function custom_views_prefix(): string {
         return static::config('views_subfolder', 'admin') . '.';
+    }
+
+    static public function layout_cmf_core_includes(): array {
+        $assetsMode = config('peskycmf.assets');
+        $subFolder = 'min';
+        $minSuffix = '.min';
+        $isSrcMode = stripos($assetsMode, 'src') === 0;
+        if ($isSrcMode || $assetsMode === 'packed') {
+            $minSuffix = '';
+            $subFolder = 'packed';
+        }
+        $ret = [
+            'js-head' => [
+                "/packages/cmf/raw/js/jquery{$minSuffix}.js",
+            ],
+            'js' => [
+                'cmf-libs' => "/packages/cmf/{$subFolder}/js/cmf-libs.js",
+                'cmf-jquery-and-bootstrap-plugins' => "/packages/cmf/{$subFolder}/js/cmf-jquery-and-bootstrap-plugins.js",
+                'cmf-core' => "/packages/cmf/{$subFolder}/js/cmf-core.js",
+                'localization' => "/packages/cmf/{$subFolder}/js/locale/" . static::getLocaleWithSuffix('_') . '.js',
+                'app' => "/packages/cmf/{$subFolder}/js/cmf-app.js",
+            ],
+            'css' => [
+                "/packages/cmf/raw/css/fonts/Roboto/roboto.css",
+                "/packages/cmf/raw/css/bootstrap/bootstrap.css",
+                "/packages/cmf/raw/css/adminlte/AdminLTE.css",
+                "/packages/cmf/raw/css/adminlte/skins/" . static::ui_skin() . '.css',
+                'cmf-libs' => "/packages/cmf/{$subFolder}/css/cmf-libs.css",
+                'cmf-core' => "/packages/cmf/{$subFolder}/css/cmf.css",
+                "/packages/cmf/raw/font-awesome/css/font-awesome{$minSuffix}.css"
+            ]
+        ];
+
+        if ($isSrcMode) {
+            $files = File::readJson(__DIR__ . '/../../../npm/config/cmf-assets.json');
+            $isCore = $assetsMode === 'src-core';
+            $packs = $isCore ? ['cmf-core'] : ['cmf-libs', 'cmf-core', 'cmf-jquery-and-bootstrap-plugins'];
+            foreach ($packs as $packName) {
+                if (isset($ret['js'][$packName])) {
+                    $ret['js'][$packName] = [];
+                    foreach ($files['scripts'][$packName]['files'] as $path) {
+                        $ret['js'][$packName][] = '/packages/cmf/src/' . $path;
+                    }
+                }
+                if (isset($ret['css'][$packName])) {
+                    $ret['css'][$packName] = [];
+                    foreach ($files['stylesheets'][$packName]['files'] as $path) {
+                        $ret['css'][$packName][] = '/packages/cmf/src/' . $path;
+                    }
+                }
+            }
+            $ret['js']['app'] = '/packages/cmf/src/src/js/cmf.app.js';
+            if (!$isCore && isset($files['localizations'][static::getLocaleWithSuffix('_')])) {
+                $ret['js']['localization'] = [];
+                foreach ($files['localizations'][static::getLocaleWithSuffix('_')]['files'] as $path) {
+                    $ret['js']['localization'][] = '/packages/cmf/src/' . $path;
+                }
+            }
+        }
+        return $ret;
     }
 
     /**
@@ -818,7 +880,8 @@ abstract class CmfConfig extends ConfigsContainer {
         return [
             'isDebug' => config('app.debug'),
             'rootUrl' => '/' . trim(static::url_prefix(), '/'),
-            'enablePing' => false,
+            'enablePing' => (int)static::config('ping_interval') > 0,
+            'pingInterval' => (int)static::config('ping_interval') * 1000,
             'uiUrl' => static::route('cmf_main_ui', [], false),
             'userDataUrl' => static::route('cmf_profile_data', [], false),
             'menuCountersDataUrl' => static::route('cmf_menu_counters_data', [], false),
@@ -1343,6 +1406,11 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     public function initSection($app) {
         $this->useAsPrimary();
+
+        // send $cmfConfig var to all views
+        \View::composer('*', function (View $view) {
+            $view->with('cmfConfig', $this);
+        });
 
         // init auth module
         /** @var CmfAuthModule $cmfAuthModuleClass */

@@ -6,17 +6,14 @@ namespace PeskyCMF\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Routing\Pipeline;
 use PeskyCMF\ApiDocs\CmfApiMethodDocumentation;
 use PeskyCMF\Auth\Middleware\CmfAuth;
-use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\WysiwygFormInput;
 use PeskyCMF\Traits\DataValidationHelper;
 use Ramsey\Uuid\Uuid;
 use Swayok\Utils\Folder;
 use Swayok\Utils\ValidateValue;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CmfGeneralController extends CmfController {
@@ -32,27 +29,31 @@ class CmfGeneralController extends CmfController {
         if ($request->ajax()) {
             return response()->json([], 404);
         }
-
-        return view(static::getCmfConfig()->layout_view());
+        $cmfConfig = static::getCmfConfig();
+        return view($cmfConfig::layout_view());
     }
 
     public function getPage(Request $request, $name) {
         if ($request->ajax()) {
             $this->authorize('cmf_page', [$name]);
+            $cmfConfig = static::getCmfConfig();
             $altName = str_replace('-', '_', $name);
-            $viewsPrefix = static::getCmfConfig()->custom_views_prefix();
+            $viewsPrefix = $cmfConfig::custom_views_prefix();
             $isModal = (bool)$request->query('modal', false);
             $primaryView = $viewsPrefix . 'page.' . $name;
+            $dataForView = [
+                'isModal' => $isModal,
+            ];
             if (\View::exists($primaryView)) {
-                return view($primaryView, ['isModal' => $isModal])->render();
+                return view($primaryView, $dataForView)->render();
             } else if ($altName !== $name && \View::exists($viewsPrefix . 'page.' . $altName)) {
-                return view($viewsPrefix . 'page.' . $altName, ['isModal' => $isModal])->render();
+                return view($viewsPrefix . 'page.' . $altName, $dataForView)->render();
             } else if (\View::exists('cmf::page.' . $name)) {
-                return view('cmf::page.' . $name, ['isModal' => $isModal])->render();
+                return view('cmf::page.' . $name, $dataForView)->render();
             }
             return $this->pageViewNotFoundResponse($request, $name, $primaryView);
         } else {
-            return view(static::getCmfConfig()->layout_view())->render();
+            return $this->loadJsApp($request)->render();
         }
     }
 
@@ -64,13 +65,13 @@ class CmfGeneralController extends CmfController {
     }
 
     public function getUiView($viewName) {
-        $configName = $viewName . '_view';
-        $configs = static::getCmfConfig();
-        if (!method_exists($configs, $configName)) {
-            abort(HttpCode::NOT_FOUND, "Config [$configName] not defined");
+        $propName = $viewName . '_view';
+        $cmfConfig = static::getCmfConfig();
+        if (!method_exists($cmfConfig, $propName)) {
+            abort(HttpCode::NOT_FOUND, "Config [$propName] not defined");
         }
 
-        return view(static::getCmfConfig()->$configName)->render();
+        return view($cmfConfig::$$propName)->render();
     }
 
     public function redirectToUserProfile() {
@@ -86,8 +87,9 @@ class CmfGeneralController extends CmfController {
     }
 
     protected function getDataForBasicUiView() {
+        $cmfConfig = static::getCmfConfig();
         return [
-            'urlPrefix' => '/' . static::getCmfConfig()->url_prefix(),
+            'urlPrefix' => '/' . $cmfConfig::url_prefix()
         ];
     }
 
