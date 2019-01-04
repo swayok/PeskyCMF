@@ -51,17 +51,17 @@ const mixCmfPluginsLocalizationScripts = function () {
 
 const publishFiles = function () {
     for (let folder in filesAndFoldersToPublish.folders) {
-        console.log('Copying ' + folder + ' folder contents to ' + addDistPath(filesAndFoldersToPublish.folders[folder]));
+        console.log('Copying ' + folder + ' folder contents to ' + addUnpackedPath(filesAndFoldersToPublish.folders[folder]));
         mix.copyDirectory(folder, addUnpackedPath(filesAndFoldersToPublish.folders[folder]));
     }
     for (let file in filesAndFoldersToPublish.files) {
         if (Array.isArray(filesAndFoldersToPublish.files[file])) {
             for (let idx in filesAndFoldersToPublish.files[file]) {
-                console.log('Copying ' + file + ' to ' + addDistPath(filesAndFoldersToPublish.files[file][idx]));
+                console.log('Copying ' + file + ' to ' + addUnpackedPath(filesAndFoldersToPublish.files[file][idx]));
                 mix.copy(file, addUnpackedPath(filesAndFoldersToPublish.files[file][idx]));
             }
         } else {
-            console.log('Copying ' + file + ' to ' + addDistPath(filesAndFoldersToPublish.files[file]));
+            console.log('Copying ' + file + ' to ' + addUnpackedPath(filesAndFoldersToPublish.files[file]));
             mix.copy(file, addUnpackedPath(filesAndFoldersToPublish.files[file]));
         }
     }
