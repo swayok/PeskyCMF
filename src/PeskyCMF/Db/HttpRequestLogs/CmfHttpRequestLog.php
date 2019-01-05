@@ -245,8 +245,8 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      */
     protected function getLogName(Route $route) {
         return array_get($route->getAction(), 'log', function () use ($route) {
-            if ($route->hasParameter('table_name')) {
-                $logName = $route->parameter('table_name');
+            if ($route->hasParameter('resource')) {
+                $logName = $route->parameter('resource');
                 if ($route->hasParameter('id')) {
                     $logName .= '.' . $route->parameter('id');
                 }

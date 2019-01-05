@@ -16,7 +16,7 @@ class DataGridRendererHelper {
     /** @var DataGridConfig  */
     protected $dataGridConfig;
     /** @var string */
-    protected $tableNameForRoutes;
+    protected $resourceName;
     /** @var TableInterface  */
     protected $table;
     /** @var FilterConfig */
@@ -38,7 +38,7 @@ class DataGridRendererHelper {
         $this->dataGridConfig = $dataGridConfig;
         $this->dataGridFilterConfig = $dataGridConfig->getScaffoldConfig()->getDataGridFilterConfig();
         $this->table = $dataGridConfig->getScaffoldConfig()->getTable();
-        $this->tableNameForRoutes = $dataGridConfig->getScaffoldConfig()->getResourceName();
+        $this->resourceName = $dataGridConfig->getScaffoldConfig()->getResourceName();
     }
 
     /**
@@ -46,7 +46,7 @@ class DataGridRendererHelper {
      */
     public function getIdSuffix() {
         if (!$this->idSuffix) {
-            $this->idSuffix = str_slug(strtolower($this->tableNameForRoutes));
+            $this->idSuffix = str_slug(strtolower($this->resourceName));
         }
         return $this->idSuffix;
     }
@@ -202,7 +202,7 @@ class DataGridRendererHelper {
                 }
             }
             if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isBulkItemsDeleteAllowed()) {
-                $action = CmfMenuItem::bulkActionOnSelectedRows(cmfRoute('cmf_api_delete_bulk', [$this->tableNameForRoutes]), 'delete')
+                $action = CmfMenuItem::bulkActionOnSelectedRows(cmfRoute('cmf_api_delete_bulk', [$this->resourceName]), 'delete')
                     ->setTitle($this->dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
                     ->setConfirm($this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_selected_confirm'))
                     ->setPrimaryKeyColumnName($pkName)
@@ -230,7 +230,7 @@ class DataGridRendererHelper {
             }
         }
         if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isFilteredItemsDeleteAllowed()) {
-            $action = CmfMenuItem::bulkActionOnFilteredRows(cmfRoute('cmf_api_delete_bulk', [$this->tableNameForRoutes]), 'delete')
+            $action = CmfMenuItem::bulkActionOnFilteredRows(cmfRoute('cmf_api_delete_bulk', [$this->resourceName]), 'delete')
                 ->setTitle($this->dataGridConfig->translateGeneral('bulk_actions.delete_filtered'))
                 ->setConfirm($this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_filtered_confirm'))
                 ->renderAsBootstrapDropdownMenuItem();
@@ -456,7 +456,7 @@ class DataGridRendererHelper {
     public function getDoubleClickUrl() {
         $doubleClickUrl = null;
         if ($this->dataGridConfig->isEditAllowed()) {
-            return routeToCmfItemEditForm($this->tableNameForRoutes, '{{= it.___pk_value }}');
+            return routeToCmfItemEditForm($this->resourceName, '{{= it.___pk_value }}');
         } else if ($this->dataGridConfig->isDetailsViewerAllowed()) {
             return '{{= it.___details_url }}';
         }
@@ -474,11 +474,11 @@ class DataGridRendererHelper {
             $this->dataGridConfig->getScaffoldConfig()->getCmfConfig()->data_tables_config(),
             $this->dataGridConfig->getAdditionalDataTablesConfig(),
             [
-                'resourceName' => $this->tableNameForRoutes,
+                'resourceName' => $this->resourceName,
                 'pkColumnName' => $this->table->getPkColumnName(),
                 'processing' => true,
                 'serverSide' => true,
-                'ajax' => cmfRoute('cmf_api_get_items', ['table_name' => $this->tableNameForRoutes], false),
+                'ajax' => cmfRoute('cmf_api_get_items', ['resource' => $this->resourceName], false),
                 'pageLength' => $this->dataGridConfig->getRecordsPerPage(),
                 'toolbarItems' => $this->getToolbarItems(),
                 'order' => [],
@@ -504,7 +504,7 @@ class DataGridRendererHelper {
                 'columns' => $this->dataGridConfig->getRowsPositioningColumns(),
                 'url' => cmfRouteTpl(
                     'cmf_api_change_item_position',
-                    ['table_name' => $this->tableNameForRoutes],
+                    ['resource' => $this->resourceName],
                     [
                         'id' => 'it.moved_row.___pk_value',
                         'before_or_after',

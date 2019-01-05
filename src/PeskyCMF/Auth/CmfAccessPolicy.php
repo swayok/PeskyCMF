@@ -100,9 +100,9 @@ class CmfAccessPolicy {
 
     /**
      * @param RecordInterface $user
-     * @return mixed
+     * @return bool
      */
-    protected function isSuperadmin(RecordInterface $user) {
+    protected function isSuperadmin(RecordInterface $user): bool {
         if ($user::hasColumn('is_superadmin')) {
             return $user->getValue('is_superadmin');
         }
@@ -111,16 +111,16 @@ class CmfAccessPolicy {
 
     /**
      * @param RecordInterface $user
-     * @return mixed
+     * @return null|string
      */
-    protected function getUserRole(RecordInterface $user) {
-        return $user::hasColumn('role') ? $user->role : 'admin';
+    protected function getUserRole(RecordInterface $user): ?string {
+        return $user::hasColumn('role') ? $user->getValue('role') : 'admin';
     }
 
     /**
      * @return CmfConfig
      */
-    protected function getCmfConfig() {
+    protected function getCmfConfig(): CmfConfig {
         return CmfConfig::getPrimary();
     }
 
@@ -129,7 +129,7 @@ class CmfAccessPolicy {
      * @param string $pageName
      * @return bool
      */
-    public function cmf_page($user, $pageName) {
+    public function cmf_page(RecordInterface $user, string $pageName): bool {
         if ($this->isSuperadmin($user)) {
             return true;
         }
@@ -142,36 +142,33 @@ class CmfAccessPolicy {
     /**
      * @param RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $user
      * @param string $ability
-     * @param string $table
+     * @param string $resourceName
      * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue
      * @param array $conditions
      * @return bool
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \ReflectionException
-     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      */
-    protected function resource($user, $ability, $table, $recordOrItemIdOrFkValue = null, array $conditions = []) {
+    protected function resource(RecordInterface $user, string $ability, string $resourceName, $recordOrItemIdOrFkValue = null, array $conditions = []): bool {
         if ($this->isSuperadmin($user)) {
             return true;
         }
         return (
-            $this->roleHasAccessToResource($this->getUserRole($user), $table, $ability)
-            && $this->userHasAccessToRecord($user, $table, $ability, $recordOrItemIdOrFkValue, $conditions)
+            $this->roleHasAccessToResource($this->getUserRole($user), $resourceName, $ability)
+            && $this->userHasAccessToRecord($user, $resourceName, $ability, $recordOrItemIdOrFkValue, $conditions)
         );
     }
 
     /**
      * @param string $role
-     * @param string $table
+     * @param string $resourceName
      * @param string $ability
      * @return bool
      */
-    protected function roleHasAccessToResource($role, $table, $ability) {
-        if (array_key_exists($table, static::$resources)) {
-            if (array_key_exists($ability, static::$resources[$table])) {
-                return static::$resources[$table][$ability] === true || in_array($role, (array)static::$resources[$table][$ability], true);
-            } else if (array_key_exists('others', static::$resources[$table])) {
-                return static::$resources[$table]['others'] === true || in_array($role, (array)static::$resources[$table]['others'], true);
+    protected function roleHasAccessToResource(string $role, string $resourceName, string $ability): bool {
+        if (array_key_exists($resourceName, static::$resources)) {
+            if (array_key_exists($ability, static::$resources[$resourceName])) {
+                return static::$resources[$resourceName][$ability] === true || in_array($role, (array)static::$resources[$resourceName][$ability], true);
+            } else if (array_key_exists('others', static::$resources[$resourceName])) {
+                return static::$resources[$resourceName]['others'] === true || in_array($role, (array)static::$resources[$resourceName]['others'], true);
             }
         }
         return $this->getAccessFromDefaults($role, $ability);
@@ -179,26 +176,23 @@ class CmfAccessPolicy {
 
     /**
      * @param RecordInterface|\PeskyCMF\Db\Admins\CmfAdmin $user
-     * @param string $tableName
+     * @param string $resourceName
      * @param string $ability
      * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue
      * @param array $conditions
      * @return bool
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \ReflectionException
-     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      */
-    protected function userHasAccessToRecord($user, $tableName, $ability, $recordOrItemIdOrFkValue = null, array $conditions = []) {
+    protected function userHasAccessToRecord(RecordInterface $user, string $resourceName, string $ability, $recordOrItemIdOrFkValue = null, array $conditions = []): bool {
         if (
-            array_key_exists($tableName, static::$resourcesWithOwnershipValidation)
-            && array_key_exists($ability, static::$resourcesWithOwnershipValidation[$tableName])
+            array_key_exists($resourceName, static::$resourcesWithOwnershipValidation)
+            && array_key_exists($ability, static::$resourcesWithOwnershipValidation[$resourceName])
             && (
-                static::$resourcesWithOwnershipValidation[$tableName][$ability] === true
-                || in_array($this->getUserRole($user), (array)static::$resourcesWithOwnershipValidation[$tableName][$ability], true)
+                static::$resourcesWithOwnershipValidation[$resourceName][$ability] === true
+                || in_array($this->getUserRole($user), (array)static::$resourcesWithOwnershipValidation[$resourceName][$ability], true)
             )
         ) {
-            $table = $this->getCmfConfig()->getTableByUnderscoredName($tableName);
-            $ownerColumn = array_get(static::$ownerColumnForTable, $tableName, static::$defaultOwnerIdColumnName);
+            $table = $this->getCmfConfig()->getTableByResourceName($resourceName);
+            $ownerColumn = array_get(static::$ownerColumnForTable, $resourceName, static::$defaultOwnerIdColumnName);
             if (!$table->getTableStructure()->hasColumn($ownerColumn)) {
                 return true;
             }
@@ -232,7 +226,7 @@ class CmfAccessPolicy {
      * @param string $ability
      * @return bool
      */
-    protected function getAccessFromDefaults($role, $ability) {
+    protected function getAccessFromDefaults(string $role, string $ability): bool {
         if (array_key_exists($ability, static::$defaults)) {
             return static::$defaults[$ability] === true || in_array($role, (array)static::$defaults[$ability], true);
         } else if (array_key_exists('others', static::$defaults)) {
@@ -242,67 +236,67 @@ class CmfAccessPolicy {
         }
     }
 
-    public function view($user, $table) {
-        return $this->resource($user, 'view', $table);
+    public function view(RecordInterface $user, string $resourceName): bool {
+        return $this->resource($user, 'view', $resourceName);
     }
 
-    public function details($user, $table, $recordOrItemIdOrFkValue = null) {
-        return $this->resource($user, 'details', $table, $recordOrItemIdOrFkValue);
+    public function details(RecordInterface $user, string $resourceName, $recordOrItemIdOrFkValue = null): bool {
+        return $this->resource($user, 'details', $resourceName, $recordOrItemIdOrFkValue);
     }
 
-    public function create($user, $table) {
-        return $this->resource($user, 'create', $table);
+    public function create(RecordInterface $user, string $resourceName): bool {
+        return $this->resource($user, 'create', $resourceName);
     }
 
-    public function update($user, $table, $recordOrItemIdOrFkValue = null) {
-        return $this->resource($user, 'update', $table, $recordOrItemIdOrFkValue);
+    public function update(RecordInterface $user, string $resourceName, $recordOrItemIdOrFkValue = null): bool {
+        return $this->resource($user, 'update', $resourceName, $recordOrItemIdOrFkValue);
     }
 
-    public function edit($user, $table, $recordOrItemIdOrFkValue = null) {
-        return $this->resource($user, 'update', $table, $recordOrItemIdOrFkValue);
+    public function edit(RecordInterface $user, string $resourceName, $recordOrItemIdOrFkValue = null): bool {
+        return $this->resource($user, 'update', $resourceName, $recordOrItemIdOrFkValue);
     }
 
-    public function delete($user, $table, $recordOrItemIdOrFkValue = null) {
-        return $this->resource($user, 'delete', $table, $recordOrItemIdOrFkValue);
+    public function delete(RecordInterface $user, string $resourceName, $recordOrItemIdOrFkValue = null): bool {
+        return $this->resource($user, 'delete', $resourceName, $recordOrItemIdOrFkValue);
     }
 
-    public function update_bulk($user, $table, array $conditions = []) {
-        return $this->resource($user, 'update_bulk', $table, null, $conditions);
+    public function update_bulk(RecordInterface $user, string $resourceName, array $conditions = []): bool {
+        return $this->resource($user, 'update_bulk', $resourceName, null, $conditions);
     }
 
-    public function delete_bulk($user, $table, array $conditions = []) {
-        return $this->resource($user, 'delete_bulk', $table, null, $conditions);
+    public function delete_bulk(RecordInterface $user, string $resourceName, array $conditions = []): bool {
+        return $this->resource($user, 'delete_bulk', $resourceName, null, $conditions);
     }
 
-    public function others($user, $table, $ability, $recordOrItemIdOrFkValue = null) {
-        return $this->resource($user, $ability, $table, $recordOrItemIdOrFkValue);
+    public function others(RecordInterface $user, string $resourceName, string $ability, $recordOrItemIdOrFkValue = null): bool {
+        return $this->resource($user, $ability, $resourceName, $recordOrItemIdOrFkValue);
     }
 
-    public function custom_page($user, $table, $pageName, $recordOrItemIdOrFkValue = null) {
+    public function custom_page(RecordInterface $user, string $resourceName, string $pageName, $recordOrItemIdOrFkValue = null): bool {
         return (
-            $this->resource($user, 'view', $table, $recordOrItemIdOrFkValue)
-            && $this->resource($user, 'page:' . $pageName, $table, $recordOrItemIdOrFkValue)
+            $this->resource($user, 'view', $resourceName, $recordOrItemIdOrFkValue)
+            && $this->resource($user, 'page:' . $pageName, $resourceName, $recordOrItemIdOrFkValue)
         );
     }
 
-    public function custom_action($user, $table, $pageName, $recordOrItemIdOrFkValue = null) {
+    public function custom_action(RecordInterface $user, string $resourceName, string $pageName, $recordOrItemIdOrFkValue = null): bool {
         return (
-            $this->resource($user, 'view', $table, $recordOrItemIdOrFkValue)
-            && $this->resource($user, 'action:' . $pageName, $table, $recordOrItemIdOrFkValue)
+            $this->resource($user, 'view', $resourceName, $recordOrItemIdOrFkValue)
+            && $this->resource($user, 'action:' . $pageName, $resourceName, $recordOrItemIdOrFkValue)
         );
     }
 
-    public function custom_page_for_item($user, $table, $pageName, $recordOrItemIdOrFkValue = null) {
+    public function custom_page_for_item(RecordInterface $user, string $resourceName, string $pageName, $recordOrItemIdOrFkValue = null): bool {
         return (
-            $this->resource($user, 'details', $table, $recordOrItemIdOrFkValue)
-            && $this->resource($user, 'item_page:' . $pageName, $table, $recordOrItemIdOrFkValue)
+            $this->resource($user, 'details', $resourceName, $recordOrItemIdOrFkValue)
+            && $this->resource($user, 'item_page:' . $pageName, $resourceName, $recordOrItemIdOrFkValue)
         );
     }
 
-    public function custom_action_for_item($user, $table, $actionName, $recordOrItemIdOrFkValue = null) {
+    public function custom_action_for_item(RecordInterface $user, string $resourceName, string $actionName, $recordOrItemIdOrFkValue = null): bool {
         return (
-            $this->resource($user, 'details', $table, $recordOrItemIdOrFkValue)
-            && $this->resource($user, 'item_action:' . $actionName, $table, $recordOrItemIdOrFkValue)
+            $this->resource($user, 'details', $resourceName, $recordOrItemIdOrFkValue)
+            && $this->resource($user, 'item_action:' . $actionName, $resourceName, $recordOrItemIdOrFkValue)
         );
     }
 }

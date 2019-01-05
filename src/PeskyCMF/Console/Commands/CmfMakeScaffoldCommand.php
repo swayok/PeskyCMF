@@ -7,7 +7,9 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\PeskyCmfManager;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
+use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\File;
 use Swayok\Utils\StringUtils;
@@ -41,9 +43,9 @@ class CmfMakeScaffoldCommand extends Command {
 
     protected function getScaffoldConfigParentClass() {
         if ($this->option('keyvalue')) {
-            return $this->getCmfConfigClass()->config('scaffold_configs_base_class_for_key_value_tables') ?: KeyValueTableScaffoldConfig::class;
+            return $this->getCmfConfigClass()->config('ui.scaffold_configs_base_class_for_key_value_tables') ?: KeyValueTableScaffoldConfig::class;
         } else {
-            return $this->getCmfConfigClass()->config('scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
+            return $this->getCmfConfigClass()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
         }
     }
 
@@ -88,9 +90,10 @@ class CmfMakeScaffoldCommand extends Command {
 
     /**
      * @param TableInterface $table
+     * @param string|null $resourceName
      * @return string - short name of scaffold class to be created
      */
-    protected function getScaffoldClassName(TableInterface $table, $resourceName = null) {
+    protected function getScaffoldClassName(TableInterface $table, ?string $resourceName = null) {
         $scaffoldClassName = $this->option('class-name');
         if (empty($scaffoldClassName)) {
             return (empty($resourceName) ? $table::getAlias() : StringUtils::classify($resourceName)) . 'ScaffoldConfig';
@@ -98,15 +101,21 @@ class CmfMakeScaffoldCommand extends Command {
         return $scaffoldClassName;
     }
 
+
+    protected function getTableObjectByTableName(string $tableName): TableInterface {
+        /** @var ClassBuilder $builderClass */
+        $builderClass = config('peskyorm.class_builder');
+        $dbClassesNamespace = rtrim(config('peskyorm.classes_namespace', 'App\\Db'), '\\') . '\\';
+        /** @var Table $className */
+        $className = $dbClassesNamespace . StringUtils::classify($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
+        return $className::getInstance();
+    }
+
     /**
      * Execute the console command.
-     *
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \ReflectionException
-     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
      */
     public function handle() {
-        $table = $this->getCmfConfigClass()->getTableByUnderscoredName($this->argument('table_name'));
+        $table = $this->getTableObjectByTableName($this->argument('table_name'));
 
         $namespace = $this->getScaffoldsNamespace();
         $className = $this->getScaffoldClassName($table, $this->option('resource'));

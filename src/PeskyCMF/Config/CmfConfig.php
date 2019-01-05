@@ -17,12 +17,12 @@ use PeskyCMF\Providers\PeskyCmfLanguageDetectorServiceProvider;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
+use PeskyCMF\UI\CmfUIModule;
 use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
-use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 use Swayok\Utils\StringUtils;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
@@ -158,6 +158,13 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
+     * @return CmfUIModule
+     */
+    static public function getUiModule(): CmfUIModule {
+        return app(CmfUIModule::class);
+    }
+
+    /**
      * Email address used in "From" header for emails sent to users
      * @return string
      * @throws \UnexpectedValueException
@@ -205,102 +212,8 @@ abstract class CmfConfig extends ConfigsContainer {
         return config('services.recaptcha.public_key');
     }
 
-    static public function recaptcha_js_file(): string {
+    static public function recaptcha_script(): string {
         return 'https://www.google.com/recaptcha/api.js?hl=' . static::getShortLocale();
-    }
-
-    /**
-     * Prefix to load custom views from.
-     * For example
-     * - if custom views stored in /resources/views/admin - prefix should be "admin."
-     * - if you placed views under namespace "admin" - prefix should be "admin:"
-     * @return string
-     */
-    static public function custom_views_prefix(): string {
-        return static::config('views_subfolder', 'admin') . '.';
-    }
-
-    static public function layout_cmf_core_includes(): array {
-        $assetsMode = config('peskycmf.assets');
-        $subFolder = 'min';
-        $minSuffix = '.min';
-        $isSrcMode = stripos($assetsMode, 'src') === 0;
-        if ($isSrcMode || $assetsMode === 'packed') {
-            $minSuffix = '';
-            $subFolder = 'packed';
-        }
-        $ret = [
-            'js-head' => [
-                "/packages/cmf/raw/js/jquery{$minSuffix}.js",
-            ],
-            'js' => [
-                'cmf-libs' => "/packages/cmf/{$subFolder}/js/cmf-libs.js",
-                'cmf-jquery-and-bootstrap-plugins' => "/packages/cmf/{$subFolder}/js/cmf-jquery-and-bootstrap-plugins.js",
-                'cmf-core' => "/packages/cmf/{$subFolder}/js/cmf-core.js",
-                'localization' => "/packages/cmf/{$subFolder}/js/locale/" . static::getLocaleWithSuffix('_') . '.js',
-                'app' => "/packages/cmf/{$subFolder}/js/cmf-app.js",
-            ],
-            'css' => [
-                "/packages/cmf/raw/css/fonts/Roboto/roboto.css",
-                "/packages/cmf/raw/css/bootstrap/bootstrap.css",
-                "/packages/cmf/raw/css/adminlte/AdminLTE.css",
-                "/packages/cmf/raw/css/adminlte/skins/" . static::ui_skin() . '.css',
-                'cmf-libs' => "/packages/cmf/{$subFolder}/css/cmf-libs.css",
-                'cmf-core' => "/packages/cmf/{$subFolder}/css/cmf.css",
-                "/packages/cmf/raw/font-awesome/css/font-awesome{$minSuffix}.css"
-            ]
-        ];
-
-        if ($isSrcMode) {
-            $files = File::readJson(__DIR__ . '/../../../npm/config/cmf-assets.json');
-            $isCore = $assetsMode === 'src-core';
-            $packs = $isCore ? ['cmf-core'] : ['cmf-libs', 'cmf-core', 'cmf-jquery-and-bootstrap-plugins'];
-            foreach ($packs as $packName) {
-                if (isset($ret['js'][$packName])) {
-                    $ret['js'][$packName] = [];
-                    foreach ($files['scripts'][$packName]['files'] as $path) {
-                        $ret['js'][$packName][] = '/packages/cmf/src/' . $path;
-                    }
-                }
-                if (isset($ret['css'][$packName])) {
-                    $ret['css'][$packName] = [];
-                    foreach ($files['stylesheets'][$packName]['files'] as $path) {
-                        $ret['css'][$packName][] = '/packages/cmf/src/' . $path;
-                    }
-                }
-            }
-            $ret['js']['app'] = '/packages/cmf/src/src/js/cmf.app.js';
-            if (!$isCore && isset($files['localizations'][static::getLocaleWithSuffix('_')])) {
-                $ret['js']['localization'] = [];
-                foreach ($files['localizations'][static::getLocaleWithSuffix('_')]['files'] as $path) {
-                    $ret['js']['localization'][] = '/packages/cmf/src/' . $path;
-                }
-            }
-        }
-        return $ret;
-    }
-
-    /**
-     * .css files to insert into cmf::layout.blade.php
-     * @return array
-     */
-    static public function layout_css_includes(): array {
-        return (array)static::config('css_files', []);
-    }
-
-    /**
-     * .js files to insert into cmf::layout.blade.php
-     * @return array
-     */
-    static public function layout_js_includes(): array {
-        return (array)static::config('js_files', []);
-    }
-
-    /**
-     * @return array
-     */
-    static public function layout_js_code_blocks(): array {
-        return (array)static::config('js_code_blocks', []);
     }
 
     /**
@@ -381,86 +294,26 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * View for CMF layout
-     * @return string
-     */
-    static public function layout_view(): string {
-        return 'cmf::layout';
-    }
-
-    static public function ui_skin(): string {
-        return static::config('ui_skin', 'skin-blue');
-    }
-
-    /**
-     * View for CMF UI
-     * @return string
-     */
-    static public function ui_view(): string {
-        return 'cmf::ui.ui';
-    }
-
-    /**
-     * @return string
-     */
-    static public function footer_view(): string {
-        return 'cmf::ui.footer';
-    }
-
-    /**
-     * View that contains all templates for scaffold section
-     * @return string
-     */
-    static public function scaffold_templates_view_for_normal_table(): string {
-        return 'cmf::scaffold.templates';
-    }
-
-    /**
-     * View that contains all templates for scaffold section
-     * @return string
-     */
-    static public function scaffold_templates_view_for_key_value_table(): string {
-        return 'cmf::scaffold.templates';
-    }
-
-    static public function top_navbar_view(): string {
-        return 'cmf::ui.top_navbar';
-    }
-
-    /**
-     * View that shows show admin info in sidebar
-     * @return string
-     */
-    static public function sidebar_admin_info_view(): string {
-        return 'cmf::ui.sidebar_admin_info';
-    }
-
-    /**
-     * View name for CMF menu
-     * @return string
-     */
-    static public function menu_view(): string {
-        return 'cmf::ui.menu';
-    }
-
-    /**
      * The menu structure of the site.
      * @return array
-     * Format:
-     *    array(
-     *        array(
+     * You may use static::getMenuItem($resourceName) or static::getMenuItems() to get
+     * menu items from registered scaffold configs.
+     * Todo: add CmfSidebarMenuItem class to help designing menu items
+     * Menu item format:
+     *    [
+     *         [
      *              'label' => 'label',
      *              'url' => '/url',
      *              'icon' => 'icon',
-     *         ),
-     *         array(
+     *         ],
+     *         [
      *              'label' => 'label',
      *              'icon' => 'icon',
      *              'open' => false,
-     *              'submenu' => array(...)
-     *         ),
-     *    )
-     * Keys:
+     *              'submenu' => [...]
+     *         ],
+     *    ]
+     * Available options:
      *  - label - text of menu item (required)
      *  - icon - icon for menu item (optinal)
      *  - url - where to send user (required if no 'submenu' present; can contain empty value to hide menu item)
@@ -518,67 +371,39 @@ abstract class CmfConfig extends ConfigsContainer {
      * @return array like ['pending_orders' => '<span class="label label-primary pull-right">2</span>']
      */
     static public function getValuesForMenuItemsCounters(): array {
-        $counters = [];
-        /** @var ScaffoldConfig $scaffoldConfigClass */
-        foreach (static::getInstance()->resources as $scaffoldConfigClass) {
-            $counterClosure = $scaffoldConfigClass::getMenuItemCounterValue();
-            if (!empty($counterClosure)) {
-                $counters[$scaffoldConfigClass::getMenuItemCounterName()] = value($counterClosure);
-            }
-        }
-        return $counters;
+        return static::getUiModule()->getValuesForMenuItemsCounters();
     }
-
-    private $menuItems = [];
-    private $menuItemsAreDirty = true;
 
     /**
      * @param string $itemKey
      * @param array|\Closure $menuItem - format: see menu()
      */
-    static public function addMenuItem($itemKey, $menuItem) {
-        static::getInstance()->menuItems[$itemKey] = $menuItem;
-        static::getInstance()->menuItemsAreDirty = true;
+    static public function addMenuItem(string $itemKey, $menuItem) {
+        static::getUiModule()->addCustomMenuItem($itemKey, $menuItem);
     }
 
     /**
-     * @param array $items - list of itemd to return, if empty - will return all items
+     * @param array $itemsKeys - list of keys to return values for, if empty - will return all menu items
      * @return array
      */
-    static protected function getMenuItems(...$items): array {
-        if (static::getInstance()->menuItemsAreDirty) {
-            // filter menu items and exec closures
-            $menuItems = [];
-            foreach (static::getInstance()->menuItems as $name => $value) {
-                if ($value instanceof \Closure) {
-                    // convert closures in menu items to arrays
-                    $tmp = $value();
-                    if (is_array($tmp) && !empty($tmp)) {
-                        $menuItems[$name] = $tmp;
-                    }
-                } else if (!empty($value)) {
-                    $menuItems[$name] = $value;
-                }
-            }
-            static::getInstance()->menuItems = $menuItems;
-            static::getInstance()->menuItemsAreDirty = false;
-        }
-        if (empty($items)) {
-            return static::getInstance()->menuItems;
+    static protected function getMenuItems(...$itemsKeys): array {
+        $menuItems = static::getUiModule()->getMenuItems();
+        if (empty($itemsKeys)) {
+            return $menuItems;
         } else {
-            return array_intersect_key(static::getInstance()->menuItems, array_flip($items));
+            return array_intersect_key($menuItems, array_flip($itemsKeys));
         }
     }
 
     /**
-     * @param array $excludeItems - list of menu items to exclude
+     * @param array $excludeItemsWithKeys - list of keys to exclude from resulting menu items array
      * @return array
      */
-    static protected function getMenuItemsExcept(...$excludeItems): array {
-        if (empty($excludeItems)) {
+    static protected function getMenuItemsExcept(...$excludeItemsWithKeys): array {
+        if (empty($excludeItemsWithKeys)) {
             return static::getInstance()->getMenuItems();
         } else {
-            return array_diff_key(static::getInstance()->getMenuItems(), array_flip($excludeItems));
+            return array_diff_key(static::getInstance()->getMenuItems(), array_flip($excludeItemsWithKeys));
         }
     }
 
@@ -793,14 +618,6 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * Logo image to display in sidebar
-     * @return string
-     */
-    static public function sidebar_logo(): string {
-        return static::config('sidebar_logo') ?: '<img src="/packages/cmf/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
-    }
-
-    /**
      * Additional configs for jQuery Data Tables lib
      * @return array
      */
@@ -873,160 +690,6 @@ abstract class CmfConfig extends ConfigsContainer {
     }
 
     /**
-     * JS application settings (accessed via CmfSettings global variable)
-     * @return array
-     */
-    static public function js_app_settings(): array {
-        return [
-            'isDebug' => config('app.debug'),
-            'rootUrl' => '/' . trim(static::url_prefix(), '/'),
-            'enablePing' => (int)static::config('ping_interval') > 0,
-            'pingInterval' => (int)static::config('ping_interval') * 1000,
-            'uiUrl' => static::route('cmf_main_ui', [], false),
-            'userDataUrl' => static::route('cmf_profile_data', [], false),
-            'menuCountersDataUrl' => static::route('cmf_menu_counters_data', [], false),
-            'defaultPageTitle' => static::default_page_title(),
-            'pageTitleAddition' => static::page_title_addition(),
-            'localizationStrings' => static::transGeneral('ui.js_component')
-        ];
-    }
-
-    /**
-     * Variables that will be sent to js and stored into AppData
-     * To access data from js code use AppData.key_name
-     * @return array
-     */
-    static public function js_app_data(): array {
-        return [];
-    }
-
-    protected $resources = [];
-
-    /**
-     * Map $tableNameInRoute to $table and $scaffoldConfigClass to be used in CmfConfig::getScaffoldConfig() and
-     * CmfConfig::getTableByUnderscoredName(). It also adds menu item if it provided by ScaffoldConfig
-     * @param string $scaffoldConfigClass - name of class that extends PeskyCMF\Scaffold\ScaffoldConfig class
-     * @param null|string $resourceName - null: use table name from $table
-     */
-    static public function registerScaffoldConfigForResource($resourceName, $scaffoldConfigClass) {
-        /** @var ScaffoldConfig $scaffoldConfigClass */
-        static::getInstance()->resources[$resourceName] = $scaffoldConfigClass;
-        static::addMenuItem($resourceName, function () use ($scaffoldConfigClass) {
-            return $scaffoldConfigClass::getMainMenuItem();
-        });
-    }
-
-    protected $scaffoldConfigs = [];
-    /**
-     * Get ScaffoldConfig instance
-     * @param string $resourceName - table name passed via route parameter, may differ from $table->getTableName()
-     *      and added here to be used in child configs when you need to use scaffolds with fake table names.
-     *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
-     * @return ScaffoldConfig
-     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
-     * @throws \InvalidArgumentException
-     */
-    static public function getScaffoldConfig($resourceName): ScaffoldConfig {
-        if (!array_has(static::getInstance()->scaffoldConfigs, $resourceName)) {
-            $className = array_get(static::getInstance()->resources, $resourceName, function () use ($resourceName) {
-                return static::config('resources.' . $resourceName, function () use ($resourceName) {
-                    throw new \InvalidArgumentException(
-                        'There is no known ScaffoldConfig class for resource "' . $resourceName . '"'
-                    );
-                });
-            });
-            if (!class_exists($className)) {
-                throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
-            }
-            static::getInstance()->scaffoldConfigs[$resourceName] = new $className();
-        }
-        return static::getInstance()->scaffoldConfigs[$resourceName];
-    }
-
-    /**
-     * @return ScaffoldConfig[]
-     */
-    static public function getRegisteredScaffolds(): array {
-        return static::getInstance()->resources;
-    }
-
-    protected $tables = [];
-
-    /**
-     * Register DB Table for resource name (or table name if it is used as resource name) to optimize
-     * CmfCongig::getTableByUnderscoredName() usage
-     * @param TableInterface $table
-     * @param null|string $resourceName - null: $table::getName() will be used as resource name
-     */
-    static public function registerTable(TableInterface $table, $resourceName = null) {
-        if (empty($resourceName)) {
-            $resourceName = $table::getName();
-        }
-        static::getInstance()->tables[$resourceName] = $table;
-    }
-
-    /**
-     * Get TableInterface instance for $tableName
-     * Note: can be ovewritted to allow usage of fake tables in resources routes
-     * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
-     * @param string $tableName
-     * @return TableInterface
-     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
-     */
-    static public function getTableByUnderscoredName($tableName): TableInterface {
-        if (!array_key_exists($tableName, static::getInstance()->tables)) {
-            if (array_key_exists($tableName, static::getInstance()->resources)) {
-                /** @var ScaffoldConfigInterface $scaffoldConfigClass */
-                $scaffoldConfigClass = static::getInstance()->resources[$tableName];
-                $table = $scaffoldConfigClass::getTable();
-            } else {
-                /** @var ClassBuilder $builderClass */
-                $builderClass = static::getDbClassesBuilderClass();
-                /** @var Table $className */
-                $className = static::getDbClassesNamespaceForTable($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
-                if (!class_exists($className)) {
-                    throw new ClassNotFoundException('Class ' . $className . ' not exists', new \ErrorException());
-                }
-                $table = $className::getInstance();
-            }
-            static::getInstance()->tables[$tableName] = $table;
-        }
-        return static::getInstance()->tables[$tableName];
-    }
-
-    /**
-     * @return ClassBuilder|string
-     */
-    static protected function getDbClassesBuilderClass(): string {
-        return config('peskyorm.class_builder');
-    }
-
-    private $dbClassesNamespace;
-    /**
-     * @param string $tableName
-     * @return string
-     * @throws \ReflectionException
-     */
-    static protected function getDbClassesNamespaceForTable($tableName): string {
-        if (static::getInstance()->dbClassesNamespace === null) {
-            static::getInstance()->dbClassesNamespace = rtrim(config('peskyorm.classes_namespace', 'App\\Db'), '\\') . '\\';
-        }
-        return static::getInstance()->dbClassesNamespace . StringUtils::classify($tableName);
-    }
-
-    private $currentResourceName;
-    /**
-     * @return string|null
-     * @throws \UnexpectedValueException
-     */
-    static public function getResourceNameFromCurrentRoute(): ?string {
-        if (static::getInstance()->currentResourceName === null) {
-            static::getInstance()->currentResourceName = request()->route()->parameter('table_name');
-        }
-        return static::getInstance()->currentResourceName;
-    }
-
-    /**
      * Data inserts for CmsPage-related scaffold configs to be added to ckeditor's plugin
      * Use WysiwygFormInput::createDataInsertConfig() and WysiwygFormInput::createDataInsertConfigWithArguments()
      * to create valid config
@@ -1045,6 +708,37 @@ abstract class CmfConfig extends ConfigsContainer {
      */
     static public function getWysywygHtmlInsertsForCmsPages(ScaffoldConfig $scaffold): array {
         return [];
+    }
+
+    /**
+     * Get ScaffoldConfig instance
+     * @param string $resourceName
+     * @return ScaffoldConfig|ScaffoldConfigInterface
+     * @throws \InvalidArgumentException
+     */
+    static public function getScaffoldConfig(string $resourceName): ScaffoldConfigInterface {
+        return static::getUiModule()->getScaffoldConfig($resourceName);
+    }
+
+    /**
+     * Get ScaffoldConfig class name
+     * @param string $resourceName
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    static public function getScaffoldConfigClass(string $resourceName): string {
+        return static::getUiModule()->getScaffoldConfigClass($resourceName);
+    }
+
+    /**
+     * Get TableInterface instance for $tableName
+     * Note: can be ovewritted to allow usage of fake tables in resources routes
+     * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
+     * @param string $resourceName
+     * @return TableInterface
+     */
+    static public function getTableByResourceName(string $resourceName): TableInterface {
+        return static::getUiModule()->getTableByResourceName($resourceName);
     }
 
     /**
@@ -1218,7 +912,7 @@ abstract class CmfConfig extends ConfigsContainer {
     static protected function collectResourcesTemplatesToBeCached(): array {
         $resourceTemplates = [];
         /** @var ScaffoldConfig $scaffoldConfigClass */
-        foreach (static::getRegisteredScaffolds() as $resourceName => $scaffoldConfigClass) {
+        foreach (static::getUiModule()->getResources() as $resourceName => $scaffoldConfigClass) {
             /** @var ScaffoldConfig $scaffoldConfig */
             $scaffoldConfig = new $scaffoldConfigClass();
             $splitted = $scaffoldConfig->renderTemplatesAndSplit();
@@ -1407,20 +1101,31 @@ abstract class CmfConfig extends ConfigsContainer {
     public function initSection($app) {
         $this->useAsPrimary();
 
-        // send $cmfConfig var to all views
-        \View::composer('*', function (View $view) {
-            $view->with('cmfConfig', $this);
-        });
-
         // init auth module
         /** @var CmfAuthModule $cmfAuthModuleClass */
-        $cmfAuthModuleClass = static::config('auth.module');
+        $cmfAuthModuleClass = static::config('auth.module') ?: CmfAuthModule::class;
         /** @var CmfAuthModule $authModule */
         $authModule = new $cmfAuthModuleClass($this);
         $app->singleton(CmfAuthModule::class, function () use ($authModule) {
             return $authModule;
         });
         $authModule->init();
+
+        // init UI module
+        /** @var CmfAuthModule $cmfAuthModuleClass */
+        $cmfUIModuleClass = static::config('ui.module') ?: CmfUIModule::class;
+        /** @var CmfAuthModule $authModule */
+        $uiModule = new $cmfUIModuleClass($this);
+        $app->singleton(CmfUIModule::class, function () use ($uiModule) {
+            return $uiModule;
+        });
+
+        // send $cmfConfig and $uiModule var to all views
+        \View::composer('*', function (View $view) use ($uiModule) {
+            $view
+                ->with('cmfConfig', $this)
+                ->with('uiModule', $uiModule);
+        });
 
         /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
         $langDetectorProvider = $app->register(PeskyCmfLanguageDetectorServiceProvider::class);
@@ -1433,7 +1138,13 @@ abstract class CmfConfig extends ConfigsContainer {
         if (static::config('file_access_mask') !== null) {
             umask(static::config('file_access_mask'));
         }
-        $this->registerScaffoldConfigsFromConfigFile();
+
+        // Register resource name to ScaffoldConfig class mappings
+        //$resources = static::getUiModule()->getScaffolds();
+        /** @var ScaffoldConfig $scaffoldConfigClass */
+        /*foreach ($resources as $scaffoldConfigClass) {
+            static::registerScaffoldConfigForResource($scaffoldConfigClass::getResourceName(), $scaffoldConfigClass);
+        }*/
     }
 
     /**
@@ -1448,18 +1159,6 @@ abstract class CmfConfig extends ConfigsContainer {
             (array)static::config('session', [])
         );
         $appConfigs->set('session', $config);
-    }
-
-    /**
-     * Register resource name to ScaffoldConfig class mappings
-     * @throws \UnexpectedValueException
-     */
-    protected function registerScaffoldConfigsFromConfigFile() {
-        /** @var ScaffoldConfig[] $resources */
-        $resources = (array)static::config('resources', []);
-        foreach ($resources as $scaffoldConfig) {
-            static::registerScaffoldConfigForResource($scaffoldConfig::getResourceName(), $scaffoldConfig);
-        }
     }
 
 }

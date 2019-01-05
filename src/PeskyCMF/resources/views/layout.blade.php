@@ -1,13 +1,16 @@
 <?php
 /**
  * @var \PeskyCMF\Config\CmfConfig $cmfConfig
+ * @var \PeskyCMF\UI\CmfUIModule $uiModule
+ * @var array $coreAssets
+ * @var array $customAssets
+ * @var string $scriptsVersion
+ * @var array $jsAppSettings
+ * @var array $jsAppData
  */
 ?>
 <!DOCTYPE html>
-<html>
-@php($scriptsVersion = '2.3.3')
-@php($scriptsMinificationSuffix = config('app.debug') ? '' : '.min')
-@php($layoutFiles = $cmfConfig::layout_cmf_core_includes())
+<html lang="">
 <head>
     <meta charset="UTF-8">
     <title>@section('page-title') {{ $cmfConfig::default_page_title() }} @show</title>
@@ -18,7 +21,7 @@
 
     @yield('html-head')
 
-    @foreach($layoutFiles['css'] as $cssPath)
+    @foreach($coreAssets['css'] as $cssPath)
         @if (is_array($cssPath))
             @foreach($cssPath as $filePath)
                 <link href="{!! $filePath !!}?v={{ $scriptsVersion }}" rel="stylesheet" type="text/css"/>
@@ -28,20 +31,19 @@
         @endif
     @endforeach
 
-    @foreach($cmfConfig::layout_css_includes() as $cssPath)
+    @foreach($customAssets['css'] as $cssPath)
         <link href="{!! $cssPath !!}" rel="stylesheet" type="text/css"/>
     @endforeach
 
     @stack('styles')
 
-    @foreach($layoutFiles['js-head'] as $jsPath)
+    @foreach($coreAssets['js-head'] as $jsPath)
         <script src="{!! $jsPath !!}" type="text/javascript"></script>
     @endforeach
 
 </head>
 
-@php($localeShort = $cmfConfig::getShortLocale())
-<body class="{{ $cmfConfig::ui_skin() }}" data-locale="{{ $localeShort }}">
+<body class="{{ $skin }}" data-locale="{{ $cmfConfig::getShortLocale() }}">
     <div class="wrapper has-preloader loading" id="page-wrapper">
 
     </div>
@@ -77,11 +79,11 @@
     </script>
 
     <script type="application/javascript">
-        var CmfSettings = {!! json_encode($cmfConfig::js_app_settings(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
-        var AppData = {!! json_encode($cmfConfig::js_app_data(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
+        var CmfSettings = {!! json_encode($jsAppSettings, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
+        var AppData = {!! json_encode($jsAppData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!};
     </script>
 
-    @foreach($layoutFiles['js'] as $jsPath)
+    @foreach($coreAssets['js'] as $jsPath)
         @if (is_array($jsPath))
             @foreach($jsPath as $filePath)
                 <script src="{!! $filePath !!}?v={{ $scriptsVersion }}" type="text/javascript"></script>
@@ -91,15 +93,15 @@
         @endif
     @endforeach
 
-    @if ($cmfConfig::config('optimize_ui_templates.enabled', false))
+    @if ($cmfConfig::config('ui.optimize_ui_templates.enabled', false))
         <script src="{{ cmfRoute('cmf_cached_templates_js', ['_' => time()]) }}" type="text/javascript"></script>
     @endif
 
-    @foreach($cmfConfig::layout_js_includes() as $jsPath)
+    @foreach($customAssets['js'] as $jsPath)
         <script src="{!! $jsPath !!}" type="text/javascript"></script>
     @endforeach
 
-    @foreach($cmfConfig::layout_js_code_blocks() as $jsCode)
+    @foreach($customAssets['js_code_blocks'] as $jsCode)
         {!! $jsCode !!}
     @endforeach
 

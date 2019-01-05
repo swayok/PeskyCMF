@@ -1,18 +1,30 @@
+<?php
+/**
+ * @var \PeskyCMF\Config\CmfConfig $cmfConfig
+ * @var \PeskyCMF\UI\CmfUIModule $uiModule
+ * @var string $footerView
+ * @var string $menuView
+ * @var string $userPanelView
+ * @var string $sidebarLogo
+ * @var string $topNavbarView
+ */
+?>
+
 <aside class="main-sidebar">
     <section class="sidebar">
-        @include(cmfConfig()->sidebar_admin_info_view())
-        @include(cmfConfig()->menu_view())
+        @include($userPanelView)
+        @include($menuView)
     </section>
 </aside>
 
 <header class="main-header">
     <a href="javascript:void(0)" class="sidebar-toggle visible-xs" data-toggle="push-menu" role="button"></a>
-    <a href="{{ cmfConfig()->home_page_url() }}" class="logo">
+    <a href="{{ $cmfConfig::home_page_url() }}" class="logo">
         <span class="logo-lg">
-            {!! cmfConfig()->sidebar_logo() !!}
+            {!! $sidebarLogo !!}
         </span>
     </a>
-    @include(cmfConfig()->top_navbar_view())
+    @include($topNavbarView)
 </header>
 
 
@@ -20,7 +32,7 @@
 
 </div>
 
-@include(cmfConfig()->footer_view())
+@include($footerView)
 
 <script type="application/javascript">
     $(document).ready(function () {

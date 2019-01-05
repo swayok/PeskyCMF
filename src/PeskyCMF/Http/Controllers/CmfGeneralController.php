@@ -29,32 +29,30 @@ class CmfGeneralController extends CmfController {
         if ($request->ajax()) {
             return response()->json([], 404);
         }
-        $cmfConfig = static::getCmfConfig();
-        return view($cmfConfig::layout_view());
+        return static::getCmfConfig()->getUiModule()->renderLayoutView();
     }
 
     public function getPage(Request $request, $name) {
-        if ($request->ajax()) {
-            $this->authorize('cmf_page', [$name]);
-            $cmfConfig = static::getCmfConfig();
-            $altName = str_replace('-', '_', $name);
-            $viewsPrefix = $cmfConfig::custom_views_prefix();
-            $isModal = (bool)$request->query('modal', false);
-            $primaryView = $viewsPrefix . 'page.' . $name;
-            $dataForView = [
-                'isModal' => $isModal,
-            ];
-            if (\View::exists($primaryView)) {
-                return view($primaryView, $dataForView)->render();
-            } else if ($altName !== $name && \View::exists($viewsPrefix . 'page.' . $altName)) {
-                return view($viewsPrefix . 'page.' . $altName, $dataForView)->render();
-            } else if (\View::exists('cmf::page.' . $name)) {
-                return view('cmf::page.' . $name, $dataForView)->render();
-            }
-            return $this->pageViewNotFoundResponse($request, $name, $primaryView);
-        } else {
-            return $this->loadJsApp($request)->render();
+        if (!$request->ajax()) {
+            return static::getCmfConfig()->getUiModule()->renderLayoutView();
         }
+        $this->authorize('cmf_page', [$name]);
+        $cmfConfig = static::getCmfConfig();
+        $altName = str_replace('-', '_', $name);
+        $viewsPrefix = $cmfConfig::getUiModule()->getCustomViewsPrefix();
+        $isModal = (bool)$request->query('modal', false);
+        $primaryView = $viewsPrefix . 'page.' . $name;
+        $dataForView = [
+            'isModal' => $isModal,
+        ];
+        if (\View::exists($primaryView)) {
+            return view($primaryView, $dataForView)->render();
+        } else if ($altName !== $name && \View::exists($viewsPrefix . 'page.' . $altName)) {
+            return view($viewsPrefix . 'page.' . $altName, $dataForView)->render();
+        } else if (\View::exists('cmf::page.' . $name)) {
+            return view('cmf::page.' . $name, $dataForView)->render();
+        }
+        return $this->pageViewNotFoundResponse($request, $name, $primaryView);
     }
 
     protected function pageViewNotFoundResponse(Request $request, $pageName, $primaryView) {
@@ -64,14 +62,8 @@ class CmfGeneralController extends CmfController {
         );
     }
 
-    public function getUiView($viewName) {
-        $propName = $viewName . '_view';
-        $cmfConfig = static::getCmfConfig();
-        if (!method_exists($cmfConfig, $propName)) {
-            abort(HttpCode::NOT_FOUND, "Config [$propName] not defined");
-        }
-
-        return view($cmfConfig::$$propName)->render();
+    public function getCustomUiView($viewName) {
+        return static::getCmfConfig()->getUiModule()->renderCustomUiView($viewName);
     }
 
     public function redirectToUserProfile() {
@@ -86,17 +78,8 @@ class CmfGeneralController extends CmfController {
         return static::getCmfConfig()->getAuthModule()->processUserProfileUpdateRequest($request);
     }
 
-    protected function getDataForBasicUiView() {
-        $cmfConfig = static::getCmfConfig();
-        return [
-            'urlPrefix' => '/' . $cmfConfig::url_prefix()
-        ];
-    }
-
     public function getBasicUiView() {
-        $viewData = $this->getDataForBasicUiView();
-
-        return view(static::getCmfConfig()->ui_view(), $viewData)->render();
+        return static::getCmfConfig()->getUiModule()->renderBasicUIView();
     }
 
     /**
@@ -228,13 +211,13 @@ class CmfGeneralController extends CmfController {
         $editorId = $request->input('CKEditor');
 
         if (preg_match('%^([^:]+):(.+)$%', $editorId, $matches)) {
-            list(, $tableName, $columnName) = $matches;
+            list(, $resourceName, $columnName) = $matches;
         } else if (preg_match('%^t-(.+?)-c-(.+?)-input$%', $matches)) {
-            list(, $tableName, $columnName) = $matches;
+            list(, $resourceName, $columnName) = $matches;
         } else {
-            return cmfTransGeneral('.ckeditor.fileupload.cannot_detect_table_and_field', ['editor_name' => $editorId]);
+            return cmfTransGeneral('.ckeditor.fileupload.cannot_detect_resource_and_field', ['editor_name' => $editorId]);
         }
-        $scaffoldConfig = static::getCmfConfig()->getScaffoldConfig($tableName);
+        $scaffoldConfig = static::getCmfConfig()->getScaffoldConfig($resourceName);
         $columns = $scaffoldConfig->getFormConfig()->getValueViewers();
         if (array_key_exists($columnName, $columns)) {
             $column = $columns[$columnName];

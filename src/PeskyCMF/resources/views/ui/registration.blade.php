@@ -1,13 +1,13 @@
 <?php
 /**
  * @var \PeskyCMF\Auth\CmfAuthModule $authModule
+ * @var \PeskyCMF\Config\CmfConfig $cmfConfig
  */
-$cmfConfig = $authModule->getCmfConfig();
 $loginInputName = $authModule->getUserLoginColumnName();
 $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
 ?>
 <script type="application/javascript">
-    Utils.requireFiles(['{{ $cmfConfig::recaptcha_js_file() }}']);
+    Utils.requireFiles(['{{ $cmfConfig::recaptcha_script() }}']);
 </script>
 <div class="register-box">
     <div class="register-logo">

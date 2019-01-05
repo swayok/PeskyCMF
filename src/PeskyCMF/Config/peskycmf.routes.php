@@ -141,7 +141,8 @@ Route::group(
                 ]);
 
                 Route::get('ui/{view}.html', [
-                    'uses' => $generalControllerClass . '@getUiView'
+                    'as' => $routeNamePrefix . 'cmf_custom_ui_view',
+                    'uses' => $generalControllerClass . '@getCustomUiView'
                 ]);
 
                 Route::get('page/menu/counters', [
@@ -193,7 +194,7 @@ Route::group(
     }
 );
 
-Route::pattern('table_name', '[a-z]+([_a-z0-9]*[a-z0-9])?');
+Route::pattern('resource', '[a-z]+([_a-z0-9]*[a-z0-9])?');
 // Scaffold pages and templates
 Route::group(
     [
@@ -201,32 +202,32 @@ Route::group(
         'middleware' => $cmfConfig::auth_middleware()
     ],
     function () use ($apiControllerClass, $generalControllerClass, $routeNamePrefix) {
-        Route::get('{table_name}', [
+        Route::get('{resource}', [
             'as' => $routeNamePrefix . 'cmf_items_table',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
-        Route::get('{table_name}/create', [
+        Route::get('{resource}/create', [
             'as' => $routeNamePrefix . 'cmf_item_add_form',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
-        Route::get('{table_name}/details/{id}', [
+        Route::get('{resource}/details/{id}', [
             'as' => $routeNamePrefix . 'cmf_item_details',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
-        Route::get('{table_name}/edit/{id}', [
+        Route::get('{resource}/edit/{id}', [
             'as' => $routeNamePrefix . 'cmf_item_edit_form',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
-        Route::get('{table_name}/clone/{id}', [
+        Route::get('{resource}/clone/{id}', [
             'as' => $routeNamePrefix . 'cmf_item_clone_form',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
-        Route::get('{table_name}/{id}/page/{page}.html', [
+        Route::get('{resource}/{id}/page/{page}.html', [
             'middleware' => AjaxOnly::class,
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_custom_page',
@@ -235,12 +236,12 @@ Route::group(
             'uses' => $apiControllerClass . '@getCustomPageForItem',
         ]);
 
-        Route::get('{table_name}/{id}/page/{page}', [
+        Route::get('{resource}/{id}/page/{page}', [
             'as' => $routeNamePrefix . 'cmf_item_custom_page',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
 
-        Route::get('{table_name}/page/{page}.html', [
+        Route::get('{resource}/page/{page}.html', [
             'middleware' => AjaxOnly::class,
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_resource_custom_page',
@@ -249,7 +250,7 @@ Route::group(
             'uses' => $apiControllerClass . '@getCustomPage',
         ]);
 
-        Route::get('{table_name}/page/{page}', [
+        Route::get('{resource}/page/{page}', [
             'as' => $routeNamePrefix . 'cmf_resource_custom_page',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
@@ -268,7 +269,7 @@ Route::group(
     ],
     function () use ($apiControllerClass, $routeNamePrefix) {
 
-        Route::get('{table_name}/service/templates', [
+        Route::get('{resource}/service/templates', [
             'as' => $routeNamePrefix . 'cmf_api_get_templates',
             'uses' => $apiControllerClass . '@getTemplates',
             'fallback' => [
@@ -277,7 +278,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{table_name}/list', [
+        Route::get('{resource}/list', [
             'as' => $routeNamePrefix . 'cmf_api_get_items',
             'uses' => $apiControllerClass . '@getItemsList',
             'fallback' => [
@@ -286,7 +287,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{table_name}/service/options/{column_name}.json', [
+        Route::get('{resource}/service/options/{column_name}.json', [
             'as' => $routeNamePrefix . 'cmf_api_get_options_as_json',
             'uses' => $apiControllerClass . '@getOptionsAsJson',
             'fallback' => [
@@ -295,7 +296,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{table_name}/service/options', [
+        Route::get('{resource}/service/options', [
             'as' => $routeNamePrefix . 'cmf_api_get_options',
             'uses' => $apiControllerClass . '@getOptions',
             'fallback' => [
@@ -304,7 +305,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{table_name}/service/defaults', [
+        Route::get('{resource}/service/defaults', [
             'as' => $routeNamePrefix . 'cmf_api_get_defaults',
             'uses' => $apiControllerClass . '@getItemDefaults',
             'fallback' => [
@@ -313,7 +314,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{table_name}/service/custom_data/{data_id}', [
+        Route::get('{resource}/service/custom_data/{data_id}', [
             'as' => $routeNamePrefix . 'cmf_api_get_custom_data',
             'uses' => $apiControllerClass . '@getCustomData',
             'fallback' => [
@@ -322,7 +323,7 @@ Route::group(
             ]
         ]);
 
-        Route::delete('{table_name}/bulk', [
+        Route::delete('{resource}/bulk', [
             'as' => $routeNamePrefix . 'cmf_api_delete_bulk',
             'uses' => $apiControllerClass . '@deleteBulk',
             'fallback' => [
@@ -331,7 +332,7 @@ Route::group(
             ]
         ]);
 
-        Route::put('{table_name}/bulk', [
+        Route::put('{resource}/bulk', [
             'as' => $routeNamePrefix . 'cmf_api_edit_bulk',
             'uses' => $apiControllerClass . '@updateBulk',
             'fallback' => [
@@ -340,7 +341,7 @@ Route::group(
             ]
         ]);
 
-        Route::any('{table_name}/action/{action}', [
+        Route::any('{resource}/action/{action}', [
             'as' => $routeNamePrefix . 'cmf_api_resource_custom_action',
             'uses' => $apiControllerClass . '@performAction',
             'fallback' => [
@@ -349,7 +350,7 @@ Route::group(
             ]
         ]);
 
-        Route::any('{table_name}/{id}/action/{action}', [
+        Route::any('{resource}/{id}/action/{action}', [
             'as' => $routeNamePrefix . 'cmf_api_item_custom_action',
             'uses' => $apiControllerClass . '@performActionForItem',
             'fallback' => [
@@ -358,7 +359,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{table_name}/{id}', [
+        Route::get('{resource}/{id}', [
             'as' => $routeNamePrefix . 'cmf_api_get_item',
             'uses' => $apiControllerClass . '@getItem',
             'fallback' => [
@@ -367,7 +368,7 @@ Route::group(
             ]
         ]);
 
-        Route::put('{table_name}/{id}', [
+        Route::put('{resource}/{id}', [
             'as' => $routeNamePrefix . 'cmf_api_update_item',
             'uses' => $apiControllerClass . '@updateItem',
             'fallback' => [
@@ -376,7 +377,7 @@ Route::group(
             ]
         ]);
 
-        Route::put('{table_name}/move/{id}/{before_or_after}/{other_id}/order/{sort_column}/{sort_direction}', [
+        Route::put('{resource}/move/{id}/{before_or_after}/{other_id}/order/{sort_column}/{sort_direction}', [
                 'as' => $routeNamePrefix . 'cmf_api_change_item_position',
                 'uses' => $apiControllerClass . '@changeItemPosition',
                 'fallback' => [
@@ -391,7 +392,7 @@ Route::group(
                 'sort_column' => '^[a-zA-Z_0-9]+$'
             ]);
 
-        Route::delete('{table_name}/{id}', [
+        Route::delete('{resource}/{id}', [
             'as' => $routeNamePrefix . 'cmf_api_delete_item',
             'uses' => $apiControllerClass . '@deleteItem',
             'fallback' => [
@@ -400,7 +401,7 @@ Route::group(
             ]
         ]);
 
-        Route::post('{table_name}', [
+        Route::post('{resource}', [
             'as' => $routeNamePrefix . 'cmf_api_create_item',
             'uses' => $apiControllerClass . '@addItem',
             'fallback' => [

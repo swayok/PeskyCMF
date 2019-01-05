@@ -484,13 +484,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         if (!$this->isSectionAllowed()) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
         }
-        return view(
-            static::getCmfConfig()->scaffold_templates_view_for_normal_table(),
-            array_merge(
-                $this->getConfigsForTemplatesRendering(),
-                ['tableNameForRoutes' => static::getResourceName()]
-            )
-        )->render();
+        return static::getCmfConfig()->getUiModule()->renderScaffoldTemplates($this);
     }
 
     /**
@@ -591,7 +585,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param TableInterface $table
      * @param null|string $message
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     protected function makeRecordNotFoundResponse(TableInterface $table, $message = null) {
         if (empty($message)) {

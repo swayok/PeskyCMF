@@ -121,7 +121,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig {
         if (!empty($record['table'])) {
             if ($record['http_method'] !== 'DELETE') {
                 try {
-                    static::getCmfConfig()->getTableByUnderscoredName($record['table']);
+                    static::getCmfConfig()->getScaffoldConfigClass($record['table']);
                     if (!empty($record['item_id'])) {
                         $url = routeToCmfItemDetails($record['table'], $record['item_id']);
                     } else {
@@ -132,7 +132,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig {
                         ->setHref($url)
                         ->setTarget('_blank')
                         ->build();
-                } catch (ClassNotFoundException $exc) {}
+                } catch (\Throwable $exc) {}
             }
             return rtrim($record['table'] . ' -> ' . $record['item_id'], '-> ');
         }
@@ -146,7 +146,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig {
                 $label .= " ({$record['requester_info']})";
             }
             try {
-                static::getCmfConfig()->getTableByUnderscoredName($record['requester_table']);
+                static::getCmfConfig()->getScaffoldConfigClass($record['requester_table']);
                 if (!empty($record['requester_id'])) {
                     $url = routeToCmfItemDetails($record['requester_table'], $record['requester_id']);
                 } else {
@@ -157,7 +157,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig {
                     ->setHref($url)
                     ->setTarget('_blank')
                     ->build();
-            } catch (ClassNotFoundException $exc) {}
+            } catch (\Throwable $exc) {}
             return $label;
         }
         return $record['requester_info'];

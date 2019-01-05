@@ -50,11 +50,11 @@ class CmfScaffoldApiController extends CmfController {
      */
     public function getRequestedResourceName() {
         if ($this->requestedResourceName === null) {
-            $tableName = static::getCmfConfig()->getResourceNameFromCurrentRoute();
-            if (empty($tableName)) {
-                abort(404, 'Table name not found in route');
+            $resourceName = request()->route()->parameter('resource');
+            if (empty($resourceName)) {
+                abort(404, 'Resource name not found in route');
             }
-            $this->requestedResourceName = $tableName;
+            $this->requestedResourceName = $resourceName;
         }
         return $this->requestedResourceName;
     }

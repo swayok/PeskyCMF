@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Auth;
 
-use App\Db\Users\User;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;

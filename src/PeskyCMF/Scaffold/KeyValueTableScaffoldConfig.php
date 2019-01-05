@@ -53,16 +53,6 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         return $formConfig;
     }
 
-    public function renderTemplates() {
-        return view(
-            static::getCmfConfig()->scaffold_templates_view_for_key_value_table(),
-            array_merge(
-                $this->getConfigsForTemplatesRendering(),
-                ['tableNameForRoutes' => static::getResourceName()]
-            )
-        )->render();
-    }
-
     public function getRecordValues($ownerRecordId = null) {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
         $table = static::getTable();

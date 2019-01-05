@@ -113,49 +113,100 @@ return [
      */
     'controllers_namespace' => null,
 
-    /**
-     * Subfolder name in app's 'resources/views' folder that contains custom views for this site section
-     * Example: for 'admin' subfolder path will be "/resources/views/admin"
-     */
-    'views_subfolder' => 'admin',
+    'ui' => [
 
-    /**
-     * Indicates if CMF JS and CSS files are compiled using webpack.mix.js and PeskyCMF/Optimization/cmf-assets-mixer.js
-     * node module. Add this to your webpack.mix.js next 2 lines to activate CMF assets mixing:
-     * var cmfAssets = require('./vendor/swayok/peskycmf/src/PeskyCMF/Optimization/cmf-assets-mixer');
-     * cmfAssets.mixCmfAssets(mix);
-     * This will mix most js and css files used in CMF into several files placed into /public/packages/cmf/compiled
-     * folder. These files then will be included in cmf layout instead of separate libs.
-     * Remember to run mixer before you set this to true:
-     * npm run production
-     */
-    'assets_are_mixed' => env('PESKYCMF_ASSETS_ARE_MIXED', false),
+        /**
+         * Class that handles rendering of section's UI
+         */
+        'module' => \PeskyCMF\UI\CmfUIModule::class,
 
-    /**
-     * CSS files to add to app
-     * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.css' is created by "php artisan cmf:install"
-     */
-    'css_files' => [
-        //'/packages/admin/css/admin.custom.css'
-    ],
+        /**
+         * Skin for UI. See skins provided by AdminLTE template
+         */
+        'skin' => 'skin-blue',
 
-    /**
-     * JS files to add to app
-     * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.js' is created by "php artisan cmf:install"
-     */
-    'js_files' => [
-        //'/packages/admin/js/admin.custom.js'
-    ],
+        /**
+         * Subfolder name in app's 'resources/views' folder that contains custom views for this site section
+         * Example: for 'admin' subfolder path will be "/resources/views/admin"
+         */
+        'views_subfolder' => 'admin',
 
-    /**
-     * JS code blocks to add to CMF layout.
-     * Example: google analytics, google firebase, other vendor script blocks.
-     * Notes:
-     *  - keys of this array are not used - you may use them to label blocks
-     *  - all code you provide via this array will be added to layout AS IS.
-     *  - if you want to use variables in code blocks - use your 'cmf_config' method called 'layout_js_code_blocks'
-     */
-    'js_code_blocks' => [
+        /**
+         * List of views accessible via '/{url_prefix}/ui/{view}.html' url
+         * (route name: 'cmf_custom_ui_view')
+         * Key - {view} in url - name of view (example: 'top_menu');
+         * Value - view path (example: 'admin.ui.top_menu');
+         */
+        'views' => [
+
+        ],
+
+        /**
+         * CSS files to add to app
+         * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.css' is created by "php artisan cmf:install"
+         */
+        'css_files' => [
+            //'/packages/admin/css/admin.custom.css'
+        ],
+
+        /**
+         * JS files to add to app
+         * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.js' is created by "php artisan cmf:install"
+         */
+        'js_files' => [
+            //'/packages/admin/js/admin.custom.js'
+        ],
+
+        /**
+         * JS code blocks to add to CMF layout.
+         * Example: google analytics, google firebase, other vendor script blocks.
+         * Notes:
+         *  - keys of this array are not used - you may use them to label blocks
+         *  - all code you provide via this array will be added to layout AS IS.
+         *  - if you want to use variables in code blocks - use your 'cmf_config' method called 'layout_js_code_blocks'
+         */
+        'js_code_blocks' => [
+
+        ],
+
+        /**
+         * HTML code
+         */
+        'sidebar_logo' => null,
+
+        /**
+         * Configuration for UI templates loading optimization (templates loaded via AJAX)
+         * Timeout (minutes): how long optimized templates should be cached. Set to 0 to cache forever
+         * Don't forget to clean cache after you change something in CMF.
+         * Note: by default cache key is based on user ID because it is not possible to cache more globally due to
+         * 'acceess_policy_class'. Though if you use default PeskyCMF\Config\CmfAccessPolicy - then cache key will be
+         * more global. If you use role-based access policy (access is not determined by user ID) - you can overwrite
+         * getCacheKeyForOptimizedUiTemplates() method in your 'cmf_config' to use roles instead of user IDs
+         */
+        'optimize_ui_templates' => [
+            'enabled' => env('PESKYCMF_OPTIMIZE_UI_TEMPLATES', false),
+            'timeout' => 0
+        ],
+
+        /**
+         * List of resources. Format:
+         * - key = resource name (alt name: table name for routes)
+         * - value = ScaffoldConfig class name
+         */
+        'resources' => [
+            \PeskyCMF\Db\Admins\CmfAdminsScaffoldConfig::class,
+            \PeskyCMF\Db\Settings\CmfSettingsScaffoldConfig::class,
+        ],
+
+        /**
+         * Base class for scaffold configs generated by 'php artisan cmf:make-scaffold' command
+         */
+        //'scaffold_configs_base_class' => \PeskyCMF\Scaffold\NormalTableScaffoldConfig::class,
+
+        /**
+         * Base class for scaffold configs generated by 'php artisan cmf:make-scaffold --keyvalue' command
+         */
+        //'scaffold_configs_base_class_for_key_value_tables' => \PeskyCMF\Scaffold\KeyValueTableScaffoldConfig::class,
 
     ],
 
@@ -172,11 +223,6 @@ return [
         'lifetime' => 1440,
         'expire_on_close' => true,
     ],
-
-    /**
-     * Skin for UI. See skins provided by AdminLTE template
-     */
-    'ui_skin' => 'skin-blue',
 
     /**
      * Dictionary to use for section's scaffolds (CmfConfig::transCustom())
@@ -196,21 +242,6 @@ return [
      */
     'locales' => [
         'en'
-    ],
-
-    /**
-     * HTML code
-     */
-    'sidebar_logo' => null,
-
-    /**
-     * List of resources. Format:
-     * - key = resource name (alt name: table name for routes)
-     * - value = ScaffoldConfig class name
-     */
-    'resources' => [
-        \PeskyCMF\Db\Admins\CmfAdminsScaffoldConfig::class,
-        \PeskyCMF\Db\Settings\CmfSettingsScaffoldConfig::class,
     ],
 
     /**
@@ -266,30 +297,6 @@ return [
      * Default: 'noreply@' . request()->getHost()
      */
     'system_email_address' => null,
-
-    /**
-     * Base class for scaffold configs generated by 'php artisan cmf:make-scaffold' command
-     */
-    'scaffold_configs_base_class' => \PeskyCMF\Scaffold\NormalTableScaffoldConfig::class,
-
-    /**
-     * Base class for scaffold configs generated by 'php artisan cmf:make-scaffold --keyvalue' command
-     */
-    'scaffold_configs_base_class_for_key_value_tables' => \PeskyCMF\Scaffold\KeyValueTableScaffoldConfig::class,
-
-    /**
-     * Configuration for UI templates loading optimization (templates loaded via AJAX)
-     * Timeout (minutes): how long optimized templates should be cached. Set to 0 to cache forever
-     * Don't forget to clean cache after you change something in CMF.
-     * Note: by default cache key is based on user ID because it is not possible to cache more globally due to
-     * 'acceess_policy_class'. Though if you use default PeskyCMF\Config\CmfAccessPolicy - then cache key will be
-     * more global. If you use role-based access policy (access is not determined by user ID) - you can overwrite
-     * getCacheKeyForOptimizedUiTemplates() method in your 'cmf_config' to use roles instead of user IDs
-     */
-    'optimize_ui_templates' => [
-        'enabled' => env('PESKYCMF_OPTIMIZE_UI_TEMPLATES', false),
-        'timeout' => 0
-    ],
 
     /**
      * Enable/disable periodical pinging in order to

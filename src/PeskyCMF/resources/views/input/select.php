@@ -17,7 +17,7 @@ $isHidden = (bool)$rendererConfig->getData('isHidden', false);
 if ($valueViewer->isOptionsFilteringEnabled()) {
     $routeName = cmfConfig()->getRouteName('cmf_api_get_options_as_json');
     $routeData = [
-        'table_name' => $sectionConfig->getScaffoldConfig()->getResourceName(),
+        'resource' => $sectionConfig->getScaffoldConfig()->getResourceName(),
         'input_name' => $valueViewer->getName(),
     ];
     $additionalOptions = implode(' ', [

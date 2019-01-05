@@ -26,6 +26,21 @@ interface ScaffoldConfigInterface {
     static public function getMainMenuItem();
 
     /**
+     * @return string
+     */
+    static public function getMenuItemCounterName();
+
+    /**
+     * Get value for menu item counter (some html code to display near menu item button: new items count, etc)
+     * More info: CmfConfig::menu()
+     * You may return an HTML string or \Closure that returns that string.
+     * Note that self::getMenuItemCounterName() uses this method to decide if it should return null or counter name.
+     * If you want to return HTML string consider overwriting of self::getMenuItemCounterName()
+     * @return null|\Closure|string
+     */
+    static public function getMenuItemCounterValue();
+
+    /**
      * @return DataGridConfig
      */
     public function getDataGridConfig();

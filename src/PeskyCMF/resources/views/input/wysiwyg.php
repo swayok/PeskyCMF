@@ -11,7 +11,7 @@
  */
 $rendererConfig->addAttribute(
     'data-editor-name',
-    request()->route()->parameter('table_name', $table->getTableStructure()->getTableName()) . ':' . $valueViewer->getName()
+    $sectionConfig->getScaffoldConfig()->getResourceName() . ':' . $valueViewer->getName()
 );
 include __DIR__ . '/textarea.php';
 
