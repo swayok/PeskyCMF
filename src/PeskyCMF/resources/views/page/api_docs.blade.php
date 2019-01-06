@@ -1,3 +1,8 @@
+<?php
+/**
+ * @var \PeskyCMF\Config\CmfConfig $cmfConfig
+ */
+?>
 <div class="content-header">
     <h1>{{ cmfTransCustom('.api_docs.header') }}</h1>
     <ol class="breadcrumb">
@@ -16,7 +21,7 @@
     </ol>
 </div>
 <div class="content" id="api-docs">
-    @foreach(cmfConfig()->getApiDocumentationClasses() as $header => $methods)
+    @foreach($cmfConfig->getApiDocumentationClasses() as $header => $methods)
         <div class="row"><div class="col-xs-12">
             <div class="box box-solid box-primary api-docs-section">
                 <div class="box-header">

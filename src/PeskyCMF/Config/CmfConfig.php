@@ -18,14 +18,10 @@ use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyCMF\UI\CmfUIModule;
-use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
-use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\Folder;
-use Swayok\Utils\StringUtils;
-use Symfony\Component\Debug\Exception\ClassNotFoundException;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 abstract class CmfConfig extends ConfigsContainer {

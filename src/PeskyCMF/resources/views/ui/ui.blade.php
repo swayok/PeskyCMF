@@ -12,8 +12,8 @@
 
 <aside class="main-sidebar">
     <section class="sidebar">
-        @include($userPanelView)
-        @include($menuView)
+        @include($uiModule->getUIView('sidebar_user_info'))
+        @include($uiModule->getUIView('sidebar_menu'))
     </section>
 </aside>
 
@@ -24,7 +24,7 @@
             {!! $sidebarLogo !!}
         </span>
     </a>
-    @include($topNavbarView)
+    @include($uiModule->getUIView('top_navbar'))
 </header>
 
 
@@ -32,7 +32,7 @@
 
 </div>
 
-@include($footerView)
+@include($uiModule->getUIView('footer'))
 
 <script type="application/javascript">
     $(document).ready(function () {

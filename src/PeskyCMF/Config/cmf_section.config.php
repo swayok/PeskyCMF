@@ -132,10 +132,16 @@ return [
         'views_subfolder' => 'admin',
 
         /**
-         * List of views accessible via '/{url_prefix}/ui/{view}.html' url
-         * (route name: 'cmf_custom_ui_view')
+         * List of views accessible via '/{url_prefix}/ui/{view}.html' url (route name: 'cmf_custom_ui_view')
          * Key - {view} in url - name of view (example: 'top_menu');
          * Value - view path (example: 'admin.ui.top_menu');
+         * Predefined views:
+         * 'layout' => 'cmf::layout',
+         * 'ui' => 'cmf::ui.ui',
+         * 'footer' => 'cmf::ui.footer',
+         * 'sidebar_user_info' => 'cmf::ui.sidebar_user_info',
+         * 'sidebar_menu' => 'cmf::ui.menu',
+         * 'top_navbar' => 'cmf::ui.top_navbar',
          */
         'views' => [
 

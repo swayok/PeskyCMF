@@ -14,18 +14,21 @@ class CmfUIModule {
 
     protected $cmfConfig;
 
-    protected $layoutViewPath = 'cmf::layout';
-    protected $basicUIViewPath = 'cmf::ui.ui';
-    protected $footerViewPath = 'cmf::ui.footer';
-    protected $userPanelViewPath = 'cmf::ui.sidebar_admin_info';
-    protected $menuViewPath = 'cmf::ui.menu';
-    protected $topNavbarViewPath = 'cmf::ui.top_navbar';
     protected $scaffoldTemplatesForNormalTableViewPath = 'cmf::scaffold.templates';
     protected $scaffoldTemplatesForKeyValueTableViewPath = 'cmf::scaffold.templates';
 
     protected $defaultSidebarLogo = '<img src="/packages/cmf/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
 
-    protected $customUIViews = null;
+    protected $UIViews = [
+        'layout' => 'cmf::layout',
+        'ui' => 'cmf::ui.ui',
+        'footer' => 'cmf::ui.footer',
+        'sidebar_user_info' => 'cmf::ui.sidebar_user_info',
+        'sidebar_menu' => 'cmf::ui.sidebar_menu',
+        'top_navbar' => 'cmf::ui.top_navbar',
+    ];
+    protected $isUIViewsLoadedFromConfigs = false;
+
     protected $resources = null;
     protected $tables = null;
     protected $scaffoldConfigs = [];
@@ -46,7 +49,7 @@ class CmfUIModule {
     }
 
     public function renderLayoutView(): string {
-        return view($this->layoutViewPath, $this->getDataForLayout())->render();
+        return $this->renderUIView('layout', $this->getDataForLayout());
     }
 
     protected function getDataForLayout(): array {
@@ -147,13 +150,9 @@ class CmfUIModule {
 
     public function renderBasicUIView() {
         $cmfConfig = $this->getCmfConfig();
-        return view($this->basicUIViewPath, [
-            'footerView' => $this->footerViewPath,
-            'userPanelView' => $this->userPanelViewPath,
-            'menuView' => $this->menuViewPath,
-            'topNavbarView' => $this->topNavbarViewPath,
+        return $this->renderUIView('ui', [
             'sidebarLogo' => $cmfConfig::config('ui.sidebar_logo') ?: $this->defaultSidebarLogo,
-        ])->render();
+        ]);
     }
 
     public function renderScaffoldTemplates(ScaffoldConfigInterface $scaffoldConfig) {
@@ -169,19 +168,25 @@ class CmfUIModule {
         )->render();
     }
 
-    protected function getCustomUIViews(): array {
-        if ($this->customUIViews === null) {
-            $this->customUIViews = (array)$this->getCmfConfig()->config('ui.views', []);
+    protected function loadUIViewsFromConfig() {
+        if (!$this->isUIViewsLoadedFromConfigs) {
+            $this->UIViews = array_replace(
+                $this->UIViews,
+                (array)$this->getCmfConfig()->config('ui.views', [])
+            );
         }
-        return $this->customUIViews;
     }
 
-    public function renderCustomUiView($viewName): string {
-        $customUIViews = $this->getCustomUIViews();
-        if (!isset($customUIViews[$viewName])) {
+    public function getUIView(string $viewName) {
+        $this->loadUIViewsFromConfig();
+        if (!isset($this->UIViews[$viewName])) {
             abort(HttpCode::NOT_FOUND, "There is no UI view with name [$viewName]");
         }
-        return view($customUIViews[$viewName])->render();
+        return $this->UIViews[$viewName];
+    }
+
+    public function renderUIView(string $viewName, array $data = []): string {
+        return view($this->getUIView($viewName), $data)->render();
     }
 
     public function getResources(): array {

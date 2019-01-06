@@ -1,9 +1,14 @@
+<?php
+/**
+ * @var \PeskyCMF\Config\CmfConfig $cmfConfig
+ */
+?>
 <ul class="sidebar-menu" data-widget="tree" id="common-menu-header">
     <li class="header">{{ cmfTransCustom('.main_menu.header') }}</li>
 </ul>
 <div id="main-sidebar-menu-scrollable-container" ss-container>
     <ul class="sidebar-menu tree" data-widget="tree" id="common-menu">
-        @foreach (cmfConfig()->menu() as $info)
+        @foreach ($cmfConfig->menu() as $info)
             @if (empty($info))
                 @continue
             @endif

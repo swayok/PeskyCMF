@@ -63,7 +63,7 @@ class CmfGeneralController extends CmfController {
     }
 
     public function getCustomUiView($viewName) {
-        return static::getCmfConfig()->getUiModule()->renderCustomUiView($viewName);
+        return static::getCmfConfig()->getUiModule()->renderUIView($viewName);
     }
 
     public function redirectToUserProfile() {
