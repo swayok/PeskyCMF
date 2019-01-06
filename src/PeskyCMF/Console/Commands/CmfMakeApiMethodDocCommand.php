@@ -17,9 +17,9 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
     protected function makeClass($className, $namespace, $filePath) {
         $this->line('Writing class ' .  $namespace . '\\' . $className . ' to file ' . $filePath);
         $namespace = ltrim($namespace, '\\');
-        $baseClass = $this->getCmfConfig()->api_method_documentation_base_class();
+        $baseClass = $this->getCmfConfig()->getApiDocumentationModule()->getMethodBaseClass();
         $baseClassName = class_basename($baseClass);
-        $classSuffix = $this->getCmfConfig()->api_documentation_class_name_suffix();
+        $classSuffix = $this->getCmfConfig()->getApiDocumentationModule()->getClassNameSuffix();
         $translationSubGroup = snake_case(
             preg_replace(
                 '%(ApiDocs?|(Method)?(Doc(umentation)?)?|' . preg_quote($classSuffix, '%') . '$)%',

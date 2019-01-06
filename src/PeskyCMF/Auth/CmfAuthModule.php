@@ -3,6 +3,7 @@
 namespace PeskyCMF\Auth;
 
 use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
@@ -18,7 +19,9 @@ use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\Set;
+use Symfony\Component\HttpFoundation\Response;
 
 class CmfAuthModule {
 
@@ -54,23 +57,40 @@ class CmfAuthModule {
     }
 
     /**
+     * @return CmfConfig
+     */
+    public function getCmfConfig(): CmfConfig {
+        return $this->cmfConfig;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getAuthGuardName(): string {
+        return $this->getCmfConfig()->config('auth.guard.name', function () {
+            $config = $this->getCmfConfig()->config('auth.guard');
+            return is_string($config) ? $config : 'admin';
+        });
+    }
+
+    /**
      * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|\App\Db\Admins\Admin|null
      */
-    public function getUser() {
+    public function getUser(): ?RecordInterface {
         return $this->getAuthGuard()->user();
     }
 
     /**
      * @return \Illuminate\Contracts\Auth\Guard|\Illuminate\Contracts\Auth\StatefulGuard|\Illuminate\Auth\SessionGuard
      */
-    public function getAuthGuard() {
+    public function getAuthGuard(): ?Guard {
         return $this->authGuard ?: \Auth::guard($this->getAuthGuardName());
     }
 
     /**
      * @return string|RecordInterface
      */
-    public function getUserRecordClass() {
+    public function getUserRecordClass(): ?string {
         return $this->getCmfConfig()->config('auth.user_record_class', function () {
             throw new \UnexpectedValueException('You need to provide a DB Record class for users');
         });
@@ -79,7 +99,7 @@ class CmfAuthModule {
     /**
      * @return \PeskyORM\ORM\TableInterface|\PeskyCMF\Db\Admins\CmfAdminsTable|\App\Db\Admins\AdminsTable
      */
-    public function getUsersTable() {
+    public function getUsersTable(): TableInterface {
         $recordClass = $this->getUserRecordClass(); //< do not merge with next line!!!
         return $recordClass::getTable();
     }
@@ -88,7 +108,7 @@ class CmfAuthModule {
      * @param string $email
      * @return bool
      */
-    public function loginOnceUsingEmail($email) {
+    public function loginOnceUsingEmail($email): bool {
         return $this->getAuthGuard()->once([$this->getUserEmailColumnName() => $email]);
     }
 
@@ -96,14 +116,14 @@ class CmfAuthModule {
      * Logo image for login and restore password pages
      * @return string
      */
-    public function getLoginPageLogo() {
+    public function getLoginPageLogo(): string {
         return $this->getCmfConfig()->config('auth.login_logo') ?: $this->defaultLoginPageLogo;
     }
 
     /**
      * @return string
      */
-    public function renderUserLoginPageView() {
+    public function renderUserLoginPageView(): string {
         if ($this->getUser()) {
             return cmfJsonResponse(HttpCode::MOVED_TEMPORARILY)
                 ->setForcedRedirect($this->getIntendedUrl());
@@ -115,12 +135,12 @@ class CmfAuthModule {
      * Enable/disable password restore link in login form
      * @return bool
      */
-    public function isRegistrationAllowed() {
+    public function isRegistrationAllowed(): bool {
         return $this->getCmfConfig()->config('auth.is_registration_allowed', true);
     }
 
     /**
-     * @return \PeskyCMF\Http\CmfJsonResponse
+     * @return \PeskyCMF\Http\CmfJsonResponse|string
      */
     public function renderUserRegistrationPageView() {
         if (!$this->isRegistrationAllowed()) {
@@ -133,7 +153,7 @@ class CmfAuthModule {
 
     /**
      * @param Request $request
-     * @return \PeskyCMF\Http\CmfJsonResponse
+     * @return \PeskyCMF\Http\CmfJsonResponse|array
      */
     public function processUserRegistrationRequest(Request $request) {
         if (!$this->isRegistrationAllowed()) {
@@ -205,7 +225,7 @@ class CmfAuthModule {
      * @return array
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function getDataForUserProfileForm() {
+    public function getDataForUserProfileForm(): array {
         /** @var CmfAdmin $admin */
         $admin = $this->getUser();
         $this->authorize('resource.details', ['cmf_profile', $admin]);
@@ -225,7 +245,7 @@ class CmfAuthModule {
      * @return string
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function renderUserProfilePageView() {
+    public function renderUserProfilePageView(): string {
         $user = $this->getUser();
         $this->authorize('resource.details', ['cmf_profile', $user]);
         return view($this->userProfilePageViewPath, [
@@ -277,7 +297,7 @@ class CmfAuthModule {
     /**
      * @return string
      */
-    public function getAccessPolicyClassName() {
+    public function getAccessPolicyClassName(): string {
         return $this->getCmfConfig()->config('auth.acceess_policy_class') ?: CmfAccessPolicy::class;
     }
 
@@ -286,7 +306,7 @@ class CmfAuthModule {
      * @return \PeskyCMF\Http\CmfJsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function processUserLoginRequest(Request $request) {
+    public function processUserLoginRequest(Request $request): CmfJsonResponse {
         $userLoginColumn = $this->getUserLoginColumnName();
         $data = $this->validate($request, [
             $userLoginColumn => 'required' . ($userLoginColumn === 'email' ? '|email' : ''),
@@ -344,7 +364,6 @@ class CmfAuthModule {
     /**
      * @param $otherUserId
      * @return \PeskyCMF\Http\CmfJsonResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function processLoginAsOtherUserRequest($otherUserId) {
         $this->authorize('cmf_page', ['login_as']);
@@ -386,7 +405,6 @@ class CmfAuthModule {
     /**
      * @param Request $request
      * @return \PeskyCMF\Http\CmfJsonResponse
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function startPasswordRecoveryProcess(Request $request) {
         if (!$this->isPasswordRestoreAllowed()) {
@@ -419,14 +437,10 @@ class CmfAuthModule {
 
     /**
      * @param Request $request
-     * @param $accessKey
+     * @param string $accessKey
      * @return \PeskyCMF\Http\CmfJsonResponse
-     * @throws \Illuminate\Validation\ValidationException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PeskyORM\Exception\InvalidTableColumnConfigException
-     * @throws \PeskyORM\Exception\OrmException
      */
-    public function finishPasswordRecoveryProcess(Request $request, $accessKey) {
+    public function finishPasswordRecoveryProcess(Request $request, string $accessKey) {
         if (!$this->isPasswordRestoreAllowed()) {
             return cmfJsonResponse(HttpCode::NOT_FOUND);
         }
@@ -455,7 +469,6 @@ class CmfAuthModule {
 
     /**
      * @return string
-     * @throws \Throwable
      */
     public function renderForgotPasswordPageView() {
         return view($this->forgotPasswordPageViewPath, ['authModule' => $this])->render();
@@ -464,11 +477,8 @@ class CmfAuthModule {
     /**
      * @param $accessKey
      * @return \PeskyCMF\Http\CmfJsonResponse|string
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \Throwable
      */
-    public function renderReplaceUserPasswordPageView($accessKey) {
+    public function renderReplaceUserPasswordPageView(string $accessKey) {
         if (!$this->isPasswordRestoreAllowed()) {
             return cmfJsonResponse(HttpCode::NOT_FOUND);
         }
@@ -491,7 +501,7 @@ class CmfAuthModule {
      * @param bool $absolute
      * @return string
      */
-    public function getLoginPageUrl($absolute = false) {
+    public function getLoginPageUrl(bool $absolute = false) {
         return route($this->getCmfConfig()->getRouteName('cmf_login'), [], $absolute);
     }
 
@@ -499,7 +509,7 @@ class CmfAuthModule {
      * @param bool $absolute
      * @return string
      */
-    public function getLogoutPageUrl($absolute = false) {
+    public function getLogoutPageUrl(bool $absolute = false) {
         return route($this->getCmfConfig()->getRouteName('cmf_logout'), [], $absolute);
     }
 
@@ -560,22 +570,16 @@ class CmfAuthModule {
     }
 
     /**
-     * @param $accessKey
+     * @param string $accessKey
      * @return bool|CmfDbRecord
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PDOException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    protected function getUserFromPasswordRecoveryAccessKey($accessKey) {
+    protected function getUserFromPasswordRecoveryAccessKey(string $accessKey) {
         /** @var ResetsPasswordsViaAccessKey $userClass */
         $userClass = $this->getUserRecordClass();
         return $userClass::loadFromPasswordRecoveryAccessKey($accessKey);
     }
 
     /**
-     * @param RecordInterface $user
      * @return string
      * @throws \BadMethodCallException
      */
@@ -595,23 +599,6 @@ class CmfAuthModule {
             }
         }
         return $this->emailColumnName;
-    }
-
-    /**
-     * @return CmfConfig
-     */
-    public function getCmfConfig() {
-        return $this->cmfConfig;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getAuthGuardName() {
-        return $this->getCmfConfig()->config('auth.guard.name', function () {
-            $config = $this->getCmfConfig()->config('auth.guard');
-            return is_string($config) ? $config : 'admin';
-        });
     }
 
     /**
@@ -697,7 +684,7 @@ class CmfAuthModule {
     /**
      * @param string $url
      */
-    public function saveIntendedUrl($url) {
+    public function saveIntendedUrl(string $url) {
         session()->put($this->getCmfConfig()->makeUtilityKey('intended_url'), $url);
     }
 

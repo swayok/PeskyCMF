@@ -265,9 +265,14 @@ return [
     'api_documentation' => [
 
         /**
+         * Class that handles everything related to API docs section
+         */
+        'module' => \PeskyCMF\ApiDocs\CmfApiDocumentationModule::class,
+
+        /**
          * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation or \PeskyCMF\ApiDocs\CmfApiDocumentation class
          * Note: there is a possibility to load classes automatically using 'api_documentation_classes_folder'. More details
-         * in CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem()
+         * in CmfApiDocumentationModule->loadApiMethodsDocumentationClassesFromFileSystem()
          */
         'classes' => [
 

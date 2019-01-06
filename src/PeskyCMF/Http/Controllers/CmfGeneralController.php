@@ -322,7 +322,7 @@ class CmfGeneralController extends CmfController {
             ],
             'item' => [],
         ];
-        foreach (static::getCmfConfig()->getApiDocumentationClasses() as $methodsList) {
+        foreach (static::getCmfConfig()->getApiDocumentationModule()->getDocumentationClassesList() as $methodsList) {
             /** @var CmfApiMethodDocumentation $apiMethodDocs */
             foreach ($methodsList as $apiMethodDocs) {
                 $docsObject = $apiMethodDocs::create();
