@@ -169,7 +169,9 @@ return [
          * Notes:
          *  - keys of this array are not used - you may use them to label blocks
          *  - all code you provide via this array will be added to layout AS IS.
-         *  - if you want to use variables in code blocks - use your 'cmf_config' method called 'layout_js_code_blocks'
+         *  - you may set value to something like CmfConfig::layout_js_code_blocks() in order to dynamically generate
+         *      code blocks; DO NOT USE CLOSURE as a value or php artisan config:cache will fail.
+         *      But you can use call_user_func((function () { return [ your code here ] }). Functions must return array.
          */
         'js_code_blocks' => [
 
