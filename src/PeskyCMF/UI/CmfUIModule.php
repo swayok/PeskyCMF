@@ -131,9 +131,9 @@ class CmfUIModule {
 
     public function getCustomAssetsForLayout(): array {
         return [
-            'js' => (array)$this->getCmfConfig()->config('js_files', []),
-            'css' => (array)$this->getCmfConfig()->config('css_files', []),
-            'js_code_blocks' => (array)$this->getCmfConfig()->config('js_code_blocks', []),
+            'js' => (array)$this->getCmfConfig()->config('ui.js_files', []),
+            'css' => (array)$this->getCmfConfig()->config('ui.css_files', []),
+            'js_code_blocks' => (array)$this->getCmfConfig()->config('ui.js_code_blocks', []),
         ];
     }
 
