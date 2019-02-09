@@ -753,7 +753,7 @@ abstract class CmfConfig extends ConfigsContainer {
     static public function getCachedPagesTemplates(): array {
         return \Cache::remember(
             static::getCacheKeyForOptimizedUiTemplates('pages'),
-            (int)static::config('optimize_ui_templates.timeout', 0),
+            (int)static::config('ui.optimize_ui_templates.timeout', 0),
             function () {
                 $generalControllerClass = static::cmf_general_controller_class();
                 /** @var \PeskyCMF\Http\Controllers\CmfGeneralController $controller */
@@ -781,7 +781,7 @@ abstract class CmfConfig extends ConfigsContainer {
         }
         return \Cache::remember(
             static::getCacheKeyForOptimizedUiTemplates('resources'),
-            (int)static::config('optimize_ui_templates.timeout', 0),
+            (int)static::config('ui.optimize_ui_templates.timeout', 0),
             function () {
                 return static::collectResourcesTemplatesToBeCached();
             }
