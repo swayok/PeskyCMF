@@ -191,6 +191,7 @@ class CmfUIModule {
 
     public function getResources(): array {
         if ($this->resources === null) {
+            $this->resources = [];
             /** @var ScaffoldConfigInterface $scaffoldConfigClass */
             foreach ((array)$this->getCmfConfig()->config('ui.resources', []) as $scaffoldConfigClass) {
                 $this->resources[$scaffoldConfigClass::getResourceName()] = $scaffoldConfigClass;
