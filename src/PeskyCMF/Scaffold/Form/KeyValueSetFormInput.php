@@ -154,11 +154,6 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @return \Closure
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function getRenderer() {
         if (empty($this->renderer)) {
@@ -172,11 +167,6 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @return InputRenderer
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     protected function getDefaultRenderer() {
         $renderer = new InputRenderer();
@@ -187,8 +177,8 @@ class KeyValueSetFormInput extends FormInput {
     public function getValidators($isCreation) {
         $allowedValues = $this->hasKeysOptions() ? '|in:' . implode(',', array_keys($this->getKeysOptions())) : '';
         return [
-            $this->getName() => 'array|min:' . $this->getMinValuesCount() . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
-            $this->getName() . '.*' => 'array',
+            $this->getName() => ($this->getMinValuesCount() > 0 ? 'required' : 'nullable') . '|array|min:' . $this->getMinValuesCount() . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
+            $this->getName() . '.*' => 'nullable|array',
             $this->getName() . '.*.key' => 'required|string' . $allowedValues,
             $this->getName() . '.*.value' => 'required'
         ];

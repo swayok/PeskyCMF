@@ -1012,7 +1012,7 @@ abstract class ScaffoldSectionConfig {
      * @throws \InvalidArgumentException
      */
     public function setJsInitiator($jsFunctionName) {
-        if (!is_string($jsFunctionName) && !preg_match('%^[$_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%s', $jsFunctionName)) {
+        if (!is_string($jsFunctionName) && !preg_match('%^[$_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%', $jsFunctionName)) {
             throw new \InvalidArgumentException("Invalid JavaScript funciton name: [$jsFunctionName]");
         }
         $this->jsInitiator = $jsFunctionName;

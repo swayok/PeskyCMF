@@ -762,10 +762,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param string $name
      * @param null|DataGridColumn|AbstractValueViewer $tableCell
      * @return ScaffoldSectionConfig
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \InvalidArgumentException
      */
     public function addValueViewer($name, AbstractValueViewer $tableCell = null) {
         $tableCell = !$tableCell && $name === static::ROW_ACTIONS_COLUMN_NAME
@@ -788,12 +784,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
-     * @throws \Exceptions\Data\NotFoundException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function finish() {
         parent::finish();
@@ -838,9 +828,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param string $parentIdColumnName
      * @param int $limitNestingDepthTo - number of nested data grids. <= 0 - no limit; 1 = 1 subview only;
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
      */
     public function enableNestedView($parentIdColumnName = 'parent_id', $limitNestingDepthTo = -1) {
         $this->getTable()->getTableStructure()->getColumn($parentIdColumnName); //< validates column existence

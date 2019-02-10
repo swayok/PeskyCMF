@@ -1,43 +1,49 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
- * @var \PeskyCMF\Scaffold\Form\KeyValueSetFormInput $valueViewer
+ * @var \PeskyCMF\Scaffold\Form\JsonArrayFormInput $valueViewer
  * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
  * @var \PeskyORM\ORM\TableInterface $table
  */
-$keysLabel = $valueViewer->getKeysLabel();
-$valuesLabel = $valueViewer->getValuesLabel();
 $defaultId = $valueViewer->getDefaultId();
 $inputName = $valueViewer->getName(true);
-$hasKeysOptions = $valueViewer->hasKeysOptions();
-$keysOptions = $hasKeysOptions ? $valueViewer->getKeysOptions() : [];
+$subInputs = $valueViewer->getSubInputs();
 ?>
 
-<div id="<?php echo $defaultId; ?>-container">
+<div id="<?php echo $defaultId; ?>-container" class="json-array-input-container">
     <div class="section-divider">
         <span><?php echo $valueViewer->getLabel($rendererConfig) ?></span>
     </div>
     <script type="text/html" id="<?php echo $defaultId ?>-row-tpl">
         <tr>
-            <td class="key form-group">
-                <?php if ($hasKeysOptions): ?>
-                    <select name="<?php echo $inputName; ?>[{{= it.index }}][key]" class="form-control input-sm"
-                    id="<?php echo $defaultId; ?>-{{= it.index }}-key">
-                        <?php foreach ($keysOptions as $optionValue => $optionLabel): ?>
-                            <option value="<?php echo $optionValue ?>" {{? it.key === '<?php echo $optionValue ?>' }}selected{{?}}>
-                                <?php echo $optionLabel ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php else: ?>
-                    <input type="text" name="<?php echo $inputName; ?>[{{= it.index }}][key]" class="form-control input-sm"
-                    id="<?php echo $defaultId; ?>-{{= it.index }}-key" value="{{= it.key || '' }}">
-                <?php endif; ?>
-            </td>
-            <td class="value form-group">
-                <input type="text" name="<?php echo $inputName; ?>[{{= it.index }}][value]" class="form-control input-sm"
-                id="<?php echo $defaultId; ?>-{{= it.index }}-value" value="{{= it.value || '' }}">
-            </td>
+            <?php foreach($subInputs as $subInputName => $subInput): ?>
+                <td class="sub-input form-group">
+                    <?php
+                        $subInputNameForHtml = $subInput->getName(true);
+                        $subInputIdForHtml = $subInput->getDefaultId();
+                        $subInputHtml = preg_replace(
+                            [
+                                '%(<div[^>]+?class=".*?)form-group(.*?"[^>]*?>)%is',
+                                '%<label for="' . preg_quote($subInputIdForHtml, '%') . '">.*?</label>%is',
+                                '%name="' . preg_quote($subInputNameForHtml, '%') . '%is',
+                                '%id="' . preg_quote($subInputIdForHtml, '%') . '"%is',
+                                '%((?:data-)?value=")[^"]*?(")%is',
+                                '%class="form-control"%is'
+                            ],
+                            [
+                                '$1$2',
+                                '',
+                                'name="' . str_replace('[][' . $subInputName, '[{{= it.index }}][' . $subInputName, $subInputNameForHtml),
+                                'id="' . str_replace('-input', '-{{= it.index }}-input', $subInputIdForHtml) . '"',
+                                "$1{{= it.{$subInputName} || '' }}$2",
+                                'class="form-control input-sm"'
+                            ],
+                            $subInput->render()
+                        );
+                        echo $subInputHtml;
+                    ?>
+                </td>
+            <?php endforeach; ?>
             <td class="delete text-center">
                 <a href="javascript: void(0)" class="text-danger delete-row" data-toggle="tooltip"
                  title="<?php echo $valueViewer->getDeleteRowButtonLabel() ?>">
@@ -50,16 +56,15 @@ $keysOptions = $hasKeysOptions ? $valueViewer->getKeysOptions() : [];
         <input type="hidden" name="<?php echo $inputName; ?>[]" id="<?php echo $defaultId; ?>" value="">
         <input type="hidden" disabled name="<?php echo $inputName; ?>" id="<?php echo $defaultId; ?>-hidden">
     </div>
-    <table class="table table-condensed table-bordered table-striped mbn">
-        <?php if (!empty($keysLabel) || !empty($valuesLabel)): ?>
+    <table class="table table-condensed table-bordered table-striped mbn json-array-input-table">
         <thead>
             <tr>
-                <th><?php echo $keysLabel; ?></th>
-                <th><?php echo $valuesLabel; ?></th>
+                <?php foreach($subInputs as $subInputName => $subInput): ?>
+                    <th><?php echo $sectionConfig->translate($valueViewer, 'input.' . $subInputName); ?></th>
+                <?php endforeach; ?>
                 <th width="60">&nbsp;</th>
             </tr>
         </thead>
-        <?php endif ?>
         <tbody id="<?php echo $defaultId ?>-rows-container">
 
         </tbody>
@@ -77,6 +82,7 @@ $keysOptions = $hasKeysOptions ? $valueViewer->getKeysOptions() : [];
     $(function () {
         var $rowsContainer = $('#<?php echo $defaultId ?>-rows-container');
         var rowTpl = doT.template($('#<?php echo $defaultId ?>-row-tpl').html());
+        var defaultTplData = {isCreation: {{= it.isCreation }}};
         var values = <?php echo $valueViewer->getDotJsInsertForValue([], 'array_encode') ?>;
         var maxRows = <?php echo $valueViewer->getMaxValuesCount(); ?>;
         var minRows = <?php echo $valueViewer->getMinValuesCount(); ?>;
@@ -89,7 +95,7 @@ $keysOptions = $hasKeysOptions ? $valueViewer->getKeysOptions() : [];
             if (!$.isPlainObject(tplData)) {
                 tplData = {};
             }
-            tplData.index = rowIndex;
+            tplData = $.extend({}, defaultTplData, tplData, {index: rowIndex});
             rowIndex++;
             $rowsContainer.append(rowTpl(tplData));
             rowsCount++;
