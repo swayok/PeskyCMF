@@ -119,7 +119,10 @@ $errors = $method->getErrors()
                         </div>
                         <div class="box-body ptn pbn">
                             @foreach($postParams as $name => $comment)
-                                <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {!! $comment !!}</div>
+                                <div class="mv10">
+                                    <span class="label label-default fs14">{{ $name }}</span>
+                                    - {!! is_array($comment) ? '<pre>' . json_encode($comment, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . '</pre>' : $comment !!}
+                                </div>
                             @endforeach
                         </div>
                     </div>
