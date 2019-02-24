@@ -21,7 +21,6 @@ use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\Set;
-use Symfony\Component\HttpFoundation\Response;
 
 class CmfAuthModule {
 
@@ -42,7 +41,7 @@ class CmfAuthModule {
     // emails views
     protected $passwordRevoceryEmailViewPath = 'cmf::emails.password_restore_instructions';
     // html elements
-    protected $defaultLoginPageLogo = '<img src="/packages/cmf/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
+    protected $defaultLoginPageLogo = '<img src="/packages/cmf/raw/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
 
     public function __construct(CmfConfig $cmfConfig) {
         $this->cmfConfig = $cmfConfig;
