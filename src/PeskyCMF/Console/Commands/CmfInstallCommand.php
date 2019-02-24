@@ -32,7 +32,7 @@ class CmfInstallCommand extends CmfCommand {
             'sectionName' => $appSubfolder,
             'urlPrefix' => trim(trim($this->input->getArgument('url_prefix'), '/\\')),
             'dbClassesAppSubfolder' => $this->input->getArgument('database_classes_app_subfolder'),
-            'cmfCongigClassName' => $appSubfolder . 'Config'
+            'cmfConfigClassName' => $appSubfolder . 'Config'
         ];
         $this->createPagesController($baseFolderPath, $viewsPath, $dataForViews);
         $this->copyBaseDbClasses($viewsPath, $dataForViews);
@@ -215,7 +215,7 @@ JS;
         if (!File::exist($generalCmfConfigFilePath)) {
             $configContents = File::contents(__DIR__ . '/../../Config/peskycmf.config.php');
             $replacements = [
-                "%('default_cmf_config')\s*=>\s*.*%im" => '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,',
+                "%('default_cmf_config')\s*=>\s*.*%im" => '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,',
             ];
             $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
             File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
@@ -226,11 +226,11 @@ JS;
             if (preg_match('%(\'default_cmf_config\')\s*=>\s*.{1,2}PeskyCMF.Config.CmfConfig.*%imu', $configContents)) {
                 $configContents = preg_replace(
                     '%(\'default_cmf_config\')\s*=>\s*.*%im',
-                    '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,',
+                    '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,',
                     $configContents
                 );
                 File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
-                $this->line($generalCmfConfigFilePath . ' updated to use ' . $dataForViews['cmfCongigClassName'] . ' as default CMF config');
+                $this->line($generalCmfConfigFilePath . ' updated to use ' . $dataForViews['cmfConfigClassName'] . ' as default CMF config');
             }
         }
     }
@@ -272,8 +272,8 @@ JS;
                 "%('views_subfolder')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('dictionary')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('routes_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$routesFileRelativePath}',\n    ],",
-                "%('css_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$publicFiles['css']}',\n    ],",
-                "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$publicFiles['js']}',\n    ],",
+                "%('css_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['css']}',\n    ],",
+                "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['js']}',\n    ],",
             ];
             $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
             File::save($cmfSectionConfigFilePath, $configContents, 0664, 0755);
@@ -282,8 +282,8 @@ JS;
             $this->line("Update next keys in 'configs/peskycmf.php' file to activate created files:");
             $this->line(' ');
 
-            $this->line("'default_cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . '::class,');
-            $this->line("'cmf_configs' => ['cmf' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfCongigClassName'] . "::class,\n]");
+            $this->line("'default_cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,');
+            $this->line("'cmf_configs' => ['cmf' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . "::class,\n]");
             $this->line("'app_settings_class' => \\App\\AppSettings::class,");
 
             $this->line("Update next keys in '$cmfSectionConfigFilePath' file to activate created files:");
@@ -306,7 +306,7 @@ JS;
     }
 
     protected function createCmfConfigClassForCmfSection($appSubfolder, $viewsPath, $baseFolderPath, array $dataForViews, $cmfSectionConfigFileNameWithoutExtension) {
-        $cmfConfigFilePath = $baseFolderPath . '/' . $dataForViews['cmfCongigClassName'] . '.php';
+        $cmfConfigFilePath = $baseFolderPath . '/' . $dataForViews['cmfConfigClassName'] . '.php';
         $writeCmfSectionConfigFile = (
             !File::exist($cmfConfigFilePath)
             || $this->confirm('CmfConfig file ' . $cmfConfigFilePath . ' already exist. Overwrite?')
