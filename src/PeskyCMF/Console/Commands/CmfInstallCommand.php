@@ -215,23 +215,13 @@ JS;
         if (!File::exist($generalCmfConfigFilePath)) {
             $configContents = File::contents(__DIR__ . '/../../Config/peskycmf.config.php');
             $replacements = [
-                "%('default_cmf_config')\s*=>\s*.*%im" => '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,',
+                "%('default')\s*=>\s*.*%im" => '\'' . $dataForViews['urlPrefix'] . '\' => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,',
+                "%('default_cmf_config')\s*=>\s*.*%im" => "$1 => '{$dataForViews['urlPrefix']}',",
             ];
             $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
             File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
             $this->line($generalCmfConfigFilePath . ' created');
             unset($configContents);
-        } else {
-            $configContents = File::contents($generalCmfConfigFilePath);
-            if (preg_match('%(\'default_cmf_config\')\s*=>\s*.{1,2}PeskyCMF.Config.CmfConfig.*%imu', $configContents)) {
-                $configContents = preg_replace(
-                    '%(\'default_cmf_config\')\s*=>\s*.*%im',
-                    '$1 => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,',
-                    $configContents
-                );
-                File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
-                $this->line($generalCmfConfigFilePath . ' updated to use ' . $dataForViews['cmfConfigClassName'] . ' as default CMF config');
-            }
         }
     }
 
@@ -282,7 +272,7 @@ JS;
             $this->line("Update next keys in 'configs/peskycmf.php' file to activate created files:");
             $this->line(' ');
 
-            $this->line("'default_cmf_config' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,');
+            $this->line("'default_cmf_config' => 'cmf',");
             $this->line("'cmf_configs' => ['cmf' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . "::class,\n]");
             $this->line("'app_settings_class' => \\App\\AppSettings::class,");
 
