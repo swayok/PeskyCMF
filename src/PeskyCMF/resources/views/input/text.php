@@ -23,7 +23,9 @@ $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText(
                 <span class="input-group-addon"><?php echo $rendererConfig->getPrefixText(); ?></span>
             <?php endif;?>
     <?php endif; ?>
-
+            <?php if ($rendererConfig->getAttribute('type') === 'password'): ?>
+                <input type="password" name="<?php echo $rendererConfig->getAttribute('name') ?>" class="hidden" formnovalidate disabled>
+            <?php endif; ?>
             <input value="<?php echo $valueViewer->getDotJsInsertForValue() ?>"
                 {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
 

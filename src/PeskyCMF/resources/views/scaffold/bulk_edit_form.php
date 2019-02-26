@@ -50,7 +50,10 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                         {{?}}
                     {{?}}
                     <!-- disable chrome email & password autofill -->
-                    <input type="text" class="hidden" formnovalidate><input type="password" class="hidden" formnovalidate>
+                    <input type="text" name="name" class="hidden" formnovalidate disabled>
+                    <input type="password" class="hidden" formnovalidate disabled>
+                    <input type="text" name="email" class="hidden" formnovalidate value="test@test.com" disabled>
+                    <input type="password" class="hidden" formnovalidate disabled>
                     <!-- end of autofill disabler -->
                     <div class="modal-body">
                     <?php

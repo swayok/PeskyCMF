@@ -6,7 +6,7 @@
  * @var \PeskyORM\ORM\TableInterface $table
  */
 $rendererConfig
-    ->addAttribute('autocomplete', 'off', false)
+    ->addAttribute('autocomplete', 'new-password', false)
     ->addAttribute('type', 'password', true);
 ?>
 

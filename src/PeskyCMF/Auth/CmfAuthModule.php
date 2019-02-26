@@ -124,8 +124,7 @@ class CmfAuthModule {
      */
     public function renderUserLoginPageView(): string {
         if ($this->getUser()) {
-            return cmfJsonResponse(HttpCode::MOVED_TEMPORARILY)
-                ->setForcedRedirect($this->getIntendedUrl());
+            return view('cmf::ui.redirect', ['url' => $this->getIntendedUrl()]);
         }
         return view($this->userLoginPageViewPath, ['authModule' => $this])->render();
     }

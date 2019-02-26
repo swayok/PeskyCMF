@@ -33,7 +33,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
             <form role="form" method="post" action="{{ cmfRoute('cmf_profile', [], false, $cmfConfig) }}" id="cmf-user-profile-form">
                 <input type="hidden" name="_method" value="PUT">
                 <!-- disable chrome email & password autofill -->
-                <input type="text" name="login" class="hidden" formnovalidate disabled>
+                <input type="text" name="name" class="hidden" formnovalidate disabled>
                 <input type="password" class="hidden" formnovalidate disabled>
                 <input type="text" name="email" class="hidden" formnovalidate value="test@test.com" disabled>
                 <input type="password" class="hidden" formnovalidate disabled>
@@ -56,9 +56,12 @@ $canSubmit = $canSubmit || $canSubmit === null;
                         </div>
                     @endif
                     <div class="form-group">
+                        <!-- disable chrome email & password autofill -->
+                        <input type="password" class="hidden" name="new_password" formnovalidate disabled>
+                        <!-- end of autofill disabler -->
                         <label for="new-password-input">{{ $cmfConfig::transCustom('.page.profile.input.new_password') }}</label>
                         <input class="form-control" value="" name="new_password" id="new-password-input"
-                               type="password" autocomplete="off" @if(!$canSubmit) disabled @endif>
+                               type="password" autocomplete="new-password" @if(!$canSubmit) disabled @endif>
                     </div>
                     @if ($user::hasColumn('name'))
                         <div class="form-group">
@@ -96,9 +99,12 @@ $canSubmit = $canSubmit || $canSubmit === null;
                         </div>
                     @endif
                     <div class="form-group">
+                        <!-- disable chrome email & password autofill -->
+                        <input type="password" class="hidden" name="old_password" formnovalidate disabled>
+                        <!-- end of autofill disabler -->
                         <label for="old-password-input">{{ $cmfConfig::transCustom('.page.profile.input.old_password') }}*</label>
                         <input class="form-control" value="" name="old_password" id="old-password-input"
-                               type="password" autocomplete="off" required="required" @if(!$canSubmit) disabled @endif>
+                               type="password" autocomplete="new-password" required="required" @if(!$canSubmit) disabled @endif>
                     </div>
                 </div>
                 <div class="box-footer">
