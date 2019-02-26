@@ -17,7 +17,7 @@ class CmfUIModule {
     protected $scaffoldTemplatesForNormalTableViewPath = 'cmf::scaffold.templates';
     protected $scaffoldTemplatesForKeyValueTableViewPath = 'cmf::scaffold.templates';
 
-    protected $defaultSidebarLogo = '<img src="/packages/cmf/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
+    protected $defaultSidebarLogo = '<img src="/packages/cmf/raw/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
 
     protected $UIViews = [
         'layout' => 'cmf::layout',
