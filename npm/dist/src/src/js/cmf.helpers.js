@@ -74,7 +74,6 @@ FormHelper.initInputPlugins = function (container) {
         .each(function () {
             $(this)
                 .attr({
-                    'data-inputmask-alias': 'Regex',
                     'data-inputmask-regex': $(this).attr('data-regexp')
                 })
                 .removeAttr('data-regexp')
