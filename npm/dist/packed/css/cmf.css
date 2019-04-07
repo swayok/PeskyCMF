@@ -2493,17 +2493,15 @@ body[data-section="resource:table"] .section-content-wrapper .content > .row > d
 body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body {
   padding: 0;
 }
+body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row {
+  margin-right: 0;
+  margin-left: 0;
+}
 body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row > div {
-  line-height: 50px;
+  padding-top: 8px;
 }
-body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row > div > *:first-child {
-  padding-left: 10px;
-}
-body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row > div > *:last-child {
-  padding-right: 10px;
-}
-body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row > div div {
-  line-height: normal;
+body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row .btn-toolbar > * {
+  margin-bottom: 8px;
 }
 body[data-section="resource:table"] .section-content-wrapper .data-grid-container {
   margin-left: 0;
