@@ -2566,6 +2566,7 @@ FormHelper.initForm = function (form, container, onSubmitSuccess, options) {
     });
     // notify that form was initiated
     $form.trigger('ready.cmfform');
+    return $form;
 };
 
 FormHelper.removeAllFormMessagesAndErrors = function ($form) {
