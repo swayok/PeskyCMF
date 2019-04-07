@@ -1,7 +1,7 @@
 /*!
- * Bootstrap-select v1.13.5 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.9 (https://developer.snapappointments.com/bootstrap-select)
  *
- * Copyright 2012-2018 SnapAppointments, LLC
+ * Copyright 2012-2019 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
  */
 
@@ -36,7 +36,7 @@
 
 
 }));
-
+//# sourceMappingURL=defaults-fa_IR.js.map
 /*!
  * FileInput Persian Translations
  *

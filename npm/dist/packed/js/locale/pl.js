@@ -299,9 +299,9 @@ QueryBuilder.defaults({ lang_code: 'pl' });
 
 (function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var e=jQuery.fn.select2.amd;return e.define("select2/i18n/pl",[],function(){var e=["znak","znaki","znaków"],t=["element","elementy","elementów"],n=function(t,n){if(t===1)return n[0];if(t>1&&t<=4)return n[1];if(t>=5)return n[2]};return{errorLoading:function(){return"Nie można załadować wyników."},inputTooLong:function(t){var r=t.input.length-t.maximum;return"Usuń "+r+" "+n(r,e)},inputTooShort:function(t){var r=t.minimum-t.input.length;return"Podaj przynajmniej "+r+" "+n(r,e)},loadingMore:function(){return"Trwa ładowanie…"},maximumSelected:function(e){return"Możesz zaznaczyć tylko "+e.maximum+" "+n(e.maximum,t)},noResults:function(){return"Brak wyników"},searching:function(){return"Trwa wyszukiwanie…"}}}),{define:e.define,require:e.require}})();
 /*!
- * Bootstrap-select v1.13.5 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.9 (https://developer.snapappointments.com/bootstrap-select)
  *
- * Copyright 2012-2018 SnapAppointments, LLC
+ * Copyright 2012-2019 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
  */
 
@@ -336,7 +336,7 @@ QueryBuilder.defaults({ lang_code: 'pl' });
 
 
 }));
-
+//# sourceMappingURL=defaults-pl_PL.js.map
 /*!
  * Ajax Bootstrap Select
  *

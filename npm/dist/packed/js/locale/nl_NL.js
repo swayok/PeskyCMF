@@ -266,9 +266,9 @@ QueryBuilder.defaults({ lang_code: 'nl' });
 
 (function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var e=jQuery.fn.select2.amd;return e.define("select2/i18n/nl",[],function(){return{errorLoading:function(){return"De resultaten konden niet worden geladen."},inputTooLong:function(e){var t=e.input.length-e.maximum,n="Gelieve "+t+" karakters te verwijderen";return n},inputTooShort:function(e){var t=e.minimum-e.input.length,n="Gelieve "+t+" of meer karakters in te voeren";return n},loadingMore:function(){return"Meer resultaten laden…"},maximumSelected:function(e){var t=e.maximum==1?"kan":"kunnen",n="Er "+t+" maar "+e.maximum+" item";return e.maximum!=1&&(n+="s"),n+=" worden geselecteerd",n},noResults:function(){return"Geen resultaten gevonden…"},searching:function(){return"Zoeken…"}}}),{define:e.define,require:e.require}})();
 /*!
- * Bootstrap-select v1.13.5 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.9 (https://developer.snapappointments.com/bootstrap-select)
  *
- * Copyright 2012-2018 SnapAppointments, LLC
+ * Copyright 2012-2019 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
  */
 
@@ -303,7 +303,7 @@ QueryBuilder.defaults({ lang_code: 'nl' });
 
 
 }));
-
+//# sourceMappingURL=defaults-nl_NL.js.map
 /*!
  * Ajax Bootstrap Select
  *
