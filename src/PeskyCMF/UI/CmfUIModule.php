@@ -148,11 +148,14 @@ class CmfUIModule {
         return $this->getCmfConfig()->config('ui.views_subfolder', 'admin') . '.';
     }
 
-    public function renderBasicUIView() {
-        $cmfConfig = $this->getCmfConfig();
+    public function renderBasicUIView(): string {
         return $this->renderUIView('ui', [
-            'sidebarLogo' => $cmfConfig::config('ui.sidebar_logo') ?: $this->defaultSidebarLogo,
+            'sidebarLogo' => $this->getSidebarLogo(),
         ]);
+    }
+
+    public function getSidebarLogo(): string {
+        return (string)($this->getCmfConfig()->config('ui.sidebar_logo') ?: $this->defaultSidebarLogo);
     }
 
     public function renderScaffoldTemplates(ScaffoldConfigInterface $scaffoldConfig) {
