@@ -568,9 +568,10 @@ class CmfScaffoldApiController extends Controller {
                     ->setValue($value)
                     ->build();
             } else {
-                $ret .= Tag::create()
-                    ->setName('optgroup')
-                    ->setAttribute('label', $value)
+                $ret .= Tag::create(
+                        ['label' => $value],
+                        'optgroup'
+                    )
                     ->setContent($this->buildFieldOptions($label))
                     ->build();
             }
