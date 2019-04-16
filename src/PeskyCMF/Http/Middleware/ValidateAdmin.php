@@ -50,7 +50,7 @@ class ValidateAdmin {
         }
         /** @var CmfDbObject $user */
         $user = \Auth::guard()->user();
-        \Event::fire(new AdminAuthorised($user));
+        event(new AdminAuthorised($user));
 
         return $next($request);
     }
