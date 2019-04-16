@@ -46,7 +46,7 @@
         "ckeditor/ckeditor": "4.*",
         "twbs/bootstrap": "3.*",
         "components/jquery": "2.*",
-        "snapappointments/bootstrap-select": "1.12.*",
+        "snapappointments/bootstrap-select": "^1.13",
         "mistic100/jquery-querybuilder": "*",
         "grimmlink/toastr": "2.*",
         "moment/moment": "2.*",
