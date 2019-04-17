@@ -164,7 +164,7 @@ class CmfGeneralController extends Controller {
      */
     public function switchLocale($locale = null) {
         if (is_string($locale) && $locale !== '' && in_array($locale, CmfConfig::getInstance()->locales(), true)) {
-            \Session::set(CmfConfig::getInstance()->locale_session_key(), strtolower($locale));
+            \Session::put(CmfConfig::getInstance()->locale_session_key(), strtolower($locale));
         }
         return \Redirect::back();
     }
