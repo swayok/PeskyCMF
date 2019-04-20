@@ -4,8 +4,8 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyORMLaravel\Db\Column\FilesColumn;
 use PeskyORMLaravel\Db\Column\ImagesColumn;
-use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
 use PeskyORMLaravel\Db\Column\Utils\FileInfo;
+use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
 
 /**
  * @method ImagesColumn|FilesColumn getTableColumn()
@@ -45,6 +45,7 @@ class ImagesValueCell extends ValueCell {
             ->getTable()
             ->newRecord()
             ->enableTrustModeForDbData()
+            ->enableReadOnlyMode()
             ->fromData($record, true, false);
         $ret = [];
         $configsToShow = $this->fileConfigsToShow ?: array_keys($this->getTableColumn()->getImagesGroupsConfigurations());

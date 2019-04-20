@@ -4,7 +4,6 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyORMLaravel\Db\Column\FileColumn;
 use PeskyORMLaravel\Db\Column\ImageColumn;
-use PeskyORMLaravel\Db\Column\Utils\FileInfo;
 use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
 
 /**
@@ -27,12 +26,12 @@ class ImageValueCell extends ValueCell {
             ->getTable()
             ->newRecord()
             ->enableTrustModeForDbData()
+            ->enableReadOnlyMode()
             ->fromData($record, true, false);
-        /** @var FileInfo[] $filesForCofing */
-        $fileInfo = $object->getValue($column, 'file_info');
-        if ($fileInfo->exists()) {
+        $url = $object->getValue($column, 'url');
+        if ($url) {
             return [
-                'url' => $fileInfo->getAbsoluteUrl()
+                'url' => $url
             ];
         }
         return null;
