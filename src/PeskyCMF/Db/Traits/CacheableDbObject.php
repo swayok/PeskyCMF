@@ -10,7 +10,7 @@ trait CacheableDbObject {
 
     /**
      * Set cache timeout for next read() or find() method call
-     * @param null|int|\DateTime $timeout - int: minutes
+     * @param null|int|\DateTime $timeout - int: seconds
      * @return $this
      */
     public function withCacheTimeout($timeout = null) {

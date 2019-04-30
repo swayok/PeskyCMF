@@ -253,7 +253,7 @@ abstract class BaseAccessManager implements AccessManagerInterface {
                 }
             }
         }
-        \Cache::put($cacheKey, $accessRightsPerRouteAndMethod, 180);
+        \Cache::put($cacheKey, $accessRightsPerRouteAndMethod, 1080);
         // dpr($accessRightsPerRouteAndMethod); exit;
         return $accessRightsPerRouteAndMethod;
     }

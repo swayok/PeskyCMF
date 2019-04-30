@@ -39,18 +39,18 @@ trait CacheHelpersTrait {
     /**
      * Return data cached via $callback call
      * @param string|array $baseKey - use method name; array - will be jsoned and hashed
-     * @param int|\DateTime $minutes
+     * @param int|\DateTime $duration - int: seconds
      * @param \Closure $dataCallback
      * @param string|array|null $cacheKeySuffix
      * @param bool $recache - true: update cache forcefully
      * @return mixed
      */
-    public function cachedData($baseKey, $minutes, \Closure $dataCallback, $cacheKeySuffix = '', $recache = false) {
+    public function cachedData($baseKey, $duration, \Closure $dataCallback, $cacheKeySuffix = '', $recache = false) {
         $cacheKay = $this->generateCacheKey($baseKey, $cacheKeySuffix);
         if ($recache) {
             \Cache::forget($cacheKay);
         }
-        return \Cache::remember($cacheKay, $minutes, $dataCallback);
+        return \Cache::remember($cacheKay, $duration, $dataCallback);
     }
 
     /**

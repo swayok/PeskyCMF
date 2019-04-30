@@ -129,12 +129,12 @@ trait CacheForDbSelects {
 
     /**
      * Set custom cache timeout for next query in this model
-     * @param int|\DateTime|bool $minutes
+     * @param int|\DateTime|bool $seconds
      * @return $this
      */
-    public function withCacheTimeout($minutes) {
+    public function withCacheTimeout($seconds) {
         /** @var CmfDbModel|CacheForDbSelects $this */
-        $this->_cacheTimeoutForNextSelect = $minutes;
+        $this->_cacheTimeoutForNextSelect = $seconds;
         return $this;
     }
 
@@ -153,7 +153,7 @@ trait CacheForDbSelects {
     private function _getCacheDurationForSelectOneInMinutes() {
         /** @var CmfDbModel|CacheForDbSelects $this */
         return $this->_cacheTimeoutForNextSelect === null
-            ? $this->getDefaultCacheDurationForSelectOneInMinutes()
+            ? $this->getDefaultCacheDurationForSelectOneInMinutes() * 60
             : $this->_cacheTimeoutForNextSelect;
     }
 
@@ -164,7 +164,7 @@ trait CacheForDbSelects {
     private function _getCacheDurationForSelectManyInMinutes() {
         /** @var CmfDbModel|CacheForDbSelects $this */
         return $this->_cacheTimeoutForNextSelect === null
-            ? $this->getDefaultCacheDurationForSelectManyInMinutes()
+            ? $this->getDefaultCacheDurationForSelectManyInMinutes() * 60
             : $this->_cacheTimeoutForNextSelect;
     }
 
@@ -228,8 +228,8 @@ trait CacheForDbSelects {
      */
     public function getCachedData($affectsSingleRecord, $cacheSettings, callable $callback) {
         $defaultTimeout = $affectsSingleRecord
-                ? $this->_getCacheDurationForSelectOneInMinutes()
-                : $this->_getCacheDurationForSelectManyInMinutes();
+                ? $this->_getCacheDurationForSelectOneInMinutes() * 60
+                : $this->_getCacheDurationForSelectManyInMinutes() * 60;
         $resolvedCacheSettings = $this->resolveCacheSettings(
             $cacheSettings,
             $defaultTimeout,
@@ -270,7 +270,7 @@ trait CacheForDbSelects {
 
     /**
      * @param mixed $cacheSettings
-     * @param int|bool|\DateTime $defaultTimeout
+     * @param int|bool|\DateTime $defaultTimeout - int: seconds
      * @param callable $defaultCacheKey
      * @param bool $isAutoCache
      * @return array|bool - bool: false - when caching is not possible
