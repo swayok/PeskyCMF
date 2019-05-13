@@ -8,6 +8,7 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use Symfony\Component\HttpFoundation\Response;
 
 class CmfConfig extends ConfigsContainer {
 
@@ -472,10 +473,6 @@ class CmfConfig extends ConfigsContainer {
         return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_locale';
     }
 
-    static public function session_redirect_key() {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_redirect';
-    }
-
     static public function session_message_key() {
         return preg_replace('%[^a-zA-Z0-9]+%i', '_', self::getInstance()->url_prefix()) . '_message';
     }
@@ -485,7 +482,7 @@ class CmfConfig extends ConfigsContainer {
      * is allowed to view the admin section. Any "falsey" response will send the user back to the 'login_path' defined below.
      *
      * @param Request $request
-     * @return callable
+     * @return bool | Response
      */
     static public function isAuthorised(Request $request) {
         return PeskyCmfAccessManager::isAuthorised($request);

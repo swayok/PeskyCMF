@@ -8,14 +8,12 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\DbExpr;
-use PeskyORM\DbModel;
 use PeskyORM\DbObject;
 use Redirect;
 use Swayok\Utils\File;
@@ -24,6 +22,8 @@ use Swayok\Utils\Set;
 class CmfGeneralController extends Controller {
 
     use DataValidationHelper;
+
+    const BACK_URL_PARAM = '_back_url';
 
     public function __construct() {
 
@@ -133,7 +133,7 @@ class CmfGeneralController extends Controller {
         $validator = \Validator::make(
             $request->data(),
             $validationRules,
-            Set::flatten(CmfConfig::transCustom('.page.profile.errors'))
+            Set::flatten((array)CmfConfig::transCustom('.page.profile.errors'))
         );
         $errors = [];
         if ($validator->fails()) {
@@ -182,7 +182,7 @@ class CmfGeneralController extends Controller {
         } else if (!Auth::guard()->check()) {
             return view(CmfConfig::getInstance()->layout_view())->render();
         } else {
-            return Redirect::to($this->getIntendedUrl());
+            return Redirect::to(static::getIntendedUrl($request));
         }
     }
 
@@ -230,11 +230,11 @@ class CmfGeneralController extends Controller {
         }
     }
 
-    private function getIntendedUrl() {
-        $intendedUrl = session()->pull(CmfConfig::getInstance()->session_redirect_key(), false);
-        if (!$intendedUrl) {
+    static public function getIntendedUrl(Request $request) {
+        if (!$request->has(static::BACK_URL_PARAM)) {
             return CmfConfig::getInstance()->home_page_url();
         } else {
+            $intendedUrl = $request->get(static::BACK_URL_PARAM);
             if (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
                 return route('cmf_items_table', [$matches[1]]);
             } else if (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
@@ -269,7 +269,7 @@ class CmfGeneralController extends Controller {
             return cmfServiceJsonResponse(HttpCode::INVALID)
                 ->setMessage(CmfConfig::transCustom('.login_form.login_failed'));
         } else {
-            return cmfServiceJsonResponse()->setRedirect($this->getIntendedUrl());
+            return cmfServiceJsonResponse()->setRedirect(static::getIntendedUrl($request));
         }
     }
 

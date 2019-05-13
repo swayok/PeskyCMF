@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\Event\AdminAuthorised;
+use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyCMF\HttpCode;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class ValidateAdmin {
 
@@ -22,30 +25,29 @@ class ValidateAdmin {
         //get the admin check closure that should be supplied in the config
         /** @var CmfConfig $configs */
         $configs = CmfConfig::getInstance();
-        //if this is a simple false value, send the user to the login redirect
         $response = false;
         if (\Auth::guard()->check()) {
-            $response = $configs->isAuthorised($request);
+            $response = $configs::isAuthorised($request);
         }
         if (!$response) {
-            $loginUrl = route($configs->login_route());
-            $currentsUrl = $request->url();
+            //if this is a simple false value, send the user to the login screen
+            $backUrl = $request->getMethod() === 'GET' && !$request->ajax()
+                ? $request->fullUrl()
+                : $configs::home_page_url();
+            $loginUrl = route($configs::login_route(), [CmfGeneralController::BACK_URL_PARAM => $backUrl]);
             if ($request->ajax()) {
-                \Session::put(CmfConfig::getInstance()->session_redirect_key(), $currentsUrl);
                 return response()->json(['redirect_with_reload' => $loginUrl], HttpCode::UNAUTHORISED);
             } else {
-                return redirect()->guest($loginUrl)->with(CmfConfig::getInstance()->session_redirect_key(), $currentsUrl);
+                return redirect()->guest($loginUrl);
             }
-        } else if (is_a($response, 'Illuminate\Http\JsonResponse') || is_a($response, 'Illuminate\Http\Response')) {
+        } else if (is_a($response, JsonResponse::class) || is_a($response, Response::class)) {
             return $response;
-        } else if (is_a($response, 'Illuminate\\Http\\RedirectResponse')) {
-            $currentsUrl = $request->url();
+        } else if (is_a($response, RedirectResponse::class)) {
             /** @var RedirectResponse $response */
             if ($request->ajax()) {
-                \Session::put(CmfConfig::getInstance()->session_redirect_key(), $currentsUrl);
                 return response()->json(['redirect' => $response->getTargetUrl()], HttpCode::UNAUTHORISED);
             } else {
-                return $response->with(CmfConfig::getInstance()->session_redirect_key(), $currentsUrl);
+                return $response;
             }
         }
         /** @var CmfDbObject $user */
