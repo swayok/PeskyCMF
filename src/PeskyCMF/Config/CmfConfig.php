@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Config;
 
-use App\AppSettings;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Application;
 use Illuminate\View\View;
@@ -20,7 +19,6 @@ use PeskyCMF\UI\CmfUIModule;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
-use Swayok\Utils\Folder;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 abstract class CmfConfig extends ConfigsContainer {
@@ -127,7 +125,7 @@ abstract class CmfConfig extends ConfigsContainer {
     /**
      * @return PeskyCmfAppSettings|\App\AppSettings
      */
-    static public function getAppSettings(): AppSettings {
+    static public function getAppSettings() {
         return app(PeskyCmfAppSettings::class);
     }
 
