@@ -25,7 +25,7 @@ class CmfInstallCommand extends CmfCommand {
         $baseFolderPath = app_path($appSubfolder);
         if (Folder::exist($baseFolderPath)) {
             $this->line('Terminated. Folder [' . $baseFolderPath . '] already exist');
-            return;
+            return -1;
         }
         $viewsPath = __DIR__ . '/../../resources/views/install/';
         $dataForViews = [
@@ -56,6 +56,7 @@ class CmfInstallCommand extends CmfCommand {
 
         $this->suggestions($peskyOrmConfigFilePath);
         $this->outro();
+        return 0;
     }
 
     /**
