@@ -273,8 +273,8 @@ JS;
                 "%('views_subfolder')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('dictionary')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('routes_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$routesFileRelativePath}',\n    ],",
-                "%('css_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['css']}',\n    ],",
-                "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['js']}',\n    ],",
+                "%('css_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['css']}',\n        ],",
+                "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['js']}',\n        ],",
             ];
             $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
             File::save($cmfSectionConfigFilePath, $configContents, 0664, 0755);
