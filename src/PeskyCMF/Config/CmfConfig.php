@@ -125,7 +125,7 @@ abstract class CmfConfig extends ConfigsContainer {
     /**
      * @return PeskyCmfAppSettings|\App\AppSettings
      */
-    static public function getAppSettings() {
+    static public function getAppSettings(): PeskyCmfAppSettings {
         return app(PeskyCmfAppSettings::class);
     }
 
