@@ -1,6 +1,8 @@
 <?php
 $dictionary = \PeskyCMF\Config\CmfConfig::getInstance()->custom_dictionary_name();
 $loginInputName = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column();
+/** @var \PeskyCMF\Http\Controllers\CmfGeneralController $generalController */
+$generalController = \PeskyCMF\Config\CmfConfig::getInstance()->cmf_general_controller_class();
 ?>
 <div class="login-box">
     <div class="login-logo">
@@ -9,6 +11,7 @@ $loginInputName = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column()
     </div>
     <div class="login-box-body" id="login-form-container">
         <form action="{{ route(\PeskyCMF\Config\CmfConfig::getInstance()->login_route(), [], false) }}" method="post" id="login-form">
+            <input type="hidden" name="{{ $generalController::BACK_URL_PARAM }}" value="{{ \PeskyCMF\Config\CmfConfig::getInstance()->home_page_url() }}">
             <div class="form-group has-feedback">
                 <input type="{{ $loginInputName === 'email' ? 'email' : 'text' }}" name="{{ $loginInputName }}" required
                     class="form-control" placeholder="{{ trans("{$dictionary}.login_form.{$loginInputName}_label") }}">
@@ -34,3 +37,15 @@ $loginInputName = \PeskyCMF\Config\CmfConfig::getInstance()->user_login_column()
         </form>
     </div>
 </div>
+
+<script type="application/javascript">
+    $(function () {
+        var queryArgName = '{{ $generalController::BACK_URL_PARAM }}';
+        if (window.adminApp.activeRequest && window.adminApp.activeRequest.query && window.adminApp.activeRequest.query[queryArgName]) {
+            var backUrl = String(window.adminApp.activeRequest.query[queryArgName]);
+            if (backUrl.length > 1 && (backUrl[0] === '/' || (backUrl[0] === 'h' && backUrl[6] === '/'))) {
+                $('input[name="' + queryArgName + '"]').val(backUrl);
+            }
+        }
+    });
+</script>

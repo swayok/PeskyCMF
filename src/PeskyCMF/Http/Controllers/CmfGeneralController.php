@@ -23,7 +23,7 @@ class CmfGeneralController extends Controller {
 
     use DataValidationHelper;
 
-    const BACK_URL_PARAM = '_back_url';
+    const BACK_URL_PARAM = 'back_url';
 
     public function __construct() {
 
@@ -231,10 +231,10 @@ class CmfGeneralController extends Controller {
     }
 
     static public function getIntendedUrl(Request $request) {
-        if (!$request->has(static::BACK_URL_PARAM)) {
+        $intendedUrl = $request->get(static::BACK_URL_PARAM);
+        if (empty($intendedUrl)) {
             return CmfConfig::getInstance()->home_page_url();
         } else {
-            $intendedUrl = $request->get(static::BACK_URL_PARAM);
             if (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
                 return route('cmf_items_table', [$matches[1]]);
             } else if (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
