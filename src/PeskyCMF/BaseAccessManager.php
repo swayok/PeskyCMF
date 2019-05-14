@@ -237,7 +237,7 @@ abstract class BaseAccessManager implements AccessManagerInterface {
                 $routeHttpMethodOverride = static::validateAndNormalizeHttpMethod($routeHttpMethodOverride);
                 $routeHttpMethods = [$routeHttpMethodOverride];
             } else {
-                $routeHttpMethods = $route->getMethods();
+                $routeHttpMethods = method_exists($route, 'getMethods') ? $route->getMethods() : $route->methods();
             }
             foreach ($routeHttpMethods as $httpMethod) {
                 // note: 'head' and 'patch' http methods are ignored
