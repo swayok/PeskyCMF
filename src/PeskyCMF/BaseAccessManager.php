@@ -211,8 +211,8 @@ abstract class BaseAccessManager implements AccessManagerInterface {
      * @return string
      */
     static protected function getPermissionKey(Route $route, $httpMethod) {
-//        return str_pad($httpMethod, 6, ' ') . ' -> /' . ltrim($route->getPath(), '/');
-        return $httpMethod . '->' . $route->getPath();
+//        return str_pad($httpMethod, 6, ' ') . ' -> /' . ltrim($route->uri(), '/');
+        return $httpMethod . '->' . $route->uri();
     }
 
     static protected function collectAndCachePermissionsForAllRoutesAndRoles($cacheKey) {
@@ -237,7 +237,7 @@ abstract class BaseAccessManager implements AccessManagerInterface {
                 $routeHttpMethodOverride = static::validateAndNormalizeHttpMethod($routeHttpMethodOverride);
                 $routeHttpMethods = [$routeHttpMethodOverride];
             } else {
-                $routeHttpMethods = method_exists($route, 'getMethods') ? $route->getMethods() : $route->methods();
+                $routeHttpMethods = $route->methods();
             }
             foreach ($routeHttpMethods as $httpMethod) {
                 // note: 'head' and 'patch' http methods are ignored
