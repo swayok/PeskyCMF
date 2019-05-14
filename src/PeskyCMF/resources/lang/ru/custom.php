@@ -490,7 +490,7 @@ $dictionary = [
             'header_create' => 'Добавление меню',
             'header_edit' => 'Редактирование меню',
             'input' => [
-                'Texts' => [
+                'texts' => [
                     'menu_title' => 'Заголовок меню',
                 ]
             ]
@@ -498,7 +498,7 @@ $dictionary = [
         'item_details' => [
             'header' => 'Просмотр меню',
             'field' => [
-                'Texts' => [
+                'texts' => [
                     'menu_title' => 'Заголовок меню',
                 ]
             ]
