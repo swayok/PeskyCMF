@@ -655,9 +655,11 @@ abstract class CmfConfig extends ConfigsContainer {
             'forceEnterMode' => true,
             'removeDialogTabs' => 'image:advanced',
             'extraPlugins' => 'uploadimage',
-            'filebrowserImageUploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
-            'uploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
             'contentsCss' => static::css_files_for_wysiwyg_editor(),
+            // _token won't be working this way =(
+            // moved to WysiwygFormInput->getWysiwygConfig()
+            //'uploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
+            //'filebrowserImageUploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
         ];
     }
 
