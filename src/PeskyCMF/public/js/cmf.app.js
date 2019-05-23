@@ -54,9 +54,8 @@ $(document).ready(function () {
         }
         if (GlobalVars.isDebug) {
             console.log('No route found for: ' + request.url);
-            toastr.error('Page not found')
         }
-        app.back(GlobalVars.rootUrl + '/login');
+        document.location = request.url;
     }).on('routestart', function (event, request) {
         if (request.routeDetected && !app.disableUrlChangeOnce && request.url !== document.location.href) {
             Pilot.setLocation(request);
