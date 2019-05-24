@@ -53,7 +53,7 @@ use {{ $objectParentClass }};
  *
 @foreach($columns as $column)
 @if (!in_array($column['column_name'], ['created_at', 'updated_at']))
- * @method $this    set{{ \Swayok\Utils\StringUtils::classify($column['column_name']) }}($value)
+ * {{ '@method' }} $this    set{{ \Swayok\Utils\StringUtils::classify($column['column_name']) }}($value)
 @endif
 @endforeach
  */
