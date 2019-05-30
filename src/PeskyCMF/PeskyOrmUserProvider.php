@@ -74,6 +74,7 @@ class PeskyOrmUserProvider implements UserProvider {
             $user->exists()
             && (!$user->_hasField('is_active') || $user->is_active)
             && (!$user->_hasField('is_banned') || !$user->is_banned)
+            && (!$user->_hasField('is_deleted') || !$user->is_deleted)
         ) {
             return $user;
         }
