@@ -58,7 +58,7 @@ class CmfUIModule {
             'skin' => $uiSkin,
             'coreAssets' => $this->getCoreAssetsForLayout($uiSkin),
             'customAssets' => $this->getCustomAssetsForLayout(),
-            'scriptsVersion' => '2.3.3',
+            'scriptsVersion' => '2.3.4',
             'jsAppSettings' => $this->getJsAppSettings(),
             'jsAppData' => $this->getJsAppData(),
         ];
