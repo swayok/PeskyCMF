@@ -28758,7 +28758,7 @@ $.prototype.onTransitionEnd = function (callback) {
 * https://github.com/RobinHerbots/Inputmask
 * Copyright (c) 2010 - 2019 Robin Herbots
 * Licensed under the MIT license (http://www.opensource.org/licenses/mit-license.php)
-* Version: 4.0.6
+* Version: 4.0.8
 */
 
 (function(modules) {
@@ -29057,6 +29057,7 @@ $.prototype.onTransitionEnd = function (callback) {
                 var that = this;
                 function importAttributeOptions(npt, opts, userOptions, dataAttribute) {
                     if (opts.importDataAttributes === true) {
+                        var attrOptions = npt.getAttribute(dataAttribute), option, dataoptions, optionData, p;
                         var importOption = function importOption(option, optionData) {
                             optionData = optionData !== undefined ? optionData : npt.getAttribute(dataAttribute + "-" + option);
                             if (optionData !== null) {
@@ -29066,7 +29067,6 @@ $.prototype.onTransitionEnd = function (callback) {
                                 userOptions[option] = optionData;
                             }
                         };
-                        var attrOptions = npt.getAttribute(dataAttribute), option, dataoptions, optionData, p;
                         if (attrOptions && attrOptions !== "") {
                             attrOptions = attrOptions.replace(/'/g, '"');
                             dataoptions = JSON.parse("{" + attrOptions + "}");
@@ -29502,6 +29502,9 @@ $.prototype.onTransitionEnd = function (callback) {
                     reverseTokens(maskTokens[0]);
                 }
                 return maskTokens;
+            },
+            positionColorMask: function positionColorMask(input, template) {
+                input.style.left = template.offsetLeft + "px";
             }
         };
         Inputmask.extendDefaults = function(options) {
@@ -29668,7 +29671,7 @@ $.prototype.onTransitionEnd = function (callback) {
             maskset = maskset || this.maskset;
             opts = opts || this.opts;
             var inputmask = this, el = this.el, isRTL = this.isRTL, undoValue, $el, skipKeyPressEvent = false, skipInputEvent = false, ignorable = false, maxLength, mouseEnter = false, colorMask, originalPlaceholder;
-            function getMaskTemplate(baseOnInput, minimalPos, includeMode, noJit, clearOptionalTail) {
+            var getMaskTemplate = function getMaskTemplate(baseOnInput, minimalPos, includeMode, noJit, clearOptionalTail) {
                 var greedy = opts.greedy;
                 if (clearOptionalTail) opts.greedy = false;
                 minimalPos = minimalPos || 0;
@@ -29701,7 +29704,7 @@ $.prototype.onTransitionEnd = function (callback) {
                 if (includeMode !== false || getMaskSet().maskLength === undefined) getMaskSet().maskLength = pos - 1;
                 opts.greedy = greedy;
                 return maskTemplate;
-            }
+            };
             function getMaskSet() {
                 return maskset;
             }
@@ -30854,7 +30857,7 @@ $.prototype.onTransitionEnd = function (callback) {
                     this.inputmask.refreshValue = false;
                     var input = this, value = e && e.detail ? e.detail[0] : arguments[1], value = value || input.inputmask._valueGet(true);
                     if ($.isFunction(opts.onBeforeMask)) value = opts.onBeforeMask.call(inputmask, value, opts) || value;
-                    value = value.split("");
+                    value = value.toString().split("");
                     checkVal(input, true, false, value);
                     undoValue = getBuffer().join("");
                     if ((opts.clearMaskOnLostFocus || opts.clearIncomplete) && input.inputmask._valueGet() === getBufferTemplate().join("")) {
@@ -31321,9 +31324,6 @@ $.prototype.onTransitionEnd = function (callback) {
                     return EventHandlers.clickEvent.call(input, [ e ]);
                 });
             }
-            Inputmask.prototype.positionColorMask = function(input, template) {
-                input.style.left = template.offsetLeft + "px";
-            };
             function renderColorMask(input, caretPos, clear) {
                 var maskTemplate = [], isStatic = false, test, testPos, ndxIntlzr, pos = 0;
                 function setEntry(entry) {
@@ -32621,7 +32621,7 @@ $.prototype.onTransitionEnd = function (callback) {
     });
 } ]);
 /*!
- * Select2 4.0.6-rc.1
+ * Select2 4.0.7
  * https://select2.github.io
  *
  * Released under the MIT license
@@ -33399,9 +33399,9 @@ S2.define('select2/utils',[
 
   var id = 0;
   Utils.GetUniqueElementId = function (element) {
-    // Get a unique element Id. If element has no id, 
-    // creates a new unique number, stores it in the id 
-    // attribute and returns the new id. 
+    // Get a unique element Id. If element has no id,
+    // creates a new unique number, stores it in the id
+    // attribute and returns the new id.
     // If an id already exists, it simply returns it.
 
     var select2Id = element.getAttribute('data-select2-id');
@@ -33420,7 +33420,7 @@ S2.define('select2/utils',[
 
   Utils.StoreData = function (element, name, value) {
     // Stores an item in the cache for a specified element.
-    // name is the cache key.    
+    // name is the cache key.
     var id = Utils.GetUniqueElementId(element);
     if (!Utils.__cache[id]) {
       Utils.__cache[id] = {};
@@ -33431,19 +33431,20 @@ S2.define('select2/utils',[
 
   Utils.GetData = function (element, name) {
     // Retrieves a value from the cache by its key (name)
-    // name is optional. If no name specified, return 
+    // name is optional. If no name specified, return
     // all cache items for the specified element.
     // and for a specified element.
     var id = Utils.GetUniqueElementId(element);
     if (name) {
       if (Utils.__cache[id]) {
-        return Utils.__cache[id][name] != null ? 
-	      Utils.__cache[id][name]:
-	      $(element).data(name); // Fallback to HTML5 data attribs.
+        if (Utils.__cache[id][name] != null) {
+          return Utils.__cache[id][name];
+        }
+        return $(element).data(name); // Fallback to HTML5 data attribs.
       }
       return $(element).data(name); // Fallback to HTML5 data attribs.
     } else {
-      return Utils.__cache[id];			   
+      return Utils.__cache[id];
     }
   };
 
@@ -33736,7 +33737,10 @@ S2.define('select2/results',[
       }
 
       self.setClasses();
-      self.highlightFirstItem();
+
+      if (self.options.get('scrollAfterSelect')) {
+        self.highlightFirstItem();
+      }
     });
 
     container.on('unselect', function () {
@@ -33745,7 +33749,10 @@ S2.define('select2/results',[
       }
 
       self.setClasses();
-      self.highlightFirstItem();
+
+      if (self.options.get('scrollAfterSelect')) {
+        self.highlightFirstItem();
+      }
     });
 
     container.on('open', function () {
@@ -33799,7 +33806,7 @@ S2.define('select2/results',[
 
       var currentIndex = $options.index($highlighted);
 
-      // If we are already at te top, don't move further
+      // If we are already at the top, don't move further
       // If no options, currentIndex will be -1
       if (currentIndex <= 0) {
         return;
@@ -34092,11 +34099,10 @@ S2.define('select2/selection/base',[
       self.$selection.removeAttr('aria-activedescendant');
       self.$selection.removeAttr('aria-owns');
 
-      self.$selection.focus();
       window.setTimeout(function () {
         self.$selection.focus();
       }, 0);
-
+    
       self._detachCloseHandler(container);
     });
 
@@ -34533,8 +34539,10 @@ S2.define('select2/selection/allowClear',[
       return;
     }
 
+    var removeAll = this.options.get('translations').get('removeAllItems');   
+
     var $remove = $(
-      '<span class="select2-selection__clear">' +
+      '<span class="select2-selection__clear" title="' + removeAll() +'">' +
         '&times;' +
       '</span>'
     );
@@ -35125,6 +35133,7 @@ S2.define('select2/diacritics',[
     '\u019F': 'O',
     '\uA74A': 'O',
     '\uA74C': 'O',
+    '\u0152': 'OE',
     '\u01A2': 'OI',
     '\uA74E': 'OO',
     '\u0222': 'OU',
@@ -35534,6 +35543,7 @@ S2.define('select2/diacritics',[
     '\uA74B': 'o',
     '\uA74D': 'o',
     '\u0275': 'o',
+    '\u0153': 'oe',
     '\u01A3': 'oi',
     '\u0223': 'ou',
     '\uA74F': 'oo',
@@ -35702,8 +35712,9 @@ S2.define('select2/diacritics',[
     '\u03CD': '\u03C5',
     '\u03CB': '\u03C5',
     '\u03B0': '\u03C5',
-    '\u03C9': '\u03C9',
-    '\u03C2': '\u03C3'
+    '\u03CE': '\u03C9',
+    '\u03C2': '\u03C3',
+    '\u2019': '\''
   };
 
   return diacritics;
@@ -36600,7 +36611,7 @@ S2.define('select2/dropdown',[
   };
 
   Dropdown.prototype.position = function ($dropdown, $container) {
-    // Should be implmented in subclasses
+    // Should be implemented in subclasses
   };
 
   Dropdown.prototype.destroy = function () {
@@ -37005,10 +37016,10 @@ S2.define('select2/dropdown/attachBody',[
       top: container.bottom
     };
 
-    // Determine what the parent element is to use for calciulating the offset
+    // Determine what the parent element is to use for calculating the offset
     var $offsetParent = this.$dropdownParent;
 
-    // For statically positoned elements, we need to get the element
+    // For statically positioned elements, we need to get the element
     // that is determining the offset
     if ($offsetParent.css('position') === 'static') {
       $offsetParent = $offsetParent.offsetParent();
@@ -37184,7 +37195,7 @@ S2.define('select2/dropdown/closeOnSelect',[
     var originalEvent = evt.originalEvent;
 
     // Don't close if the control key is being held
-    if (originalEvent && originalEvent.ctrlKey) {
+    if (originalEvent && (originalEvent.ctrlKey || originalEvent.metaKey)) {
       return;
     }
 
@@ -37238,6 +37249,9 @@ S2.define('select2/i18n/en',[],function () {
     },
     searching: function () {
       return 'Searching…';
+    },
+    removeAllItems: function () {
+      return 'Remove all items';
     }
   };
 });
@@ -37609,6 +37623,7 @@ S2.define('select2/defaults',[
       maximumSelectionLength: 0,
       minimumResultsForSearch: 0,
       selectOnClose: false,
+      scrollAfterSelect: false,
       sorter: function (data) {
         return data;
       },
@@ -37720,20 +37735,43 @@ S2.define('select2/options',[
 
       $e.attr('ajax--url', Utils.GetData($e[0], 'ajaxUrl'));
       Utils.StoreData($e[0], 'ajax-Url', Utils.GetData($e[0], 'ajaxUrl'));
-	  
     }
 
     var dataset = {};
 
+    function upperCaseLetter(_, letter) {
+      return letter.toUpperCase();
+    }
+
+    // Pre-load all of the attributes which are prefixed with `data-`
+    for (var attr = 0; attr < $e[0].attributes.length; attr++) {
+      var attributeName = $e[0].attributes[attr].name;
+      var prefix = 'data-';
+
+      if (attributeName.substr(0, prefix.length) == prefix) {
+        // Get the contents of the attribute after `data-`
+        var dataName = attributeName.substring(prefix.length);
+
+        // Get the data contents from the consistent source
+        // This is more than likely the jQuery data helper
+        var dataValue = Utils.GetData($e[0], dataName);
+
+        // camelCase the attribute name to match the spec
+        var camelDataName = dataName.replace(/-([a-z])/g, upperCaseLetter);
+
+        // Store the data attribute contents into the dataset since
+        dataset[camelDataName] = dataValue;
+      }
+    }
+
     // Prefer the element's `dataset` attribute if it exists
     // jQuery 1.x does not correctly handle data attributes with multiple dashes
     if ($.fn.jquery && $.fn.jquery.substr(0, 2) == '1.' && $e[0].dataset) {
-      dataset = $.extend(true, {}, $e[0].dataset, Utils.GetData($e[0]));
-    } else {
-      dataset = Utils.GetData($e[0]);
+      dataset = $.extend(true, {}, $e[0].dataset, dataset);
     }
 
-    var data = $.extend(true, {}, dataset);
+    // Prefer our internal data cache if it exists
+    var data = $.extend(true, {}, Utils.GetData($e[0]), dataset);
 
     data = Utils._convertData(data);
 
@@ -39183,10 +39221,10 @@ S2.define('jquery.select2',[
 /**
   * bootstrap-switch - Turn checkboxes and radio buttons into toggle switches.
   *
-  * @version v3.3.4
+  * @version v3.4.0
   * @homepage https://bttstrp.github.io/bootstrap-switch
   * @author Mattia Larentis <mattia@larentis.eu> (http://larentis.eu)
-  * @license Apache-2.0
+  * @license MIT
   */
 
 (function (global, factory) {
@@ -39252,67 +39290,335 @@ S2.define('jquery.select2',[
 
   var $ = _jquery2.default || window.jQuery || window.$;
 
+  function getClasses(options, id) {
+    var state = options.state,
+        size = options.size,
+        disabled = options.disabled,
+        readonly = options.readonly,
+        indeterminate = options.indeterminate,
+        inverse = options.inverse;
+
+    return [state ? 'on' : 'off', size, disabled ? 'disabled' : undefined, readonly ? 'readonly' : undefined, indeterminate ? 'indeterminate' : undefined, inverse ? 'inverse' : undefined, id ? 'id-' + id : undefined].filter(function (v) {
+      return v == null;
+    });
+  }
+
+  function prvgetElementOptions() {
+    return {
+      state: this.$element.is(':checked'),
+      size: this.$element.data('size'),
+      animate: this.$element.data('animate'),
+      disabled: this.$element.is(':disabled'),
+      readonly: this.$element.is('[readonly]'),
+      indeterminate: this.$element.data('indeterminate'),
+      inverse: this.$element.data('inverse'),
+      radioAllOff: this.$element.data('radio-all-off'),
+      onColor: this.$element.data('on-color'),
+      offColor: this.$element.data('off-color'),
+      onText: this.$element.data('on-text'),
+      offText: this.$element.data('off-text'),
+      labelText: this.$element.data('label-text'),
+      handleWidth: this.$element.data('handle-width'),
+      labelWidth: this.$element.data('label-width'),
+      baseClass: this.$element.data('base-class'),
+      wrapperClass: this.$element.data('wrapper-class')
+    };
+  }
+
+  function prvwidth() {
+    var _this = this;
+
+    var $handles = this.$on.add(this.$off).add(this.$label).css('width', '');
+    var handleWidth = this.options.handleWidth === 'auto' ? Math.round(Math.max(this.$on.width(), this.$off.width())) : this.options.handleWidth;
+    $handles.width(handleWidth);
+    this.$label.width(function (index, width) {
+      if (_this.options.labelWidth !== 'auto') {
+        return _this.options.labelWidth;
+      }
+      if (width < handleWidth) {
+        return handleWidth;
+      }
+      return width;
+    });
+    this.privateHandleWidth = this.$on.outerWidth();
+    this.privateLabelWidth = this.$label.outerWidth();
+    this.$container.width(this.privateHandleWidth * 2 + this.privateLabelWidth);
+    return this.$wrapper.width(this.privateHandleWidth + this.privateLabelWidth);
+  }
+
+  function prvcontainerPosition() {
+    var _this2 = this;
+
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.ope;
+
+    this.$container.css('margin-left', function () {
+      var values = [0, '-' + _this2.privateHandleWidth + 'px'];
+      if (_this2.options.indeterminate) {
+        return '-' + _this2.privateHandleWidth / 2 + 'px';
+      }
+      if (state) {
+        if (_this2.options.inverse) {
+          return values[1];
+        }
+        return values[0];
+      }
+      if (_this2.options.inverse) {
+        return values[0];
+      }
+      return values[1];
+    });
+  }
+
+  function prvgetClass(name) {
+    return this.options.baseClass + '-' + name;
+  }
+
+  function prvinit() {
+    var _this3 = this;
+
+    var init = function init() {
+      _this3.setPrevOptions();
+      prvwidth.call(_this3);
+      prvcontainerPosition.call(_this3);
+      setTimeout(function () {
+        return _this3.options.animate && _this3.$wrapper.addClass(prvgetClass.call(_this3, 'animate'));
+      }, 50);
+    };
+    if (this.$wrapper.is(':visible')) {
+      init();
+      return;
+    }
+    var initInterval = window.setInterval(function () {
+      return _this3.$wrapper.is(':visible') && (init() || true) && window.clearInterval(initInterval);
+    }, 50);
+  }
+
+  function prvelementHandlers() {
+    var _this4 = this;
+
+    return this.$element.on({
+      'setPreviousOptions.bootstrapSwitch': function setPreviousOptionsBootstrapSwitch() {
+        return _this4.setPrevOptions();
+      },
+
+      'previousState.bootstrapSwitch': function previousStateBootstrapSwitch() {
+        _this4.options = _this4.prevOptions;
+        if (_this4.options.indeterminate) {
+          _this4.$wrapper.addClass(prvgetClass.call(_this4, 'indeterminate'));
+        }
+        _this4.$element.prop('checked', _this4.options.state).trigger('change.bootstrapSwitch', true);
+      },
+
+      'change.bootstrapSwitch': function changeBootstrapSwitch(event, skip) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        var state = _this4.$element.is(':checked');
+        prvcontainerPosition.call(_this4, state);
+        if (state === _this4.options.state) {
+          return;
+        }
+        _this4.options.state = state;
+        _this4.$wrapper.toggleClass(prvgetClass.call(_this4, 'off')).toggleClass(prvgetClass.call(_this4, 'on'));
+        if (!skip) {
+          if (_this4.$element.is(':radio')) {
+            $('[name="' + _this4.$element.attr('name') + '"]').not(_this4.$element).prop('checked', false).trigger('change.bootstrapSwitch', true);
+          }
+          _this4.$element.trigger('switchChange.bootstrapSwitch', [state]);
+        }
+      },
+
+      'focus.bootstrapSwitch': function focusBootstrapSwitch(event) {
+        event.preventDefault();
+        _this4.$wrapper.addClass(prvgetClass.call(_this4, 'focused'));
+      },
+
+      'blur.bootstrapSwitch': function blurBootstrapSwitch(event) {
+        event.preventDefault();
+        _this4.$wrapper.removeClass(prvgetClass.call(_this4, 'focused'));
+      },
+
+      'keydown.bootstrapSwitch': function keydownBootstrapSwitch(event) {
+        if (!event.which || _this4.options.disabled || _this4.options.readonly) {
+          return;
+        }
+        if (event.which === 37 || event.which === 39) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          _this4.state(event.which === 39);
+        }
+      }
+    });
+  }
+
+  function prvhandleHandlers() {
+    var _this5 = this;
+
+    this.$on.on('click.bootstrapSwitch', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      _this5.state(false);
+      return _this5.$element.trigger('focus.bootstrapSwitch');
+    });
+    return this.$off.on('click.bootstrapSwitch', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      _this5.state(true);
+      return _this5.$element.trigger('focus.bootstrapSwitch');
+    });
+  }
+
+  function prvlabelHandlers() {
+    var _this6 = this;
+
+    var dragStart = void 0;
+    var dragEnd = void 0;
+    var handlers = {
+      click: function click(event) {
+        event.stopPropagation();
+      },
+
+
+      'mousedown.bootstrapSwitch touchstart.bootstrapSwitch': function mousedownBootstrapSwitchTouchstartBootstrapSwitch(event) {
+        if (dragStart || _this6.options.disabled || _this6.options.readonly) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        dragStart = (event.pageX || event.originalEvent.touches[0].pageX) - parseInt(_this6.$container.css('margin-left'), 10);
+        if (_this6.options.animate) {
+          _this6.$wrapper.removeClass(prvgetClass.call(_this6, 'animate'));
+        }
+        _this6.$element.trigger('focus.bootstrapSwitch');
+      },
+
+      'mousemove.bootstrapSwitch touchmove.bootstrapSwitch': function mousemoveBootstrapSwitchTouchmoveBootstrapSwitch(event) {
+        if (dragStart == null) {
+          return;
+        }
+        var difference = (event.pageX || event.originalEvent.touches[0].pageX) - dragStart;
+        event.preventDefault();
+        if (difference < -_this6.privateHandleWidth || difference > 0) {
+          return;
+        }
+        dragEnd = difference;
+        _this6.$container.css('margin-left', dragEnd + 'px');
+      },
+
+      'mouseup.bootstrapSwitch touchend.bootstrapSwitch': function mouseupBootstrapSwitchTouchendBootstrapSwitch(event) {
+        if (!dragStart) {
+          return;
+        }
+        event.preventDefault();
+        if (_this6.options.animate) {
+          _this6.$wrapper.addClass(prvgetClass.call(_this6, 'animate'));
+        }
+        if (dragEnd) {
+          var state = dragEnd > -(_this6.privateHandleWidth / 2);
+          dragEnd = false;
+          _this6.state(_this6.options.inverse ? !state : state);
+        } else {
+          _this6.state(!_this6.options.state);
+        }
+        dragStart = false;
+      },
+
+      'mouseleave.bootstrapSwitch': function mouseleaveBootstrapSwitch() {
+        _this6.$label.trigger('mouseup.bootstrapSwitch');
+      }
+    };
+    this.$label.on(handlers);
+  }
+
+  function prvexternalLabelHandler() {
+    var _this7 = this;
+
+    var $externalLabel = this.$element.closest('label');
+    $externalLabel.on('click', function (event) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (event.target === $externalLabel[0]) {
+        _this7.toggleState();
+      }
+    });
+  }
+
+  function prvformHandler() {
+    function isBootstrapSwitch() {
+      return $(this).data('bootstrap-switch');
+    }
+
+    function performReset() {
+      return $(this).bootstrapSwitch('state', this.checked);
+    }
+
+    var $form = this.$element.closest('form');
+    if ($form.data('bootstrap-switch')) {
+      return;
+    }
+    $form.on('reset.bootstrapSwitch', function () {
+      window.setTimeout(function () {
+        $form.find('input').filter(isBootstrapSwitch).each(performReset);
+      }, 1);
+    }).data('bootstrap-switch', true);
+  }
+
+  function prvgetClasses(classes) {
+    var _this8 = this;
+
+    if (!$.isArray(classes)) {
+      return [prvgetClass.call(this, classes)];
+    }
+    return classes.map(function (v) {
+      return prvgetClass.call(_this8, v);
+    });
+  }
+
   var BootstrapSwitch = function () {
     function BootstrapSwitch(element) {
-      var _this = this;
+      var _this9 = this;
 
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       _classCallCheck(this, BootstrapSwitch);
 
       this.$element = $(element);
-      this.options = $.extend({}, $.fn.bootstrapSwitch.defaults, this._getElementOptions(), options);
+      this.options = $.extend({}, $.fn.bootstrapSwitch.defaults, prvgetElementOptions.call(this), options);
       this.prevOptions = {};
       this.$wrapper = $('<div>', {
         class: function _class() {
-          var classes = [];
-          classes.push(_this.options.state ? 'on' : 'off');
-          if (_this.options.size) {
-            classes.push(_this.options.size);
-          }
-          if (_this.options.disabled) {
-            classes.push('disabled');
-          }
-          if (_this.options.readonly) {
-            classes.push('readonly');
-          }
-          if (_this.options.indeterminate) {
-            classes.push('indeterminate');
-          }
-          if (_this.options.inverse) {
-            classes.push('inverse');
-          }
-          if (_this.$element.attr('id')) {
-            classes.push('id-' + _this.$element.attr('id'));
-          }
-          return classes.map(_this._getClass.bind(_this)).concat([_this.options.baseClass], _this._getClasses(_this.options.wrapperClass)).join(' ');
+          return getClasses(_this9.options, _this9.$element.attr('id')).map(function (v) {
+            return prvgetClass.call(_this9, v);
+          }).concat([_this9.options.baseClass], prvgetClasses.call(_this9, _this9.options.wrapperClass)).join(' ');
         }
       });
-      this.$container = $('<div>', { class: this._getClass('container') });
+      this.$container = $('<div>', { class: prvgetClass.call(this, 'container') });
       this.$on = $('<span>', {
         html: this.options.onText,
-        class: this._getClass('handle-on') + ' ' + this._getClass(this.options.onColor)
+        class: prvgetClass.call(this, 'handle-on') + ' ' + prvgetClass.call(this, this.options.onColor)
       });
       this.$off = $('<span>', {
         html: this.options.offText,
-        class: this._getClass('handle-off') + ' ' + this._getClass(this.options.offColor)
+        class: prvgetClass.call(this, 'handle-off') + ' ' + prvgetClass.call(this, this.options.offColor)
       });
       this.$label = $('<span>', {
         html: this.options.labelText,
-        class: this._getClass('label')
+        class: prvgetClass.call(this, 'label')
       });
 
-      this.$element.on('init.bootstrapSwitch', this.options.onInit.bind(this, element));
+      this.$element.on('init.bootstrapSwitch', function () {
+        return _this9.options.onInit(element);
+      });
       this.$element.on('switchChange.bootstrapSwitch', function () {
         for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
           args[_key] = arguments[_key];
         }
 
-        if (_this.options.onSwitchChange.apply(element, args) === false) {
-          if (_this.$element.is(':radio')) {
-            $('[name="' + _this.$element.attr('name') + '"]').trigger('previousState.bootstrapSwitch', true);
+        var changeState = _this9.options.onSwitchChange.apply(element, args);
+        if (changeState === false) {
+          if (_this9.$element.is(':radio')) {
+            $('[name="' + _this9.$element.attr('name') + '"]').trigger('previousState.bootstrapSwitch', true);
           } else {
-            _this.$element.trigger('previousState.bootstrapSwitch', true);
+            _this9.$element.trigger('previousState.bootstrapSwitch', true);
           }
         }
       });
@@ -39325,12 +39631,12 @@ S2.define('jquery.select2',[
         this.$element.prop('indeterminate', true);
       }
 
-      this._init();
-      this._elementHandlers();
-      this._handleHandlers();
-      this._labelHandlers();
-      this._formHandler();
-      this._externalLabelHandler();
+      prvinit.call(this);
+      prvelementHandlers.call(this);
+      prvhandleHandlers.call(this);
+      prvlabelHandlers.call(this);
+      prvformHandler.call(this);
+      prvexternalLabelHandler.call(this);
       this.$element.trigger('init.bootstrapSwitch', this.options.state);
     }
 
@@ -39368,9 +39674,8 @@ S2.define('jquery.select2',[
         if (this.options.indeterminate) {
           this.indeterminate(false);
           return this.state(true);
-        } else {
-          return this.$element.prop('checked', !this.options.state).trigger('change.bootstrapSwitch', skip);
         }
+        return this.$element.prop('checked', !this.options.state).trigger('change.bootstrapSwitch', skip);
       }
     }, {
       key: 'size',
@@ -39379,13 +39684,13 @@ S2.define('jquery.select2',[
           return this.options.size;
         }
         if (this.options.size != null) {
-          this.$wrapper.removeClass(this._getClass(this.options.size));
+          this.$wrapper.removeClass(prvgetClass.call(this, this.options.size));
         }
         if (value) {
-          this.$wrapper.addClass(this._getClass(value));
+          this.$wrapper.addClass(prvgetClass.call(this, value));
         }
-        this._width();
-        this._containerPosition();
+        prvwidth.call(this);
+        prvcontainerPosition.call(this);
         this.options.size = value;
         return this.$element;
       }
@@ -39404,7 +39709,7 @@ S2.define('jquery.select2',[
       key: 'toggleAnimate',
       value: function toggleAnimate() {
         this.options.animate = !this.options.animate;
-        this.$wrapper.toggleClass(this._getClass('animate'));
+        this.$wrapper.toggleClass(prvgetClass.call(this, 'animate'));
         return this.$element;
       }
     }, {
@@ -39423,7 +39728,7 @@ S2.define('jquery.select2',[
       value: function toggleDisabled() {
         this.options.disabled = !this.options.disabled;
         this.$element.prop('disabled', this.options.disabled);
-        this.$wrapper.toggleClass(this._getClass('disabled'));
+        this.$wrapper.toggleClass(prvgetClass.call(this, 'disabled'));
         return this.$element;
       }
     }, {
@@ -39442,7 +39747,7 @@ S2.define('jquery.select2',[
       value: function toggleReadonly() {
         this.options.readonly = !this.options.readonly;
         this.$element.prop('readonly', this.options.readonly);
-        this.$wrapper.toggleClass(this._getClass('readonly'));
+        this.$wrapper.toggleClass(prvgetClass.call(this, 'readonly'));
         return this.$element;
       }
     }, {
@@ -39461,8 +39766,8 @@ S2.define('jquery.select2',[
       value: function toggleIndeterminate() {
         this.options.indeterminate = !this.options.indeterminate;
         this.$element.prop('indeterminate', this.options.indeterminate);
-        this.$wrapper.toggleClass(this._getClass('indeterminate'));
-        this._containerPosition();
+        this.$wrapper.toggleClass(prvgetClass.call(this, 'indeterminate'));
+        prvcontainerPosition.call(this);
         return this.$element;
       }
     }, {
@@ -39479,7 +39784,7 @@ S2.define('jquery.select2',[
     }, {
       key: 'toggleInverse',
       value: function toggleInverse() {
-        this.$wrapper.toggleClass(this._getClass('inverse'));
+        this.$wrapper.toggleClass(prvgetClass.call(this, 'inverse'));
         var $on = this.$on.clone(true);
         var $off = this.$off.clone(true);
         this.$on.replaceWith($off);
@@ -39496,9 +39801,9 @@ S2.define('jquery.select2',[
           return this.options.onColor;
         }
         if (this.options.onColor) {
-          this.$on.removeClass(this._getClass(this.options.onColor));
+          this.$on.removeClass(prvgetClass.call(this, this.options.onColor));
         }
-        this.$on.addClass(this._getClass(value));
+        this.$on.addClass(prvgetClass.call(this, value));
         this.options.onColor = value;
         return this.$element;
       }
@@ -39509,9 +39814,9 @@ S2.define('jquery.select2',[
           return this.options.offColor;
         }
         if (this.options.offColor) {
-          this.$off.removeClass(this._getClass(this.options.offColor));
+          this.$off.removeClass(prvgetClass.call(this, this.options.offColor));
         }
-        this.$off.addClass(this._getClass(value));
+        this.$off.addClass(prvgetClass.call(this, value));
         this.options.offColor = value;
         return this.$element;
       }
@@ -39522,8 +39827,8 @@ S2.define('jquery.select2',[
           return this.options.onText;
         }
         this.$on.html(value);
-        this._width();
-        this._containerPosition();
+        prvwidth.call(this);
+        prvcontainerPosition.call(this);
         this.options.onText = value;
         return this.$element;
       }
@@ -39534,8 +39839,8 @@ S2.define('jquery.select2',[
           return this.options.offText;
         }
         this.$off.html(value);
-        this._width();
-        this._containerPosition();
+        prvwidth.call(this);
+        prvcontainerPosition.call(this);
         this.options.offText = value;
         return this.$element;
       }
@@ -39546,7 +39851,7 @@ S2.define('jquery.select2',[
           return this.options.labelText;
         }
         this.$label.html(value);
-        this._width();
+        prvwidth.call(this);
         this.options.labelText = value;
         return this.$element;
       }
@@ -39557,8 +39862,8 @@ S2.define('jquery.select2',[
           return this.options.handleWidth;
         }
         this.options.handleWidth = value;
-        this._width();
-        this._containerPosition();
+        prvwidth.call(this);
+        prvcontainerPosition.call(this);
         return this.$element;
       }
     }, {
@@ -39568,13 +39873,13 @@ S2.define('jquery.select2',[
           return this.options.labelWidth;
         }
         this.options.labelWidth = value;
-        this._width();
-        this._containerPosition();
+        prvwidth.call(this);
+        prvcontainerPosition.call(this);
         return this.$element;
       }
     }, {
       key: 'baseClass',
-      value: function baseClass(value) {
+      value: function baseClass() {
         return this.options.baseClass;
       }
     }, {
@@ -39583,12 +39888,10 @@ S2.define('jquery.select2',[
         if (typeof value === 'undefined') {
           return this.options.wrapperClass;
         }
-        if (!value) {
-          value = $.fn.bootstrapSwitch.defaults.wrapperClass;
-        }
-        this.$wrapper.removeClass(this._getClasses(this.options.wrapperClass).join(' '));
-        this.$wrapper.addClass(this._getClasses(value).join(' '));
-        this.options.wrapperClass = value;
+        var wrapperClass = value || $.fn.bootstrapSwitch.defaults.wrapperClass;
+        this.$wrapper.removeClass(prvgetClasses.call(this, this.options.wrapperClass).join(' '));
+        this.$wrapper.addClass(prvgetClasses.call(this, wrapperClass).join(' '));
+        this.options.wrapperClass = wrapperClass;
         return this.$element;
       }
     }, {
@@ -39610,10 +39913,7 @@ S2.define('jquery.select2',[
         if (typeof value === 'undefined') {
           return this.options.onInit;
         }
-        if (!value) {
-          value = $.fn.bootstrapSwitch.defaults.onInit;
-        }
-        this.options.onInit = value;
+        this.options.onInit = value || $.fn.bootstrapSwitch.defaults.onInit;
         return this.$element;
       }
     }, {
@@ -39622,10 +39922,7 @@ S2.define('jquery.select2',[
         if (typeof value === 'undefined') {
           return this.options.onSwitchChange;
         }
-        if (!value) {
-          value = $.fn.bootstrapSwitch.defaults.onSwitchChange;
-        }
-        this.options.onSwitchChange = value;
+        this.options.onSwitchChange = value || $.fn.bootstrapSwitch.defaults.onSwitchChange;
         return this.$element;
       }
     }, {
@@ -39639,290 +39936,12 @@ S2.define('jquery.select2',[
         this.$element.unwrap().unwrap().off('.bootstrapSwitch').removeData('bootstrap-switch');
         return this.$element;
       }
-    }, {
-      key: '_getElementOptions',
-      value: function _getElementOptions() {
-        return {
-          state: this.$element.is(':checked'),
-          size: this.$element.data('size'),
-          animate: this.$element.data('animate'),
-          disabled: this.$element.is(':disabled'),
-          readonly: this.$element.is('[readonly]'),
-          indeterminate: this.$element.data('indeterminate'),
-          inverse: this.$element.data('inverse'),
-          radioAllOff: this.$element.data('radio-all-off'),
-          onColor: this.$element.data('on-color'),
-          offColor: this.$element.data('off-color'),
-          onText: this.$element.data('on-text'),
-          offText: this.$element.data('off-text'),
-          labelText: this.$element.data('label-text'),
-          handleWidth: this.$element.data('handle-width'),
-          labelWidth: this.$element.data('label-width'),
-          baseClass: this.$element.data('base-class'),
-          wrapperClass: this.$element.data('wrapper-class')
-        };
-      }
-    }, {
-      key: '_width',
-      value: function _width() {
-        var _this2 = this;
-
-        var $handles = this.$on.add(this.$off).add(this.$label).css('width', '');
-        var handleWidth = this.options.handleWidth === 'auto' ? Math.round(Math.max(this.$on.width(), this.$off.width())) : this.options.handleWidth;
-        $handles.width(handleWidth);
-        this.$label.width(function (index, width) {
-          if (_this2.options.labelWidth !== 'auto') {
-            return _this2.options.labelWidth;
-          }
-          if (width < handleWidth) {
-            return handleWidth;
-          }
-          return width;
-        });
-        this._handleWidth = this.$on.outerWidth();
-        this._labelWidth = this.$label.outerWidth();
-        this.$container.width(this._handleWidth * 2 + this._labelWidth);
-        return this.$wrapper.width(this._handleWidth + this._labelWidth);
-      }
-    }, {
-      key: '_containerPosition',
-      value: function _containerPosition() {
-        var _this3 = this;
-
-        var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.options.state;
-        var callback = arguments[1];
-
-        this.$container.css('margin-left', function () {
-          var values = [0, '-' + _this3._handleWidth + 'px'];
-          if (_this3.options.indeterminate) {
-            return '-' + _this3._handleWidth / 2 + 'px';
-          }
-          if (state) {
-            if (_this3.options.inverse) {
-              return values[1];
-            } else {
-              return values[0];
-            }
-          } else {
-            if (_this3.options.inverse) {
-              return values[0];
-            } else {
-              return values[1];
-            }
-          }
-        });
-      }
-    }, {
-      key: '_init',
-      value: function _init() {
-        var _this4 = this;
-
-        var init = function init() {
-          _this4.setPrevOptions();
-          _this4._width();
-          _this4._containerPosition();
-          setTimeout(function () {
-            if (_this4.options.animate) {
-              return _this4.$wrapper.addClass(_this4._getClass('animate'));
-            }
-          }, 50);
-        };
-        if (this.$wrapper.is(':visible')) {
-          init();
-          return;
-        }
-        var initInterval = window.setInterval(function () {
-          if (_this4.$wrapper.is(':visible')) {
-            init();
-            return window.clearInterval(initInterval);
-          }
-        }, 50);
-      }
-    }, {
-      key: '_elementHandlers',
-      value: function _elementHandlers() {
-        var _this5 = this;
-
-        return this.$element.on({
-          'setPreviousOptions.bootstrapSwitch': this.setPrevOptions.bind(this),
-
-          'previousState.bootstrapSwitch': function previousStateBootstrapSwitch() {
-            _this5.options = _this5.prevOptions;
-            if (_this5.options.indeterminate) {
-              _this5.$wrapper.addClass(_this5._getClass('indeterminate'));
-            }
-            _this5.$element.prop('checked', _this5.options.state).trigger('change.bootstrapSwitch', true);
-          },
-
-          'change.bootstrapSwitch': function changeBootstrapSwitch(event, skip) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            var state = _this5.$element.is(':checked');
-            _this5._containerPosition(state);
-            if (state === _this5.options.state) {
-              return;
-            }
-            _this5.options.state = state;
-            _this5.$wrapper.toggleClass(_this5._getClass('off')).toggleClass(_this5._getClass('on'));
-            if (!skip) {
-              if (_this5.$element.is(':radio')) {
-                $('[name="' + _this5.$element.attr('name') + '"]').not(_this5.$element).prop('checked', false).trigger('change.bootstrapSwitch', true);
-              }
-              _this5.$element.trigger('switchChange.bootstrapSwitch', [state]);
-            }
-          },
-
-          'focus.bootstrapSwitch': function focusBootstrapSwitch(event) {
-            event.preventDefault();
-            _this5.$wrapper.addClass(_this5._getClass('focused'));
-          },
-
-          'blur.bootstrapSwitch': function blurBootstrapSwitch(event) {
-            event.preventDefault();
-            _this5.$wrapper.removeClass(_this5._getClass('focused'));
-          },
-
-          'keydown.bootstrapSwitch': function keydownBootstrapSwitch(event) {
-            if (!event.which || _this5.options.disabled || _this5.options.readonly) {
-              return;
-            }
-            if (event.which === 37 || event.which === 39) {
-              event.preventDefault();
-              event.stopImmediatePropagation();
-              _this5.state(event.which === 39);
-            }
-          }
-        });
-      }
-    }, {
-      key: '_handleHandlers',
-      value: function _handleHandlers() {
-        var _this6 = this;
-
-        this.$on.on('click.bootstrapSwitch', function (event) {
-          event.preventDefault();
-          event.stopPropagation();
-          _this6.state(false);
-          return _this6.$element.trigger('focus.bootstrapSwitch');
-        });
-        return this.$off.on('click.bootstrapSwitch', function (event) {
-          event.preventDefault();
-          event.stopPropagation();
-          _this6.state(true);
-          return _this6.$element.trigger('focus.bootstrapSwitch');
-        });
-      }
-    }, {
-      key: '_labelHandlers',
-      value: function _labelHandlers() {
-        var _this7 = this;
-
-        var handlers = {
-          click: function click(event) {
-            event.stopPropagation();
-          },
-
-
-          'mousedown.bootstrapSwitch touchstart.bootstrapSwitch': function mousedownBootstrapSwitchTouchstartBootstrapSwitch(event) {
-            if (_this7._dragStart || _this7.options.disabled || _this7.options.readonly) {
-              return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            _this7._dragStart = (event.pageX || event.originalEvent.touches[0].pageX) - parseInt(_this7.$container.css('margin-left'), 10);
-            if (_this7.options.animate) {
-              _this7.$wrapper.removeClass(_this7._getClass('animate'));
-            }
-            _this7.$element.trigger('focus.bootstrapSwitch');
-          },
-
-          'mousemove.bootstrapSwitch touchmove.bootstrapSwitch': function mousemoveBootstrapSwitchTouchmoveBootstrapSwitch(event) {
-            if (_this7._dragStart == null) {
-              return;
-            }
-            var difference = (event.pageX || event.originalEvent.touches[0].pageX) - _this7._dragStart;
-            event.preventDefault();
-            if (difference < -_this7._handleWidth || difference > 0) {
-              return;
-            }
-            _this7._dragEnd = difference;
-            _this7.$container.css('margin-left', _this7._dragEnd + 'px');
-          },
-
-          'mouseup.bootstrapSwitch touchend.bootstrapSwitch': function mouseupBootstrapSwitchTouchendBootstrapSwitch(event) {
-            if (!_this7._dragStart) {
-              return;
-            }
-            event.preventDefault();
-            if (_this7.options.animate) {
-              _this7.$wrapper.addClass(_this7._getClass('animate'));
-            }
-            if (_this7._dragEnd) {
-              var state = _this7._dragEnd > -(_this7._handleWidth / 2);
-              _this7._dragEnd = false;
-              _this7.state(_this7.options.inverse ? !state : state);
-            } else {
-              _this7.state(!_this7.options.state);
-            }
-            _this7._dragStart = false;
-          },
-
-          'mouseleave.bootstrapSwitch': function mouseleaveBootstrapSwitch() {
-            _this7.$label.trigger('mouseup.bootstrapSwitch');
-          }
-        };
-        this.$label.on(handlers);
-      }
-    }, {
-      key: '_externalLabelHandler',
-      value: function _externalLabelHandler() {
-        var _this8 = this;
-
-        var $externalLabel = this.$element.closest('label');
-        $externalLabel.on('click', function (event) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          if (event.target === $externalLabel[0]) {
-            _this8.toggleState();
-          }
-        });
-      }
-    }, {
-      key: '_formHandler',
-      value: function _formHandler() {
-        var $form = this.$element.closest('form');
-        if ($form.data('bootstrap-switch')) {
-          return;
-        }
-        $form.on('reset.bootstrapSwitch', function () {
-          window.setTimeout(function () {
-            $form.find('input').filter(function () {
-              return $(this).data('bootstrap-switch');
-            }).each(function () {
-              return $(this).bootstrapSwitch('state', this.checked);
-            });
-          }, 1);
-        }).data('bootstrap-switch', true);
-      }
-    }, {
-      key: '_getClass',
-      value: function _getClass(name) {
-        return this.options.baseClass + '-' + name;
-      }
-    }, {
-      key: '_getClasses',
-      value: function _getClasses(classes) {
-        if (!$.isArray(classes)) {
-          return [this._getClass(classes)];
-        }
-        return classes.map(this._getClass.bind(this));
-      }
     }]);
 
     return BootstrapSwitch;
   }();
 
-  $.fn.bootstrapSwitch = function (option) {
+  function bootstrapSwitch(option) {
     for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
       args[_key2 - 1] = arguments[_key2];
     }
@@ -39940,7 +39959,9 @@ S2.define('jquery.select2',[
       return ret;
     }
     return Array.prototype.reduce.call(this, reducer, this);
-  };
+  }
+
+  $.fn.bootstrapSwitch = bootstrapSwitch;
   $.fn.bootstrapSwitch.Constructor = BootstrapSwitch;
   $.fn.bootstrapSwitch.defaults = {
     state: true,
@@ -39966,7 +39987,7 @@ S2.define('jquery.select2',[
 });
 
 /*!
- * Bootstrap-select v1.13.9 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.10 (https://developer.snapappointments.com/bootstrap-select)
  *
  * Copyright 2012-2019 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
@@ -40292,23 +40313,45 @@ S2.define('jquery.select2',[
     });
   }
 
-  // much faster than $.val()
-  function getSelectValues (select) {
-    var result = [];
-    var options = select.selectedOptions;
-    var opt;
+  function getSelectedOptions (select, ignoreDisabled) {
+    var selectedOptions = select.selectedOptions,
+        options = [],
+        opt;
 
-    if (select.multiple) {
-      for (var i = 0, len = options.length; i < len; i++) {
-        opt = options[i];
+    if (ignoreDisabled) {
+      for (var i = 0, len = selectedOptions.length; i < len; i++) {
+        opt = selectedOptions[i];
 
-        result.push(opt.value || opt.text);
+        if (!(opt.disabled || opt.parentNode.tagName === 'OPTGROUP' && opt.parentNode.disabled)) {
+          options.push(opt);
+        }
       }
-    } else {
-      result = select.value;
+
+      return options;
     }
 
-    return result;
+    return selectedOptions;
+  }
+
+  // much faster than $.val()
+  function getSelectValues (select, selectedOptions) {
+    var value = [],
+        options = selectedOptions || select.selectedOptions,
+        opt;
+
+    for (var i = 0, len = options.length; i < len; i++) {
+      opt = options[i];
+
+      if (!(opt.disabled || opt.parentNode.tagName === 'OPTGROUP' && opt.parentNode.disabled)) {
+        value.push(opt.value || opt.text);
+      }
+    }
+
+    if (!select.multiple) {
+      return !value.length ? null : value[0];
+    }
+
+    return value;
   }
 
   // set data-selected on select element if the value has been programmatically selected
@@ -40763,8 +40806,8 @@ S2.define('jquery.select2',[
     this.options = options;
     this.selectpicker = {
       main: {},
-      current: {}, // current changes if a search is in progress
       search: {},
+      current: {}, // current changes if a search is in progress
       view: {},
       keydown: {
         keyHistory: '',
@@ -40804,7 +40847,7 @@ S2.define('jquery.select2',[
     this.init();
   };
 
-  Selectpicker.VERSION = '1.13.9';
+  Selectpicker.VERSION = '1.13.10';
 
   // part of this is duplicated in i18n/defaults-en_US.js. Make sure to update both.
   Selectpicker.DEFAULTS = {
@@ -40868,13 +40911,17 @@ S2.define('jquery.select2',[
       var that = this,
           id = this.$element.attr('id');
 
-      this.selectId = selectId++;
+      selectId++;
+      this.selectId = 'bs-select-' + selectId;
 
       this.$element[0].classList.add('bs-select-hidden');
 
       this.multiple = this.$element.prop('multiple');
       this.autofocus = this.$element.prop('autofocus');
-      this.options.showTick = this.$element[0].classList.contains('show-tick');
+
+      if (this.$element[0].classList.contains('show-tick')) {
+        this.options.showTick = true;
+      }
 
       this.$newElement = this.createDropdown();
       this.$element
@@ -40896,7 +40943,14 @@ S2.define('jquery.select2',[
 
       this.checkDisabled();
       this.clickListener();
-      if (this.options.liveSearch) this.liveSearchListener();
+
+      if (this.options.liveSearch) {
+        this.liveSearchListener();
+        this.focusedParent = this.$searchbox[0];
+      } else {
+        this.focusedParent = this.$menuInner[0];
+      }
+
       this.setStyle();
       this.render();
       this.setWidth();
@@ -40921,14 +40975,12 @@ S2.define('jquery.select2',[
 
       this.$newElement.on({
         'hide.bs.dropdown': function (e) {
-          that.$menuInner.attr('aria-expanded', false);
           that.$element.trigger('hide' + EVENT_KEY, e);
         },
         'hidden.bs.dropdown': function (e) {
           that.$element.trigger('hidden' + EVENT_KEY, e);
         },
         'show.bs.dropdown': function (e) {
-          that.$menuInner.attr('aria-expanded', true);
           that.$element.trigger('show' + EVENT_KEY, e);
         },
         'shown.bs.dropdown': function (e) {
@@ -40969,6 +41021,7 @@ S2.define('jquery.select2',[
       // Options
       // If we are multiple or showTick option is set, then add the show-tick class
       var showTick = (this.multiple || this.options.showTick) ? ' show-tick' : '',
+          multiselectable = this.multiple ? ' aria-multiselectable="true"' : '',
           inputGroup = '',
           autofocus = this.autofocus ? ' autofocus' : '';
 
@@ -41000,7 +41053,7 @@ S2.define('jquery.select2',[
                 :
                 ' placeholder="' + htmlEscape(this.options.liveSearchPlaceholder) + '"'
               ) +
-              ' role="textbox" aria-label="Search">' +
+              ' role="combobox" aria-label="Search" aria-controls="' + this.selectId + '" aria-autocomplete="list">' +
           '</div>';
       }
 
@@ -41031,7 +41084,7 @@ S2.define('jquery.select2',[
 
       drop =
         '<div class="dropdown bootstrap-select' + showTick + inputGroup + '">' +
-          '<button type="button" class="' + this.options.styleBase + ' dropdown-toggle" ' + (this.options.display === 'static' ? 'data-display="static"' : '') + 'data-toggle="dropdown"' + autofocus + ' role="button">' +
+          '<button type="button" class="' + this.options.styleBase + ' dropdown-toggle" ' + (this.options.display === 'static' ? 'data-display="static"' : '') + 'data-toggle="dropdown"' + autofocus + ' role="combobox" aria-owns="' + this.selectId + '" aria-haspopup="listbox" aria-expanded="false">' +
             '<div class="filter-option">' +
               '<div class="filter-option-inner">' +
                 '<div class="filter-option-inner-inner"></div>' +
@@ -41045,12 +41098,12 @@ S2.define('jquery.select2',[
               '</span>'
             ) +
           '</button>' +
-          '<div class="' + classNames.MENU + ' ' + (version.major === '4' ? '' : classNames.SHOW) + '" role="combobox">' +
+          '<div class="' + classNames.MENU + ' ' + (version.major === '4' ? '' : classNames.SHOW) + '">' +
             header +
             searchbox +
             actionsbox +
-            '<div class="inner ' + classNames.SHOW + '" role="listbox" aria-expanded="false" tabindex="-1">' +
-                '<ul class="' + classNames.MENU + ' inner ' + (version.major === '4' ? classNames.SHOW : '') + '">' +
+            '<div class="inner ' + classNames.SHOW + '" role="listbox" id="' + this.selectId + '" tabindex="-1" ' + multiselectable + '>' +
+                '<ul class="' + classNames.MENU + ' inner ' + (version.major === '4' ? classNames.SHOW : '') + '" role="presentation">' +
                 '</ul>' +
             '</div>' +
             donebutton +
@@ -41062,6 +41115,7 @@ S2.define('jquery.select2',[
 
     setPositionData: function () {
       this.selectpicker.view.canHighlight = [];
+      this.selectpicker.view.size = 0;
 
       for (var i = 0; i < this.selectpicker.current.data.length; i++) {
         var li = this.selectpicker.current.data[i],
@@ -41081,6 +41135,11 @@ S2.define('jquery.select2',[
 
         this.selectpicker.view.canHighlight.push(canHighlight);
 
+        if (canHighlight) {
+          this.selectpicker.view.size++;
+          li.posinset = this.selectpicker.view.size;
+        }
+
         li.position = (i === 0 ? 0 : this.selectpicker.current.data[i - 1].position) + li.height;
       }
     },
@@ -41089,18 +41148,34 @@ S2.define('jquery.select2',[
       return (this.options.virtualScroll !== false) && (this.selectpicker.main.elements.length >= this.options.virtualScroll) || this.options.virtualScroll === true;
     },
 
-    createView: function (isSearching, scrollTop) {
-      scrollTop = scrollTop || 0;
-
-      var that = this;
+    createView: function (isSearching, setSize, refresh) {
+      var that = this,
+          scrollTop = 0,
+          active = [],
+          selected,
+          prevActive;
 
       this.selectpicker.current = isSearching ? this.selectpicker.search : this.selectpicker.main;
 
-      var active = [];
-      var selected;
-      var prevActive;
-
       this.setPositionData();
+
+      if (setSize) {
+        if (refresh) {
+          scrollTop = this.$menuInner[0].scrollTop;
+        } else if (!that.multiple) {
+          var element = that.$element[0],
+              selectedIndex = (element.options[element.selectedIndex] || {}).liIndex;
+
+          if (typeof selectedIndex === 'number' && that.options.size !== false) {
+            var selectedData = that.selectpicker.main.data[selectedIndex],
+                position = selectedData && selectedData.position;
+
+            if (position) {
+              scrollTop = position - ((that.sizeInfo.menuInnerHeight + that.sizeInfo.liHeight) / 2);
+            }
+          }
+        }
+      }
 
       scroll(scrollTop, true);
 
@@ -41175,22 +41250,19 @@ S2.define('jquery.select2',[
           selected = that.selectpicker.main.elements[that.selectedIndex];
 
           if (init) {
-            if (that.activeIndex !== that.selectedIndex && active && active.length) {
-              active.classList.remove('active');
-              if (active.firstChild) active.firstChild.classList.remove('active');
+            if (that.activeIndex !== that.selectedIndex) {
+              that.defocusItem(active);
             }
             that.activeIndex = undefined;
           }
 
-          if (that.activeIndex && that.activeIndex !== that.selectedIndex && selected && selected.length) {
-            selected.classList.remove('active');
-            if (selected.firstChild) selected.firstChild.classList.remove('active');
+          if (that.activeIndex && that.activeIndex !== that.selectedIndex) {
+            that.defocusItem(selected);
           }
         }
 
-        if (that.prevActiveIndex !== undefined && that.prevActiveIndex !== that.activeIndex && that.prevActiveIndex !== that.selectedIndex && prevActive && prevActive.length) {
-          prevActive.classList.remove('active');
-          if (prevActive.firstChild) prevActive.firstChild.classList.remove('active');
+        if (that.prevActiveIndex !== undefined && that.prevActiveIndex !== that.activeIndex && that.prevActiveIndex !== that.selectedIndex) {
+          that.defocusItem(prevActive);
         }
 
         if (init || positionIsDifferent) {
@@ -41253,6 +41325,9 @@ S2.define('jquery.select2',[
 
               menuInner.firstChild.style.marginTop = marginTop + 'px';
               menuInner.firstChild.style.marginBottom = marginBottom + 'px';
+            } else {
+              menuInner.firstChild.style.marginTop = 0;
+              menuInner.firstChild.style.marginBottom = 0;
             }
 
             menuInner.firstChild.appendChild(menuFragment);
@@ -41273,17 +41348,11 @@ S2.define('jquery.select2',[
 
           newActive = that.selectpicker.view.visibleElements[index];
 
-          if (that.selectpicker.view.currentActive) {
-            that.selectpicker.view.currentActive.classList.remove('active');
-            if (that.selectpicker.view.currentActive.firstChild) that.selectpicker.view.currentActive.firstChild.classList.remove('active');
-          }
-
-          if (newActive) {
-            newActive.classList.add('active');
-            if (newActive.firstChild) newActive.firstChild.classList.add('active');
-          }
+          that.defocusItem(that.selectpicker.view.currentActive);
 
           that.activeIndex = (that.selectpicker.current.data[index] || {}).index;
+
+          that.focusItem(newActive);
         }
       }
 
@@ -41294,6 +41363,31 @@ S2.define('jquery.select2',[
 
           if (isActive) scroll(that.$menuInner[0].scrollTop);
         });
+    },
+
+    focusItem: function (li, liData, noStyle) {
+      if (li) {
+        liData = liData || this.selectpicker.main.data[this.activeIndex];
+        var a = li.firstChild;
+
+        if (a) {
+          a.setAttribute('aria-setsize', this.selectpicker.view.size);
+          a.setAttribute('aria-posinset', liData.posinset);
+
+          if (noStyle !== true) {
+            this.focusedParent.setAttribute('aria-activedescendant', a.id);
+            li.classList.add('active');
+            a.classList.add('active');
+          }
+        }
+      }
+    },
+
+    defocusItem: function (li) {
+      if (li) {
+        li.classList.remove('active');
+        if (li.firstChild) li.firstChild.classList.remove('active');
+      }
     },
 
     setPlaceholder: function () {
@@ -41406,18 +41500,21 @@ S2.define('jquery.select2',[
           config.iconBase = iconBase;
 
           var textElement = generateOption.text(config);
-
-          mainElements.push(
-            generateOption.li(
-              generateOption.a(
-                textElement,
-                optionClass,
-                inlineStyle
-              ),
-              '',
-              config.optID
-            )
+          var liElement = generateOption.li(
+            generateOption.a(
+              textElement,
+              optionClass,
+              inlineStyle
+            ),
+            '',
+            config.optID
           );
+
+          if (liElement.firstChild) {
+            liElement.firstChild.id = that.selectId + '-' + liIndex;
+          }
+
+          mainElements.push(liElement);
 
           option.liIndex = liIndex;
 
@@ -41532,7 +41629,8 @@ S2.define('jquery.select2',[
       this.setPlaceholder();
 
       var that = this,
-          selectedOptions = this.$element[0].selectedOptions,
+          element = this.$element[0],
+          selectedOptions = getSelectedOptions(element, this.options.hideDisabled),
           selectedCount = selectedOptions.length,
           button = this.$button[0],
           buttonInner = button.querySelector('.filter-option-inner-inner'),
@@ -41542,7 +41640,7 @@ S2.define('jquery.select2',[
           countMax,
           hasContent = false;
 
-      this.togglePlaceholder();
+      button.classList.toggle('bs-placeholder', that.multiple ? !selectedCount : !getSelectValues(element, selectedOptions));
 
       this.tabIndex();
 
@@ -41918,9 +42016,7 @@ S2.define('jquery.select2',[
       if (this.options.size === false) return;
 
       var that = this,
-          $window = $(window),
-          selectedIndex,
-          offset = 0;
+          $window = $(window);
 
       this.setMenuSize();
 
@@ -41942,19 +42038,7 @@ S2.define('jquery.select2',[
         $window.off('resize' + EVENT_KEY + '.' + this.selectId + '.setMenuSize' + ' scroll' + EVENT_KEY + '.' + this.selectId + '.setMenuSize');
       }
 
-      if (refresh) {
-        offset = this.$menuInner[0].scrollTop;
-      } else if (!that.multiple) {
-        var element = that.$element[0];
-        selectedIndex = (element.options[element.selectedIndex] || {}).liIndex;
-
-        if (typeof selectedIndex === 'number' && that.options.size !== false) {
-          offset = that.sizeInfo.liHeight * selectedIndex;
-          offset = offset - (that.sizeInfo.menuInnerHeight / 2) + (that.sizeInfo.liHeight / 2);
-        }
-      }
-
-      that.createView(false, offset);
+      that.createView(false, true, refresh);
     },
 
     setWidth: function () {
@@ -42066,7 +42150,7 @@ S2.define('jquery.select2',[
       });
     },
 
-    setOptionStatus: function () {
+    setOptionStatus: function (selectedOnly) {
       var that = this;
 
       that.noScroll = false;
@@ -42077,10 +42161,12 @@ S2.define('jquery.select2',[
               option = liData.option;
 
           if (option) {
-            that.setDisabled(
-              liData.index,
-              liData.disabled
-            );
+            if (selectedOnly !== true) {
+              that.setDisabled(
+                liData.index,
+                liData.disabled
+              );
+            }
 
             that.setSelected(
               liData.index,
@@ -42120,28 +42206,33 @@ S2.define('jquery.select2',[
       }
 
       li.classList.toggle('selected', selected);
-      li.classList.toggle('active', keepActive);
 
       if (keepActive) {
+        this.focusItem(li, liData);
         this.selectpicker.view.currentActive = li;
         this.activeIndex = index;
+      } else {
+        this.defocusItem(li);
       }
 
       if (a) {
         a.classList.toggle('selected', selected);
-        a.classList.toggle('active', keepActive);
-        a.setAttribute('aria-selected', selected);
-      }
 
-      if (!keepActive) {
-        if (!activeIndexIsSet && selected && this.prevActiveIndex !== undefined) {
-          prevActive = this.selectpicker.main.elements[this.prevActiveIndex];
-
-          prevActive.classList.remove('active');
-          if (prevActive.firstChild) {
-            prevActive.firstChild.classList.remove('active');
+        if (selected) {
+          a.setAttribute('aria-selected', true);
+        } else {
+          if (this.multiple) {
+            a.setAttribute('aria-selected', false);
+          } else {
+            a.removeAttribute('aria-selected');
           }
         }
+      }
+
+      if (!keepActive && !activeIndexIsSet && selected && this.prevActiveIndex !== undefined) {
+        prevActive = this.selectpicker.main.elements[this.prevActiveIndex];
+
+        this.defocusItem(prevActive);
       }
     },
 
@@ -42162,11 +42253,11 @@ S2.define('jquery.select2',[
       if (a) {
         if (version.major === '4') a.classList.toggle(classNames.DISABLED, disabled);
 
-        a.setAttribute('aria-disabled', disabled);
-
         if (disabled) {
+          a.setAttribute('aria-disabled', disabled);
           a.setAttribute('tabindex', -1);
         } else {
+          a.removeAttribute('aria-disabled');
           a.setAttribute('tabindex', 0);
         }
       }
@@ -42196,17 +42287,6 @@ S2.define('jquery.select2',[
       this.$button.on('click', function () {
         return !that.isDisabled();
       });
-    },
-
-    togglePlaceholder: function () {
-      // much faster than calling $.val()
-      var element = this.$element[0],
-          selectedIndex = element.selectedIndex,
-          nothingSelected = selectedIndex === -1;
-
-      if (!nothingSelected && !element.options[selectedIndex].value) nothingSelected = true;
-
-      this.$button.toggleClass('bs-placeholder', nothingSelected);
     },
 
     tabIndex: function () {
@@ -42273,13 +42353,25 @@ S2.define('jquery.select2',[
         }
       });
 
+      // ensure posinset and setsize are correct before selecting an option via a click
+      this.$menuInner.on('mouseenter', 'li a', function (e) {
+        var hoverLi = this.parentElement,
+            position0 = that.isVirtual() ? that.selectpicker.view.position0 : 0,
+            index = Array.prototype.indexOf.call(hoverLi.parentElement.children, hoverLi),
+            hoverData = that.selectpicker.current.data[index + position0];
+
+        that.focusItem(hoverLi, hoverData, true);
+      });
+
       this.$menuInner.on('click', 'li a', function (e, retainActive) {
         var $this = $(this),
+            element = that.$element[0],
             position0 = that.isVirtual() ? that.selectpicker.view.position0 : 0,
             clickedData = that.selectpicker.current.data[$this.parent().index() + position0],
             clickedIndex = clickedData.index,
-            prevValue = getSelectValues(that.$element[0]),
-            prevIndex = that.$element.prop('selectedIndex'),
+            prevValue = getSelectValues(element),
+            prevIndex = element.selectedIndex,
+            prevOption = element.options[prevIndex],
             triggerChange = true;
 
         // Don't close on multi choice menu
@@ -42308,7 +42400,7 @@ S2.define('jquery.select2',[
           }
 
           if (!that.multiple) { // Deselect all others if not multi select box
-            $options.prop('selected', false);
+            prevOption.selected = false;
             option.selected = true;
             that.setSelected(clickedIndex, true);
           } else { // Toggle the one we have chosen if we are multi select.
@@ -42390,7 +42482,7 @@ S2.define('jquery.select2',[
 
           // Trigger select 'change'
           if (triggerChange) {
-            if ((prevValue != getSelectValues(that.$element[0]) && that.multiple) || (prevIndex != that.$element.prop('selectedIndex') && !that.multiple)) {
+            if (that.multiple || prevIndex !== element.selectedIndex) {
               // $option.prop('selected') is current option state (selected/unselected). prevValue is the value of the select prior to being changed.
               changedArguments = [option.index, $option.prop('selected'), prevValue];
               that.$element
@@ -42548,14 +42640,29 @@ S2.define('jquery.select2',[
     },
 
     val: function (value) {
+      var element = this.$element[0];
+
       if (typeof value !== 'undefined') {
-        var prevValue = getSelectValues(this.$element[0]);
+        var prevValue = getSelectValues(element);
 
         changedArguments = [null, null, prevValue];
 
         this.$element
           .val(value)
           .trigger('changed' + EVENT_KEY, changedArguments);
+
+        if (this.$newElement.hasClass(classNames.SHOW)) {
+          if (this.multiple) {
+            this.setOptionStatus(true);
+          } else {
+            var liSelectedIndex = (element.options[element.selectedIndex] || {}).liIndex;
+
+            if (typeof liSelectedIndex === 'number') {
+              this.setSelected(this.selectedIndex, false);
+              this.setSelected(liSelectedIndex, true);
+            }
+          }
+        }
 
         this.render();
 
@@ -42594,8 +42701,6 @@ S2.define('jquery.select2',[
       if (previousSelected === currentSelected) return;
 
       this.setOptionStatus();
-
-      this.togglePlaceholder();
 
       changedArguments = [null, null, prevValue];
 
@@ -42664,15 +42769,11 @@ S2.define('jquery.select2',[
       if (isArrowKey) { // if up or down
         if (!$items.length) return;
 
-        // $items.index/.filter is too slow with a large list and no virtual scroll
-        index = isVirtual === true ? $items.index($items.filter('.active')) : that.activeIndex;
-
-        if (index === undefined) index = -1;
+        liActive = that.selectpicker.main.elements[that.activeIndex];
+        index = liActive ? Array.prototype.indexOf.call(liActive.parentElement.children, liActive) : -1;
 
         if (index !== -1) {
-          liActive = that.selectpicker.current.elements[index + position0];
-          liActive.classList.remove('active');
-          if (liActive.firstChild) liActive.firstChild.classList.remove('active');
+          that.defocusItem(liActive);
         }
 
         if (e.which === keyCodes.ARROW_UP) { // up
@@ -42724,12 +42825,9 @@ S2.define('jquery.select2',[
 
         liActive = that.selectpicker.current.elements[liActiveIndex];
 
-        if (liActive) {
-          liActive.classList.add('active');
-          if (liActive.firstChild) liActive.firstChild.classList.add('active');
-        }
-
         that.activeIndex = that.selectpicker.current.data[liActiveIndex].index;
+
+        that.focusItem(liActive);
 
         that.selectpicker.view.currentActive = liActive;
 
@@ -42804,11 +42902,12 @@ S2.define('jquery.select2',[
           }
 
           liActive = that.selectpicker.main.elements[searchMatch];
-          liActive.classList.add('active');
-          if (liActive.firstChild) liActive.firstChild.classList.add('active');
+
           that.activeIndex = matches[matchIndex];
 
-          liActive.firstChild.focus();
+          that.focusItem(liActive);
+
+          if (liActive) liActive.firstChild.focus();
 
           if (updateScroll) that.$menuInner[0].scrollTop = offset;
 
@@ -43031,16 +43130,16 @@ S2.define('jquery.select2',[
  *
  * Extends existing [Bootstrap Select] implementations by adding the ability to search via AJAX requests as you type. Originally for CROSCON.
  *
- * @version 1.4.4
+ * @version 1.4.5
  * @author Adam Heim - https://github.com/truckingsim
  * @link https://github.com/truckingsim/Ajax-Bootstrap-Select
- * @copyright 2018 Adam Heim
+ * @copyright 2019 Adam Heim
  * @license Released under the MIT license.
  *
  * Contributors:
  *   Mark Carver - https://github.com/markcarver
  *
- * Last build: 2018-06-12 11:53:57 AM EDT
+ * Last build: 2019-04-23 12:18:55 PM EDT
  */
 !(function ($, window) {
 
@@ -43358,12 +43457,6 @@ AjaxBootstrapSelect.prototype.init = function () {
             plugin.log(plugin.LOG_DEBUG, 'Key ignored.');
             return;
         }
-		
-        // Don't process if below minimum query length
-        if (query.length < plugin.options.minLength) {
-            plugin.list.setStatus(plugin.t('statusTooShort'));
-            return;
-        }
 
         // Clear out any existing timer.
         clearTimeout(requestDelayTimer);
@@ -43379,6 +43472,12 @@ AjaxBootstrapSelect.prototype.init = function () {
             if (!plugin.options.emptyRequest) {
                 return;
             }
+        }
+
+        // Don't process if below minimum query length
+        if (query.length < plugin.options.minLength) {
+            plugin.list.setStatus(plugin.t('statusTooShort'));
+            return;
         }
 
         // Store the query.

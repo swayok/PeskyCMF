@@ -1,5 +1,5 @@
 /*!
- * Bootstrap-select v1.13.9 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.10 (https://developer.snapappointments.com/bootstrap-select)
  *
  * Copyright 2012-2019 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
@@ -42,16 +42,16 @@
  *
  * Extends existing [Bootstrap Select] implementations by adding the ability to search via AJAX requests as you type. Originally for CROSCON.
  *
- * @version 1.4.4
+ * @version 1.4.5
  * @author Adam Heim - https://github.com/truckingsim
  * @link https://github.com/truckingsim/Ajax-Bootstrap-Select
- * @copyright 2018 Adam Heim
+ * @copyright 2019 Adam Heim
  * @license Released under the MIT license.
  *
  * Contributors:
  *   Mark Carver - https://github.com/markcarver
  *
- * Last build: 2018-06-12 11:53:57 AM EDT
+ * Last build: 2019-04-23 12:18:55 PM EDT
  */
 !(function ($) {
 /*!
@@ -328,6 +328,6 @@ $.fn.ajaxSelectPicker.locale.ja = $.fn.ajaxSelectPicker.locale['ja-JP'];
 
 })));
 
-/*! Select2 4.0.6-rc.1 | https://github.com/select2/select2/blob/master/LICENSE.md */
+/*! Select2 4.0.7 | https://github.com/select2/select2/blob/master/LICENSE.md */
 
-(function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var e=jQuery.fn.select2.amd;return e.define("select2/i18n/ja",[],function(){return{errorLoading:function(){return"結果が読み込まれませんでした"},inputTooLong:function(e){var t=e.input.length-e.maximum,n=t+" 文字を削除してください";return n},inputTooShort:function(e){var t=e.minimum-e.input.length,n="少なくとも "+t+" 文字を入力してください";return n},loadingMore:function(){return"読み込み中…"},maximumSelected:function(e){var t=e.maximum+" 件しか選択できません";return t},noResults:function(){return"対象が見つかりません"},searching:function(){return"検索しています…"}}}),{define:e.define,require:e.require}})();
+(function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var e=jQuery.fn.select2.amd;return e.define("select2/i18n/ja",[],function(){return{errorLoading:function(){return"結果が読み込まれませんでした"},inputTooLong:function(e){var t=e.input.length-e.maximum,n=t+" 文字を削除してください";return n},inputTooShort:function(e){var t=e.minimum-e.input.length,n="少なくとも "+t+" 文字を入力してください";return n},loadingMore:function(){return"読み込み中…"},maximumSelected:function(e){var t=e.maximum+" 件しか選択できません";return t},noResults:function(){return"対象が見つかりません"},searching:function(){return"検索しています…"},removeAllItems:function(){return"すべてのアイテムを削除"}}}),{define:e.define,require:e.require}})();

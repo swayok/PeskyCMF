@@ -6643,6 +6643,14 @@ var ScaffoldFormHelper = {
                         'default': !!inputConfig.checked
                     });
                     break;
+                case 'textarea':
+                    dialogElements.push({
+                        type: 'textarea',
+                        label: inputConfig.label,
+                        id: inputName,
+                        'default': typeof inputConfig.value !== 'undefined' ? inputConfig.value : ''
+                    });
+                    break;
                 default:
                     dialogElements.push({
                         type: 'text',

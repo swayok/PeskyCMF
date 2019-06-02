@@ -2,6 +2,8 @@
     "/dist/raw/js/jquery.js": "/dist/raw/js/jquery.js",
     "/dist/raw/js/jquery.min.js": "/dist/raw/js/jquery.min.js",
     "/dist/raw/js/jquery.min.map": "/dist/raw/js/jquery.min.map",
+    "/dist/raw/js/bootstrap.js": "/dist/raw/js/bootstrap.js",
+    "/dist/raw/js/bootstrap.min.js": "/dist/raw/js/bootstrap.min.js",
     "/dist/raw/css/helpers.css": "/dist/raw/css/helpers.css",
     "/dist/raw/js/cmf-app.js": "/dist/raw/js/cmf-app.js",
     "/dist/src/src/js/cmf.app.js": "/dist/src/src/js/cmf.app.js",
