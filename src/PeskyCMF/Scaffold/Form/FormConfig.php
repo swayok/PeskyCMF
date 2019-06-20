@@ -488,25 +488,23 @@ class FormConfig extends ScaffoldActionConfig {
             $messages = Set::flatten($messages);
         }
         $arrayFields = [];
-        foreach ($validators as $key => &$value) {
+        foreach ($validators as $key => $value) {
             if (is_string($value)) {
-                $value = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
-                if (preg_match('%(^|\|)array%i', $value)) {
+                $validators[$key] = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
+                if (preg_match('%(^|\|)array%i', $validators[$key])) {
                     $arrayFields[] = $key;
                 }
             } else if (is_array($value)) {
-                foreach ($value as &$validator) {
-                    if (is_string($validator)) {
-                        $validator = StringUtils::insert($value, $data, ['before' => '{{', 'after' => '}}']);
+                foreach ($value as $index => $validator) {
+                    if (is_string($validator) || method_exists($validator, '__toString')) {
+                        $validators[$key][$index] = StringUtils::insert((string)$validator, $data, ['before' => '{{', 'after' => '}}']);
                     }
-                    if ($validator === 'array') {
+                    if ($validators[$key][$index] === 'array') {
                         $arrayFields[] = $key;
                     }
                 }
-                unset($validator);
             }
         }
-        unset($value);
         $validator = \Validator::make($data, $validators, $messages);
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
