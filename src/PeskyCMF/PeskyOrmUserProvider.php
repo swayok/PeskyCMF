@@ -56,11 +56,15 @@ class PeskyOrmUserProvider implements UserProvider {
     public function retrieveByToken($identifier, $token) {
         /** @var DbObject|Authenticatable $dbObject */
         $dbObject = $this->createDbObject();
-        /** @var DbObject $user */
-        $user = $dbObject->find([
+        $conditions = array(
             $dbObject->_getPkFieldName() => $identifier,
-            $dbObject->getRememberTokenName() => $token
-        ]);
+            $dbObject->getRememberTokenName() => $token,
+        );
+        if ($dbObject->_hasField('is_deleted')) {
+            $conditions['is_deleted'] = false;
+        }
+        /** @var DbObject $user */
+        $user = $dbObject->find($conditions);
         return $this->validateUser($user, null);
     }
 
@@ -102,14 +106,18 @@ class PeskyOrmUserProvider implements UserProvider {
      */
     public function retrieveByCredentials(array $credentials) {
 
-        $conditions = array();
-
+        $conditions = array(
+        );
         foreach ($credentials as $key => $value) {
             if (!str_contains($key, 'password')) {
                 $conditions[$key] = $value;
             }
         }
-        $user = $this->createDbObject()->find($conditions);
+        $user = $this->createDbObject();
+        if ($user->_hasField('is_deleted')) {
+            $conditions['is_deleted'] = false;
+        }
+        $user->find($conditions);
 
         return $this->validateUser($user, null);
     }
