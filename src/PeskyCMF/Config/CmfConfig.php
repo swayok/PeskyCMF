@@ -377,12 +377,12 @@ class CmfConfig extends ConfigsContainer {
         return [
             [
                 'label' => self::transCustom('.page.dashboard.menu_title'),
-                'url' => route('cmf_page', ['dashboard']),
+                'url' => route('cmf_page', ['page' => 'dashboard']),
                 'icon' => 'glyphicon glyphicon-dashboard',
             ],
             [
                 'label' => self::transCustom('.admins.menu_title'),
-                'url' => route('cmf_items_table', ['admins']),
+                'url' => route('cmf_items_table', ['table_name' => 'admins']),
                 'icon' => 'fa fa-group'
             ]
             /*[

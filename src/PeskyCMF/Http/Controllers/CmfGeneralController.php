@@ -236,19 +236,19 @@ class CmfGeneralController extends Controller {
             return CmfConfig::getInstance()->home_page_url();
         } else {
             if (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
-                return route('cmf_items_table', [$matches[1]]);
+                return route('cmf_items_table', ['table_name' => $matches[1]]);
             } else if (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
-                return route('cmf_items_table', [$matches[1]]);
+                return route('cmf_items_table', ['table_name' => $matches[1]]);
             } else if (preg_match('%/api/([^/]+?)/([^/]+?)/?(?:details=(\d)|$)%i', $intendedUrl, $matches)) {
                 if (isset($matches[3]) && $matches[3] === '1') {
-                    return route('cmf_item_details', [$matches[1], $matches[2]]);
+                    return route('cmf_item_details', ['table_name' => $matches[1], 'id' => $matches[2]]);
                 } else {
-                    return route('cmf_item_edit_form', [$matches[1], $matches[2]]);
+                    return route('cmf_item_edit_form', ['table_name' => $matches[1], 'id' => $matches[2]]);
                 }
             } else if (preg_match('%/api/([^/]+?)%i', $intendedUrl, $matches)) {
-                return route('cmf_items_table', [$matches[1]]);
+                return route('cmf_items_table', ['table_name' => $matches[1]]);
             } else if (preg_match('%/page/([^/]+)\.html$%i', $intendedUrl, $matches)) {
-                return route('cmf_page', [$matches[1]]);
+                return route('cmf_page', ['page' => $matches[1]]);
             } else {
                return $intendedUrl;
             }

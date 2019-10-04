@@ -126,7 +126,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_selected'))
                     ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_selected_confirm'))
                     ->setDataAttr('action', 'bulk-selected')
-                    ->setDataAttr('url', route('cmf_api_delete_bulk', [$tableNameForRoutes], false))
+                    ->setDataAttr('url', route('cmf_api_delete_bulk', ['table_name' => $tableNameForRoutes], false))
                     ->setDataAttr('id-field', $pkName)
                     ->setDataAttr('method', 'delete')
                     ->setHref('javascript: void(0)')
@@ -146,7 +146,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_filtered'))
                 ->setDataAttr('action', 'bulk-filtered')
                 ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.datagrid.bulk_actions.delete_filtered_confirm'))
-                ->setDataAttr('url', route('cmf_api_delete_bulk', [$tableNameForRoutes], false))
+                ->setDataAttr('url', route('cmf_api_delete_bulk', ['table_name' => $tableNameForRoutes], false))
                 ->setDataAttr('method', 'delete')
                 ->setHref('javascript: void(0)')
                 ->build();
@@ -191,13 +191,13 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $toolbar['create'] = \Swayok\Html\Tag::a()
                 ->setContent(\PeskyCMF\Config\CmfConfig::transBase('.datagrid.toolbar.create'))
                 ->setClass('btn btn-primary')
-                ->setHref(route('cmf_item_add_form', [$tableNameForRoutes], false))
+                ->setHref(route('cmf_item_add_form', ['table_name' => $tableNameForRoutes], false))
                 ->build();
         }
         // row actions
         $actionsTpl = '';
         if ($dataGridConfig->isDetailsViewerAllowed()) {
-            $url = $dblClickUrl = route('cmf_item_details', [$tableNameForRoutes, ":{$pkName}:"], false);
+            $url = $dblClickUrl = route('cmf_item_details', ['table_name' => $tableNameForRoutes, 'id' => ":{$pkName}:"], false);
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-light-blue item-details')
                 ->setContent('<i class="glyphicon glyphicon-info-sign"></i>')
@@ -209,7 +209,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
             $actionsTpl .= '{{? !!it.___details_allowed }}' . $btn . '{{?}}';
         }
         if ($dataGridConfig->isEditAllowed()) {
-            $url = $dblClickUrl = route('cmf_item_edit_form', [$tableNameForRoutes, ":{$pkName}:"], false);
+            $url = $dblClickUrl = route('cmf_item_edit_form', ['table_name' => $tableNameForRoutes, 'id' => ":{$pkName}:"], false);
             $btn = \Swayok\Html\Tag::a()
                 ->setClass('row-action text-green item-edit')
                 ->setContent('<i class="glyphicon glyphicon-edit"></i>')
@@ -230,7 +230,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                 ->setDataAttr('block-datagrid', '1')
                 ->setDataAttr('action', 'request')
                 ->setDataAttr('method', 'delete')
-                ->setDataAttr('url', route('cmf_api_delete_item', [$tableNameForRoutes, ":{$pkName}:"], false))
+                ->setDataAttr('url', route('cmf_api_delete_item', ['table_name' => $tableNameForRoutes, 'id' => ":{$pkName}:"], false))
                 ->setDataAttr('confirm', \PeskyCMF\Config\CmfConfig::transBase('.action.delete.please_confirm'))
                 ->setHref('javascript: void(0)')
                 ->build();
@@ -254,7 +254,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                     [
                         'processing' => true,
                         'serverSide' => true,
-                        'ajax' => route('cmf_api_get_items', ['model' => $tableNameForRoutes], false),
+                        'ajax' => route('cmf_api_get_items', ['table_name' => $tableNameForRoutes], false),
                         'pageLength' => $dataGridConfig->getLimit(),
                         'toolbarItems' => array_values($toolbar),
                         'order' => []

@@ -60,7 +60,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
             {{?}}
             <?php if ($itemDetailsConfig->isCreateAllowed()) : ?>
                 <?php
-                    $createUrl = route('cmf_item_add_form', [$tableNameForRoutes]);
+                    $createUrl = route('cmf_item_add_form', ['table_name' => $tableNameForRoutes]);
                 ?>
                 <a class="btn btn-primary" href="<?php echo $createUrl; ?>">
                     <?php echo \PeskyCMF\Config\CmfConfig::transBase('.item_details.toolbar.create'); ?>
@@ -78,7 +78,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
                     $deleteUrl = str_ireplace(
                         ':id:',
                         "{{= it.{$model->getPkColumnName()} }}",
-                        route('cmf_api_delete_item', [$tableNameForRoutes, ':id:'])
+                        route('cmf_api_delete_item', ['table_name' => $tableNameForRoutes, 'id' => ':id:'])
                     );
                 ?>
                 {{? !!it.___delete_allowed }}
@@ -94,7 +94,7 @@ if ($itemDetailsConfig->hasJsInitiator()) {
                     $editUrl = str_ireplace(
                         ':id:',
                         "{{= it.{$model->getPkColumnName()} }}",
-                        route('cmf_item_edit_form', [$tableNameForRoutes, ':id:'])
+                        route('cmf_item_edit_form', ['table_name' => $tableNameForRoutes, 'id' => ':id:'])
                     );
                 ?>
                 {{? !!it.___edit_allowed }}

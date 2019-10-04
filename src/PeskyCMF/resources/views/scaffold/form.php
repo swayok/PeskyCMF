@@ -86,7 +86,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                 <?php echo $ifEdit; ?>
                     <?php if ($formConfig->isCreateAllowed()) : ?>
                         <?php
-                            $createUrl = route('cmf_item_add_form', [$tableNameForRoutes]);
+                            $createUrl = route('cmf_item_add_form', ['table_name' => $tableNameForRoutes]);
                         ?>
                         <a class="btn btn-primary" href="<?php echo $createUrl; ?>">
                             <?php echo \PeskyCMF\Config\CmfConfig::transBase('.form.toolbar.create'); ?>
@@ -97,7 +97,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                             $deleteUrl = str_ireplace(
                                 ':id:',
                                 "{{= it.{$model->getPkColumnName()} }}",
-                                route('cmf_api_delete_item', [$tableNameForRoutes, ':id:'])
+                                route('cmf_api_delete_item', ['table_name' => $tableNameForRoutes, 'id' => ':id:'])
                             );
                         ?>
                         {{? !!it.___delete_allowed }}
