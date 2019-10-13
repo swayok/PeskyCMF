@@ -34,7 +34,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">=7.0",
-        "laravel/framework": ">=5.3",
+        "laravel/framework": ">=5.3|>=6.0",
 
         "swayok/utils": "master@dev",
         "swayok/peskyorm": "v2.x-dev",
