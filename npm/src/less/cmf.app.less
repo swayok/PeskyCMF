@@ -372,6 +372,11 @@ form {
     }
 }
 
+.dropdown-menu {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    .box-shadow(0 6px 12px rgba(0, 0, 0, .175));
+}
+
 .checkbox.icheck label .icheckbox_square-blue {
     margin-right: 4px;
     vertical-align: top;
@@ -846,17 +851,19 @@ body[data-section="resource:table"] {
 
             .toolbar-container.row {
 
+                margin-right: 0;
+                margin-left: 0;
+
                 > div {
-                    line-height: 50px;
+                    padding-top: 8px;
+                }
 
-                    > *:first-child {
-                        padding-left: 10px;
-                    }
-
-                    > *:last-child {
-                        padding-right: 10px;
+                .btn-toolbar {
+                    > * {
+                        margin-bottom: 8px;
                     }
                 }
+
             }
 
         }
@@ -1845,8 +1852,8 @@ aside.main-sidebar {
 }
 
 // use lessc --include-path=$ContentRoot$ where $ContentRoot$ is path to project root folder
-@import "/vendor/almasaeed2010/adminlte/build/less/datepicker";
-@import "/vendor/almasaeed2010/adminlte/build/less/select2";
+@import "../../node_modules/admin-lte/build/less/datepicker";
+@import "../../node_modules/admin-lte/build/less/select2";
 
 .select2-container--default {
 

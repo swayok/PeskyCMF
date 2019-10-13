@@ -2,6 +2,8 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
+use PeskyCMF\Config\CmfConfig;
+
 class WysiwygFormInput extends FormInput {
 
     /**
@@ -178,11 +180,12 @@ class WysiwygFormInput extends FormInput {
      *      ],
      *      'some_text' => [
      *          'label' => 'Page',
-     *          'type' => 'text'
+     *          'type' => 'text',
+     *          'base64' => true,
      *      ],
      *  )
-     *  Types: 'select', 'text', 'checkbox'
-     *  Additional options: 'value' (default one), 'checked' (bool, for checkbox)
+     *  Types: 'select', 'text', 'checkbox', 'textarea'
+     *  Additional options: 'value' (default one), 'checked' (bool, for checkbox), 'base64' (bool, encode value into base64 string)
      *  Resulting insert may look like 'printPageData("home", "content")'
      *  Note that for options loaded via URL, URL will be modified to contain 'pk' URL query argument that holds
      *  current item id loaded into edit form. This is the way to exclude some items from returned options.
@@ -325,6 +328,8 @@ class WysiwygFormInput extends FormInput {
                 $config['contentsCss'] = $this->customCssFiles;
             }
         }
+        $config['uploadUrl'] = CmfConfig::getInstance()->route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]);
+        $config['filebrowserImageUploadUrl'] = $config['uploadUrl'];
         return $config;
     }
 

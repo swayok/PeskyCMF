@@ -499,7 +499,7 @@ $dictionary = [
             'header_create' => 'Menu creation',
             'header_edit' => 'Menu editing',
             'input' => [
-                'Texts' => [
+                'texts' => [
                     'menu_title' => 'Menu header',
                 ]
             ]
@@ -507,7 +507,7 @@ $dictionary = [
         'item_details' => [
             'header' => 'Menu details',
             'field' => [
-                'Texts' => [
+                'texts' => [
                     'menu_title' => 'Menu header',
                 ]
             ]

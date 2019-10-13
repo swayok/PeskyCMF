@@ -136,7 +136,7 @@ if (!function_exists('routeToCmfItemsTable')) {
         ];
         $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($filters);
         if (!empty($filters)) {
-            $params['filter'] = $replaces['data'];
+            $params['filter'] = json_encode($replaces['data']);
         }
         $url = cmfRoute('cmf_items_table', $params, $absolute, $cmfConfig);
         return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
@@ -440,7 +440,7 @@ if (!function_exists('replaceDotJsInstertsInArrayValuesByUrlSafeInserts')) {
                 foreach ($matches[1] as $i => $dotJsInsert) {
                     $replace = '__dotjs_' . $i . '_insert__';
                     $ret['replaces'][$replace] = '{{' . trim($matches[$i][0], '{} ') . '}}';
-                    $json = str_replace($ret['replaces'][$replace], $replace, $json);
+                    $json = str_replace($dotJsInsert, $replace, $json);
                 }
                 $ret['data'] = json_decode($json, true);
             }

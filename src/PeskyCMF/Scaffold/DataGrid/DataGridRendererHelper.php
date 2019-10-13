@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\MenuItem\CmfBulkActionMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRedirectMenuItem;
@@ -322,14 +321,14 @@ class DataGridRendererHelper {
     public function getNestedViewTriggerCellTemplate() {
         $showChildren = Tag::a()
             ->setClass('row-action link-muted show-children')
-            ->setContent('<i class="glyphicon glyphicon-plus-sign"></i>')
+            ->setContent('<i class="glyphicon glyphicon-folder-close"></i>')
             ->setTitle($this->dataGridConfig->translateGeneral('actions.show_children'))
             ->setDataAttr('toggle', 'tooltip')
             ->setHref('javascript: void(0)')
             ->build();
         $hideChildren = Tag::a()
             ->setClass('row-action link-muted hide-children hidden')
-            ->setContent('<i class="glyphicon glyphicon-minus-sign"></i>')
+            ->setContent('<i class="glyphicon glyphicon-folder-open"></i>')
             ->setTitle($this->dataGridConfig->translateGeneral('actions.hide_children'))
             ->setDataAttr('toggle', 'tooltip')
             ->setHref('javascript: void(0)')

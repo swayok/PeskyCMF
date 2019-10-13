@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Config;
 
-use App\AppSettings;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Application;
 use Illuminate\View\View;
@@ -20,7 +19,6 @@ use PeskyCMF\UI\CmfUIModule;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TableInterface;
-use Swayok\Utils\Folder;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 abstract class CmfConfig extends ConfigsContainer {
@@ -127,7 +125,7 @@ abstract class CmfConfig extends ConfigsContainer {
     /**
      * @return PeskyCmfAppSettings|\App\AppSettings
      */
-    static public function getAppSettings(): AppSettings {
+    static public function getAppSettings(): PeskyCmfAppSettings {
         return app(PeskyCmfAppSettings::class);
     }
 
@@ -657,9 +655,11 @@ abstract class CmfConfig extends ConfigsContainer {
             'forceEnterMode' => true,
             'removeDialogTabs' => 'image:advanced',
             'extraPlugins' => 'uploadimage',
-            'filebrowserImageUploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
-            'uploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
             'contentsCss' => static::css_files_for_wysiwyg_editor(),
+            // _token won't be working this way =(
+            // moved to WysiwygFormInput->getWysiwygConfig()
+            //'uploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
+            //'filebrowserImageUploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
         ];
     }
 

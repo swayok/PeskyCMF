@@ -32,6 +32,6 @@ class {$className} extends {$extendsClass} {
 
 FILE;
         File::save($filePath, $fileContents, 0664, 0755);
-        $this->line('Added migration ' . $migrationsPath);
+        $this->line('Added migration ' . $filePath);
     }
 }

@@ -82,7 +82,7 @@ class CmfAuthModule {
     /**
      * @return \Illuminate\Contracts\Auth\Guard|\Illuminate\Contracts\Auth\StatefulGuard|\Illuminate\Auth\SessionGuard
      */
-    public function getAuthGuard(): ?Guard {
+    public function getAuthGuard(): Guard {
         return $this->authGuard ?: \Auth::guard($this->getAuthGuardName());
     }
 

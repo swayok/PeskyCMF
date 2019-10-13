@@ -190,6 +190,12 @@ QueryBuilder.defaults({ lang_code: 'cs' });
 
     var months = 'leden_únor_březen_duben_květen_červen_červenec_srpen_září_říjen_listopad_prosinec'.split('_'),
         monthsShort = 'led_úno_bře_dub_kvě_čvn_čvc_srp_zář_říj_lis_pro'.split('_');
+
+    var monthsParse = [/^led/i, /^úno/i, /^bře/i, /^dub/i, /^kvě/i, /^(čvn|červen$|června)/i, /^(čvc|červenec|července)/i, /^srp/i, /^zář/i, /^říj/i, /^lis/i, /^pro/i];
+    // NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.
+    // Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.
+    var monthsRegex = /^(leden|únor|březen|duben|květen|červenec|července|červen|června|srpen|září|říjen|listopad|prosinec|led|úno|bře|dub|kvě|čvn|čvc|srp|zář|říj|lis|pro)/i;
+
     function plural(n) {
         return (n > 1) && (n < 5) && (~~(n / 10) !== 1);
     }
@@ -256,28 +262,15 @@ QueryBuilder.defaults({ lang_code: 'cs' });
     var cs = moment.defineLocale('cs', {
         months : months,
         monthsShort : monthsShort,
-        monthsParse : (function (months, monthsShort) {
-            var i, _monthsParse = [];
-            for (i = 0; i < 12; i++) {
-                // use custom parser to solve problem with July (červenec)
-                _monthsParse[i] = new RegExp('^' + months[i] + '$|^' + monthsShort[i] + '$', 'i');
-            }
-            return _monthsParse;
-        }(months, monthsShort)),
-        shortMonthsParse : (function (monthsShort) {
-            var i, _shortMonthsParse = [];
-            for (i = 0; i < 12; i++) {
-                _shortMonthsParse[i] = new RegExp('^' + monthsShort[i] + '$', 'i');
-            }
-            return _shortMonthsParse;
-        }(monthsShort)),
-        longMonthsParse : (function (months) {
-            var i, _longMonthsParse = [];
-            for (i = 0; i < 12; i++) {
-                _longMonthsParse[i] = new RegExp('^' + months[i] + '$', 'i');
-            }
-            return _longMonthsParse;
-        }(months)),
+        monthsRegex : monthsRegex,
+        monthsShortRegex : monthsRegex,
+        // NOTE: 'červen' is substring of 'červenec'; therefore 'červenec' must precede 'červen' in the regex to be fully matched.
+        // Otherwise parser matches '1. červenec' as '1. červen' + 'ec'.
+        monthsStrictRegex : /^(leden|ledna|února|únor|březen|března|duben|dubna|květen|května|červenec|července|červen|června|srpen|srpna|září|říjen|října|listopadu|listopad|prosinec|prosince)/i,
+        monthsShortStrictRegex : /^(led|úno|bře|dub|kvě|čvn|čvc|srp|zář|říj|lis|pro)/i,
+        monthsParse : monthsParse,
+        longMonthsParse : monthsParse,
+        shortMonthsParse : monthsParse,
         weekdays : 'neděle_pondělí_úterý_středa_čtvrtek_pátek_sobota'.split('_'),
         weekdaysShort : 'ne_po_út_st_čt_pá_so'.split('_'),
         weekdaysMin : 'ne_po_út_st_čt_pá_so'.split('_'),
@@ -357,6 +350,6 @@ QueryBuilder.defaults({ lang_code: 'cs' });
 
 })));
 
-/*! Select2 4.0.6-rc.1 | https://github.com/select2/select2/blob/master/LICENSE.md */
+/*! Select2 4.0.7 | https://github.com/select2/select2/blob/master/LICENSE.md */
 
-(function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var e=jQuery.fn.select2.amd;return e.define("select2/i18n/cs",[],function(){function e(e,t){switch(e){case 2:return t?"dva":"dvě";case 3:return"tři";case 4:return"čtyři"}return""}return{errorLoading:function(){return"Výsledky nemohly být načteny."},inputTooLong:function(t){var n=t.input.length-t.maximum;return n==1?"Prosím, zadejte o jeden znak méně.":n<=4?"Prosím, zadejte o "+e(n,!0)+" znaky méně.":"Prosím, zadejte o "+n+" znaků méně."},inputTooShort:function(t){var n=t.minimum-t.input.length;return n==1?"Prosím, zadejte ještě jeden znak.":n<=4?"Prosím, zadejte ještě další "+e(n,!0)+" znaky.":"Prosím, zadejte ještě dalších "+n+" znaků."},loadingMore:function(){return"Načítají se další výsledky…"},maximumSelected:function(t){var n=t.maximum;return n==1?"Můžete zvolit jen jednu položku.":n<=4?"Můžete zvolit maximálně "+e(n,!1)+" položky.":"Můžete zvolit maximálně "+n+" položek."},noResults:function(){return"Nenalezeny žádné položky."},searching:function(){return"Vyhledávání…"}}}),{define:e.define,require:e.require}})();
+(function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var e=jQuery.fn.select2.amd;return e.define("select2/i18n/cs",[],function(){function e(e,t){switch(e){case 2:return t?"dva":"dvě";case 3:return"tři";case 4:return"čtyři"}return""}return{errorLoading:function(){return"Výsledky nemohly být načteny."},inputTooLong:function(t){var n=t.input.length-t.maximum;return n==1?"Prosím, zadejte o jeden znak méně.":n<=4?"Prosím, zadejte o "+e(n,!0)+" znaky méně.":"Prosím, zadejte o "+n+" znaků méně."},inputTooShort:function(t){var n=t.minimum-t.input.length;return n==1?"Prosím, zadejte ještě jeden znak.":n<=4?"Prosím, zadejte ještě další "+e(n,!0)+" znaky.":"Prosím, zadejte ještě dalších "+n+" znaků."},loadingMore:function(){return"Načítají se další výsledky…"},maximumSelected:function(t){var n=t.maximum;return n==1?"Můžete zvolit jen jednu položku.":n<=4?"Můžete zvolit maximálně "+e(n,!1)+" položky.":"Můžete zvolit maximálně "+n+" položek."},noResults:function(){return"Nenalezeny žádné položky."},searching:function(){return"Vyhledávání…"},removeAllItems:function(){return"Odstraňte všechny položky"}}}),{define:e.define,require:e.require}})();

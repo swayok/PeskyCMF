@@ -14,7 +14,6 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\ORM\RecordInterface;
-use PeskyORM\ORM\TableInterface;
 use PeskyORM\ORM\TempRecord;
 
 abstract class ScaffoldConfig implements ScaffoldConfigInterface {
@@ -582,11 +581,10 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     }
 
     /**
-     * @param TableInterface $table
      * @param null|string $message
      * @return $this
      */
-    protected function makeRecordNotFoundResponse(TableInterface $table, $message = null) {
+    protected function makeRecordNotFoundResponse($message = null) {
         if (empty($message)) {
             $message = $this->translateGeneral('message.resource_item_not_found');
         }

@@ -1,10 +1,10 @@
 /**
   * bootstrap-switch - Turn checkboxes and radio buttons into toggle switches.
   *
-  * @version v3.3.4
+  * @version v3.4.0
   * @homepage https://bttstrp.github.io/bootstrap-switch
   * @author Mattia Larentis <mattia@larentis.eu> (http://larentis.eu)
-  * @license Apache-2.0
+  * @license MIT
   */
 
 .bootstrap-switch {
@@ -562,9 +562,9 @@
 }
 
 /*!
- * Bootstrap-select v1.13.5 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.10 (https://developer.snapappointments.com/bootstrap-select)
  *
- * Copyright 2012-2018 SnapAppointments, LLC
+ * Copyright 2012-2019 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
  */
 
@@ -581,9 +581,23 @@ select.selectpicker {
 .bootstrap-select > .dropdown-toggle {
   position: relative;
   width: 100%;
-  z-index: 1;
   text-align: right;
   white-space: nowrap;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+.bootstrap-select > .dropdown-toggle:after {
+  margin-top: -1px;
 }
 .bootstrap-select > .dropdown-toggle.bs-placeholder,
 .bootstrap-select > .dropdown-toggle.bs-placeholder:hover,
@@ -627,13 +641,14 @@ select.selectpicker {
   padding: 0 !important;
   opacity: 0 !important;
   border: none;
+  z-index: 0 !important;
 }
 .bootstrap-select > select.mobile-device {
   top: 0;
   left: 0;
   display: block !important;
   width: 100% !important;
-  z-index: 2;
+  z-index: 2 !important;
 }
 .has-error .bootstrap-select .dropdown-toggle,
 .error .bootstrap-select .dropdown-toggle,
@@ -661,15 +676,18 @@ select.selectpicker {
   margin-bottom: 0;
   padding: 0;
   border: none;
+  height: auto;
 }
 :not(.input-group) > .bootstrap-select.form-control:not([class*="col-"]) {
   width: 100%;
 }
 .bootstrap-select.form-control.input-group-btn {
+  float: none;
   z-index: auto;
 }
-.bootstrap-select.form-control.input-group-btn:not(:first-child):not(:last-child) > .btn {
-  border-radius: 0;
+.form-inline .bootstrap-select,
+.form-inline .bootstrap-select.form-control:not([class*="col-"]) {
+  width: auto;
 }
 .bootstrap-select:not(.input-group-btn),
 .bootstrap-select[class*="col-"] {
@@ -731,26 +749,40 @@ select.selectpicker {
 .bootstrap-select.bs-container .dropdown-menu {
   z-index: 1060;
 }
-.bootstrap-select .dropdown-toggle:before {
-  content: '';
-  display: inline-block;
-}
 .bootstrap-select .dropdown-toggle .filter-option {
-  position: absolute;
+  position: static;
   top: 0;
   left: 0;
-  padding-top: inherit;
-  padding-right: inherit;
-  padding-bottom: inherit;
-  padding-left: inherit;
+  float: left;
   height: 100%;
   width: 100%;
   text-align: left;
+  overflow: hidden;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+      -ms-flex: 0 1 auto;
+          flex: 0 1 auto;
 }
-.bootstrap-select .dropdown-toggle .filter-option-inner {
+.bs3.bootstrap-select .dropdown-toggle .filter-option {
+  padding-right: inherit;
+}
+.input-group .bs3-has-addon.bootstrap-select .dropdown-toggle .filter-option {
+  position: absolute;
+  padding-top: inherit;
+  padding-bottom: inherit;
+  padding-left: inherit;
+  float: none;
+}
+.input-group .bs3-has-addon.bootstrap-select .dropdown-toggle .filter-option .filter-option-inner {
   padding-right: inherit;
 }
 .bootstrap-select .dropdown-toggle .filter-option-inner-inner {
+  overflow: hidden;
+}
+.bootstrap-select .dropdown-toggle .filter-expand {
+  width: 0 !important;
+  float: left;
+  opacity: 0 !important;
   overflow: hidden;
 }
 .bootstrap-select .dropdown-toggle .caret {
@@ -845,6 +877,9 @@ select.selectpicker {
 .bootstrap-select.fit-width .dropdown-toggle .filter-option-inner,
 .bootstrap-select.fit-width .dropdown-toggle .filter-option-inner-inner {
   display: inline;
+}
+.bootstrap-select.fit-width .dropdown-toggle .bs-caret:before {
+  content: '\00a0';
 }
 .bootstrap-select.fit-width .dropdown-toggle .caret {
   position: static;
@@ -960,16 +995,16 @@ select.selectpicker {
  *
  * Extends existing [Bootstrap Select] implementations by adding the ability to search via AJAX requests as you type. Originally for CROSCON.
  *
- * @version 1.4.4
+ * @version 1.4.5
  * @author Adam Heim - https://github.com/truckingsim
  * @link https://github.com/truckingsim/Ajax-Bootstrap-Select
- * @copyright 2018 Adam Heim
+ * @copyright 2019 Adam Heim
  * @license Released under the MIT license.
  *
  * Contributors:
  *   Mark Carver - https://github.com/markcarver
  *
- * Last build: 2018-06-12 11:53:58 AM EDT
+ * Last build: 2019-04-23 12:18:56 PM EDT
  */
 .bootstrap-select .status {
   background: #f0f0f0;
@@ -984,22 +1019,21 @@ select.selectpicker {
 }
 
 /*!
- * bootstrap-fileinput v4.5.2
+ * bootstrap-fileinput v4.5.3
  * http://plugins.krajee.com/file-input
  *
  * Krajee default styling for bootstrap-fileinput.
  *
  * Author: Kartik Visweswaran
- * Copyright: 2014 - 2018, Kartik Visweswaran, Krajee.com
+ * Copyright: 2014 - 2019, Kartik Visweswaran, Krajee.com
  *
- * Licensed under the BSD 3-Clause
+ * Licensed under the BSD-3-Clause
  * https://github.com/kartik-v/bootstrap-fileinput/blob/master/LICENSE.md
  */
 .file-loading input[type=file], input[type=file].file-loading {
     width: 0;
     height: 0;
 }
-
 .file-no-browse {
     position: absolute;
     left: 50%;
@@ -1013,40 +1047,32 @@ select.selectpicker {
     outline: none;
     box-shadow: none;
 }
-
 .kv-hidden, .file-caption-icon, .file-zoom-dialog .modal-header:before, .file-zoom-dialog .modal-header:after, .file-input-new .file-preview, .file-input-new .close, .file-input-new .glyphicon-file, .file-input-new .fileinput-remove-button, .file-input-new .fileinput-upload-button, .file-input-new .no-browse .input-group-btn, .file-input-ajax-new .fileinput-remove-button, .file-input-ajax-new .fileinput-upload-button, .file-input-ajax-new .no-browse .input-group-btn, .hide-content .kv-file-content {
     display: none;
 }
-
 .btn-file input[type=file], .file-caption-icon, .file-preview .fileinput-remove, .krajee-default .file-thumb-progress, .file-zoom-dialog .btn-navigate, .file-zoom-dialog .floating-buttons {
     position: absolute;
 }
-
 .file-input, .file-loading:before, .btn-file, .file-caption, .file-preview, .krajee-default.file-preview-frame, .krajee-default .file-thumbnail-footer, .file-zoom-dialog .modal-dialog {
     position: relative;
 }
-
 .file-error-message pre, .file-error-message ul, .krajee-default .file-actions, .krajee-default .file-other-error {
     text-align: left;
 }
-
 .file-error-message pre, .file-error-message ul {
     margin: 0;
 }
-
 .krajee-default .file-drag-handle, .krajee-default .file-upload-indicator {
     float: left;
     margin: 5px 0 -5px;
     width: 16px;
     height: 16px;
 }
-
 .krajee-default .file-thumb-progress .progress, .krajee-default .file-thumb-progress .progress-bar {
     height: 11px;
     font-family: Verdana, Helvetica, sans-serif;
     font-size: 9px;
 }
-
 .krajee-default .file-caption-info, .krajee-default .file-size-info {
     display: block;
     white-space: nowrap;
@@ -1056,21 +1082,17 @@ select.selectpicker {
     height: 15px;
     margin: auto;
 }
-
 .file-zoom-content > .file-object.type-video, .file-zoom-content > .file-object.type-flash, .file-zoom-content > .file-object.type-image {
     max-width: 100%;
     max-height: 100%;
     width: auto;
 }
-
 .file-zoom-content > .file-object.type-video, .file-zoom-content > .file-object.type-flash {
     height: 100%;
 }
-
 .file-zoom-content > .file-object.type-pdf, .file-zoom-content > .file-object.type-html, .file-zoom-content > .file-object.type-text, .file-zoom-content > .file-object.type-default {
     width: 100%;
 }
-
 .file-loading:before {
     content: " Loading...";
     display: inline-block;
@@ -1081,16 +1103,13 @@ select.selectpicker {
     color: #999;
     background: transparent url(../img/loading.gif) top left no-repeat;
 }
-
 .file-object {
     margin: 0 0 -5px 0;
     padding: 0;
 }
-
 .btn-file {
     overflow: hidden;
 }
-
 .btn-file input[type=file] {
     top: 0;
     left: 0;
@@ -1102,13 +1121,11 @@ select.selectpicker {
     cursor: inherit;
     display: block;
 }
-
 .btn-file ::-ms-browse {
     font-size: 10000px;
     width: 100%;
     height: 100%;
 }
-
 .file-caption .file-caption-name {
     width: 100%;
     margin: 0;
@@ -1118,19 +1135,15 @@ select.selectpicker {
     background: none;
     outline: none;
 }
-
 .file-caption.icon-visible .file-caption-icon {
     display: inline-block;
 }
-
 .file-caption.icon-visible .file-caption-name {
     padding-left: 15px;
 }
-
 .file-caption-icon {
     left: 8px;
 }
-
 .file-error-message {
     color: #a94442;
     background-color: #f2dede;
@@ -1139,17 +1152,14 @@ select.selectpicker {
     border-radius: 4px;
     padding: 15px;
 }
-
 .file-error-message pre {
     margin: 5px 0;
 }
-
 .file-caption-disabled {
     background-color: #eee;
     cursor: not-allowed;
     opacity: 1;
 }
-
 .file-preview {
     border-radius: 5px;
     border: 1px solid #ddd;
@@ -1157,61 +1167,50 @@ select.selectpicker {
     width: 100%;
     margin-bottom: 5px;
 }
-
 .file-preview .btn-xs {
     padding: 1px 5px;
     font-size: 12px;
     line-height: 1.5;
     border-radius: 3px;
 }
-
 .file-preview .fileinput-remove {
     top: 1px;
     right: 1px;
     line-height: 10px;
 }
-
 .file-preview .clickable {
     cursor: pointer;
 }
-
 .file-preview-image {
     font: 40px Impact, Charcoal, sans-serif;
     color: #008000;
 }
-
 .krajee-default.file-preview-frame {
     margin: 8px;
-    border: 1px solid rgba(0,0,0,0.2);
-    box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
     padding: 6px;
     float: left;
     text-align: center;
 }
-
 .krajee-default.file-preview-frame .kv-file-content {
     width: 213px;
     height: 160px;
 }
-
 .krajee-default.file-preview-frame .kv-file-content.kv-pdf-rendered {
     width: 400px;
 }
-
 .krajee-default.file-preview-frame[data-template="audio"] .kv-file-content {
     width: 240px;
     height: 55px;
 }
-
 .krajee-default.file-preview-frame .file-thumbnail-footer {
     height: 70px;
 }
-
 .krajee-default.file-preview-frame:not(.file-preview-error):hover {
-    border: 1px solid rgba(0,0,0,0.3);
-    box-shadow: 0 0 10px 0 rgba(0,0,0,0.4);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.4);
 }
-
 .krajee-default .file-preview-text {
     display: block;
     color: #428bca;
@@ -1221,21 +1220,17 @@ select.selectpicker {
     padding: 8px;
     resize: none;
 }
-
 .krajee-default .file-preview-html {
     border: 1px solid #ddd;
     padding: 8px;
     overflow: auto;
 }
-
 .krajee-default .file-other-icon {
     font-size: 6em;
 }
-
 .krajee-default .file-footer-buttons {
     float: right;
 }
-
 .krajee-default .file-footer-caption {
     display: block;
     text-align: center;
@@ -1244,59 +1239,48 @@ select.selectpicker {
     color: #777;
     margin-bottom: 15px;
 }
-
 .krajee-default .file-preview-error {
     opacity: 0.65;
     box-shadow: none;
 }
-
 .krajee-default .file-thumb-progress {
     height: 11px;
     top: 37px;
     left: 0;
     right: 0;
 }
-
 .krajee-default.kvsortable-ghost {
     background: #e1edf7;
     border: 2px solid #a1abff;
 }
-
 .krajee-default .file-preview-other:hover {
     opacity: 0.8;
 }
-
 .krajee-default .file-preview-frame:not(.file-preview-error) .file-footer-caption:hover {
     color: #000;
 }
-
 .kv-upload-progress .progress {
     height: 20px;
     margin: 10px 0;
     overflow: hidden;
 }
-
 .kv-upload-progress .progress-bar {
     height: 20px;
     font-family: Verdana, Helvetica, sans-serif;
 }
-
 /*noinspection CssOverwrittenProperties*/
 .file-zoom-dialog .file-other-icon {
     font-size: 22em;
     font-size: 50vmin;
 }
-
 .file-zoom-dialog .modal-dialog {
     width: auto;
 }
-
 .file-zoom-dialog .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-
 .file-zoom-dialog .btn-navigate {
     padding: 0;
     margin: 0;
@@ -1308,30 +1292,24 @@ select.selectpicker {
     font-size: 4em;
     color: #1c94c4;
 }
-
 .file-zoom-dialog .btn-navigate:not([disabled]):hover {
     outline: none;
     box-shadow: none;
     opacity: 0.6;
 }
-
 .file-zoom-dialog .floating-buttons {
     top: 5px;
     right: 10px;
 }
-
 .file-zoom-dialog .btn-navigate[disabled] {
     opacity: 0.3;
 }
-
 .file-zoom-dialog .btn-prev {
     left: 1px;
 }
-
 .file-zoom-dialog .btn-next {
     right: 1px;
 }
-
 .file-zoom-dialog .kv-zoom-title {
     font-weight: 300;
     color: #999;
@@ -1340,123 +1318,98 @@ select.selectpicker {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-
 .file-input-new .no-browse .form-control {
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
 }
-
 .file-input-ajax-new .no-browse .form-control {
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
 }
-
 .file-caption-main {
     width: 100%;
 }
-
 .file-thumb-loading {
     background: transparent url(../img/loading.gif) no-repeat scroll center center content-box !important;
 }
-
 .file-drop-zone {
     border: 1px dashed #aaa;
     border-radius: 4px;
-    height: 100%;
     text-align: center;
     vertical-align: middle;
     margin: 12px 15px 12px 12px;
     padding: 5px;
 }
-
 .file-drop-zone.clickable:hover {
     border: 2px dashed #999;
 }
-
 .file-drop-zone.clickable:focus {
     border: 2px solid #5acde2;
 }
-
 .file-drop-zone .file-preview-thumbnails {
     cursor: default;
 }
-
 .file-drop-zone-title {
     color: #aaa;
     font-size: 1.6em;
     padding: 85px 10px;
     cursor: default;
 }
-
 .file-highlighted {
     border: 2px dashed #999 !important;
     background-color: #eee;
 }
-
 .file-uploading {
     background: url(../img/loading-sm.gif) no-repeat center bottom 10px;
     opacity: 0.65;
 }
-
 .file-zoom-fullscreen .modal-dialog {
     min-width: 100%;
     margin: 0;
 }
-
 .file-zoom-fullscreen .modal-content {
     border-radius: 0;
     box-shadow: none;
     min-height: 100vh;
 }
-
 .file-zoom-fullscreen .modal-body {
     overflow-y: auto;
 }
-
 .floating-buttons {
     z-index: 3000;
 }
-
 .floating-buttons .btn-kv {
     margin-left: 3px;
     z-index: 3000;
 }
-
 .file-zoom-content {
     height: 480px;
     text-align: center;
 }
-
 .file-zoom-content .file-preview-image {
     max-height: 100%;
 }
-
 .file-zoom-content .file-preview-video {
     max-height: 100%;
 }
-
 .file-zoom-content > .file-object.type-image {
     height: auto;
     min-height: inherit;
 }
-
 .file-zoom-content > .file-object.type-audio {
     width: auto;
     height: 30px;
 }
-
 @media (min-width: 576px) {
     .file-zoom-dialog .modal-dialog {
         max-width: 500px;
     }
 }
-
 @media (min-width: 992px) {
     .file-zoom-dialog .modal-lg {
         max-width: 800px;
     }
 }
-
 @media (max-width: 767px) {
     .file-preview-thumbnails {
         display: flex;
@@ -1464,47 +1417,38 @@ select.selectpicker {
         align-items: center;
         flex-direction: column;
     }
-
     .file-zoom-dialog .modal-header {
         flex-direction: column;
     }
 }
-
 @media (max-width: 350px) {
     .krajee-default.file-preview-frame:not([data-template="audio"]) .kv-file-content {
         width: 160px;
     }
 }
-
 @media (max-width: 420px) {
     .krajee-default.file-preview-frame .kv-file-content.kv-pdf-rendered {
         width: 100%;
     }
 }
-
 .file-loading[dir=rtl]:before {
     background: transparent url(../img/loading.gif) top right no-repeat;
     padding-left: 0;
     padding-right: 20px;
 }
-
 .file-sortable .file-drag-handle {
     cursor: move;
     opacity: 1;
 }
-
 .file-sortable .file-drag-handle:hover {
     opacity: 0.7;
 }
-
 .clickable .file-drop-zone-title {
     cursor: pointer;
 }
-
 .kv-zoom-actions .btn-kv {
     margin-left: 3px;
 }
-
 .file-preview-initial.sortable-chosen {
     background-color: #d9edf7;
 }

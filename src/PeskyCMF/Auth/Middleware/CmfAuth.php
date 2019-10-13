@@ -21,7 +21,7 @@ class CmfAuth {
                 : redirect($loginUrl);
         } else {
             /** @var RecordInterface|Authenticatable $user */
-            \Event::fire(new CmfUserAuthenticated($cmfConfig::getUser()));
+            \Event::dispatch(new CmfUserAuthenticated($cmfConfig::getUser()));
 
             $response = $next($request);
             if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {

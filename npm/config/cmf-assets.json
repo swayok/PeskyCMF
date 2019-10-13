@@ -86,6 +86,8 @@
             "node_modules/jquery/dist/jquery.js": "js/jquery.js",
             "node_modules/jquery/dist/jquery.min.js": "js/jquery.min.js",
             "node_modules/jquery/dist/jquery.min.map": "js/jquery.min.map",
+            "node_modules/bootstrap/dist/js/bootstrap.js": "js/bootstrap.js",
+            "node_modules/bootstrap/dist/js/bootstrap.min.js": "js/bootstrap.min.js",
             "src/css/helpers.css": "css/helpers.css",
             "src/js/cmf.app.js": [
                 "js/cmf-app.js",

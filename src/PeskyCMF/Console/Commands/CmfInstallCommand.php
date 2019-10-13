@@ -25,7 +25,7 @@ class CmfInstallCommand extends CmfCommand {
         $baseFolderPath = app_path($appSubfolder);
         if (Folder::exist($baseFolderPath)) {
             $this->line('Terminated. Folder [' . $baseFolderPath . '] already exist');
-            return;
+            return -1;
         }
         $viewsPath = __DIR__ . '/../../resources/views/install/';
         $dataForViews = [
@@ -56,6 +56,7 @@ class CmfInstallCommand extends CmfCommand {
 
         $this->suggestions($peskyOrmConfigFilePath);
         $this->outro();
+        return 0;
     }
 
     /**
@@ -66,14 +67,13 @@ class CmfInstallCommand extends CmfCommand {
     }
 
     protected function outro() {
-        $this->line('Remeber to perform next steps to activate CMF:');
-        $this->line('1. Add ' . PeskyCmfServiceProvider::class . ' to you app.providers config');
+        $this->line('You will need to perform next steps to activate CMF:');
+        $this->line('1. Add ' . PeskyCmfServiceProvider::class . ' to you app.providers config (not needed if you use PeskyCMS)');
         $this->line('2. Remove ' . PeskyOrmServiceProvider::class . ' from you app.providers config');
-        $this->line('3. Run "php artisan vendor:publish --tag=config" to add vendor configs to you "config" folder');
-        $this->line('4. Run "php artisan vendor:publish --tag=public --force" to publish vendor public files');
-        $this->line('5. Add "php artisan vendor:publish --tag=public --force" to you composer.json into "scripts"."post-autoload-dump" array to make all public vendor files be up to date');
-        $this->line('6. Run "php artisan migrate" to create tables in database');
-        $this->line('7. Run "php artisan cmf::add-admin your-email@address.com" to create superadmin for CMS');
+        $this->line('3. Run "php artisan vendor:publish --tag=public --force" to publish vendor public files');
+        $this->line('4. Add "php artisan vendor:publish --tag=public --force" to you composer.json into "scripts"."post-autoload-dump" array to make all public vendor files be up to date');
+        $this->line('5. Run "php artisan migrate" to create tables in database');
+        $this->line('6. Run "php artisan cmf:add-admin your-email@address.com" to create superadmin for CMS');
     }
 
     protected function suggestions($peskyOrmConfigFilePath) {
@@ -215,13 +215,24 @@ JS;
         if (!File::exist($generalCmfConfigFilePath)) {
             $configContents = File::contents(__DIR__ . '/../../Config/peskycmf.config.php');
             $replacements = [
+                // rename 'cmf_configs.default' to 'cmf_configs.{urlPrefix}'
                 "%('default')\s*=>\s*.*%im" => '\'' . $dataForViews['urlPrefix'] . '\' => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,',
+                // replace 'default_cmf_config' value by '{urlPrefix}'
                 "%('default_cmf_config')\s*=>\s*.*%im" => "$1 => '{$dataForViews['urlPrefix']}',",
+                // replace 'app_settings_class' value by '\App\AppSettings::class'
+                "%('app_settings_class')\s*=>\s*.*%im" => "$1 => '\\App\\AppSettings::class',",
             ];
             $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
             File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
             $this->line($generalCmfConfigFilePath . ' created');
             unset($configContents);
+        } else {
+            $this->line("Update next keys in 'configs/peskycmf.php' file to activate CMF:");
+            $this->line(' ');
+
+            $this->line("'default_cmf_config' => 'cmf',");
+            $this->line("'cmf_configs' => ['cmf' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . "::class,\n]");
+            $this->line("'app_settings_class' => \\App\\AppSettings::class,");
         }
     }
 
@@ -262,21 +273,14 @@ JS;
                 "%('views_subfolder')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('dictionary')\s*=>\s*.*%im" => "$1 => '{$subfolderName}',",
                 "%('routes_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n        '{$routesFileRelativePath}',\n    ],",
-                "%('css_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['css']}',\n    ],",
-                "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['js']}',\n    ],",
+                "%('css_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['css']}',\n        ],",
+                "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['js']}',\n        ],",
             ];
             $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
             File::save($cmfSectionConfigFilePath, $configContents, 0664, 0755);
             $this->line($cmfSectionConfigFilePath . ' updated');
         } else {
-            $this->line("Update next keys in 'configs/peskycmf.php' file to activate created files:");
-            $this->line(' ');
-
-            $this->line("'default_cmf_config' => 'cmf',");
-            $this->line("'cmf_configs' => ['cmf' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . "::class,\n]");
-            $this->line("'app_settings_class' => \\App\\AppSettings::class,");
-
-            $this->line("Update next keys in '$cmfSectionConfigFilePath' file to activate created files:");
+            $this->line("Update next keys in '$cmfSectionConfigFilePath' file to activate CMF:");
             $this->line(' ');
 
             $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");

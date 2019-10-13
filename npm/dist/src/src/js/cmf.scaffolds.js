@@ -1869,7 +1869,13 @@ var ScaffoldFormHelper = {
                                                 tplData.__tag = data.__tag || 'span';
                                                 delete data.__tag;
                                                 for (var argName in data) {
-                                                    tplData.code = tplData.code.replace(':' + argName, data[argName].replace(/(['"])/g, '\\$1'));
+                                                    var escaped;
+                                                    if (insertInfo.args_options[argName].base64) {
+                                                        escaped = Base64.encode(data[argName]);
+                                                    } else {
+                                                        escaped = data[argName].replace(/(['"])/g, '\\$1');
+                                                    }
+                                                    tplData.code = tplData.code.replace(':' + argName, escaped);
                                                 }
                                                 if (insertInfo.widget_title_tpl) {
                                                     tplData.title = tplData.widget_title_tpl;
@@ -2105,6 +2111,14 @@ var ScaffoldFormHelper = {
                         label: inputConfig.label,
                         id: inputName,
                         'default': !!inputConfig.checked
+                    });
+                    break;
+                case 'textarea':
+                    dialogElements.push({
+                        type: 'textarea',
+                        label: inputConfig.label,
+                        id: inputName,
+                        'default': typeof inputConfig.value !== 'undefined' ? inputConfig.value : ''
                     });
                     break;
                 default:

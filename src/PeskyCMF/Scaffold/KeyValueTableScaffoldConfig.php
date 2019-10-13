@@ -3,7 +3,6 @@
 
 namespace PeskyCMF\Scaffold;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
@@ -71,7 +70,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         }
         $fkColumn = $table->getMainForeignKeyColumnName();
         if (empty($ownerRecordId) && !empty($fkColumn)) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $keysAndValues = $table::getValuesForForeignKey(empty($fkColumn) ? null : $ownerRecordId, true);
         $keysAndValues[$table::getPkColumnName()] = 0;

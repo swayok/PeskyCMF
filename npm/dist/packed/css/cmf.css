@@ -1653,7 +1653,6 @@ on tables, feel free to add more*/
   }
 }
 /*# sourceMappingURL=helpers.css.map */
-
 body,
 h1,
 h2,
@@ -1996,6 +1995,12 @@ form .bulk-edit-form-input-container.checkbox-switch .bulk-edit-form-input-enabl
 }
 form .bulk-edit-form-input-container.checkbox-switch input.bulk-edit-form-input-enabler-input {
   margin-top: 4px !important;
+}
+.dropdown-menu {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
 }
 .checkbox.icheck label .icheckbox_square-blue {
   margin-right: 4px;
@@ -2488,14 +2493,15 @@ body[data-section="resource:table"] .section-content-wrapper .content > .row > d
 body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body {
   padding: 0;
 }
+body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row {
+  margin-right: 0;
+  margin-left: 0;
+}
 body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row > div {
-  line-height: 50px;
+  padding-top: 8px;
 }
-body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row > div > *:first-child {
-  padding-left: 10px;
-}
-body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row > div > *:last-child {
-  padding-right: 10px;
+body[data-section="resource:table"] .section-content-wrapper .scaffold-data-grid-container.box-body .toolbar-container.row .btn-toolbar > * {
+  margin-bottom: 8px;
 }
 body[data-section="resource:table"] .section-content-wrapper .data-grid-container {
   margin-left: 0;

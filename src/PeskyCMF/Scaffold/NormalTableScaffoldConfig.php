@@ -146,7 +146,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $object = $table->newRecord();
         if (count($object::getPrimaryKeyColumn()->validateValue($id)) > 0) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $conditions = $sectionConfig->getSpecialConditions();
         $conditions[$table::getPkColumnName()] = $id;
@@ -173,7 +173,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
         }
         if (!$object->fromDb($conditions, array_unique($columnsToSelect), array_keys($relationsToRead))->existsInDb()) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $this->logDbRecordLoad($object, static::getResourceName());
         $data = $object->toArray([], $relationsToRead, true);
@@ -286,17 +286,17 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeValidationErrorsJsonResponse($errors);
         }
         if (!$this->getRequest()->input($table::getPkColumnName())) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $id = $this->getRequest()->input($table::getPkColumnName());
         $record = $table->newRecord();
         if (count($record::getPrimaryKeyColumn()->validateValue($id)) > 0) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $conditions = $formConfig->getSpecialConditions();
         $conditions[$table::getPkColumnName()] = $id;
         if (!$record->fromDb($conditions)->existsInDb()) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         if (!$this->isRecordEditAllowed($record->toArrayWithoutFiles())) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden_for_record'));
@@ -611,13 +611,13 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $table = static::getTable();
         $record = $table->newRecord();
         if (count($record::getPrimaryKeyColumn()->validateValue($id)) > 0) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $formConfig = $this->getFormConfig();
         $conditions = $formConfig->getSpecialConditions();
         $conditions[$table::getPkColumnName()] = $id;
         if (!$record->fromDb($conditions)->existsInDb()) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         if (!$this->isRecordDeleteAllowed($record->toArrayWithoutFiles())) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden_for_record'));
@@ -732,7 +732,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             count($table::getPkColumn()->validateValue($id)) > 0
             || count($table::getPkColumn()->validateValue($otherId)) > 0
         ) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $specialConditions = $dataGridConfig->getSpecialConditions();
         /** @var RecordPositionColumn $columnConfig */
@@ -741,7 +741,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             ->newRecord()
             ->fromDb(array_merge($specialConditions, [$table::getPkColumnName() => $id]));
         if (!$movedRecord->existsInDb()) {
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $position1 = $table::selectValue(
             DbExpr::create("`$columnName`"),
@@ -749,7 +749,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         );
         if ($position1 === null) {
             // this value must be present to continue
-            return $this->makeRecordNotFoundResponse($table);
+            return $this->makeRecordNotFoundResponse();
         }
         $isFloat = $columnConfig->getType() === $columnConfig::TYPE_FLOAT;
         $position1 = $isFloat ? (float)$position1 : (int)$position1;
