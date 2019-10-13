@@ -39,7 +39,7 @@
         "swayok/peskyorm": "v2.x-dev",
         "swayok/peskyorm-laravel": "master@dev",
         "swayok/html-tag-helper": "^1.0",
-        "vluzrmos/language-detector": "1.*"
+        "swayok/laravel-language-detector": "1.*"
     },
     "scripts": {
         "post-install-cmd": [
