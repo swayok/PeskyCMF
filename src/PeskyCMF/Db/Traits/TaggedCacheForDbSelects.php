@@ -18,7 +18,7 @@ trait TaggedCacheForDbSelects {
         if (static::$_cachingIsPossible === null) {
             /** @var \AlternativeLaravelCache\Core\AlternativeCacheStore $cache */
             $storeClass = '\AlternativeLaravelCache\Core\AlternativeCacheStore';
-            $poolInterface = '\Cache\Taggable\TaggablePoolInterface';
+            $poolInterface = 'Cache\TagInterop\TaggableCacheItemPoolInterface';
             $cache = app('cache.store')->getStore();
             static::$_cachingIsPossible = (
                 $cache instanceof $storeClass
