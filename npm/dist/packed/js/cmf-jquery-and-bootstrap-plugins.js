@@ -28758,7 +28758,7 @@ $.prototype.onTransitionEnd = function (callback) {
 * https://github.com/RobinHerbots/Inputmask
 * Copyright (c) 2010 - 2019 Robin Herbots
 * Licensed under the MIT license (http://www.opensource.org/licenses/mit-license.php)
-* Version: 4.0.8
+* Version: 4.0.9
 */
 
 (function(modules) {
@@ -31522,7 +31522,7 @@ $.prototype.onTransitionEnd = function (callback) {
                         initializeColorMask(el);
                     }
                     if (mobile) {
-                        if ("inputmode" in el) {
+                        if ("inputMode" in el) {
                             el.inputmode = opts.inputmode;
                             el.setAttribute("inputmode", opts.inputmode);
                         }
@@ -32621,7 +32621,7 @@ $.prototype.onTransitionEnd = function (callback) {
     });
 } ]);
 /*!
- * Select2 4.0.7
+ * Select2 4.0.11
  * https://select2.github.io
  *
  * Released under the MIT license
@@ -33454,6 +33454,8 @@ S2.define('select2/utils',[
     if (Utils.__cache[id] != null) {
       delete Utils.__cache[id];
     }
+
+    element.removeAttribute('data-select2-id');
   };
 
   return Utils;
@@ -33475,7 +33477,7 @@ S2.define('select2/results',[
 
   Results.prototype.render = function () {
     var $results = $(
-      '<ul class="select2-results__options" role="tree"></ul>'
+      '<ul class="select2-results__options" role="listbox"></ul>'
     );
 
     if (this.options.get('multiple')) {
@@ -33498,7 +33500,7 @@ S2.define('select2/results',[
     this.hideLoading();
 
     var $message = $(
-      '<li role="treeitem" aria-live="assertive"' +
+      '<li role="alert" aria-live="assertive"' +
       ' class="select2-results__option"></li>'
     );
 
@@ -33632,11 +33634,16 @@ S2.define('select2/results',[
     option.className = 'select2-results__option';
 
     var attrs = {
-      'role': 'treeitem',
+      'role': 'option',
       'aria-selected': 'false'
     };
 
-    if (data.disabled) {
+    var matches = window.Element.prototype.matches ||
+      window.Element.prototype.msMatchesSelector ||
+      window.Element.prototype.webkitMatchesSelector;
+
+    if ((data.element != null && matches.call(data.element, ':disabled')) ||
+        (data.element == null && data.disabled)) {
       delete attrs['aria-selected'];
       attrs['aria-disabled'] = 'true';
     }
@@ -34047,6 +34054,7 @@ S2.define('select2/selection/base',[
 
     $selection.attr('title', this.$element.attr('title'));
     $selection.attr('tabindex', this._tabindex);
+    $selection.attr('aria-disabled', 'false');
 
     this.$selection = $selection;
 
@@ -34056,7 +34064,6 @@ S2.define('select2/selection/base',[
   BaseSelection.prototype.bind = function (container, $container) {
     var self = this;
 
-    var id = container.id + '-container';
     var resultsId = container.id + '-results';
 
     this.container = container;
@@ -34099,19 +34106,19 @@ S2.define('select2/selection/base',[
       self.$selection.removeAttr('aria-activedescendant');
       self.$selection.removeAttr('aria-owns');
 
-      window.setTimeout(function () {
-        self.$selection.focus();
-      }, 0);
-    
+      self.$selection.trigger('focus');
+
       self._detachCloseHandler(container);
     });
 
     container.on('enable', function () {
       self.$selection.attr('tabindex', self._tabindex);
+      self.$selection.attr('aria-disabled', 'false');
     });
 
     container.on('disable', function () {
       self.$selection.attr('tabindex', '-1');
+      self.$selection.attr('aria-disabled', 'true');
     });
   };
 
@@ -34134,7 +34141,6 @@ S2.define('select2/selection/base',[
   };
 
   BaseSelection.prototype._attachCloseHandler = function (container) {
-    var self = this;
 
     $(document.body).on('mousedown.select2.' + container.id, function (e) {
       var $target = $(e.target);
@@ -34144,8 +34150,6 @@ S2.define('select2/selection/base',[
       var $all = $('.select2.select2-container--open');
 
       $all.each(function () {
-        var $this = $(this);
-
         if (this == $select[0]) {
           return;
         }
@@ -34238,7 +34242,7 @@ S2.define('select2/selection/single',[
 
     container.on('focus', function (evt) {
       if (!container.isOpen()) {
-        self.$selection.focus();
+        self.$selection.trigger('focus');
       }
     });
   };
@@ -34272,7 +34276,14 @@ S2.define('select2/selection/single',[
     var formatted = this.display(selection, $rendered);
 
     $rendered.empty().append(formatted);
-    $rendered.attr('title', selection.title || selection.text);
+
+    var title = selection.title || selection.text;
+
+    if (title) {
+      $rendered.attr('title', title);
+    } else {
+      $rendered.removeAttr('title');
+    }
   };
 
   return SingleSelection;
@@ -34375,7 +34386,12 @@ S2.define('select2/selection/multiple',[
       var formatted = this.display(selection, $selection);
 
       $selection.append(formatted);
-      $selection.attr('title', selection.title || selection.text);
+
+      var title = selection.title || selection.text;
+
+      if (title) {
+        $selection.attr('title', title);
+      }
 
       Utils.StoreData($selection[0], 'data', selection);
 
@@ -34568,7 +34584,7 @@ S2.define('select2/selection/search',[
       '<li class="select2-search select2-search--inline">' +
         '<input class="select2-search__field" type="search" tabindex="-1"' +
         ' autocomplete="off" autocorrect="off" autocapitalize="none"' +
-        ' spellcheck="false" role="textbox" aria-autocomplete="list" />' +
+        ' spellcheck="false" role="searchbox" aria-autocomplete="list" />' +
       '</li>'
     );
 
@@ -34585,14 +34601,18 @@ S2.define('select2/selection/search',[
   Search.prototype.bind = function (decorated, container, $container) {
     var self = this;
 
+    var resultsId = container.id + '-results';
+
     decorated.call(this, container, $container);
 
     container.on('open', function () {
+      self.$search.attr('aria-controls', resultsId);
       self.$search.trigger('focus');
     });
 
     container.on('close', function () {
       self.$search.val('');
+      self.$search.removeAttr('aria-controls');
       self.$search.removeAttr('aria-activedescendant');
       self.$search.trigger('focus');
     });
@@ -34612,7 +34632,11 @@ S2.define('select2/selection/search',[
     });
 
     container.on('results:focus', function (params) {
-      self.$search.attr('aria-activedescendant', params.id);
+      if (params.data._resultId) {
+        self.$search.attr('aria-activedescendant', params.data._resultId);
+      } else {
+        self.$search.removeAttr('aria-activedescendant');
+      }
     });
 
     this.$selection.on('focusin', '.select2-search--inline', function (evt) {
@@ -34643,6 +34667,12 @@ S2.define('select2/selection/search',[
 
           evt.preventDefault();
         }
+      }
+    });
+
+    this.$selection.on('click', '.select2-search--inline', function (evt) {
+      if (self.$search.val()) {
+        evt.stopPropagation();
       }
     });
 
@@ -34731,13 +34761,7 @@ S2.define('select2/selection/search',[
 
     this.resizeSearch();
     if (searchHadFocus) {
-      var isTagInput = this.$element.find('[data-select2-tag]').length;
-      if (isTagInput) {
-        // fix IE11 bug where tag input lost focus
-        this.$element.focus();
-      } else {
-        this.$search.focus();
-      }
+      this.$search.trigger('focus');
     }
   };
 
@@ -34770,7 +34794,7 @@ S2.define('select2/selection/search',[
     var width = '';
 
     if (this.$search.attr('placeholder') !== '') {
-      width = this.$selection.find('.select2-selection__rendered').innerWidth();
+      width = this.$selection.find('.select2-selection__rendered').width();
     } else {
       var minimumWidth = this.$search.val().length + 1;
 
@@ -36053,14 +36077,18 @@ S2.define('select2/data/array',[
   'jquery'
 ], function (SelectAdapter, Utils, $) {
   function ArrayAdapter ($element, options) {
-    var data = options.get('data') || [];
+    this._dataToConvert = options.get('data') || [];
 
     ArrayAdapter.__super__.constructor.call(this, $element, options);
-
-    this.addOptions(this.convertToOptions(data));
   }
 
   Utils.Extend(ArrayAdapter, SelectAdapter);
+
+  ArrayAdapter.prototype.bind = function (container, $container) {
+    ArrayAdapter.__super__.bind.call(this, container, $container);
+
+    this.addOptions(this.convertToOptions(this._dataToConvert));
+  };
 
   ArrayAdapter.prototype.select = function (data) {
     var $option = this.$element.find('option').filter(function (i, elm) {
@@ -36351,8 +36379,6 @@ S2.define('select2/data/tags',[
   };
 
   Tags.prototype._removeOldTags = function (_) {
-    var tag = this._lastTag;
-
     var $options = this.$element.find('option[data-select2-tag]');
 
     $options.each(function () {
@@ -36427,7 +36453,7 @@ S2.define('select2/data/tokenizer',[
       // Replace the search term if we have the search box
       if (this.$search.length) {
         this.$search.val(tokenData.term);
-        this.$search.focus();
+        this.$search.trigger('focus');
       }
 
       params.term = tokenData.term;
@@ -36556,8 +36582,28 @@ S2.define('select2/data/maximumSelectionLength',[
     decorated.call(this, $e, options);
   }
 
+  MaximumSelectionLength.prototype.bind =
+    function (decorated, container, $container) {
+      var self = this;
+
+      decorated.call(this, container, $container);
+
+      container.on('select', function () {
+        self._checkIfMaximumSelected();
+      });
+  };
+
   MaximumSelectionLength.prototype.query =
     function (decorated, params, callback) {
+      var self = this;
+
+      this._checkIfMaximumSelected(function () {
+        decorated.call(self, params, callback);
+      });
+  };
+
+  MaximumSelectionLength.prototype._checkIfMaximumSelected =
+    function (_, successCallback) {
       var self = this;
 
       this.current(function (currentData) {
@@ -36572,7 +36618,10 @@ S2.define('select2/data/maximumSelectionLength',[
           });
           return;
         }
-        decorated.call(self, params, callback);
+
+        if (successCallback) {
+          successCallback();
+        }
       });
   };
 
@@ -36635,7 +36684,7 @@ S2.define('select2/dropdown/search',[
       '<span class="select2-search select2-search--dropdown">' +
         '<input class="select2-search__field" type="search" tabindex="-1"' +
         ' autocomplete="off" autocorrect="off" autocapitalize="none"' +
-        ' spellcheck="false" role="textbox" />' +
+        ' spellcheck="false" role="searchbox" aria-autocomplete="list" />' +
       '</span>'
     );
 
@@ -36649,6 +36698,8 @@ S2.define('select2/dropdown/search',[
 
   Search.prototype.bind = function (decorated, container, $container) {
     var self = this;
+
+    var resultsId = container.id + '-results';
 
     decorated.call(this, container, $container);
 
@@ -36672,24 +36723,27 @@ S2.define('select2/dropdown/search',[
 
     container.on('open', function () {
       self.$search.attr('tabindex', 0);
+      self.$search.attr('aria-controls', resultsId);
 
-      self.$search.focus();
+      self.$search.trigger('focus');
 
       window.setTimeout(function () {
-        self.$search.focus();
+        self.$search.trigger('focus');
       }, 0);
     });
 
     container.on('close', function () {
       self.$search.attr('tabindex', -1);
+      self.$search.removeAttr('aria-controls');
+      self.$search.removeAttr('aria-activedescendant');
 
       self.$search.val('');
-      self.$search.blur();
+      self.$search.trigger('blur');
     });
 
     container.on('focus', function () {
       if (!container.isOpen()) {
-        self.$search.focus();
+        self.$search.trigger('focus');
       }
     });
 
@@ -36702,6 +36756,14 @@ S2.define('select2/dropdown/search',[
         } else {
           self.$searchContainer.addClass('select2-search--hide');
         }
+      }
+    });
+
+    container.on('results:focus', function (params) {
+      if (params.data._resultId) {
+        self.$search.attr('aria-activedescendant', params.data._resultId);
+      } else {
+        self.$search.removeAttr('aria-activedescendant');
       }
     });
   };
@@ -36788,6 +36850,7 @@ S2.define('select2/dropdown/infiniteScroll',[
 
     if (this.showLoadingMore(data)) {
       this.$results.append(this.$loadingMore);
+      this.loadMoreIfNeeded();
     }
   };
 
@@ -36806,25 +36869,27 @@ S2.define('select2/dropdown/infiniteScroll',[
       self.loading = true;
     });
 
-    this.$results.on('scroll', function () {
-      var isLoadMoreVisible = $.contains(
-        document.documentElement,
-        self.$loadingMore[0]
-      );
+    this.$results.on('scroll', this.loadMoreIfNeeded.bind(this));
+  };
 
-      if (self.loading || !isLoadMoreVisible) {
-        return;
-      }
+  InfiniteScroll.prototype.loadMoreIfNeeded = function () {
+    var isLoadMoreVisible = $.contains(
+      document.documentElement,
+      this.$loadingMore[0]
+    );
 
-      var currentOffset = self.$results.offset().top +
-        self.$results.outerHeight(false);
-      var loadingMoreOffset = self.$loadingMore.offset().top +
-        self.$loadingMore.outerHeight(false);
+    if (this.loading || !isLoadMoreVisible) {
+      return;
+    }
 
-      if (currentOffset + 50 >= loadingMoreOffset) {
-        self.loadMore();
-      }
-    });
+    var currentOffset = this.$results.offset().top +
+      this.$results.outerHeight(false);
+    var loadingMoreOffset = this.$loadingMore.offset().top +
+      this.$loadingMore.outerHeight(false);
+
+    if (currentOffset + 50 >= loadingMoreOffset) {
+      this.loadMore();
+    }
   };
 
   InfiniteScroll.prototype.loadMore = function () {
@@ -36845,7 +36910,7 @@ S2.define('select2/dropdown/infiniteScroll',[
     var $option = $(
       '<li ' +
       'class="select2-results__option select2-results__option--load-more"' +
-      'role="treeitem" aria-disabled="true"></li>'
+      'role="option" aria-disabled="true"></li>'
     );
 
     var message = this.options.get('translations').get('loadingMore');
@@ -36863,7 +36928,7 @@ S2.define('select2/dropdown/attachBody',[
   '../utils'
 ], function ($, Utils) {
   function AttachBody (decorated, $element, options) {
-    this.$dropdownParent = options.get('dropdownParent') || $(document.body);
+    this.$dropdownParent = $(options.get('dropdownParent') || document.body);
 
     decorated.call(this, $element, options);
   }
@@ -36871,27 +36936,14 @@ S2.define('select2/dropdown/attachBody',[
   AttachBody.prototype.bind = function (decorated, container, $container) {
     var self = this;
 
-    var setupResultsEvents = false;
-
     decorated.call(this, container, $container);
 
     container.on('open', function () {
       self._showDropdown();
       self._attachPositioningHandler(container);
 
-      if (!setupResultsEvents) {
-        setupResultsEvents = true;
-
-        container.on('results:all', function () {
-          self._positionDropdown();
-          self._resizeDropdown();
-        });
-
-        container.on('results:append', function () {
-          self._positionDropdown();
-          self._resizeDropdown();
-        });
-      }
+      // Must bind after the results handlers to ensure correct sizing
+      self._bindContainerResultHandlers(container);
     });
 
     container.on('close', function () {
@@ -36938,6 +36990,44 @@ S2.define('select2/dropdown/attachBody',[
 
   AttachBody.prototype._hideDropdown = function (decorated) {
     this.$dropdownContainer.detach();
+  };
+
+  AttachBody.prototype._bindContainerResultHandlers =
+      function (decorated, container) {
+
+    // These should only be bound once
+    if (this._containerResultsHandlersBound) {
+      return;
+    }
+
+    var self = this;
+
+    container.on('results:all', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    container.on('results:append', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    container.on('results:message', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    container.on('select', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    container.on('unselect', function () {
+      self._positionDropdown();
+      self._resizeDropdown();
+    });
+
+    this._containerResultsHandlersBound = true;
   };
 
   AttachBody.prototype._attachPositioningHandler =
@@ -37025,7 +37115,14 @@ S2.define('select2/dropdown/attachBody',[
       $offsetParent = $offsetParent.offsetParent();
     }
 
-    var parentOffset = $offsetParent.offset();
+    var parentOffset = {
+      top: 0,
+      left: 0
+    };
+
+    if ($.contains(document.body, $offsetParent[0])) {
+      parentOffset = $offsetParent.offset();
+    }
 
     css.top -= parentOffset.top;
     css.left -= parentOffset.left;
@@ -37490,66 +37587,29 @@ S2.define('select2/defaults',[
       );
     }
 
-    if (typeof options.language === 'string') {
-      // Check if the language is specified with a region
-      if (options.language.indexOf('-') > 0) {
-        // Extract the region information if it is included
-        var languageParts = options.language.split('-');
-        var baseLanguage = languageParts[0];
+    // If the defaults were not previously applied from an element, it is
+    // possible for the language option to have not been resolved
+    options.language = this._resolveLanguage(options.language);
 
-        options.language = [options.language, baseLanguage];
-      } else {
-        options.language = [options.language];
+    // Always fall back to English since it will always be complete
+    options.language.push('en');
+
+    var uniqueLanguages = [];
+
+    for (var l = 0; l < options.language.length; l++) {
+      var language = options.language[l];
+
+      if (uniqueLanguages.indexOf(language) === -1) {
+        uniqueLanguages.push(language);
       }
     }
 
-    if ($.isArray(options.language)) {
-      var languages = new Translation();
-      options.language.push('en');
+    options.language = uniqueLanguages;
 
-      var languageNames = options.language;
-
-      for (var l = 0; l < languageNames.length; l++) {
-        var name = languageNames[l];
-        var language = {};
-
-        try {
-          // Try to load it with the original name
-          language = Translation.loadPath(name);
-        } catch (e) {
-          try {
-            // If we couldn't load it, check if it wasn't the full path
-            name = this.defaults.amdLanguageBase + name;
-            language = Translation.loadPath(name);
-          } catch (ex) {
-            // The translation could not be loaded at all. Sometimes this is
-            // because of a configuration problem, other times this can be
-            // because of how Select2 helps load all possible translation files.
-            if (options.debug && window.console && console.warn) {
-              console.warn(
-                'Select2: The language file for "' + name + '" could not be ' +
-                'automatically loaded. A fallback will be used instead.'
-              );
-            }
-
-            continue;
-          }
-        }
-
-        languages.extend(language);
-      }
-
-      options.translations = languages;
-    } else {
-      var baseTranslation = Translation.loadPath(
-        this.defaults.amdLanguageBase + 'en'
-      );
-      var customTranslation = new Translation(options.language);
-
-      customTranslation.extend(baseTranslation);
-
-      options.translations = customTranslation;
-    }
+    options.translations = this._processTranslations(
+      options.language,
+      options.debug
+    );
 
     return options;
   };
@@ -37616,7 +37676,7 @@ S2.define('select2/defaults',[
       debug: false,
       dropdownAutoWidth: false,
       escapeMarkup: Utils.escapeMarkup,
-      language: EnglishTranslation,
+      language: {},
       matcher: matcher,
       minimumInputLength: 0,
       maximumInputLength: 0,
@@ -37636,6 +37696,103 @@ S2.define('select2/defaults',[
       theme: 'default',
       width: 'resolve'
     };
+  };
+
+  Defaults.prototype.applyFromElement = function (options, $element) {
+    var optionLanguage = options.language;
+    var defaultLanguage = this.defaults.language;
+    var elementLanguage = $element.prop('lang');
+    var parentLanguage = $element.closest('[lang]').prop('lang');
+
+    var languages = Array.prototype.concat.call(
+      this._resolveLanguage(elementLanguage),
+      this._resolveLanguage(optionLanguage),
+      this._resolveLanguage(defaultLanguage),
+      this._resolveLanguage(parentLanguage)
+    );
+
+    options.language = languages;
+
+    return options;
+  };
+
+  Defaults.prototype._resolveLanguage = function (language) {
+    if (!language) {
+      return [];
+    }
+
+    if ($.isEmptyObject(language)) {
+      return [];
+    }
+
+    if ($.isPlainObject(language)) {
+      return [language];
+    }
+
+    var languages;
+
+    if (!$.isArray(language)) {
+      languages = [language];
+    } else {
+      languages = language;
+    }
+
+    var resolvedLanguages = [];
+
+    for (var l = 0; l < languages.length; l++) {
+      resolvedLanguages.push(languages[l]);
+
+      if (typeof languages[l] === 'string' && languages[l].indexOf('-') > 0) {
+        // Extract the region information if it is included
+        var languageParts = languages[l].split('-');
+        var baseLanguage = languageParts[0];
+
+        resolvedLanguages.push(baseLanguage);
+      }
+    }
+
+    return resolvedLanguages;
+  };
+
+  Defaults.prototype._processTranslations = function (languages, debug) {
+    var translations = new Translation();
+
+    for (var l = 0; l < languages.length; l++) {
+      var languageData = new Translation();
+
+      var language = languages[l];
+
+      if (typeof language === 'string') {
+        try {
+          // Try to load it with the original name
+          languageData = Translation.loadPath(language);
+        } catch (e) {
+          try {
+            // If we couldn't load it, check if it wasn't the full path
+            language = this.defaults.amdLanguageBase + language;
+            languageData = Translation.loadPath(language);
+          } catch (ex) {
+            // The translation could not be loaded at all. Sometimes this is
+            // because of a configuration problem, other times this can be
+            // because of how Select2 helps load all possible translation files
+            if (debug && window.console && console.warn) {
+              console.warn(
+                'Select2: The language file for "' + language + '" could ' +
+                'not be automatically loaded. A fallback will be used instead.'
+              );
+            }
+          }
+        }
+      } else if ($.isPlainObject(language)) {
+        languageData = new Translation(language);
+      } else {
+        languageData = language;
+      }
+
+      translations.extend(languageData);
+    }
+
+    return translations;
   };
 
   Defaults.prototype.set = function (key, value) {
@@ -37667,6 +37824,10 @@ S2.define('select2/options',[
       this.fromElement($element);
     }
 
+    if ($element != null) {
+      this.options = Defaults.applyFromElement(this.options, $element);
+    }
+
     this.options = Defaults.apply(this.options);
 
     if ($element && $element.is('input')) {
@@ -37688,14 +37849,6 @@ S2.define('select2/options',[
 
     if (this.options.disabled == null) {
       this.options.disabled = $e.prop('disabled');
-    }
-
-    if (this.options.language == null) {
-      if ($e.prop('lang')) {
-        this.options.language = $e.prop('lang').toLowerCase();
-      } else if ($e.closest('[lang]').prop('lang')) {
-        this.options.language = $e.closest('[lang]').prop('lang');
-      }
     }
 
     if (this.options.dir == null) {
@@ -37963,6 +38116,12 @@ S2.define('select2/core',[
       }
 
       return null;
+    }
+
+    if (method == 'computedstyle') {
+      var computedStyle = window.getComputedStyle($element[0]);
+
+      return computedStyle.width;
     }
 
     return method;
@@ -39221,10 +39380,10 @@ S2.define('jquery.select2',[
 /**
   * bootstrap-switch - Turn checkboxes and radio buttons into toggle switches.
   *
-  * @version v3.4.0
+  * @version v3.3.4
   * @homepage https://bttstrp.github.io/bootstrap-switch
   * @author Mattia Larentis <mattia@larentis.eu> (http://larentis.eu)
-  * @license MIT
+  * @license Apache-2.0
   */
 
 (function (global, factory) {
@@ -39290,335 +39449,67 @@ S2.define('jquery.select2',[
 
   var $ = _jquery2.default || window.jQuery || window.$;
 
-  function getClasses(options, id) {
-    var state = options.state,
-        size = options.size,
-        disabled = options.disabled,
-        readonly = options.readonly,
-        indeterminate = options.indeterminate,
-        inverse = options.inverse;
-
-    return [state ? 'on' : 'off', size, disabled ? 'disabled' : undefined, readonly ? 'readonly' : undefined, indeterminate ? 'indeterminate' : undefined, inverse ? 'inverse' : undefined, id ? 'id-' + id : undefined].filter(function (v) {
-      return v == null;
-    });
-  }
-
-  function prvgetElementOptions() {
-    return {
-      state: this.$element.is(':checked'),
-      size: this.$element.data('size'),
-      animate: this.$element.data('animate'),
-      disabled: this.$element.is(':disabled'),
-      readonly: this.$element.is('[readonly]'),
-      indeterminate: this.$element.data('indeterminate'),
-      inverse: this.$element.data('inverse'),
-      radioAllOff: this.$element.data('radio-all-off'),
-      onColor: this.$element.data('on-color'),
-      offColor: this.$element.data('off-color'),
-      onText: this.$element.data('on-text'),
-      offText: this.$element.data('off-text'),
-      labelText: this.$element.data('label-text'),
-      handleWidth: this.$element.data('handle-width'),
-      labelWidth: this.$element.data('label-width'),
-      baseClass: this.$element.data('base-class'),
-      wrapperClass: this.$element.data('wrapper-class')
-    };
-  }
-
-  function prvwidth() {
-    var _this = this;
-
-    var $handles = this.$on.add(this.$off).add(this.$label).css('width', '');
-    var handleWidth = this.options.handleWidth === 'auto' ? Math.round(Math.max(this.$on.width(), this.$off.width())) : this.options.handleWidth;
-    $handles.width(handleWidth);
-    this.$label.width(function (index, width) {
-      if (_this.options.labelWidth !== 'auto') {
-        return _this.options.labelWidth;
-      }
-      if (width < handleWidth) {
-        return handleWidth;
-      }
-      return width;
-    });
-    this.privateHandleWidth = this.$on.outerWidth();
-    this.privateLabelWidth = this.$label.outerWidth();
-    this.$container.width(this.privateHandleWidth * 2 + this.privateLabelWidth);
-    return this.$wrapper.width(this.privateHandleWidth + this.privateLabelWidth);
-  }
-
-  function prvcontainerPosition() {
-    var _this2 = this;
-
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.ope;
-
-    this.$container.css('margin-left', function () {
-      var values = [0, '-' + _this2.privateHandleWidth + 'px'];
-      if (_this2.options.indeterminate) {
-        return '-' + _this2.privateHandleWidth / 2 + 'px';
-      }
-      if (state) {
-        if (_this2.options.inverse) {
-          return values[1];
-        }
-        return values[0];
-      }
-      if (_this2.options.inverse) {
-        return values[0];
-      }
-      return values[1];
-    });
-  }
-
-  function prvgetClass(name) {
-    return this.options.baseClass + '-' + name;
-  }
-
-  function prvinit() {
-    var _this3 = this;
-
-    var init = function init() {
-      _this3.setPrevOptions();
-      prvwidth.call(_this3);
-      prvcontainerPosition.call(_this3);
-      setTimeout(function () {
-        return _this3.options.animate && _this3.$wrapper.addClass(prvgetClass.call(_this3, 'animate'));
-      }, 50);
-    };
-    if (this.$wrapper.is(':visible')) {
-      init();
-      return;
-    }
-    var initInterval = window.setInterval(function () {
-      return _this3.$wrapper.is(':visible') && (init() || true) && window.clearInterval(initInterval);
-    }, 50);
-  }
-
-  function prvelementHandlers() {
-    var _this4 = this;
-
-    return this.$element.on({
-      'setPreviousOptions.bootstrapSwitch': function setPreviousOptionsBootstrapSwitch() {
-        return _this4.setPrevOptions();
-      },
-
-      'previousState.bootstrapSwitch': function previousStateBootstrapSwitch() {
-        _this4.options = _this4.prevOptions;
-        if (_this4.options.indeterminate) {
-          _this4.$wrapper.addClass(prvgetClass.call(_this4, 'indeterminate'));
-        }
-        _this4.$element.prop('checked', _this4.options.state).trigger('change.bootstrapSwitch', true);
-      },
-
-      'change.bootstrapSwitch': function changeBootstrapSwitch(event, skip) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        var state = _this4.$element.is(':checked');
-        prvcontainerPosition.call(_this4, state);
-        if (state === _this4.options.state) {
-          return;
-        }
-        _this4.options.state = state;
-        _this4.$wrapper.toggleClass(prvgetClass.call(_this4, 'off')).toggleClass(prvgetClass.call(_this4, 'on'));
-        if (!skip) {
-          if (_this4.$element.is(':radio')) {
-            $('[name="' + _this4.$element.attr('name') + '"]').not(_this4.$element).prop('checked', false).trigger('change.bootstrapSwitch', true);
-          }
-          _this4.$element.trigger('switchChange.bootstrapSwitch', [state]);
-        }
-      },
-
-      'focus.bootstrapSwitch': function focusBootstrapSwitch(event) {
-        event.preventDefault();
-        _this4.$wrapper.addClass(prvgetClass.call(_this4, 'focused'));
-      },
-
-      'blur.bootstrapSwitch': function blurBootstrapSwitch(event) {
-        event.preventDefault();
-        _this4.$wrapper.removeClass(prvgetClass.call(_this4, 'focused'));
-      },
-
-      'keydown.bootstrapSwitch': function keydownBootstrapSwitch(event) {
-        if (!event.which || _this4.options.disabled || _this4.options.readonly) {
-          return;
-        }
-        if (event.which === 37 || event.which === 39) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          _this4.state(event.which === 39);
-        }
-      }
-    });
-  }
-
-  function prvhandleHandlers() {
-    var _this5 = this;
-
-    this.$on.on('click.bootstrapSwitch', function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      _this5.state(false);
-      return _this5.$element.trigger('focus.bootstrapSwitch');
-    });
-    return this.$off.on('click.bootstrapSwitch', function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      _this5.state(true);
-      return _this5.$element.trigger('focus.bootstrapSwitch');
-    });
-  }
-
-  function prvlabelHandlers() {
-    var _this6 = this;
-
-    var dragStart = void 0;
-    var dragEnd = void 0;
-    var handlers = {
-      click: function click(event) {
-        event.stopPropagation();
-      },
-
-
-      'mousedown.bootstrapSwitch touchstart.bootstrapSwitch': function mousedownBootstrapSwitchTouchstartBootstrapSwitch(event) {
-        if (dragStart || _this6.options.disabled || _this6.options.readonly) {
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        dragStart = (event.pageX || event.originalEvent.touches[0].pageX) - parseInt(_this6.$container.css('margin-left'), 10);
-        if (_this6.options.animate) {
-          _this6.$wrapper.removeClass(prvgetClass.call(_this6, 'animate'));
-        }
-        _this6.$element.trigger('focus.bootstrapSwitch');
-      },
-
-      'mousemove.bootstrapSwitch touchmove.bootstrapSwitch': function mousemoveBootstrapSwitchTouchmoveBootstrapSwitch(event) {
-        if (dragStart == null) {
-          return;
-        }
-        var difference = (event.pageX || event.originalEvent.touches[0].pageX) - dragStart;
-        event.preventDefault();
-        if (difference < -_this6.privateHandleWidth || difference > 0) {
-          return;
-        }
-        dragEnd = difference;
-        _this6.$container.css('margin-left', dragEnd + 'px');
-      },
-
-      'mouseup.bootstrapSwitch touchend.bootstrapSwitch': function mouseupBootstrapSwitchTouchendBootstrapSwitch(event) {
-        if (!dragStart) {
-          return;
-        }
-        event.preventDefault();
-        if (_this6.options.animate) {
-          _this6.$wrapper.addClass(prvgetClass.call(_this6, 'animate'));
-        }
-        if (dragEnd) {
-          var state = dragEnd > -(_this6.privateHandleWidth / 2);
-          dragEnd = false;
-          _this6.state(_this6.options.inverse ? !state : state);
-        } else {
-          _this6.state(!_this6.options.state);
-        }
-        dragStart = false;
-      },
-
-      'mouseleave.bootstrapSwitch': function mouseleaveBootstrapSwitch() {
-        _this6.$label.trigger('mouseup.bootstrapSwitch');
-      }
-    };
-    this.$label.on(handlers);
-  }
-
-  function prvexternalLabelHandler() {
-    var _this7 = this;
-
-    var $externalLabel = this.$element.closest('label');
-    $externalLabel.on('click', function (event) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      if (event.target === $externalLabel[0]) {
-        _this7.toggleState();
-      }
-    });
-  }
-
-  function prvformHandler() {
-    function isBootstrapSwitch() {
-      return $(this).data('bootstrap-switch');
-    }
-
-    function performReset() {
-      return $(this).bootstrapSwitch('state', this.checked);
-    }
-
-    var $form = this.$element.closest('form');
-    if ($form.data('bootstrap-switch')) {
-      return;
-    }
-    $form.on('reset.bootstrapSwitch', function () {
-      window.setTimeout(function () {
-        $form.find('input').filter(isBootstrapSwitch).each(performReset);
-      }, 1);
-    }).data('bootstrap-switch', true);
-  }
-
-  function prvgetClasses(classes) {
-    var _this8 = this;
-
-    if (!$.isArray(classes)) {
-      return [prvgetClass.call(this, classes)];
-    }
-    return classes.map(function (v) {
-      return prvgetClass.call(_this8, v);
-    });
-  }
-
   var BootstrapSwitch = function () {
     function BootstrapSwitch(element) {
-      var _this9 = this;
+      var _this = this;
 
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       _classCallCheck(this, BootstrapSwitch);
 
       this.$element = $(element);
-      this.options = $.extend({}, $.fn.bootstrapSwitch.defaults, prvgetElementOptions.call(this), options);
+      this.options = $.extend({}, $.fn.bootstrapSwitch.defaults, this._getElementOptions(), options);
       this.prevOptions = {};
       this.$wrapper = $('<div>', {
         class: function _class() {
-          return getClasses(_this9.options, _this9.$element.attr('id')).map(function (v) {
-            return prvgetClass.call(_this9, v);
-          }).concat([_this9.options.baseClass], prvgetClasses.call(_this9, _this9.options.wrapperClass)).join(' ');
+          var classes = [];
+          classes.push(_this.options.state ? 'on' : 'off');
+          if (_this.options.size) {
+            classes.push(_this.options.size);
+          }
+          if (_this.options.disabled) {
+            classes.push('disabled');
+          }
+          if (_this.options.readonly) {
+            classes.push('readonly');
+          }
+          if (_this.options.indeterminate) {
+            classes.push('indeterminate');
+          }
+          if (_this.options.inverse) {
+            classes.push('inverse');
+          }
+          if (_this.$element.attr('id')) {
+            classes.push('id-' + _this.$element.attr('id'));
+          }
+          return classes.map(_this._getClass.bind(_this)).concat([_this.options.baseClass], _this._getClasses(_this.options.wrapperClass)).join(' ');
         }
       });
-      this.$container = $('<div>', { class: prvgetClass.call(this, 'container') });
+      this.$container = $('<div>', { class: this._getClass('container') });
       this.$on = $('<span>', {
         html: this.options.onText,
-        class: prvgetClass.call(this, 'handle-on') + ' ' + prvgetClass.call(this, this.options.onColor)
+        class: this._getClass('handle-on') + ' ' + this._getClass(this.options.onColor)
       });
       this.$off = $('<span>', {
         html: this.options.offText,
-        class: prvgetClass.call(this, 'handle-off') + ' ' + prvgetClass.call(this, this.options.offColor)
+        class: this._getClass('handle-off') + ' ' + this._getClass(this.options.offColor)
       });
       this.$label = $('<span>', {
         html: this.options.labelText,
-        class: prvgetClass.call(this, 'label')
+        class: this._getClass('label')
       });
 
-      this.$element.on('init.bootstrapSwitch', function () {
-        return _this9.options.onInit(element);
-      });
+      this.$element.on('init.bootstrapSwitch', this.options.onInit.bind(this, element));
       this.$element.on('switchChange.bootstrapSwitch', function () {
         for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
           args[_key] = arguments[_key];
         }
 
-        var changeState = _this9.options.onSwitchChange.apply(element, args);
-        if (changeState === false) {
-          if (_this9.$element.is(':radio')) {
-            $('[name="' + _this9.$element.attr('name') + '"]').trigger('previousState.bootstrapSwitch', true);
+        if (_this.options.onSwitchChange.apply(element, args) === false) {
+          if (_this.$element.is(':radio')) {
+            $('[name="' + _this.$element.attr('name') + '"]').trigger('previousState.bootstrapSwitch', true);
           } else {
-            _this9.$element.trigger('previousState.bootstrapSwitch', true);
+            _this.$element.trigger('previousState.bootstrapSwitch', true);
           }
         }
       });
@@ -39631,12 +39522,12 @@ S2.define('jquery.select2',[
         this.$element.prop('indeterminate', true);
       }
 
-      prvinit.call(this);
-      prvelementHandlers.call(this);
-      prvhandleHandlers.call(this);
-      prvlabelHandlers.call(this);
-      prvformHandler.call(this);
-      prvexternalLabelHandler.call(this);
+      this._init();
+      this._elementHandlers();
+      this._handleHandlers();
+      this._labelHandlers();
+      this._formHandler();
+      this._externalLabelHandler();
       this.$element.trigger('init.bootstrapSwitch', this.options.state);
     }
 
@@ -39674,8 +39565,9 @@ S2.define('jquery.select2',[
         if (this.options.indeterminate) {
           this.indeterminate(false);
           return this.state(true);
+        } else {
+          return this.$element.prop('checked', !this.options.state).trigger('change.bootstrapSwitch', skip);
         }
-        return this.$element.prop('checked', !this.options.state).trigger('change.bootstrapSwitch', skip);
       }
     }, {
       key: 'size',
@@ -39684,13 +39576,13 @@ S2.define('jquery.select2',[
           return this.options.size;
         }
         if (this.options.size != null) {
-          this.$wrapper.removeClass(prvgetClass.call(this, this.options.size));
+          this.$wrapper.removeClass(this._getClass(this.options.size));
         }
         if (value) {
-          this.$wrapper.addClass(prvgetClass.call(this, value));
+          this.$wrapper.addClass(this._getClass(value));
         }
-        prvwidth.call(this);
-        prvcontainerPosition.call(this);
+        this._width();
+        this._containerPosition();
         this.options.size = value;
         return this.$element;
       }
@@ -39709,7 +39601,7 @@ S2.define('jquery.select2',[
       key: 'toggleAnimate',
       value: function toggleAnimate() {
         this.options.animate = !this.options.animate;
-        this.$wrapper.toggleClass(prvgetClass.call(this, 'animate'));
+        this.$wrapper.toggleClass(this._getClass('animate'));
         return this.$element;
       }
     }, {
@@ -39728,7 +39620,7 @@ S2.define('jquery.select2',[
       value: function toggleDisabled() {
         this.options.disabled = !this.options.disabled;
         this.$element.prop('disabled', this.options.disabled);
-        this.$wrapper.toggleClass(prvgetClass.call(this, 'disabled'));
+        this.$wrapper.toggleClass(this._getClass('disabled'));
         return this.$element;
       }
     }, {
@@ -39747,7 +39639,7 @@ S2.define('jquery.select2',[
       value: function toggleReadonly() {
         this.options.readonly = !this.options.readonly;
         this.$element.prop('readonly', this.options.readonly);
-        this.$wrapper.toggleClass(prvgetClass.call(this, 'readonly'));
+        this.$wrapper.toggleClass(this._getClass('readonly'));
         return this.$element;
       }
     }, {
@@ -39766,8 +39658,8 @@ S2.define('jquery.select2',[
       value: function toggleIndeterminate() {
         this.options.indeterminate = !this.options.indeterminate;
         this.$element.prop('indeterminate', this.options.indeterminate);
-        this.$wrapper.toggleClass(prvgetClass.call(this, 'indeterminate'));
-        prvcontainerPosition.call(this);
+        this.$wrapper.toggleClass(this._getClass('indeterminate'));
+        this._containerPosition();
         return this.$element;
       }
     }, {
@@ -39784,7 +39676,7 @@ S2.define('jquery.select2',[
     }, {
       key: 'toggleInverse',
       value: function toggleInverse() {
-        this.$wrapper.toggleClass(prvgetClass.call(this, 'inverse'));
+        this.$wrapper.toggleClass(this._getClass('inverse'));
         var $on = this.$on.clone(true);
         var $off = this.$off.clone(true);
         this.$on.replaceWith($off);
@@ -39801,9 +39693,9 @@ S2.define('jquery.select2',[
           return this.options.onColor;
         }
         if (this.options.onColor) {
-          this.$on.removeClass(prvgetClass.call(this, this.options.onColor));
+          this.$on.removeClass(this._getClass(this.options.onColor));
         }
-        this.$on.addClass(prvgetClass.call(this, value));
+        this.$on.addClass(this._getClass(value));
         this.options.onColor = value;
         return this.$element;
       }
@@ -39814,9 +39706,9 @@ S2.define('jquery.select2',[
           return this.options.offColor;
         }
         if (this.options.offColor) {
-          this.$off.removeClass(prvgetClass.call(this, this.options.offColor));
+          this.$off.removeClass(this._getClass(this.options.offColor));
         }
-        this.$off.addClass(prvgetClass.call(this, value));
+        this.$off.addClass(this._getClass(value));
         this.options.offColor = value;
         return this.$element;
       }
@@ -39827,8 +39719,8 @@ S2.define('jquery.select2',[
           return this.options.onText;
         }
         this.$on.html(value);
-        prvwidth.call(this);
-        prvcontainerPosition.call(this);
+        this._width();
+        this._containerPosition();
         this.options.onText = value;
         return this.$element;
       }
@@ -39839,8 +39731,8 @@ S2.define('jquery.select2',[
           return this.options.offText;
         }
         this.$off.html(value);
-        prvwidth.call(this);
-        prvcontainerPosition.call(this);
+        this._width();
+        this._containerPosition();
         this.options.offText = value;
         return this.$element;
       }
@@ -39851,7 +39743,7 @@ S2.define('jquery.select2',[
           return this.options.labelText;
         }
         this.$label.html(value);
-        prvwidth.call(this);
+        this._width();
         this.options.labelText = value;
         return this.$element;
       }
@@ -39862,8 +39754,8 @@ S2.define('jquery.select2',[
           return this.options.handleWidth;
         }
         this.options.handleWidth = value;
-        prvwidth.call(this);
-        prvcontainerPosition.call(this);
+        this._width();
+        this._containerPosition();
         return this.$element;
       }
     }, {
@@ -39873,13 +39765,13 @@ S2.define('jquery.select2',[
           return this.options.labelWidth;
         }
         this.options.labelWidth = value;
-        prvwidth.call(this);
-        prvcontainerPosition.call(this);
+        this._width();
+        this._containerPosition();
         return this.$element;
       }
     }, {
       key: 'baseClass',
-      value: function baseClass() {
+      value: function baseClass(value) {
         return this.options.baseClass;
       }
     }, {
@@ -39888,10 +39780,12 @@ S2.define('jquery.select2',[
         if (typeof value === 'undefined') {
           return this.options.wrapperClass;
         }
-        var wrapperClass = value || $.fn.bootstrapSwitch.defaults.wrapperClass;
-        this.$wrapper.removeClass(prvgetClasses.call(this, this.options.wrapperClass).join(' '));
-        this.$wrapper.addClass(prvgetClasses.call(this, wrapperClass).join(' '));
-        this.options.wrapperClass = wrapperClass;
+        if (!value) {
+          value = $.fn.bootstrapSwitch.defaults.wrapperClass;
+        }
+        this.$wrapper.removeClass(this._getClasses(this.options.wrapperClass).join(' '));
+        this.$wrapper.addClass(this._getClasses(value).join(' '));
+        this.options.wrapperClass = value;
         return this.$element;
       }
     }, {
@@ -39913,7 +39807,10 @@ S2.define('jquery.select2',[
         if (typeof value === 'undefined') {
           return this.options.onInit;
         }
-        this.options.onInit = value || $.fn.bootstrapSwitch.defaults.onInit;
+        if (!value) {
+          value = $.fn.bootstrapSwitch.defaults.onInit;
+        }
+        this.options.onInit = value;
         return this.$element;
       }
     }, {
@@ -39922,7 +39819,10 @@ S2.define('jquery.select2',[
         if (typeof value === 'undefined') {
           return this.options.onSwitchChange;
         }
-        this.options.onSwitchChange = value || $.fn.bootstrapSwitch.defaults.onSwitchChange;
+        if (!value) {
+          value = $.fn.bootstrapSwitch.defaults.onSwitchChange;
+        }
+        this.options.onSwitchChange = value;
         return this.$element;
       }
     }, {
@@ -39936,12 +39836,290 @@ S2.define('jquery.select2',[
         this.$element.unwrap().unwrap().off('.bootstrapSwitch').removeData('bootstrap-switch');
         return this.$element;
       }
+    }, {
+      key: '_getElementOptions',
+      value: function _getElementOptions() {
+        return {
+          state: this.$element.is(':checked'),
+          size: this.$element.data('size'),
+          animate: this.$element.data('animate'),
+          disabled: this.$element.is(':disabled'),
+          readonly: this.$element.is('[readonly]'),
+          indeterminate: this.$element.data('indeterminate'),
+          inverse: this.$element.data('inverse'),
+          radioAllOff: this.$element.data('radio-all-off'),
+          onColor: this.$element.data('on-color'),
+          offColor: this.$element.data('off-color'),
+          onText: this.$element.data('on-text'),
+          offText: this.$element.data('off-text'),
+          labelText: this.$element.data('label-text'),
+          handleWidth: this.$element.data('handle-width'),
+          labelWidth: this.$element.data('label-width'),
+          baseClass: this.$element.data('base-class'),
+          wrapperClass: this.$element.data('wrapper-class')
+        };
+      }
+    }, {
+      key: '_width',
+      value: function _width() {
+        var _this2 = this;
+
+        var $handles = this.$on.add(this.$off).add(this.$label).css('width', '');
+        var handleWidth = this.options.handleWidth === 'auto' ? Math.round(Math.max(this.$on.width(), this.$off.width())) : this.options.handleWidth;
+        $handles.width(handleWidth);
+        this.$label.width(function (index, width) {
+          if (_this2.options.labelWidth !== 'auto') {
+            return _this2.options.labelWidth;
+          }
+          if (width < handleWidth) {
+            return handleWidth;
+          }
+          return width;
+        });
+        this._handleWidth = this.$on.outerWidth();
+        this._labelWidth = this.$label.outerWidth();
+        this.$container.width(this._handleWidth * 2 + this._labelWidth);
+        return this.$wrapper.width(this._handleWidth + this._labelWidth);
+      }
+    }, {
+      key: '_containerPosition',
+      value: function _containerPosition() {
+        var _this3 = this;
+
+        var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.options.state;
+        var callback = arguments[1];
+
+        this.$container.css('margin-left', function () {
+          var values = [0, '-' + _this3._handleWidth + 'px'];
+          if (_this3.options.indeterminate) {
+            return '-' + _this3._handleWidth / 2 + 'px';
+          }
+          if (state) {
+            if (_this3.options.inverse) {
+              return values[1];
+            } else {
+              return values[0];
+            }
+          } else {
+            if (_this3.options.inverse) {
+              return values[0];
+            } else {
+              return values[1];
+            }
+          }
+        });
+      }
+    }, {
+      key: '_init',
+      value: function _init() {
+        var _this4 = this;
+
+        var init = function init() {
+          _this4.setPrevOptions();
+          _this4._width();
+          _this4._containerPosition();
+          setTimeout(function () {
+            if (_this4.options.animate) {
+              return _this4.$wrapper.addClass(_this4._getClass('animate'));
+            }
+          }, 50);
+        };
+        if (this.$wrapper.is(':visible')) {
+          init();
+          return;
+        }
+        var initInterval = window.setInterval(function () {
+          if (_this4.$wrapper.is(':visible')) {
+            init();
+            return window.clearInterval(initInterval);
+          }
+        }, 50);
+      }
+    }, {
+      key: '_elementHandlers',
+      value: function _elementHandlers() {
+        var _this5 = this;
+
+        return this.$element.on({
+          'setPreviousOptions.bootstrapSwitch': this.setPrevOptions.bind(this),
+
+          'previousState.bootstrapSwitch': function previousStateBootstrapSwitch() {
+            _this5.options = _this5.prevOptions;
+            if (_this5.options.indeterminate) {
+              _this5.$wrapper.addClass(_this5._getClass('indeterminate'));
+            }
+            _this5.$element.prop('checked', _this5.options.state).trigger('change.bootstrapSwitch', true);
+          },
+
+          'change.bootstrapSwitch': function changeBootstrapSwitch(event, skip) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            var state = _this5.$element.is(':checked');
+            _this5._containerPosition(state);
+            if (state === _this5.options.state) {
+              return;
+            }
+            _this5.options.state = state;
+            _this5.$wrapper.toggleClass(_this5._getClass('off')).toggleClass(_this5._getClass('on'));
+            if (!skip) {
+              if (_this5.$element.is(':radio')) {
+                $('[name="' + _this5.$element.attr('name') + '"]').not(_this5.$element).prop('checked', false).trigger('change.bootstrapSwitch', true);
+              }
+              _this5.$element.trigger('switchChange.bootstrapSwitch', [state]);
+            }
+          },
+
+          'focus.bootstrapSwitch': function focusBootstrapSwitch(event) {
+            event.preventDefault();
+            _this5.$wrapper.addClass(_this5._getClass('focused'));
+          },
+
+          'blur.bootstrapSwitch': function blurBootstrapSwitch(event) {
+            event.preventDefault();
+            _this5.$wrapper.removeClass(_this5._getClass('focused'));
+          },
+
+          'keydown.bootstrapSwitch': function keydownBootstrapSwitch(event) {
+            if (!event.which || _this5.options.disabled || _this5.options.readonly) {
+              return;
+            }
+            if (event.which === 37 || event.which === 39) {
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              _this5.state(event.which === 39);
+            }
+          }
+        });
+      }
+    }, {
+      key: '_handleHandlers',
+      value: function _handleHandlers() {
+        var _this6 = this;
+
+        this.$on.on('click.bootstrapSwitch', function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          _this6.state(false);
+          return _this6.$element.trigger('focus.bootstrapSwitch');
+        });
+        return this.$off.on('click.bootstrapSwitch', function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          _this6.state(true);
+          return _this6.$element.trigger('focus.bootstrapSwitch');
+        });
+      }
+    }, {
+      key: '_labelHandlers',
+      value: function _labelHandlers() {
+        var _this7 = this;
+
+        var handlers = {
+          click: function click(event) {
+            event.stopPropagation();
+          },
+
+
+          'mousedown.bootstrapSwitch touchstart.bootstrapSwitch': function mousedownBootstrapSwitchTouchstartBootstrapSwitch(event) {
+            if (_this7._dragStart || _this7.options.disabled || _this7.options.readonly) {
+              return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            _this7._dragStart = (event.pageX || event.originalEvent.touches[0].pageX) - parseInt(_this7.$container.css('margin-left'), 10);
+            if (_this7.options.animate) {
+              _this7.$wrapper.removeClass(_this7._getClass('animate'));
+            }
+            _this7.$element.trigger('focus.bootstrapSwitch');
+          },
+
+          'mousemove.bootstrapSwitch touchmove.bootstrapSwitch': function mousemoveBootstrapSwitchTouchmoveBootstrapSwitch(event) {
+            if (_this7._dragStart == null) {
+              return;
+            }
+            var difference = (event.pageX || event.originalEvent.touches[0].pageX) - _this7._dragStart;
+            event.preventDefault();
+            if (difference < -_this7._handleWidth || difference > 0) {
+              return;
+            }
+            _this7._dragEnd = difference;
+            _this7.$container.css('margin-left', _this7._dragEnd + 'px');
+          },
+
+          'mouseup.bootstrapSwitch touchend.bootstrapSwitch': function mouseupBootstrapSwitchTouchendBootstrapSwitch(event) {
+            if (!_this7._dragStart) {
+              return;
+            }
+            event.preventDefault();
+            if (_this7.options.animate) {
+              _this7.$wrapper.addClass(_this7._getClass('animate'));
+            }
+            if (_this7._dragEnd) {
+              var state = _this7._dragEnd > -(_this7._handleWidth / 2);
+              _this7._dragEnd = false;
+              _this7.state(_this7.options.inverse ? !state : state);
+            } else {
+              _this7.state(!_this7.options.state);
+            }
+            _this7._dragStart = false;
+          },
+
+          'mouseleave.bootstrapSwitch': function mouseleaveBootstrapSwitch() {
+            _this7.$label.trigger('mouseup.bootstrapSwitch');
+          }
+        };
+        this.$label.on(handlers);
+      }
+    }, {
+      key: '_externalLabelHandler',
+      value: function _externalLabelHandler() {
+        var _this8 = this;
+
+        var $externalLabel = this.$element.closest('label');
+        $externalLabel.on('click', function (event) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          if (event.target === $externalLabel[0]) {
+            _this8.toggleState();
+          }
+        });
+      }
+    }, {
+      key: '_formHandler',
+      value: function _formHandler() {
+        var $form = this.$element.closest('form');
+        if ($form.data('bootstrap-switch')) {
+          return;
+        }
+        $form.on('reset.bootstrapSwitch', function () {
+          window.setTimeout(function () {
+            $form.find('input').filter(function () {
+              return $(this).data('bootstrap-switch');
+            }).each(function () {
+              return $(this).bootstrapSwitch('state', this.checked);
+            });
+          }, 1);
+        }).data('bootstrap-switch', true);
+      }
+    }, {
+      key: '_getClass',
+      value: function _getClass(name) {
+        return this.options.baseClass + '-' + name;
+      }
+    }, {
+      key: '_getClasses',
+      value: function _getClasses(classes) {
+        if (!$.isArray(classes)) {
+          return [this._getClass(classes)];
+        }
+        return classes.map(this._getClass.bind(this));
+      }
     }]);
 
     return BootstrapSwitch;
   }();
 
-  function bootstrapSwitch(option) {
+  $.fn.bootstrapSwitch = function (option) {
     for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
       args[_key2 - 1] = arguments[_key2];
     }
@@ -39959,9 +40137,7 @@ S2.define('jquery.select2',[
       return ret;
     }
     return Array.prototype.reduce.call(this, reducer, this);
-  }
-
-  $.fn.bootstrapSwitch = bootstrapSwitch;
+  };
   $.fn.bootstrapSwitch.Constructor = BootstrapSwitch;
   $.fn.bootstrapSwitch.defaults = {
     state: true,
@@ -39987,7 +40163,7 @@ S2.define('jquery.select2',[
 });
 
 /*!
- * Bootstrap-select v1.13.10 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.12 (https://developer.snapappointments.com/bootstrap-select)
  *
  * Copyright 2012-2019 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
@@ -40847,7 +41023,7 @@ S2.define('jquery.select2',[
     this.init();
   };
 
-  Selectpicker.VERSION = '1.13.10';
+  Selectpicker.VERSION = '1.13.12';
 
   // part of this is duplicated in i18n/defaults-en_US.js. Make sure to update both.
   Selectpicker.DEFAULTS = {
@@ -41047,7 +41223,7 @@ S2.define('jquery.select2',[
       if (this.options.liveSearch) {
         searchbox =
           '<div class="bs-searchbox">' +
-            '<input type="text" class="form-control" autocomplete="off"' +
+            '<input type="search" class="form-control" autocomplete="off"' +
               (
                 this.options.liveSearchPlaceholder === null ? ''
                 :
@@ -41200,15 +41376,6 @@ S2.define('jquery.select2',[
 
         that.selectpicker.view.scrollTop = scrollTop;
 
-        if (isVirtual === true) {
-          // if an option that is encountered that is wider than the current menu width, update the menu width accordingly
-          if (that.sizeInfo.hasScrollBar && that.$menu[0].offsetWidth > that.sizeInfo.totalMenuWidth) {
-            that.sizeInfo.menuWidth = that.$menu[0].offsetWidth;
-            that.sizeInfo.totalMenuWidth = that.sizeInfo.menuWidth + that.sizeInfo.scrollBarWidth;
-            that.$menu.css('min-width', that.sizeInfo.menuWidth);
-          }
-        }
-
         chunkSize = Math.ceil(that.sizeInfo.menuInnerHeight / that.sizeInfo.liHeight * 1.5); // number of options in a chunk
         chunkCount = Math.round(size / chunkSize) || 1; // number of chunks
 
@@ -41226,7 +41393,7 @@ S2.define('jquery.select2',[
 
           if (!size) break;
 
-          if (currentChunk === undefined && scrollTop <= that.selectpicker.current.data[endOfChunk - 1].position - that.sizeInfo.menuInnerHeight) {
+          if (currentChunk === undefined && scrollTop - 1 <= that.selectpicker.current.data[endOfChunk - 1].position - that.sizeInfo.menuInnerHeight) {
             currentChunk = i;
           }
         }
@@ -41331,6 +41498,29 @@ S2.define('jquery.select2',[
             }
 
             menuInner.firstChild.appendChild(menuFragment);
+
+            // if an option is encountered that is wider than the current menu width, update the menu width accordingly
+            // switch to ResizeObserver with increased browser support
+            if (isVirtual === true && that.sizeInfo.hasScrollBar) {
+              var menuInnerInnerWidth = menuInner.firstChild.offsetWidth;
+
+              if (init && menuInnerInnerWidth < that.sizeInfo.menuInnerInnerWidth && that.sizeInfo.totalMenuWidth > that.sizeInfo.selectWidth) {
+                menuInner.firstChild.style.minWidth = that.sizeInfo.menuInnerInnerWidth + 'px';
+              } else if (menuInnerInnerWidth > that.sizeInfo.menuInnerInnerWidth) {
+                // set to 0 to get actual width of menu
+                that.$menu[0].style.minWidth = 0;
+
+                var actualMenuWidth = menuInner.firstChild.offsetWidth;
+
+                if (actualMenuWidth > that.sizeInfo.menuInnerInnerWidth) {
+                  that.sizeInfo.menuInnerInnerWidth = actualMenuWidth;
+                  menuInner.firstChild.style.minWidth = that.sizeInfo.menuInnerInnerWidth + 'px';
+                }
+
+                // reset to default CSS styling
+                that.$menu[0].style.minWidth = '';
+              }
+            }
           }
         }
 
@@ -41813,7 +42003,7 @@ S2.define('jquery.select2',[
       text.className = 'text';
       a.className = 'dropdown-item ' + (firstOption ? firstOption.className : '');
       newElement.className = this.$menu[0].parentNode.className + ' ' + classNames.SHOW;
-      newElement.style.width = this.sizeInfo.selectWidth + 'px';
+      newElement.style.width = 0; // ensure button width doesn't affect natural width of menu when calculating
       if (this.options.width === 'auto') menu.style.minWidth = 0;
       menu.className = classNames.MENU + ' ' + classNames.SHOW;
       menuInner.className = 'inner ' + classNames.SHOW;
@@ -41896,6 +42086,7 @@ S2.define('jquery.select2',[
       this.sizeInfo.menuPadding = menuPadding;
       this.sizeInfo.menuExtras = menuExtras;
       this.sizeInfo.menuWidth = menuWidth;
+      this.sizeInfo.menuInnerInnerWidth = menuWidth - menuPadding.horiz;
       this.sizeInfo.totalMenuWidth = this.sizeInfo.menuWidth;
       this.sizeInfo.scrollBarWidth = scrollBarWidth;
       this.sizeInfo.selectHeight = this.$newElement[0].offsetHeight;
@@ -41980,10 +42171,6 @@ S2.define('jquery.select2',[
         minHeight = menuInnerMinHeight = '';
       }
 
-      if (this.options.dropdownAlignRight === 'auto') {
-        this.$menu.toggleClass(classNames.MENURIGHT, this.sizeInfo.selectOffsetLeft > this.sizeInfo.selectOffsetRight && this.sizeInfo.selectOffsetRight < (this.sizeInfo.totalMenuWidth - selectWidth));
-      }
-
       this.$menu.css({
         'max-height': maxHeight + 'px',
         'overflow': 'hidden',
@@ -42002,8 +42189,10 @@ S2.define('jquery.select2',[
       if (this.selectpicker.current.data.length && this.selectpicker.current.data[this.selectpicker.current.data.length - 1].position > this.sizeInfo.menuInnerHeight) {
         this.sizeInfo.hasScrollBar = true;
         this.sizeInfo.totalMenuWidth = this.sizeInfo.menuWidth + this.sizeInfo.scrollBarWidth;
+      }
 
-        this.$menu.css('min-width', this.sizeInfo.totalMenuWidth);
+      if (this.options.dropdownAlignRight === 'auto') {
+        this.$menu.toggleClass(classNames.MENURIGHT, this.sizeInfo.selectOffsetLeft > this.sizeInfo.selectOffsetRight && this.sizeInfo.selectOffsetRight < (this.sizeInfo.totalMenuWidth - selectWidth));
       }
 
       if (this.dropdown && this.dropdown._popper) this.dropdown._popper.update();
@@ -42268,8 +42457,6 @@ S2.define('jquery.select2',[
     },
 
     checkDisabled: function () {
-      var that = this;
-
       if (this.isDisabled()) {
         this.$newElement[0].classList.add(classNames.DISABLED);
         this.$button.addClass(classNames.DISABLED).attr('tabindex', -1).attr('aria-disabled', true);
@@ -42283,10 +42470,6 @@ S2.define('jquery.select2',[
           this.$button.removeAttr('tabindex');
         }
       }
-
-      this.$button.on('click', function () {
-        return !that.isDisabled();
-      });
     },
 
     tabIndex: function () {
@@ -42383,8 +42566,7 @@ S2.define('jquery.select2',[
 
         // Don't run if the select is disabled
         if (!that.isDisabled() && !$this.parent().hasClass(classNames.DISABLED)) {
-          var $options = that.$element.find('option'),
-              option = clickedData.option,
+          var option = clickedData.option,
               $option = $(option),
               state = option.selected,
               $optgroup = $option.parent('optgroup'),
@@ -42400,7 +42582,7 @@ S2.define('jquery.select2',[
           }
 
           if (!that.multiple) { // Deselect all others if not multi select box
-            prevOption.selected = false;
+            if (prevOption) prevOption.selected = false;
             option.selected = true;
             that.setSelected(clickedIndex, true);
           } else { // Toggle the one we have chosen if we are multi select.
@@ -42410,28 +42592,22 @@ S2.define('jquery.select2',[
             $this.trigger('blur');
 
             if (maxOptions !== false || maxOptionsGrp !== false) {
-              var maxReached = maxOptions < $options.filter(':selected').length,
+              var maxReached = maxOptions < getSelectedOptions(element).length,
                   maxReachedGrp = maxOptionsGrp < $optgroup.find('option:selected').length;
 
               if ((maxOptions && maxReached) || (maxOptionsGrp && maxReachedGrp)) {
                 if (maxOptions && maxOptions == 1) {
-                  $options.prop('selected', false);
-                  $option.prop('selected', true);
-
-                  for (var i = 0; i < $options.length; i++) {
-                    that.setSelected(i, false);
-                  }
-
-                  that.setSelected(clickedIndex, true);
+                  element.selectedIndex = -1;
+                  option.selected = true;
+                  that.setOptionStatus(true);
                 } else if (maxOptionsGrp && maxOptionsGrp == 1) {
-                  $optgroup.find('option:selected').prop('selected', false);
-                  $option.prop('selected', true);
-
                   for (var i = 0; i < $optgroupOptions.length; i++) {
-                    var option = $optgroupOptions[i];
-                    that.setSelected($options.index(option), false);
+                    var _option = $optgroupOptions[i];
+                    _option.selected = false;
+                    that.setSelected(_option.liIndex, false);
                   }
 
+                  option.selected = true;
                   that.setSelected(clickedIndex, true);
                 } else {
                   var maxOptionsText = typeof that.options.maxOptionsText === 'string' ? [that.options.maxOptionsText, that.options.maxOptionsText] : that.options.maxOptionsText,
@@ -42446,7 +42622,7 @@ S2.define('jquery.select2',[
                     maxTxtGrp = maxTxtGrp.replace('{var}', maxOptionsArr[2][maxOptionsGrp > 1 ? 0 : 1]);
                   }
 
-                  $option.prop('selected', false);
+                  option.selected = false;
 
                   that.$menu.append($notify);
 
@@ -42466,9 +42642,11 @@ S2.define('jquery.select2',[
                     that.setSelected(clickedIndex, false);
                   }, 10);
 
-                  $notify.delay(750).fadeOut(300, function () {
-                    $(this).remove();
-                  });
+                  $notify[0].classList.add('fadeOut');
+
+                  setTimeout(function () {
+                    $notify.remove();
+                  }, 1050);
                 }
               }
             }
@@ -42741,6 +42919,9 @@ S2.define('jquery.select2',[
           scrollTop = that.$menuInner[0].scrollTop,
           isVirtual = that.isVirtual(),
           position0 = isVirtual === true ? that.selectpicker.view.position0 : 0;
+
+      // do nothing if a function key is pressed
+      if (e.which >= 112 && e.which <= 123) return;
 
       isActive = that.$newElement.hasClass(classNames.SHOW);
 
@@ -43106,7 +43287,7 @@ S2.define('jquery.select2',[
   };
 
   $(document)
-    .off('keydown.bs.dropdown.data-api')
+    .off('keydown.bs.dropdown.data-api', '.bootstrap-select [data-toggle="dropdown"], .bootstrap-select .dropdown-menu')
     .on('keydown' + EVENT_KEY, '.bootstrap-select [data-toggle="dropdown"], .bootstrap-select [role="listbox"], .bootstrap-select .bs-searchbox input', Selectpicker.prototype.keydown)
     .on('focusin.modal', '.bootstrap-select [data-toggle="dropdown"], .bootstrap-select [role="listbox"], .bootstrap-select .bs-searchbox input', function (e) {
       e.stopPropagation();
