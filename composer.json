@@ -38,7 +38,7 @@
         "swayok/html-tag-helper": "~1.0",
         "swayok/laravel-site-loader": "master@dev",
         "almasaeed2010/adminlte": "2.3.*",
-        "FortAwesome/Font-Awesome": "*",
+        "fortawesome/font-awesome": "^4.7",
         "driftyco/ionicons": "*",
         "nostalgiaz/bootstrap-switch": "*",
         "Eonasdan/bootstrap-datetimepicker": "*",
