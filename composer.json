@@ -41,7 +41,7 @@
         "fortawesome/font-awesome": "^4.7",
         "driftyco/ionicons": "*",
         "nostalgiaz/bootstrap-switch": "*",
-        "Eonasdan/bootstrap-datetimepicker": "*",
+        "eonasdan/bootstrap-datetimepicker": "*",
         "datatables/datatables": "*",
         "ckeditor/ckeditor": "4.*",
         "twbs/bootstrap": "3.*",
