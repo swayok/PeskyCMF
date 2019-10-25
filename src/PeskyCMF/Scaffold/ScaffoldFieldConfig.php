@@ -256,7 +256,7 @@ abstract class ScaffoldFieldConfig {
                         $value = 'Invalid value for JSON: ' . print_r($value, true);
                     }
                 }
-                return '<pre class="json-text">' . htmlentities(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</pre>';
+                return '<pre class="json-text">' . htmlentities(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre>';
                 break;
         }
         return $value;
