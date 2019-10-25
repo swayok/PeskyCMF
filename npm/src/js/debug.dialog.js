@@ -34,7 +34,7 @@ var DebugDialog = function () {
         } else if (!content.match(/^\s*<(html|!doctype)/i)) {
             content = content.replace(/^([\s\S]*?)((?:<!doctype[^>]*>)?\s*<html[\s\S]*?<body[^>]*>)/i, '$2$1', content);
         }
-        content = content.replace(/<(\/?script[^>]*)>/i, '&lt;$1&gt;');
+        // content = content.replace(/<(\/?script[^>]*)>/i, '&lt;$1&gt;');
         $.extend(model, {
             isVisible: true,
             title: title,
