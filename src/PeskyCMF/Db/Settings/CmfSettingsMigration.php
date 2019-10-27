@@ -14,9 +14,9 @@ class CmfSettingsMigration extends Migration {
                 $table->string('key');
 
                 if (config('database.connections.' . ($this->getConnection() ?: config('database.default')) . '.driver') === 'pgsql') {
-                    $table->jsonb('value');
+                    $table->jsonb('value')->nullable();
                 } else {
-                    $table->mediumText('value');
+                    $table->mediumText('value')->nullable();
                 }
 
                 $table->unique('key');
