@@ -33,7 +33,7 @@ class CmfSettingsTableStructure extends CmfDbTableStructure {
         // DO NOT USE TYPE_JSON/TYPE_JSONB here. It will add duplicate json encoding and cause
         // unnecessary problems with numeric values
         return Column::create(Column::TYPE_TEXT)
-            ->disallowsNullValues();
+            ->convertsEmptyStringToNull();
     }
 
     private function default_language() {
