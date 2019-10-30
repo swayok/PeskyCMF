@@ -59,6 +59,15 @@ abstract class ValueRenderer {
     }
 
     /**
+     * @param array $data
+     * @return $this
+     */
+    public function mergeData(array $data) {
+        $this->data = array_merge($this->data, $data);
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getTemplate() {

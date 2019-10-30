@@ -21,6 +21,8 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     protected $varNameForDotJs;
     /** @var string|null */
     protected $templateForDefaultRenderer;
+    /** @var array */
+    protected $templateDataForDefaultRenderer = [];
 
     /**
      * @param string $name - something like 'RelationName.column_name' (Do not add 'it.' in the beginning!!!)
@@ -274,7 +276,9 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      */
     public function configureDefaultRenderer(ValueRenderer $renderer) {
         if ($this->templateForDefaultRenderer) {
-            $renderer->setTemplate($this->templateForDefaultRenderer);
+            $renderer
+                ->setTemplate($this->templateForDefaultRenderer)
+                ->mergeData($this->templateDataForDefaultRenderer);
         }
         return $this;
     }
@@ -285,6 +289,15 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      */
     public function setTemplateForDefaultRenderer($template) {
         $this->templateForDefaultRenderer = $template;
+        return $this;
+    }
+
+    /**
+     * @param string $data
+     * @return $this
+     */
+    public function setAdditionalTemplateDataForDefaultRenderer(array $data) {
+        $this->templateDataForDefaultRenderer = $data;
         return $this;
     }
 

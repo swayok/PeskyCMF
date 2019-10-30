@@ -4,7 +4,9 @@
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $sectionConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ValueCell $valueViewer
  * @var \PeskyORM\ORM\TableInterface $table
+ * @var bool $noTimestamp
  */
+$urlQuery = empty($noTimestamp) ? '?_=' . time() : ''
 ?>
 {{? !!it.<?php echo $valueViewer->getName() ?> }}
 <div class="image-previews-container">
@@ -13,9 +15,9 @@
             <div class="img-thumbnail image-preview" style="vertical-align: top">
             {{? !!imageInfo.url }}
                 {{? imageInfo.label }}<p class="text-center image-preview-label">{{= imageInfo.label }}</p>{{?}}
-                <img src="{{= imageInfo.url || imageInfo }}?_=<?php echo time(); ?>" class="img-responsive">
+                <img src="{{= imageInfo.url || imageInfo }}<?php echo $urlQuery; ?>" class="img-responsive">
             {{??}}
-                <img src="{{= imageInfo }}?_=<?php echo time(); ?>" class="img-responsive">
+                <img src="{{= imageInfo }}<?php echo $urlQuery; ?>" class="img-responsive">
             {{?}}
             </div>
         {{~}}
@@ -26,13 +28,13 @@
                     {{? <?php echo $valueViewer->getFailsafeValueForDotJs(['label']) ?> }}
                         <p class="text-center image-preview-label"><?php echo $valueViewer->getDotJsInsertForValue(['label']) ?></p>
                     {{?}}
-                    <img src="<?php echo $valueViewer->getDotJsInsertForValue(['url']) ?>?_=<?php echo time(); ?>" class="img-responsive">
+                    <img src="<?php echo $valueViewer->getDotJsInsertForValue(['url']) . $urlQuery ?>" class="img-responsive">
                 </div>
             {{?}}
         {{??}}
             {{? <?php echo $valueViewer->getFailsafeValueForDotJs() ?> }}
                 <div class="img-thumbnail image-preview">
-                    <img src="<?php echo $valueViewer->getDotJsInsertForValue() ?>?_=<?php echo time(); ?>" class="img-responsive">
+                    <img src="<?php echo $valueViewer->getDotJsInsertForValue() . $urlQuery ?>" class="img-responsive">
                 </div>
             {{?}}
         {{?}}
