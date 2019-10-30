@@ -39,13 +39,13 @@ class CmfMakeScaffoldCommand extends Command {
     /**
      * @var CmfConfig
      */
-    protected $cmfConfigClass;
+    protected $cmfConfig;
 
     protected function getScaffoldConfigParentClass() {
         if ($this->option('keyvalue')) {
-            return $this->getCmfConfigClass()->config('ui.scaffold_configs_base_class_for_key_value_tables') ?: KeyValueTableScaffoldConfig::class;
+            return $this->getCmfConfig()->config('ui.scaffold_configs_base_class_for_key_value_tables') ?: KeyValueTableScaffoldConfig::class;
         } else {
-            return $this->getCmfConfigClass()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
+            return $this->getCmfConfig()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
         }
     }
 
@@ -53,8 +53,8 @@ class CmfMakeScaffoldCommand extends Command {
      * @return CmfConfig
      * @throws \InvalidArgumentException
      */
-    protected function getCmfConfigClass() {
-        if (!$this->cmfConfigClass) {
+    protected function getCmfConfig() {
+        if (!$this->cmfConfig) {
             $class = $this->option('cmf-config-class');
             if ($class) {
                 if (!class_exists($class)) {
@@ -68,24 +68,25 @@ class CmfMakeScaffoldCommand extends Command {
                     );
                 }
                 /** @var CmfConfig $class */
-                $this->cmfConfigClass = $class::getInstance();
+                $this->cmfConfig = $class::getInstance();
             } else {
                 $sectionName = $this->argument('cmf-section');
                 if (!empty($sectionName)) {
                     /** @var PeskyCmfManager $peskyCmfManager */
                     $peskyCmfManager = app(PeskyCmfManager::class);
-                    $this->cmfConfigClass = $peskyCmfManager->getCmfConfigForSection($sectionName);
+                    $this->cmfConfig = $peskyCmfManager->getCmfConfigForSection($sectionName);
                 } else {
-                    $this->cmfConfigClass = CmfConfig::getDefault();
-                    if (get_class($this->cmfConfigClass) === CmfConfig::class) {
+                    $this->cmfConfig = CmfConfig::getDefault();
+                    if (get_class($this->cmfConfig) === CmfConfig::class) {
                         throw new \InvalidArgumentException(
                             'Child class for CmfConfig was not found. You need to provide it through --cmf-config-class option '
                         );
                     }
                 }
             }
+            $this->cmfConfig->initSection(app());
         }
-        return $this->cmfConfigClass;
+        return $this->cmfConfig;
     }
 
     /**
@@ -181,7 +182,7 @@ INFO
      * @return string
      */
     protected function getScaffoldsNamespace() {
-        $appSubfolder = str_replace('/', '\\', $this->getCmfConfigClass()->app_subfolder());
+        $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->app_subfolder());
         $scaffoldsSubfolder = str_replace('/', '\\', $this->getScaffoldsFolderName());
         return 'App\\' . $appSubfolder . '\\' . $scaffoldsSubfolder;
     }
@@ -208,7 +209,7 @@ INFO
      * @return string
      */
     protected function getFolder($namespace) {
-        $appSubfolder = str_replace('/', '\\', $this->getCmfConfigClass()->app_subfolder());
+        $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->app_subfolder());
         return static::getBasePathToApp() . DIRECTORY_SEPARATOR . $appSubfolder . DIRECTORY_SEPARATOR . $this->getScaffoldsFolderName() . DIRECTORY_SEPARATOR;
         /*$folder = preg_replace(
             ['%[\\/]%', '%^/?App%'],

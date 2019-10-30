@@ -5,6 +5,7 @@ namespace PeskyCMF\Console\Commands;
 use Illuminate\Console\Command;
 use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\PeskyCmfManager;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 
@@ -15,7 +16,13 @@ class CmfMakeApiDocCommand extends Command {
     protected $signature = 'cmf:make-api-doc 
         {class_name} 
         {docs_group}
-        {folder? : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}';
+        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}
+        {--folder= : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}
+        {--cmf-config-class= : full class name to a class that extends CmfConfig}
+        ';
+
+    /** @var CmfConfig */
+    protected $cmfConfig;
 
     public function fire() {
         // compatibility with Laravel <= 5.4
@@ -26,13 +33,46 @@ class CmfMakeApiDocCommand extends Command {
      * @return CmfConfig
      */
     protected function getCmfConfig() {
-        return CmfConfig::getPrimary();
+        if (!$this->cmfConfig) {
+            $class = $this->option('cmf-config-class');
+            if ($class) {
+                if (!class_exists($class)) {
+                    throw new \InvalidArgumentException(
+                        'Class ' . $class . ' provided through option --cmf-config-class does not exist'
+                    );
+                }
+                if (!is_subclass_of($class, CmfConfig::class)) {
+                    throw new \InvalidArgumentException(
+                        'Class ' . $class . ' provided through option --cmf-config-class must extend CmfConfig class'
+                    );
+                }
+                /** @var CmfConfig $class */
+                $this->cmfConfig = $class::getInstance();
+            } else {
+                $sectionName = $this->argument('cmf-section');
+                if (!empty($sectionName)) {
+                    /** @var PeskyCmfManager $peskyCmfManager */
+                    $peskyCmfManager = app(PeskyCmfManager::class);
+                    $this->cmfConfig = $peskyCmfManager->getCmfConfigForSection($sectionName);
+                } else {
+                    $this->cmfConfig = CmfConfig::getDefault();
+                    if (get_class($this->cmfConfig) === CmfConfig::class) {
+                        throw new \InvalidArgumentException(
+                            'Child class for CmfConfig was not found. You need to provide it through --cmf-config-class option '
+                        );
+                    }
+                }
+            }
+            $this->cmfConfig->initSection(app());
+        }
+
+        return $this->cmfConfig;
     }
 
     public function handle() {
         $classSuffix = $this->getCmfConfig()->getApiDocumentationModule()->getClassNameSuffix();
         $className = preg_replace('%' . preg_quote($classSuffix, '%') . '$%', '', $this->argument('class_name')) . $classSuffix;
-        $folder = $this->argument('folder');
+        $folder = $this->option('folder');
         if (trim($folder) === '') {
             $folder = $this->getCmfConfig()->getApiDocumentationModule()->getClassesFolderPath();
         } else {
