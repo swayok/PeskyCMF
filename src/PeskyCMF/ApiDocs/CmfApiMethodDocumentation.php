@@ -82,7 +82,8 @@ HTML;
     protected function getPossibleErrors() {
         /* Example:
             ApiMethodErrorResponseInfo::create()
-                ->setDescription('Not found')
+                ->setTitle('Not found')
+                ->setDescription('Happens if record not exists in DB')
                 ->setHttpCode(HttpCode::NOT_FOUND)
                 ->setResponse([
                     'message' => 'item_not_found'
@@ -93,6 +94,7 @@ HTML;
             [
                 'code' => HttpCode::NOT_FOUND,
                 'title' => 'Not found',
+                'description' => 'Happens if record not exists in DB',
                 'response' => [
                     'message' => 'item_not_found'
                 ]
@@ -100,7 +102,8 @@ HTML;
 
             or if you want localized API docs:
             ApiMethodErrorResponseInfo::create()
-                ->setDescription('{error.item_not_found}')
+                ->setTitle('{error.item_not_found.title}')
+                ->setDescription('{error.item_not_found.description}')
                 ->setHttpCode(HttpCode::NOT_FOUND)
                 ->setResponse([
                     'message' => 'item_not_found'
@@ -109,7 +112,8 @@ HTML;
             OR
             [
                 'code' => HttpCode::NOT_FOUND,
-                'title' => '{error.item_not_found}',
+                'title' => '{error.item_not_found.title}',
+                'description' => '{error.item_not_found.description}',
                 'response' => [
                     'message' => 'item_not_found'
                 ]
@@ -142,13 +146,15 @@ HTML;
             $additionalErrors[] = $error;
         }
         $errors = array_merge($this->getCommonErrors(), $additionalErrors, $this->getPossibleErrors());
-        // translate titles
+        // translate titles and descriptions
         foreach ($errors as &$error) {
             if ($error instanceof ApiMethodErrorResponseInfo) {
                 $error = $error->toArray();
             }
-            $error['title'] = $this->translate($error['title']);
+            $error['title'] = $this->translate(array_get($error, 'title', ''));
+            $error['description'] = $this->translate(array_get($error, 'description', ''));
         }
+        unset($error);
         usort($errors, function ($err1, $err2) {
             return (int)array_get($err1, 'code', 0) <=> (int)array_get($err2, 'code', 0);
         });
@@ -157,7 +163,8 @@ HTML;
 
     static protected $authFailError = [
         'code' => HttpCode::UNAUTHORISED,
-        'title' => '{error.auth_failure}',
+        'title' => '{error.auth_failure.title}',
+        'description' => '{error.auth_failure.description}',
         'response' => [
             'message' => 'Unauthenticated.'
         ]
@@ -165,7 +172,8 @@ HTML;
 
     static protected $accessDeniedError = [
         'code' => HttpCode::FORBIDDEN,
-        'title' => '{error.access_denied}',
+        'title' => '{error.access_denied.title}',
+        'description' => '{error.auth_failure.description}',
         'response' => [
             'message' => 'Unauthorized.'
         ]
@@ -173,7 +181,8 @@ HTML;
 
     static protected $dataValidationError = [
         'code' => HttpCode::CANNOT_PROCESS,
-        'title' => '{error.validation_errors}',
+        'title' => '{error.validation_errors.title}',
+        'description' => '{error.auth_failure.description}',
         'response' => [
             'message' => 'The given data was invalid.',
             'errors' => []
@@ -182,9 +191,19 @@ HTML;
 
     static protected $serverError = [
         'code' => HttpCode::SERVER_ERROR,
-        'title' => '{error.server_error}',
+        'title' => '{error.server_error.title}',
+        'description' => '{error.auth_failure.description}',
         'response' => [
             'message' => 'Server error.',
+        ]
+    ];
+
+    static protected $itemNotFound = [
+        'code' => HttpCode::SERVER_ERROR,
+        'title' => '{error.item_not_found.title}',
+        'description' => '{error.item_not_found.description}',
+        'response' => [
+            'message' => 'Record not found in DB.',
         ]
     ];
 
@@ -197,19 +216,19 @@ HTML;
     }
 
     public function getHeaders() {
-        return $this->headers;
+        return $this->prepareUrlVarsForTable('header', $this->headers);
     }
 
     public function getUrlParameters() {
-        return $this->translateArrayValues($this->urlParameters);
+        return $this->prepareUrlVarsForTable('params.url', $this->urlParameters);
     }
 
     public function getUrlQueryParameters() {
-        return $this->translateArrayValues($this->urlQueryParameters);
+        return $this->prepareUrlVarsForTable('params.url_query', $this->urlQueryParameters);
     }
 
     public function getPostParameters() {
-        return $this->translateArrayValues($this->postParameters);
+        return $this->prepareUrlVarsForTable('params.post', $this->postParameters);
     }
 
     public function getValidationErrors() {
@@ -236,11 +255,31 @@ HTML;
         return $array;
     }
 
+    /**
+     * Prepare url variables to be displayed in docs as table with 3 columns: name, type, description
+     * @param string $group
+     * @param array $array
+     * @return array
+     */
+    protected function prepareUrlVarsForTable(string $group, array $array) {
+        $array = $this->translateArrayValues($array);
+        $ret = [];
+        $descriptions = (array)$this->translate($group);
+        foreach ($array as $key => $value) {
+            $ret[$key] = [
+                'name' => $key,
+                'type' => $value,
+                'description' => array_get($descriptions, $key, '')
+            ];
+        }
+        return $ret;
+    }
+
     final public function isMethodDocumentation() {
         return true;
     }
 
-    public function getConfigForPostman() {
+    public function getConfigForPostman(): array {
         $queryParams = [];
         foreach ($this->getUrlQueryParameters() as $name => $info) {
             if ($name === '_method') {
@@ -258,17 +297,7 @@ HTML;
                     preg_replace('%\{([^/]+?)\}%', ':$1', $url) . $queryParams
                 ),
                 'method' => strtoupper($this->getHttpMethod()),
-                'description' => preg_replace(
-                    ['% +%', "%\n\s+%s"],
-                    [' ', "\n"],
-                    trim(strip_tags(
-                        preg_replace(
-                            ["%\n+%m", '%</(p|div|li|ul)>|<br>%'],
-                            [' ', "\n"],
-                            $this->getTitle() . "\n" . $this->getDescription()
-                        )
-                    ))
-                ),
+                'description' => $this->cleanTextForPostman($this->getTitle() . "\n" . $this->getDescription()),
                 'header' => [],
                 'body' => [
                     'mode' => 'formdata',
@@ -279,11 +308,12 @@ HTML;
             ],
             'response' => []
         ];
+        $headerDescriptions = (array)$this->translate('header');
         foreach ($this->getHeaders() as $key => $value) {
             $item['request']['header'][] = [
                 'key' => $key,
                 'value' => $value,
-                'description' => ''
+                'description' => $this->cleanTextForPostman(array_get($headerDescriptions, $key, ''))
             ];
         }
         foreach ($this->getPostParameters() as $key => $value) {
@@ -295,6 +325,20 @@ HTML;
             ];
         }
         return $item;
+    }
+
+    protected function cleanTextForPostman(string $text): string {
+        return preg_replace(
+            ['% +%', "%\n\s+%s"],
+            [' ', "\n"],
+            trim(strip_tags(
+                preg_replace(
+                    ["%\n+%m", '%</(p|div|li|ul)>|<br>%'],
+                    [' ', "\n"],
+                    $text
+                )
+            ))
+        );
     }
 
 }

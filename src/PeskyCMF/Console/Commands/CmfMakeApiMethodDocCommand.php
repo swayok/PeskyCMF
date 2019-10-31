@@ -76,7 +76,8 @@ class {$className} extends {$baseClassName} {
     protected function getPossibleErrors() {
         /* Example:
             ApiMethodErrorResponseInfo::create()
-                ->setDescription('{{$translationGroup}.item_not_found}')
+                ->setTitle('{{$translationGroup}.error.item_not_found.title}')
+                ->setDescription('{{$translationGroup}.error.item_not_found.description}')
                 ->setHttpCode(HttpCode::NOT_FOUND)
                 ->setResponse([
                     'message' => 'Record not found in DB.'
@@ -93,6 +94,11 @@ CLASS;
         $translations = [];
         array_set($translations, $translationGroup . '.title', '');
         array_set($translations, $translationGroup . '.description', '');
+        array_set($translations, $translationGroup . '.params.url', []);
+        array_set($translations, $translationGroup . '.params.url_query', []);
+        array_set($translations, $translationGroup . '.params.post', []);
+        array_set($translations, $translationGroup . '.header', []);
+        array_set($translations, $translationGroup . '.error', []);
         $this->line($this->arrayToString($translations));
     }
 

@@ -250,21 +250,47 @@ $dictionary = [
         'header' => 'Документация к API',
         'description' => 'Описание',
         'headers' => 'HTTP headers',
+        'header_name' => 'Имя',
+        'header_value' => 'Значение',
+        'header_description' => 'Описание',
         'url_params' => 'URL параметры (параметры внутри самого URL-адреса)',
         'url_query_params' => 'HTTP GET параметры (URL query params)',
         'post_params' => 'HTTP POST параметры',
         'response' => 'Ответ сервера при успешном выполнении запроса',
+        'param_name' => 'Имя',
+        'param_type' => 'Тип',
+        'param_description' => 'Описание',
         'errors' => 'Ошибки, которые могут возникнуть',
+        'error_http_code' => 'HTTP код',
+        'error_title' => 'Ошибка',
+        'error_response' => 'Ответ',
+        'error_description' => 'Описание',
         'download_postman_collection' => 'Скачать коллекцию запросов для Postman',
         'postman_collection_file_name' => 'postman_collection_for_api_on_:http_host',
         'section' => [
             'no_section' => 'Не сгруппированные методы API'
         ],
         'error' => [
-            'auth_failure' => 'Не удалось авторизовать пользователя',
-            'access_denied' => 'Доступ запрещен',
-            'validation_errors' => 'Ошибки валидации данных',
-            'server_error' => 'Критическая ошибка на стороне сервера',
+            'auth_failure' => [
+                'title' => 'Не удалось авторизовать пользователя',
+                'description' => '',
+            ],
+            'access_denied' => [
+                'title' => 'Доступ запрещен',
+                'description' => '',
+            ],
+            'validation_errors' => [
+                'title' => 'Ошибки валидации данных',
+                'description' => '',
+            ],
+            'server_error' => [
+                'title' => 'Критическая ошибка на стороне сервера',
+                'description' => '',
+            ],
+            'item_not_found' => [
+                'title' => 'Объект не найден',
+                'description' => 'Запрошенный объект не найден в базе данных',
+            ]
         ]
     ],
     'cms_pages' => [

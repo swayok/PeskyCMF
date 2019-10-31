@@ -250,21 +250,47 @@ $dictionary = [
         'header' => 'API Documentation',
         'description' => 'Description',
         'headers' => 'HTTP headers',
+        'header_name' => 'Name',
+        'header_value' => 'Value',
+        'header_description' => 'Description',
         'url_params' => 'URL parameters (parameters inside the URL)',
         'url_query_params' => 'HTTP GET parameters (URL query)',
         'post_params' => 'HTTP POST parameters',
         'response' => 'Server response on success',
+        'param_name' => 'Name',
+        'param_type' => 'Type',
+        'param_description' => 'Description',
         'errors' => 'Possible errors',
+        'error_http_code' => 'HTTP code',
+        'error_title' => 'Error',
+        'error_response' => 'Response',
+        'error_description' => 'Description',
         'download_postman_collection' => 'Download requests collection for Postman',
         'postman_collection_file_name' => 'postman_collection_for_api_on_:http_host',
         'section' => [
             'no_section' => 'API methods without a group'
         ],
         'error' => [
-            'auth_failure' => 'Authentication failure',
-            'access_denied' => 'Access denied',
-            'validation_errors' => 'Invalid data received',
-            'server_error' => 'Critical error on server',
+            'auth_failure' => [
+                'title' => 'Authentication failure',
+                'description' => '',
+            ],
+            'access_denied' => [
+                'title' => 'Access denied',
+                'description' => '',
+            ],
+            'validation_errors' => [
+                'title' => 'Invalid data received',
+                'description' => '',
+            ],
+            'server_error' => [
+                'title' => 'Critical error on server',
+                'description' => '',
+            ],
+            'item_not_found' => [
+                'title' => 'Object not found',
+                'description' => 'Requested object was not found in database',
+            ]
         ]
     ],
     'cms_pages' => [

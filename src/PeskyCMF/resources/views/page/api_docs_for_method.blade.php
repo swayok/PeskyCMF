@@ -12,7 +12,12 @@ $successData = $method->getOnSuccessData();
 $errors = $method->getErrors()
 ?>
 <div class="panel box box-solid box-default">
-    <div class="box-header with-border" style="cursor:pointer" data-toggle="collapse" data-target="#{{ $method->getUuid() }}">
+    <div
+        class="box-header with-border api-documentation-for-method-header"
+        style="cursor:pointer"
+        data-toggle="collapse"
+        data-target="#{{ $method->getUuid() }}"
+    >
         @if ($hasUrl)
             <div class="col-xs-6 text-bold">{{ $method->getTitle() }}</div>
             <div class="col-xs-6 text-nowrap of-h">
@@ -46,8 +51,8 @@ $errors = $method->getErrors()
                         </div>
                     @else
                         <div class="col-xs-12 col-xl-6">
-                            <div class="box box-solid box-default">
-                                <div class="box-header">
+                            <div class="box box-default">
+                                <div class="box-header br-r br-l br-b">
                                     <div class="box-title">
                                         {{ cmfTransCustom('.api_docs.description') }}
                                     </div>
@@ -61,16 +66,43 @@ $errors = $method->getErrors()
                 @endif
                 @if (!empty($headers))
                 <div class="col-xs-12 col-xl-6">
-                    <div class="box box-solid box-default">
-                        <div class="box-header">
+                    <div class="box box-default">
+                        <div class="box-header br-r br-l br-b">
                             <div class="box-title">
                                 {{ cmfTransCustom('.api_docs.headers') }}
                             </div>
                         </div>
-                        <div class="box-body">
-                            @foreach($headers as $header => $value)
-                                <div>{{ $header }}: {{ $value }}</div>
-                            @endforeach
+                        <div class="box-body pn">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th width="150" class="api-documentation-header-name-cell">
+                                        {{ cmfTransCustom('.api_docs.header_name') }}
+                                    </th>
+                                    <th width="200" class="api-documentation-header-value-cell">
+                                        {{ cmfTransCustom('.api_docs.header_value') }}
+                                    </th>
+                                    <th class="api-documentation-header-description-cell">
+                                        {{ cmfTransCustom('.api_docs.header_description') }}
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($headers as $headerInfo)
+                                    <tr>
+                                        <td class="api-documentation-header-name-cell">
+                                            <span class="label label-default fs14">{{ $headerInfo['name'] }}</span>
+                                        </td>
+                                        <td class="api-documentation-header-value-cell">
+                                            {!! $headerInfo['type'] !!}
+                                        </td>
+                                        <td class="api-documentation-header-description-cell">
+                                            {!! $headerInfo['description'] !!}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -80,31 +112,85 @@ $errors = $method->getErrors()
                 @if (!empty($urlParams))
                     <div class="col-xs-12 col-xl-6">
                         <div class="box box-solid box-warning">
-                            <div class="box-header">
-                                <div class="box-title">
+                            <div class="box-header br-b bg-none">
+                                <div class="box-title text-orange">
                                     {{ cmfTransCustom('.api_docs.url_params') }}
                                 </div>
                             </div>
-                            <div class="box-body ptn pbn">
-                                @foreach($urlParams as $name => $comment)
-                                    <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {!! $comment !!}</div>
-                                @endforeach
+                            <div class="box-body pn">
+                                <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th width="150" class="api-documentation-param-name-cell">
+                                            {{ cmfTransCustom('.api_docs.param_name') }}
+                                        </th>
+                                        <th width="200" class="api-documentation-param-type-cell">
+                                            {{ cmfTransCustom('.api_docs.param_type') }}
+                                        </th>
+                                        <th class="api-documentation-param-description-cell">
+                                            {{ cmfTransCustom('.api_docs.param_description') }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($urlParams as $paramInfo)
+                                    <tr>
+                                        <td class="api-documentation-param-name-cell">
+                                            <span class="label label-default fs14">{{ $paramInfo['name'] }}</span>
+                                        </td>
+                                        <td class="api-documentation-param-type-cell">
+                                            {!! $paramInfo['type'] !!}
+                                        </td>
+                                        <td class="api-documentation-param-description-cell">
+                                            {!! $paramInfo['description'] !!}
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 @endif
                 @if (!empty($urlQueryParams))
                 <div class="col-xs-12 col-xl-6">
-                    <div class="box box-solid box-warning">
-                        <div class="box-header">
-                            <div class="box-title">
+                    <div class="box box-solid box-primary">
+                        <div class="box-header bg-none br-b">
+                            <div class="box-title text-primary">
                                 {{ cmfTransCustom('.api_docs.url_query_params') }}
                             </div>
                         </div>
-                        <div class="box-body ptn pbn">
-                            @foreach($urlQueryParams as $name => $comment)
-                                <div class="mv10"><span class="label label-default fs14">{{ $name }}</span> - {!! $comment !!}</div>
-                            @endforeach
+                        <div class="box-body pn">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th width="150" class="api-documentation-param-name-cell">
+                                            {{ cmfTransCustom('.api_docs.param_name') }}
+                                        </th>
+                                        <th width="200" class="api-documentation-param-type-cell">
+                                            {{ cmfTransCustom('.api_docs.param_type') }}
+                                        </th>
+                                        <th class="api-documentation-param-description-cell">
+                                            {{ cmfTransCustom('.api_docs.param_description') }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($urlQueryParams as $paramInfo)
+                                    <tr>
+                                        <td class="api-documentation-param-name-cell">
+                                            <span class="label label-default fs14">{{ $paramInfo['name'] }}</span>
+                                        </td>
+                                        <td class="api-documentation-param-type-cell">
+                                            {!! $paramInfo['type'] !!}
+                                        </td>
+                                        <td class="api-documentation-param-description-cell">
+                                            {!! $paramInfo['description'] !!}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -112,18 +198,46 @@ $errors = $method->getErrors()
                 @if (!empty($postParams))
                 <div class="col-xs-12 col-xl-6">
                     <div class="box box-solid box-info">
-                        <div class="box-header">
-                            <div class="box-title">
+                        <div class="box-header bg-none br-b">
+                            <div class="box-title text-aqua">
                                 {{ cmfTransCustom('.api_docs.post_params') }}
                             </div>
                         </div>
-                        <div class="box-body ptn pbn">
-                            @foreach($postParams as $name => $comment)
-                                <div class="mv10">
-                                    <span class="label label-default fs14">{{ $name }}</span>
-                                    - {!! is_array($comment) ? '<pre>' . json_encode($comment, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . '</pre>' : $comment !!}
-                                </div>
-                            @endforeach
+                        <div class="box-body pn">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th width="150" class="api-documentation-param-name-cell">
+                                            {{ cmfTransCustom('.api_docs.param_name') }}
+                                        </th>
+                                        <th width="200" class="api-documentation-param-type-cell">
+                                            {{ cmfTransCustom('.api_docs.param_type') }}
+                                        </th>
+                                        <th class="api-documentation-param-description-cell">
+                                            {{ cmfTransCustom('.api_docs.param_description') }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($postParams as $paramInfo)
+                                    <tr>
+                                        <td class="api-documentation-param-name-cell">
+                                            <span class="label label-default fs14">{{ $paramInfo['name'] }}</span>
+                                        </td>
+                                        <td class="api-documentation-param-type-cell">
+                                            @if(is_array($paramInfo['type']))
+                                                {!! json_encode($paramInfo['type'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) !!}
+                                            @else
+                                                {!! $paramInfo['type'] !!}
+                                            @endif
+                                        </td>
+                                        <td class="api-documentation-param-description-cell">
+                                            {!! $paramInfo['description'] !!}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -131,7 +245,7 @@ $errors = $method->getErrors()
             </div>
             <div class="row">
                 @if (!empty($successData))
-                    <div class="@if(empty($errors)) col-xs-12 @else col-xs-6 @endif">
+                    <div class="col-xs-12 col-xl-4">
                         <div class="box box-solid box-success">
                             <div class="box-header">
                                 <div class="box-title">
@@ -146,23 +260,52 @@ $errors = $method->getErrors()
                 @endif
 
                 @if(!empty($errors))
-                    <div class="@if(empty($successData)) col-xs-12 @else col-xs-6 @endif">
+                    <div class="col-xs-12 col-xl-8">
                         <div class="box box-solid box-danger">
                             <div class="box-header">
                                 <div class="box-title">
                                     {{ cmfTransCustom('.api_docs.errors') }}
                                 </div>
                             </div>
-                            <div class="box-body">
-                                <dl>
+                            <div class="box-body pn">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th width="90" class="api-documentation-error-code-cell">
+                                                {{ cmfTransCustom('.api_docs.error_http_code') }}
+                                            </th>
+                                            <th width="200" class="api-documentation-error-title-cell">
+                                                {{ cmfTransCustom('.api_docs.error_title') }}
+                                            </th>
+                                            <th width="320" class="api-documentation-error-response-cell">
+                                                {{ cmfTransCustom('.api_docs.error_response') }}
+                                            </th>
+                                            <th class="api-documentation-error-description-cell">
+                                                {{ cmfTransCustom('.api_docs.error_description') }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                     @foreach($errors as $failInfo)
-                                        <dt>
-                                            <div>{{ array_get($failInfo, 'title', '*no title*') }}</div>
-                                            <small class="text-danger">HTTP code: {{ array_get($failInfo, 'code', '*no HTTP code*') }}</small>
-                                        </dt>
-                                        <dd><pre>{{ json_encode(array_get($failInfo, 'response', ''), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre></dd>
+                                        <tr>
+                                            <td class="api-documentation-error-code-cell">
+                                                <span class="label label-default fs14">
+                                                    {{ array_get($failInfo, 'code', '*no HTTP code*') }}
+                                                </span>
+                                            </td>
+                                            <td class="api-documentation-error-title-cell">
+                                                {{ array_get($failInfo, 'title', '*no title*') }}
+                                            </td>
+                                            <td class="api-documentation-error-response-cell pn">
+                                                <pre style="max-width: 320px; margin: 0">{{ json_encode(array_get($failInfo, 'response', ''), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                            </td>
+                                            <td class="api-documentation-error-description-cell">
+                                                {!! array_get($failInfo, 'description') !!}
+                                            </td>
+                                        </tr>
                                     @endforeach
-                                </dl>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

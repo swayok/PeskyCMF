@@ -51,7 +51,7 @@ class CmfApiDocumentationModule {
      * Subfolders names used as API sections.
      * Collects only classes that extend next classes:
      *  - ApiDocumentation
-     *  - ApiMethodDocumentation
+     *  - V1ApiMethodDocumentation
      *  - static::api_method_documentation_base_class()
      * @return array
      */
@@ -68,7 +68,7 @@ class CmfApiDocumentationModule {
                 if (preg_match('%\.php$%i', $fileName)) {
                     $file = fopen($folderPath . DIRECTORY_SEPARATOR . $fileName, 'rb');
                     $buffer = fread($file, 512);
-                    $parentClassName = class_basename($this->getMethodBaseClass()) . '|[a-zA-Z0-9_-]+ApiMethodDocumentation|CmfApiDocumentation';
+                    $parentClassName = class_basename($this->getMethodBaseClass()) . '|[a-zA-Z0-9_-]+V1ApiMethodDocumentation|CmfApiDocumentation';
                     if (preg_match('%^\s*class\s+(\w+)\s+extends\s+(' . $parentClassName . ')%im', $buffer, $classMatches)) {
                         $class = $classMatches[1];
                         if (preg_match("%[^w]namespace\s+([\w\\\]+).*?class\s+{$class}\s+%is", $buffer, $nsMatches)) {

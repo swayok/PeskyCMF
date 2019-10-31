@@ -3,7 +3,6 @@
 namespace PeskyCMF\ApiDocs;
 
 use PeskyCMF\Config\CmfConfig;
-use Ramsey\Uuid\Uuid;
 
 /**
  * Extend this class to show description for some topic that is not an API method (like wiki page)
@@ -53,7 +52,7 @@ HTML;
     protected $uuid;
 
     public function __construct() {
-        $this->uuid = Uuid::uuid4()->toString();
+        $this->uuid = 'doc-' . snake_case(str_replace('\\', '', get_class($this)), '-');
     }
 
     static public function getPosition() {

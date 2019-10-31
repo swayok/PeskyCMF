@@ -11,7 +11,11 @@ class ApiMethodErrorResponseInfo {
     /**
      * @var string
      */
-    protected $description = 'No description provided';
+    protected $title = 'No title provided';
+    /**
+     * @var string
+     */
+    protected $description = '';
     /**
      * @var array
      */
@@ -52,7 +56,22 @@ class ApiMethodErrorResponseInfo {
      */
     public function setHttpCode($httpCode) {
         $this->httpCode = $httpCode;
+        return $this;
+    }
 
+    /**
+     * @return string
+     */
+    public function getTitle(): string {
+        return $this->title;
+    }
+
+    /**
+     * @param string $description
+     * @return $this
+     */
+    public function setTitle($description) {
+        $this->title = $description;
         return $this;
     }
 
@@ -111,9 +130,10 @@ class ApiMethodErrorResponseInfo {
     public function toArray() {
         $ret = [
             'code' => $this->getHttpCode(),
-            'title' => $this->getDescription(),
+            'title' => $this->getTitle(),
             'response' => $this->getResponse(),
-            'extra' => $this->getExtraData()
+            'extra' => $this->getExtraData(),
+            'description' => $this->getDescription()
         ];
         if (empty($ret['extra'])) {
             unset($ret['extra']);

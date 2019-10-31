@@ -21,7 +21,7 @@
     </ol>
 </div>
 <div class="content" id="api-docs">
-    @foreach($cmfConfig->getApiDocumentationModule()->getDocumentationClassesList() as $header => $methods)
+    @foreach($cmfConfig::getApiDocumentationModule()->getDocumentationClassesList() as $header => $methods)
         <div class="row"><div class="col-xs-12">
             <div class="box box-solid box-primary api-docs-section">
                 <div class="box-header">
@@ -43,8 +43,23 @@
 </div>
 
 <script type="application/javascript">
-    $("#api-docs").find('.api-docs-section').boxWidget({
-        animationSpeed: 0
+    $(function () {
+        var $apiDocs = $("#api-docs");
+        $apiDocs.find('.api-docs-section').boxWidget({
+            animationSpeed: 0
+        });
+        $apiDocs.on('click', '.api-documentation-for-method-header', function () {
+            document.location.hash = $(this).attr('data-target');
+        });
+        if (document.location.hash) {
+            var $el = $apiDocs.find(document.location.hash);
+            if ($el.length) {
+                $apiDocs.find(document.location.hash).collapse('show');
+                $('html, body').animate({
+                    scrollTop: Math.max(0, $el.offset().top - 100)
+                });
+            }
+        }
     });
 </script>
 
