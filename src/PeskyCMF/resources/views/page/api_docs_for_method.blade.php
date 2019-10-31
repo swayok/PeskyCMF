@@ -253,7 +253,7 @@ $errors = $method->getErrors()
                                 </div>
                             </div>
                             <div class="box-body">
-                                <pre>{{ json_encode($successData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                <pre>{!! json_encode($successData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) !!}</pre>
                             </div>
                         </div>
                     </div>
@@ -297,7 +297,7 @@ $errors = $method->getErrors()
                                                 {{ array_get($failInfo, 'title', '*no title*') }}
                                             </td>
                                             <td class="api-documentation-error-response-cell pn">
-                                                <pre style="max-width: 320px; margin: 0">{{ json_encode(array_get($failInfo, 'response', ''), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                                <pre style="max-width: 320px; margin: 0">{!! json_encode(array_get($failInfo, 'response', ''), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) !!}</pre>
                                             </td>
                                             <td class="api-documentation-error-description-cell">
                                                 {!! array_get($failInfo, 'description') !!}
