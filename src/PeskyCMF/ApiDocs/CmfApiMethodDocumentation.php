@@ -199,7 +199,7 @@ HTML;
     ];
 
     static protected $itemNotFound = [
-        'code' => HttpCode::SERVER_ERROR,
+        'code' => HttpCode::NOT_FOUND,
         'title' => '{error.item_not_found.title}',
         'description' => '{error.item_not_found.description}',
         'response' => [
