@@ -19,6 +19,13 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
     static protected $position;
 
     /**
+     * Base path to translations for current api method documentation
+     * Mostly used to get descriptions for headers, url params, url query params, post params and errors
+     * @var string
+     */
+    protected $translationsBasePath = '';
+
+    /**
      * You can use simple string or translation path in format: '{method.some_name.title}'
      * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
      * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
@@ -151,8 +158,8 @@ HTML;
             if ($error instanceof ApiMethodErrorResponseInfo) {
                 $error = $error->toArray();
             }
-            $error['title'] = $this->translate(array_get($error, 'title', ''));
-            $error['description'] = $this->translate(array_get($error, 'description', ''));
+            $error['title'] = $this->translateInserts(array_get($error, 'title', ''));
+            $error['description'] = $this->translateInserts(array_get($error, 'description', ''));
         }
         unset($error);
         usort($errors, function ($err1, $err2) {
@@ -216,19 +223,19 @@ HTML;
     }
 
     public function getHeaders() {
-        return $this->prepareUrlVarsForTable('header', $this->headers);
+        return $this->prepareUrlVarsForTable(rtrim($this->translationsBasePath, '.') . '.header', $this->headers);
     }
 
     public function getUrlParameters() {
-        return $this->prepareUrlVarsForTable('params.url', $this->urlParameters);
+        return $this->prepareUrlVarsForTable(rtrim($this->translationsBasePath, '.') . '.params.url', $this->urlParameters);
     }
 
     public function getUrlQueryParameters() {
-        return $this->prepareUrlVarsForTable('params.url_query', $this->urlQueryParameters);
+        return $this->prepareUrlVarsForTable(rtrim($this->translationsBasePath, '.') . '.params.url_query', $this->urlQueryParameters);
     }
 
     public function getPostParameters() {
-        return $this->prepareUrlVarsForTable('params.post', $this->postParameters);
+        return $this->prepareUrlVarsForTable(rtrim($this->translationsBasePath, '.') . '.params.post', $this->postParameters);
     }
 
     public function getValidationErrors() {
@@ -247,7 +254,7 @@ HTML;
     protected function translateArrayValues(array $array) {
         foreach ($array as &$value) {
             if (is_string($value)) {
-                $value = $this->translate($value);
+                $value = $this->translateInserts($value);
             } else if (is_array($value)) {
                 $value = $this->translateArrayValues($value);
             }
@@ -264,7 +271,10 @@ HTML;
     protected function prepareUrlVarsForTable(string $group, array $array) {
         $array = $this->translateArrayValues($array);
         $ret = [];
-        $descriptions = (array)$this->translate($group);
+        $descriptions = $this->translatePath($group);
+        if (!is_array($descriptions)) {
+            $descriptions = [];
+        }
         foreach ($array as $key => $value) {
             $ret[$key] = [
                 'name' => $key,
@@ -312,14 +322,14 @@ HTML;
             $item['request']['header'][] = [
                 'key' => $key,
                 'value' => $info['type'],
-                'description' => $info['description']
+                'description' => $this->cleanTextForPostman($info['description'])
             ];
         }
         foreach ($this->getPostParameters() as $key => $info) {
             $item['request']['body']['formdata'][] = [
                 'key' => $key,
                 'value' => ($key === '_method') ? $info['type'] : '{{' . $key . '}}',
-                'description' => $info['description'],
+                'description' => $this->cleanTextForPostman($info['description']),
                 'type' => 'text',
                 'enabled' => true
             ];

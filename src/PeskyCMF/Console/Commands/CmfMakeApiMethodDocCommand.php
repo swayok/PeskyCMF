@@ -8,8 +8,8 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
 
     protected $description = 'Create class that extends CmfApiMethodDocumentation class';
 
-    protected $signature = 'cmf:make-api-method-doc 
-        {class_name} 
+    protected $signature = 'cmf:make-api-method-doc
+        {class_name}
         {docs_group}
         {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}
         {--folder= : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}
@@ -57,6 +57,10 @@ use PeskyCMF\ApiDocs\ApiMethodErrorResponseInfo;
 
 class {$className} extends {$baseClassName} {
 
+    //static protected \$position = 10;
+    
+    protected \$translationsBasePath = '{$translationGroup}';
+
     protected \$title = '{{$translationGroup}.title}';
     protected \$description = '{{$translationGroup}.description}';
 
@@ -65,7 +69,7 @@ class {$className} extends {$baseClassName} {
 
 {$urlParams}{$urlQueryParams}{$postParams}
 {$validationErrors}
-    
+
     public \$onSuccess = [
 //        'name' => 'string',
     ];

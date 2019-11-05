@@ -60,11 +60,11 @@ HTML;
     }
 
     public function getTitle() {
-        return $this->translate($this->title);
+        return $this->translateInserts($this->title);
     }
 
     public function getDescription() {
-        return $this->description ? $this->translate($this->description) : '';
+        return $this->description ? $this->translateInserts($this->description) : '';
     }
 
     public function hasDescription() {
@@ -109,17 +109,21 @@ HTML;
 
     /**
      * Translate blocks like "{method.name.title}" placed inside the $string
-     * @param string $string
+     * @param string $text
      * @return string
      */
-    protected function translate($string) {
+    protected function translateInserts(string $text) {
         return preg_replace_callback(
             '%\{([^{}]*)\}%',
             function ($matches) {
-                return CmfConfig::transApiDoc($matches[1]);
+                return $this->translatePath($matches[1]);
             },
-            $string
+            $text
         );
+    }
+
+    protected function translatePath(string $path) {
+        return CmfConfig::transApiDoc($path);
     }
 
     public function isMethodDocumentation() {
