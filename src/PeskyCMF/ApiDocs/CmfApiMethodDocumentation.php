@@ -283,7 +283,7 @@ HTML;
         $queryParams = [];
         foreach ($this->getUrlQueryParameters() as $name => $info) {
             if ($name === '_method') {
-                $queryParams[] = urlencode($name) . '=' . $info;
+                $queryParams[] = urlencode($name) . '=' . $info['type'];
             } else {
                 $queryParams[] = urlencode($name) . '={{' . $name . '}}';
             }
@@ -308,18 +308,18 @@ HTML;
             ],
             'response' => []
         ];
-        $headerDescriptions = (array)$this->translate('header');
-        foreach ($this->getHeaders() as $key => $value) {
+        foreach ($this->getHeaders() as $key => $info) {
             $item['request']['header'][] = [
                 'key' => $key,
-                'value' => $value,
-                'description' => $this->cleanTextForPostman(array_get($headerDescriptions, $key, ''))
+                'value' => $info['type'],
+                'description' => $info['description']
             ];
         }
-        foreach ($this->getPostParameters() as $key => $value) {
+        foreach ($this->getPostParameters() as $key => $info) {
             $item['request']['body']['formdata'][] = [
                 'key' => $key,
-                'value' => ($key === '_method') ? $value : '{{' . $key . '}}',
+                'value' => ($key === '_method') ? $info['type'] : '{{' . $key . '}}',
+                'description' => $info['description'],
                 'type' => 'text',
                 'enabled' => true
             ];
