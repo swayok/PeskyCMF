@@ -13,8 +13,8 @@ class CmfMakeApiDocCommand extends Command {
 
     protected $description = 'Create class that extends CmfApiDocumentation class';
 
-    protected $signature = 'cmf:make-api-doc 
-        {class_name} 
+    protected $signature = 'cmf:make-api-doc
+        {class_name}
         {docs_group}
         {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}
         {--folder= : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}
@@ -114,8 +114,10 @@ use {$baseClass};
 
 class {$className} extends {$baseClassName} {
 
-    protected \$title = '{{$translationGroup}.title}';
-    protected \$description = '{{$translationGroup}.description}';
+    protected \$translationsBasePath = '{$translationGroup}';
+
+    //protected \$title = '{{$translationGroup}.title}';
+    //protected \$description = '{{$translationGroup}.description}';
 
 }
 CLASS;

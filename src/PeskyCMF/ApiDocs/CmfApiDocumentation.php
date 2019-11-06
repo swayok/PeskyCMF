@@ -19,24 +19,32 @@ abstract class CmfApiDocumentation {
     static protected $position;
 
     /**
+     * Base path to translations for current api method documentation
+     * Mostly used to get descriptions for headers, url params, url query params, post params and errors
+     * Format: 'group', 'group.method', 'user.details'
+     * @var string
+     */
+    protected $translationsBasePath = '';
+
+    /**
      * You can use simple string or translation path in format: '{method.some_name.title}'
      * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
      * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
      * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
-     * @var string
+     * When null: $this->translationsBasePath . '.title' will be used
+     * @var string|null
      */
-    protected $title = '';
+    protected $title;
 
     /**
      * You can use simple string or translation path in format: '{method.some_name.description}'
      * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
      * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
      * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
-     * @var string
+     * When null: $this->translationsBasePath . '.description' will be used
+     * @var string|null
      */
-    protected $description = <<<HTML
-
-HTML;
+    protected $description;
 
     /**
      * @return array
@@ -60,11 +68,15 @@ HTML;
     }
 
     public function getTitle() {
-        return $this->translateInserts($this->title);
+        return $this->title
+            ? $this->translateInserts($this->title)
+            : $this->translatePath(rtrim($this->translationsBasePath, '.') . '.title');
     }
 
     public function getDescription() {
-        return $this->description ? $this->translateInserts($this->description) : '';
+        return $this->description
+            ? $this->translateInserts($this->description)
+            : $this->translatePath(rtrim($this->translationsBasePath, '.') . '.description');
     }
 
     public function hasDescription() {

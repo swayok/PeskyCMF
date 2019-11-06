@@ -58,11 +58,11 @@ use PeskyCMF\ApiDocs\ApiMethodErrorResponseInfo;
 class {$className} extends {$baseClassName} {
 
     //static protected \$position = 10;
-    
+
     protected \$translationsBasePath = '{$translationGroup}';
 
-    protected \$title = '{{$translationGroup}.title}';
-    protected \$description = '{{$translationGroup}.description}';
+    //protected \$title = '{{$translationGroup}.title}';
+    //protected \$description = '{{$translationGroup}.description}';
 
     protected \$url = '{$url}';
     public \$httpMethod = '{$httpMethod}';

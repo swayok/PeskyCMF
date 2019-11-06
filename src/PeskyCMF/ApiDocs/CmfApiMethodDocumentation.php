@@ -11,39 +11,11 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
 
     // override next properties and methods
 
-    /**
-     * Position of this method within the group.
-     * Used only by CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem().
-     * @var int|null
-     */
-    static protected $position;
+    //static protected $position = 10;
 
-    /**
-     * Base path to translations for current api method documentation
-     * Mostly used to get descriptions for headers, url params, url query params, post params and errors
-     * @var string
-     */
-    protected $translationsBasePath = '';
-
-    /**
-     * You can use simple string or translation path in format: '{method.some_name.title}'
-     * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
-     * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
-     * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
-     * @var string
-     */
-    protected $title = '';
-
-    /**
-     * You can use simple string or translation path in format: '{method.some_name.description}'
-     * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
-     * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
-     * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
-     * @var string
-     */
-    protected $description = <<<HTML
-
-HTML;
+    //protected $translationsBasePath = 'group.method';
+    //protected $title = '{group.method.title}';
+    //protected $description = '{group.method.description}';
 
     /**
      * You can use '{url_parameter}' or ':url_parameter' to insert parameters into url and be able to
