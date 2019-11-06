@@ -48,8 +48,12 @@
         $apiDocs.find('.api-docs-section').boxWidget({
             animationSpeed: 0
         });
-        $apiDocs.on('click', '.api-documentation-for-method-header', function () {
-            document.location.hash = $(this).attr('data-target');
+        $apiDocs.on('click', '.api-documentation-for-method-header[data-target]', function () {
+            if ($(this).attr('aria-expanded') === 'true') {
+                document.location.hash = '';
+            } else {
+                document.location.hash = $(this).attr('data-target');
+            }
         });
         if (document.location.hash) {
             var $el = $apiDocs.find(document.location.hash);
