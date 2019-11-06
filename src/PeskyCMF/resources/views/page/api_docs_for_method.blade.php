@@ -21,7 +21,7 @@ $errors = $method->getErrors()
         @if ($hasUrl)
             <div class="col-xs-6 text-bold">{{ $method->getTitle() }}</div>
             <div class="col-xs-6 text-nowrap of-h">
-                <div class="http-method ib" style="width: 65px;">{{ $method->getHttpMethod() }}</div>
+                <div class="http-method ib" style="width: 100px;">{{ $method->getHttpMethod() }}</div>
                 <span class="url">{{ $url }}</span>
             </div>
         @else
