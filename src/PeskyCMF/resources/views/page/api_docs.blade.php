@@ -53,10 +53,13 @@
                 document.location.hash = '';
             } else {
                 document.location.hash = $(this).attr('data-target');
+                $('html, body').animate({
+                    scrollTop: Math.max(0, $(this).offset().top - 100)
+                });
             }
         });
         if (document.location.hash) {
-            var $el = $apiDocs.find(document.location.hash);
+            var $el = $apiDocs.find('.api-documentation-for-method-header[data-target="' + document.location.hash + '"]');
             if ($el.length) {
                 $apiDocs.find(document.location.hash).collapse('show');
                 $('html, body').animate({
