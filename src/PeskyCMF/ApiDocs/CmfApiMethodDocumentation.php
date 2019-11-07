@@ -219,19 +219,35 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
     }
 
     public function getHeaders() {
-        return $this->prepareUrlVarsForTable(rtrim($this->translationsBasePath, '.') . '.header', $this->headers);
+        return $this->prepareUrlVarsForTable(
+            rtrim($this->translationsBasePath, '.') . '.header',
+            $this->headers,
+            []
+        );
     }
 
     public function getUrlParameters() {
-        return $this->prepareUrlVarsForTable(rtrim($this->translationsBasePath, '.') . '.params.url', $this->urlParameters);
+        return $this->prepareUrlVarsForTable(
+            rtrim($this->translationsBasePath, '.') . '.params.url',
+            $this->urlParameters,
+            $this->getDefaultParamsValuesForPostman('url')
+        );
     }
 
     public function getUrlQueryParameters() {
-        return $this->prepareUrlVarsForTable(rtrim($this->translationsBasePath, '.') . '.params.url_query', $this->urlQueryParameters);
+        return $this->prepareUrlVarsForTable(
+            rtrim($this->translationsBasePath, '.') . '.params.url_query',
+            $this->urlQueryParameters,
+            $this->getDefaultParamsValuesForPostman('url_query')
+        );
     }
 
     public function getPostParameters() {
-        return $this->prepareUrlVarsForTable(rtrim($this->translationsBasePath, '.') . '.params.post', $this->postParameters);
+        return $this->prepareUrlVarsForTable(
+            rtrim($this->translationsBasePath, '.') . '.params.post',
+            $this->postParameters,
+            $this->getDefaultParamsValuesForPostman('post')
+        );
     }
 
     public function getValidationErrors() {
@@ -240,6 +256,14 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
 
     public function getOnSuccessData() {
         return $this->translateArrayValues($this->onSuccess);
+    }
+
+    /**
+     * @param string $group - one of: 'url', 'url_query', 'post'
+     * @return array
+     */
+    public function getDefaultParamsValuesForPostman(string $group): array {
+        return [];
     }
 
     /**
@@ -261,21 +285,23 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
     /**
      * Prepare url variables to be displayed in docs as table with 3 columns: name, type, description
      * @param string $group
-     * @param array $array
+     * @param array $params
+     * @param array $defaultValues
      * @return array
      */
-    protected function prepareUrlVarsForTable(string $group, array $array) {
-        $array = $this->translateArrayValues($array);
+    protected function prepareUrlVarsForTable(string $group, array $params, array $defaultValues) {
+        $params = $this->translateArrayValues($params);
         $ret = [];
         $descriptions = $this->translatePath($group);
         if (!is_array($descriptions)) {
             $descriptions = [];
         }
-        foreach ($array as $key => $value) {
+        foreach ($params as $key => $value) {
             $ret[$key] = [
                 'name' => $key,
                 'type' => $value,
-                'description' => array_get($descriptions, $key, '')
+                'description' => array_get($descriptions, $key, ''),
+                'value' => array_get($defaultValues, $key, '')
             ];
         }
         return $ret;
@@ -291,7 +317,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
             if ($name === '_method') {
                 $queryParams[] = urlencode($name) . '=' . $info['type'];
             } else {
-                $queryParams[] = urlencode($name) . '={{' . $name . '}}';
+                $queryParams[] = urlencode($name) . '=' . urlencode(array_get($info, 'value', ''));
             }
         }
         $queryParams = empty($queryParams) ? '' : '?' . implode('&', $queryParams);
@@ -323,7 +349,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
         foreach ($this->getPostParameters() as $key => $info) {
             $item['request']['body']['formdata'][] = [
                 'key' => $key,
-                'value' => ($key === '_method') ? $info['type'] : '',
+                'value' => ($key === '_method') ? $info['type'] : array_get($info, 'value', ''),
                 'description' => $this->cleanTextForPostman($info['description']),
                 'type' => 'text',
                 'enabled' => true
