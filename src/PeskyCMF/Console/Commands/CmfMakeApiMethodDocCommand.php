@@ -62,6 +62,7 @@ class {$className} extends {$baseClassName} {
     protected \$translationsBasePath = '{$translationGroup}';
 
     //protected \$title = '{{$translationGroup}.title}';
+    //protected \$titleForPostman = '{{$translationGroup}.title_for_postman}';
     //protected \$description = '{{$translationGroup}.description}';
 
     protected \$url = '{$url}';
@@ -97,6 +98,7 @@ CLASS;
         $this->line('Add next translations to you dictionaries:');
         $translations = [];
         array_set($translations, $translationGroup . '.title', '');
+        array_set($translations, $translationGroup . '.title_for_postman', '');
         array_set($translations, $translationGroup . '.description', '');
         array_set($translations, $translationGroup . '.params.url', []);
         array_set($translations, $translationGroup . '.params.url_query', []);

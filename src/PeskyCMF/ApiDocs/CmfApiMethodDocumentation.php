@@ -18,6 +18,17 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
     //protected $description = '{group.method.description}';
 
     /**
+     * You can use simple string or translation path in format: '{method.some_name.title_for_postman}'
+     * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
+     * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
+     * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
+     * When null: $this->translationsBasePath . '.title_for_postman' or $this->getUrl() will be used
+     * @var string|null
+     */
+    protected $titleForPostman;
+    //protected $titleForPostman = '{group.method.title_for_postman}';
+
+    /**
      * You can use '{url_parameter}' or ':url_parameter' to insert parameters into url and be able to
      * export it to postman properly (postman uses ':url_parameter' format but it is not expressive
      * enough unlike '{url_parameter}' variant)
@@ -186,12 +197,25 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
         ]
     ];
 
+    public function getTitleForPostman() {
+        $title = $this->titleForPostman
+            ? $this->translateInserts($this->titleForPostman)
+            : $this->translatePath(rtrim($this->translationsBasePath, '.') . '.title_for_postman');
+        return !empty(trim($title)) && stripos($title, '.title_for_postman') === false ? $title : $this->getUrl();
+    }
+
     public function getUrl() {
         return trim((string)$this->url);
     }
 
     public function getHttpMethod() {
         return $this->httpMethod;
+    }
+
+    public function getHttpMethodForPostman() {
+        return strtoupper(
+            preg_replace('%^\s*(get|post|put|delete|patch|head|options|connect|trace).*$%i', '$1', $this->httpMethod)
+        );
     }
 
     public function getHeaders() {
@@ -271,14 +295,13 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
             }
         }
         $queryParams = empty($queryParams) ? '' : '?' . implode('&', $queryParams);
-        $url = $this->getUrl();
         $item = [
-            'name' => $url,
+            'name' => $this->getTitleForPostman(),
             'request' => [
                 'url' => url(
-                    preg_replace('%\{([^/]+?)\}%', ':$1', $url) . $queryParams
+                    preg_replace('%\{([^/]+?)\}%', ':$1', $this->getUrl()) . $queryParams
                 ),
-                'method' => strtoupper($this->getHttpMethod()),
+                'method' => $this->getHttpMethodForPostman(),
                 'description' => $this->cleanTextForPostman($this->getTitle() . "\n" . $this->getDescription()),
                 'header' => [],
                 'body' => [
@@ -300,7 +323,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
         foreach ($this->getPostParameters() as $key => $info) {
             $item['request']['body']['formdata'][] = [
                 'key' => $key,
-                'value' => ($key === '_method') ? $info['type'] : '{{' . $key . '}}',
+                'value' => ($key === '_method') ? $info['type'] : '',
                 'description' => $this->cleanTextForPostman($info['description']),
                 'type' => 'text',
                 'enabled' => true
