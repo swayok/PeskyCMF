@@ -317,7 +317,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
             if ($name === '_method') {
                 $queryParams[] = urlencode($name) . '=' . $info['type'];
             } else {
-                $queryParams[] = urlencode($name) . '=' . urlencode(array_get($info, 'value', ''));
+                $queryParams[] = urlencode($name) . '=' . array_get($info, 'value', '');
             }
         }
         $queryParams = empty($queryParams) ? '' : '?' . implode('&', $queryParams);
