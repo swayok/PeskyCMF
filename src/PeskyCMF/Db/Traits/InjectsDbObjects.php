@@ -29,8 +29,12 @@ trait InjectsDbObjects {
         }
         if (!empty($object)) {
             $id = $route->parameter('id', false);
-            if ($id === false && \Request::method() !== 'GET') {
-                 $id = \Request::get('id', false);
+            if ($id === false) {
+                if (\Request::method() === 'GET') {
+                    $id = \Request::query('id', false);
+                } else {
+                    $id = \Request::get('id', false);
+                }
             }
             if (empty($id)) {
                 $this->sendRecordNotFoundResponse();
