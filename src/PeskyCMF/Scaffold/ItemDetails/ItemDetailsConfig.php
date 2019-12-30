@@ -21,8 +21,6 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     protected $rowsGroups = [];
     /** @var null|int */
     protected $currentRowsGroup;
-    /** @var bool */
-    protected $showInDialog = true;
 
     public function getRelationsToRead() {
         $relations = parent::getRelationsToRead();
@@ -167,7 +165,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         $this->currentTab = null;
         return $this;
     }
-    
+
     /**
      * @param $label
      */
@@ -182,7 +180,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
             'keys_for_values' => []
         ];
     }
-    
+
     /**
      * @param $label
      */
@@ -194,7 +192,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         ];
         $this->currentRowsGroup = null;
     }
-    
+
     /**
      * @return array
      */
@@ -211,22 +209,6 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
 
     protected function getSectionTranslationsPrefix($subtype = null) {
         return $subtype === 'value_viewer' ? 'item_details.field' : 'item_details';
-    }
-
-    /**
-     * @param bool $useDialog
-     * @return $this
-     */
-    public function setShowAsDialog($useDialog) {
-        $this->showInDialog = (bool)$useDialog;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isUsingDialog() {
-        return $this->showInDialog;
     }
 
 }

@@ -204,7 +204,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
     #}}
     {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog <?php echo $formConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
+            <div class="modal-dialog modal-<?php echo $formConfig->getModalSize() ?>">
                 <div class="modal-content item-form-modal-content <?php echo $ifCreate; ?>item-creation<?php echo $else; ?>item-editing<?php echo $endIf; ?>">
                     <div class="modal-header pv10">
                         <div class="box-tools pull-right">

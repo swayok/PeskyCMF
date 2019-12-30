@@ -24,6 +24,8 @@ abstract class CmfMenuItem {
     protected $tooltip;
     /** @var string */
     protected $tooltipPosition = 'top';
+    /** @var bool|null */
+    protected $openInModal = null;
 
     /**
      * @param string $url
@@ -37,7 +39,6 @@ abstract class CmfMenuItem {
      * @param string $url
      * @param string $method
      * @return CmfRequestMenuItem
-     * @throws \InvalidArgumentException
      */
     static public function request(string $url, string $method = 'post') {
         return new CmfRequestMenuItem($url, $method);
@@ -47,7 +48,6 @@ abstract class CmfMenuItem {
      * @param string $url
      * @param string $method
      * @return CmfBulkActionMenuItem
-     * @throws \InvalidArgumentException
      */
     static public function bulkActionOnSelectedRows(string $url, string $method = 'post') {
         return new CmfBulkActionMenuItem($url, $method, true);
@@ -57,7 +57,6 @@ abstract class CmfMenuItem {
      * @param string $url
      * @param string $method
      * @return CmfBulkActionMenuItem
-     * @throws \InvalidArgumentException
      */
     static public function bulkActionOnFilteredRows(string $url, string $method = 'post') {
         return new CmfBulkActionMenuItem($url, $method, false);
@@ -305,7 +304,5 @@ abstract class CmfMenuItem {
         $this->tooltipPosition = $tooltipPosition;
         return $this;
     }
-
-
 
 }

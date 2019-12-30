@@ -100,11 +100,20 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $additionalViewsForTemplate = [];
     /** @var DataGridRendererHelper|null */
     protected $rendererHelper;
+    /** @var bool */
+    protected $openInModal = false;
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         parent::__construct($table, $scaffoldConfig);
         $this->recordsPerPage = $scaffoldConfig::getCmfConfig()->rows_per_page();
         $this->setOrderBy($table->getPkColumnName());
+    }
+
+    /**
+     * @private
+     */
+    public function setModalConfig(bool $isEnabled = false, ?string $size = null) {
+        throw new \BadMethodCallException('Data grid cannot be opened in modal');
     }
 
     /**

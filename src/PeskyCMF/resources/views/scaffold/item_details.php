@@ -153,7 +153,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
     #}}
     {{? it.__modal }}
         <div class="modal fade" tabindex="-1" role="dialog" data-pk-name="<?php echo $table::getPkColumnName() ?>">
-            <div class="modal-dialog <?php echo $itemDetailsConfig->getWidth() >= 60 ? 'modal-lg' : 'modal-md' ?>">
+            <div class="modal-dialog modal-<?php echo $itemDetailsConfig->getModalSize() ?>">
                 <div class="datagrid-modal-items-navigation">
                     <button type="button" class="prev-item top" disabled data-placement="bottom"
                             data-toggle="tooltip" title="<?php echo $itemDetailsConfig->translateGeneral('previous_item') ?>">

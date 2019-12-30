@@ -241,12 +241,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return array
-     * @throws \Exceptions\Data\NotFoundException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldSectionConfigException
      */
     public function getConfigsForTemplatesRendering() {
@@ -307,12 +301,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return DataGridConfig
-     * @throws \Exceptions\Data\NotFoundException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function getDataGridConfig() {
         if (empty($this->dataGridConfig)) {
@@ -335,7 +323,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return ItemDetailsConfig
-     * @throws \BadMethodCallException
      */
     public function getItemDetailsConfig() {
         if (empty($this->itemDetailsConfig)) {
@@ -347,7 +334,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @return FormConfig
-     * @throws \BadMethodCallException
      */
     public function getFormConfig() {
         if (empty($this->formConfig)) {
@@ -582,7 +568,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     /**
      * @param null|string $message
-     * @return $this
+     * @return CmfJsonResponse
      */
     protected function makeRecordNotFoundResponse($message = null) {
         if (empty($message)) {
@@ -631,12 +617,10 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param RecordInterface $record
      * @param null|string $tableName
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function logDbRecordBeforeChange(RecordInterface $record, $tableName = null) {
         if ($this->hasLogger()) {
+            /** @noinspection NullPointerExceptionInspection */
             $this->getLogger()->logDbRecordBeforeChange(
                 $record,
                 $tableName,
@@ -650,12 +634,10 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @param RecordInterface $record
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function logDbRecordAfterChange(RecordInterface $record) {
         if ($this->hasLogger()) {
+            /** @noinspection NullPointerExceptionInspection */
             $this->getLogger()->logDbRecordAfterChange(
                 $record,
                 $this->getLoggableRecordColumns($record),
@@ -669,12 +651,10 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param RecordInterface $record
      * @param null|string $tableName
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function logDbRecordLoad(RecordInterface $record, $tableName = null) {
         if ($this->hasLogger()) {
+            /** @noinspection NullPointerExceptionInspection */
             $this->getLogger()->logDbRecordUsage($record, $tableName);
         }
         return $this;
@@ -683,9 +663,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @param RecordInterface $record
      * @return array
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     protected function getLoggableRecordColumns(RecordInterface $record) {
         if (is_array($this->loggableRecordColumns)) {
@@ -708,9 +685,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @param RecordInterface $record
      * @return array
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     protected function getLoggableRecordRelations(RecordInterface $record) {
         if ($this->loggableRecordRelations === false || $record instanceof TempRecord) {
@@ -735,7 +709,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * Call scaffold's method called $actionName without arguments
      * @param string $actionName
-     * @return $this
+     * @return CmfJsonResponse
      */
     public function performAction($actionName) {
         if (method_exists($this, $actionName)) {
@@ -756,7 +730,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * Call scaffold's method called $actionName with $itemId argument
      * @param string $itemId
      * @param string $actionName
-     * @return $this
+     * @return CmfJsonResponse
      */
     public function performActionForRecord($itemId, $actionName) {
         if (method_exists($this, $actionName)) {

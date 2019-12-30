@@ -7,12 +7,22 @@ use Swayok\Html\Tag;
 class CmfRedirectMenuItem extends CmfMenuItem {
 
     protected $openOnNewTab = false;
+    protected $openInModal = null;
 
     /**
      * @return $this
      */
     public function openOnNewTab() {
         $this->openOnNewTab = true;
+        return $this;
+    }
+
+    /**
+     * @param bool $openInModal
+     * @return $this
+     */
+    public function setOpenInModal(bool $openInModal = true) {
+        $this->openInModal = $openInModal;
         return $this;
     }
 
@@ -24,11 +34,9 @@ class CmfRedirectMenuItem extends CmfMenuItem {
     public function renderAsButton(bool $withIcon = true): string {
         if ($this->isAccessible()) {
             return $this->wrapIntoShowCondition(
-                Tag::a(($withIcon ? $this->makeIcon() . ' ' : '') . $this->getTitle())
+                $this->addCommonAttributes(Tag::a(($withIcon ? $this->makeIcon() . ' ' : '') . $this->getTitle()))
                     ->setClass($this->getButtonClasses() . ' ' . $this->makeConditionalDisabledAttribute())
-                    ->setHref($this->getUrl())
                     ->setTitle($this->getTooltip())
-                    ->setTarget($this->openOnNewTab ? '_blank' : null)
                     ->setDataAttr('toggle', $this->hasTooltip() ? 'tooltip' : null)
                     ->setDataAttr('position', $this->hasTooltip() ? $this->getTooltipPosition() : null)
                     ->build()
@@ -47,11 +55,9 @@ class CmfRedirectMenuItem extends CmfMenuItem {
     public function renderAsIcon(string $additionalClasses = '', bool $allowIconColorClass = true): string {
         if ($this->isAccessible()) {
             return $this->wrapIntoShowCondition(
-                Tag::a($this->makeIcon($allowIconColorClass))
+                $this->addCommonAttributes(Tag::a($this->makeIcon($allowIconColorClass)))
                     ->setClass($additionalClasses)
-                    ->setHref($this->getUrl())
                     ->setTitle($this->getTooltipOrTitle())
-                    ->setTarget($this->openOnNewTab ? '_blank' : null)
                     ->setDataAttr('toggle', $this->hasTooltipOrTitle() ? 'tooltip' : null)
                     ->setDataAttr('position', $this->hasTooltipOrTitle() ? $this->getTooltipPosition() : null)
                     ->build()
@@ -67,10 +73,8 @@ class CmfRedirectMenuItem extends CmfMenuItem {
      */
     public function renderAsBootstrapDropdownMenuItem(): string {
         if ($this->isAccessible()) {
-            $link = Tag::a($this->makeIcon(true) . ' ' . $this->getTitle())
-                ->setHref($this->getUrl())
+            $link = $this->addCommonAttributes(Tag::a($this->makeIcon(true) . ' ' . $this->getTitle()))
                 ->setTitle($this->getTooltip())
-                ->setTarget($this->openOnNewTab ? '_blank' : null)
                 ->setDataAttr('toggle', $this->hasTooltip() ? 'tooltip' : null)
                 ->setDataAttr('position', $this->hasTooltip() ? $this->getTooltipPosition() : null)
                 ->build();
@@ -80,5 +84,13 @@ class CmfRedirectMenuItem extends CmfMenuItem {
         } else {
             return '';
         }
+    }
+
+    protected function addCommonAttributes(Tag $tag): Tag {
+        $tag
+            ->setHref($this->getUrl())
+            ->setTarget($this->openOnNewTab ? '_blank' : null)
+            ->setDataAttr('modal', $this->openInModal === null ? null : (string)(int)$this->openInModal);
+        return $tag;
     }
 }
