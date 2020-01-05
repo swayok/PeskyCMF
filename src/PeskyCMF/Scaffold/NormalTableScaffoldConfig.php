@@ -527,15 +527,24 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
         }
         $table::commitTransaction();
-        $url = 'reload';
-        if ($created && empty($this->getRequest()->input('create_another'))) {
-            $url = routeToCmfItemEditForm(static::getResourceName(), $object->getPrimaryKeyValue());
-        }
         return cmfJsonResponse()
             ->setMessage(
                 $formConfig->translateGeneral($created ? 'message.create.success' : 'message.edit.success')
             )
-            ->setRedirect($url);
+            ->setRedirect($this->getRedirectUrlAfterDataSaved($created, $object) ?: 'back', static::getUrlToItemsTable());
+    }
+
+    /**
+     * @param bool $created
+     * @param RecordInterface $object
+     * @return string|null - null will close modal or return to previous page
+     */
+    protected function getRedirectUrlAfterDataSaved(bool $created, RecordInterface $object): ?string {
+        $url = 'reload';
+        if ($created && empty($this->getRequest()->input('create_another'))) {
+            $url = static::getUrlToItemEditForm($object->getPrimaryKeyValue());
+        }
+        return $url;
     }
 
     public function updateBulkOfRecords() {
