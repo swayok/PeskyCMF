@@ -24,7 +24,7 @@
                 "node_modules/datatables.net-bs/js/dataTables.bootstrap.js",
                 "src/cmf-vendors/datatables/extensions/Select/js/dataTables.select.js",
                 "src/cmf-vendors/datatables/extensions/FixedColumns/js/dataTables.fixedColumns.js",
-                "node_modules/jquery-extendext/jQuery.extendext.js",
+                "node_modules/jquery-extendext/jquery-extendext.js",
                 "node_modules/jQuery-QueryBuilder/dist/js/query-builder.js",
                 "src/cmf-vendors/db-query-builder/plugins/bt-selectpicker-values/plugin.js",
                 "src/cmf-vendors/jquery.plugins.js",
@@ -272,13 +272,15 @@
         "bn": {
             "output": "js/locale/bn.js",
             "files": [
-                "node_modules/moment/locale/bn.js"
+                "node_modules/moment/locale/bn.js",
+                "node_modules/select2/dist/js/i18n/bn.js"
             ]
         },
         "bn_BN": {
             "output": "js/locale/bn_BN.js",
             "files": [
-                "node_modules/moment/locale/bn.js"
+                "node_modules/moment/locale/bn.js",
+                "node_modules/select2/dist/js/i18n/bn.js"
             ]
         },
         "bo": {
@@ -372,7 +374,8 @@
                 "node_modules/bootstrap-fileinput/js/locales/cs.js",
                 "node_modules/moment/locale/cs.js",
                 "node_modules/select2/dist/js/i18n/cs.js",
-                "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js"
+                "node_modules/bootstrap-select/dist/js/i18n/defaults-cs_CZ.js",
+                "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.cs-CZ.js"
             ]
         },
         "cv": {
@@ -577,6 +580,16 @@
                 "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
                 "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js",
                 "node_modules/moment/locale/en-nz.js"
+            ]
+        },
+        "en_SG": {
+            "output": "js/locale/en_SG.js",
+            "files": [
+                "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.en.js",
+                "node_modules/select2/dist/js/i18n/en.js",
+                "node_modules/bootstrap-select/dist/js/i18n/defaults-en_US.js",
+                "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.en-US.js",
+                "node_modules/moment/locale/en-SG.js"
             ]
         },
         "en_US": {
@@ -809,6 +822,18 @@
                 "node_modules/moment/locale/fy.js"
             ]
         },
+        "ga": {
+            "output": "js/locale/ga.js",
+            "files": [
+                "node_modules/moment/locale/ga.js"
+            ]
+        },
+        "ga_GA": {
+            "output": "js/locale/ga_GA.js",
+            "files": [
+                "node_modules/moment/locale/ga.js"
+            ]
+        },
         "gd": {
             "output": "js/locale/gd.js",
             "files": [
@@ -979,6 +1004,17 @@
                 "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.it-IT.js"
             ]
         },
+        "it_CH": {
+            "output": "js/locale/it_CH.js",
+            "files": [
+                "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.it.js",
+                "node_modules/bootstrap-fileinput/js/locales/it.js",
+                "node_modules/moment/locale/it-ch.js",
+                "node_modules/select2/dist/js/i18n/it.js",
+                "node_modules/bootstrap-select/dist/js/i18n/defaults-it_IT.js",
+                "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.it-IT.js"
+            ]
+        },
         "it_IT": {
             "output": "js/locale/it_IT.js",
             "files": [
@@ -1036,14 +1072,16 @@
             "output": "js/locale/ka.js",
             "files": [
                 "node_modules/bootstrap-fileinput/js/locales/ka.js",
-                "node_modules/moment/locale/ka.js"
+                "node_modules/moment/locale/ka.js",
+                "node_modules/select2/dist/js/i18n/ka.js"
             ]
         },
         "ka_KA": {
             "output": "js/locale/ka_KA.js",
             "files": [
                 "node_modules/bootstrap-fileinput/js/locales/ka.js",
-                "node_modules/moment/locale/ka.js"
+                "node_modules/moment/locale/ka.js",
+                "node_modules/select2/dist/js/i18n/ka.js"
             ]
         },
         "kh_KM": {
@@ -1369,13 +1407,15 @@
         "ne": {
             "output": "js/locale/ne.js",
             "files": [
-                "node_modules/moment/locale/ne.js"
+                "node_modules/moment/locale/ne.js",
+                "node_modules/select2/dist/js/i18n/ne.js"
             ]
         },
         "ne_NE": {
             "output": "js/locale/ne_NE.js",
             "files": [
-                "node_modules/moment/locale/ne.js"
+                "node_modules/moment/locale/ne.js",
+                "node_modules/select2/dist/js/i18n/ne.js"
             ]
         },
         "nl": {
@@ -1634,14 +1674,16 @@
             "output": "js/locale/sq.js",
             "files": [
                 "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.sq.js",
-                "node_modules/moment/locale/sq.js"
+                "node_modules/moment/locale/sq.js",
+                "node_modules/select2/dist/js/i18n/sq.js"
             ]
         },
         "sq_SQ": {
             "output": "js/locale/sq_SQ.js",
             "files": [
                 "node_modules/jQuery-QueryBuilder/dist/i18n/query-builder.sq.js",
-                "node_modules/moment/locale/sq.js"
+                "node_modules/moment/locale/sq.js",
+                "node_modules/select2/dist/js/i18n/sq.js"
             ]
         },
         "sr": {
@@ -1656,6 +1698,14 @@
             "files": [
                 "node_modules/moment/locale/sr-cyrl.js",
                 "node_modules/select2/dist/js/i18n/sr.js"
+            ]
+        },
+        "sr_SP": {
+            "output": "js/locale/sr_SP.js",
+            "files": [
+                "node_modules/moment/locale/sr.js",
+                "node_modules/select2/dist/js/i18n/sr.js",
+                "node_modules/ajax-bootstrap-select/dist/js/locale/ajax-bootstrap-select.sr-SP.js"
             ]
         },
         "sr_SR": {
@@ -1859,19 +1909,22 @@
         "uz": {
             "output": "js/locale/uz.js",
             "files": [
-                "node_modules/moment/locale/uz.js"
+                "node_modules/moment/locale/uz.js",
+                "node_modules/bootstrap-fileinput/js/locales/uz.js"
             ]
         },
         "uz_LATN": {
             "output": "js/locale/uz_LATN.js",
             "files": [
-                "node_modules/moment/locale/uz-latn.js"
+                "node_modules/moment/locale/uz-latn.js",
+                "node_modules/bootstrap-fileinput/js/locales/uz.js"
             ]
         },
         "uz_UZ": {
             "output": "js/locale/uz_UZ.js",
             "files": [
-                "node_modules/moment/locale/uz.js"
+                "node_modules/moment/locale/uz.js",
+                "node_modules/bootstrap-fileinput/js/locales/uz.js"
             ]
         },
         "vi": {

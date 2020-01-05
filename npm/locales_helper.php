@@ -6,12 +6,12 @@ use Illuminate\Support\Arr;
 use Swayok\Utils\Folder;
 
 $folders = [
-    'node_modules/jQuery-QueryBuilder/dist/i18n/' => '%^query-builder.([a-zA-Z]{2}).js%',
-    'node_modules/bootstrap-fileinput/js/locales/' => '%^([a-zA-Z]{2}).js%',
-    'node_modules/moment/locale/' => '%^([a-zA-Z]{2})(?:-([a-zA-Z]{2,}))?.js%',
-    'node_modules/bootstrap-select/dist/js/i18n/' => '%^defaults-([a-zA-Z]{2})_([a-zA-Z]{2,}).js%',
-    'node_modules/ajax-bootstrap-select/dist/js/locale/' => '%^ajax-bootstrap-select.([a-zA-Z]{2})-([a-zA-Z]{2,}).js%',
-    'node_modules/select2/dist/js/i18n/' => '%^([a-zA-Z]{2}).js%',
+    'node_modules/jQuery-QueryBuilder/dist/i18n/' => '%^query-builder.([a-zA-Z]{2}).js$%',
+    'node_modules/bootstrap-fileinput/js/locales/' => '%^([a-zA-Z]{2}).js$%',
+    'node_modules/moment/locale/' => '%^([a-zA-Z]{2})(?:-([a-zA-Z]{2,}))?.js$%',
+    'node_modules/bootstrap-select/dist/js/i18n/' => '%^defaults-([a-zA-Z]{2})_([a-zA-Z]{2,}).js$%',
+    'node_modules/ajax-bootstrap-select/dist/js/locale/' => '%^ajax-bootstrap-select.([a-zA-Z]{2})-([a-zA-Z]{2,}).js$%',
+    'node_modules/select2/dist/js/i18n/' => '%^([a-zA-Z]{2}).js$%',
 ];
 $locales = [];
 foreach ($folders as $folderPath => $fileNameRegex) {

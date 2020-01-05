@@ -580,9 +580,9 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                             if (isModal) {
                                 Utils.showPreloader($content.find('.modal-dialog'));
                                 $.when(
-                                        ScaffoldsManager.getResourceItemData(resource, itemId, false),
-                                        ScaffoldFormHelper.loadOptions(resource, itemId)
-                                    )
+                                    ScaffoldsManager.getResourceItemData(resource, itemId, false),
+                                    ScaffoldFormHelper.loadOptions(resource, itemId)
+                                )
                                     .done(function (data, options) {
                                         data._options = options;
                                         data._is_creation = !itemId;
@@ -600,6 +600,12 @@ CmfRouteChange.scaffoldItemFormPage = function (request) {
                                     })
                             } else {
                                 page.reload();
+                            }
+                        } else if (json.redirect === 'back') {
+                            if (isModal) {
+                                $content.modal('hide');
+                            } else {
+                                page.back(json.redirect_fallback || $form.attr('data-back-url') || CmfConfig.rootUrl);
                             }
                         } else {
                             Utils.hidePreloader($form);
