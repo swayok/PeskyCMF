@@ -52,6 +52,7 @@
     "/dist/src/node_modules/bootstrap-fileinput/js/plugins/piexif.js": "/dist/src/node_modules/bootstrap-fileinput/js/plugins/piexif.js",
     "/dist/src/node_modules/bootstrap-fileinput/js/plugins/purify.js": "/dist/src/node_modules/bootstrap-fileinput/js/plugins/purify.js",
     "/dist/src/node_modules/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js": "/dist/src/node_modules/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js",
+    "/dist/src/node_modules/typeahead.js/dist/typeahead.bundle.js": "/dist/src/node_modules/typeahead.js/dist/typeahead.bundle.js",
     "/dist/min/js/cmf-core.js": "/dist/min/js/cmf-core.js",
     "/dist/src/src/js/inputs/cmf.fileuploads.js": "/dist/src/src/js/inputs/cmf.fileuploads.js",
     "/dist/src/node_modules/page-on-promises/page.js": "/dist/src/node_modules/page-on-promises/page.js",

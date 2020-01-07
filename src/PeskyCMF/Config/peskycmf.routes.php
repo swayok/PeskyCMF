@@ -287,7 +287,7 @@ Route::group(
             ]
         ]);
 
-        Route::get('{resource}/service/options/{column_name}.json', [
+        Route::get('{resource}/service/options/{input_name}.json', [
             'as' => $routeNamePrefix . 'cmf_api_get_options_as_json',
             'uses' => $apiControllerClass . '@getOptionsAsJson',
             'fallback' => [

@@ -133,6 +133,13 @@ class FormInput extends RenderableValueViewer {
     }
 
     /**
+     * @return bool
+     */
+    public function hasOptionsOrOptionsLoader() {
+        return $this->hasOptionsLoader() || !empty($this->options);
+    }
+
+    /**
      * @param null|array|\Closure $options
      * @return $this
      * @throws ValueViewerConfigException

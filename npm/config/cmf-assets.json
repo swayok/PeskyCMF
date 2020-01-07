@@ -37,7 +37,8 @@
                 "node_modules/bootstrap-fileinput/js/fileinput.js",
                 "node_modules/bootstrap-fileinput/js/plugins/piexif.js",
                 "node_modules/bootstrap-fileinput/js/plugins/purify.js",
-                "node_modules/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js"
+                "node_modules/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js",
+                "node_modules/typeahead.js/dist/typeahead.bundle.js"
             ]
         },
         "cmf-core": {
