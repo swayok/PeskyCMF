@@ -83,7 +83,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
         }
         $dbColumns = static::getTable()->getTableStructure()->getColumns();
-        $columnsToSelect = [];
+        $columnsToSelect = [static::getTable()->getTableStructure()->getPkColumnName()];
         $virtualColumns = [];
         foreach (array_keys($dataGridConfig->getViewersLinkedToDbColumns(false)) as $originalColName) {
             list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($originalColName);
