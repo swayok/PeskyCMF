@@ -39,7 +39,6 @@
         "swayok/laravel-site-loader": "master@dev",
         "almasaeed2010/adminlte": "2.3.*",
         "fortawesome/font-awesome": "^4.7",
-        "driftyco/ionicons": "*",
         "nostalgiaz/bootstrap-switch": "*",
         "eonasdan/bootstrap-datetimepicker": "*",
         "datatables/datatables": "*",
