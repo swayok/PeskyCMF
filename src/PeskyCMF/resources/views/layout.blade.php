@@ -118,7 +118,6 @@
     <script src="/packages/cmf-vendors/modernizr.custom.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/pilot.router.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/jquery.observable.js" type="text/javascript"></script>
-    <script src="/packages/cmf-vendors/rison.object.coder.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/dotjs/doT.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/moment/moment.js" type="text/javascript"></script>
     <script src="/packages/cmf-vendors/moment/locale/{{ app()->getLocale() }}.js" type="text/javascript"></script>

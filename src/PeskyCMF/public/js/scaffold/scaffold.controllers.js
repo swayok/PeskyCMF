@@ -187,39 +187,168 @@ var ScaffoldDataGridHelper = {
         filter: true,
         stateSave: true,
         dom: "<'row'<'col-sm-12'<'#query-builder'>>><'row'<'col-xs-12 col-md-5'<'filter-toolbar btn-toolbar text-left'>><'col-xs-12 col-md-7'<'toolbar btn-toolbar text-right'>>><'row'<'col-sm-12'tr>><'row'<'col-sm-3 hidden-xs hidden-sm'i><'col-xs-12 col-md-6'p><'col-sm-3 hidden-xs hidden-sm'l>>",
+
         stateSaveCallback: function (settings, state) {
+            var cleanedState = $.extend(true, {}, state);
+            delete cleanedState.time;
+            var api = this.api();
+            // compress sorting - using column index is not really readable idea and actually makes it less reliable on server side
+            if (typeof cleanedState.order !== 'undefined' && $.isArray(cleanedState.order)) {
+                var sorting = cleanedState.order;
+                delete cleanedState.order;
+                cleanedState.sort = {};
+                for (var k = 0; k < sorting.length; k++) {
+                    cleanedState.sort[api.column(sorting[k][0]).dataSrc()] = sorting[k][1];
+                }
+            }
+            // compress cleanedState.search - we only use cleanedState.search.search, other keys are not used
+            if (
+                typeof cleanedState.search !== 'undefined'
+                && $.isPlainObject(cleanedState.search)
+                && typeof cleanedState.search.search !== 'undefined'
+            ) {
+                if (cleanedState.search.search.length >= 2) {
+                    try {
+                        cleanedState.filter = JSON.parse(cleanedState.search.search);
+                    } catch (e) {
+                        console.warn('Failed to parse encoded filtering rules', cleanedState.search.search, e);
+                    }
+                }
+                delete cleanedState.search;
+            }
+            // compress columns (we only need visibility value and only for possible future usage to add columns show/hide plugin)
+            if (typeof cleanedState.columns !== 'undefined' && $.isArray(cleanedState.columns)) {
+                var columns = cleanedState.columns;
+                delete cleanedState.columns;
+                cleanedState.cv = [];
+                for (var i = 0; i < columns.length; i++) {
+                    cleanedState.cv.push(columns[i].visible ? 1 : 0);
+                }
+            }
+            var encodedState = JSON.stringify(cleanedState);
             if (settings.iDraw > 1) {
-                var newUrl = window.adminApp.request.path + '?' + settings.sTableId + '=' + rison.encode_object(state);
-                window.history.pushState(null, document.title, newUrl);
-                window.adminApp.addToHistory(newUrl);
-                ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
+                if (encodedState !== settings.initialState) {
+                    var newUrl = document.location.pathname + '?' + settings.sTableId + '=' + encodedState + document.location.hash;
+                    window.history.pushState(null, document.title, newUrl);
+                    window.adminApp.addToHistory(newUrl);
+                    ScaffoldDataGridHelper.hideRowActions($(settings.nTable));
+                    settings.initialState = encodedState;
+                }
+            } else {
+                settings.initialState = encodedState;
             }
         },
         stateLoadCallback: function (settings) {
             if (window.adminApp.request.query[settings.sTableId]) {
+                var encodedState = window.adminApp.request.query[settings.sTableId];
                 try {
-                    return rison.decode_object(window.adminApp.request.query[settings.sTableId]);
+                    var state = JSON.parse(encodedState);
                 } catch (e) {
                     if (GlobalVars.isDebug) {
-                        console.log('Invalid Rison object');
+                        console.warn('Invalid JSON', encodedState, e);
+                    }
+                }
+                try {
+                    state.time = (new Date()).getTime();
+                    // restore compressed state.columns
+                    if (typeof state.cv !== 'undefined' && $.isArray(state.cv)) {
+                        var columnsEncoded = state.cv;
+                        state.columns = [];
+                        for (var i = 0; i < columnsEncoded.length; i++) {
+                            state.columns.push({
+                                visible: !!columnsEncoded[i],
+                                search: {
+                                    caseInsensitive: true,
+                                    regex: false,
+                                    search: '',
+                                    smart: true
+                                }
+                            })
+                        }
+                        delete state.cv;
+                    }
+                    // restore compressed state.search
+                    if (typeof state.filter !== 'undefined' && state.filter) {
+                        state.search = {
+                            caseInsensitive: true,
+                            regex: false,
+                            search: state.filter ? JSON.stringify(state.filter) : '',
+                            smart: true
+                        };
+                        delete state.filter;
+                    } else if (typeof state.search === 'undefined' || !state.search) {
+                        state.search = {
+                            caseInsensitive: true,
+                            regex: false,
+                            search: '',
+                            smart: true
+                        };
+                    }
+                    // restore compressed state.order
+                    if (typeof state.sort !== 'undefined' && $.isPlainObject(state.sort)) {
+                        state.order = [];
+                        var columns = this.api().columns().dataSrc();
+                        for (var columnName in state.sort) {
+                            var index = $.inArray(columnName, columns);
+                            if (index >= 0) {
+                                state.order.push([index, state.sort[columnName]]);
+                            }
+                        }
+                        delete state.sort;
+                    } else if (typeof state.order === 'undefined' || !state.order || !$.isArray(state.order)) {
+                        state.order = [];
+                    }
+                    return state;
+                } catch (e) {
+                    if (GlobalVars.isDebug) {
+                        console.warn('Failed to parse DataTable state: ', state, e);
                     }
                 }
             } else if (window.adminApp.request.query.filter) {
+                var filters = null;
                 try {
-                    var filters = JSON.parse(window.adminApp.request.query.filter);
-                    if (filters) {
-                        var search = DataGridSearchHelper.convertKeyValueFiltersToRules(filters);
-                        if (search) {
-                            this.api().search(search);
-                        }
-                        return {};
-                    }
+                    filters = JSON.parse(window.adminApp.request.query.filter);
                 } catch (e) {
                     if (GlobalVars.isDebug) {
-                        console.log('Invalid json for "filter" query arg');
+                        console.warn('Invalid json for "filter" query arg');
                     }
+                    return {};
                 }
-
+                try {
+                    if (filters && $.isPlainObject(filters)) {
+                        var tableConfigs = $(settings.nTable).data('configs');
+                        var fieldNameToFilterIdMap = null;
+                        if (
+                            $.isPlainObject(tableConfigs)
+                            && tableConfigs.hasOwnProperty('queryBuilderConfig')
+                            && $.isPlainObject(tableConfigs.queryBuilderConfig)
+                            && tableConfigs.queryBuilderConfig.hasOwnProperty('fieldNameToFilterIdMap')
+                        ) {
+                            fieldNameToFilterIdMap = tableConfigs.queryBuilderConfig.fieldNameToFilterIdMap;
+                        }
+                        var search = DataGridSearchHelper.convertKeyValueFiltersToRules(
+                            filters,
+                            fieldNameToFilterIdMap
+                        );
+                        if (search) {
+                            return {
+                                time: (new Date()).getTime(),
+                                search: {
+                                    caseInsensitive: true,
+                                    regex: false,
+                                    search: search,
+                                    smart: true
+                                }
+                            };
+                        }
+                    }
+                    return {};
+                } catch (e) {
+                    if (GlobalVars.isDebug) {
+                        console.error('Failed to apply filters from "filter" query arg', e);
+                    }
+                    return {};
+                }
             }
             return {};
         }
