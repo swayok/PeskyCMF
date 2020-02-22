@@ -2,6 +2,8 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
+use PeskyCMF\Scaffold\AbstractValueViewer;
+
 class JsonArrayFormInput extends FormInput {
 
     protected $minValuesCount = 0;
@@ -34,11 +36,11 @@ class JsonArrayFormInput extends FormInput {
 
     /**
      * @param string $name
-     * @param FormInput|null $subInputConfig
+     * @param FormInput|AbstractValueViewer|null $subInputConfig
      * @return $this
      */
     public function addSubInput(string $name, ?FormInput $subInputConfig) {
-        if (empty($subInputConfig)) {
+        if (!$subInputConfig) {
             $subInputConfig = FormInput::create();
         }
         $subInputConfig->setIsLinkedToDbColumn(false);
@@ -95,6 +97,7 @@ class JsonArrayFormInput extends FormInput {
     protected function getValidatorsForSubInputs(bool $isCreation): array {
         $validators = [];
         foreach ($this->subInputs as $name => $input) {
+            /** @noinspection SlowArrayOperationsInLoopInspection */
             $validators = array_merge($validators, $input->getValidators($isCreation));
         }
         if ($this->validatorsForSubInputs) {

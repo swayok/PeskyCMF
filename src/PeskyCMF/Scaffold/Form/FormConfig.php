@@ -802,9 +802,6 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param bool $isRevalidation
      * @param bool $isBulkEdit
      * @return array|string|bool
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
-     * @throws \InvalidArgumentException
-     * @throws \LogicException
      */
     public function validateData(
         array $data,
