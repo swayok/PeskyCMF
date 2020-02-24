@@ -198,6 +198,7 @@ if ($valueViewer->hasOptionsOrOptionsLoader() && $valueViewer->isOptionsFilterin
             if (!addRow({}) || maxRows > 0 && rowsCount >= maxRows) {
                 $addRowBtn.hide();
             }
+            $rowsContainer.find('input:last').focus();
         });
         $rowsContainer.on('click', 'a.delete-row', function () {
             $(this).tooltip('hide');
