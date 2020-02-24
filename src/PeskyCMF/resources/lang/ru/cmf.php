@@ -310,7 +310,8 @@ return [
             'key_value_set' => [
                 'add_row' => 'Добавить строку',
                 'delete_row' => 'Удалить строку',
-                'row_delete_action_forbidden' => 'Нельзя удалить эту строку т.к. достигнуто минимальное количество строк'
+                'row_delete_action_forbidden' => 'Нельзя удалить эту строку т.к. достигнуто минимальное количество строк',
+                'table_header_for_abstract_value' => 'Значение',
             ],
             'has_many_related_records' => [
                 'add_row' => 'Добавить',

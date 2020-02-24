@@ -69,6 +69,7 @@ if ($valueViewer->hasOptionsOrOptionsLoader() && $valueViewer->isOptionsFilterin
         {{??}}
             var options = <?php echo json_encode(value($valueViewer->getOptions())); ?>;
         {{?}}
+        var timeout, lastQuery = $input.val();
         $input.typeahead(
             {
                 minLength: <?php echo $rendererConfig->getAttribute('data-min-length', $valueViewer->getMinCharsRequiredToInitOptionsFiltering()); ?>,
@@ -80,22 +81,31 @@ if ($valueViewer->hasOptionsOrOptionsLoader() && $valueViewer->isOptionsFilterin
                 limit: <?php echo $rendererConfig->getAttribute('data-limit', 8); ?>,
                 source: function (query, syncResults, asyncResults) {
                     <?php if ($valueViewer->isOptionsFilteringEnabled()) : ?>
-                        $.ajax({
-                                url: $input.attr('data-abs-ajax-url'),
-                                method: $input.attr('data-abs-ajax-type') || 'GET',
-                                type: 'json',
-                                data: {keywords: query}
-                            })
-                            .done(function (options) {
-                                var ret = [];
-                                for (var i = 0; i < options.length; i++) {
-                                    ret.push(options[i].text);
-                                }
-                                asyncResults(ret);
-                            })
-                            .fail(function () {
-                                asyncResults([]);
-                            });
+                        if (timeout) {
+                            clearTimeout(timeout);
+                            timeout = null;
+                        }
+                        if (!lastQuery || lastQuery !== query) {
+                            timeout = setTimeout(function () {
+                                $.ajax({
+                                        url: $input.attr('data-abs-ajax-url'),
+                                        method: $input.attr('data-abs-ajax-type') || 'GET',
+                                        type: 'json',
+                                        data: {keywords: query}
+                                    })
+                                    .done(function (options) {
+                                        var ret = [];
+                                        for (var i = 0; i < options.length; i++) {
+                                            ret.push(options[i].text);
+                                        }
+                                        lastQuery = query;
+                                        asyncResults(ret);
+                                    })
+                                    .fail(function () {
+                                        asyncResults([]);
+                                    });
+                            }, 500);
+                        }
                     <?php else : ?>
                         var matches, substringRegex;
 

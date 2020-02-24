@@ -128,7 +128,9 @@ $subInputs = $valueViewer->getSubInputs();
             }
         }
         if (rowsCount < minRows) {
-            addRow({});
+            for (i = rowsCount; i <= minRows; i++, rowsCount++) {
+                addRow({});
+            }
         }
     });
 </script>

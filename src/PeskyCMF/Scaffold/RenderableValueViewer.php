@@ -12,9 +12,9 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * }
      * @var null|\Closure
      */
-    protected $renderer = null;
+    protected $renderer;
     /** @var null|\Closure */
-    protected $defaultRendererConfigurator = null;
+    protected $defaultRendererConfigurator;
     /** @var array  */
     protected $jsBlocks = [];
     /** @var string|null */
@@ -37,7 +37,6 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @param bool $addIt - true: adds 'it.' before var name ('it' is name of var that contains template data in doT.js)
      * @param array $additionalVarNameParts - additional parts of var name
      * @return string
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getVarNameForDotJs($addIt = true, array $additionalVarNameParts = []) {
         if ($this->varNameForDotJs === null) {
@@ -55,7 +54,6 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      *      - "''" - inserts empty string (used instead of null),
      *      - "[]" inserts array
      * @return string
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getFailsafeValueForDotJs(array $additionalVarNameParts = [], $type = 'string', $default = null) {
         $fullName = $this->getVarNameForDotJs();
@@ -64,7 +62,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
         $chain = 'it';
         for ($i = 1, $cnt = count($parts); $i < $cnt; $i++) {
             $chain .= '.' . $parts[$i];
-            if ($i != ($cnt - 1)) {
+            if ($i !== ($cnt - 1)) {
                 $conditions[] = "(typeof $chain == 'object')";
             } else {
                 $conditions[] = "(typeof $chain !== 'undefined')";
@@ -116,7 +114,6 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      *      - false: insert as is
      *      - null: uatodetect depending on $type
      * @return string
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getDotJsInsertForValue(array $additionalVarNameParts = [], $type = 'string', $default = null, $encodeHtml = null) {
         $jsonStringify = false;
@@ -149,7 +146,6 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @param string $elseInsert - insert this data when condition is negative
      * @param array $additionalVarNameParts - additional parts of var name
      * @return string
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getConditionalDotJsInsertForValue($thenInsert, $elseInsert, array $additionalVarNameParts = []) {
         $fullName = $this->getVarNameForDotJs();
@@ -165,7 +161,6 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
 
     /**
      * @return \Closure
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      * @throws ValueViewerConfigException
      */
     public function getRenderer() {
@@ -192,12 +187,10 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     /**
      * @param array $dataForTemplate
      * @return string
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
-     * @throws \Throwable
      * @throws ValueViewerConfigException
      */
     public function render(array $dataForTemplate = []) {
-        $configOrString = call_user_func_array($this->getRenderer(), [$this, $this->getScaffoldSectionConfig(), $dataForTemplate]);
+        $configOrString = call_user_func($this->getRenderer(), $this, $this->getScaffoldSectionConfig(), $dataForTemplate);
         if (is_string($configOrString)) {
             $rendered = $configOrString;
         } else if ($configOrString instanceof ValueRenderer) {
@@ -287,13 +280,13 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @param string $template - path to template (in Laravel templates stored in /resources/views by default)
      * @return $this
      */
-    public function setTemplateForDefaultRenderer($template) {
+    public function setTemplateForDefaultRenderer(string $template) {
         $this->templateForDefaultRenderer = $template;
         return $this;
     }
 
     /**
-     * @param string $data
+     * @param array $data
      * @return $this
      */
     public function setAdditionalTemplateDataForDefaultRenderer(array $data) {

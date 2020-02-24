@@ -5,7 +5,6 @@ namespace PeskyCMF\Scaffold\Form;
 use Illuminate\Validation\Rule;
 use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ValueRenderer;
-use PeskyCMF\Scaffold\ValueViewerConfigException;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 
@@ -16,24 +15,24 @@ class FormInput extends RenderableValueViewer {
     /** @var bool */
     protected $showOnEdit = true;
 
-    const TYPE_STRING = Column::TYPE_STRING;
-    const TYPE_PASSWORD = Column::TYPE_PASSWORD;
-    const TYPE_EMAIL = Column::TYPE_EMAIL;
-    const TYPE_TEXT = Column::TYPE_TEXT;
-    const TYPE_WYSIWYG = 'wysiwyg';
-    const TYPE_BOOL = Column::TYPE_BOOL;
-    const TYPE_SELECT = 'select';
-    const TYPE_MULTISELECT = 'multiselect';
-    const TYPE_TAGS = 'tags';
-    const TYPE_HIDDEN = 'hidden';
-    const TYPE_IMAGE = 'image';
-    const TYPE_FILE = 'file';
-    const TYPE_DATE = Column::TYPE_DATE;
-    const TYPE_DATETIME = Column::TYPE_TIMESTAMP;
-    const TYPE_DATE_RANGE = 'daterange';
-    const TYPE_DATETIME_RANGE = 'datetimerange';
-    const TYPE_TIME = Column::TYPE_TIME;
-    const TYPE_TIME_RANGE = 'timerange';
+    public const TYPE_STRING = Column::TYPE_STRING;
+    public const TYPE_PASSWORD = Column::TYPE_PASSWORD;
+    public const TYPE_EMAIL = Column::TYPE_EMAIL;
+    public const TYPE_TEXT = Column::TYPE_TEXT;
+    public const TYPE_WYSIWYG = 'wysiwyg';
+    public const TYPE_BOOL = Column::TYPE_BOOL;
+    public const TYPE_SELECT = 'select';
+    public const TYPE_MULTISELECT = 'multiselect';
+    public const TYPE_TAGS = 'tags';
+    public const TYPE_HIDDEN = 'hidden';
+    public const TYPE_IMAGE = 'image';
+    public const TYPE_FILE = 'file';
+    public const TYPE_DATE = Column::TYPE_DATE;
+    public const TYPE_DATETIME = Column::TYPE_TIMESTAMP;
+    public const TYPE_DATE_RANGE = 'daterange';
+    public const TYPE_DATETIME_RANGE = 'datetimerange';
+    public const TYPE_TIME = Column::TYPE_TIME;
+    public const TYPE_TIME_RANGE = 'timerange';
 
     /**
      * value can be:
@@ -67,10 +66,6 @@ class FormInput extends RenderableValueViewer {
     /**
      * Default input id
      * @return string
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws ValueViewerConfigException
      */
     public function getDefaultId() {
         return static::makeDefaultId(
@@ -82,7 +77,6 @@ class FormInput extends RenderableValueViewer {
     /**
      * @param bool $forHtmlInput - convert name into a valid HTML input name('Relation.coln_name' to 'Relation[col_name]')
      * @return null|string
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getName($forHtmlInput = false) {
         if ($forHtmlInput) {
@@ -142,11 +136,11 @@ class FormInput extends RenderableValueViewer {
     /**
      * @param null|array|\Closure $options
      * @return $this
-     * @throws ValueViewerConfigException
+     * @throws \InvalidArgumentException
      */
     public function setOptions($options) {
         if (!is_array($options) && !($options instanceof \Closure)) {
-            throw new ValueViewerConfigException($this, '$options argument should be an array or \Closure');
+            throw new \InvalidArgumentException($this, '$options argument should be an array or \Closure');
         }
         $this->options = $options;
         return $this;
@@ -213,7 +207,7 @@ class FormInput extends RenderableValueViewer {
      * @return null|string
      */
     public function getEmptyOptionLabel() {
-        return $this->emptyOptionLabel === null ? '' : $this->emptyOptionLabel;
+        return $this->emptyOptionLabel ?: '';
     }
 
     /**
@@ -272,10 +266,6 @@ class FormInput extends RenderableValueViewer {
     /**
      * @param null|InputRenderer $renderer
      * @return string
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function getLabel(InputRenderer $renderer = null) {
         $isRequired = '';
@@ -357,7 +347,6 @@ class FormInput extends RenderableValueViewer {
     /**
      * @param bool $isCreation - true: validators for record creation; false: validators for record update
      * @return array
-     * @throws ValueViewerConfigException
      */
     public function getValidators($isCreation) {
         if (!$this->isLinkedToDbColumn() || $this->hasRelation()) {
@@ -384,7 +373,7 @@ class FormInput extends RenderableValueViewer {
                 // validation with lowercasing of this column's value
                 $uniquenessValidator = preg_replace('%^unique%', 'unique_ceseinsensitive', (string)$uniquenessValidator);
             }
-            $rule .= (string)$uniquenessValidator;
+            $rule .= $uniquenessValidator;
         } else if (in_array($column->getType(), [$column::TYPE_JSON, $column::TYPE_JSONB], true)) {
             $rule .= 'array';
         } else if ($column->getType() === $column::TYPE_BOOL) {
@@ -413,7 +402,6 @@ class FormInput extends RenderableValueViewer {
         if ($column->isItAForeignKey()) {
             /** @var Relation $relation */
             $relation = $column->getForeignKeyRelation();
-            /** @noinspection NullPointerExceptionInspection */
             $rule .= '|exists:' . $relation->getForeignTable()->getName() . ',' . $relation->getForeignColumnName();
         }
         return [$columnName => $rule];
@@ -494,11 +482,8 @@ class FormInput extends RenderableValueViewer {
      *      - true: if input is not present in form this condition will be ignored
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    public function setDisabledUntil($otherInput, $hasValue, $ignoreIfInputIsAbsent = false) {
+    public function setDisabledUntil($otherInput, $hasValue, bool $ignoreIfInputIsAbsent = false) {
         return $this->addDisablerConfig($otherInput, false, $hasValue, $ignoreIfInputIsAbsent, false);
     }
 
@@ -517,11 +502,8 @@ class FormInput extends RenderableValueViewer {
      *      - true: if input is not present in form this condition will be ignored
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    public function setDisabledWhen($otherInput, $hasValue, $ignoreIfInputIsAbsent = false) {
+    public function setDisabledWhen($otherInput, $hasValue, bool $ignoreIfInputIsAbsent = false) {
         return $this->addDisablerConfig($otherInput, true, $hasValue, $ignoreIfInputIsAbsent, false);
     }
 
@@ -558,11 +540,8 @@ class FormInput extends RenderableValueViewer {
      *      - null: leave as is
      *      - string or bool: change value of this input when it gets "readonly" attribute
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    public function setReadonlyUntil($otherInput, $hasValue, $ignoreIfInputIsAbsent = false, $changeValue = null) {
+    public function setReadonlyUntil($otherInput, $hasValue, bool $ignoreIfInputIsAbsent = false, $changeValue = null) {
         return $this->addDisablerConfig($otherInput, false, $hasValue, $ignoreIfInputIsAbsent, true, $changeValue);
     }
 
@@ -584,11 +563,8 @@ class FormInput extends RenderableValueViewer {
      *      - null: leave as is
      *      - string or bool: change value of this input when it gets "readonly" attribute
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    public function setReadonlyWhen($otherInput, $hasValue, $ignoreIfInputIsAbsent = false, $changeValue = null) {
+    public function setReadonlyWhen($otherInput, $hasValue, bool $ignoreIfInputIsAbsent = false, $changeValue = null) {
         return $this->addDisablerConfig($otherInput, true, $hasValue, $ignoreIfInputIsAbsent, true, $changeValue);
     }
 
@@ -609,10 +585,10 @@ class FormInput extends RenderableValueViewer {
 
     protected function addDisablerConfig(
         $enablerInputName,
-        $isEqualsTo,
+        bool $isEqualsTo,
         $value,
-        $ignoreIfInputIsAbsent = true,
-        $setReadOnly = false,
+        bool $ignoreIfInputIsAbsent = true,
+        bool $setReadOnly = false,
         $readonlyValue = null
     ) {
         $closure = function () use ($enablerInputName, $isEqualsTo, $value, $ignoreIfInputIsAbsent, $setReadOnly, $readonlyValue) {
@@ -627,9 +603,9 @@ class FormInput extends RenderableValueViewer {
             return [
                 'disabler_input_name' => $enablerInputName,
                 'on_value' => $value,
-                'value_is_equals' => (bool)$isEqualsTo,
-                'attribute' => (bool)$setReadOnly ? 'readonly' : 'disabled',
-                'set_readonly_value' => (bool)$setReadOnly ? $readonlyValue : null,
+                'value_is_equals' => $isEqualsTo,
+                'attribute' => $setReadOnly ? 'readonly' : 'disabled',
+                'set_readonly_value' => $setReadOnly ? $readonlyValue : null,
                 'ignore_if_disabler_input_is_absent' => $ignoreIfInputIsAbsent
             ];
         };
@@ -643,7 +619,6 @@ class FormInput extends RenderableValueViewer {
 
     /**
      * @return array
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getDisablersConfigs() {
         if (!array_key_exists('input_name', $this->disablersConfigs)) {
@@ -670,11 +645,6 @@ class FormInput extends RenderableValueViewer {
     /**
      * @param ValueRenderer|InputRenderer $renderer
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \UnexpectedValueException
      */
     public function configureDefaultRenderer(ValueRenderer $renderer) {
         parent::configureDefaultRenderer($renderer);
@@ -706,7 +676,7 @@ class FormInput extends RenderableValueViewer {
                         !$this->hasValueConverter()
                         && in_array(
                             $this->getTableColumn()->getType(),
-                            [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
+                            [static::TYPE_JSON, static::TYPE_JSONB],
                             true
                         )
                     ) {
@@ -725,7 +695,7 @@ class FormInput extends RenderableValueViewer {
                         !$this->hasValueConverter()
                         && in_array(
                             $this->getTableColumn()->getType(),
-                            [FormInput::TYPE_JSON, FormInput::TYPE_JSONB],
+                            [static::TYPE_JSON, static::TYPE_JSONB],
                             true
                         )
                     ) {

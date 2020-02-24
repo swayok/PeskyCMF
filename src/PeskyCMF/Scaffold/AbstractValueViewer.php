@@ -12,41 +12,41 @@ use Swayok\Html\Tag;
 abstract class AbstractValueViewer {
 
     /** @var null|ScaffoldSectionConfig */
-    protected $scaffoldSectionConfig = null;
+    protected $scaffoldSectionConfig;
 
     /** @var string|null */
-    protected $name = null;
+    protected $name;
 
     /** @var string */
-    protected $type = null;
-    const TYPE_STRING = Column::TYPE_STRING;
-    const TYPE_DATE = Column::TYPE_DATE;
-    const TYPE_TIME = Column::TYPE_TIME;
-    const TYPE_DATETIME = Column::TYPE_TIMESTAMP;
-    const TYPE_BOOL = Column::TYPE_BOOL;
-    const TYPE_TEXT = Column::TYPE_TEXT;
-    const TYPE_MULTILINE = 'multiline'; //< for non-html multiline text
-    const TYPE_IMAGE = 'image';
-    const TYPE_JSON = Column::TYPE_JSON;
-    const TYPE_JSONB = Column::TYPE_JSONB;
-    const TYPE_LINK = 'link';
+    protected $type;
+    public const TYPE_STRING = Column::TYPE_STRING;
+    public const TYPE_DATE = Column::TYPE_DATE;
+    public const TYPE_TIME = Column::TYPE_TIME;
+    public const TYPE_DATETIME = Column::TYPE_TIMESTAMP;
+    public const TYPE_BOOL = Column::TYPE_BOOL;
+    public const TYPE_TEXT = Column::TYPE_TEXT;
+    public const TYPE_MULTILINE = 'multiline'; //< for non-html multiline text
+    public const TYPE_IMAGE = 'image';
+    public const TYPE_JSON = Column::TYPE_JSON;
+    public const TYPE_JSONB = Column::TYPE_JSONB;
+    public const TYPE_LINK = 'link';
     /**
      * @var null|string
      */
-    protected $label = null;
+    protected $label;
     /**
      * Position
      * @var null|int
      */
-    protected $position = null;
+    protected $position;
 
     /**
      * @var null|\Closure
      */
-    protected $valueConverter = null;
-    const FORMAT_DATE = 'Y-m-d';
-    const FORMAT_TIME = 'H:i:s';
-    const FORMAT_DATETIME = 'Y-m-d H:i:s';
+    protected $valueConverter;
+    public const FORMAT_DATE = 'Y-m-d';
+    public const FORMAT_TIME = 'H:i:s';
+    public const FORMAT_DATETIME = 'Y-m-d H:i:s';
     /** @var bool */
     protected $isLinkedToDbColumn = true;
     /** @var Relation */
@@ -62,7 +62,7 @@ abstract class AbstractValueViewer {
      * @return $this
      */
     static public function create() {
-        $classname = get_called_class();
+        $classname = static::class;
         return new $classname();
     }
 
@@ -84,17 +84,13 @@ abstract class AbstractValueViewer {
 
     /**
      * @return Column
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws ValueViewerConfigException
      */
     public function getTableColumn() {
         if ($this->relation) {
             return $this->relation->getForeignTable()->getTableStructure()->getColumn($this->relationColumn);
         } else {
-            list($columnName, ) = static::splitComplexViewerName($this->getName());
-            return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($columnName);
+            $parts = static::splitComplexViewerName($this->getName());
+            return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($parts[0]);
         }
     }
 
@@ -201,13 +197,13 @@ abstract class AbstractValueViewer {
      */
     public function setName($name) {
         $this->name = $name;
+        if ($this->nameForTranslation === null) {
+            $this->nameForTranslation = rtrim($name, '[]');
+        }
         return $this;
     }
 
     public function getNameForTranslation() {
-        if ($this->nameForTranslation === null) {
-            $this->nameForTranslation = $this->getName();
-        }
         return $this->nameForTranslation;
     }
 
@@ -222,10 +218,6 @@ abstract class AbstractValueViewer {
 
     /**
      * @return string
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getType() {
         if (empty($this->type)) {
@@ -318,18 +310,14 @@ abstract class AbstractValueViewer {
      * @param array $record
      * @param bool $ignoreValueConverter
      * @return mixed
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws ValueViewerConfigException
      */
     public function convertValue($value, array $record, $ignoreValueConverter = false) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
         if (!empty($valueConverter)) {
             if ($this->isLinkedToDbColumn()) {
-                $value = call_user_func($valueConverter, $value, $this->getTableColumn(), $record, $this);
+                $value = $valueConverter($value, $this->getTableColumn(), $record, $this);
             } else {
-                $value = call_user_func($valueConverter, $record, $this, $this->getScaffoldSectionConfig());
+                $value = $valueConverter($record, $this, $this->getScaffoldSectionConfig());
             }
         } else if (!empty($value) || is_bool($value)) {
             if ($this->getType() === static::TYPE_LINK && $this->isLinkedToDbColumn()) {
@@ -378,6 +366,13 @@ abstract class AbstractValueViewer {
         return $value;
     }
 
+    /**
+     * @param Column $columnConfig
+     * @param array $record
+     * @param null $linkLabel
+     * @return string
+     * @throws ValueViewerConfigException
+     */
     public function buildLinkToExternalRecord(Column $columnConfig, array $record, $linkLabel = null) {
         if (empty($record[$columnConfig->getName()])) {
             return '-';
@@ -400,7 +395,7 @@ abstract class AbstractValueViewer {
                 }
             }
         }
-        if (empty($relationConfig)) {
+        if (!$relationConfig) {
             throw new ValueViewerConfigException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
         $relationPkColumn = $relationConfig->getForeignTable()->getPkColumnName();

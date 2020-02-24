@@ -309,7 +309,8 @@ return [
             'key_value_set' => [
                 'add_row' => 'Add row',
                 'delete_row' => 'Remove row',
-                'row_delete_action_forbidden' => 'Row removal is forbidden. You need to maintain minimal required row count.'
+                'row_delete_action_forbidden' => 'Row removal is forbidden. You need to maintain minimal required row count.',
+                'table_header_for_abstract_value' => 'Value',
             ],
             'has_many_related_records' => [
                 'add_row' => 'Add element',
