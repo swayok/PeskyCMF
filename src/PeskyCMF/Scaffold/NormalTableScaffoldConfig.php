@@ -145,7 +145,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             );
         }
         $object = $table->newRecord();
-        if (count($object::getPrimaryKeyColumn()->validateValue($id)) > 0) {
+        if (count($object::getPrimaryKeyColumn()->validateValue($id, false, false)) > 0) {
             return $this->makeRecordNotFoundResponse();
         }
         $conditions = $sectionConfig->getSpecialConditions();
@@ -290,7 +290,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $id = $this->getRequest()->input($table::getPkColumnName());
         $record = $table->newRecord();
-        if (count($record::getPrimaryKeyColumn()->validateValue($id)) > 0) {
+        if (count($record::getPrimaryKeyColumn()->validateValue($id, false, false)) > 0) {
             return $this->makeRecordNotFoundResponse();
         }
         $conditions = $formConfig->getSpecialConditions();
@@ -619,7 +619,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $table = static::getTable();
         $record = $table->newRecord();
-        if (count($record::getPrimaryKeyColumn()->validateValue($id)) > 0) {
+        if (count($record::getPrimaryKeyColumn()->validateValue($id, false, false)) > 0) {
             return $this->makeRecordNotFoundResponse();
         }
         $formConfig = $this->getFormConfig();
@@ -738,8 +738,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $table = static::getTable();
         if (
-            count($table::getPkColumn()->validateValue($id)) > 0
-            || count($table::getPkColumn()->validateValue($otherId)) > 0
+            count($table::getPkColumn()->validateValue($id, false, false)) > 0
+            || count($table::getPkColumn()->validateValue($otherId, false, false)) > 0
         ) {
             return $this->makeRecordNotFoundResponse();
         }
