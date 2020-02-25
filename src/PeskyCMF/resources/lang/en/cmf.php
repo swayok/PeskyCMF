@@ -142,6 +142,10 @@ return [
             '12' => 'December',
         ]
     ],
+    'year_suffix' => [
+        'full' => '',
+        'short' => ''
+    ],
     'format_seconds' => [
         'days_short' => ':days d. ',
         'days' => [

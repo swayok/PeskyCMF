@@ -47,7 +47,8 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         $formConfig = parent::getFormConfig();
         $fkName = static::getTable()->getMainForeignKeyColumnName();
         if ($fkName && !$formConfig->hasFormInput($fkName)) {
-            $formConfig->addValueViewer($fkName, FormInput::create()->setType(FormInput::TYPE_HIDDEN));
+            $viewer = FormInput::create()->setType(FormInput::TYPE_HIDDEN);
+            $formConfig->addValueViewer($fkName, $viewer);
         }
         return $formConfig;
     }

@@ -608,17 +608,32 @@ if (!function_exists('formatDate')) {
     /**
      * @param string $date
      * @param bool $addTime
+     * @param string $yearSuffix - autodetect based on $addTime | 'none', 'full', 'short' or custom value
      * @return string
      */
-    function formatDate(string $date, bool $addTime = false): string {
+    function formatDate(string $date, bool $addTime = false, ?string $yearSuffix = 'full'): string {
         if (!is_numeric($date)) {
             $date = strtotime($date);
         }
         if ($date <= 0) {
             return cmfTransGeneral('.message.invalid_date_received');
         }
-        $month = cmfTransGeneral('.month.when.' . date('m', $date));
-        return date('j ', $date) . $month . date(' Y', $date) . ($addTime ? date(' H:i', $date) : '');
+        if (in_array(app()->getLocale(), ['ru', 'ru_RU'], true)) {
+            $month = cmfTransGeneral('.month.when.' . date('m', $date));
+            switch ($yearSuffix) {
+                case 'short':
+                    $yearSuffix = (string)cmfTransGeneral('.year_suffix.short');
+                    break;
+                case 'full':
+                    $yearSuffix = (string)cmfTransGeneral('.year_suffix.full');
+                    break;
+                case 'none':
+                    $yearSuffix = '';
+            }
+            return ($addTime ? date('H:i ', $date) : '') . date('j ', $date) . $month . date(' Y', $date) . $yearSuffix;
+        } else {
+            return date('H:i d F Y');
+        }
     }
 }
 

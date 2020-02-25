@@ -60,14 +60,11 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
 
     /**
      * Alias for setValueViewers
-     * @param array $formInputs
+     * @param array $valueCells
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
      */
-    public function setValueCells(array $formInputs) {
-        return $this->setValueViewers($formInputs);
+    public function setValueCells(array $valueCells) {
+        return $this->setValueViewers($valueCells);
     }
 
     /**
@@ -88,7 +85,6 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     /**
      * @param string $name
      * @return ValueCell
-     * @throws \InvalidArgumentException
      */
     public function getValueCell($name) {
         return $this->getValueViewer($name);
@@ -97,14 +93,10 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     /**
      * @param array $valueCells
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function setValueViewers(array $valueCells) {
         /** @var AbstractValueViewer|null $config */
         foreach ($valueCells as $name => $config) {
-            $valueConverter = null;
             if (is_array($config)) {
                 /** @var array $config */
                 $this->newRowsGroup(is_int($name) ? '' : $name);
@@ -117,17 +109,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
                 }
                 $this->currentRowsGroup = null;
             } else {
-                if (is_int($name)) {
-                    $name = $config;
-                    $config = null;
-                } else if ($config instanceof \Closure) {
-                    $valueConverter = $config;
-                    $config = null;
-                }
-                $this->addValueViewer($name, $config);
-                if (!empty($valueConverter)) {
-                    $this->getValueViewer($name)->setValueConverter($valueConverter);
-                }
+                $this->normalizeAndAddValueViewer($name, $config);
             }
         }
         return $this;
@@ -136,13 +118,11 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
     /**
      * @param string $name
      * @param AbstractValueViewer|null $viewer
+     * @param bool $autodetectIfLinkedToDbColumn
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
      */
-    public function addValueViewer($name, AbstractValueViewer $viewer = null) {
-        parent::addValueViewer($name, $viewer);
+    public function addValueViewer($name, AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false) {
+        parent::addValueViewer($name, $viewer, $autodetectIfLinkedToDbColumn);
         if ($this->currentRowsGroup === null) {
             $this->newRowsGroup('');
         }
@@ -154,10 +134,6 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
      * @param string $tabLabel
      * @param array $formInputs
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \InvalidArgumentException
      */
     public function addTab($tabLabel, array $formInputs) {
         $this->newTab($tabLabel);

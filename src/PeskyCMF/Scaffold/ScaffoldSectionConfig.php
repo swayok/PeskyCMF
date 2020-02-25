@@ -43,7 +43,7 @@ abstract class ScaffoldSectionConfig {
     /**
      * @var null|\Closure
      */
-    protected $defaultFieldRenderer = null;
+    protected $defaultFieldRenderer;
     /**
      * @var null|\Closure
      */
@@ -64,7 +64,7 @@ abstract class ScaffoldSectionConfig {
     /**
      * @var \Closure|null
      */
-    protected $toolbarItems = null;
+    protected $toolbarItems;
     /**
      * @var array|\Closure
      */
@@ -84,11 +84,11 @@ abstract class ScaffoldSectionConfig {
     /**
      * @var string
      */
-    protected $template = null;
+    protected $template;
     /**
      * @var string
      */
-    protected $jsInitiator = null;
+    protected $jsInitiator;
     protected $isFinished = false;
     /** @var  bool */
     protected $allowRelationsInValueViewers = false;
@@ -106,7 +106,7 @@ abstract class ScaffoldSectionConfig {
      * @return $this
      */
     static public function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
-        $class = get_called_class();
+        $class = static::class;
         return new $class($table, $scaffoldConfig);
     }
 
@@ -132,6 +132,10 @@ abstract class ScaffoldSectionConfig {
         return $this;
     }
 
+    /**
+     * @return string
+     * @throws ScaffoldSectionConfigException
+     */
     public function getTemplate() {
         if (empty($this->template)) {
             throw new ScaffoldSectionConfigException($this, 'Scaffold section view file not set');
@@ -200,25 +204,49 @@ abstract class ScaffoldSectionConfig {
     /**
      * @param array $viewers
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \InvalidArgumentException
      */
     protected function setValueViewers(array $viewers) {
         /** @var AbstractValueViewer|null $config */
         foreach ($viewers as $name => $config) {
-            $valueConverter = null;
-            if (is_int($name)) {
-                $name = $config;
-                $config = null;
-            } else if ($config instanceof \Closure) {
-                $valueConverter = $config;
-                $config = null;
-            }
-            $this->addValueViewer($name, $config);
-            if (!empty($valueConverter)) {
-                $this->getValueViewer($name)->setValueConverter($valueConverter);
+            $this->normalizeAndAddValueViewer($name, $config);
+        }
+        return $this;
+    }
+
+    /**
+     * @param string|int $name
+     * @param \Closure|string|AbstractValueViewer|null $config
+     * @return $this
+     */
+    protected function normalizeAndAddValueViewer($name, $config) {
+        $valueConverter = null;
+        if (is_int($name)) {
+            /** @noinspection CallableParameterUseCaseInTypeContextInspection */
+            $name = $config;
+            $config = null;
+        } else if ($config instanceof \Closure) {
+            $valueConverter = $config;
+            $config = null;
+        }
+        $this->addValueViewer($name, $config, (bool)$valueConverter);
+        if ($valueConverter) {
+            if ($config->getType() === $config::TYPE_LINK) {
+                $config->setValueConverter(
+                    function ($value, Column $columnConfig, array $record, AbstractValueViewer $valueViewer) use ($valueConverter) {
+                        $linkLabel = $valueConverter($value, $columnConfig, $record, $valueViewer);
+                        if (!$linkLabel) {
+                            // there is no related record
+                            return $linkLabel;
+                        }
+                        if (stripos($linkLabel, '<a ') !== false) {
+                            // it is a link already
+                            return $linkLabel;
+                        }
+                        return $valueViewer->buildLinkToExternalRecord($valueViewer->getTableColumn(), $record, $linkLabel);
+                    }
+                );
+            } else {
+                $config->setValueConverter($valueConverter);
             }
         }
         return $this;
@@ -302,54 +330,70 @@ abstract class ScaffoldSectionConfig {
     /**
      * @param string $name
      * @param null|AbstractValueViewer $viewer
+     * @param bool $autodetectIfLinkedToDbColumn
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public function addValueViewer($name, AbstractValueViewer $viewer = null) {
+    public function addValueViewer($name, ?AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false) {
         $usesRelation = false;
+        $hasColumnWithViewerName = $this->getTable()->getTableStructure()->hasColumn($name);
+        $isAutocreated = !$viewer;
         if (
             !$this->thereIsNoDbColumns
+            && !$hasColumnWithViewerName
             && (!$viewer || $viewer->isLinkedToDbColumn())
-            && !$this->getTable()->getTableStructure()->hasColumn($name)
             && !$this->isValidComplexValueViewerName($name) //< $name is something like "column_name:key_name"
         ) {
             if ($this->allowRelationsInValueViewers) {
-                list($relation, $relationColumnName) = $this->validateRelationValueViewerName($name);
-                $usesRelation = true;
+                list($relation, $relationColumnName) = $this->validateRelationValueViewerName($name, !$autodetectIfLinkedToDbColumn);
+                $usesRelation = $relation && $relationColumnName;
             } else {
                 throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
             }
         }
-        if (empty($viewer)) {
+        if (!$viewer) {
             $viewer = $this->createValueViewer();
         }
-        if ($this->thereIsNoDbColumns) {
+        if ($this->thereIsNoDbColumns || ($autodetectIfLinkedToDbColumn && !$hasColumnWithViewerName)) {
             $viewer->setIsLinkedToDbColumn(false);
         }
         $viewer->setName($name);
         $viewer->setPosition($this->getNextValueViewerPosition($viewer));
         $viewer->setScaffoldSectionConfig($this);
         if ($usesRelation) {
+            /** @noinspection PhpUndefinedVariableInspection */
             $viewer->setRelation($relation, $relationColumnName);
+        }
+        if (
+            $isAutocreated
+            && !($viewer instanceof FormInput)
+            && $viewer->isLinkedToDbColumn()
+            && $viewer->getTableColumn()->getForeignKeyRelation()
+        ) {
+            // this viewer references other record and shpuld be displayed as link
+            $viewer->setType($viewer::TYPE_LINK);
         }
         $this->valueViewers[$name] = $viewer;
         return $this;
     }
 
     /**
-     * @param $name
+     * @param string $name
+     * @param bool $throwErrorIfLocalColumnNotFound
+     * - true: if $name is local column name (not relation or relation's column) - throw exception
+     * - false: return [null, null] instead of throwing an excception
      * @return array - array(Relation, column_name)
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    protected function validateRelationValueViewerName($name) {
+    protected function validateRelationValueViewerName(string $name, bool $throwErrorIfLocalColumnNotFound = true): array {
         $nameParts = explode('.', $name);
         $hasRelation = $this->getTable()->getTableStructure()->hasRelation($nameParts[0]);
         if (!$hasRelation && count($nameParts) === 1) {
-            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
+            if ($throwErrorIfLocalColumnNotFound) {
+                throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
+            } else {
+                return [null, null];
+            }
         } else if (!$hasRelation) {
             throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no relation '{$nameParts[0]}'");
         }
@@ -445,17 +489,9 @@ abstract class ScaffoldSectionConfig {
      * @param array $record
      * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
      * @return array
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PDOException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function prepareRecord(array $record, array $virtualColumns = []) {
         $pkKey = $this->getTable()->getPkColumnName();
-        /** @noinspection UnnecessaryParenthesesInspection */
         $permissionsAndServiceData = [
             '___create_allowed' => $this->isCreateAllowed(),
             '___delete_allowed' => (
@@ -582,10 +618,6 @@ abstract class ScaffoldSectionConfig {
      * @param array $relationRecordData
      * @param null|string $index - string: passed for HAS_MANY relation | null: for relations other then HAS_MANY
      * @return array
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     protected function prepareRelatedRecord($relationName, array $relationRecordData, $index = null) {
         $recordWithBackup = $relationRecordData;
@@ -620,11 +652,11 @@ abstract class ScaffoldSectionConfig {
      * @param array|\Closure $arrayOrClosure
      *      - \Closure: funciton (array $record, ScaffoldSectionConfig $scaffoldSectionConfig) { return []; }
      * @return $this
-     * @throws ScaffoldException
+     * @throws \InvalidArgumentException
      */
     public function setDataToAddToRecord($arrayOrClosure) {
         if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
-            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrClosure) accepts only array or \Closure');
+            throw new \InvalidArgumentException('$arrayOrClosure argument must be an array or \Closure');
         }
         $this->dataToAddToRecord = $arrayOrClosure;
         return $this;
@@ -647,11 +679,11 @@ abstract class ScaffoldSectionConfig {
     /**
      * @param array|\Closure $arrayOrClosure - function (ScaffoldSectionConfig $sectionConfig) { return [] }
      * @return $this
-     * @throws ScaffoldException
+     * @throws \InvalidArgumentException
      */
     public function sendDataToTemplate($arrayOrClosure) {
         if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
-            throw new ScaffoldException($this, 'setDataToAddToRecord($arrayOrClosure) accepts only array or \Closure');
+            throw new \InvalidArgumentException('$arrayOrClosure argument must be an array or \Closure');
         }
         $this->dataToSendToTemplate = $arrayOrClosure;
         return $this;
@@ -702,7 +734,6 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * @return \Closure|null
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function getDefaultValueRenderer() {
         if (!empty($this->defaultFieldRenderer)) {
@@ -767,6 +798,8 @@ abstract class ScaffoldSectionConfig {
          */
         foreach ($toolbarItems as &$item) {
             if (is_object($item)) {
+                /** @noinspection MissingOrEmptyGroupStatementInspection */
+                /** @noinspection PhpStatementHasEmptyBodyInspection */
                 if ($item instanceof CmfMenuItem) {
                     // do nothing
                 } else if (method_exists($item, 'build')) {
@@ -951,7 +984,7 @@ abstract class ScaffoldSectionConfig {
      */
     public function setSpecialConditions($specialConditions) {
         if (!is_array($specialConditions) && !($specialConditions instanceof \Closure)) {
-            throw new \InvalidArgumentException('setSpecialConditions expects array or \Closure');
+            throw new \InvalidArgumentException('$specialConditions argument must be an array or \Closure');
         }
         $this->specialConditions = $specialConditions;
         return $this;
@@ -998,6 +1031,7 @@ abstract class ScaffoldSectionConfig {
     }
 
     public function getModalSize() {
+        /** @noinspection NestedTernaryOperatorInspection */
         return $this->modalSize ?: ($this->getWidth() > 60 ? 'lg' : 'md');
     }
 

@@ -257,14 +257,11 @@ class FormConfig extends ScaffoldSectionConfig {
     /**
      * @param string $name
      * @param AbstractValueViewer|null $viewer
+     * @param bool $autodetectIfLinkedToDbColumn
      * @return $this
      */
-    public function addValueViewer($name, AbstractValueViewer $viewer = null) {
-        parent::addValueViewer($name, $viewer);
-        if (!$viewer) {
-            // make sure viewer exists
-            $this->getValueViewer($name);
-        }
+    public function addValueViewer($name, AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false) {
+        parent::addValueViewer($name, $viewer, $autodetectIfLinkedToDbColumn);
         if ($this->currentInputsGroup === null) {
             $this->newInputsGroup('');
         }

@@ -142,6 +142,10 @@ return [
             '12' => 'Декабря',
         ]
     ],
+    'year_suffix' => [
+        'full' => ' года',
+        'short' => 'г.'
+    ],
     'format_seconds' => [
         'days_short' => ':days д. ',
         'days' => [

@@ -20,7 +20,7 @@ class DataGridColumn extends RenderableValueViewer {
     /**
      * @var null|int
      */
-    protected $columnWidth = null;
+    protected $columnWidth;
     /**
      * @var array
      */
@@ -103,6 +103,7 @@ class DataGridColumn extends RenderableValueViewer {
     /**
      * @param string $width - 100, 100px, 25%. No units means that width is in pixels: 100 == 100px
      * @return $this
+     * @throws \InvalidArgumentException
      */
     public function setWidth($width) {
         if (!preg_match('%^\d+\s*(px|\%|)$%i', $width)) {
@@ -128,10 +129,6 @@ class DataGridColumn extends RenderableValueViewer {
 
     /**
      * @return \Closure|null
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getValueConverter() {
         if (empty($this->valueConverter)) {
@@ -180,7 +177,6 @@ class DataGridColumn extends RenderableValueViewer {
 
     /**
      * @return int
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
      */
     public function getPosition() {
         if (

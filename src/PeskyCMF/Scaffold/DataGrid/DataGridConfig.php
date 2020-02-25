@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold\DataGrid;
 use Exceptions\Data\NotFoundException;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
+use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\Core\DbExpr;
@@ -15,7 +16,7 @@ use Swayok\Utils\ValidateValue;
 
 class DataGridConfig extends ScaffoldSectionConfig {
 
-    const ROW_ACTIONS_COLUMN_NAME = '__actions';
+    public const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
     protected $allowRelationsInValueViewers = true;
 
@@ -37,17 +38,17 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @var string
      */
-    protected $orderBy = null;
+    protected $orderBy;
     /**
      * @var string
      */
     protected $orderDirection = self::ORDER_ASC;
-    const ORDER_ASC = 'asc';
-    const ORDER_DESC = 'desc';
-    const ORDER_ASC_NULLS_FIRST = 'asc nulls first';
-    const ORDER_ASC_NULLS_LAST = 'asc nulls last';
-    const ORDER_DESC_NULLS_FIRST = 'desc nulls first';
-    const ORDER_DESC_NULLS_LAST = 'desc nulls last';
+    public const ORDER_ASC = 'asc';
+    public const ORDER_DESC = 'desc';
+    public const ORDER_ASC_NULLS_FIRST = 'asc nulls first';
+    public const ORDER_ASC_NULLS_LAST = 'asc nulls last';
+    public const ORDER_DESC_NULLS_FIRST = 'desc nulls first';
+    public const ORDER_DESC_NULLS_LAST = 'desc nulls last';
 
     static protected $orderOptions = [
         self::ORDER_ASC,
@@ -111,6 +112,9 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     /**
      * @private
+     * @param bool $isEnabled
+     * @param string|null $size
+     * @throws \BadMethodCallException
      */
     public function setModalConfig(bool $isEnabled = false, ?string $size = null) {
         throw new \BadMethodCallException('Data grid cannot be opened in modal');
@@ -120,10 +124,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * Alias for setValueViewers
      * @param array $datagridColumns
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \InvalidArgumentException
      */
     public function setColumns(array $datagridColumns) {
         return $this->setValueViewers($datagridColumns);
@@ -151,11 +151,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param array $columnNames
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \BadMethodCallException
-     * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldSectionConfigException
      */
     public function setInvisibleColumns(...$columnNames) {
         return call_user_func_array(array($this, 'setAdditionalColumnsToSelect'), $columnNames);
@@ -165,15 +160,12 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * Mimics setInvisibleColumns()
      * @param array $columnNames
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     public function setAdditionalColumnsToSelect(...$columnNames) {
         parent::setAdditionalColumnsToSelect($columnNames);
         foreach ($this->getAdditionalColumnsToSelect() as $name) {
-            $this->addValueViewer($name, DataGridColumn::create()->setIsVisible(false));
+            $valueViewer = DataGridColumn::create()->setIsVisible(false);
+            $this->addValueViewer($name, $valueViewer);
         }
         return $this;
     }
@@ -280,7 +272,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param string $orderBy
      * @param null $direction - 'asc', 'desc', 'asc nulls first' or 'desc nulls last' in any case
      * @return $this
-     * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
     public function setOrderBy($orderBy, $direction = null) {
@@ -440,6 +431,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
         /** @var array $bulkActionsToolbarItems */
         foreach ($bulkActionsToolbarItems as &$item) {
             if (is_object($item)) {
+                /** @noinspection MissingOrEmptyGroupStatementInspection */
+                /** @noinspection PhpStatementHasEmptyBodyInspection */
                 if ($item instanceof CmfMenuItem) {
                     // do nothing
                 } else if (method_exists($item, 'build')) {
@@ -770,17 +763,18 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * @param string $name
      * @param null|DataGridColumn|AbstractValueViewer $tableCell
+     * @param bool $autodetectIfLinkedToDbColumn
      * @return ScaffoldSectionConfig
      */
-    public function addValueViewer($name, AbstractValueViewer $tableCell = null) {
+    public function addValueViewer($name, AbstractValueViewer &$tableCell = null, bool $autodetectIfLinkedToDbColumn = false) {
         $tableCell = !$tableCell && $name === static::ROW_ACTIONS_COLUMN_NAME
             ? $this->getTableCellForForRowActions()
             : $tableCell;
-        return parent::addValueViewer($name, $tableCell);
+        return parent::addValueViewer($name, $tableCell, $autodetectIfLinkedToDbColumn);
     }
 
     /**
-     * @return DataGridColumn
+     * @return DataGridColumn|RenderableValueViewer
      */
     protected function getTableCellForForRowActions() {
         return DataGridColumn::create()
@@ -793,14 +787,17 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
+     * @throws \UnexpectedValueException
+     * @throws NotFoundException
      */
     public function finish() {
         parent::finish();
         if ($this->isRowActionsEnabled() && !$this->hasValueViewer(static::ROW_ACTIONS_COLUMN_NAME)) {
-            $this->addValueViewer(static::ROW_ACTIONS_COLUMN_NAME, null);
+            $this->addValueViewer(static::ROW_ACTIONS_COLUMN_NAME);
         }
         if ($this->isNestedViewEnabled() && !$this->hasValueViewer($this->getColumnNameForNestedView())) {
-            $this->addValueViewer($this->getColumnNameForNestedView(), DataGridColumn::create()->setIsVisible(false));
+            $valueViewer = DataGridColumn::create()->setIsVisible(false);
+            $this->addValueViewer($this->getColumnNameForNestedView(), $valueViewer);
         }
         if ($this->isRowsReorderingEnabled()) {
             $reorderingColumns = $this->getRowsPositioningColumns();
@@ -956,9 +953,6 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param array $record
      * @param array $virtualColumns
      * @return array
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PeskyORM\Exception\OrmException
      */
     public function prepareRecord(array $record, array $virtualColumns = []) {
         $data = parent::prepareRecord($record, $virtualColumns);
