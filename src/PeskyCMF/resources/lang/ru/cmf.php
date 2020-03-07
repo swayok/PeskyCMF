@@ -321,7 +321,34 @@ return [
                 'add_row' => 'Добавить',
                 'delete_row' => 'Удалить',
                 'row_delete_action_forbidden' => 'Нельзя удалить этот объект т.к. достигнуто минимальное количество объектов'
-            ]
+            ],
+            'async_files_uploads' => [
+                'file_name' => 'Имя',
+                'file_size' => 'Размер',
+                'file_size_measure_mb' => 'МБ',
+                'cancel_uploading' => 'Отмена',
+                'retry_upload' => 'Повторить',
+                'delete_file' => 'Удалить',
+                'tooltip' => [
+                    'uploaded' => 'Файл загружен на сервер',
+                    'failed_to_upload' => 'Ошибка при загрузке файла на сервер',
+                ],
+                'invalid_encoded_info' => 'Получены некорректные данные по загруженному файлу.',
+                'js_locale' => [
+                    'error' => [
+                        'mime_type_forbidden' => 'Файлы этого типа запрещены.',
+                        'mime_type_and_extension_missmatch' => 'Расширение файла не соответствует его типу.',
+                        'already_attached' => 'Файл {name} уже прикреплен.',
+                        'too_many_files' => 'Достигнуто максимальное количество файлов: {limit}.',
+                        'not_enough_files' => 'Минимальное количество прикрепленных файлов: {limit}.',
+                        'file_too_large' => 'Размер файла превышает максимально допустимый размер ({max_size_mb} МБ).',
+                        'server_error' => 'Произошла неопределенная ошибка при сохранении файла.',
+                        'unexpected_error' => 'Не удалось обработать и сохранить файл.',
+                        'non_json_validation_error' => 'Файл не прошел проверку на стороне сервера.',
+                        'invalid_response' => 'Получен некорректный ответ от сервера.',
+                    ]
+                ]
+            ],
         ],
         'bulk_edit' => [
             'toolbar' => [

@@ -8,7 +8,7 @@ use PeskyORMLaravel\Db\Column\ImagesColumn;
 /**
  * @method ImagesColumn|FilesColumn getTableColumn()
  */
-class ImagesFormInput extends FilesFormInput {
+class AsyncImagesFormInput extends AsyncFilesFormInput {
 
     /**
      * List of image names to accept.

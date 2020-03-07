@@ -159,7 +159,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemsTable(array $filters = [], $absolute = false) {
+    static public function getUrlToItemsTable(array $filters = [], bool $absolute = false) {
         return routeToCmfItemsTable(static::getResourceName(), $filters, $absolute);
     }
 
@@ -169,7 +169,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlCustomAction($actionId, array $queryArgs = [], $absolute = false) {
+    static public function getUrlCustomAction($actionId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfResourceCustomAction(static::getResourceName(), $actionId, $queryArgs, $absolute);
     }
 
@@ -179,7 +179,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlCustomPage($pageId, array $queryArgs = [], $absolute = false) {
+    static public function getUrlCustomPage($pageId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfResourceCustomPage(static::getResourceName(), $pageId, $queryArgs, $absolute);
     }
 
@@ -188,7 +188,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemDetails($itemId, $absolute = false) {
+    static public function getUrlToItemDetails($itemId, bool $absolute = false) {
         return routeToCmfItemDetails(static::getResourceName(), $itemId, $absolute);
     }
 
@@ -197,7 +197,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemAddForm(array $data = [], $absolute = false) {
+    static public function getUrlToItemAddForm(array $data = [], bool $absolute = false) {
         return routeToCmfItemAddForm(static::getResourceName(), $data, $absolute);
     }
 
@@ -206,8 +206,26 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemEditForm($itemId, $absolute = false) {
+    static public function getUrlToItemEditForm($itemId, bool $absolute = false) {
         return routeToCmfItemEditForm(static::getResourceName(), $itemId, $absolute);
+    }
+
+    /**
+     * @param string $inputName
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlForTempFileUpload(string $inputName, bool $absolute = false) {
+        return routeForCmfTempFileUpload(static::getResourceName(), $inputName, $absolute);
+    }
+
+    /**
+     * @param string $inputName
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlForTempFileDelete(string $inputName, bool $absolute = false) {
+        return routeForCmfTempFileDelete(static::getResourceName(), $inputName, $absolute);
     }
 
     /**
@@ -217,7 +235,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemCustomAction($itemId, $actionId, array $queryArgs = [], $absolute = false) {
+    static public function getUrlToItemCustomAction($itemId, $actionId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfItemCustomAction(static::getResourceName(), $itemId, $actionId, $queryArgs, $absolute);
     }
 
@@ -228,7 +246,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemCustomPage($itemId, $pageId, array $queryArgs = [], $absolute = false) {
+    static public function getUrlToItemCustomPage($itemId, $pageId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfItemCustomPage(static::getResourceName(), $itemId, $pageId, $queryArgs, $absolute);
     }
 
@@ -739,6 +757,24 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             return cmfJsonResponse(HttpCode::NOT_FOUND)
                 ->setMessage('Method [' . static::class . '->' . $actionName . '] is not defined');
         }
+    }
+
+    public function uploadTempFileForInput(string $inputName) {
+        $input = $this->getFormConfig()->getValueViewer($inputName);
+        if (method_exists($input, 'uploadTempFile')) {
+            return $input->uploadTempFile($this->getRequest());
+        }
+        return cmfJsonResponse(HttpCode::FORBIDDEN)
+            ->setMessage("Input $inputName does not support temp files uploading: method uploadTempFile does not exist");
+    }
+
+    public function deleteTempFileForInput(string $inputName) {
+        $input = $this->getFormConfig()->getValueViewer($inputName);
+        if (method_exists($input, 'deleteTempFile')) {
+            return $input->deleteTempFile($this->getRequest());
+        }
+        return cmfJsonResponse(HttpCode::FORBIDDEN)
+            ->setMessage("Input $inputName does not support temp files delete: method deleteTempFile does not exist");
     }
 
 }

@@ -77,6 +77,10 @@ interface ScaffoldConfigInterface {
 
     public function updateRecord();
 
+    public function uploadTempFileForInput(string $inputName);
+
+    public function deleteTempFileForInput(string $inputName);
+
     public function changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection);
 
     public function updateBulkOfRecords();

@@ -95,6 +95,14 @@ class CmfScaffoldApiController extends CmfController {
         return $this->getScaffoldConfig()->updateRecord();
     }
 
+    public function uploadTempFileForInput($resourceName, $inputName) {
+        return $this->getScaffoldConfig()->uploadTempFileForInput($inputName);
+    }
+
+    public function deleteTempFileForInput($resourceName, $inputName) {
+        return $this->getScaffoldConfig()->deleteTempFileForInput($inputName);
+    }
+
     public function changeItemPosition($resourceName, $id, $beforeOrAfter, $otherId, $columnName, $sortDirection) {
         return $this->getScaffoldConfig()->changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection);
     }

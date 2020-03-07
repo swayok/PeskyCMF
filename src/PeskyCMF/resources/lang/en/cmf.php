@@ -320,7 +320,34 @@ return [
                 'add_row' => 'Add element',
                 'delete_row' => 'Remove element',
                 'row_delete_action_forbidden' => 'Element removal is forbidden. You need to maintain minimal required elements count.'
-            ]
+            ],
+            'async_files_uploads' => [
+                'file_name' => 'Name',
+                'file_size' => 'Size',
+                'file_size_measure_mb' => 'MB',
+                'cancel_uploading' => 'Cancel',
+                'retry_upload' => 'Retry',
+                'delete_file' => 'Delete',
+                'tooltip' => [
+                    'uploaded' => 'File uploaded',
+                    'failed_to_upload' => 'Failed to upload file',
+                ],
+                'invalid_encoded_info' => 'Received invalid data for uploaded file.',
+                'js_locale' => [
+                    'error' => [
+                        'mime_type_forbidden' => 'Files of this type are forbidden.',
+                        'mime_type_and_extension_missmatch' => 'File extension does not fit file type.',
+                        'already_attached' => 'File {name} already attached.',
+                        'too_many_files' => 'Minimum number of files required: {limit}.',
+                        'not_enough_files' => 'Maximum files limit reached: {limit}.',
+                        'file_too_large' => 'File size is bigger then maximum allowed file size ({max_size_mb} MB).',
+                        'server_error' => 'Unknown error occured during file saving.',
+                        'unexpected_error' => 'Failed to process and save file.',
+                        'non_json_validation_error' => 'File validation failed on server side.',
+                        'invalid_response' => 'Invalid response received from server.',
+                    ]
+                ]
+            ],
         ],
         'bulk_edit' => [
             'toolbar' => [

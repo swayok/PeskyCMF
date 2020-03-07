@@ -377,6 +377,24 @@ Route::group(
             ]
         ]);
 
+        Route::post('{resource}/upload/temp/for/{input}', [
+            'as' => $routeNamePrefix . 'cmf_upload_temp_file_for_input',
+            'uses' => $apiControllerClass . '@uploadTempFileForInput',
+            'fallback' => [
+                'route' => $routeNamePrefix . 'cmf_items_table',
+                'use_params' => false
+            ]
+        ]);
+
+        Route::post('{resource}/delete/temp/for/{input}', [
+            'as' => $routeNamePrefix . 'cmf_delete_temp_file_for_input',
+            'uses' => $apiControllerClass . '@deleteTempFileForInput',
+            'fallback' => [
+                'route' => $routeNamePrefix . 'cmf_items_table',
+                'use_params' => false
+            ]
+        ]);
+
         Route::put('{resource}/move/{id}/{before_or_after}/{other_id}/order/{sort_column}/{sort_direction}', [
                 'as' => $routeNamePrefix . 'cmf_api_change_item_position',
                 'uses' => $apiControllerClass . '@changeItemPosition',

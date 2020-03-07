@@ -2,12 +2,14 @@
 
 namespace PeskyCMF\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdminCommand;
 use PeskyCMF\Console\Commands\CmfAddSectionCommand;
+use PeskyCMF\Console\Commands\CmfCleanUploadedTempFilesCommand;
 use PeskyCMF\Console\Commands\CmfInstallCommand;
 use PeskyCMF\Console\Commands\CmfInstallHttpRequestsLoggingCommand;
 use PeskyCMF\Console\Commands\CmfInstallHttpRequestsProfilingCommand;
@@ -84,6 +86,8 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->configureViews();
 
         $this->declareRoutesAndConfigsForAllCmfSections();
+
+        $this->scheduleCommands();
     }
 
     /**
@@ -142,6 +146,7 @@ class PeskyCmfServiceProvider extends ServiceProvider {
         $this->registerAddAdminCommand();
         $this->registerMakeScaffoldCommand();
         $this->registerMakeApiDocsCommands();
+        $this->registerCleanUploadedTempFilesCommand();
     }
 
     protected function registerInstallCommand() {
@@ -196,6 +201,22 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             return new CmfMakeApiMethodDocCommand();
         });
         $this->commands('command.cmf.make-api-method-docs');
+    }
+
+    protected function registerCleanUploadedTempFilesCommand() {
+        $this->app->singleton('command.cmf.clean-uploaded-temp-files', function () {
+            return new CmfCleanUploadedTempFilesCommand();
+        });
+        $this->commands('command.cmf.clean-uploaded-temp-files');
+    }
+
+    protected function scheduleCommands() {
+        if ($this->runningInConsole()) {
+            /** @var Schedule $schedule */
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command('cmf:clean-uploaded-temp-files')
+                ->dailyAt('06:00');
+        }
     }
 
     protected function configureTranslations() {

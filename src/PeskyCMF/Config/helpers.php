@@ -246,6 +246,50 @@ if (!function_exists('routeToCmfItemEditForm')) {
     }
 }
 
+if (!function_exists('routeForCmfTempFileUpload')) {
+    /**
+     * @param string $resourceName
+     * @param string $inputName
+     * @param bool $absolute
+     * @param null|CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
+     * @return string|null
+     */
+    function routeForCmfTempFileUpload(string $resourceName, string $inputName, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.create', [$resourceName])) {
+            return null;
+        }
+        return cmfRoute(
+            'cmf_upload_temp_file_for_input',
+            ['resource' => $resourceName, 'input' => $inputName],
+            $absolute,
+            $cmfConfig
+        );
+    }
+}
+
+if (!function_exists('routeForCmfTempFileDelete')) {
+    /**
+     * @param string $resourceName
+     * @param string $inputName
+     * @param bool $absolute
+     * @param null|CmfConfig $cmfConfig
+     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
+     * @return string|null
+     */
+    function routeForCmfTempFileDelete(string $resourceName, string $inputName, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
+        if (!$ignoreAccessPolicy && Gate::denies('resource.create', [$resourceName])) {
+            return null;
+        }
+        return cmfRoute(
+            'cmf_delete_temp_file_for_input',
+            ['resource' => $resourceName, 'input' => $inputName],
+            $absolute,
+            $cmfConfig
+        );
+    }
+}
+
 if (!function_exists('routeToCmfItemCloneForm')) {
     /**
      * @param string $resourceName
