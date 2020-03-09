@@ -17,8 +17,16 @@ $isImages = $column->isItAnImage();
     <?php foreach ($filesConfigs as $configName => $fileConfig): ?>
         <?php
             $inputId = $defaultId . '-' . preg_replace('%[^a-zA-Z0-9]+%', '-', $configName);
-            $configNameToInputId[$configName] = array_merge(['id' => $inputId], $fileConfig->getConfigsArrayForJs());
             $inputName = $valueViewer->getName(true) . '[' . $configName . ']';
+            $configNameToInputId[$configName] = array_merge(
+                $valueViewer->getConfigsArrayForJs($configName),
+                $fileConfig->getConfigsArrayForJs(),
+                [
+                    'id' => $inputId,
+                    'name' => $inputName . '[]'
+                ]
+            );
+
         ?>
         <div class="section-divider">
             <span><?php echo $sectionConfig->translate($valueViewer, $configName); ?></span>
@@ -102,7 +110,7 @@ $isImages = $column->isItAnImage();
             {{? it.uploaded_file_info }}
                 <input
                     type="hidden"
-                    name="files[]"
+                    name="{{= it.input_name }}"
                     value="{{= it.uploaded_file_info }}"
                 >
             {{?}}
@@ -169,8 +177,6 @@ $isImages = $column->isItAnImage();
             configs,
             locale,
             files,
-            '<?php echo $sectionConfig->getScaffoldConfig()->getUrlForTempFileUpload($valueViewer->getName(false)) ?>',
-            '<?php echo $sectionConfig->getScaffoldConfig()->getUrlForTempFileDelete($valueViewer->getName(false)) ?>',
             {{= it.___pk_value || 'null' }},
             {{= !!it._is_cloning ? 'true' : 'false' }}
         );

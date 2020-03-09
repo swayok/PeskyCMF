@@ -14,6 +14,7 @@ class UploadedTempFileInfo {
     protected $realPath;
     protected $isSaved = false;
     protected $isValid = true;
+    protected $size;
 
     static public function getUploadsTempFolder(): string {
         return storage_path('app' . DIRECTORY_SEPARATOR . 'temp');
@@ -86,6 +87,13 @@ class UploadedTempFileInfo {
 
     public function getRealPath(): string {
         return $this->realPath;
+    }
+
+    public function getSize(): int {
+        if (!isset($this->size)) {
+            $this->size = filesize($this->getRealPath());
+        }
+        return $this->size;
     }
 
     public function isValid(): bool {

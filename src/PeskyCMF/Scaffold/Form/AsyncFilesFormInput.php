@@ -4,9 +4,10 @@ namespace PeskyCMF\Scaffold\Form;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Http\UploadedFile;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
+use PeskyORM\ORM\Column;
+use PeskyORMLaravel\Db\Column\AsyncFilesColumn;
 use PeskyORMLaravel\Db\Column\FilesColumn;
 use PeskyORMLaravel\Db\Column\Utils\FileInfo;
 use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
@@ -24,6 +25,8 @@ class AsyncFilesFormInput extends FormInput {
     protected $fileConfigsToUse;
 
     protected $jsPluginOptions = [];
+
+    protected $linkedColumnClass = AsyncFilesColumn::class;
 
     /**
      * @param array $options
@@ -81,16 +84,11 @@ class AsyncFilesFormInput extends FormInput {
      * @throws \BadMethodCallException
      */
     protected function getDefaultRenderer() {
-        $column = $this->getTableColumn();
-        if (!($column instanceof FilesColumn)) {
-            throw new \BadMethodCallException(
-                "Linked column for form field '{$this->getName()}' must be an instance of " . FilesColumn::class
-            );
-        }
+        $this->validateLinkedColumnClass();
         $configs = $this->getAcceptedFileConfigurations();
         if (empty($configs)) {
             throw new \BadMethodCallException(
-                "There is no configurations for files in column '{$column->getName()}'"
+                "There is no configurations for files in column '{$this->getTableColumn()->getName()}'"
             );
         }
         $renderer = new InputRenderer();
@@ -98,6 +96,17 @@ class AsyncFilesFormInput extends FormInput {
             ->setTemplate($this->view)
             ->addData('filesConfigs', $configs);
         return $renderer;
+    }
+
+    /**
+     * @throws \BadMethodCallException
+     */
+    protected function validateLinkedColumnClass() {
+        if (!($this->getTableColumn() instanceof AsyncFilesColumn)) {
+            throw new \BadMethodCallException(
+                "Linked column for form field '{$this->getName()}' must be an instance of " . AsyncFilesColumn::class
+            );
+        }
     }
 
     /**
@@ -137,70 +146,54 @@ class AsyncFilesFormInput extends FormInput {
      * @return array|mixed
      */
     public function doDefaultValueConversionByType($value, $type, array $data) {
-        $ret = [
-            'urls' => [],
-            'preview_info' => [],
-            'files' => []
-        ];
-        if (!is_array($value)) {
-            $value = json_decode($value, true);
-        }
-        if (!is_array($value) || empty($value)) {
-            return $ret;
-        }
-        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-        $pkValue = array_get($data, $record::getPrimaryKeyColumnName());
-        $record->fromData($data, !empty($pkValue) || is_numeric($pkValue), false);
-
-        $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
-        foreach ($fileInfoArrays as $fileName => $fileInfoArray) {
-            if (empty($fileInfoArray)) {
-                continue;
-            }
-            $ret['preview_info'][$fileName] = [];
-            $ret['urls'][$fileName] = [];
-            $ret['files'][$fileName] = [];
-            /** @var FileInfo $fileInfo */
-            foreach ($fileInfoArray as $fileInfo) {
-                if ($fileInfo->exists()) {
-                    $ret['urls'][$fileName][] = $fileInfo->getAbsoluteUrl();
-                    $ret['files'][$fileName][] = [
-                        'info' => $fileInfo->getCustomInfo(),
-                        'name' => $fileInfo->getOriginalFileName() ?: $fileInfo->getFileName(),
-                        'extension' => $fileInfo->getFileExtension(),
-                        'uuid' => $fileInfo->getUuid(),
-                    ];
-
-                    $ret['preview_info'][$fileName][] = [
-                        'caption' => $fileInfo->getOriginalFileNameWithExtension(),
-                        'size' => $fileInfo->getSize(),
-                        'downloadUrl' => $fileInfo->getAbsoluteUrl(),
-                        'filetype' => $fileInfo->getMimeType(),
-                        'type' => static::getUploaderPreviewTypeFromFileInfo($fileInfo),
-                        'key' => 1
-                    ];
-                }
-            }
-        }
-        return $ret;
-    }
-
-    /**
-     * @param FileInfo $fileInfo
-     * @return string
-     */
-    static protected function getUploaderPreviewTypeFromFileInfo(FileInfo $fileInfo) {
-        $type = $fileInfo->getFileType();
-        switch ($type) {
-            case FilesGroupConfig::TYPE_IMAGE:
-            case FilesGroupConfig::TYPE_AUDIO:
-            case FilesGroupConfig::TYPE_VIDEO:
-            case FilesGroupConfig::TYPE_TEXT:
-            case FilesGroupConfig::TYPE_OFFICE:
-                return $type;
-            default:
-                return 'object';
-        }
+        // todo: refactor this
+//        $ret = [
+//            'urls' => [],
+//            'preview_info' => [],
+//            'files' => []
+//        ];
+//        if (!is_array($value)) {
+//            $value = json_decode($value, true);
+//        }
+//        if (!is_array($value) || empty($value)) {
+//            return $ret;
+//        }
+//        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
+//        $pkValue = array_get($data, $record::getPrimaryKeyColumnName());
+//        $record->fromData($data, !empty($pkValue) || is_numeric($pkValue), false);
+//
+//        $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
+//        foreach ($fileInfoArrays as $fileName => $fileInfoArray) {
+//            if (empty($fileInfoArray)) {
+//                continue;
+//            }
+//            $ret['preview_info'][$fileName] = [];
+//            $ret['urls'][$fileName] = [];
+//            $ret['files'][$fileName] = [];
+//            /** @var FileInfo $fileInfo */
+//            foreach ($fileInfoArray as $fileInfo) {
+//                if ($fileInfo->exists()) {
+//                    $ret['urls'][$fileName][] = $fileInfo->getAbsoluteUrl();
+//                    $ret['files'][$fileName][] = [
+//                        'info' => $fileInfo->getCustomInfo(),
+//                        'name' => $fileInfo->getOriginalFileName() ?: $fileInfo->getFileName(),
+//                        'extension' => $fileInfo->getFileExtension(),
+//                        'uuid' => $fileInfo->getUuid(),
+//                    ];
+//
+//                    $ret['preview_info'][$fileName][] = [
+//                        'caption' => $fileInfo->getOriginalFileNameWithExtension(),
+//                        'size' => $fileInfo->getSize(),
+//                        'downloadUrl' => $fileInfo->getAbsoluteUrl(),
+//                        'filetype' => $fileInfo->getMimeType(),
+//                        'type' => static::getUploaderPreviewTypeFromFileInfo($fileInfo),
+//                        'key' => 1
+//                    ];
+//                }
+//            }
+//        }
+//        return $ret;
+        return $value;
     }
 
     public function getValidators($isCreation) {
@@ -208,17 +201,14 @@ class AsyncFilesFormInput extends FormInput {
         $configs = $this->getAcceptedFileConfigurations();
         foreach ($configs as $fileConfig) {
             $baseName = $this->getName() . '.' . $fileConfig->getName();
-            $isRequired = $fileConfig->getMinFilesCount() > 0 ? 'required|' : '';
-            $validators[$baseName] = $isRequired . 'array|max:' . $fileConfig->getMaxFilesCount();
-            $commonValidators = 'nullable|' . ($fileConfig instanceof ImagesGroupConfig ? 'image' : 'file') . '|max:' . $fileConfig->getMaxFileSize()
-                . '|mimetypes:' . implode(',', $fileConfig->getAllowedMimeTypes());
+            $minFilesCount = $fileConfig->getMinFilesCount();
+            $isRequired = $minFilesCount > 0 ? 'required|' : '';
+            $validators[$baseName] = $isRequired . 'array|max:' . $fileConfig->getMaxFilesCount() . '|min:' . $minFilesCount;
             for ($i = 0; $i < $fileConfig->getMaxFilesCount(); $i++) {
-                if ($fileConfig->getMinFilesCount() > $i) {
-                    $validators["{$baseName}.{$i}.file"] = "required_without:{$baseName}.{$i}.uuid|required_if:{$baseName}.{$i}.deleted,1|{$commonValidators}";
-                    $validators["{$baseName}.{$i}.uuid"] = "required_without:{$baseName}.{$i}.file|nullable|string";
+                if ($i < $minFilesCount) {
+                    $validators["{$baseName}.{$i}"] = 'required|string';
                 } else {
-                    $validators["{$baseName}.{$i}.file"] = "nullable|{$commonValidators}";
-                    $validators["{$baseName}.{$i}.uuid"] = 'nullable|string';
+                    $validators["{$baseName}.{$i}"] = 'nullable|string';
                 }
             }
         }
@@ -294,6 +284,14 @@ class AsyncFilesFormInput extends FormInput {
             $tempFile->delete();
             return response('ok');
         }
+    }
+
+    public function getConfigsArrayForJs(string $filesGroupName): array {
+        $scaffoldConfig = $this->getScaffoldSectionConfig()->getScaffoldConfig();
+        return [
+            'upload_url' => $scaffoldConfig::getUrlForTempFileUpload($this->getName(false)),
+            'delete_url' => $scaffoldConfig::getUrlForTempFileUpload($this->getName(false)),
+        ];
     }
 
 }

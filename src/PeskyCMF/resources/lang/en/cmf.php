@@ -299,6 +299,7 @@ return [
                 'invalid_file_type' => "Uploaded file type '%s' is not allowed for '%s'. Allowed file types: %s.",
                 'file_size_is_too_large' => "Uploaded file size is too large for '%s'. Maximum file size is %s kilobytes.",
                 'file_is_not_a_valid_image' => "Uploaded file for '%s' is corrupted or it is not a valid image.",
+                'file_is_not_a_valid_upload' => "Data received for '%s' is not a valid upload.",
             ]
         ],
         'input' => [
