@@ -48,6 +48,7 @@ $isImages = $column->isItAnImage();
             <input
                 type="file"
                 style="display: none !important;"
+                <?php echo $fileConfig->getMaxFilesCount() !== 1 ? 'multiple' : '' ?>
                 id="<?php echo $inputId; ?>"
             >
             <button type="button" class="btn btn-default btn-sm" id="<?php echo $inputId; ?>-attach-button">
@@ -59,7 +60,7 @@ $isImages = $column->isItAnImage();
 
 <script type="text/html" id="<?php echo $defaultId; ?>-files-uploader-preview-tpl">
     <tr class="files-uploader-file" data-uid="{{= it.uid }}">
-        <td class="files-uploader-file-preview va-t text-center" width="{{= it.preview_width }}">
+        <td class="files-uploader-file-preview va-t text-center bg-white" width="{{= it.preview_width }}">
             {{? it.is_image }}
                 <div class="files-uploader-file-preview-image">
                     {{= it.preview }}
@@ -70,13 +71,17 @@ $isImages = $column->isItAnImage();
                 </div>
             {{?}}
         </td>
-        <td class="files-uploader-file-info va-t" {{= it.is_uploading || it.can_retry || it.can_delete ? '' : 'colspan="2"' }}>
+        <td class="files-uploader-file-info va-t fluid-width bg-white" {{= it.is_uploading || it.can_retry || it.can_delete ? '' : 'colspan="2"' }}>
             <div class="files-uploader-file-name">
-                <span class="files-uploader-file-info-label"><?php echo $sectionConfig->translateGeneral('input.async_files_uploads.file_name') ?>:</span>
+                <span class="files-uploader-file-info-label">
+                    <?php echo $sectionConfig->translateGeneral('input.async_files_uploads.file_name') ?>:
+                </span>
                 <span class="files-uploader-file-info-value">{{= it.name }}</span>
             </div>
             <div class="files-uploader-file-size mt5">
-                <span class="files-uploader-file-info-label"><?php echo $sectionConfig->translateGeneral('input.async_files_uploads.file_size') ?>:</span>
+                <span class="files-uploader-file-info-label">
+                    <?php echo $sectionConfig->translateGeneral('input.async_files_uploads.file_size') ?>:
+                </span>
                 <span class="files-uploader-file-info-value">
                     {{= it.size }} <?php echo $sectionConfig->translateGeneral('input.async_files_uploads.file_size_measure_mb') ?>
                     {{? it.is_uploaded }}
@@ -96,6 +101,14 @@ $isImages = $column->isItAnImage();
                     {{?}}
                 </span>
             </div>
+            {{? it.is_image }}
+                <div class="files-uploader-image-dimensions mt5">
+                    <span class="files-uploader-file-info-label">
+                        <?php echo $sectionConfig->translateGeneral('input.async_files_uploads.image_dimensions') ?>:
+                    </span>
+                    <span class="files-uploader-file-info-value">{{= it.width }}x{{= it.height }}</span>
+                </div>
+            {{?}}
             {{? it.is_uploading }}
                 <div class="files-uploader-file-upload-status mt10" data-container="progress-bar">
                     {{= it.progress_bar }}
@@ -116,18 +129,19 @@ $isImages = $column->isItAnImage();
             {{?}}
         </td>
         {{? it.is_uploading || it.can_retry || it.can_delete }}
-            <td class="files-uploader-file-actions va-t" width="70">
+            <td class="files-uploader-file-actions va-t posr bg-white" width="70">
                 {{? !it.is_uploading }}
                     {{? it.can_delete }}
                         <button
                             type="button"
                             class="btn btn-danger btn-xs fs12 files-uploader-file-delete fluid-width mb10"
                             data-uid="{{= it.uid }}"
+                            data-existing="{{= it.is_new ? '0' : '1' }}"
                         >
                             <?php echo $sectionConfig->translateGeneral('input.async_files_uploads.delete_file') ?>
                         </button>
                     {{?}}
-                    {{? it.can_retry }}
+                    {{? it.is_new && it.can_retry }}
                         <button
                             type="button"
                             class="btn btn-default btn-xs fs12 files-uploader-file-retry fluid-width"
@@ -145,6 +159,13 @@ $isImages = $column->isItAnImage();
                         <?php echo $sectionConfig->translateGeneral('input.async_files_uploads.cancel_uploading') ?>
                     </button>
                 {{?}}
+                <div
+                    class="files-uploader-dragger text-center"
+                    style="cursor: move; cursor: row-resize; position: absolute; bottom: 10px; right: 0; width: 100%"
+                    title="<?php echo $sectionConfig->translateGeneral('input.async_files_uploads.reorder') ?>"
+                >
+                    <i class="fa fa-arrows fs18 text-muted"></i>
+                </div>
             </td>
         {{?}}
     </tr>
@@ -172,7 +193,7 @@ $isImages = $column->isItAnImage();
         var files = <?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode') ?>;
         var configs = <?php echo json_encode($configNameToInputId); ?>;
         var locale = <?php echo json_encode($sectionConfig->translateGeneral('input.async_files_uploads.js_locale')); ?>;
-        AsyncFilesUploaderHelper.initInputsFromConfigs(
+        CmfAsyncFilesUploaderHelper.initInputsFromConfigs(
             '<?php echo $defaultId; ?>',
             configs,
             locale,

@@ -164,6 +164,9 @@
 .bg-none {
   background-color: transparent !important;
 }
+.bg-white {
+    background-color: #ffffff !important;
+}
 /* box-shadow Helpers */
 .no-boxshadow {
   box-shadow: none !important;

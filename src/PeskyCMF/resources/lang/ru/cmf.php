@@ -325,17 +325,20 @@ return [
             ],
             'async_files_uploads' => [
                 'file_name' => 'Имя',
-                'file_size' => 'Размер',
+                'file_size' => 'Размер файла',
+                'image_dimensions' => 'Размеры изображения',
                 'file_size_measure_mb' => 'МБ',
                 'cancel_uploading' => 'Отмена',
                 'retry_upload' => 'Повторить',
                 'delete_file' => 'Удалить',
+                'reorder' => 'Перетяните эту строку вверх или вниз для изменения порядка строк',
                 'tooltip' => [
                     'uploaded' => 'Файл загружен на сервер',
                     'failed_to_upload' => 'Ошибка при загрузке файла на сервер',
                 ],
                 'invalid_encoded_info' => 'Получены некорректные данные по загруженному файлу.',
                 'js_locale' => [
+                    'drop_files_here' => 'Перетащите файлы сюда ...',
                     'error' => [
                         'mime_type_forbidden' => 'Файлы этого типа запрещены.',
                         'mime_type_and_extension_missmatch' => 'Расширение файла не соответствует его типу.',

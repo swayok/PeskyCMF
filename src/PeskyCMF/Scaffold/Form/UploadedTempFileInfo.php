@@ -3,6 +3,9 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use Illuminate\Http\UploadedFile;
+use PeskyORM\ORM\RecordInterface;
+use PeskyORMLaravel\Db\Column\Utils\FileConfig;
+use PeskyORMLaravel\Db\Column\Utils\FileInfo;
 use Ramsey\Uuid\Uuid;
 use Swayok\Utils\Folder;
 
@@ -71,6 +74,10 @@ class UploadedTempFileInfo {
             'relative_path' => $this->getRelativePath(),
             'absolute_path' => $this->getRealPath()
         ];
+    }
+
+    public function toFileInfo(FileConfig $fileConfig, RecordInterface $record, ?string $fileSuffix): FileInfo {
+        return FileInfo::fromUploadedTempFileInfo($this, $fileConfig, $record, $fileSuffix);
     }
 
     public function getName(): string {

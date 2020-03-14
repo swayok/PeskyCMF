@@ -164,6 +164,9 @@
 .bg-none {
   background-color: transparent !important;
 }
+.bg-white {
+    background-color: #ffffff !important;
+}
 /* box-shadow Helpers */
 .no-boxshadow {
   box-shadow: none !important;
@@ -1653,6 +1656,7 @@ on tables, feel free to add more*/
   }
 }
 /*# sourceMappingURL=helpers.css.map */
+
 body,
 h1,
 h2,

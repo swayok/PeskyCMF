@@ -6,12 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
-use PeskyORM\ORM\Column;
 use PeskyORMLaravel\Db\Column\AsyncFilesColumn;
 use PeskyORMLaravel\Db\Column\FilesColumn;
 use PeskyORMLaravel\Db\Column\Utils\FileInfo;
 use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
-use PeskyORMLaravel\Db\Column\Utils\ImagesGroupConfig;
+use PeskyORMLaravel\Db\Column\Utils\MimeTypesHelper;
 
 /**
  * @method FilesColumn getTableColumn()
@@ -146,54 +145,33 @@ class AsyncFilesFormInput extends FormInput {
      * @return array|mixed
      */
     public function doDefaultValueConversionByType($value, $type, array $data) {
-        // todo: refactor this
-//        $ret = [
-//            'urls' => [],
-//            'preview_info' => [],
-//            'files' => []
-//        ];
-//        if (!is_array($value)) {
-//            $value = json_decode($value, true);
-//        }
-//        if (!is_array($value) || empty($value)) {
-//            return $ret;
-//        }
-//        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-//        $pkValue = array_get($data, $record::getPrimaryKeyColumnName());
-//        $record->fromData($data, !empty($pkValue) || is_numeric($pkValue), false);
-//
-//        $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
-//        foreach ($fileInfoArrays as $fileName => $fileInfoArray) {
-//            if (empty($fileInfoArray)) {
-//                continue;
-//            }
-//            $ret['preview_info'][$fileName] = [];
-//            $ret['urls'][$fileName] = [];
-//            $ret['files'][$fileName] = [];
-//            /** @var FileInfo $fileInfo */
-//            foreach ($fileInfoArray as $fileInfo) {
-//                if ($fileInfo->exists()) {
-//                    $ret['urls'][$fileName][] = $fileInfo->getAbsoluteUrl();
-//                    $ret['files'][$fileName][] = [
-//                        'info' => $fileInfo->getCustomInfo(),
-//                        'name' => $fileInfo->getOriginalFileName() ?: $fileInfo->getFileName(),
-//                        'extension' => $fileInfo->getFileExtension(),
-//                        'uuid' => $fileInfo->getUuid(),
-//                    ];
-//
-//                    $ret['preview_info'][$fileName][] = [
-//                        'caption' => $fileInfo->getOriginalFileNameWithExtension(),
-//                        'size' => $fileInfo->getSize(),
-//                        'downloadUrl' => $fileInfo->getAbsoluteUrl(),
-//                        'filetype' => $fileInfo->getMimeType(),
-//                        'type' => static::getUploaderPreviewTypeFromFileInfo($fileInfo),
-//                        'key' => 1
-//                    ];
-//                }
-//            }
-//        }
-//        return $ret;
-        return $value;
+        $ret = [];
+        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
+        $pkValue = array_get($data, $record::getPrimaryKeyColumnName());
+        $record->fromData($data, !empty($pkValue) || is_numeric($pkValue), false);
+        $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
+        /** @var FileInfo[] $fileInfoArray */
+        foreach ($fileInfoArrays as $groupName => $fileInfoArray) {
+            if (empty($fileInfoArray)) {
+                continue;
+            }
+            foreach ($fileInfoArray as $fileInfo) {
+                $info = [
+                    'is_image' => $fileInfo->getFileType() === MimeTypesHelper::TYPE_IMAGE,
+                    'name' => $fileInfo->getOriginalFileNameWithExtension(),
+                    'size' => $fileInfo->getSize(),
+                    'url' => $fileInfo->getAbsoluteUrl(),
+                    'type' => $fileInfo->getMimeType(),
+                    'uuid' => $fileInfo->getUuid(),
+                    'uploaded_file_info' => 'uuid:' . $fileInfo->getUuid(),
+                ];
+                if ($info['is_image']) {
+                    list($info['width'], $info['height']) = getimagesize($fileInfo->getAbsoluteFilePath());
+                }
+                $ret[$groupName][] = $info;
+            }
+        }
+        return $ret;
     }
 
     public function getValidators($isCreation) {

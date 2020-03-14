@@ -324,17 +324,20 @@ return [
             ],
             'async_files_uploads' => [
                 'file_name' => 'Name',
-                'file_size' => 'Size',
+                'file_size' => 'File size',
                 'file_size_measure_mb' => 'MB',
+                'image_dimensions' => 'Image dimensions',
                 'cancel_uploading' => 'Cancel',
                 'retry_upload' => 'Retry',
                 'delete_file' => 'Delete',
+                'reorder' => 'Drag this item up or down to reorder items in list',
                 'tooltip' => [
                     'uploaded' => 'File uploaded',
                     'failed_to_upload' => 'Failed to upload file',
                 ],
                 'invalid_encoded_info' => 'Received invalid data for uploaded file.',
                 'js_locale' => [
+                    'drop_files_here' => 'Drop files here',
                     'error' => [
                         'mime_type_forbidden' => 'Files of this type are forbidden.',
                         'mime_type_and_extension_missmatch' => 'File extension does not fit file type.',

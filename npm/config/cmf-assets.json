@@ -10,6 +10,8 @@
                 "node_modules/toastr/toastr.js",
                 "node_modules/sortablejs/Sortable.js",
                 "src/cmf-vendors/base64.js",
+                "src/cmf-vendors/FileAPI/FileAPI.html5.js",
+                "src/cmf-vendors/FileAPI/FileAPI.exif.js",
                 "node_modules/admin-lte/dist/js/adminlte.js"
             ],
             "future": [
@@ -44,7 +46,6 @@
         "cmf-core": {
             "output": "js/cmf-core.js",
             "files": [
-                "src/js/inputs/cmf.fileuploads.js",
                 "node_modules/page-on-promises/page.js",
                 "src/js/cmf.config.js",
                 "src/js/debug.dialog.js",
@@ -52,7 +53,8 @@
                 "src/js/cmf.utils.js",
                 "src/js/cmf.routing.js",
                 "src/js/cmf.scaffolds.js",
-                "src/js/inputs/cmf.fileuploads.js"
+                "src/js/inputs/cmf.fileuploads.js",
+                "src/js/inputs/cmf.asyncfileuploads.js"
             ]
         }
     },
