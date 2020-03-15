@@ -983,6 +983,9 @@ abstract class CmfConfig extends ConfigsContainer {
     public function initSection($app) {
         $this->useAsPrimary();
 
+        // configure session
+        $this->configureSession($app);
+
         // init auth module
         /** @var CmfAuthModule $cmfAuthModuleClass */
         $cmfAuthModuleClass = static::config('auth.module') ?: CmfAuthModule::class;
@@ -1019,9 +1022,6 @@ abstract class CmfConfig extends ConfigsContainer {
         $langDetectorProvider = $app->register(PeskyCmfLanguageDetectorServiceProvider::class);
         $app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
         $langDetectorProvider->importConfigsFromPeskyCmf($this);
-
-        // configure session
-        $this->configureSession($app);
 
         if (static::config('file_access_mask') !== null) {
             umask(static::config('file_access_mask'));
