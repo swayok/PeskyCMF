@@ -50,10 +50,14 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                         {{?}}
                     {{?}}
                     <!-- disable chrome email & password autofill -->
-                    <input type="text" name="name" class="hidden" formnovalidate disabled>
+                    <input type="text" name="login" class="hidden" formnovalidate disabled>
                     <input type="password" class="hidden" formnovalidate disabled>
                     <input type="text" name="email" class="hidden" formnovalidate value="test@test.com" disabled>
                     <input type="password" class="hidden" formnovalidate disabled>
+                    <input type="email" name="email" class="hidden" formnovalidate value="test@test.com" disabled>
+                    <input type="password" class="hidden" formnovalidate disabled>
+                    <input type="email" formnovalidate style="display: block; width: 0; height: 0; margin: 0; padding: 0; border: 0;" value="test@test.com">
+                    <input type="password" formnovalidate style="display: block; width: 0; height: 0; margin: 0; padding: 0; border: 0;">
                     <!-- end of autofill disabler -->
                     <div class="modal-body">
                     <?php
@@ -65,7 +69,7 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                                 $enablerSwitchId = $baseEnablerId . str_slug($inputConfig->getName());
                                 $enablerSwitch = <<<INPUT
                                     <div class="bulk-edit-form-input-enabler pull-left va-t mr15">
-                                        <input class="bulk-edit-form-input-enabler-input" type="checkbox" 
+                                        <input class="bulk-edit-form-input-enabler-input" type="checkbox"
                                             id="{$enablerSwitchId}" data-toggle="tooltip" data-title="{$enablerTooltip}">
                                     </div>
 INPUT;
