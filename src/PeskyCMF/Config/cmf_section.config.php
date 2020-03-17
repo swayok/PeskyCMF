@@ -77,6 +77,11 @@ return [
         'default_role' => 'admin',
 
         /**
+         * Request current password when saving user profile data when password change is not requested
+         */
+        'profile_update_requires_current_password' => true,
+
+        /**
          * List of middleware for cmf routes and routes provided in 'routes_files' that require user to be authenticated
          */
         'middleware' => [

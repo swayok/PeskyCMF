@@ -73,7 +73,7 @@ class CmfAuthModule {
     }
 
     /**
-     * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|\App\Db\Admins\Admin|null
+     * @return CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|\App\Db\Admins\Admin|null
      */
     public function getUser(): ?RecordInterface {
         return $this->getAuthGuard()->user();
@@ -138,7 +138,7 @@ class CmfAuthModule {
     }
 
     /**
-     * @return \PeskyCMF\Http\CmfJsonResponse|string
+     * @return CmfJsonResponse|string
      */
     public function renderUserRegistrationPageView() {
         if (!$this->isRegistrationAllowed()) {
@@ -151,7 +151,7 @@ class CmfAuthModule {
 
     /**
      * @param Request $request
-     * @return \PeskyCMF\Http\CmfJsonResponse|array
+     * @return CmfJsonResponse|array
      */
     public function processUserRegistrationRequest(Request $request) {
         if (!$this->isRegistrationAllowed()) {
@@ -255,15 +255,10 @@ class CmfAuthModule {
 
     /**
      * @param Request $request
-     * @return \PeskyCMF\Http\CmfJsonResponse
-     * @throws \PeskyORM\Exception\DbException
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PeskyORM\Exception\InvalidTableColumnConfigException
-     * @throws \PeskyORM\Exception\OrmException
+     * @return CmfJsonResponse
      */
     public function processUserProfileUpdateRequest(Request $request) {
-        /** @var \PeskyCMF\Db\Admins\CmfAdmin $user */
+        /** @var CmfAdmin $user */
         $user = $this->getUser();
         $this->authorize('resource.update', ['cmf_profile', $user]);
         $updatesOrResponse = $this->validateAndGetUserProfileUpdates($request, $user);
@@ -273,7 +268,7 @@ class CmfAuthModule {
             $oldEmail = $user::hasColumn('email') ? $user->email : null;
             $user
                 ->begin()
-                ->updateValues($updatesOrResponse);
+                ->updateValues($updatesOrResponse, false, false);
             if (!empty(trim($request->input('new_password')))) {
                 $user->setPassword($request->input('new_password'));
             }
@@ -301,8 +296,7 @@ class CmfAuthModule {
 
     /**
      * @param Request $request
-     * @return \PeskyCMF\Http\CmfJsonResponse
-     * @throws \Illuminate\Validation\ValidationException
+     * @return CmfJsonResponse
      */
     public function processUserLoginRequest(Request $request): CmfJsonResponse {
         $userLoginColumn = $this->getUserLoginColumnName();
@@ -323,7 +317,7 @@ class CmfAuthModule {
     }
 
     /**
-     * @return \Illuminate\Http\RedirectResponse|\PeskyCMF\Http\CmfJsonResponse
+     * @return \Illuminate\Http\RedirectResponse|CmfJsonResponse
      */
     public function processUserLogoutRequest() {
         $loginPageUrl = $this->getLoginPageUrl(true);
@@ -361,7 +355,7 @@ class CmfAuthModule {
 
     /**
      * @param $otherUserId
-     * @return \PeskyCMF\Http\CmfJsonResponse
+     * @return CmfJsonResponse
      */
     public function processLoginAsOtherUserRequest($otherUserId) {
         $this->authorize('cmf_page', ['login_as']);
@@ -377,7 +371,7 @@ class CmfAuthModule {
             return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
                 ->setMessage(cmfTransCustom('admins.login_as.no_auth_token'));
         }
-        /** @var \PeskyCMF\Db\Admins\CmfAdmin|RecordInterface $otherUser */
+        /** @var CmfAdmin|RecordInterface $otherUser */
         $otherUser = $this->getAuthGuard()->loginUsingId($otherUserId);
         if (!is_object($otherUser)) {
             // Warning: do not use Auth->login($currentUser) - it might fail
@@ -402,7 +396,7 @@ class CmfAuthModule {
 
     /**
      * @param Request $request
-     * @return \PeskyCMF\Http\CmfJsonResponse
+     * @return CmfJsonResponse
      */
     public function startPasswordRecoveryProcess(Request $request) {
         if (!$this->isPasswordRestoreAllowed()) {
@@ -436,7 +430,7 @@ class CmfAuthModule {
     /**
      * @param Request $request
      * @param string $accessKey
-     * @return \PeskyCMF\Http\CmfJsonResponse
+     * @return CmfJsonResponse
      */
     public function finishPasswordRecoveryProcess(Request $request, string $accessKey) {
         if (!$this->isPasswordRestoreAllowed()) {
@@ -474,7 +468,7 @@ class CmfAuthModule {
 
     /**
      * @param $accessKey
-     * @return \PeskyCMF\Http\CmfJsonResponse|string
+     * @return CmfJsonResponse|string
      */
     public function renderReplaceUserPasswordPageView(string $accessKey) {
         if (!$this->isPasswordRestoreAllowed()) {
@@ -718,13 +712,11 @@ class CmfAuthModule {
      * @param Request $request
      * @param RecordInterface|Authenticatable $admin
      * @return array|\Illuminate\Http\JsonResponse
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
     protected function validateAndGetUserProfileUpdates(Request $request, RecordInterface $admin) {
+        $requirePassword = $this->getCmfConfig()->config('auth.profile_update_requires_current_password', true);
         $validationRules = [
-            'old_password' => 'required',
+            'old_password' => $requirePassword ? 'required|string' : 'nullable|required_with:new_password|string',
             'new_password' => 'nullable|min:6',
         ];
         $columnsToUpdate = [];
@@ -770,12 +762,16 @@ class CmfAuthModule {
         $errors = [];
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
-        } else if (method_exists($admin, 'checkPassword')) {
-            if (!$admin->checkPassword($request->input('old_password'))) {
+        } else {
+            if (!$requirePassword && empty($request->input('new_password'))) {
+                // do nothing
+            } else if (method_exists($admin, 'checkPassword')) {
+                if (!$admin->checkPassword($request->input('old_password'))) {
+                    $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
+                }
+            } else if (!\Hash::check($request->input('old_password'), $admin->getAuthPassword())) {
                 $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
             }
-        } else if (!\Hash::check($request->input('old_password'), $admin->getAuthPassword())) {
-            $errors['old_password'] = cmfTransCustom('.page.profile.errors.old_password.match');
         }
         if (count($errors) > 0) {
             return $this->makeValidationErrorsJsonResponse($errors);
