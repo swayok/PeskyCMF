@@ -29,7 +29,7 @@ $dictionary = [
         'login_to_account_label' => 'Login to account',
         'errors' => [
             'password' => [
-                'min' => 'Minimum password length is :max symbols',
+                'min' => 'Minimum password length is :min symbols',
                 'confirmed' => 'Passwords do not match'
             ],
             'email' => [
@@ -179,7 +179,7 @@ $dictionary = [
             'saved' => 'Account settings saved',
             'errors' => [
                 'new_password' => [
-                    'min' => 'Minimum password length is :max symbols'
+                    'min' => 'Minimum password length is :min symbols'
                 ],
                 'old_password' => [
                     'required' => 'Enter current password to save changes',
