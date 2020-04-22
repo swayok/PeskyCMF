@@ -17,8 +17,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     public function register() {
-        $this->app->register(PeskyOrmServiceProvider::class);
+        $this->app->register(\PeskyORMLaravel\Providers\PeskyOrmServiceProvider::class);
         $this->app->register(PeskyValidationServiceProvider::class);
+        $this->app->register(\PeskyORMLaravel\Providers\PeskyValidationServiceProvider::class);
         $this->registerCommands();
     }
 
