@@ -2,44 +2,23 @@
 
 namespace PeskyCMF;
 
-use LaravelSiteLoader\Providers\AppSitesServiceProvider;
+use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
 use PeskyCMF\Console\Commands\MakeDbClasses;
 
-class PeskyCmfServiceProvider extends AppSitesServiceProvider {
-
-    /**
-     * @param \Illuminate\Contracts\Foundation\Application $app
-     */
-    public function __construct($app) {
-        $this->defaultSiteLoaderClass = config('cmf.default_site_loader');
-        $this->consoleSiteLoaderClass = config('cmf.console_site_loader');
-        $this->additionalSiteLoaderClasses = (array)config('cmf.additional_site_loaders');
-
-        parent::__construct($app);
-    }
+class PeskyCmfServiceProvider extends ServiceProvider {
 
     public function boot() {
-        $this->configurePublishes();
-        parent::boot();
+        if ($this->app->runningInConsole()) {
+            $this->configurePublishes();
+        }
         require_once __DIR__ . '/Config/helpers.php';
     }
 
     public function register() {
-        parent::register();
         $this->app->register(PeskyOrmServiceProvider::class);
         $this->app->register(PeskyValidationServiceProvider::class);
-
-        if ($this->app->environment() === 'local') {
-            if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
-                $this->app->register('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider');
-            }
-            if (class_exists('\Barryvdh\Debugbar\ServiceProvider::class')) {
-                $this->app->register('\Barryvdh\Debugbar\ServiceProvider::class');
-            }
-        }
-
         $this->registerCommands();
     }
 

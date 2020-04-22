@@ -4,7 +4,8 @@
 namespace PeskyCMF\Db;
 
 use Illuminate\Database\Migrations\Migration as Base;
-use PeskyORM\Db;
+use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\Core\Utils;
 use PeskyORM\DbExpr;
 use Swayok\Utils\StringUtils;
 
@@ -17,14 +18,7 @@ class Migration extends Base {
     }
 
     public function getPeskyOrmConnection() {
-        $driver = $this->getConnection();
-        return new Db(
-            $driver,
-            config("database.connections.$driver.database"),
-            config("database.connections.$driver.username"),
-            config("database.connections.$driver.password"),
-            config("database.connections.$driver.host") ?: 'localhost'
-        );
+        return DbConnectionsManager::getConnection($this->getConnection());
     }
 
     protected function out($string) {
@@ -39,7 +33,7 @@ class Migration extends Base {
         $ds = $this->getPeskyOrmConnection();
         $stmnt = $ds->query(DbExpr::create($test));
         if ($stmnt) {
-            $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
+            $exists = Utils::getDataFromStatement($stmnt, Utils::FETCH_VALUE);
             if (!empty($exists)) {
                 $this->out('- Table already exists');
             } else {
@@ -58,7 +52,7 @@ class Migration extends Base {
         $test = "SELECT to_regclass('{$schema}.{$tableName}')::int;";
         $stmnt = $ds->query(DbExpr::create($test));
         if ($stmnt) {
-            $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
+            $exists = Utils::getDataFromStatement($stmnt, Utils::FETCH_VALUE);
             if (empty($exists)) {
                 $this->out('- Table not exists');
             } else {
@@ -89,7 +83,7 @@ class Migration extends Base {
                     $test = StringUtils::insert($testQueryTpl, ['table' => $tableName, 'schema' => $schema]);
                     $stmnt = $ds->query(DbExpr::create($test));
                     if ($stmnt) {
-                        $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
+                        $exists = Utils::getDataFromStatement($stmnt, Utils::FETCH_VALUE);
                         if (!empty($exists)) {
                             $this->out('- Object already exists');
                         } else {
@@ -110,7 +104,7 @@ class Migration extends Base {
                 $test = StringUtils::insert($testQueryTpl, ['schema' => $schema]);
                 $stmnt = $ds->query(DbExpr::create($test));
                 if ($stmnt) {
-                    $exists = Db::processRecords($stmnt, DB::FETCH_VALUE);
+                    $exists = Utils::getDataFromStatement($stmnt, Utils::FETCH_VALUE);
                     if (!empty($exists)) {
                         $this->out('- Object already exists');
                     } else {

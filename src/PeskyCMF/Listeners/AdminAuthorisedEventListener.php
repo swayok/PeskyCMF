@@ -2,17 +2,18 @@
 
 namespace PeskyCMF\Listeners;
 
+use App\Db\Admin\Admin;
 use PeskyCMF\Event\AdminAuthorised;
-use PeskyORM\Db;
+use PeskyORM\Core\DbAdapterInterface;
 use PeskyORM\DbObject;
 
 class AdminAuthorisedEventListener {
 
     public function handle(AdminAuthorised $event) {
-        /** @var DbObject $user */
+        /** @var Admin $user */
         $user = $event->user;
         if ($user->_hasField('timezone')) {
-            $user->_getModel()->getDataSource()->onConnect(function (Db $db) use ($user) {
+            $user->_getModel()->getDataSource()->onConnect(function (DbAdapterInterface $db) use ($user) {
                 $db->setTimezone($user->timezone);
             });
             date_default_timezone_set($user->timezone);

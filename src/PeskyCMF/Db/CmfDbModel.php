@@ -4,8 +4,9 @@ namespace PeskyCMF\Db;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyORM\Db;
-use PeskyORM\DbExpr;
+use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\Core\DbExpr;
+use PeskyORM\Core\Utils;
 use PeskyORM\DbModel;
 use Swayok\Utils\StringUtils;
 
@@ -20,11 +21,9 @@ abstract class CmfDbModel extends DbModel {
 
     static public function getTimezonesList($asOptions = false) {
         if (self::$timeZonesList === null) {
-            $ds = self::_getDataSource('default');
-            $query = $ds->replaceQuotes(
-                DbExpr::create('SELECT * from `pg_timezone_names` ORDER BY `utc_offset` ASC')->get()
-            );
-            self::$timeZonesList = Db::processRecords($ds->query($query), Db::FETCH_ALL);
+            $ds = DbConnectionsManager::getConnection('default');
+            $query = $ds->quoteDbExpr(DbExpr::create('SELECT * from `pg_timezone_names` ORDER BY `utc_offset` ASC'));
+            self::$timeZonesList = Utils::getDataFromStatement($ds->query($query), Utils::FETCH_ALL);
         }
         if ($asOptions) {
             if (self::$timeZonesOptions === null) {

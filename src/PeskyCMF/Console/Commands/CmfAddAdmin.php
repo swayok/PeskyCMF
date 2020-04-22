@@ -3,7 +3,8 @@
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Database\Console\Migrations\BaseCommand;
-use PeskyORM\Db;
+use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\Core\Utils;
 use PeskyORM\DbExpr;
 
 class CmfAddAdmin extends BaseCommand {
@@ -13,21 +14,15 @@ class CmfAddAdmin extends BaseCommand {
 
     public function fire() {
         $driver = config('database.default');
-        $db = new Db(
-            $driver,
-            config("database.connections.$driver.database"),
-            config("database.connections.$driver.username"),
-            config("database.connections.$driver.password"),
-            config("database.connections.$driver.host") ?: 'localhost'
-        );
+        $db = DbConnectionsManager::getConnection($driver);
         $args = $this->input->getArguments();
         $emailOrLogin = strtolower(trim($args['email_or_login']));
         $authField = $this->input->getOption('login') ? 'login' : 'email';
         $password = \Hash::make($args['password']);
         $table = "`{$args['schema']}`.`{$args['table']}`";
-        $exists = $db::processRecords(
+        $exists = Utils::getDataFromStatement(
             $db->query(DbExpr::create("SELECT 1 FROM {$table} WHERE `{$authField}`=``{$emailOrLogin}``")),
-            $db::FETCH_VALUE
+            Utils::FETCH_VALUE
         );
         if ($exists > 0) {
             $query = "UPDATE {$table} SET `password`=``{$password}``, `role`=``{$args['role']}`` WHERE `{$authField}`=``{$emailOrLogin}``";
