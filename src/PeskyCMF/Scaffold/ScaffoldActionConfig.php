@@ -81,9 +81,6 @@ abstract class ScaffoldActionConfig {
     /**
      * @param array $fields
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws ScaffoldActionException
      */
     public function setFields(array $fields) {
         /** @var ScaffoldFieldConfig|null $config */
@@ -162,8 +159,6 @@ abstract class ScaffoldActionConfig {
      * @param string $name
      * @param null|ScaffoldFieldConfig $config
      * @return $this
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      * @throws ScaffoldActionException
      */
     public function addField($name, $config = null) {
@@ -216,9 +211,6 @@ abstract class ScaffoldActionConfig {
      * @param array $record
      * @return array
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
      */
     public function prepareRecord(array $record) {
         $permissions = [

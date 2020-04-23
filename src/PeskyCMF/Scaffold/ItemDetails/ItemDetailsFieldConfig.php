@@ -23,7 +23,7 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
                                 unset($value['url']['source']);
                             }
                             $images = [];
-                            $translationPath = CmfConfig::getInstance()->custom_dictionary_name() . '.' . $columnConfig->getDbTableConfig()->getName()
+                            $translationPath = CmfConfig::getInstance()->custom_dictionary_name() . '.' . $this->getScaffoldActionConfig()->getModel()->getName()
                                 . '.item_details.field.' . $columnConfig->getName() . '_version.';
                             foreach ($value['url'] as $key => $url) {
                                 $images[] = [

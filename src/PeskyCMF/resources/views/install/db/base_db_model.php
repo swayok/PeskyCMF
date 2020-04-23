@@ -6,7 +6,6 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\Traits\CacheableDbModel;
 use PeskyORM\Db;
 use PeskyORM\DbExpr;
-use PeskyORM\Exception\DbUtilsException;
 
 abstract class BaseDbModel extends CmfDbModel {
 
@@ -36,7 +35,7 @@ abstract class BaseDbModel extends CmfDbModel {
                 $query = $ds->replaceQuotes('SELECT ' . self::getCurrentTimeDbExpr()->get());
                 self::$currentTime = strtotime(Db::processRecords($ds->query($query), Db::FETCH_VALUE));
             } else {
-                throw new DbUtilsException('There is no DataSource callde [default]');
+                throw new \UnexpectedValueException('There is no DataSource called [default]');
             }
         }
         return self::$currentTime;

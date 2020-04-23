@@ -4,7 +4,6 @@ namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\CmfDbModel;
 use PeskyORM\DbExpr;
-use PeskyORM\Exception\DbModelException;
 use Swayok\Utils\Set;
 
 trait CacheForDbSelects {
@@ -197,17 +196,14 @@ trait CacheForDbSelects {
 
     /**
      * @return string
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws DbModelException
      */
     public function getModelCachePrefix() {
         /** @var CmfDbModel|CacheForDbSelects $this */
         $parts = [
-            $this->getConnectionAlias(),
+            static::getConnection()->getConnectionConfig()->getName(),
             $this->getTableConfig()->getSchema(),
-            $this->getDataSource()->getDbName(),
-            $this->getAlias()
+            static::getConnection()->getConnectionConfig()->getDbName(),
+            static::getAlias()
         ];
         return implode('.', $parts) . '.';
     }
@@ -259,9 +255,6 @@ trait CacheForDbSelects {
      * @param null|array $conditionsAndOptions
      * @return string
      * @throws \InvalidArgumentException
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
         $mid = $affectsSingleRecord ? 'one.' : 'many.';
@@ -324,11 +317,7 @@ trait CacheForDbSelects {
      * @param bool $asObjects - true: return DbObject | false: return array
      * @param bool $withRootAlias
      * @return array|Object[]
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbObjectException
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function select($columns = '*', $conditionsAndOptions = null, $asObjects = false, $withRootAlias = false) {
         if ($this->cachingIsPossible()) {
@@ -389,11 +378,6 @@ trait CacheForDbSelects {
      * @param string $column
      * @param null|array|string $conditionsAndOptions
      * @return array
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbQueryException
-     * @throws \PeskyORM\Exception\DbException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function selectColumnFromCache($column, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {
@@ -410,10 +394,6 @@ trait CacheForDbSelects {
      * @param string $valuesColumn
      * @param null|array|string $conditionsAndOptions
      * @return array
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbQueryException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function selectAssocFromCache($keysColumn, $valuesColumn, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {
@@ -440,8 +420,6 @@ trait CacheForDbSelects {
      * @param null|array $conditionsAndOptions
      * @param bool $removeNotInnerJoins
      * @return int
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function count($conditionsAndOptions = null, $removeNotInnerJoins = false) {
         if ($this->cachingIsPossible()) {
@@ -501,8 +479,6 @@ trait CacheForDbSelects {
      * @param string $expression - example: 'COUNT(*)', 'SUM(`field`)'
      * @param array|string|null $conditionsAndOptions
      * @return string|int|float|bool
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     public function expression($expression, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {
@@ -580,16 +556,13 @@ trait CacheForDbSelects {
     /**
      * @inheritdoc
      * Also you can use 'CACHE' option. See description of select() method
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbObjectException
      */
     public function selectOne($columns, $conditionsAndOptions, $asObject = false, $withRootAlias = false) {
         if ($this->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
             if (empty($conditionsAndOptions)) {
-                throw new DbModelException($this, 'Selecting one record without conditions is not allowed');
+                throw new \InvalidArgumentException('Selecting one record without conditions is not allowed');
             }
             $hasCacheOption = is_array($conditionsAndOptions) && array_key_exists('CACHE', $conditionsAndOptions);
             if (
@@ -630,8 +603,6 @@ trait CacheForDbSelects {
     /**
      * @inheritdoc
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     public function insert($data, $returning = null) {
         $ret = parent::insert($data, $returning);
@@ -647,12 +618,7 @@ trait CacheForDbSelects {
      * @param array[] $rows - arrays of values for $fieldNames
      * @param bool|string $returning - string: something compatible with RETURNING for postgresql query | false: do not return
      * @return int|array - int: amount of rows created | array: records (when $returning !== false)
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbException
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     public function insertMany($fieldNames, $rows, $returning = false) {
         $ret = parent::insertMany($fieldNames, $rows, $returning);
@@ -664,10 +630,6 @@ trait CacheForDbSelects {
 
     /**
      * @inheritdoc
-     * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbObjectException
      */
     public function update($data, $conditionsAndOptions = null, $returning = false) {
         /** @var CmfDbModel|CacheForDbSelects $this */
@@ -699,10 +661,6 @@ trait CacheForDbSelects {
 
     /**
      * @inheritdoc
-     * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbObjectException
      */
     public function delete($conditionsAndOptions = null, $returning = false) {
         /** @var CmfDbModel|CacheForDbSelects $this */

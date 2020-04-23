@@ -17,7 +17,6 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      * @param  string $idColumn
      * @param  array $extra
      * @return int
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function getCount($tableName, $column, $value, $excludeId = null, $idColumn = null, array $extra = []) {
         $conditions = [$column => $value];
@@ -38,7 +37,6 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      * @param  array $values
      * @param  array $extra
      * @return int
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function getMultiCount($tableName, $column, array $values, array $extra = []) {
         $conditions = [$column => $values];
@@ -53,7 +51,6 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
     /**
      * @param $tableName
      * @return CmfDbModel
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     private function getModel($tableName) {
         /** @var CmfDbModel $baseClass */

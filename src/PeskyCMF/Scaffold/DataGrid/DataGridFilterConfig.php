@@ -6,6 +6,7 @@ namespace PeskyCMF\Scaffold\DataGrid;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 
 class DataGridFilterConfig {
     /** @var CmfDbModel */
@@ -15,17 +16,23 @@ class DataGridFilterConfig {
     protected $defaultConditions = ['condition' => 'AND', 'rules' => []];
     
     static public $dbTypeToFilterType = [
-        DbColumnConfig::DB_TYPE_VARCHAR => DataGridColumnFilterConfig::TYPE_STRING,
-        DbColumnConfig::DB_TYPE_TEXT => DataGridColumnFilterConfig::TYPE_STRING,
-        DbColumnConfig::DB_TYPE_INT => DataGridColumnFilterConfig::TYPE_INTEGER,
-        DbColumnConfig::DB_TYPE_FLOAT => DataGridColumnFilterConfig::TYPE_FLOAT,
-        DbColumnConfig::DB_TYPE_BOOL => DataGridColumnFilterConfig::TYPE_BOOL,
-        DbColumnConfig::DB_TYPE_JSONB => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_STRING => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_TEXT => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_INT => DataGridColumnFilterConfig::TYPE_INTEGER,
+        Column::TYPE_FLOAT => DataGridColumnFilterConfig::TYPE_FLOAT,
+        Column::TYPE_BOOL => DataGridColumnFilterConfig::TYPE_BOOL,
+        Column::TYPE_JSON => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_JSONB => DataGridColumnFilterConfig::TYPE_STRING,
         // it is rarely needed to use date-time filter, so it is better to use date filter instead
-        DbColumnConfig::DB_TYPE_TIMESTAMP => DataGridColumnFilterConfig::TYPE_DATE,
-        DbColumnConfig::DB_TYPE_DATE => DataGridColumnFilterConfig::TYPE_DATE,
-        DbColumnConfig::DB_TYPE_TIME => DataGridColumnFilterConfig::TYPE_TIME,
-        DbColumnConfig::DB_TYPE_IP_ADDRESS => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_TIMESTAMP => DataGridColumnFilterConfig::TYPE_DATE,
+        Column::TYPE_TIMESTAMP_WITH_TZ => DataGridColumnFilterConfig::TYPE_DATE,
+        Column::TYPE_DATE => DataGridColumnFilterConfig::TYPE_DATE,
+        Column::TYPE_TIME => DataGridColumnFilterConfig::TYPE_TIME,
+        Column::TYPE_IPV4_ADDRESS => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_EMAIL => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_ENUM => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_PASSWORD => DataGridColumnFilterConfig::TYPE_STRING,
+        Column::TYPE_UNIX_TIMESTAMP => DataGridColumnFilterConfig::TYPE_INTEGER,
     ];
     protected $defaultDataGridColumnFilterConfigClass = DataGridColumnFilterConfig::class;
 
@@ -49,9 +56,6 @@ class DataGridFilterConfig {
     /**
      * @param DataGridColumnFilterConfig[] $filters
      * @return $this
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
      * @throws ScaffoldException
      */
     public function setFilters(array $filters) {
@@ -71,10 +75,6 @@ class DataGridFilterConfig {
      * @param string $columnName - 'col_name' or 'RelationAlias.col_name'
      * @param null|DataGridColumnFilterConfig $config
      * @return $this
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
      * @throws ScaffoldException
      */
     public function addFilter($columnName, $config = null) {
@@ -114,10 +114,6 @@ class DataGridFilterConfig {
     /**
      * @param string $columnName
      * @return DataGridColumnFilterConfig
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function createColumnFilterConfig($columnName) {
@@ -126,17 +122,16 @@ class DataGridFilterConfig {
         /** @var DataGridColumnFilterConfig $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         if (
-            $columnConfig->getDbType() === DbColumnConfig::DB_TYPE_INT
-            && $columnConfig->getDbTableConfig()->getName() === $model->getTableName()
-            && $model->getPkColumnName() === $columnConfig->getName()
+            $columnConfig->getType() === Column::TYPE_INT
+            && $model::getPkColumnName() === $columnConfig->getName()
         ) {
             // Primary key integer column
             return $configClass::forPositiveInteger()
                 ->setColumnName($this->getColumnNameWithAlias($columnName));
         } else {
             return $configClass::create(
-                self::$dbTypeToFilterType[$columnConfig->getDbType()],
-                $columnConfig->isNullable(),
+                self::$dbTypeToFilterType[$columnConfig->getType()],
+                $columnConfig->isValueCanBeNull(),
                 $this->getColumnNameWithAlias($columnName)
             );
         }
@@ -145,9 +140,6 @@ class DataGridFilterConfig {
     /**
      * @param $columnName
      * @return DbColumnConfig
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbTableConfigException
      * @throws ScaffoldException
      */
     public function findColumnConfig($columnName) {
@@ -169,10 +161,6 @@ class DataGridFilterConfig {
      * @param array $scannedModels
      * @param int $depth
      * @return bool|\PeskyCMF\Db\CmfDbModel
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws ScaffoldException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     protected function findRelatedModel(CmfDbModel $model, $relationAlias, array &$scannedModels = [], $depth = 0) {
         if ($model->hasTableRelation($relationAlias)) {

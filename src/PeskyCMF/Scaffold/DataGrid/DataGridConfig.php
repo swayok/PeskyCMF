@@ -96,9 +96,6 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * @param array $fieldNames
      * @return $this
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     public function setInvisibleFields(array $fieldNames) {
         foreach ($fieldNames as $fieldName) {
@@ -193,7 +190,6 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param string $orderBy
      * @param null $direction
      * @return $this
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws ScaffoldActionException
      */
     public function setOrderBy($orderBy, $direction = null) {
@@ -408,9 +404,6 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param array $records
      * @return array
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
-     * @throws \PeskyORM\Exception\DbTableConfigException
      */
     public function prepareRecords(array $records) {
         foreach ($records as $idx => &$record) {
@@ -547,9 +540,6 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @param string $name
      * @param null|DataGridFieldConfig $config
      * @return ScaffoldActionConfig
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     public function addField($name, $config = null) {
         $config = !$config && $name === static::ROW_ACTIONS_COLUMN_NAME
@@ -572,9 +562,6 @@ class DataGridConfig extends ScaffoldActionConfig {
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
      */
     public function finish() {
         if (!$this->isRowActionsFloating() && !$this->hasField(static::ROW_ACTIONS_COLUMN_NAME)) {

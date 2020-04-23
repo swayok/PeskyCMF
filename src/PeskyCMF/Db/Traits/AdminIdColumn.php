@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use App\Db\Admin\AdminTableConfig;
+use App\Db\Admin\AdminModel;
 use PeskyORM\DbColumnConfig;
 use PeskyORM\DbRelationConfig;
 
@@ -16,7 +16,7 @@ trait AdminIdColumn {
     }
 
     private function Admin() {
-        return DbRelationConfig::create($this, 'admin_id', DbRelationConfig::BELONGS_TO, AdminTableConfig::TABLE_NAME, 'id')
+        return DbRelationConfig::create('admin_id', DbRelationConfig::BELONGS_TO, AdminModel::class, 'id')
             ->setDisplayField('email');
     }
 

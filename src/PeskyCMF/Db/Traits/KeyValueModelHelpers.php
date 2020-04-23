@@ -5,7 +5,6 @@ namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\CmfDbModel;
 use PeskyORM\DbRelationConfig;
-use PeskyORM\Exception\DbModelException;
 use Swayok\Utils\NormalizeValue;
 
 trait KeyValueModelHelpers {
@@ -15,7 +14,6 @@ trait KeyValueModelHelpers {
     /**
      * Override if you wish to provide key manually
      * @return string|null - null returned when there is no foreign key
-     * @throws DbModelException
      */
     protected function getMainForeignKeyColumnName() {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
@@ -27,7 +25,7 @@ trait KeyValueModelHelpers {
                 }
             }
             if (empty($this->_detectedMainForeignKeyColumnName)) {
-                throw new DbModelException($this, get_class($this) . '::' . __METHOD__ . ' - cannot find foreign key column name');
+                throw new \BadMethodCallException(get_class($this) . '::' . __METHOD__ . ' - cannot find foreign key column name');
             }
         }
         return $this->_detectedMainForeignKeyColumnName;
@@ -38,7 +36,6 @@ trait KeyValueModelHelpers {
      * @param mixed $value
      * @param null $foreignKeyValue
      * @return array
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     static public function makeRecord($key, $value, $foreignKeyValue = null) {
         $record = [
@@ -108,11 +105,6 @@ trait KeyValueModelHelpers {
      * Update existing value or create new one
      * @param array $record - must contain: key, foreign_key, value
      * @return bool
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbObjectFieldException
-     * @throws \PeskyORM\Exception\DbObjectValidationException
-     * @throws \PeskyORM\Exception\DbObjectException
-     * @throws DbModelException
      */
     public function updateOrCreateRecord(array $record) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */

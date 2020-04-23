@@ -7,8 +7,7 @@ use PeskyORM\DbObject;
 
 abstract class CmfDbObject extends DbObject {
 
-    protected $_autoAddPkValueToPublicArray = false;
-    protected $_baseModelClass = CmfDbModel::class;
+    static protected $_baseModelClass = CmfDbModel::class;
 
     protected function _loadModel() {
         $modelClass = get_called_class() . call_user_func([$this->_baseModelClass, 'getModelClassSuffix']);

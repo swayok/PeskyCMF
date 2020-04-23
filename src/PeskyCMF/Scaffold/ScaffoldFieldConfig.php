@@ -208,7 +208,6 @@ abstract class ScaffoldFieldConfig {
      * @param bool $ignoreValueConverter
      * @return mixed
      * @throws ScaffoldFieldException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
      */
     public function convertValue($value, array $record, $ignoreValueConverter = false) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;

@@ -15,7 +15,6 @@ trait UserDataSavingHelper {
     /**
      * 1. Test if password is empty and skips its saving for user update action
      * 2. normalizes user's login field
-     * @throws \PeskyORM\Exception\DbObjectException
      */
     protected function processUserDataBeforeSave() {
         /** @var UserDataSavingHelper|CmfDbObject $this */

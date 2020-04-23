@@ -14,7 +14,6 @@ use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\DbExpr;
-use PeskyORM\Exception\DbObjectValidationException;
 use Swayok\Html\Tag;
 
 class CmfScaffoldApiController extends Controller {
@@ -27,7 +26,6 @@ class CmfScaffoldApiController extends Controller {
 
     /**
      * @return CmfDbModel
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     public function getModel() {
         if ($this->model === null) {
@@ -447,13 +445,6 @@ class CmfScaffoldApiController extends Controller {
      * @param string $inputNamePrefix - input name prefix
      *      For example if you use '_ids' instead of 'ids' - use prefix '_'
      * @return array|Response
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyCMF\PeskyCmfException
-     * @throws \PeskyORM\Exception\DbQueryException
-     * @throws \PeskyORM\Exception\DbException
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbUtilsException
-     * @throws \PeskyORM\Exception\DbModelException
      */
     private function getConditionsForBulkActions(Request $request, CmfDbModel $model, $inputNamePrefix = '') {
         $specialConditions = $this->getScaffoldConfig()->getFormConfig()->getSpecialConditions();

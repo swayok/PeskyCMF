@@ -633,7 +633,6 @@ class CmfConfig extends ConfigsContainer {
      * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
      * @param string $tableName
      * @return CmfDbModel
-     * @throws \PeskyORM\Exception\DbUtilsException
      */
     static public function getModelByTableName($tableName) {
         return call_user_func(

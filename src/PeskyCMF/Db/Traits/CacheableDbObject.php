@@ -27,7 +27,7 @@ trait CacheableDbObject {
      * @param array $relations
      * @return $this
      */
-    public function find($conditions, $fieldNames = '*', $relations = array()) {
+    public function fromDb($conditions, $fieldNames = '*', $relations = array()) {
         if ($this->_cacheOnceTimeout !== false) {
             if (!is_array($conditions)) {
                 $conditions = empty($conditions) ? [] : [$conditions];
@@ -35,7 +35,7 @@ trait CacheableDbObject {
             $conditions['CACHE'] = ['timeout' => $this->_cacheOnceTimeout];
             $this->_cacheOnceTimeout = false;
         }
-        return parent::find($conditions, $fieldNames, $relations);
+        return parent::fromDb($conditions, $fieldNames === '*' ? [] : (array)$fieldNames, $relations);
     }
 
     /**

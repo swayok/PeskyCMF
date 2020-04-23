@@ -81,7 +81,6 @@ class FormConfig extends ScaffoldActionConfig {
      * @param InputRendererConfig|ScaffoldFieldRendererConfig $rendererConfig
      * @param FormFieldConfig|ScaffoldFieldConfig $fieldConfig
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyORM\Exception\DbColumnConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     protected function configureDefaultRenderer(
@@ -173,24 +172,21 @@ class FormConfig extends ScaffoldActionConfig {
     /**
      * @param InputRendererConfig $rendererConfig
      * @param DbColumnConfig $columnConfig
-     * @throws \PeskyORM\Exception\DbColumnConfigException
      */
     protected function configureRendererByColumnConfig(
         InputRendererConfig $rendererConfig,
         DbColumnConfig $columnConfig
     ) {
         $rendererConfig
-            ->setIsRequiredForCreate($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE))
-            ->setIsRequiredForEdit($columnConfig->isRequiredOn(DbColumnConfig::ON_CREATE));
+            ->setIsRequiredForCreate($columnConfig->isValueRequiredToBeNotEmpty())
+            ->setIsRequiredForEdit($columnConfig->isValueRequiredToBeNotEmpty());
     }
 
     /**
      * @param array $fields
      * @return $this
-     * @throws \PeskyORM\Exception\DbTableConfigException
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \PeskyORM\Exception\DbModelException
      * @throws \BadMethodCallException
      */
     public function setBulkEditableFields(array $fields) {
@@ -211,10 +207,6 @@ class FormConfig extends ScaffoldActionConfig {
      * @param string $name
      * @param null|FormFieldConfig $fieldConfig - null: FormFieldConfig will be imported from $this->fields or created default one
      * @return $this
-     * @throws \PeskyORM\Exception\DbTableConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws ScaffoldActionException
      */
     public function addBulkEditableField($name, $fieldConfig = null) {
         if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getModel()->hasTableColumn($name)) {

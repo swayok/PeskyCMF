@@ -11,7 +11,6 @@ trait ResetsPasswordsViaAccessKey {
 
     /**
      * @return string
-     * @throws \PeskyORM\Exception\DbObjectException
      */
     public function getPasswordRecoveryAccessKey() {
         /** @var CmfDbObject|ResetsPasswordsViaAccessKey $this */

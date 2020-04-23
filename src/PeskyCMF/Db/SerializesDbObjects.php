@@ -2,11 +2,11 @@
 
 namespace PeskyCMF\Db;
 
+use Illuminate\Contracts\Database\ModelIdentifier;
 use Illuminate\Contracts\Queue\EntityNotFoundException;
 use PeskyORM\DbObject;
 use ReflectionClass;
 use ReflectionProperty;
-use Illuminate\Contracts\Database\ModelIdentifier;
 
 trait SerializesDbObjects {
 
@@ -63,7 +63,7 @@ trait SerializesDbObjects {
         if ($value instanceof ModelIdentifier){
             /** @var DbObject $class */
             $class = $value->class;
-            $dbObject = $class::create()->read($value->id);
+            $dbObject = $class::read($value->id);
             if (!$dbObject->exists()) {
                 throw new EntityNotFoundException($value->class, $value->id);
             }
