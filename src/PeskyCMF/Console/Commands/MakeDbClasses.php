@@ -7,13 +7,15 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\Db\Traits\AdminIdColumn;
-use PeskyCMF\Db\Traits\IdColumn;
-use PeskyCMF\Db\Traits\IsActiveColumn;
-use PeskyCMF\Db\Traits\TimestampColumns;
-use PeskyCMF\Db\Traits\UserAuthColumns;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\DbExpr;
 use PeskyORM\DbTableConfig;
+use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\IsActiveColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\IsPublishedColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\PositionColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns;
+use PeskyORMLaravel\Db\TableStructureTraits\UserAuthColumns;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 use Swayok\Utils\Set;
@@ -165,7 +167,9 @@ class MakeDbClasses extends Command {
             IdColumn::class,
             AdminIdColumn::class,
             IsActiveColumn::class,
-            TimestampColumns::class
+            TimestampColumns::class,
+            PositionColumn::class,
+            IsPublishedColumn::class,
         ];
     }
 

@@ -27,15 +27,15 @@ trait CacheableDbObject {
      * @param array $relations
      * @return $this
      */
-    public function fromDb($conditions, $fieldNames = '*', $relations = array()) {
+    public function fromDb(array $conditionsAndOptions, array $columns = [], array $readRelatedRecords = []) {
         if ($this->_cacheOnceTimeout !== false) {
-            if (!is_array($conditions)) {
-                $conditions = empty($conditions) ? [] : [$conditions];
+            if (!is_array($conditionsAndOptions)) {
+                $conditionsAndOptions = empty($conditionsAndOptions) ? [] : [$conditionsAndOptions];
             }
-            $conditions['CACHE'] = ['timeout' => $this->_cacheOnceTimeout];
+            $conditionsAndOptions['CACHE'] = ['timeout' => $this->_cacheOnceTimeout];
             $this->_cacheOnceTimeout = false;
         }
-        return parent::fromDb($conditions, $fieldNames === '*' ? [] : (array)$fieldNames, $relations);
+        return parent::fromDb($conditionsAndOptions, $columns, $readRelatedRecords);
     }
 
     /**
@@ -43,8 +43,8 @@ trait CacheableDbObject {
      * @param null $relations
      * @return $this
      */
-    public function reload($fieldNames = '*', $relations = null) {
+    public function reload(array $columns = [], array $readRelatedRecords = []) {
         $this->_cacheOnceTimeout = false;
-        return parent::reload($fieldNames, $relations);
+        return parent::reload($columns, $readRelatedRecords);
     }
 }

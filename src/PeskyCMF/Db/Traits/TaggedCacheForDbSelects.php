@@ -115,7 +115,7 @@ trait TaggedCacheForDbSelects {
      */
     public function cleanRecordCache($record, $cleanRelatedModelsCache = null) {
         /** @var CmfDbModel|TaggedCacheForDbSelects $this */
-        if (!($record instanceof DbObject) || $record->exists()) {
+        if (!($record instanceof DbObject) || $record->existsInDb()) {
             \Cache::tags($this->getRecordCacheTag($record))->flush();
         }
         $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
@@ -144,13 +144,13 @@ trait TaggedCacheForDbSelects {
     public function getRecordCacheTag($record) {
         /** @var CmfDbModel|TaggedCacheForDbSelects $this */
         if ($record instanceof DbObject) {
-            $id = $record->exists() ? $record->_getPkValue() : null;
+            $id = $record->existsInDb() ? $record->getPrimaryKeyValue() : null;
         } else if (!is_array($record)) {
             $id = $record;
-        } else if (!empty($record[$this->getPkColumnName()])) {
-            $id = $record[$this->getPkColumnName()];
-        } else if (!empty($record[$this->getAlias()]) && !empty($record[$this->getAlias()][$this->getPkColumnName()])) {
-            $id = $record[$this->getAlias()][$this->getPkColumnName()];
+        } else if (!empty($record[static::getPkColumnName()])) {
+            $id = $record[static::getPkColumnName()];
+        } else if (!empty($record[$this->getTableAlias()]) && !empty($record[$this->getTableAlias()][static::getPkColumnName()])) {
+            $id = $record[$this->getTableAlias()][static::getPkColumnName()];
         }
         if (empty($id)) {
             throw new \UnexpectedValueException('Data passed to getRecordCacheTag() has no value for primary key');
@@ -178,13 +178,13 @@ trait TaggedCacheForDbSelects {
         if ($data === '{!404!}') {
             $data = $callback();
             if ($data instanceof DbObject) {
-                $data = $data->exists() ? $data->toPublicArray() : [];
+                $data = $data->existsInDb() ? $data->toArray() : [];
             }
             $tags = $cacheSettings['tags'];
             $tags[] = $this->getModelCachePrefix();
             if ($affectsSingleRecord) {
                 $tags[] = $this->getSelectOneCacheTag();
-                if (!empty($data) && is_array($data) && !empty($data[$this->getPkColumnName()])) {
+                if (!empty($data) && is_array($data) && !empty($data[static::getPkColumnName()])) {
                     // create tag only for record with primary key value
                     $tags[] = $this->getRecordCacheTag($data);
                 }

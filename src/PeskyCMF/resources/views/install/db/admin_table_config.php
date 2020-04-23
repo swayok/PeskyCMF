@@ -3,12 +3,11 @@
 namespace App\Db\Admin;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\Traits\IdColumn;
-use PeskyCMF\Db\Traits\IsActiveColumn;
-use PeskyCMF\Db\Traits\TimestampColumns;
-use PeskyCMF\Db\Traits\UserAuthColumns;
+use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\IsActiveColumn;
+use PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns;
+use PeskyORMLaravel\Db\TableStructureTraits\UserAuthColumns;
 use PeskyORM\DbColumnConfig;
-use PeskyORM\DbColumnConfig\EnumColumnConfig;
 use PeskyORM\DbRelationConfig;
 use PeskyORM\DbTableConfig;
 
@@ -58,7 +57,7 @@ class AdminTableConfig extends DbTableConfig {
     }
 
     private function role() {
-        return EnumColumnConfig::create()
+        return DbColumnConfig::create(DbColumnConfig::TYPE_STRING)
             ->setAllowedValues(CmfConfig::getInstance()->roles_list())
             ->setIsNullable(false)
             ->setIsRequired(true)
@@ -66,7 +65,7 @@ class AdminTableConfig extends DbTableConfig {
     }
 
     private function language() {
-        return EnumColumnConfig::create()
+        return DbColumnConfig::create(DbColumnConfig::TYPE_STRING)
             ->setAllowedValues(CmfConfig::getInstance()->locales())
             ->setIsRequired(true)
             ->setIsNullable(false)
