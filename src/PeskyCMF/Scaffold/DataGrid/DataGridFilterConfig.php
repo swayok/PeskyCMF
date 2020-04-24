@@ -7,6 +7,8 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyORM\DbColumnConfig;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\Table;
+use PeskyORM\ORM\TableInterface;
 
 class DataGridFilterConfig {
     /** @var CmfDbModel */
@@ -160,24 +162,24 @@ class DataGridFilterConfig {
      * @param string $relationAlias
      * @param array $scannedModels
      * @param int $depth
-     * @return bool|\PeskyCMF\Db\CmfDbModel
+     * @return bool|\PeskyCMF\Db\CmfDbModel|Table|TableInterface
      */
     protected function findRelatedModel(CmfDbModel $model, $relationAlias, array &$scannedModels = [], $depth = 0) {
         if ($model->hasTableRelation($relationAlias)) {
-            return $model->getRelatedModel($relationAlias);
+            return $model->getTableRealtaion($relationAlias)->getForeignTable();
         }
-        $scannedModels[] = $model->getTableName();
+        $scannedModels[] = $model::getName();
         foreach ($model->getTableRealtaions() as $alias => $relationConfig) {
             /** @var CmfDbModel $relModel */
-            $relModel = $model->getRelatedModel($alias);
-            if (!empty($scannedModels[$relModel->getTableName()])) {
+            $relModel = $model->getTableRealtaion($alias)->getForeignTable();
+            if (!empty($scannedModels[$relModel::getName()])) {
                 continue;
             }
             $modelFound = $this->findRelatedModel($relModel, $relationAlias, $scannedModels, $depth + 1);
             if ($modelFound) {
                 return $modelFound;
             }
-            $scannedModels[] = $relModel->getTableName();
+            $scannedModels[] = $relModel::getName();
         }
         if (!$depth === 0 && empty($modelFound)) {
             throw new ScaffoldException("Cannot find relation [$relationAlias] in model [{$model->getAlias()}] or among its relations");

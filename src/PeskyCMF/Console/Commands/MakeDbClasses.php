@@ -8,7 +8,10 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\CmfDbObject;
 use PeskyCMF\Db\Traits\AdminIdColumn;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\Core\Utils;
 use PeskyORM\DbExpr;
+use PeskyORM\DbModel;
 use PeskyORM\DbTableConfig;
 use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
 use PeskyORMLaravel\Db\TableStructureTraits\IsActiveColumn;
@@ -89,23 +92,25 @@ class MakeDbClasses extends Command {
         if (empty($columns)) {
             return false;
         }
+        /** @var DbModel $modelParentClass */
+        $modelParentClass = $this->modelParentClass;
         $dataForViews = [
             'folder' => $folder,
             'table' => $tableName,
             'schema' => $tableSchema,
             'columns' => $columns,
-            'modelParentClass' => $this->modelParentClass,
+            'modelParentClass' => $modelParentClass,
             'objectParentClass' => $this->objectParentClass,
             'tableConfigParentClass' => $this->tableConfigParentClass,
             'scaffoldConfigParentClass' => $this->scaffoldConfigParentClass,
-            'modelClassName' => call_user_func([$this->modelParentClass, 'getModelNameByTableName'], $tableName),
-            'objectClassName' => call_user_func([$this->modelParentClass, 'getObjectNameByTableName'], $tableName),
-            'tableConfigClassName' => call_user_func([$this->modelParentClass, 'getTableConfigNameByTableName'], $tableName),
+            'modelClassName' => $modelParentClass::getModelNameByTableName($tableName),
+            'objectClassName' => $modelParentClass::getObjectNameByTableName($tableName),
+            'tableConfigClassName' => $modelParentClass::getTableConfigNameByTableName($tableName),
             'scaffoldConfigClassName' => CmfConfig::getInstance()->getScaffoldConfigNameByTableName($tableName),
             'traitsForTableConfig' => $this->getTraitsForTableConfig()
         ];
         $dataForViews['modelAlias'] = $dataForViews['objectClassName'];
-        $dataForViews['namespace'] = call_user_func([$this->modelParentClass, 'getRootNamespace']) . '\\' . $dataForViews['objectClassName'];
+        $dataForViews['namespace'] = $modelParentClass::getRootNamespace() . '\\' . $dataForViews['objectClassName'];
         $dataForViews['files']['model'] = $folder . DIRECTORY_SEPARATOR . $dataForViews['modelClassName'] . '.php';
         $dataForViews['files']['object'] = $folder . DIRECTORY_SEPARATOR . $dataForViews['objectClassName'] . '.php';
         $dataForViews['files']['table_config'] = $folder . DIRECTORY_SEPARATOR . $dataForViews['tableConfigClassName'] . '.php';
@@ -115,9 +120,9 @@ class MakeDbClasses extends Command {
     }
 
     protected function getColumns($tableName, $tableSchema = 'public') {
-        $dataSource = call_user_func([$this->modelParentClass, '_getDataSource'], 'default');
+        $dataSource = DbConnectionsManager::getConnection('default');
         $query = "SELECT * FROM `information_schema`.`columns` WHERE `table_name` = ``$tableName`` AND `table_schema` = ``$tableSchema``";
-        $columns = $dataSource->processRecords($dataSource->query(DbExpr::create($query)));
+        $columns = Utils::getDataFromStatement($dataSource->query(DbExpr::create($query)));
         if (empty($columns)) {
             $this->line("Table [$tableName] possibly not exists");
             return false;
@@ -127,8 +132,10 @@ class MakeDbClasses extends Command {
     }
 
     protected function getFolderAndValidate($tableName, $modelClass) {
+        /** @var DbModel $modelParentClass */
+        $modelParentClass = $this->modelParentClass;
         $folder = preg_replace(
-            ['%\\\[^\\\]+?' . call_user_func([$this->modelParentClass, 'getModelClassSuffix']) . '$%is', '%\\\%', '%^App%'],
+            ['%\\\[^\\\]+?' . $modelParentClass::getModelClassSuffix() . '$%is', '%\\\%', '%^App%'],
             ['', DIRECTORY_SEPARATOR, $this->getBasePathToApp()],
             $modelClass
         );

@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Db;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyORM\Core\DbConnectionsManager;
 use PeskyORM\Core\DbExpr;
@@ -53,6 +52,7 @@ abstract class CmfDbModel extends DbModel {
     }
 
     /**
+     * @deprecated
      * MUST BE OVERRIDEN
      * @return string
      */
@@ -70,30 +70,20 @@ abstract class CmfDbModel extends DbModel {
     }
 
     static public function getFullModelClassByTableName($tableName) {
-        $rootNs = call_user_func([get_called_class(), 'getRootNamespace']);
+        /** @var DbModel $class */
+        $class = static::class;
+        $rootNs = $class::getRootNamespace();
         $subfolder = StringUtils::modelize($tableName);
-        $modelClassName = call_user_func([get_called_class() ,'getModelNameByTableName'], $tableName);
+        
+        $modelClassName = $class::getModelNameByTableName($tableName);
         return  $rootNs . '\\' . $subfolder . '\\' .$modelClassName;
     }
 
     static public function getFullDbObjectClass($dbObjectNameOrTableName) {
         /** @var CmfDbModel $calledClass */
-        $calledClass = get_called_class();
-        $modelClassName = call_user_func(
-            [$calledClass, 'getFullModelClassNameByName'],
-            StringUtils::modelize($dbObjectNameOrTableName)
-        );
+        $calledClass = static::class;
+        $modelClassName = $calledClass::getFullModelClassNameByName(StringUtils::modelize($dbObjectNameOrTableName));
         return preg_replace('%' . $calledClass::$modelClassSuffix . '$%', '', $modelClassName);
-    }
-
-    /**
-     * @return ScaffoldSectionConfig
-     */
-    public function getScaffoldConfig() {
-        if (!$this->scaffoldConfig) {
-            $this->scaffoldConfig = CmfConfig::getScaffoldConfig($this, $this->getTableName());
-        }
-        return $this->scaffoldConfig;
     }
 
 }

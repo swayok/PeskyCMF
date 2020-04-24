@@ -68,7 +68,7 @@ trait TaggedCacheForDbSelects {
                     throw new \InvalidArgumentException("Model has no relation named $relationKey");
                 }
                 /** @var CmfDbModel|TaggedCacheForDbSelects $model */
-                $model = $this->getRelatedModel($relationKey);
+                $model = $this->getTableRealtaion($relationKey)->getForeignTable();
                 $tags[] = $model->getModelCachePrefix();
             }
             if (!empty($tags)) {
