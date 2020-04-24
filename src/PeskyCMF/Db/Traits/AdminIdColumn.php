@@ -17,7 +17,7 @@ trait AdminIdColumn {
 
     private function Admin() {
         return DbRelationConfig::create('admin_id', DbRelationConfig::BELONGS_TO, AdminModel::class, 'id')
-            ->setDisplayField('email');
+            ->setDisplayColumnName('email');
     }
 
 }

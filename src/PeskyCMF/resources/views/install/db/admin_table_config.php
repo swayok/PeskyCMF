@@ -76,7 +76,7 @@ class AdminTableConfig extends DbTableConfig {
 
     private function ParentAdmin() {
         return DbRelationConfig::create($this, 'parent_id', DbRelationConfig::BELONGS_TO, self::TABLE_NAME, 'id')
-            ->setDisplayField(CmfConfig::getInstance()->user_login_column());
+            ->setDisplayColumnName(CmfConfig::getInstance()->user_login_column());
     }
 
 }

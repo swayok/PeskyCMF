@@ -18,7 +18,7 @@ trait KeyValueModelHelpers {
     protected function getMainForeignKeyColumnName() {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
         if (empty($this->_detectedMainForeignKeyColumnName)) {
-            foreach ($this->getTableConfig()->getRelations() as $relationConfig) {
+            foreach ($this->getTableStructure()->getRelations() as $relationConfig) {
                 if ($relationConfig->getType() === DbRelationConfig::BELONGS_TO) {
                     $this->_detectedMainForeignKeyColumnName = $relationConfig->getColumn();
                     break;
@@ -96,7 +96,7 @@ trait KeyValueModelHelpers {
      * @param null|array $conditionsAndOptions
      * @return array
      */
-    public function selectAssoc($keysColumn = 'key', $valuesColumn = 'value', $conditionsAndOptions = null) {
+    static public function selectAssoc($keysColumn, $valuesColumn, array $conditionsAndOptions = [], \Closure $configurator = null) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
         return static::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions));
     }
@@ -109,9 +109,9 @@ trait KeyValueModelHelpers {
     public function updateOrCreateRecord(array $record) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
         if (empty($record['key'])) {
-            throw new DbModelException($this, '$record does not contain [key] key or its value is empty');
+            throw new \InvalidArgumentException('$record does not contain [key] key or its value is empty');
         } else if (!array_key_exists('value', $record)) {
-            throw new DbModelException($this, '$record does not contain [value] key');
+            throw new \InvalidArgumentException('$record does not contain [value] key');
         }
         $conditions = [
             'key' => $record['key']
@@ -119,11 +119,11 @@ trait KeyValueModelHelpers {
         $fkName = $this->getMainForeignKeyColumnName();
         if (!empty($fkName)) {
             if (empty($record[$fkName])) {
-                throw new DbModelException($this, "\$record does not contain [{$fkName}] key or its value is empty");
+                throw new \InvalidArgumentException("\$record does not contain [{$fkName}] key or its value is empty");
             }
             $conditions[$fkName] = $record[$fkName];
         }
-        $object = $this->getOwnDbObject()->find($conditions);
+        $object = $this->newRecord()->fromDb($conditions);
         if ($object->exists()) {
             return $object
                 ->begin()
@@ -149,21 +149,19 @@ trait KeyValueModelHelpers {
      */
     public function updateOrCreateRecords(array $records) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
-        $this->begin();
+        $this::beginTransaction();
         try {
             foreach ($records as $record) {
                 $success = $this->updateOrCreateRecord($record);
                 if (!$success) {
-                    $this->rollback();
+                    $this::rollBackTransaction();
                     return false;
                 }
             }
-            $this->commit();
+            $this::commitTransaction();
             return true;
         } catch (\Exception $exc) {
-            if ($this->inTransaction()) {
-                $this->rollback();
-            }
+            $this::rollBackTransactionIfExists();
             throw $exc;
         }
     }
@@ -174,7 +172,6 @@ trait KeyValueModelHelpers {
      *      getMainForeignKeyColumnName() method returns null
      * @param mixed $default
      * @return array
-     * @throws DbModelException
      */
     public function selectOneByKeyAndForeignKeyValue($key, $foreignKeyValue = null, $default = []) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
@@ -184,14 +181,14 @@ trait KeyValueModelHelpers {
         $fkName = $this->getMainForeignKeyColumnName();
         if ($fkName !== null) {
             if (empty($foreignKeyValue)) {
-                throw new DbModelException($this, 'Foreign key value is required');
+                throw new \InvalidArgumentException('$foreignKeyValue argument is required');
             }
             $conditions[$fkName] = $foreignKeyValue;
         } else if (!empty($foreignKeyValue)) {
-            throw new DbModelException($this, 'Foreign key value provided for model that does not have main foreign key column');
+            throw new \InvalidArgumentException('$foreignKeyValue argument provided for model that does not have main foreign key column');
         }
         /** @var array $record */
-        $record = $this->selectOne('*', $conditions, false);
+        $record = static::selectOne('*', $conditions, false);
         return empty($record) ? $default : static::decodeValue($record['value']);
     }
 }

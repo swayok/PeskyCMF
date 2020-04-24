@@ -478,10 +478,8 @@ class CmfScaffoldApiController extends Controller {
                         $filterConditions,
                         $specialConditions
                     );
-                    $subQuery = $model->builder()
-                        ->fromOptions($model->resolveContains($subQueryConditions))
-                        ->fields(['id'])
-                        ->buildQuery(DbExpr::create("`{$model->getAlias()}`.`id`"), false, false);
+                    [$columns, $subQueryConditions] = $model::resolveContains([], $subQueryConditions);
+                    $subQuery = $model::makeSelect([$model::getPkColumnName()], $subQueryConditions)->getQuery();
                     $conditions = [DbExpr::create("`{$model->getPkColumnName()}` IN ({$subQuery})")];
                 } else {
                     $conditions = array_merge($filterConditions, $specialConditions);

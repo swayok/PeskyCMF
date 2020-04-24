@@ -56,7 +56,7 @@ class DataGridFilterConfig {
     }
 
     /**
-     * @param DataGridColumnFilterConfig[] $filters
+     * @param DataGridColumnFilterConfig[]|string[] $filters
      * @return $this
      * @throws ScaffoldException
      */

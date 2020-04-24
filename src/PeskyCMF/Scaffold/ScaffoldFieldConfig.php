@@ -277,13 +277,13 @@ abstract class ScaffoldFieldConfig {
         if (empty($relationConfig)) {
             throw new ScaffoldFieldException($this, "Column [{$columnConfig->getName()}] has no fitting relation");
         }
-        if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getForeignColumn()])) {
+        if (empty($record[$relationAlias]) || empty($record[$relationAlias][$relationConfig->getForeignColumnName()])) {
             return CmfConfig::transBase('.item_details.field.no_relation');
         } else {
             if (empty($linkLabel)) {
-                $displayField = $relationConfig->getDisplayField();
+                $displayField = $relationConfig->getDisplayColumnName();
                 if (empty($record[$relationAlias][$displayField])) {
-                    $displayField = $relationConfig->getForeignColumn();
+                    $displayField = $relationConfig->getForeignColumnName();
                 }
                 $linkLabel = $record[$relationAlias][$displayField];
             }
