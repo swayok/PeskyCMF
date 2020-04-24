@@ -188,7 +188,7 @@ trait KeyValueModelHelpers {
             throw new \InvalidArgumentException('$foreignKeyValue argument provided for model that does not have main foreign key column');
         }
         /** @var array $record */
-        $record = static::selectOne('*', $conditions, false);
+        $record = static::selectOne('*', $conditions);
         return empty($record) ? $default : static::decodeValue($record['value']);
     }
 }

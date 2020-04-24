@@ -454,8 +454,8 @@ trait CacheForDbSelects {
                     $count = $model->_getCachedData(
                         false,
                         $cacheSettings,
-                        function () use ($conditionsAndOptions, $removeNotInnerJoins) {
-                            return parent::count($conditionsAndOptions, $removeNotInnerJoins);
+                        function () use ($configurator, $conditionsAndOptions, $removeNotInnerJoins) {
+                            return parent::count($conditionsAndOptions, $configurator, $removeNotInnerJoins);
                         }
                     );
                     return $count;
@@ -463,7 +463,7 @@ trait CacheForDbSelects {
             }
         }
         unset($conditionsAndOptions['CACHE']);
-        return parent::count($conditionsAndOptions, $removeNotInnerJoins);
+        return parent::count($conditionsAndOptions, $configurator, $removeNotInnerJoins);
     }
 
     /**
@@ -548,7 +548,7 @@ trait CacheForDbSelects {
      * @param bool $withRootAlias
      * @return array|bool|Object
      */
-    public function selectOneFromCache($columns, $conditionsAndOptions = null, $asObject = false, $withRootAlias = false) {
+    public function selectOneFromCache($columns, $conditionsAndOptions = null) {
         if ($this->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
             if (is_numeric($conditionsAndOptions) || is_int($conditionsAndOptions)) {
@@ -556,15 +556,14 @@ trait CacheForDbSelects {
             }
             static::addCacheOptionToConditionsAndOptions($conditionsAndOptions, true);
         }
-        return static::selectOne($columns, $conditionsAndOptions, $asObject, $withRootAlias);
+        return static::selectOne($columns, $conditionsAndOptions);
     }
 
     /**
      * @inheritdoc
      * Also you can use 'CACHE' option. See description of select() method
-     * @throws \BadMethodCallException
      */
-    static public function selectOne($columns, array $conditionsAndOptions, $asObject = false, $withRootAlias = false) {
+    static public function selectOne($columns, array $conditionsAndOptions, ?\Closure $configurator = null) {
         /** @var DbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
@@ -595,17 +594,18 @@ trait CacheForDbSelects {
                     $record = $model->_getCachedData(true, $cacheSettings, function () use ($columns, $conditionsAndOptions) {
                         return parent::selectOne($columns, $conditionsAndOptions, false, false);
                     });
-                    if ($asObject) {
-                        $record = static::getOwnDbObject($record, false, true);
-                    } else if ($withRootAlias) {
-                        $record = array($model->getTableAlias() => $record);
-                    }
                     return $record;
                 }
             }
         }
         unset($conditionsAndOptions['CACHE']);
-        return parent::selectOne($columns, $conditionsAndOptions, $asObject, $withRootAlias);
+        return parent::selectOne($columns, $conditionsAndOptions, $configurator);
+    }
+    
+    static public function selectOneAsDbRecord($columns, array $conditionsAndOptions, ?\Closure $configurator = null) {
+        /** @var DbModel|CacheForDbSelects $model */
+        $data = static::selectOne($columns, $conditionsAndOptions, $configurator);
+        return static::getInstance()->newRecord()->fromData($data, true, false);
     }
 
     /**
