@@ -28,9 +28,9 @@ trait ResetsPasswordsViaAccessKey {
     public function getAdditionalFieldsForPasswordRecoveryAccessKey() {
         /** @var CmfDbObject|ResetsPasswordsViaAccessKey $this */
         $fields = [];
-        if ($this->_hasField('updated_at')) {
+        if ($this::hasColumn('updated_at')) {
             $fields[] = 'updated_at';
-        } else if ($this->_hasField('password')) {
+        } else if ($this::hasColumn('password')) {
             $fields[] = 'password';
         }
         return $fields;
@@ -69,7 +69,7 @@ trait ResetsPasswordsViaAccessKey {
             if (empty($data[$fieldName])) {
                 return false;
             }
-            $fieldType = $user->_getField($fieldName)->getType();
+            $fieldType = $user::getColumn($fieldName)->getType();
             switch ($fieldType) {
                 case DbColumnConfig::TYPE_DATE:
                     $conditions[$fieldName . '::date'] = DbExpr::create("``$data[$fieldName]``::date");
@@ -84,7 +84,7 @@ trait ResetsPasswordsViaAccessKey {
                     $conditions[$fieldName] = $data[$fieldName];
             }
         }
-        if (!$user->find($conditions)->exists()) {
+        if (!$user->fromDb($conditions)->existsInDb()) {
             return false;
         }
         return $user;

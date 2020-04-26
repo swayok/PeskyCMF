@@ -42,8 +42,8 @@
                             <input class="form-control" value="{{ $admin->$loginColumn }}" name="{{ $loginColumn }}" id="{{ $loginColumn }}-input" type="text" required="required">
                         </div>
                     @endif
-                    @if ($admin->_hasField('email'))
-                        <?php $emailRequired = $admin->_getField('email')->isRequiredOnAnyAction(); ?>
+                    @if ($admin::hasColumn('email'))
+                        <?php $emailRequired = $admin::getColumn('email')->isValueRequiredToBeNotEmpty(); ?>
                         <div class="form-group">
                             <label for="email-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.email') . ($emailRequired ? '*' : '') }}</label>
                             <input class="form-control" value="{{ $admin->email }}" name="email" id="email-input" type="email" @if($emailRequired) required="required" @endif>
@@ -53,13 +53,13 @@
                         <label for="new-password-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.new_password') }}</label>
                         <input class="form-control" value="" name="new_password" id="new-password-input" type="password" autocomplete="off">
                     </div>
-                    @if ($admin->_hasField('name'))
+                    @if ($admin::hasColumn('name'))
                         <div class="form-group">
                             <label for="name-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.name') }}</label>
                             <input class="form-control" value="{{ $admin->name }}" name="name" id="name-input" type="text">
                         </div>
                     @endif
-                    @if ($admin->_hasField('language'))
+                    @if ($admin::hasColumn('language'))
                         <div class="form-group">
                             <label for="language-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.language') }}</label>
                             <select class="form-control" data-value=" {{ $admin->language }}" name="language" id="language-input" required="required">
@@ -69,7 +69,7 @@
                             </select>
                         </div>
                     @endif
-                    @if ($admin->_hasField('timezone'))
+                    @if ($admin::hasColumn('timezone'))
                         <div class="form-group">
                             <label for="timezone-input">{{ \PeskyCMF\Config\CmfConfig::transCustom('.page.profile.input.timezone') }}</label>
                             <select class="form-control" data-value="{{ $admin->timezone }}" name="timezone" id="timezone-input" required="required">

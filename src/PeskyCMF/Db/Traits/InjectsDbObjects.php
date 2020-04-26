@@ -44,7 +44,7 @@ trait InjectsDbObjects {
             ];
             $this->addConditionsForDbObjectInjection($route, $object, $conditions);
             $this->addParentIdsConditionsForDbObjectInjection($route, $object, $conditions);
-            $object->find($conditions);
+            $object->fromDb($conditions);
             if (!$object->exists()) {
                 $this->sendRecordNotFoundResponse();
             }
@@ -74,7 +74,7 @@ trait InjectsDbObjects {
      */
     protected function addParentIdsConditionsForDbObjectInjection(Route $route, CmfDbObject $object, array &$conditions) {
         foreach ($route->parameterNames() as $name) {
-            if ($object->_hasField($name)) {
+            if ($object::hasColumn($name)) {
                 $conditions[$name] = $route->parameter($name);
             }
         }

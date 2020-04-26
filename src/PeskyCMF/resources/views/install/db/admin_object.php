@@ -5,7 +5,6 @@ namespace App\Db\Admin;
 use App\Db\BaseDbObject;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use PeskyCMF\Db\Traits\Authenticatable;
-use PeskyCMF\Db\Traits\UserDataSavingHelper;
 
 /**
  * @package App\DbObject
@@ -45,7 +44,6 @@ use PeskyCMF\Db\Traits\UserDataSavingHelper;
  */
 class Admin extends BaseDbObject implements AuthenticatableContract {
 
-    use Authenticatable,
-        UserDataSavingHelper;
+    use Authenticatable;
 
 }

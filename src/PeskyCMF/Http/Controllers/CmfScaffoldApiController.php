@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
@@ -14,6 +15,9 @@ use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\DbExpr;
+use PeskyORM\Exception\InvalidDataException;
+use PeskyORM\ORM\Record;
+use PeskyORM\ORM\Table;
 use Swayok\Html\Tag;
 
 class CmfScaffoldApiController extends Controller {
@@ -102,8 +106,8 @@ class CmfScaffoldApiController extends Controller {
                 ->setMessage(CmfConfig::transBase('.action.edit.forbidden'))
                 ->goBack(route('cmf_items_table', ['table_name' => $this->getTableNameForRoutes()]));
         }
-        $object = $model::getOwnDbObject();
-        if (!$object->_getPkField()->isValidValueFormat($id)) {
+        $object = $model->newRecord();
+        if (!$object::validateValue($object::getPrimaryKeyColumn(), $id)) {
             return $this->sendItemNotFoundResponse($model);
         }
         if ($isItemDetails) {
@@ -112,14 +116,14 @@ class CmfScaffoldApiController extends Controller {
             $actionConfig = $this->getScaffoldConfig()->getFormConfig();
         }
         $conditions = $actionConfig->getSpecialConditions();
-        $conditions[$model->getPkColumnName()] = $id;
+        $conditions[$model::getPkColumnName()] = $id;
         if ($actionConfig->hasContains()) {
             $conditions['CONTAIN'] = $actionConfig->getContains();
         }
-        if (!$object->find($conditions)->exists()) {
+        if (!$object->fromDb($conditions)->existsInDb()) {
             return $this->sendItemNotFoundResponse($model);
         }
-        $data = $object->toPublicArray(null, true, false);
+        $data = $object->toArray([], ['*'], false);
         if (
             (
                 $isItemDetails
@@ -148,7 +152,7 @@ class CmfScaffoldApiController extends Controller {
                 ->goBack(route('cmf_items_table', ['table_name' => $this->getTableNameForRoutes()]));
         }
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
-        $data = $formConfig->alterDefaultValues($this->getModel()->getOwnDbObject()->getDefaultsArray());
+        $data = $formConfig->alterDefaultValues($this->getModel()->newRecord()->getDefaults());
         return new JsonResponse($formConfig->prepareRecord($data));
     }
 
@@ -182,7 +186,7 @@ class CmfScaffoldApiController extends Controller {
         if (count($errors) !== 0) {
             return $this->sendValidationErrorsResponse($errors);
         }
-        unset($data[$model->getPkColumnName()]);
+        unset($data[$model::getPkColumnName()]);
         if ($formConfig->hasBeforeSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeSaveCallback(), true, $data, $formConfig);
             if (empty($data)) {
@@ -196,43 +200,22 @@ class CmfScaffoldApiController extends Controller {
                 }
             }
         }
-        unset($data[$model->getPkColumnName()]); //< to be 100% sure =)
+        unset($data[$model::getPkColumnName()]); //< to be 100% sure =)
         if (!empty($data)) {
-            $model->begin();
+            $model::beginTransaction();
             try {
                 $dbData = array_diff_key($data, $formConfig->getNonDbFields());
-                $object = $model::getOwnDbObject($dbData);
-                $success = $object->save();
-                if (!$success) {
-                    $model->rollback();
-                    return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
-                        ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
-                } else if ($formConfig->hasAfterSaveCallback()) {
-                    $success = call_user_func($formConfig->getAfterSaveCallback(), true, $data, $object, $formConfig);
-                    if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
-                        if ($success->getStatusCode() < 400) {
-                            $model->commit();
-                        } else {
-                            $model->rollback();
-                        }
-                        return $success;
-                    } else if ($success !== true) {
-                        $model->rollback();
-                        throw new ScaffoldException(
-                            'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
-                        );
-                    }
-                }
-                $model->commit();
-            } catch (DbObjectValidationException $exc) {
-                if ($model->inTransaction()) {
-                    $model->rollback();
-                }
-                return $this->sendValidationErrorsResponse($exc->getValidationErrors());
+                $object = $model
+                    ->newRecord()
+                    ->fromData($dbData)
+                    ->save();
+                $this->runAfterSaveCallback($formConfig, $model, $object, $data);
+                $model::commitTransaction();
+            } catch (InvalidDataException $exc) {
+                $model::rollBackTransactionIfExists();
+                return $this->sendValidationErrorsResponse($exc->getErrors(true));
             } catch (\Exception $exc) {
-                if ($model->inTransaction()) {
-                    $model->rollback();
-                }
+                $model::rollBackTransactionIfExists();
                 throw $exc;
             }
         }
@@ -249,26 +232,26 @@ class CmfScaffoldApiController extends Controller {
         $model = $this->getModel();
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
         $expectedFields = array_keys($formConfig->getFields());
-        $expectedFields[] = $model->getPkColumnName();
+        $expectedFields[] = $model::getPkColumnName();
         $data = array_intersect_key($request->data(), array_flip($expectedFields));
         $errors = $formConfig->validateDataForEdit($data);
         if (count($errors) !== 0) {
             return $this->sendValidationErrorsResponse($errors);
         }
-        if (!$request->data($model->getPkColumnName())) {
+        if (!$request->data($model::getPkColumnName())) {
             return $this->sendItemNotFoundResponse($model);
         }
-        $id = $request->data($model->getPkColumnName());
-        $object = $model::getOwnDbObject();
-        if (!$object->_getPkField()->isValidValueFormat($id)) {
+        $id = $request->data($model::getPkColumnName());
+        $object = $model->newRecord();
+        if (!$object::validateValue($object::getPrimaryKeyColumn(), $id)) {
             return $this->sendItemNotFoundResponse($model);
         }
         $conditions = $formConfig->getSpecialConditions();
-        $conditions[$model->getPkColumnName()] = $id;
-        if (!$object->find($conditions)->exists()) {
+        $conditions[$model::getPkColumnName()] = $id;
+        if (!$object->fromDb($conditions)->existsInDb()) {
             return $this->sendItemNotFoundResponse($model);
         }
-        if (!$this->getScaffoldConfig()->isRecordEditAllowed($object->toPublicArrayWithoutFiles())) {
+        if (!$this->getScaffoldConfig()->isRecordEditAllowed($object->toArrayWithoutFiles())) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(CmfConfig::transBase('.action.edit.forbidden_for_record'))
                 ->goBack(route('cmf_items_table', ['table_name' => $this->getTableNameForRoutes()]));
@@ -286,47 +269,48 @@ class CmfScaffoldApiController extends Controller {
                 }
             }
         }
-        unset($data[$model->getPkColumnName()]);
+        unset($data[$model::getPkColumnName()]);
         if (!empty($data)) {
-            $model->begin();
+            $model::beginTransaction();
             try {
                 $dbData = array_diff_key($data, $formConfig->getNonDbFields());
-                $success = $object->begin()->updateValues($dbData)->commit();
-                if (!$success) {
-                    $model->rollback();
-                    return cmfServiceJsonResponse(HttpCode::SERVER_ERROR)
-                        ->setMessage(CmfConfig::transBase('.form.failed_to_save_data'));
-                } else if ($formConfig->hasAfterSaveCallback()) {
-                    $success = call_user_func($formConfig->getAfterSaveCallback(), false, $data, $object, $formConfig);
-                    if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
-                        if ($success->getStatusCode() < 400) {
-                            $model->commit();
-                        } else {
-                            $model->rollback();
-                        }
-                        return $success;
-                    } else if ($success !== true) {
-                        $model->rollback();
-                        throw new ScaffoldException(
-                            'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
-                        );
-                    }
-                }
-                $model->commit();
-            } catch (DbObjectValidationException $exc) {
-                if ($model->inTransaction()) {
-                    $model->rollback();
-                }
-                return $this->sendValidationErrorsResponse($exc->getValidationErrors());
+                $object
+                    ->begin()
+                    ->updateValues($dbData)
+                    ->commit();
+                $this->runAfterSaveCallback($formConfig, $model, $object, $data);
+                $model::commitTransaction();
+            } catch (InvalidDataException $exc) {
+                $model::rollBackTransactionIfExists();
+                return $this->sendValidationErrorsResponse($exc->getErrors(true));
             } catch (\Exception $exc) {
-                if ($model->inTransaction()) {
-                    $model->rollback();
-                }
+                $model::rollBackTransactionIfExists();
                 throw $exc;
             }
         }
         return cmfServiceJsonResponse()
             ->setMessage(CmfConfig::transBase('.form.resource_updated_successfully'));
+    }
+    
+    protected function runAfterSaveCallback(FormConfig $formConfig, Table $model, Record $object, array $data) {
+        if ($formConfig->hasAfterSaveCallback()) {
+            $response = call_user_func($formConfig->getAfterSaveCallback(), false, $data, $object, $formConfig);
+            if ($response === true || $response === null) {
+                return;
+            }
+            if (!($response instanceof \Symfony\Component\HttpFoundation\JsonResponse)) {
+                $model::rollBackTransaction();
+                throw new ScaffoldException(
+                    'afterSave callback must return true, null or instance of \Symfony\Component\HttpFoundation\JsonResponse'
+                );
+            }
+            if ($response->getStatusCode() < 400) {
+                $model::commitTransaction();
+            } else {
+                $model::rollBackTransaction();
+            }
+            abort($response);
+        }
     }
 
     public function updateBulk(Request $request) {
@@ -364,25 +348,25 @@ class CmfScaffoldApiController extends Controller {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
-        $model->begin();
-        $updatedCount = $model->update($data, $conditions);
+        $model::beginTransaction();
+        $updatedCount = $model::update($data, $conditions);
         if ($formConfig->hasAfterBulkEditDataAfterSaveCallback()) {
             $success = call_user_func($formConfig->getAfterBulkEditDataAfterSaveCallback(), $data);
             if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
                 if ($success->getStatusCode() < 400) {
-                    $model->commit();
+                    $model::commitTransaction();
                 } else {
-                    $model->rollback();
+                    $model::rollBackTransaction();
                 }
                 return $success;
             } else if ($success !== true) {
-                $model->rollback();
+                $model::rollBackTransaction();
                 throw new ScaffoldException(
                     'afterBulkEditDataAfterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
                 );
             }
         }
-        $model->commit();
+        $model::commitTransaction();
         $message = $updatedCount
             ? CmfConfig::transBase('.action.bulk_edit.success', ['count' => $updatedCount])
             : CmfConfig::transBase('.action.bulk_edit.nothing_updated');
@@ -398,17 +382,17 @@ class CmfScaffoldApiController extends Controller {
                 ->goBack(route('cmf_items_table', ['table_name' => $this->getTableNameForRoutes()]));
         }
         $model = $this->getModel();
-        $object = $model::getOwnDbObject();
-        if (!$object->_getPkField()->isValidValueFormat($id)) {
+        $object = $model->newRecord();
+        if (!$object::validateValue($object::getPrimaryKeyColumn(), $id, false)) {
             return $this->sendItemNotFoundResponse($model);
         }
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
         $conditions = $formConfig->getSpecialConditions();
-        $conditions[$model->getPkColumnName()] = $id;
-        if (!$object->find($conditions)->exists()) {
+        $conditions[$model::getPkColumnName()] = $id;
+        if (!$object->fromDb($conditions)->existsInDb()) {
             return $this->sendItemNotFoundResponse($model);
         }
-        if (!$this->getScaffoldConfig()->isRecordDeleteAllowed($object->toPublicArrayWithoutFiles())) {
+        if (!$this->getScaffoldConfig()->isRecordDeleteAllowed($object->toArrayWithoutFiles())) {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
                 ->setMessage(CmfConfig::transBase('.action.delete.forbidden_for_record'))
                 ->goBack(route('cmf_items_table', ['table_name' => $this->getTableNameForRoutes()]));
@@ -430,7 +414,7 @@ class CmfScaffoldApiController extends Controller {
         if (!is_array($conditions)) {
             return $conditions; //< response
         }
-        $deletedCount = $model->delete($conditions);
+        $deletedCount = $model::delete($conditions);
         $message = $deletedCount
             ? CmfConfig::transBase('.action.delete_bulk.success', ['count' => $deletedCount])
             : CmfConfig::transBase('.action.delete_bulk.nothing_deleted');
@@ -444,7 +428,7 @@ class CmfScaffoldApiController extends Controller {
      * @param CmfDbModel $model
      * @param string $inputNamePrefix - input name prefix
      *      For example if you use '_ids' instead of 'ids' - use prefix '_'
-     * @return array|Response
+     * @return array|Response|CmfJsonResponse
      */
     private function getConditionsForBulkActions(Request $request, CmfDbModel $model, $inputNamePrefix = '') {
         $specialConditions = $this->getScaffoldConfig()->getFormConfig()->getSpecialConditions();
@@ -478,7 +462,7 @@ class CmfScaffoldApiController extends Controller {
                         $filterConditions,
                         $specialConditions
                     );
-                    [$columns, $subQueryConditions] = $model::resolveContains([], $subQueryConditions);
+                    [, $subQueryConditions] = $model::resolveContains([], $subQueryConditions);
                     $subQuery = $model::makeSelect([$model::getPkColumnName()], $subQueryConditions)->getQuery();
                     $conditions = [DbExpr::create("`{$model->getPkColumnName()}` IN ({$subQuery})")];
                 } else {
@@ -546,7 +530,6 @@ class CmfScaffoldApiController extends Controller {
     /**
      * @param array $options
      * @return string
-     * @throws \Swayok\Html\HtmlTagException
      */
     private function buildFieldOptions(array $options) {
         $ret = '';
@@ -571,16 +554,15 @@ class CmfScaffoldApiController extends Controller {
     /**
      * @param CmfDbModel $model
      * @param null|string $message
-     * @return $this
      */
     protected function sendItemNotFoundResponse(CmfDbModel $model, $message = null) {
         if (empty($message)) {
             $message = CmfConfig::transBase('.error.resource_item_not_found');
         }
-        return cmfJsonResponseForHttp404(
+        abort(cmfJsonResponseForHttp404(
             route('cmf_items_table', ['table_name' => $this->getTableNameForRoutes()]),
             $message
-        );
+        ));
     }
 
 }

@@ -96,21 +96,21 @@ class CmfGeneralController extends Controller {
             'new_password' => 'min:6',
         ];
         $fieldsToUpdate = [];
-        if ($admin->_hasField('language')) {
+        if ($admin::hasColumn('language')) {
             $validationRules['language'] = 'required|in:' . implode(CmfConfig::getInstance()->locales());
             $fieldsToUpdate[] = 'language';
         }
-        if ($admin->_hasField('name')) {
+        if ($admin::hasColumn('name')) {
             $validationRules['name'] = 'max:200';
             $fieldsToUpdate[] = 'name';
         }
-        if ($admin->_hasField('timezone')) {
+        if ($admin::hasColumn('timezone')) {
             $validationRules['timezone'] = 'required|exists2:pg_timezone_names,name';
             $fieldsToUpdate[] = 'timezone';
         }
         $usersTable = CmfConfig::getInstance()->users_table_name();
         $userLoginCol = CmfConfig::getInstance()->user_login_column();
-        if ($admin->_hasField('email')) {
+        if ($admin::hasColumn('email')) {
             if ($userLoginCol === 'email') {
                 $validationRules['email'] = "required|email|unique:$usersTable,email,{$admin->getAuthIdentifier()},id";
             } else {

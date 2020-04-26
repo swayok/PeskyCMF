@@ -11,7 +11,7 @@ class AdminAuthorisedEventListener {
     public function handle(AdminAuthorised $event) {
         /** @var Admin $user */
         $user = $event->user;
-        if ($user->_hasField('timezone')) {
+        if ($user::hasColumn('timezone')) {
             $user->_getModel()->getConnection(true)->onConnect(function (DbAdapterInterface $db) use ($user) {
                 $db->setTimezone($user->timezone);
             });
