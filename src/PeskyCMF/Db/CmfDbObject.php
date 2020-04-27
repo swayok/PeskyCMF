@@ -15,6 +15,7 @@ abstract class CmfDbObject extends DbObject {
     }
 
     /**
+     * @deprecated
      * Needed for IDE autocompletion
      * @return CmfDbModel|CacheForDbSelects
      */
