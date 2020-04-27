@@ -107,7 +107,7 @@ class CmfScaffoldApiController extends Controller {
                 ->goBack(route('cmf_items_table', ['table_name' => $this->getTableNameForRoutes()]));
         }
         $object = $model->newRecord();
-        if (!$object::validateValue($object::getPrimaryKeyColumn(), $id)) {
+        if (!empty($object::validateValue($object::getPrimaryKeyColumn(), $id, false))) {
             return $this->sendItemNotFoundResponse($model);
         }
         if ($isItemDetails) {
@@ -243,7 +243,7 @@ class CmfScaffoldApiController extends Controller {
         }
         $id = $request->data($model::getPkColumnName());
         $object = $model->newRecord();
-        if (!$object::validateValue($object::getPrimaryKeyColumn(), $id)) {
+        if (!empty($object::validateValue($object::getPrimaryKeyColumn(), $id, false))) {
             return $this->sendItemNotFoundResponse($model);
         }
         $conditions = $formConfig->getSpecialConditions();
@@ -383,7 +383,7 @@ class CmfScaffoldApiController extends Controller {
         }
         $model = $this->getModel();
         $object = $model->newRecord();
-        if (!$object::validateValue($object::getPrimaryKeyColumn(), $id, false)) {
+        if (!empty($object::validateValue($object::getPrimaryKeyColumn(), $id, false))) {
             return $this->sendItemNotFoundResponse($model);
         }
         $formConfig = $this->getScaffoldConfig()->getFormConfig();
