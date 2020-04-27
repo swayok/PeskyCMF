@@ -42,12 +42,12 @@ use {{ $objectParentClass }};
 @foreach($columns as $column)
  * @property-read {{ $convertDbTypeToPhpType($column) }} ${{ $column['column_name'] }}
 @if (in_array($column['data_type'], $timestampTypes))
- * @property-read string        ${{ $column['column_name'] }}_date
- * @property-read string        ${{ $column['column_name'] }}_time
- * @property-read int           ${{ $column['column_name'] }}_ts
+ * @property-read string        ${{ $column['column_name'] }}_as_date
+ * @property-read string        ${{ $column['column_name'] }}_as_time
+ * @property-read int           ${{ $column['column_name'] }}_as_unix_ts
 @endif
 @if ($column['data_type'] === \PeskyORM\DbColumnConfig::DB_TYPE_JSONB)
- * @property-read array         ${{ $column['column_name'] }}_array
+ * @property-read array         ${{ $column['column_name'] }}_as_array
 @endif
 @endforeach
  *
