@@ -5,6 +5,7 @@ namespace PeskyCMF\Db\Traits;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyORM\DbExpr;
 use PeskyORM\DbModel;
+use PeskyORM\ORM\RecordsArray;
 use Swayok\Utils\Set;
 
 trait CacheForDbSelects {
@@ -320,7 +321,7 @@ trait CacheForDbSelects {
      * @return array|Object[]
      * @throws \BadMethodCallException
      */
-    static public function select($columns = '*', $conditionsAndOptions = null, $asObjects = false, $withRootAlias = false) {
+    static public function select($columns = '*', array $conditionsAndOptions = [], \Closure $configurator = null, bool $asRecordSet = false) {
         /** @var DbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
@@ -348,17 +349,15 @@ trait CacheForDbSelects {
                     $records = $model->_getCachedData(false, $cacheSettings, function () use ($columns, $conditionsAndOptions) {
                         return parent::select($columns, $conditionsAndOptions, false, false);
                     });
-                    if ($asObjects) {
-                        $records = $model->recordsToObjects($records, true);
-                    } else if ($withRootAlias) {
-                        $records = array($model->getTableAlias() => $records);
+                    if ($asRecordSet) {
+                        $records = new RecordsArray($model, $records, true, true);
                     }
                     return $records;
                 }
             }
         }
         unset($conditionsAndOptions['CACHE']);
-        return parent::select($columns, $conditionsAndOptions, $asObjects, $withRootAlias);
+        return parent::select($columns, $conditionsAndOptions, $configurator, $asRecordSet);
     }
 
     /**
@@ -368,12 +367,12 @@ trait CacheForDbSelects {
      * @param bool $withRootAlias
      * @return array|Object[]
      */
-    public function selectFromCache($columns = '*', $conditionsAndOptions = null, $asObjects = false, $withRootAlias = false) {
+    public function selectFromCache($columns = '*', $conditionsAndOptions = null, \Closure $configurator = null, bool $asRecordSet = false) {
         if ($this->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
             static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
-        return static::select($columns, $conditionsAndOptions, $asObjects, $withRootAlias);
+        return static::select($columns, $conditionsAndOptions, $configurator, $asRecordSet);
     }
 
     /**

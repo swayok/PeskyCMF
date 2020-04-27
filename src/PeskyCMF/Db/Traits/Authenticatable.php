@@ -29,7 +29,7 @@ trait Authenticatable {
      */
     public function getKey() {
         /** @var DbObject|Authenticatable $this */
-        return $this->_getPkValue();
+        return $this->getPrimaryKeyValue();
     }
 
     /**
@@ -38,7 +38,7 @@ trait Authenticatable {
      */
     public function getKeyName() {
         /** @var DbObject|Authenticatable $this */
-        return $this->_getPkFieldName();
+        return static::getPrimaryKeyColumnName();
     }
 
     /**
@@ -57,7 +57,7 @@ trait Authenticatable {
      */
     public function getRememberToken() {
         /** @var DbObject|Authenticatable $this */
-        return $this->_getFieldValue($this->getRememberTokenName());
+        return $this->getValue($this->getRememberTokenName());
     }
 
     /**

@@ -21,10 +21,11 @@ trait CacheHelpersTrait {
         }
         $key = get_class($this) . '->' . $baseKey;
         if ($this instanceof CmfDbObject) {
-            $key .= '-' . $this->_getTableConfig()->getSchema();
-            $key .= '-id-' . $this->_getPkValue();
+            $key .= '-' . $this::getTableStructure()->getSchema();
+            $key .= '-id-' . $this->getPrimaryKeyValue();
         } else if ($this instanceof CmfDbModel) {
-            $key .= '-' . $this->getTableConfig()->getSchema();
+            /** @var CmfDbModel $this */
+            $key .= '-' . $this->getTableStructure()->getSchema();
         }
         if (!empty($suffix)) {
             if (is_array($suffix)) {

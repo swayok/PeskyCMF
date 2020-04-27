@@ -462,7 +462,7 @@ class CmfScaffoldApiController extends Controller {
                         $filterConditions,
                         $specialConditions
                     );
-                    [, $subQueryConditions] = $model::resolveContains([], $subQueryConditions);
+                    [, $subQueryConditions] = $model::normalizeConditionsAndOptions([], $subQueryConditions);
                     $subQuery = $model::makeSelect([$model::getPkColumnName()], $subQueryConditions)->getQuery();
                     $conditions = [DbExpr::create("`{$model->getPkColumnName()}` IN ({$subQuery})")];
                 } else {

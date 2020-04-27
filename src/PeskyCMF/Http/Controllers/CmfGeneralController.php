@@ -221,7 +221,7 @@ class CmfGeneralController extends Controller {
         if (!empty($user)) {
             return view(CmfConfig::getInstance()->replace_password_view(), [
                 'accessKey' => $accessKey,
-                'userId' => $user->_getPkValue()
+                'userId' => $user->getPrimaryKeyValue()
             ])->render();
         } else {
             return cmfServiceJsonResponse(HttpCode::FORBIDDEN)
@@ -307,7 +307,7 @@ class CmfGeneralController extends Controller {
             'password_confirm' => 'required|min:6|same:password'
         ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
-        if (!empty($user) && $user->_getPkValue() !== $request->data('id')) {
+        if (!empty($user) && $user->getPrimaryKeyValue() !== $request->data('id')) {
             /** @var CmfDbObject $user */
             $user->begin()->_setFieldValue('password', $request->data('password'));
             if ($user->commit()) {

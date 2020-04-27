@@ -96,7 +96,7 @@ trait KeyValueModelHelpers {
      * @param null|array $conditionsAndOptions
      * @return array
      */
-    static public function selectAssoc($keysColumn, $valuesColumn, array $conditionsAndOptions = [], \Closure $configurator = null) {
+    static public function selectAssoc($keysColumn = 'key', $valuesColumn = 'value', array $conditionsAndOptions = [], \Closure $configurator = null) {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
         return static::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions));
     }

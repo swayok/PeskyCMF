@@ -15,12 +15,12 @@ trait ResetsPasswordsViaAccessKey {
     public function getPasswordRecoveryAccessKey() {
         /** @var CmfDbObject|ResetsPasswordsViaAccessKey $this */
         $data = [
-            'account_id' => $this->_getPkValue(),
+            'account_id' => $this->getPrimaryKeyValue(),
             'expires_at' => time() + config('auth.passwords.' . \Auth::getDefaultDriver() . 'expire', 60) * 60,
         ];
         $this->reload(); //< needed to exclude situation with outdated data
         foreach ($this->getAdditionalFieldsForPasswordRecoveryAccessKey() as $fieldName) {
-            $data[$fieldName] = $this->_getFieldValue($fieldName);
+            $data[$fieldName] = $this->getValue($fieldName);
         }
         return \Crypt::encrypt(json_encode($data));
     }
@@ -63,7 +63,7 @@ trait ResetsPasswordsViaAccessKey {
         /** @var CmfDbObject|ResetsPasswordsViaAccessKey $user */
         $user = static::create();
         $conditions = [
-            $user->_getPkFieldName() => $data['account_id'],
+            $user::getPrimaryKeyColumnName() => $data['account_id'],
         ];
         foreach ($user->getAdditionalFieldsForPasswordRecoveryAccessKey() as $fieldName) {
             if (empty($data[$fieldName])) {

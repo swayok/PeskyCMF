@@ -50,7 +50,7 @@ trait SerializesDbObjects {
      */
     protected function getSerializedPropertyValue($value) {
         return $value instanceof DbObject
-            ? new ModelIdentifier(get_class($value), $value->_getPkValue()) : $value;
+            ? new ModelIdentifier(get_class($value), $value->getPrimaryKeyValue()) : $value;
     }
 
     /**
@@ -64,7 +64,7 @@ trait SerializesDbObjects {
             /** @var DbObject $class */
             $class = $value->class;
             $dbObject = $class::read($value->id);
-            if (!$dbObject->exists()) {
+            if (!$dbObject->existsInDb()) {
                 throw new EntityNotFoundException($value->class, $value->id);
             }
             return $dbObject;
