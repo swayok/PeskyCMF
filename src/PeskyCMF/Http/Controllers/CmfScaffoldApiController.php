@@ -515,15 +515,19 @@ class CmfScaffoldApiController extends Controller {
                 }
             }
         }
-        $result = $this->getModel()->selectWithCount(array_keys($dataGridConfig->getDbFields()), $conditions);
-        if ($result['count'] > 0) {
-            $result['records'] = $dataGridConfig->prepareRecords($result['records']);
+        $model = $this->getModel();
+        $count = $model::count($conditions, null, true);
+        $records = [];
+        if ($count) {
+            $records = $dataGridConfig->prepareRecords(
+                $model::select(array_keys($dataGridConfig->getDbFields()), $conditions)
+            );
         }
         return [
             'draw' => $request->query('draw'),
-            'recordsTotal' => $result['count'],
-            'recordsFiltered' => $result['count'],
-            'data' => $result['records'],
+            'recordsTotal' => $count,
+            'recordsFiltered' => $count,
+            'data' => $records,
         ];
     }
 

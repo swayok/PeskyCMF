@@ -8,7 +8,7 @@ use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
 use PeskyCMF\Scaffold\ScaffoldFieldRendererConfig;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
 
@@ -171,11 +171,11 @@ class FormConfig extends ScaffoldActionConfig {
 
     /**
      * @param InputRendererConfig $rendererConfig
-     * @param DbColumnConfig $columnConfig
+     * @param Column $columnConfig
      */
     protected function configureRendererByColumnConfig(
         InputRendererConfig $rendererConfig,
-        DbColumnConfig $columnConfig
+        Column $columnConfig
     ) {
         $rendererConfig
             ->setIsRequiredForCreate($columnConfig->isValueRequiredToBeNotEmpty())

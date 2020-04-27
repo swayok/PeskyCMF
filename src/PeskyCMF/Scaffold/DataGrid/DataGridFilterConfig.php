@@ -5,7 +5,6 @@ namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Scaffold\ScaffoldException;
-use PeskyORM\DbColumnConfig;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
@@ -141,7 +140,7 @@ class DataGridFilterConfig {
 
     /**
      * @param $columnName
-     * @return DbColumnConfig
+     * @return Column
      * @throws ScaffoldException
      */
     public function findColumnConfig($columnName) {
@@ -149,7 +148,7 @@ class DataGridFilterConfig {
         $colNameParts = explode('.', $columnName, 2);
         if (count($colNameParts) === 2) {
             $columnName = $colNameParts[1];
-            if ($colNameParts[0] !== $model->getAlias()) {
+            if ($colNameParts[0] !== $model::getAlias()) {
                 // recursively find related model
                 $model = $this->findRelatedModel($model, $colNameParts[0]);
             }

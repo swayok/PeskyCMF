@@ -4,7 +4,7 @@ namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Scaffold\ScaffoldFieldException;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 
 class FormFieldConfig extends ScaffoldRenderableFieldConfig {
 
@@ -13,23 +13,23 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
     /** @var bool */
     protected $showOnEdit = true;
 
-    const TYPE_STRING = DbColumnConfig::TYPE_STRING;
-    const TYPE_PASSWORD = DbColumnConfig::TYPE_PASSWORD;
-    const TYPE_EMAIL = DbColumnConfig::TYPE_EMAIL;
-    const TYPE_TEXT = DbColumnConfig::TYPE_TEXT;
+    const TYPE_STRING = Column::TYPE_STRING;
+    const TYPE_PASSWORD = Column::TYPE_PASSWORD;
+    const TYPE_EMAIL = Column::TYPE_EMAIL;
+    const TYPE_TEXT = Column::TYPE_TEXT;
     const TYPE_WYSIWYG = 'wysiwyg';
-    const TYPE_BOOL = DbColumnConfig::TYPE_BOOL;
+    const TYPE_BOOL = Column::TYPE_BOOL;
     const TYPE_SELECT = 'select';
     const TYPE_MULTISELECT = 'multiselect';
     const TYPE_TAGS = 'tags';
     const TYPE_HIDDEN = 'hidden';
     const TYPE_IMAGE = 'image';
     const TYPE_FILE = 'file';
-    const TYPE_DATE = DbColumnConfig::TYPE_DATE;
-    const TYPE_DATETIME = DbColumnConfig::TYPE_TIMESTAMP;
+    const TYPE_DATE = Column::TYPE_DATE;
+    const TYPE_DATETIME = Column::TYPE_TIMESTAMP;
     const TYPE_DATE_RANGE = 'daterange';
     const TYPE_DATETIME_RANGE = 'datetimerange';
-    const TYPE_TIME = DbColumnConfig::TYPE_TIME;
+    const TYPE_TIME = Column::TYPE_TIME;
     const TYPE_TIME_RANGE = 'timerange';
 
     /**
@@ -166,7 +166,7 @@ class FormFieldConfig extends ScaffoldRenderableFieldConfig {
      * @throws \PeskyCMF\Scaffold\ScaffoldFieldException
      */
     public function getLabel($default = '') {
-        $suffix = $this->isDbField() && $this->getTableColumnConfig()->isRequiredOnAnyAction() ? '*' : '';
+        $suffix = $this->isDbField() && $this->getTableColumnConfig()->isValueRequiredToBeNotEmpty() ? '*' : '';
         return parent::getLabel($default) . $suffix;
     }
 

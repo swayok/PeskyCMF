@@ -8,6 +8,7 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use PeskyORM\DbModel;
 use Symfony\Component\HttpFoundation\Response;
 
 class CmfConfig extends ConfigsContainer {
@@ -635,10 +636,9 @@ class CmfConfig extends ConfigsContainer {
      * @return CmfDbModel
      */
     static public function getModelByTableName($tableName) {
-        return call_user_func(
-            [static::getInstance()->base_db_model_class(), 'getModelByTableName'],
-            $tableName
-        );
+        /** @var DbModel $class */
+        $class = static::getInstance()->base_db_model_class();
+        return $class::getModelByTableName($tableName);
     }
 
     /**

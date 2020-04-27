@@ -4,8 +4,8 @@ namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use PeskyCMF\Db\CmfDbObject;
-use PeskyORM\DbColumnConfig;
 use PeskyORM\DbExpr;
+use PeskyORM\ORM\Column;
 
 trait ResetsPasswordsViaAccessKey {
 
@@ -71,13 +71,13 @@ trait ResetsPasswordsViaAccessKey {
             }
             $fieldType = $user::getColumn($fieldName)->getType();
             switch ($fieldType) {
-                case DbColumnConfig::TYPE_DATE:
+                case Column::TYPE_DATE:
                     $conditions[$fieldName . '::date'] = DbExpr::create("``$data[$fieldName]``::date");
                     break;
-                case DbColumnConfig::TYPE_TIME:
+                case Column::TYPE_TIME:
                     $conditions[$fieldName . '::time'] = DbExpr::create("``$data[$fieldName]``::time");
                     break;
-                case DbColumnConfig::TYPE_TIMESTAMP:
+                case Column::TYPE_TIMESTAMP:
                     $conditions[] = DbExpr::create("`{$fieldName}`::timestamp(0) = ``{$data[$fieldName]}``::timestamp(0)");
                     break;
                 default:

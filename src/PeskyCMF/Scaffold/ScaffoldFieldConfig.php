@@ -6,8 +6,8 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
-use PeskyORM\DbColumnConfig;
 use PeskyORM\DbRelationConfig;
+use PeskyORM\ORM\Column;
 use Swayok\Html\Tag;
 
 abstract class ScaffoldFieldConfig {
@@ -20,16 +20,16 @@ abstract class ScaffoldFieldConfig {
 
     /** @var string */
     protected $type = null;
-    const TYPE_STRING = DbColumnConfig::TYPE_STRING;
-    const TYPE_DATE = DbColumnConfig::TYPE_DATE;
-    const TYPE_TIME = DbColumnConfig::TYPE_TIME;
-    const TYPE_DATETIME = DbColumnConfig::TYPE_TIMESTAMP;
-    const TYPE_BOOL = DbColumnConfig::TYPE_BOOL;
-    const TYPE_TEXT = DbColumnConfig::TYPE_TEXT;
+    const TYPE_STRING = Column::TYPE_STRING;
+    const TYPE_DATE = Column::TYPE_DATE;
+    const TYPE_TIME = Column::TYPE_TIME;
+    const TYPE_DATETIME = Column::TYPE_TIMESTAMP;
+    const TYPE_BOOL = Column::TYPE_BOOL;
+    const TYPE_TEXT = Column::TYPE_TEXT;
     const TYPE_MULTILINE = 'multiline'; //< for non-html multiline text
     const TYPE_IMAGE = 'image';
-    const TYPE_JSON = DbColumnConfig::TYPE_JSON;
-    const TYPE_JSONB = DbColumnConfig::TYPE_JSONB;
+    const TYPE_JSON = Column::TYPE_JSON;
+    const TYPE_JSONB = Column::TYPE_JSONB;
     const TYPE_LINK = 'link';
     /**
      * @var null|string
@@ -78,7 +78,7 @@ abstract class ScaffoldFieldConfig {
     }
 
     /**
-     * @return DbColumnConfig
+     * @return Column
      * @throws ScaffoldFieldException
      */
     public function getTableColumnConfig() {
@@ -193,7 +193,7 @@ abstract class ScaffoldFieldConfig {
 
     /**
      * @param callable $valueConverter 
-     *      - when $this->isDbField() === true: function ($value, DbColumnConfig $columnConfig, array $record, ScaffoldFieldConfig $fieldConfig) {}
+     *      - when $this->isDbField() === true: function ($value, Column $columnConfig, array $record, ScaffoldFieldConfig $fieldConfig) {}
      *      - when $this->isDbField() === false: function (array $record, ScaffoldFieldConfig $fieldConfig, ScaffolActionConfig $scaffoldActionConfig) {}
      * @return $this
      */
@@ -261,7 +261,7 @@ abstract class ScaffoldFieldConfig {
         return $value;
     }
 
-    public function buildLinkToExternalRecord(DbColumnConfig $columnConfig, array $record, $linkLabel = null) {
+    public function buildLinkToExternalRecord(Column $columnConfig, array $record, $linkLabel = null) {
         if (empty($record[$columnConfig->getName()])) {
             return '-';
         }

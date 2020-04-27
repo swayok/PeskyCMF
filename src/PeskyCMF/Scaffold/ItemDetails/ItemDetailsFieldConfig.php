@@ -4,7 +4,7 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldRenderableFieldConfig;
-use PeskyORM\DbColumnConfig;
+use PeskyORM\ORM\Column;
 
 class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
 
@@ -17,7 +17,7 @@ class ItemDetailsFieldConfig extends ScaffoldRenderableFieldConfig {
         if (empty(parent::getValueConverter())) {
             switch ($this->getType()) {
                 case self::TYPE_IMAGE:
-                    $this->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
+                    $this->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         if (!empty($value) && is_array($value) && !empty($value['url']) && is_array($value['url'])) {
                             if (count($value['url']) > 0) {
                                 unset($value['url']['source']);

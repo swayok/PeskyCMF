@@ -8,7 +8,7 @@
  */
 
 $formId = "scaffold-form-{$idSuffix}";
-$pkColName = $model->getPkColumnName();
+$pkColName = $model::getPkColumnName();
 
 $ifEdit = "{{? it.{$pkColName} > 0 }}";
 $ifCreate = "{{? !it.{$pkColName} }}";
@@ -96,7 +96,7 @@ $backUrl = route('cmf_items_table', ['table_name' => $tableNameForRoutes], false
                         <?php
                             $deleteUrl = str_ireplace(
                                 ':id:',
-                                "{{= it.{$model->getPkColumnName()} }}",
+                                "{{= it.{$pkColName} }}",
                                 route('cmf_api_delete_item', ['table_name' => $tableNameForRoutes, 'id' => ':id:'])
                             );
                         ?>
