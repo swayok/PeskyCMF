@@ -61,7 +61,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $conditions['ORDER'][] = DbExpr::create($config['column']->get() . ' ' . $config['dir'], false);
                 } else {
                     if (AbstractValueViewer::isComplexViewerName($config['column'])) {
-                        list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($config['column']);
+                        [$colName, $keyName] = AbstractValueViewer::splitComplexViewerName($config['column']);
                         $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$config['dir']}", false);
                     } else if (
                         $defaultDirectionWithNulls
@@ -86,7 +86,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $columnsToSelect = [static::getTable()->getTableStructure()->getPkColumnName()];
         $virtualColumns = [];
         foreach (array_keys($dataGridConfig->getViewersLinkedToDbColumns(false)) as $originalColName) {
-            list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($originalColName);
+            [$colName, $keyName] = AbstractValueViewer::splitComplexViewerName($originalColName);
             if (array_key_exists($colName, $dbColumns)) {
                 if ($dbColumns[$colName]->isItExistsInDb()) {
                     if ($keyName) {
@@ -172,7 +172,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $columnsToSelect[] = $valueViewer->getTableColumn()->getName();
             }
         }
-        if (!$object->fromDb($conditions, array_unique($columnsToSelect), array_keys($relationsToRead))->existsInDb()) {
+        if (!$object->fetch($conditions, array_unique($columnsToSelect), array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse();
         }
         $this->logDbRecordLoad($object, static::getResourceName());
@@ -295,7 +295,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $conditions = $formConfig->getSpecialConditions();
         $conditions[$table::getPkColumnName()] = $id;
-        if (!$record->fromDb($conditions)->existsInDb()) {
+        if (!$record->fetch($conditions)->existsInDb()) {
             return $this->makeRecordNotFoundResponse();
         }
         if (!$this->isRecordEditAllowed($record->toArrayWithoutFiles())) {
@@ -377,7 +377,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         foreach ($formConfig->getValueViewers() as $valueViewer) {
             if (($isCreation && $valueViewer->isShownOnCreate()) || (!$isCreation && $valueViewer->isShownOnEdit())) {
                 if ($valueViewer::isComplexViewerName($valueViewer->getName())) {
-                    list($colName, ) = $valueViewer::splitComplexViewerName($valueViewer->getName());
+                    [$colName, ] = $valueViewer::splitComplexViewerName($valueViewer->getName());
                     $expectedDataKeys[] = $colName;
                 } else {
                     $expectedDataKeys[] = $valueViewer->getName();
@@ -427,7 +427,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 // attach new related record
                 if ($relationPk) {
                     // related record already exists in DB but may belong to other record or to none - reattach it
-                    $relatedRecord->reset()->fromPrimaryKey($relationPk);
+                    $relatedRecord->reset()->fetchByPrimaryKey($relationPk);
                     unset($relationUpdates[$relatedRecord::getPrimaryKeyColumnName()]);
                     $relatedRecord->begin()->updateValues($relationUpdates, false)->commit();
                 } else {
@@ -461,7 +461,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $relationPk = $relatedRecord->getPrimaryKeyValue();
                 } else {
                     // read existing related record from db and update it
-                    $relatedRecord->reset()->fromPrimaryKey($relationPk);
+                    $relatedRecord->reset()->fetchByPrimaryKey($relationPk);
                     $relatedRecord->begin()->updateValues($relationUpdates)->commit();
                 }
                 // attach new related record to this object
@@ -625,7 +625,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $formConfig = $this->getFormConfig();
         $conditions = $formConfig->getSpecialConditions();
         $conditions[$table::getPkColumnName()] = $id;
-        if (!$record->fromDb($conditions)->existsInDb()) {
+        if (!$record->fetch($conditions)->existsInDb()) {
             return $this->makeRecordNotFoundResponse();
         }
         if (!$this->isRecordDeleteAllowed($record->toArrayWithoutFiles())) {
@@ -748,7 +748,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $columnConfig = static::getTable()->getTableStructure()->getColumn($columnName);
         $movedRecord = $table::getInstance()
             ->newRecord()
-            ->fromDb(array_merge($specialConditions, [$table::getPkColumnName() => $id]));
+            ->fetch(array_merge($specialConditions, [$table::getPkColumnName() => $id]));
         if (!$movedRecord->existsInDb()) {
             return $this->makeRecordNotFoundResponse();
         }

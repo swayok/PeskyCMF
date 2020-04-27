@@ -100,7 +100,7 @@ trait ResetsPasswordsViaAccessKey {
                     $conditions[$columnName] = $data[$columnName];
             }
         }
-        if (!$user->fromDb($conditions)->existsInDb()) {
+        if (!$user->fetch($conditions)->existsInDb()) {
             return false;
         }
         return $user;
