@@ -5,7 +5,7 @@ namespace App\Db;
 use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\Traits\CacheableDbModel;
 use PeskyORM\Db;
-use PeskyORM\DbExpr;
+use PeskyORM\Core\DbExpr;
 
 abstract class BaseDbModel extends CmfDbModel {
 

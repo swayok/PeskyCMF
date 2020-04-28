@@ -3,7 +3,7 @@
 namespace PeskyCMF\Db;
 
 use Illuminate\Validation\PresenceVerifierInterface;
-use PeskyORM\DbModel;
+use PeskyORM\ORM\Table;
 
 class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
@@ -54,7 +54,7 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
      */
     private function getModel($tableName) {
         /** @var CmfDbModel $baseClass */
-        $baseClass = app()->make(DbModel::class);
+        $baseClass = app()->make(Table::class);
         return $baseClass::getModelByClassName($baseClass::getFullModelClassByTableName($tableName));
     }
 

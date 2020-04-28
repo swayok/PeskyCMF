@@ -8,7 +8,6 @@ use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyORM\DbModel;
 use Symfony\Component\HttpFoundation\Response;
 
 class CmfConfig extends ConfigsContainer {
@@ -613,19 +612,8 @@ class CmfConfig extends ConfigsContainer {
      */
     static public function getScaffoldConfig(CmfDbModel $model, $tableName) {
         // $tableName is no tused by default and added here to be used in child configs
-        $className = $model->getNamespace() . $model->getAlias() . static::scaffold_config_class_suffix();
+        $className = $model::getRootNamespace() . $model::getAlias() . static::scaffold_config_class_suffix();
         return new $className($model);
-    }
-
-    /**
-     * Get scaffold config class name only by table name avoiding model class usage
-     * Used by MakeDbClasses console command
-     * @param $tableName
-     * @return string
-     */
-    static public function getScaffoldConfigNameByTableName($tableName) {
-        $objectName = call_user_func([static::base_db_model_class(), 'getObjectNameByTableName'], $tableName);
-        return $objectName . CmfConfig::getInstance()->scaffold_config_class_suffix();
     }
 
     /**
@@ -636,7 +624,7 @@ class CmfConfig extends ConfigsContainer {
      * @return CmfDbModel
      */
     static public function getModelByTableName($tableName) {
-        /** @var DbModel $class */
+        /** @var CmfDbModel $class */
         $class = static::getInstance()->base_db_model_class();
         return $class::getModelByTableName($tableName);
     }

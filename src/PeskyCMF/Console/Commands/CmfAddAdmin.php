@@ -4,8 +4,8 @@ namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Database\Console\Migrations\BaseCommand;
 use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
-use PeskyORM\DbExpr;
 
 class CmfAddAdmin extends BaseCommand {
 

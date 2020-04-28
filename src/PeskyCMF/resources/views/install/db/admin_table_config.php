@@ -7,11 +7,11 @@ use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
 use PeskyORMLaravel\Db\TableStructureTraits\IsActiveColumn;
 use PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns;
 use PeskyORMLaravel\Db\TableStructureTraits\UserAuthColumns;
-use PeskyORM\DbColumnConfig;
-use PeskyORM\DbRelationConfig;
-use PeskyORM\DbTableConfig;
+use App\Db\DbColumnConfig;
+use PeskyORM\ORM\Relation;
+use App\Db\BaseDbTableConfig;
 
-class AdminTableConfig extends DbTableConfig {
+class AdminTableConfig extends BaseDbTableConfig {
 
     const TABLE_NAME = 'admins';
     protected $name = self::TABLE_NAME;
@@ -75,7 +75,7 @@ class AdminTableConfig extends DbTableConfig {
     }
 
     private function ParentAdmin() {
-        return DbRelationConfig::create($this, 'parent_id', DbRelationConfig::BELONGS_TO, self::TABLE_NAME, 'id')
+        return Relation::create($this, 'parent_id', Relation::BELONGS_TO, self::TABLE_NAME, 'id')
             ->setDisplayColumnName(CmfConfig::getInstance()->user_login_column());
     }
 

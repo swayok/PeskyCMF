@@ -260,7 +260,7 @@ uasort($gridColumnsConfigs, function ($a, $b) {
                         'order' => []
                     ]
                 );
-                if (!$dataGridConfig->getOrderBy() instanceof \PeskyORM\DbExpr) {
+                if (!$dataGridConfig->getOrderBy() instanceof \PeskyORM\Core\DbExpr) {
                     $dataTablesConfig['order'] = [
                         [
                             $dataGridConfig->getField($dataGridConfig->getOrderBy())->getPosition(),

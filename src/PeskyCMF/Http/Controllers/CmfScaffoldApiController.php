@@ -14,7 +14,7 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ScaffoldException;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Traits\DataValidationHelper;
-use PeskyORM\DbExpr;
+use PeskyORM\Core\DbExpr;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Table;

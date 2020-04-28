@@ -3,7 +3,8 @@
 namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\CmfDbModel;
-use PeskyORM\DbObject;
+use PeskyCMF\Db\CmfDbObject;
+use PeskyORM\ORM\Record;
 
 trait TaggedCacheForDbSelects {
 
@@ -108,14 +109,14 @@ trait TaggedCacheForDbSelects {
     }
 
     /**
-     * @param int|string|array|DbObject $record
+     * @param int|string|array|CmfDbObject|Record $record
      * @param bool $cleanRelatedModelsCache
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
     public function cleanRecordCache($record, $cleanRelatedModelsCache = null) {
         /** @var CmfDbModel|TaggedCacheForDbSelects $this */
-        if (!($record instanceof DbObject) || $record->existsInDb()) {
+        if (!($record instanceof Record) || $record->existsInDb()) {
             \Cache::tags($this->getRecordCacheTag($record))->flush();
         }
         $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
@@ -143,7 +144,7 @@ trait TaggedCacheForDbSelects {
      */
     public function getRecordCacheTag($record) {
         /** @var CmfDbModel|TaggedCacheForDbSelects $this */
-        if ($record instanceof DbObject) {
+        if ($record instanceof Record) {
             $id = $record->existsInDb() ? $record->getPrimaryKeyValue() : null;
         } else if (!is_array($record)) {
             $id = $record;
@@ -177,7 +178,7 @@ trait TaggedCacheForDbSelects {
         $data = empty($cacheSettings['recache']) ? \Cache::get($cacheSettings['key'], '{!404!}') : '{!404!}';
         if ($data === '{!404!}') {
             $data = $callback();
-            if ($data instanceof DbObject) {
+            if ($data instanceof Record) {
                 $data = $data->existsInDb() ? $data->toArray() : [];
             }
             $tags = $cacheSettings['tags'];

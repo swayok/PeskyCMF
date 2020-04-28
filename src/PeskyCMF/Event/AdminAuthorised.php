@@ -3,13 +3,13 @@
 namespace PeskyCMF\Event;
 
 use App\Events\Event;
-use PeskyORM\DbObject;
+use PeskyCMF\Db\CmfDbObject;
 
 class AdminAuthorised extends Event {
 
     public $user;
 
-    public function __construct(DbObject $user) {
+    public function __construct(CmfDbObject $user) {
         $this->user = $user;
     }
 

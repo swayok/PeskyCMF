@@ -13,8 +13,7 @@ use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Traits\DataValidationHelper;
-use PeskyORM\DbExpr;
-use PeskyORM\DbObject;
+use PeskyORM\Core\DbExpr;
 use Redirect;
 use Swayok\Utils\File;
 use Swayok\Utils\Set;
@@ -87,10 +86,10 @@ class CmfGeneralController extends Controller {
 
     /**
      * @param Request $request
-     * @param DbObject|Authenticatable $admin
+     * @param CmfDbObject|Authenticatable $admin
      * @return array|\Illuminate\Http\JsonResponse
      */
-    protected function validateAndGetAdminProfileUpdates(Request $request, DbObject $admin) {
+    protected function validateAndGetAdminProfileUpdates(Request $request, CmfDbObject $admin) {
         $validationRules = [
             'old_password' => 'required',
             'new_password' => 'min:6',

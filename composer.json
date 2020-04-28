@@ -35,7 +35,7 @@
         "laravel/framework": ">=5.2",
         "swayok/utils": "~1.0",
         "swayok/peskyorm": "dev-v1_v2_upgrade",
-        "swayok/peskyorm-laravel": "dev-orm_v1_v2_upgrade",
+        "swayok/peskyorm-laravel": "dev-v2",
         "swayok/html-tag-helper": "~1.0",
         "almasaeed2010/adminlte": "2.3.*",
         "fortawesome/font-awesome": "^4.7",

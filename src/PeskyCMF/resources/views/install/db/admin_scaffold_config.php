@@ -9,7 +9,7 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormFieldConfig;
 use PeskyCMF\Scaffold\Form\InputRendererConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
-use PeskyORM\DbColumnConfig;
+use PeskyCMF\Core\Column;
 
 class AdminScaffoldConfig extends ScaffoldSectionConfig {
 
@@ -30,7 +30,7 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
                 'is_superadmin',
                 'role' => DataGridFieldConfig::create()
                     ->setIsSortable(true)
-                    ->setValueConverter(function ($value, DbColumnConfig $columnConfig, $record) {
+                    ->setValueConverter(function ($value, Column $columnConfig, $record) {
                         return CmfConfig::transCustom(".admins.role.$value");
                     }),
                 'parent_id' => DataGridFieldConfig::create()
@@ -47,12 +47,12 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
                 'email',
                 'name',
                 'language' => ItemDetailsFieldConfig::create()
-                    ->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
+                    ->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         return CmfConfig::transCustom(".language.$value");
                     }),
                 'is_active',
                 'role' => ItemDetailsFieldConfig::create()
-                    ->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
+                    ->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         return CmfConfig::transCustom(".admins.role.$value");
                     }),
                 'is_superadmin' => ItemDetailsFieldConfig::create(),
@@ -107,7 +107,7 @@ class AdminScaffoldConfig extends ScaffoldSectionConfig {
                 'parent_id' => FormFieldConfig::create()
                     ->setRenderer(function () {
                         return InputRendererConfig::create('cmf::input/hidden');
-                    })->setValueConverter(function ($value, DbColumnConfig $columnConfig, array $record) {
+                    })->setValueConverter(function ($value, Column $columnConfig, array $record) {
                         if (empty($record['id']) && empty($value)) {
                             return \Auth::guard()->user()->id;
                         } else {

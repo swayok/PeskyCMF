@@ -4,7 +4,7 @@
 namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\CmfDbModel;
-use PeskyORM\DbRelationConfig;
+use PeskyORM\ORM\Relation;
 use Swayok\Utils\NormalizeValue;
 
 trait KeyValueModelHelpers {
@@ -19,7 +19,7 @@ trait KeyValueModelHelpers {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
         if (empty($this->_detectedMainForeignKeyColumnName)) {
             foreach ($this->getTableStructure()->getRelations() as $relationConfig) {
-                if ($relationConfig->getType() === DbRelationConfig::BELONGS_TO) {
+                if ($relationConfig->getType() === Relation::BELONGS_TO) {
                     $this->_detectedMainForeignKeyColumnName = $relationConfig->getColumn();
                     break;
                 }

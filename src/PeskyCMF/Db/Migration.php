@@ -5,8 +5,8 @@ namespace PeskyCMF\Db;
 
 use Illuminate\Database\Migrations\Migration as Base;
 use PeskyORM\Core\DbConnectionsManager;
+use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
-use PeskyORM\DbExpr;
 use Swayok\Utils\StringUtils;
 
 class Migration extends Base {

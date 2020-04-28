@@ -4,7 +4,7 @@ namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use PeskyCMF\Db\CmfDbObject;
-use PeskyORM\DbExpr;
+use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 
 trait ResetsPasswordsViaAccessKey {

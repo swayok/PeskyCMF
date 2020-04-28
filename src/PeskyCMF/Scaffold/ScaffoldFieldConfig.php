@@ -6,8 +6,8 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
-use PeskyORM\DbRelationConfig;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\Relation;
 use Swayok\Html\Tag;
 
 abstract class ScaffoldFieldConfig {
@@ -268,7 +268,7 @@ abstract class ScaffoldFieldConfig {
         $relationConfig = null;
         $relationAlias = null;
         foreach ($columnConfig->getRelations() as $alias => $relation) {
-            if (in_array($relation->getType(), [DbRelationConfig::BELONGS_TO, DbRelationConfig::HAS_ONE], true)) {
+            if (in_array($relation->getType(), [Relation::BELONGS_TO, Relation::HAS_ONE], true)) {
                 $relationConfig = $relation;
                 $relationAlias = $alias;
                 break;

@@ -4,9 +4,8 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyCMF\Scaffold\ScaffoldException;
-use PeskyORM\DbExpr;
+use PeskyORM\Core\DbExpr;
 use Swayok\Utils\NormalizeValue;
 
 class DataGridColumnFilterConfig {

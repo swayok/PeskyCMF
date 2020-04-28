@@ -3,8 +3,7 @@
 namespace PeskyCMF\Db\Traits;
 
 use PeskyCMF\Db\CmfDbModel;
-use PeskyORM\DbExpr;
-use PeskyORM\DbModel;
+use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\RecordsArray;
 use Swayok\Utils\Set;
 
@@ -322,7 +321,7 @@ trait CacheForDbSelects {
      * @throws \BadMethodCallException
      */
     static public function select($columns = '*', array $conditionsAndOptions = [], \Closure $configurator = null, bool $asRecordSet = false) {
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
@@ -424,7 +423,7 @@ trait CacheForDbSelects {
      * @return int
      */
     static public function count(array $conditionsAndOptions = [], \Closure $configurator = null, $removeNotInnerJoins = false) {
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
@@ -484,7 +483,7 @@ trait CacheForDbSelects {
      * @return string|int|float|bool
      */
     static public function expression($expression, array $conditionsAndOptions = []) {
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
@@ -563,7 +562,7 @@ trait CacheForDbSelects {
      * Also you can use 'CACHE' option. See description of select() method
      */
     static public function selectOne($columns, array $conditionsAndOptions, ?\Closure $configurator = null) {
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
             /** @var CmfDbModel|CacheForDbSelects $this */
@@ -602,7 +601,7 @@ trait CacheForDbSelects {
     }
     
     static public function selectOneAsDbRecord($columns, array $conditionsAndOptions, ?\Closure $configurator = null) {
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $data = static::selectOne($columns, $conditionsAndOptions, $configurator);
         return static::getInstance()->newRecord()->fromData($data, true, false);
     }
@@ -613,7 +612,7 @@ trait CacheForDbSelects {
      */
     static public function insert(array $data, $returning = false) {
         $ret = parent::insert($data, $returning);
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
             $model->cleanSelectManyCache();
@@ -631,7 +630,7 @@ trait CacheForDbSelects {
      */
     static public function insertMany(array $columns, array $rows, $returning = false) {
         $ret = parent::insertMany($columns, $rows, $returning);
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
             $model->cleanSelectManyCache();
@@ -645,7 +644,7 @@ trait CacheForDbSelects {
     static public function update(array $data, array $conditionsAndOptions, $returning = false) {
         /** @var CmfDbModel|CacheForDbSelects $this */
         $ret = parent::update($data, $conditionsAndOptions, $returning);
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
             $pkColumnName = $model::getPkColumnName();
@@ -679,7 +678,7 @@ trait CacheForDbSelects {
     static public function delete(array $conditionsAndOptions = [], $returning = false) {
         /** @var CmfDbModel|CacheForDbSelects $this */
         $ret = parent::delete($conditionsAndOptions, $returning);
-        /** @var DbModel|CacheForDbSelects $model */
+        /** @var CmfDbModel|CacheForDbSelects $model */
         $model = static::getInstance();
         if ($model->cachingIsPossible()) {
             $pkColumnName = $model::getPkColumnName();

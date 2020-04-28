@@ -5,7 +5,6 @@ namespace PeskyCMF;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
-use PeskyCMF\Console\Commands\MakeDbClasses;
 
 class PeskyCmfServiceProvider extends ServiceProvider {
 
@@ -77,16 +76,11 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             base_path('vendor/robinherbots/jquery.inputmask/dist/min/jquery.inputmask.bundle.min.js') => public_path('packages/cmf-vendors/jquery.inputmask/jquery.inputmask.bundle.min.js'),
 
         ], 'public');
-
-        $this->publishes([
-            __DIR__ . '/Config/cmf.config.php' => config_path('cmf.php')
-        ], 'config');
     }
 
     protected function registerCommands() {
         $this->registerInstallCommand();
         $this->registerAddAdminCommand();
-        $this->registerMakeDbClassesCommand();
     }
 
     protected function registerInstallCommand() {
@@ -101,13 +95,6 @@ class PeskyCmfServiceProvider extends ServiceProvider {
             return new CmfAddAdmin();
         });
         $this->commands('command.cmf.add-admin');
-    }
-
-    protected function registerMakeDbClassesCommand() {
-        $this->app->singleton('command.cmf.make-db-classes', function() {
-            return new MakeDbClasses();
-        });
-        $this->commands('command.cmf.make-db-classes');
     }
 
 }
