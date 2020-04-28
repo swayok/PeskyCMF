@@ -7,7 +7,7 @@ use PeskyORMLaravel\Db\TableStructureTraits\IdColumn;
 use PeskyORMLaravel\Db\TableStructureTraits\IsActiveColumn;
 use PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns;
 use PeskyORMLaravel\Db\TableStructureTraits\UserAuthColumns;
-use App\Db\DbColumnConfig;
+use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 use App\Db\BaseDbTableConfig;
 
@@ -23,52 +23,45 @@ class AdminTableConfig extends BaseDbTableConfig {
         ;
 
     private function parent_id() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_INT)
-            ->setIsRequired(false)
-            ->setIsNullable(true);
+        return Column::create(Column::TYPE_INT)
+            ->allowsNullValues();
     }
 
     private function email() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_EMAIL)
-            ->setIsNullable(false)
-            ->setIsRequired(true)
-            ->setTrimValue(true)
+        return Column::create(Column::TYPE_EMAIL)
+            ->disallowsNullValues()
+            ->trimsValue()
             ->setIsUnique(true);
     }
 
     private function name() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_STRING)
-            ->setIsNullable(false)
-            ->setIsRequired(false)
+        return Column::create(Column::TYPE_STRING)
+            ->disallowsNullValues()
             ->setMaxLength(200);
     }
 
     private function ip() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_IPV4_ADDRESS)
-            ->setIsRequired(false)
-            ->setIsNullable(false);
+        return Column::create(Column::TYPE_IPV4_ADDRESS)
+            ->disallowsNullValues();
     }
 
     private function is_superadmin() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_BOOL)
-            ->setIsNullable(false)
-            ->setIsRequired(false)
+        return Column::create(Column::TYPE_BOOL)
+            ->disallowsNullValues()
             ->setDefaultValue(false);
     }
 
     private function role() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_STRING)
+        return Column::create(Column::TYPE_STRING)
             ->setAllowedValues(CmfConfig::getInstance()->roles_list())
-            ->setIsNullable(false)
-            ->setIsRequired(true)
+            ->disallowsNullValues()
             ->setDefaultValue(CmfConfig::getInstance()->default_role());
     }
 
     private function language() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_STRING)
+        return Column::create(Column::TYPE_STRING)
             ->setAllowedValues(CmfConfig::getInstance()->locales())
-            ->setIsRequired(true)
-            ->setIsNullable(false)
+            ->disallowsNullValues()
             ->setMaxLength(2)
             ->setMinLength(2)
             ->setDefaultValue(CmfConfig::getInstance()->default_locale());

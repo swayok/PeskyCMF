@@ -3,16 +3,15 @@
 namespace PeskyCMF\Db\Traits;
 
 use App\Db\Admin\AdminModel;
-use App\Db\DbColumnConfig;
+use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 
 trait AdminIdColumn {
 
     private function admin_id() {
-        return DbColumnConfig::create(DbColumnConfig::TYPE_INT)
-            ->setIsRequired(false)
-            ->setIsNullable(true)
-            ->setConvertEmptyValueToNull(true);
+        return Column::create(Column::TYPE_INT)
+            ->allowsNullValues()
+            ->convertsEmptyStringToNull();
     }
 
     private function Admin() {

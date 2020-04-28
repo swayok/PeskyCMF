@@ -211,13 +211,14 @@ class FormConfig extends ScaffoldActionConfig {
     public function addBulkEditableField($name, $fieldConfig = null) {
         if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
-        } else if ($this->getModel()->getTableColumn($name)->isFile()) {
+        } else if ($this->getModel()->getTableColumn($name)->isItAFile()) {
             throw new ScaffoldActionException(
                 $this,
                 "Attaching files in bulk editing form is not suppoted. Table column: [$name]"
             );
         }
         if (empty($fieldConfig)) {
+            /** @noinspection CallableParameterUseCaseInTypeContextInspection */
             $fieldConfig = $this->hasField($name) ? $this->getField($name) : $this->createFieldConfig();
         }
         /** @var FormFieldConfig $fieldConfig */
