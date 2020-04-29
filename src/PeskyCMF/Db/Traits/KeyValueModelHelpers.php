@@ -88,17 +88,18 @@ trait KeyValueModelHelpers {
     static public function decodeValue($encodedValue) {
         return $encodedValue === '""' ? '' : json_decode($encodedValue, true);
     }
-
+    
     /**
      * Update: added values decoding
      * @param string $keysColumn
      * @param string $valuesColumn
-     * @param null|array $conditionsAndOptions
+     * @param null|array $conditions
+     * @param \Closure|null $configurator
      * @return array
      */
-    static public function selectAssoc($keysColumn = 'key', $valuesColumn = 'value', array $conditionsAndOptions = [], \Closure $configurator = null) {
+    static public function selectAssoc(string $keysColumn, string $valuesColumn, array $conditions = [], ?\Closure $configurator = null): array {
         /** @var CmfDbModel|KeyValueModelHelpers $this */
-        return static::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions));
+        return static::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditions));
     }
 
     /**

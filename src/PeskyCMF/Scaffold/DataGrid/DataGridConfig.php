@@ -69,8 +69,8 @@ class DataGridConfig extends ScaffoldActionConfig {
     public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSectionConfig) {
         parent::__construct($model, $scaffoldSectionConfig);
         $this->limit = CmfConfig::getInstance()->rows_per_page();
-        if ($model->getOrderField()) {
-            $this->setOrderBy($model->getOrderField(), $model->getOrderDirection());
+        if ($model->getDefaultOrderByColumn()) {
+            $this->setOrderBy($model->getDefaultOrderByColumn(), $model->getOrderDirectionForDefaultOrderByColumn());
         }
     }
 
@@ -193,7 +193,7 @@ class DataGridConfig extends ScaffoldActionConfig {
      * @throws ScaffoldActionException
      */
     public function setOrderBy($orderBy, $direction = null) {
-        if (!($orderBy instanceof DbExpr) && !$this->model->hasTableColumn($orderBy)) {
+        if (!($orderBy instanceof DbExpr) && !$this->model->getTableStructure()->hasColumn($orderBy)) {
             throw new ScaffoldActionException($this, "Unknown column [$orderBy]");
         }
         if (!empty($direction)) {

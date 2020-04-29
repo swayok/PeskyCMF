@@ -162,7 +162,7 @@ abstract class ScaffoldActionConfig {
      * @throws ScaffoldActionException
      */
     public function addField($name, $config = null) {
-        if ((!$config || $config->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
+        if ((!$config || $config->isDbField()) && !$this->getModel()->getTableStructure()->hasColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
         }
         if (empty($config)) {
@@ -236,7 +236,7 @@ abstract class ScaffoldActionConfig {
             $recordWithBackup[$key] = $recordWithBackup['__' . $key] = $value;
         }
         foreach ($record as $key => $notUsed) {
-            if ($this->getModel()->hasTableRelation($key)) {
+            if ($this->getModel()->getTableStructure()->hasRelation($key)) {
                 continue;
             }
             if (empty($dbFields[$key])) {

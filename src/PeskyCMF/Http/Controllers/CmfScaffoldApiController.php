@@ -520,7 +520,7 @@ class CmfScaffoldApiController extends Controller {
         $records = [];
         if ($count) {
             $records = $dataGridConfig->prepareRecords(
-                $model::select(array_keys($dataGridConfig->getDbFields()), $conditions)
+                $model::selectAsArray(array_keys($dataGridConfig->getDbFields()), $conditions)
             );
         }
         return [

@@ -209,9 +209,9 @@ class FormConfig extends ScaffoldActionConfig {
      * @return $this
      */
     public function addBulkEditableField($name, $fieldConfig = null) {
-        if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getModel()->hasTableColumn($name)) {
+        if ((!$fieldConfig || $fieldConfig->isDbField()) && !$this->getModel()->getTableStructure()->hasColumn($name)) {
             throw new ScaffoldActionException($this, "Unknown table column [$name]");
-        } else if ($this->getModel()->getTableColumn($name)->isItAFile()) {
+        } else if ($this->getModel()->getTableStructure()->getColumn($name)->isItAFile()) {
             throw new ScaffoldActionException(
                 $this,
                 "Attaching files in bulk editing form is not suppoted. Table column: [$name]"
@@ -473,7 +473,8 @@ class FormConfig extends ScaffoldActionConfig {
             return [];
         }
         if (empty($messages)) {
-            $messages = CmfConfig::transCustom('.' . $this->getModel()->getTableName() . '.form.validation');
+            /** @noinspection CallableParameterUseCaseInTypeContextInspection */
+            $messages = CmfConfig::transCustom('.' . $this->getModel()->getName() . '.form.validation');
         }
         if (!is_array($messages)) {
             $messages = [];

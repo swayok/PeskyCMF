@@ -153,7 +153,7 @@ class DataGridFilterConfig {
                 $model = $this->findRelatedModel($model, $colNameParts[0]);
             }
         }
-        return $model->getTableColumn($columnName);
+        return $model->getTableStructure()->getColumn($columnName);
     }
 
     /**
@@ -163,14 +163,14 @@ class DataGridFilterConfig {
      * @param int $depth
      * @return bool|\PeskyCMF\Db\CmfDbModel|Table|TableInterface
      */
-    protected function findRelatedModel(CmfDbModel $model, $relationAlias, array &$scannedModels = [], $depth = 0) {
-        if ($model->hasTableRelation($relationAlias)) {
-            return $model->getTableRealtaion($relationAlias)->getForeignTable();
+    protected function findRelatedModel(CmfDbModel $model, string $relationAlias, array &$scannedModels = [], $depth = 0) {
+        if ($model->getTableStructure()->hasRelation($relationAlias)) {
+            return $model->getTableStructure()->getRelation($relationAlias)->getForeignTable();
         }
         $scannedModels[] = $model::getName();
-        foreach ($model->getTableRealtaions() as $alias => $relationConfig) {
+        foreach ($model->getTableStructure()->getRelations() as $alias => $relationConfig) {
             /** @var CmfDbModel $relModel */
-            $relModel = $model->getTableRealtaion($alias)->getForeignTable();
+            $relModel = $relationConfig->getForeignTable();
             if (!empty($scannedModels[$relModel::getName()])) {
                 continue;
             }

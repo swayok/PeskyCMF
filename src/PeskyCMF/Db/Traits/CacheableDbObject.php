@@ -16,7 +16,7 @@ trait CacheableDbObject {
     public function withCacheTimeout($timeout = null) {
         /** @var CmfDbObject|CacheableDbObject $this */
         $this->_cacheOnceTimeout = empty($timeout)
-            ? $this->_getModel()->getDefaultCacheDurationForSelectOneInMinutes()
+            ? static::getTable()->getDefaultCacheDurationForSelectOneInMinutes()
             : $timeout;
         return $this;
     }

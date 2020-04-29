@@ -82,7 +82,7 @@ abstract class ScaffoldFieldConfig {
      * @throws ScaffoldFieldException
      */
     public function getTableColumnConfig() {
-        return $this->getScaffoldActionConfig()->getModel()->getTableColumn($this->getName());
+        return $this->getScaffoldActionConfig()->getModel()->getTableStructure()->getColumn($this->getName());
     }
 
     /**

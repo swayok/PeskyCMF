@@ -65,11 +65,11 @@ trait TaggedCacheForDbSelects {
             }
             $tags = [];
             foreach ($relationsToClean as $relationKey) {
-                if (!$this->hasTableRelation($relationKey)) {
+                if (!$this->getTableStructure()->hasRelation($relationKey)) {
                     throw new \InvalidArgumentException("Model has no relation named $relationKey");
                 }
                 /** @var CmfDbModel|TaggedCacheForDbSelects $model */
-                $model = $this->getTableRealtaion($relationKey)->getForeignTable();
+                $model = $this->getTableStructure()->getRelation($relationKey)->getForeignTable();
                 $tags[] = $model->getModelCachePrefix();
             }
             if (!empty($tags)) {
@@ -83,7 +83,7 @@ trait TaggedCacheForDbSelects {
      */
     protected function getDefaultRelationsForCacheCleaner() {
         /** @var CmfDbModel|TaggedCacheForDbSelects $this */
-        return array_keys($this->getTableRealtaions());
+        return array_keys($this->getTableStructure()->getRelations());
     }
 
     /**

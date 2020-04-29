@@ -282,7 +282,7 @@ class CmfGeneralController extends Controller {
             $user = Auth::guard()->getLastAttempted();
             $data = [
                 'url' => route('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
-                'user' => $user->toPublicArrayWithoutFiles()
+                'user' => $user->toArrayWithoutFiles()
             ];
             $subject = CmfConfig::transCustom('.forgot_password.email_subject');
             $from = CmfConfig::getInstance()->system_email_address();
@@ -308,7 +308,7 @@ class CmfGeneralController extends Controller {
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (!empty($user) && $user->getPrimaryKeyValue() !== $request->data('id')) {
             /** @var CmfDbObject $user */
-            $user->begin()->_setFieldValue('password', $request->data('password'));
+            $user->begin()->updateValue('password', $request->data('password'), false);
             if ($user->commit()) {
                 return cmfServiceJsonResponse()
                     ->setMessage(CmfConfig::transCustom('.replace_password.password_replaced'))
@@ -333,7 +333,7 @@ class CmfGeneralController extends Controller {
 
     public function getAdminInfo() {
         $admin = $this->getAdmin();
-        $adminData = $admin->toPublicArray();
+        $adminData = $admin->toArray();
         if (!empty($adminData['role'])) {
             $adminData['_role'] = $admin->role;
             $role = ($admin->is_superadmin ? 'superadmin' : $admin->role);

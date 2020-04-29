@@ -24,7 +24,7 @@ abstract class BaseDbObject extends CmfDbObject {
      * @return string
      */
     public function getCurrentTime() {
-        return $this->_getModel()->getCurrentTime();
+        return static::getTable()->getCurrentTime();
     }
 
 }
