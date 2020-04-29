@@ -5,12 +5,9 @@ namespace PeskyCMF\Db;
 use PeskyORM\Core\DbConnectionsManager;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
-use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\Table;
-use PeskyORM\ORM\TableStructure;
-use Swayok\Utils\StringUtils;
 
 abstract class CmfTable extends Table {
 
@@ -19,22 +16,14 @@ abstract class CmfTable extends Table {
     /** @var array */
     static private $timeZonesOptions;
     
-    /** @var CmfTable[] */
-    static protected $loadedModels = [];    //< Model objects
+    public const ORDER_ASCENDING = 'ASC';
+    public const ORDER_DESCENDING = 'DESC';
     
-    const ORDER_ASCENDING = 'ASC';
-    const ORDER_DESCENDING = 'DESC';
-    
-    /** @var TableStructure */
-    protected $tableConfig;
     /** @var string|null */
     protected $defaultOrderByColumn;
     /** @var string */
     protected $orderDirectionForDefaultOrderByColumn = self::ORDER_ASCENDING;
     
-    static protected $tableConfigClassSuffix = 'TableStructure';
-    static protected $modelClassSuffix = 'Table';
-
     static public function getTimezonesList($asOptions = false) {
         if (self::$timeZonesList === null) {
             $ds = DbConnectionsManager::getConnection('default');
@@ -57,66 +46,6 @@ abstract class CmfTable extends Table {
     }
     
     /**
-     * @deprecated
-     * @return string
-     */
-    static public function getRootNamespace() {
-        return config('peskyorm.classes_namespace') . '\\';
-    }
-    
-    /**
-     * @deprecated
-     * @param $modelNameOrObjectName
-     * @return string
-     */
-    static public function getFullModelClassNameByName($modelNameOrObjectName) {
-        $subfolder = preg_replace('%' . static::$modelClassSuffix . '$%i', '', $modelNameOrObjectName);
-        $modelName = $subfolder . static::$modelClassSuffix;
-        $rootNs = static::getRootNamespace();
-        return $rootNs . $subfolder . '\\' . $modelName;
-    }
-    
-    /**
-     * @deprecated
-     * @param $tableName
-     * @return string
-     */
-    static public function getFullModelClassByTableName($tableName) {
-        $rootNs = static::getRootNamespace();
-        $subfolder = StringUtils::modelize($tableName);
-        $modelClassName = StringUtils::modelize($tableName) . static::$modelClassSuffix;
-        return  $rootNs . $subfolder . '\\' .$modelClassName;
-    }
-    
-    /**
-     * @deprecated
-     * @param $dbObjectNameOrTableName
-     * @return string|string[]|null
-     */
-    static public function getFullDbObjectClass($dbObjectNameOrTableName) {
-        /** @var CmfTable $calledClass */
-        $calledClass = static::class;
-        $modelClassName = $calledClass::getFullModelClassNameByName(StringUtils::modelize($dbObjectNameOrTableName));
-        return preg_replace('%' . $calledClass::$modelClassSuffix . '$%', '', $modelClassName);
-    }
-    
-    public function getTableStructure() {
-        if (!$this->tableConfig) {
-            if (!preg_match('%^(.*?\\\?)([a-zA-Z0-9]+)' . static::$modelClassSuffix . '$%is', static::class, $classNameParts)) {
-                $className = static::class;
-                throw new \UnexpectedValueException("Invalid Model class name [{$className}]. Required name is like NameSpace\\SomeModel.");
-            }
-            /** @var TableStructure $tableConfigClass */
-            $tableConfigClass = $classNameParts[1] . $classNameParts[2] . static::$tableConfigClassSuffix;
-            if (!class_exists($tableConfigClass)) {
-                throw new \UnexpectedValueException("Db table config class [{$tableConfigClass}] not found");
-            }
-            $this->tableConfig = $tableConfigClass::getInstance();
-        }
-        return $this->tableConfig;
-    }
-    
-    /**
      * @return null|string
      */
     public function getDefaultOrderByColumn() {
@@ -128,83 +57,6 @@ abstract class CmfTable extends Table {
      */
     public function getOrderDirectionForDefaultOrderByColumn() {
         return $this->orderDirectionForDefaultOrderByColumn;
-    }
-
-    /**
-     * @param string $modelNameOrObjectName - base class name (UserToken or UserTokenModel or User)
-     * @return CmfTable
-     *@deprecated
-     * Load and return requested Model
-     */
-    static public function getModel($modelNameOrObjectName) {
-        /** @var CmfTable $calledClass */
-        $calledClass = static::class;
-        $modelClass = $calledClass::getFullModelClassNameByName($modelNameOrObjectName);
-        return $calledClass::getModelByClassName($modelClass);
-    }
-
-    /**
-     * @deprecated
-     * @param string $modelClass
-     * @return $this
-     */
-    static public function getModelByClassName($modelClass) {
-        if (empty(self::$loadedModels[$modelClass])) {
-            if (!class_exists($modelClass)) {
-                throw new \InvalidArgumentException("Class $modelClass was not found");
-            }
-            self::$loadedModels[$modelClass] = new $modelClass();
-        }
-        return self::$loadedModels[$modelClass];
-    }
-
-    /**
-     * @param string $tableName
-     * @return $this
-     */
-    static public function getModelByTableName($tableName) {
-        $modelClass = static::getFullModelClassByTableName($tableName);
-        return static::getModelByClassName($modelClass);
-    }
-
-    /**
-     * @param string $dbObjectNameOrTableName - class name or table name (UserToken or user_tokens)
-     * @param null|array|string|int $data - null: do nothing | int and string: is primary key (read db) | array: object data
-     * @param bool $filter - used only when $data not empty and is array
-     *      true: filters $data that does not belong to this object
-     *      false: $data that does not belong to this object will trigger exceptions
-     * @param bool $isDbValues
-     * @return Record|CmfRecord
-     *@deprecated
-     * Load DbObject class and create new instance of it
-     */
-    static private function createDbObject($dbObjectNameOrTableName, $data = null, $filter = false, $isDbValues = false) {
-        $dbObjectClass = static::getFullDbObjectClass($dbObjectNameOrTableName);
-        if (!class_exists($dbObjectClass)) {
-            throw new \InvalidArgumentException("Class $dbObjectClass was not found");
-        }
-        $model = static::getModel(StringUtils::modelize($dbObjectNameOrTableName));
-        return new $dbObjectClass($data, $filter, $isDbValues, $model);
-    }
-    
-    /**
-     * @return Record|CmfRecord
-     */
-    public function newRecord() {
-        $objectName = preg_replace(
-            [
-                '%^.*[\\\]%is',
-                '%' . static::$modelClassSuffix . '$%',
-                '%^' . preg_quote(addslashes(static::getRootNamespace()), '%') . '/%'
-            ],
-            [
-                '',
-                '',
-                static::getRootNamespace() . '/'
-            ],
-            static::class
-        );
-        return static::createDbObject($objectName);
     }
 
     /**

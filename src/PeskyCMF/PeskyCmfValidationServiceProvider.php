@@ -6,7 +6,7 @@ use Illuminate\Validation\ValidationServiceProvider;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Validator;
 
-class PeskyValidationServiceProvider extends ValidationServiceProvider {
+class PeskyCmfValidationServiceProvider extends ValidationServiceProvider {
 
     /**
      * Bootstrap any application services.
@@ -22,12 +22,6 @@ class PeskyValidationServiceProvider extends ValidationServiceProvider {
         $this->addFileExtensionValidator();
         $this->getFileSizeValidator();
         $this->addAlternativeExistsValidator();
-    }
-
-    protected function registerPresenceVerifier() {
-        $this->app->singleton('validation.presence', function ($app) {
-            return new \PeskyCMF\Db\DatabasePresenceVerifier();
-        });
     }
 
     /**

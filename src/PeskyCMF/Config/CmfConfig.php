@@ -4,13 +4,13 @@ namespace PeskyCMF\Config;
 
 use Illuminate\Http\Request;
 use PeskyCMF\ConfigsContainer;
-use PeskyCMF\Db\CmfTable;
 use PeskyCMF\Http\Middleware\ValidateAdmin;
 use PeskyCMF\PeskyCmfAccessManager;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
+use Swayok\Utils\StringUtils;
 use Symfony\Component\HttpFoundation\Response;
 
-class CmfConfig extends ConfigsContainer {
+abstract class CmfConfig extends ConfigsContainer {
 
     public function __construct() {
         parent::__construct();
@@ -37,8 +37,8 @@ class CmfConfig extends ConfigsContainer {
      * Note: you must overwrite this to avoid problems
      * @return string
      */
-    static public function base_db_model_class() {
-        return CmfTable::class;
+    static public function base_db_table_class() {
+        return config('peskyorm.base_table_class');
     }
 
     /**
@@ -128,12 +128,7 @@ class CmfConfig extends ConfigsContainer {
      * Class name of user db object
      * @return string
      */
-    static public function user_object_class() {
-        return call_user_func(
-            [static::base_db_model_class(), 'getFullDbObjectClass'],
-            static::users_table_name()
-        );
-    }
+    abstract static public function user_object_class();
 
     /**
      * @return string
@@ -601,41 +596,18 @@ class CmfConfig extends ConfigsContainer {
     static public function js_app_data() {
         return [];
     }
+    
+    abstract static public function scaffolds_base_namespace();
 
     /**
      * Get ScaffoldSectionConfig instance
-     * @param CmfTable $model - a model to be used in ScaffoldSectionConfig
-     * @param string $tableName - table name passed via route parameter, may differ from $model->getTableName()
-     *      and added here to be used in child configs when you need to use scaffolds with fake table names.
-     *      It should be used together with static::getModelByTableName() to provide correct model for a fake table name
+     * @param string $tableName - table name passed via route parameter (resource name)
      * @return ScaffoldSectionConfig
      */
-    static public function getScaffoldConfig(CmfTable $model, $tableName) {
-        // $tableName is no tused by default and added here to be used in child configs
-        $className = $model::getRootNamespace() . $model::getAlias() . static::scaffold_config_class_suffix();
-        return new $className($model);
-    }
-
-    /**
-     * Get CmfTable instance for $tableName
-     * Note: can be ovewritted to allow usage of fake tables in resources routes
-     * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
-     * @param string $tableName
-     * @return CmfTable
-     */
-    static public function getModelByTableName($tableName) {
-        /** @var CmfTable $class */
-        $class = static::getInstance()->base_db_model_class();
-        return $class::getModelByTableName($tableName);
-    }
-
-    /**
-     * Shortcut to static::getScaffoldConfig()
-     * @param string $tableName
-     * @return ScaffoldSectionConfig
-     */
-    static public function getScaffoldConfigByTableName($tableName) {
-        return static::getScaffoldConfig(static::getModelByTableName($tableName), $tableName);
+    static public function getScaffoldConfig($tableName) {
+        $scaffoldClassName = StringUtils::modelize($tableName) . static::scaffold_config_class_suffix();
+        $className = static::scaffolds_base_namespace() . $scaffoldClassName;
+        return new $className();
     }
 
 }

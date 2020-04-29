@@ -5,6 +5,8 @@ namespace PeskyCMF;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\Console\Commands\CmfAddAdmin;
 use PeskyCMF\Console\Commands\CmfInstall;
+use PeskyORMLaravel\Providers\PeskyOrmServiceProvider;
+use PeskyORMLaravel\Providers\PeskyValidationServiceProvider;
 
 class PeskyCmfServiceProvider extends ServiceProvider {
 
@@ -16,9 +18,9 @@ class PeskyCmfServiceProvider extends ServiceProvider {
     }
 
     public function register() {
-        $this->app->register(\PeskyORMLaravel\Providers\PeskyOrmServiceProvider::class);
+        $this->app->register(PeskyOrmServiceProvider::class);
+        $this->app->register(PeskyCmfValidationServiceProvider::class);
         $this->app->register(PeskyValidationServiceProvider::class);
-        $this->app->register(\PeskyORMLaravel\Providers\PeskyValidationServiceProvider::class);
         $this->registerCommands();
     }
 

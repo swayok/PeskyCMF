@@ -12,8 +12,6 @@ use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 
 abstract class ScaffoldSectionConfig {
 
-    /** @var CmfTable */
-    protected $model;
     /** @var DataGridConfig */
     protected $dataGridConfig = null;
     /** @var DataGridFilterConfig */
@@ -41,20 +39,9 @@ abstract class ScaffoldSectionConfig {
     protected $viewsLocalizationKey = null;
 
     /**
-     * ScaffoldSectionConfig constructor.
-     * @param CmfTable $model
-     * @throws \PeskyCMF\Scaffold\ScaffoldActionException
-     */
-    public function __construct(CmfTable $model) {
-        $this->model = $model;
-    }
-
-    /**
      * @return CmfTable
      */
-    public function getModel() {
-        return $this->model;
-    }
+    abstract static public function getTable();
 
     /**
      * @return array
@@ -62,7 +49,7 @@ abstract class ScaffoldSectionConfig {
      */
     public function getConfigs() {
         $configs = [
-            'model' => $this->getModel(),
+            'model' => static::getTable(),
             'scaffoldSection' => $this
         ];
         $configs['dataGridConfig'] = $this->getDataGridConfig();
@@ -88,28 +75,28 @@ abstract class ScaffoldSectionConfig {
      * @return DataGridConfig
      */
     protected function createDataGridConfig() {
-        return DataGridConfig::create($this->getModel(), $this);
+        return DataGridConfig::create(static::getTable(), $this);
     }
 
     /**
      * @return DataGridFilterConfig
      */
     protected function createDataGridFilterConfig() {
-        return DataGridFilterConfig::create($this->getModel());
+        return DataGridFilterConfig::create(static::getTable());
     }
 
     /**
      * @return ItemDetailsConfig
      */
     protected function createItemDetailsConfig() {
-        return ItemDetailsConfig::create($this->getModel(), $this);
+        return ItemDetailsConfig::create(static::getTable(), $this);
     }
 
     /**
      * @return FormConfig
      */
     protected function createFormConfig() {
-        return FormConfig::create($this->getModel(), $this);
+        return FormConfig::create(static::getTable(), $this);
     }
 
     /**
