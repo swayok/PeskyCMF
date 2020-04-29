@@ -9,18 +9,19 @@ use PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns;
 use PeskyORMLaravel\Db\TableStructureTraits\UserAuthColumns;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
-use App\Db\BaseDbTableConfig;
+use PeskyORM\ORM\TableStructure;
 
-class AdminTableConfig extends BaseDbTableConfig {
-
-    const TABLE_NAME = 'admins';
-    protected $name = self::TABLE_NAME;
+class AdminTableConfig extends TableStructure {
 
     use IdColumn,
         TimestampColumns,
         IsActiveColumn,
         UserAuthColumns
         ;
+
+    static public function getTableName(): string {
+        return 'admins';
+    }
 
     private function parent_id() {
         return Column::create(Column::TYPE_INT)
@@ -68,7 +69,7 @@ class AdminTableConfig extends BaseDbTableConfig {
     }
 
     private function ParentAdmin() {
-        return Relation::create($this, 'parent_id', Relation::BELONGS_TO, self::TABLE_NAME, 'id')
+        return Relation::create($this, 'parent_id', Relation::BELONGS_TO, self::getTableName(), 'id')
             ->setDisplayColumnName(CmfConfig::getInstance()->user_login_column());
     }
 
