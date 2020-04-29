@@ -6,16 +6,10 @@ use PeskyCMF\Db\Traits\CacheForDbSelects;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Table;
 
+/**
+ * @method static CmfTable|Table|CacheForDbSelects getTable()
+ */
 abstract class CmfRecord extends Record {
-
-    /**
-     * @return CmfTable|Table|CacheForDbSelects
-     */
-    public static function getTable() {
-        /** @var CmfTable $baseModelClass */
-        $baseModelClass = config('peskyorm.base_table_class');
-        return $baseModelClass::getModel(class_basename(static::class));
-    }
 
     /**
      * @param array $values
