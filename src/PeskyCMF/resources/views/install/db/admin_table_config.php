@@ -11,7 +11,7 @@ use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableStructure;
 
-class AdminTableConfig extends TableStructure {
+class AdminTableStructure extends TableStructure {
 
     use IdColumn,
         TimestampColumns,

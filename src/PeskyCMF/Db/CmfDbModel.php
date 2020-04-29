@@ -32,7 +32,7 @@ abstract class CmfDbModel extends Table {
     /** @var string */
     protected $orderDirectionForDefaultOrderByColumn = self::ORDER_ASCENDING;
     
-    static protected $tableConfigClassSuffix = 'TableConfig';
+    static protected $tableConfigClassSuffix = 'TableStructure';
     static protected $modelClassSuffix = 'Model';
 
     static public function getTimezonesList($asOptions = false) {

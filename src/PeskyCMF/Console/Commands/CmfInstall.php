@@ -55,7 +55,7 @@ class CmfInstall extends BaseCommand {
             $file->write(view('cmf::install.db.admin_object')->render());
             $file = File::load($subfolder->pwd() . '/AdminModel.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.admin_model')->render());
-            $file = File::load($subfolder->pwd() . '/AdminTableConfig.php', true, 0755, 0644);
+            $file = File::load($subfolder->pwd() . '/AdminTableStructure.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.admin_table_config')->render());
             $file = File::load($subfolder->pwd() . '/AdminScaffoldConfig.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.admin_scaffold_config')->render());
