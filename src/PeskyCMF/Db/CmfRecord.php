@@ -6,7 +6,7 @@ use PeskyCMF\Db\Traits\CacheForDbSelects;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\Table;
 
-abstract class CmfDbObject extends Record {
+abstract class CmfRecord extends Record {
 
     /**
      * @return CmfTable|Table|CacheForDbSelects

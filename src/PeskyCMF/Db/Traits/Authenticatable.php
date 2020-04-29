@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfRecord;
 
 trait Authenticatable {
     /**
@@ -28,7 +28,7 @@ trait Authenticatable {
      * @return int|string
      */
     public function getKey() {
-        /** @var CmfDbObject|Authenticatable $this */
+        /** @var CmfRecord|Authenticatable $this */
         return $this->getPrimaryKeyValue();
     }
 
@@ -37,7 +37,7 @@ trait Authenticatable {
      * @return string
      */
     public function getKeyName() {
-        /** @var CmfDbObject|Authenticatable $this */
+        /** @var CmfRecord|Authenticatable $this */
         return static::getPrimaryKeyColumnName();
     }
 
@@ -56,7 +56,7 @@ trait Authenticatable {
      * @return string
      */
     public function getRememberToken() {
-        /** @var CmfDbObject|Authenticatable $this */
+        /** @var CmfRecord|Authenticatable $this */
         return $this->getValue($this->getRememberTokenName());
     }
 
@@ -67,7 +67,7 @@ trait Authenticatable {
      * @return $this
      */
     public function setRememberToken($value) {
-        /** @var $this CmfDbObject|Authenticatable */
+        /** @var $this CmfRecord|Authenticatable */
         $this->updateValue($this->getRememberTokenName(), $value, false);
         return $this;
     }

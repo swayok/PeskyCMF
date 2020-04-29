@@ -3,13 +3,13 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfRecord;
 use PeskyCMF\Db\CmfTable;
 
 trait CacheHelpersTrait {
 
     /**
-     * Generate cache key from $baseKey for current class and DB Object id (if current class instance of \App\Db\BaseDbObject)
+     * Generate cache key from $baseKey for current class and DB Object id (if current class instance of \App\Db\AppRecord)
      * @param string|array $baseKey - use method name; array - will be jsoned and hashed
      * @param string|array|null $suffix
      * @return string
@@ -20,7 +20,7 @@ trait CacheHelpersTrait {
             $baseKey = \Hash::make(json_encode($baseKey, JSON_UNESCAPED_UNICODE));
         }
         $key = get_class($this) . '->' . $baseKey;
-        if ($this instanceof CmfDbObject) {
+        if ($this instanceof CmfRecord) {
             $key .= '-' . $this::getTableStructure()->getSchema();
             $key .= '-id-' . $this->getPrimaryKeyValue();
         } else if ($this instanceof CmfTable) {

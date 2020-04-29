@@ -3,7 +3,7 @@
 namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Contracts\Encryption\DecryptException;
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfRecord;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 
@@ -13,7 +13,7 @@ trait ResetsPasswordsViaAccessKey {
      * @return string
      */
     public function getPasswordRecoveryAccessKey() {
-        /** @var CmfDbObject|ResetsPasswordsViaAccessKey $this */
+        /** @var CmfRecord|ResetsPasswordsViaAccessKey $this */
         $data = [
             'account_id' => $this->getPrimaryKeyValue(),
             'expires_at' => time() + config('auth.passwords.' . \Auth::getDefaultDriver() . 'expire', 60) * 60,
@@ -26,7 +26,7 @@ trait ResetsPasswordsViaAccessKey {
     }
 
     public function getAdditionalFieldsForPasswordRecoveryAccessKey() {
-        /** @var CmfDbObject|ResetsPasswordsViaAccessKey $this */
+        /** @var CmfRecord|ResetsPasswordsViaAccessKey $this */
         $fields = [];
         if ($this::hasColumn('updated_at')) {
             $fields[] = 'updated_at';
@@ -39,7 +39,7 @@ trait ResetsPasswordsViaAccessKey {
     /**
      * Vlidate access key and find user
      * @param string $accessKey
-     * @return CmfDbObject|bool - false = failed to parse access key, validate data or load user
+     * @return CmfRecord|bool - false = failed to parse access key, validate data or load user
      */
     static public function loadFromPasswordRecoveryAccessKey($accessKey) {
         try {
@@ -60,7 +60,7 @@ trait ResetsPasswordsViaAccessKey {
         ) {
             return false;
         }
-        /** @var CmfDbObject|ResetsPasswordsViaAccessKey $user */
+        /** @var CmfRecord|ResetsPasswordsViaAccessKey $user */
         $user = static::create();
         $conditions = [
             $user::getPrimaryKeyColumnName() => $data['account_id'],

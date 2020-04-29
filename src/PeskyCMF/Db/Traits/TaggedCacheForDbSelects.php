@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfRecord;
 use PeskyCMF\Db\CmfTable;
 use PeskyORM\ORM\Record;
 
@@ -109,7 +109,7 @@ trait TaggedCacheForDbSelects {
     }
 
     /**
-     * @param int|string|array|CmfDbObject|Record $record
+     * @param int|string|array|CmfRecord|Record $record
      * @param bool $cleanRelatedModelsCache
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException

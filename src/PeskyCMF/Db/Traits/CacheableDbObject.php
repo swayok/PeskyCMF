@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfRecord;
 
 trait CacheableDbObject {
 
@@ -14,7 +14,7 @@ trait CacheableDbObject {
      * @return $this
      */
     public function withCacheTimeout($timeout = null) {
-        /** @var CmfDbObject|CacheableDbObject $this */
+        /** @var CmfRecord|CacheableDbObject $this */
         $this->_cacheOnceTimeout = empty($timeout)
             ? static::getTable()->getDefaultCacheDurationForSelectOneInMinutes()
             : $timeout;

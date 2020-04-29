@@ -168,15 +168,15 @@ abstract class CmfTable extends Table {
     }
 
     /**
-     * @deprecated
-     * Load DbObject class and create new instance of it
      * @param string $dbObjectNameOrTableName - class name or table name (UserToken or user_tokens)
      * @param null|array|string|int $data - null: do nothing | int and string: is primary key (read db) | array: object data
      * @param bool $filter - used only when $data not empty and is array
      *      true: filters $data that does not belong to this object
      *      false: $data that does not belong to this object will trigger exceptions
      * @param bool $isDbValues
-     * @return Record|CmfDbObject
+     * @return Record|CmfRecord
+     *@deprecated
+     * Load DbObject class and create new instance of it
      */
     static private function createDbObject($dbObjectNameOrTableName, $data = null, $filter = false, $isDbValues = false) {
         $dbObjectClass = static::getFullDbObjectClass($dbObjectNameOrTableName);
@@ -188,7 +188,7 @@ abstract class CmfTable extends Table {
     }
     
     /**
-     * @return Record|CmfDbObject
+     * @return Record|CmfRecord
      */
     public function newRecord() {
         $objectName = preg_replace(

@@ -2,15 +2,15 @@
 namespace PeskyCMF\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfRecord;
 use PeskyCMF\Event\AdminAuthorised;
 use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyCMF\HttpCode;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 
 class ValidateAdmin {
 
@@ -50,7 +50,7 @@ class ValidateAdmin {
                 return $response;
             }
         }
-        /** @var CmfDbObject $user */
+        /** @var CmfRecord $user */
         $user = \Auth::guard()->user();
         event(new AdminAuthorised($user));
 

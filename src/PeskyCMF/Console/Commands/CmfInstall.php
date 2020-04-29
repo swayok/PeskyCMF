@@ -47,7 +47,7 @@ class CmfInstall extends BaseCommand {
             $dbFolder = Folder::load(app_path('/' . $this->input->getArgument('database_classes_app_subfolder')), true, 0755);
             $file = File::load($dbFolder->pwd() . '/BaseTable.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.base_db_model')->render());
-            $file = File::load($dbFolder->pwd() . '/BaseDbObject.php', true, 0755, 0644);
+            $file = File::load($dbFolder->pwd() . '/AppRecord.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.base_db_object')->render());
             // copy admin table classes
             $subfolder = Folder::load($dbFolder->pwd() . '/Admin', true, 0755);

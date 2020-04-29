@@ -4,7 +4,7 @@ namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Routing\Route;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfRecord;
 use PeskyCMF\HttpCode;
 
 trait InjectsDbObjects {
@@ -22,7 +22,7 @@ trait InjectsDbObjects {
         $route = \Request::route();
         $object = null;
         foreach ($parameters as $key => $value) {
-            if ($value instanceof CmfDbObject) {
+            if ($value instanceof CmfRecord) {
                 // get only last object in params
                 $object = $value;
             }
@@ -60,19 +60,19 @@ trait InjectsDbObjects {
 
     /**
      * @param Route $route
-     * @param CmfDbObject $object
+     * @param CmfRecord $object
      * @param array $conditions
      */
-    protected function addConditionsForDbObjectInjection(Route $route, CmfDbObject $object, array &$conditions) {
+    protected function addConditionsForDbObjectInjection(Route $route, CmfRecord $object, array &$conditions) {
 
     }
 
     /**
      * @param Route $route
-     * @param CmfDbObject $object
+     * @param CmfRecord $object
      * @param array $conditions
      */
-    protected function addParentIdsConditionsForDbObjectInjection(Route $route, CmfDbObject $object, array &$conditions) {
+    protected function addParentIdsConditionsForDbObjectInjection(Route $route, CmfRecord $object, array &$conditions) {
         foreach ($route->parameterNames() as $name) {
             if ($object::hasColumn($name)) {
                 $conditions[$name] = $route->parameter($name);

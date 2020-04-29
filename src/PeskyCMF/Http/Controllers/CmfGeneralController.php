@@ -8,7 +8,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Message;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
@@ -86,10 +86,10 @@ class CmfGeneralController extends Controller {
 
     /**
      * @param Request $request
-     * @param CmfDbObject|Authenticatable $admin
+     * @param CmfRecord|Authenticatable $admin
      * @return array|\Illuminate\Http\JsonResponse
      */
-    protected function validateAndGetAdminProfileUpdates(Request $request, CmfDbObject $admin) {
+    protected function validateAndGetAdminProfileUpdates(Request $request, CmfRecord $admin) {
         $validationRules = [
             'old_password' => 'required',
             'new_password' => 'min:6',
@@ -199,7 +199,7 @@ class CmfGeneralController extends Controller {
 
     /**
      * @param $accessKey
-     * @return bool|CmfDbObject
+     * @return bool|CmfRecord
      */
     protected function getUserFromPasswordRecoveryAccessKey($accessKey) {
         /** @var ResetsPasswordsViaAccessKey $userClass */
@@ -278,7 +278,7 @@ class CmfGeneralController extends Controller {
         ]);
         $email = strtolower(trim($request->data('email')));
         if (Auth::guard()->attempt(['email' => $email], false, false)) {
-            /** @var CmfDbObject|ResetsPasswordsViaAccessKey $user */
+            /** @var CmfRecord|ResetsPasswordsViaAccessKey $user */
             $user = Auth::guard()->getLastAttempted();
             $data = [
                 'url' => route('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()]),
@@ -307,7 +307,7 @@ class CmfGeneralController extends Controller {
         ]);
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if (!empty($user) && $user->getPrimaryKeyValue() !== $request->data('id')) {
-            /** @var CmfDbObject $user */
+            /** @var CmfRecord $user */
             $user->begin()->updateValue('password', $request->data('password'), false);
             if ($user->commit()) {
                 return cmfServiceJsonResponse()
