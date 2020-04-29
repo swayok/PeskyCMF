@@ -12,14 +12,14 @@ use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableStructure;
 use Swayok\Utils\StringUtils;
 
-abstract class CmfDbModel extends Table {
+abstract class CmfTable extends Table {
 
     /** @var array */
     static private $timeZonesList;
     /** @var array */
     static private $timeZonesOptions;
     
-    /** @var CmfDbModel[] */
+    /** @var CmfTable[] */
     static protected $loadedModels = [];    //< Model objects
     
     const ORDER_ASCENDING = 'ASC';
@@ -33,7 +33,7 @@ abstract class CmfDbModel extends Table {
     protected $orderDirectionForDefaultOrderByColumn = self::ORDER_ASCENDING;
     
     static protected $tableConfigClassSuffix = 'TableStructure';
-    static protected $modelClassSuffix = 'Model';
+    static protected $modelClassSuffix = 'Table';
 
     static public function getTimezonesList($asOptions = false) {
         if (self::$timeZonesList === null) {
@@ -94,7 +94,7 @@ abstract class CmfDbModel extends Table {
      * @return string|string[]|null
      */
     static public function getFullDbObjectClass($dbObjectNameOrTableName) {
-        /** @var CmfDbModel $calledClass */
+        /** @var CmfTable $calledClass */
         $calledClass = static::class;
         $modelClassName = $calledClass::getFullModelClassNameByName(StringUtils::modelize($dbObjectNameOrTableName));
         return preg_replace('%' . $calledClass::$modelClassSuffix . '$%', '', $modelClassName);
@@ -131,13 +131,13 @@ abstract class CmfDbModel extends Table {
     }
 
     /**
-     * @deprecated
-     * Load and return requested Model
      * @param string $modelNameOrObjectName - base class name (UserToken or UserTokenModel or User)
-     * @return CmfDbModel
+     * @return CmfTable
+     *@deprecated
+     * Load and return requested Model
      */
     static public function getModel($modelNameOrObjectName) {
-        /** @var CmfDbModel $calledClass */
+        /** @var CmfTable $calledClass */
         $calledClass = static::class;
         $modelClass = $calledClass::getFullModelClassNameByName($modelNameOrObjectName);
         return $calledClass::getModelByClassName($modelClass);

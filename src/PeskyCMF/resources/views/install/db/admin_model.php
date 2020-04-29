@@ -2,9 +2,9 @@
 
 namespace App\Db\Admin;
 
-use App\Db\BaseDbModel;
+use App\Db\AppTable;
 
-class AdminModel extends BaseDbModel {
+class AdminTable extends AppTable {
 
     protected $orderField = 'id';
     protected $orderDirection = self::ORDER_ASCENDING;

@@ -3,8 +3,8 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbModel;
 use PeskyCMF\Db\CmfDbObject;
+use PeskyCMF\Db\CmfTable;
 
 trait CacheHelpersTrait {
 
@@ -23,8 +23,8 @@ trait CacheHelpersTrait {
         if ($this instanceof CmfDbObject) {
             $key .= '-' . $this::getTableStructure()->getSchema();
             $key .= '-id-' . $this->getPrimaryKeyValue();
-        } else if ($this instanceof CmfDbModel) {
-            /** @var CmfDbModel $this */
+        } else if ($this instanceof CmfTable) {
+            /** @var CmfTable $this */
             $key .= '-' . $this->getTableStructure()->getSchema();
         }
         if (!empty($suffix)) {

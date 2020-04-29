@@ -9,10 +9,10 @@ use PeskyORM\ORM\Table;
 abstract class CmfDbObject extends Record {
 
     /**
-     * @return CmfDbModel|Table|CacheForDbSelects
+     * @return CmfTable|Table|CacheForDbSelects
      */
     public static function getTable() {
-        /** @var CmfDbModel $baseModelClass */
+        /** @var CmfTable $baseModelClass */
         $baseModelClass = config('peskyorm.base_table_class');
         return $baseModelClass::getModel(class_basename(static::class));
     }

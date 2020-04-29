@@ -2,12 +2,12 @@
 
 namespace App\Db;
 
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfTable;
 use PeskyCMF\Db\Traits\CacheableDbModel;
 use PeskyORM\Db;
 use PeskyORM\Core\DbExpr;
 
-abstract class BaseDbModel extends CmfDbModel {
+abstract class AppTable extends CmfTable {
 
     use CacheableDbModel;
 

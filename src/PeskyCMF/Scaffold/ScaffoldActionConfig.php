@@ -2,14 +2,14 @@
 
 namespace PeskyCMF\Scaffold;
 
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfTable;
 use PeskyCMF\Scaffold\DataGrid\DataGridFieldConfig;
 use PeskyCMF\Scaffold\Form\FormFieldConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig;
 use Swayok\Html\Tag;
 
 abstract class ScaffoldActionConfig {
-    /** @var CmfDbModel */
+    /** @var CmfTable */
     protected $model;
     /** @var array */
     protected $fieldsConfigs = [];
@@ -47,21 +47,21 @@ abstract class ScaffoldActionConfig {
     protected $jsInitiator = null;
 
     /**
-     * @param CmfDbModel $model
+     * @param CmfTable $model
      * @param ScaffoldSectionConfig $scaffoldSection
      * @return $this
      */
-    static public function create(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSection) {
+    static public function create(CmfTable $model, ScaffoldSectionConfig $scaffoldSection) {
         $class = get_called_class();
         return new $class($model, $scaffoldSection);
     }
 
     /**
      * ScaffoldActionConfig constructor.
-     * @param CmfDbModel $model
+     * @param CmfTable $model
      * @param ScaffoldSectionConfig $scaffoldSection
      */
-    public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSection) {
+    public function __construct(CmfTable $model, ScaffoldSectionConfig $scaffoldSection) {
         $this->model = $model;
         $this->scaffoldSection = $scaffoldSection;
     }
@@ -184,7 +184,7 @@ abstract class ScaffoldActionConfig {
     }
 
     /**
-     * @return CmfDbModel
+     * @return CmfTable
      */
     public function getModel() {
         return $this->model;

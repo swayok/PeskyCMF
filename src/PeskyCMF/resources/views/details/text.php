@@ -3,7 +3,7 @@
  * @var \PeskyCMF\Scaffold\Form\InputRendererConfig $rendererConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig $actionConfig
  * @var \PeskyCMF\Scaffold\ItemDetails\ItemDetailsFieldConfig $fieldConfig
- * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var \PeskyCMF\Db\CmfTable $model
  * @var string $translationPrefix
  */
 echo '{{= it.' . $fieldConfig->getName() . ' || "" }}';

@@ -4,7 +4,7 @@
 namespace PeskyCMF\Scaffold;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfTable;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridFilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
@@ -12,7 +12,7 @@ use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 
 abstract class ScaffoldSectionConfig {
 
-    /** @var CmfDbModel */
+    /** @var CmfTable */
     protected $model;
     /** @var DataGridConfig */
     protected $dataGridConfig = null;
@@ -42,15 +42,15 @@ abstract class ScaffoldSectionConfig {
 
     /**
      * ScaffoldSectionConfig constructor.
-     * @param CmfDbModel $model
+     * @param CmfTable $model
      * @throws \PeskyCMF\Scaffold\ScaffoldActionException
      */
-    public function __construct(CmfDbModel $model) {
+    public function __construct(CmfTable $model) {
         $this->model = $model;
     }
 
     /**
-     * @return CmfDbModel
+     * @return CmfTable
      */
     public function getModel() {
         return $this->model;

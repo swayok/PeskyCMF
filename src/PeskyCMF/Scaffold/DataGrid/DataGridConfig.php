@@ -3,7 +3,7 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfTable;
 use PeskyCMF\Scaffold\ScaffoldActionConfig;
 use PeskyCMF\Scaffold\ScaffoldActionException;
 use PeskyCMF\Scaffold\ScaffoldFieldConfig;
@@ -66,7 +66,7 @@ class DataGridConfig extends ScaffoldActionConfig {
 
     const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
-    public function __construct(CmfDbModel $model, ScaffoldSectionConfig $scaffoldSectionConfig) {
+    public function __construct(CmfTable $model, ScaffoldSectionConfig $scaffoldSectionConfig) {
         parent::__construct($model, $scaffoldSectionConfig);
         $this->limit = CmfConfig::getInstance()->rows_per_page();
         if ($model->getDefaultOrderByColumn()) {

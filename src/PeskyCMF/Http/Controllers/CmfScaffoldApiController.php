@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfTable;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Http\Request;
 use PeskyCMF\HttpCode;
@@ -29,7 +29,7 @@ class CmfScaffoldApiController extends Controller {
     protected $scaffoldConfig = null;
 
     /**
-     * @return CmfDbModel
+     * @return CmfTable
      */
     public function getModel() {
         if ($this->model === null) {
@@ -425,12 +425,12 @@ class CmfScaffoldApiController extends Controller {
 
     /**
      * @param Request $request
-     * @param CmfDbModel $model
+     * @param CmfTable $model
      * @param string $inputNamePrefix - input name prefix
      *      For example if you use '_ids' instead of 'ids' - use prefix '_'
      * @return array|Response|CmfJsonResponse
      */
-    private function getConditionsForBulkActions(Request $request, CmfDbModel $model, $inputNamePrefix = '') {
+    private function getConditionsForBulkActions(Request $request, CmfTable $model, $inputNamePrefix = '') {
         $specialConditions = $this->getScaffoldConfig()->getFormConfig()->getSpecialConditions();
         $conditions = $specialConditions;
         $idsField = $inputNamePrefix . 'ids';
@@ -556,10 +556,10 @@ class CmfScaffoldApiController extends Controller {
     }
 
     /**
-     * @param CmfDbModel $model
+     * @param CmfTable $model
      * @param null|string $message
      */
-    protected function sendItemNotFoundResponse(CmfDbModel $model, $message = null) {
+    protected function sendItemNotFoundResponse(CmfTable $model, $message = null) {
         if (empty($message)) {
             $message = CmfConfig::transBase('.error.resource_item_not_found');
         }

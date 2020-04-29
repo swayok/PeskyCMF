@@ -3,7 +3,7 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbModel;
+use PeskyCMF\Db\CmfTable;
 use PeskyORM\ORM\Relation;
 use Swayok\Utils\NormalizeValue;
 
@@ -16,7 +16,7 @@ trait KeyValueModelHelpers {
      * @return string|null - null returned when there is no foreign key
      */
     protected function getMainForeignKeyColumnName() {
-        /** @var CmfDbModel|KeyValueModelHelpers $this */
+        /** @var CmfTable|KeyValueModelHelpers $this */
         if (empty($this->_detectedMainForeignKeyColumnName)) {
             foreach ($this->getTableStructure()->getRelations() as $relationConfig) {
                 if ($relationConfig->getType() === Relation::BELONGS_TO) {
@@ -98,7 +98,7 @@ trait KeyValueModelHelpers {
      * @return array
      */
     static public function selectAssoc(string $keysColumn, string $valuesColumn, array $conditions = [], ?\Closure $configurator = null): array {
-        /** @var CmfDbModel|KeyValueModelHelpers $this */
+        /** @var CmfTable|KeyValueModelHelpers $this */
         return static::decodeValues(parent::selectAssoc($keysColumn, $valuesColumn, $conditions));
     }
 
@@ -108,7 +108,7 @@ trait KeyValueModelHelpers {
      * @return bool
      */
     public function updateOrCreateRecord(array $record) {
-        /** @var CmfDbModel|KeyValueModelHelpers $this */
+        /** @var CmfTable|KeyValueModelHelpers $this */
         if (empty($record['key'])) {
             throw new \InvalidArgumentException('$record does not contain [key] key or its value is empty');
         } else if (!array_key_exists('value', $record)) {
@@ -149,7 +149,7 @@ trait KeyValueModelHelpers {
      * @throws \Exception
      */
     public function updateOrCreateRecords(array $records) {
-        /** @var CmfDbModel|KeyValueModelHelpers $this */
+        /** @var CmfTable|KeyValueModelHelpers $this */
         $this::beginTransaction();
         try {
             foreach ($records as $record) {
@@ -175,7 +175,7 @@ trait KeyValueModelHelpers {
      * @return array
      */
     public function selectOneByKeyAndForeignKeyValue($key, $foreignKeyValue = null, $default = []) {
-        /** @var CmfDbModel|KeyValueModelHelpers $this */
+        /** @var CmfTable|KeyValueModelHelpers $this */
         $conditions = [
             'key' => $key
         ];

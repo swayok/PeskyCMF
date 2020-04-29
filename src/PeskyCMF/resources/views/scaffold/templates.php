@@ -1,7 +1,7 @@
 <?php
 /**
  * @var \PeskyCMF\Scaffold\ScaffoldSectionConfig $scaffoldSection
- * @var \PeskyCMF\Db\CmfDbModel $model
+ * @var \PeskyCMF\Db\CmfTable $model
  * @var string $tableNameForRoutes
  * @var string $localizationKey
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $dataGridConfig

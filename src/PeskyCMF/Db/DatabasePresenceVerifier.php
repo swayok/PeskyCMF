@@ -50,10 +50,10 @@ class DatabasePresenceVerifier implements PresenceVerifierInterface {
 
     /**
      * @param $tableName
-     * @return CmfDbModel
+     * @return CmfTable
      */
     private function getModel($tableName) {
-        /** @var CmfDbModel $baseClass */
+        /** @var CmfTable $baseClass */
         $baseClass = app()->make(Table::class);
         return $baseClass::getModelByClassName($baseClass::getFullModelClassByTableName($tableName));
     }
