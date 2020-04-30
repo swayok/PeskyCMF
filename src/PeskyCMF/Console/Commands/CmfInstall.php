@@ -45,17 +45,17 @@ class CmfInstall extends BaseCommand {
         if (!$this->input->getOption('no-db-classes')) {
             // copy base db classes
             $dbFolder = Folder::load(app_path('/' . $this->input->getArgument('database_classes_app_subfolder')), true, 0755);
-            $file = File::load($dbFolder->pwd() . '/BaseTable.php', true, 0755, 0644);
+            $file = File::load($dbFolder->pwd() . '/AbstractTable.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.base_db_model')->render());
-            $file = File::load($dbFolder->pwd() . '/AppRecord.php', true, 0755, 0644);
+            $file = File::load($dbFolder->pwd() . '/AbstractRecord.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.base_db_object')->render());
             // copy admin table classes
             $subfolder = Folder::load($dbFolder->pwd() . '/Admin', true, 0755);
             $file = File::load($subfolder->pwd() . '/Admin.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.admin_object')->render());
-            $file = File::load($subfolder->pwd() . '/AdminTable.php', true, 0755, 0644);
+            $file = File::load($subfolder->pwd() . '/AdminsTable.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.admin_model')->render());
-            $file = File::load($subfolder->pwd() . '/AdminTableStructure.php', true, 0755, 0644);
+            $file = File::load($subfolder->pwd() . '/AdminsTableStructure.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.admin_table_config')->render());
             $file = File::load($subfolder->pwd() . '/AdminScaffoldConfig.php', true, 0755, 0644);
             $file->write(view('cmf::install.db.admin_scaffold_config')->render());

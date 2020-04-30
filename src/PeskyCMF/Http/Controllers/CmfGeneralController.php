@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Http\Controllers;
 
-use App\Db\Admin\Admin;
+use App\Db\Admins\Admin;
 use Auth;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Mail\Message;

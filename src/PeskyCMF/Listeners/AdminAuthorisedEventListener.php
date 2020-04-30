@@ -2,7 +2,7 @@
 
 namespace PeskyCMF\Listeners;
 
-use App\Db\Admin\Admin;
+use App\Db\Admins\Admin;
 use PeskyCMF\Event\AdminAuthorised;
 use PeskyORM\Core\DbAdapterInterface;
 

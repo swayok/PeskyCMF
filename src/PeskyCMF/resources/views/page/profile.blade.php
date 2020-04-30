@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Db\Admin\Admin $admin
+ * @var \App\Db\Admins\Admin $admin
  */
 ?>
 <div class="content-header">

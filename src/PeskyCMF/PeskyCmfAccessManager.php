@@ -2,7 +2,7 @@
 
 namespace PeskyCMF;
 
-use App\Db\Admin\Admin;
+use App\Db\Admins\Admin;
 use Illuminate\Http\Request;
 
 class PeskyCmfAccessManager extends BaseAccessManager {

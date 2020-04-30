@@ -55,7 +55,7 @@ class {{ $sectionName }}Config extends CmfConfig {
     }
 
     static public function base_db_model_class() {
-        return \App\{{ str_replace('/', '\\', $dbClassesAppSubfolder) }}\BaseTable::class;
+        return \App\{{ str_replace('/', '\\', $dbClassesAppSubfolder) }}\AbstractTable::class;
     }
 
     /**

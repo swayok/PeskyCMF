@@ -9,7 +9,7 @@ use PeskyCMF\Db\CmfTable;
 trait CacheHelpersTrait {
 
     /**
-     * Generate cache key from $baseKey for current class and DB Object id (if current class instance of \App\Db\AppRecord)
+     * Generate cache key from $baseKey for current class and DB Object id (if current class instance of \App\Db\AbstractRecord)
      * @param string|array $baseKey - use method name; array - will be jsoned and hashed
      * @param string|array|null $suffix
      * @return string
