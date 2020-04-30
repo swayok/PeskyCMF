@@ -10,25 +10,28 @@ trait CacheableRecord {
 
     /**
      * Set cache timeout for next read() or find() method call
-     * @param null|int|\DateTime $timeout - int: minutes
+     * @param null|int|\DateTime $timeout - int: seconds
      * @return $this
      */
     public function withCacheTimeout($timeout = null) {
         /** @var CmfDbRecord|CacheableRecord $this */
         $this->_cacheOnceTimeout = empty($timeout)
-            ? $this->getTable()->getDefaultCacheDurationForSelectOneInMinutes()
+            ? static::getTable()->getDefaultCacheDurationForSelectOneInMinutes()
             : $timeout;
         return $this;
     }
 
     /**
-     * @param array $conditionsAndOptions
-     * @param array $columns
-     * @param array $readRelatedRecords
+     * @param $conditions
+     * @param string $fieldNames
+     * @param array $relations
      * @return $this
      */
     public function fromDb(array $conditionsAndOptions, array $columns = [], array $readRelatedRecords = []) {
         if ($this->_cacheOnceTimeout !== false) {
+            if (!is_array($conditionsAndOptions)) {
+                $conditionsAndOptions = empty($conditionsAndOptions) ? [] : [$conditionsAndOptions];
+            }
             $conditionsAndOptions['CACHE'] = ['timeout' => $this->_cacheOnceTimeout];
             $this->_cacheOnceTimeout = false;
         }
@@ -36,8 +39,8 @@ trait CacheableRecord {
     }
 
     /**
-     * @param array $columns
-     * @param array $readRelatedRecords
+     * @param string $fieldNames
+     * @param null $relations
      * @return $this
      */
     public function reload(array $columns = [], array $readRelatedRecords = []) {

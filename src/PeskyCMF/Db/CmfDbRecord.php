@@ -17,7 +17,7 @@ abstract class CmfDbRecord extends Record {
         if (!$withLabels) {
             return $values;
         }
-        $options = array();
+        $options = [];
         $translator = $translationsPath instanceof \Closure ? $translationsPath : function ($value) use ($translationsPath) {
             return trans($translationsPath . $value);
         };

@@ -2,14 +2,14 @@
 
 namespace PeskyCMF\Db\Traits;
 
+use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\CmfDbTable;
-use PeskyORM\DbObject;
-use PeskyORM\Exception\DbModelException;
+use PeskyORM\ORM\Record;
 
 trait TaggedCacheForDbSelects {
-
+    
     use CacheForDbSelects;
-
+    
     /**
      * Detect if caching is possible
      * @return bool
@@ -18,7 +18,7 @@ trait TaggedCacheForDbSelects {
         if (static::$_cachingIsPossible === null) {
             /** @var \AlternativeLaravelCache\Core\AlternativeCacheStore $cache */
             $storeClass = '\AlternativeLaravelCache\Core\AlternativeCacheStore';
-            $poolInterface = 'Cache\TagInterop\TaggableCacheItemPoolInterface';
+            $poolInterface = '\Cache\Taggable\TaggablePoolInterface';
             $cache = app('cache.store')->getStore();
             static::$_cachingIsPossible = (
                 $cache instanceof $storeClass
@@ -27,13 +27,10 @@ trait TaggedCacheForDbSelects {
         }
         return static::$_cachingIsPossible;
     }
-
+    
     /**
      * @param bool|true $cleanRelatedModelsCache - true: clean cache for all related models
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \InvalidArgumentException
      */
     public function cleanModelCache($cleanRelatedModelsCache = null) {
@@ -41,21 +38,17 @@ trait TaggedCacheForDbSelects {
         \Cache::tags($this->getModelCachePrefix())->flush();
         $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
-
+    
     /**
      * Clean cache for all related models
      * @param bool|null|array|string $cleanRelatedModelsCache -
      *      - array: list of relations to clean
      *      - string: single relation to clean
-     *      - bool: true = clean all relations provided by $this->getRelationsToCleanByDefault(); false - don't clean relations
-     *      - null: if ($this->canCleanRelationsCache() === true) then clean $this->getRelationsToCleanByDefault()
+     *      - bool: true = clean all relations provided by $this->getDefaultRelationsForCacheCleaner(); false - don't clean relations
+     *      - null: if ($this->canCleanRelationsCache() === true) then clean $this->getDefaultRelationsForCacheCleaner()
      *
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \InvalidArgumentException
-     * @throws \PeskyORM\Exception\DbTableConfigException
      */
     public function cleanRelatedModelsCache($cleanRelatedModelsCache = true) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
@@ -72,11 +65,11 @@ trait TaggedCacheForDbSelects {
             }
             $tags = [];
             foreach ($relationsToClean as $relationKey) {
-                if (!$this->hasTableRelation($relationKey)) {
+                if (!$this->getTableStructure()->hasRelation($relationKey)) {
                     throw new \InvalidArgumentException("Model has no relation named $relationKey");
                 }
                 /** @var CmfDbTable|TaggedCacheForDbSelects $model */
-                $model = $this->getRelatedModel($relationKey);
+                $model = $this->getTableStructure()->getRelation($relationKey)->getForeignTable();
                 $tags[] = $model->getModelCachePrefix();
             }
             if (!empty($tags)) {
@@ -84,22 +77,18 @@ trait TaggedCacheForDbSelects {
             }
         }
     }
-
+    
     /**
      * @return array - relations names
-     * @throws \PeskyORM\Exception\DbModelException
      */
     protected function getDefaultRelationsForCacheCleaner() {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        return array_keys($this->getTableRealtaions());
+        return array_keys($this->getTableStructure()->getRelations());
     }
-
+    
     /**
      * @param bool $cleanRelatedModelsCache
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \InvalidArgumentException
      */
     public function cleanSelectManyCache($cleanRelatedModelsCache = null) {
@@ -107,13 +96,10 @@ trait TaggedCacheForDbSelects {
         \Cache::tags($this->getSelectManyCacheTag())->flush();
         $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
-
+    
     /**
      * @param bool $cleanRelatedModelsCache
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \InvalidArgumentException
      */
     public function cleanSelectOneCache($cleanRelatedModelsCache = null) {
@@ -121,69 +107,58 @@ trait TaggedCacheForDbSelects {
         \Cache::tags($this->getSelectOneCacheTag())->flush();
         $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
-
+    
     /**
-     * @param int|string|array|DbObject $record
+     * @param int|string|array|CmfDbRecord|Record $record
      * @param bool $cleanRelatedModelsCache
-     * @throws DbModelException
      * @throws \BadMethodCallException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws \PeskyORM\Exception\DbObjectException
-     * @throws \PeskyORM\Exception\DbUtilsException
      * @throws \InvalidArgumentException
      */
     public function cleanRecordCache($record, $cleanRelatedModelsCache = null) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        if (!($record instanceof DbObject) || $record->exists()) {
+        if (!($record instanceof Record) || $record->existsInDb()) {
             \Cache::tags($this->getRecordCacheTag($record))->flush();
         }
         $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
-
+    
     /**
      * @return string
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function getSelectManyCacheTag() {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         return $this->getModelCachePrefix() . 'many';
     }
-
+    
     /**
      * @return string
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function getSelectOneCacheTag() {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         return $this->getModelCachePrefix() . 'one';
     }
-
+    
     /**
      * @param mixed $record
      * @return string
-     * @throws \PeskyORM\Exception\DbObjectException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
-     * @throws DbModelException
      */
     public function getRecordCacheTag($record) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        if ($record instanceof DbObject) {
-            $id = $record->exists() ? $record->_getPkValue() : null;
+        if ($record instanceof Record) {
+            $id = $record->existsInDb() ? $record->getPrimaryKeyValue() : null;
         } else if (!is_array($record)) {
             $id = $record;
-        } else if (!empty($record[$this->getPkColumnName()])) {
-            $id = $record[$this->getPkColumnName()];
-        } else if (!empty($record[$this->getAlias()]) && !empty($record[$this->getAlias()][$this->getPkColumnName()])) {
-            $id = $record[$this->getAlias()][$this->getPkColumnName()];
+        } else if (!empty($record[static::getPkColumnName()])) {
+            $id = $record[static::getPkColumnName()];
+        } else if (!empty($record[$this->getTableAlias()]) && !empty($record[$this->getTableAlias()][static::getPkColumnName()])) {
+            $id = $record[$this->getTableAlias()][static::getPkColumnName()];
         }
         if (empty($id)) {
-            throw new DbModelException($this, 'Data passed to getRecordCacheTag() has no value for primary key');
+            throw new \UnexpectedValueException('Data passed to getRecordCacheTag() has no value for primary key');
         }
         return $this->getModelCachePrefix() . 'id=' . $id;
     }
-
+    
     /**
      * Get data from cache or put data from $callback to cache
      * @param bool $affectsSingleRecord
@@ -193,27 +168,24 @@ trait TaggedCacheForDbSelects {
      *      'tags' => ['custom', 'cache', 'tags'],
      *      'recache' => 'bool, ignore cached data and replace it with fresh data'
      * ]
-     * @param \Closure $callback
+     * @param callable $callback
      *
      * @return array
-     * @throws \PeskyORM\Exception\DbObjectException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      * @throws \BadMethodCallException
      */
-    protected function _getCachedData($affectsSingleRecord, array $cacheSettings, \Closure $callback) {
+    protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         $data = empty($cacheSettings['recache']) ? \Cache::get($cacheSettings['key'], '{!404!}') : '{!404!}';
         if ($data === '{!404!}') {
             $data = $callback();
-            if ($data instanceof DbObject) {
-                $data = $data->exists() ? $data->toPublicArray() : [];
+            if ($data instanceof Record) {
+                $data = $data->existsInDb() ? $data->toArray() : [];
             }
             $tags = $cacheSettings['tags'];
             $tags[] = $this->getModelCachePrefix();
             if ($affectsSingleRecord) {
                 $tags[] = $this->getSelectOneCacheTag();
-                if (!empty($data) && is_array($data) && !empty($data[$this->getPkColumnName()])) {
+                if (!empty($data) && is_array($data) && !empty($data[static::getPkColumnName()])) {
                     // create tag only for record with primary key value
                     $tags[] = $this->getRecordCacheTag($data);
                 }
@@ -229,20 +201,17 @@ trait TaggedCacheForDbSelects {
         }
         return $data;
     }
-
+    
     /**
      * @param bool $affectsSingleRecord
      * @param null|string|array $columns
      * @param null|array $conditionsAndOptions
      * @return string
-     * @throws \InvalidArgumentException
-     * @throws \PeskyORM\Exception\DbModelException
-     * @throws \PeskyORM\Exception\DbConnectionConfigException
      */
     public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
         $prefix = $affectsSingleRecord ? $this->getSelectOneCacheTag() : $this->getSelectManyCacheTag();
         return $prefix . '.' . static::buildCacheKey($columns, $conditionsAndOptions);
     }
-
-
+    
+    
 }
