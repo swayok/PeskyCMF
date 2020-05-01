@@ -146,6 +146,9 @@ return [
         'full' => ' года',
         'short' => 'г.'
     ],
+    'time' => [
+        'at' => 'в',
+    ],
     'format_seconds' => [
         'days_short' => ':days д. ',
         'days' => [

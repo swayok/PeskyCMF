@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
@@ -582,7 +584,7 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
      */
     function cmfJsonResponseForValidationErrors(array $errors = [], ?string $message = null): CmfJsonResponse {
         if (empty($message)) {
-            $message = cmfTransGeneral('.form.message.validation_errors');
+            $message = (string)cmfTransGeneral('.form.message.validation_errors');
         }
         return cmfJsonResponse(\PeskyCMF\HttpCode::CANNOT_PROCESS)
             ->setErrors($errors, $message);
@@ -597,7 +599,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
      */
     function cmfJsonResponseForHttp404(?string $fallbackUrl = null, ?string $message = null): CmfJsonResponse {
         if (empty($message)) {
-            $message = cmfTransGeneral('.message.http404');
+            $message = (string)cmfTransGeneral('.message.http404');
         }
         if (empty($fallbackUrl)) {
             $fallbackUrl = cmfConfig()->home_page_url();
@@ -650,33 +652,54 @@ if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
 
 if (!function_exists('formatDate')) {
     /**
-     * @param string $date
+     * @param string|int|CarbonInterface|Carbon|null $date
      * @param bool $addTime
-     * @param string $yearSuffix - autodetect based on $addTime | 'none', 'full', 'short' or custom value
+     * @param string $yearSuffix - 'none', 'full', 'short' or custom value
+     * @param bool|string|integer $ignoreYear
+     *      - false: year will be added
+     *      - true: year will not be added;
+     *      - 'current': drop year only when it is same as current
+     *      - integer: drop year only when it is same as passed integer
+     *      - other values: year will be added
      * @return string
      */
-    function formatDate(string $date, bool $addTime = false, ?string $yearSuffix = 'full'): string {
-        if (!is_numeric($date)) {
-            $date = strtotime($date);
+    function formatDate($date, bool $addTime = false, string $yearSuffix = 'full', $ignoreYear = false): string {
+        if (!$date) {
+            return '';
         }
-        if ($date <= 0) {
-            return cmfTransGeneral('.message.invalid_date_received');
+        if (!($date instanceof Carbon)) {
+            if (is_numeric($date)) {
+                $date = Carbon::createFromTimestamp($date);
+            } else {
+                $date = Carbon::parse($date);
+            }
         }
         if (in_array(app()->getLocale(), ['ru', 'ru_RU'], true)) {
-            $month = cmfTransGeneral('.month.when.' . date('m', $date));
-            switch ($yearSuffix) {
-                case 'short':
-                    $yearSuffix = (string)cmfTransGeneral('.year_suffix.short');
-                    break;
-                case 'full':
-                    $yearSuffix = (string)cmfTransGeneral('.year_suffix.full');
-                    break;
-                case 'none':
-                    $yearSuffix = '';
+            $month = mb_strtolower(cmfTransGeneral('.month.when.' . $date->format('m')));
+            if (
+                $ignoreYear === true //< ignore any year
+                || ($ignoreYear === 'current' && $date->isCurrentYear()) //< ignore current year
+                || (is_numeric($ignoreYear) && (int)$ignoreYear === $date->year) //< ignore certain year ($ignoreYear)
+            ) {
+                $year = '';
+            } else {
+                switch ($yearSuffix) {
+                    case 'short':
+                        $yearSuffix = (string)cmfTransGeneral('.year_suffix.short');
+                        break;
+                    case 'full':
+                        $yearSuffix = (string)cmfTransGeneral('.year_suffix.full');
+                        break;
+                    case 'none':
+                        $yearSuffix = '';
+                }
+                $year = $date->year . $yearSuffix;
             }
-            return ($addTime ? date('H:i ', $date) : '') . date('j ', $date) . $month . date(' Y', $date) . $yearSuffix;
+            $dateStr = rtrim("{$date->day} {$month} {$year}");
+            $timeStr = ($addTime ? ' ' . ltrim(cmfTransGeneral('.time.at') . $date->format(' H:i')) : '');
+            return $dateStr . $timeStr;
         } else {
-            return date('H:i d F Y');
+            return date('H:i d F Y') . (in_array($yearSuffix, ['short', 'full', 'none'], true) ? '' : $yearSuffix);
         }
     }
 }
@@ -687,8 +710,8 @@ if (!function_exists('formatMoney')) {
      * @param string $thousandsSeparator
      * @return string
      */
-    function formatMoney(float $number, string $thousandsSeparator = ' '): string {
-        return number_format($number, 2, '.', $thousandsSeparator);
+    function formatMoney(float $number, int $decimals = 2, string $thousandsSeparator = ' '): string {
+        return number_format($number, $decimals, '.', $thousandsSeparator);
     }
 }
 

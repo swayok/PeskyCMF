@@ -146,6 +146,9 @@ return [
         'full' => '',
         'short' => ''
     ],
+    'time' => [
+        'at' => '',
+    ],
     'format_seconds' => [
         'days_short' => ':days d. ',
         'days' => [
