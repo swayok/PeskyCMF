@@ -145,7 +145,7 @@ return [
          * 'ui' => 'cmf::ui.ui',
          * 'footer' => 'cmf::ui.footer',
          * 'sidebar_user_info' => 'cmf::ui.sidebar_user_info',
-         * 'sidebar_menu' => 'cmf::ui.menu',
+         * 'sidebar_menu' => 'cmf::ui.sidebar_menu',
          * 'top_navbar' => 'cmf::ui.top_navbar',
          */
         'views' => [
