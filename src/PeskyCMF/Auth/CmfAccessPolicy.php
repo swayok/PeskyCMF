@@ -72,7 +72,7 @@ class CmfAccessPolicy {
     static protected $defaultOwnerIdColumnName = 'admin_id';
 
     /**
-     * Access to CMF pages: cmfRoute('cmf_page', ['page' => 'page_name'])
+     * Access to CMF pages: routeToCmfPage('page_name')
      * Format: [
             'page_name' => ['role1', 'role2', ...]
             'page_name2' => true
