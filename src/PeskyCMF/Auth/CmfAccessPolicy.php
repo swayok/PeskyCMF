@@ -15,10 +15,18 @@ class CmfAccessPolicy {
      * Access to CMF resources
      * Format: [
             'resource_name' => [
-                'ability1' => ['role1', 'role2', ...],
-                'ability2' => ['role1'],
-                'ability3' => true,
-                'others' => ['role2']
+                'view' => true, //< allowed for everyone
+                'details' => true, //< allowed for everyone
+                'create' => ['role1', 'role2'],
+                'update' => ['role1', 'role2'],
+                'delete' => false, //< allowed only for user with is_superadmin = true
+                'update_bulk' => ['role1', 'role2'],
+                'delete_bulk' => ['role1', 'role2'],
+                'page:custom_page_name' => [...], //< pages accesed by routeToCmfResourceCustomPage('resource_name', 'custom_page_name')
+                'action:custom_action_name' => [...], //< pages accesed by routeToCmfResourceCustomAction('resource_name', 'custom_action_name')
+                'item_page:custom_page_name' => [...], //< pages accesed by routeToCmfItemCustomPage('resource_name', $pkValue, 'custom_page_name')
+                'item_action:custom_action_name' => [...], //< pages accesed by routeToCmfItemCustomAction('resource_name', $pkValue, 'custom_action_name')
+                'others' => [...]
             ],
             ...
         ]
@@ -27,7 +35,7 @@ class CmfAccessPolicy {
      * @var array
      */
     static protected $resources = [
-        'cmf_profile' => [
+        'buildings' => [
             'others' => true,
         ],
     ];
@@ -74,14 +82,15 @@ class CmfAccessPolicy {
     /**
      * Access to CMF pages: routeToCmfPage('page_name')
      * Format: [
-            'page_name' => ['role1', 'role2', ...]
-            'page_name2' => true
+            'page_name' => ['role1', 'role2', ...],
+            'page_name2' => true,   //< allowed for everyone
+            'page_name3' => false,  //< allowed only for user with is_superadmin = true
         ]
      * To allow access for all roles use 'true' intead of roles array.
      * @var array
      */
     static protected $cmfPages = [
-        'login_as' => false, //< everyone except user with is_superadmin = true
+        'login_as' => false,
     ];
 
     /**

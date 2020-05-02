@@ -149,16 +149,20 @@ class CmfUIModule {
     }
 
     public function renderBasicUIView(): string {
-        return $this->renderUIView('ui', [
+        return $this->renderUIView('ui', $this->getDataForBasicUiView());
+    }
+    
+    protected function getDataForBasicUiView(): array {
+        return [
             'sidebarLogo' => $this->getSidebarLogo(),
-        ]);
+        ];
     }
 
     public function getSidebarLogo(): string {
         return (string)($this->getCmfConfig()->config('ui.sidebar_logo') ?: $this->defaultSidebarLogo);
     }
 
-    public function renderScaffoldTemplates(ScaffoldConfigInterface $scaffoldConfig) {
+    public function renderScaffoldTemplates(ScaffoldConfigInterface $scaffoldConfig): string {
         $view = $scaffoldConfig instanceof KeyValueTableScaffoldConfig
             ? $this->scaffoldTemplatesForNormalTableViewPath
             : $this->scaffoldTemplatesForKeyValueTableViewPath;
@@ -180,7 +184,7 @@ class CmfUIModule {
         }
     }
 
-    public function getUIView(string $viewName) {
+    public function getUIView(string $viewName): string {
         $this->loadUIViewsFromConfig();
         if (!isset($this->UIViews[$viewName])) {
             abort(HttpCode::NOT_FOUND, "There is no UI view with name [$viewName]");

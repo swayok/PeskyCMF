@@ -5,6 +5,7 @@ namespace PeskyCMF\Auth;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
 use PeskyCMF\Config\CmfConfig;
@@ -174,7 +175,7 @@ class CmfAuthModule {
 
     /**
      * @param Request $request
-     * @return array|CmfJsonResponse
+     * @return array|CmfJsonResponse|JsonResponse
      */
     protected function validateAndGetDataForRegistration(Request $request) {
         $validationRules = [
@@ -255,7 +256,7 @@ class CmfAuthModule {
 
     /**
      * @param Request $request
-     * @return CmfJsonResponse
+     * @return CmfJsonResponse|JsonResponse
      */
     public function processUserProfileUpdateRequest(Request $request) {
         /** @var CmfAdmin $user */
@@ -711,7 +712,7 @@ class CmfAuthModule {
     /**
      * @param Request $request
      * @param RecordInterface|Authenticatable $admin
-     * @return array|\Illuminate\Http\JsonResponse
+     * @return array|JsonResponse
      */
     protected function validateAndGetUserProfileUpdates(Request $request, RecordInterface $admin) {
         $requirePassword = $this->getCmfConfig()->config('auth.profile_update_requires_current_password', true);
@@ -763,6 +764,9 @@ class CmfAuthModule {
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
         } else {
+            /** @noinspection NestedPositiveIfStatementsInspection */
+            /** @noinspection MissingOrEmptyGroupStatementInspection */
+            /** @noinspection PhpStatementHasEmptyBodyInspection */
             if (!$requirePassword && empty($request->input('new_password'))) {
                 // do nothing
             } else if (method_exists($admin, 'checkPassword')) {
