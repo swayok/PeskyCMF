@@ -254,6 +254,18 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_resource_custom_page',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
+        
+        // resource downloads
+    
+        Route::get('{resource}/download/{name}', [
+            'as' => $routeNamePrefix . 'cmf_resource_custom_download',
+            'uses' => $apiControllerClass . '@performDownload',
+        ]);
+    
+        Route::any('{resource}/{id}/download/{name}', [
+            'as' => $routeNamePrefix . 'cmf_item_custom_download',
+            'uses' => $apiControllerClass . '@performDownloadForItem',
+        ]);
     }
 );
 
@@ -349,7 +361,7 @@ Route::group(
                 'use_params' => true
             ]
         ]);
-
+    
         Route::any('{resource}/{id}/action/{action}', [
             'as' => $routeNamePrefix . 'cmf_api_item_custom_action',
             'uses' => $apiControllerClass . '@performActionForItem',
@@ -358,7 +370,7 @@ Route::group(
                 'use_params' => true
             ]
         ]);
-
+    
         Route::get('{resource}/{id}', [
             'as' => $routeNamePrefix . 'cmf_api_get_item',
             'uses' => $apiControllerClass . '@getItem',

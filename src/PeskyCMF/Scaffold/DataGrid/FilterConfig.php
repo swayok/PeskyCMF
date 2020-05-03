@@ -35,8 +35,7 @@ class FilterConfig {
      * @return $this
      */
     static public function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
-        $class = get_called_class();
-        return new $class($table, $scaffoldConfig);
+        return new static($table, $scaffoldConfig);
     }
 
     /**
@@ -52,18 +51,13 @@ class FilterConfig {
     /**
      * @return ScaffoldConfig
      */
-    public function getScaffoldConfig() {
+    public function getScaffoldConfig(): ScaffoldConfig {
         return $this->scaffoldConfig;
     }
 
     /**
-     * @param ColumnFilter[] $filters
+     * @param ColumnFilter[]|string[] $filters
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws ScaffoldException
      */
     public function setFilters(array $filters) {
         $this->filters = [];
@@ -82,21 +76,14 @@ class FilterConfig {
      * @param string $columnName - 'col_name' or 'RelationAlias.col_name'
      * @param null|ColumnFilter $config
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws ScaffoldException
      */
-    public function addFilter($columnName, $config = null) {
+    public function addFilter(string $columnName, ?ColumnFilter $config = null) {
         if (empty($config)) {
-            $this->findColumnConfig($columnName); //< needed to validate column existense
+            $this->findTableColumn($columnName); //< needed to validate column existense
             $config = $this->createColumnFilterConfig($columnName);
-        } else if (!($config instanceof ColumnFilter)) {
-            throw new ScaffoldException("Filter column config for column [$columnName] should an object of class [ColumnFilter]");
         } else if (!$config->hasColumnNameReplacementForCondition()) {
             // needed to validate column existense
-            $this->findColumnConfig($config->hasColumnName() ? $config->getColumnName() : $columnName);
+            $this->findTableColumn($config->hasColumnName() ? $config->getColumnName() : $columnName);
         }
         if (!$config->hasColumnName()) {
             $config->setColumnName($this->getColumnNameWithAlias($columnName));
@@ -109,20 +96,16 @@ class FilterConfig {
     /**
      * @return ColumnFilter[]
      */
-    public function getFilters() {
+    public function getFilters(): array {
         return $this->filters;
     }
 
     /**
      * @param string $columnName
      * @return ColumnFilter
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
-    public function getFilter($columnName) {
+    public function getFilter(string $columnName): ColumnFilter {
         $columnName = $this->getColumnNameWithAlias($columnName);
         if (empty($this->filters[$columnName])) {
             throw new ScaffoldException("Unknown filter column name: $columnName");
@@ -130,18 +113,9 @@ class FilterConfig {
         return $this->filters[$columnName];
     }
 
-    /**
-     * @param string $columnName
-     * @return ColumnFilter
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     */
-    public function createColumnFilterConfig($columnName) {
+    public function createColumnFilterConfig(string $columnName): ColumnFilter {
         $table = $this->getTable();
-        $columnConfig = $this->findColumnConfig($columnName);
+        $columnConfig = $this->findTableColumn($columnName);
         /** @var ColumnFilter $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         if (
@@ -163,16 +137,7 @@ class FilterConfig {
         }
     }
 
-    /**
-     * @param $columnName
-     * @return Column
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws ScaffoldException
-     */
-    public function findColumnConfig($columnName) {
+    public function findTableColumn(string $columnName): Column {
         $table = $this->getTable();
         $colNameParts = explode('.', $columnName, 2);
         if (count($colNameParts) === 2) {
@@ -185,26 +150,18 @@ class FilterConfig {
         return $table::getStructure()->getColumn($columnName);
     }
 
-    /**
-     * @param TableInterface $table
-     * @param string $relationAlias
-     * @param array $scannedTables
-     * @param int $depth
-     * @return bool|TableInterface
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws ScaffoldException
-     */
-    protected function findRelatedTable(TableInterface $table, $relationAlias, array &$scannedTables = [], $depth = 0) {
+    protected function findRelatedTable(
+        TableInterface $table,
+        string $relationAlias,
+        array &$scannedTables = [],
+        int $depth = 0
+    ): ?TableInterface {
         $structure = $table->getTableStructure();
         if ($structure::hasRelation($relationAlias)) {
             return $structure::getRelation($relationAlias)->getForeignTable();
         }
         $scannedTables[] = $structure::getTableName();
         foreach ($structure::getRelations() as $alias => $relationConfig) {
-            /** @var TableInterface $relTable */
             $relTable = $relationConfig->getForeignTable();
             if (!empty($scannedTables[$relTable::getName()])) {
                 continue;
@@ -218,18 +175,10 @@ class FilterConfig {
         if (!$depth === 0 && empty($relatedTableFound)) {
             throw new ScaffoldException("Cannot find relation [$relationAlias] in table [{$table->getAlias()}] or among its relations");
         }
-        return false;
+        return null;
     }
 
-    /**
-     * @param string $columnName
-     * @return string
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    public function getColumnNameWithAlias($columnName) {
+    public function getColumnNameWithAlias(string $columnName): string {
         if (strpos($columnName, '.') === false) {
             return $this->getTable()->getAlias() . '.' . $columnName;
         }
@@ -248,17 +197,11 @@ class FilterConfig {
         return $this->filters[$columnName];
     }
 
-    /**
-     * @return TableInterface
-     */
-    public function getTable() {
+    public function getTable(): TableInterface {
         return $this->table;
     }
 
-    /**
-     * @return array
-     */
-    public function getDefaultConditions() {
+    public function getDefaultConditions(): array {
         return $this->defaultConditions;
     }
 
@@ -274,15 +217,11 @@ class FilterConfig {
     /**
      * @param string $columnName
      * @param string $operator
-     * @param string|int|bool|float $value
+     * @param mixed $value
      * @return $this
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
-    public function addDefaultCondition($columnName, $operator, $value) {
+    public function addDefaultCondition(string $columnName, string $operator, $value) {
         /** @var ColumnFilter $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
         if (!$configClass::hasOperator($operator)) {
@@ -299,12 +238,7 @@ class FilterConfig {
     }
 
     /**
-     * @return FilterConfig
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws ScaffoldException
+     * @return $this
      */
     public function addDefaultConditionForPk() {
         /** @var ColumnFilter $configClass */
@@ -316,16 +250,7 @@ class FilterConfig {
         );
     }
 
-    /**
-     * @param array $rulesGroup
-     * @return array
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     */
-    public function buildConditionsFromSearchRules(array $rulesGroup) {
+    public function buildConditionsFromSearchRules(array $rulesGroup): array {
         $conditions = [];
         foreach ($rulesGroup['r'] as $rule) {
             if (!empty($rule['c'])) {
@@ -340,13 +265,9 @@ class FilterConfig {
     /**
      * @param array $searchRule
      * @return array
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      * @throws ScaffoldException
      */
-    protected function buildConditionFromSearchRule(array $searchRule) {
+    protected function buildConditionFromSearchRule(array $searchRule): array {
         if (!array_key_exists('v', $searchRule) || empty($searchRule['f']) || empty($searchRule['o'])) {
             throw new ScaffoldException('Invalid search rule passed: ' . json_encode($searchRule));
         }
@@ -362,13 +283,9 @@ class FilterConfig {
      * Note: keys - column name in one of formats: 'column_name' or 'Relation.column_name'
      * @param array $keyValueArray
      * @param array $otherArgs
-     * @return string
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
+     * @return array - modified $otherArgs
      */
-    public function makeFilterFromData(array $keyValueArray, array $otherArgs = []) {
+    public function makeFilterFromData(array $keyValueArray, array $otherArgs = []): array {
         $filters = [];
         foreach ($keyValueArray as $column => $value) {
             $column = $this->getColumnNameWithAlias($column);
@@ -391,7 +308,7 @@ class FilterConfig {
      * @param string $className
      * @return $this
      */
-    public function setDefaultDataGridColumnFilterConfigClass($className) {
+    public function setDefaultDataGridColumnFilterConfigClass(string $className) {
         $this->defaultDataGridColumnFilterConfigClass = $className;
         return $this;
     }
@@ -399,6 +316,7 @@ class FilterConfig {
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
+     * @return void
      */
     public function finish() {
 
@@ -406,6 +324,7 @@ class FilterConfig {
 
     /**
      * Called before scaffold template rendering
+     * @return void
      */
     public function beforeRender() {
 
@@ -416,7 +335,7 @@ class FilterConfig {
      * @param string $suffix
      * @return string
      */
-    public function translate(ColumnFilter $columnFilter, $suffix = '') {
+    public function translate(ColumnFilter $columnFilter, string $suffix = ''): string {
         return $this->getScaffoldConfig()->translate('datagrid.filter.' . $columnFilter->getColumnNameForTranslation(), $suffix);
     }
 

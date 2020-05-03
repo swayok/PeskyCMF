@@ -134,14 +134,24 @@ class CmfScaffoldApiController extends CmfController {
         return $this->getScaffoldConfig()->getCustomPageForRecord($itemId, $pageName);
     }
 
+    public function performAction($resourceName, $actionName) {
+        $this->authorize('resource.custom_action', [$resourceName, $actionName]);
+        return $this->getScaffoldConfig()->performAction($actionName);
+    }
+    
     public function performActionForItem($resourceName, $itemId, $actionName) {
         $this->authorize('resource.custom_action_for_item', [$resourceName, $actionName, $itemId]);
         return $this->getScaffoldConfig()->performActionForRecord($itemId, $actionName);
     }
-
-    public function performAction($resourceName, $actionName) {
-        $this->authorize('resource.custom_action', [$resourceName, $actionName]);
-        return $this->getScaffoldConfig()->performAction($actionName);
+    
+    public function performDownload($resourceName, $downloadName) {
+        $this->authorize('resource.custom_page', [$resourceName, $downloadName]);
+        return $this->getScaffoldConfig()->downloadFile($downloadName);
+    }
+    
+    public function performDownloadForItem($resourceName, $itemId, $downloadName) {
+        $this->authorize('resource.custom_page_for_item', [$resourceName, $downloadName, $itemId]);
+        return $this->getScaffoldConfig()->downloadFileForRecord($itemId, $downloadName);
     }
 
 }

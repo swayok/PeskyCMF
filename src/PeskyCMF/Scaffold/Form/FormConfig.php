@@ -132,7 +132,7 @@ class FormConfig extends ScaffoldSectionConfig {
                     $name = $config;
                     $config = null;
                 }
-                $this->addValueViewer($name, $config);
+                $this->normalizeAndAddValueViewer($name, $config);
             }
         }
         return $this;

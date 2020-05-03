@@ -5,6 +5,7 @@ namespace PeskyCMF\Scaffold;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
@@ -182,6 +183,16 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     static public function getUrlCustomPage($pageId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfResourceCustomPage(static::getResourceName(), $pageId, $queryArgs, $absolute);
     }
+    
+    /**
+     * @param string $downloadId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlCustomDownload($downloadId, array $queryArgs = [], bool $absolute = false) {
+        return routeToCmfResourceCustomDownload(static::getResourceName(), $downloadId, $queryArgs, $absolute);
+    }
 
     /**
      * @param mixed $itemId
@@ -248,6 +259,17 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      */
     static public function getUrlToItemCustomPage($itemId, $pageId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfItemCustomPage(static::getResourceName(), $itemId, $pageId, $queryArgs, $absolute);
+    }
+    
+    /**
+     * @param mixed $itemId
+     * @param string $downloadId
+     * @param array $queryArgs
+     * @param bool $absolute
+     * @return string
+     */
+    static public function getUrlToItemCustomDownload($itemId, $downloadId, array $queryArgs = [], bool $absolute = false) {
+        return routeToCmfItemCustomDownload(static::getResourceName(), $itemId, $downloadId, $queryArgs, $absolute);
     }
 
     /**
@@ -720,8 +742,14 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
     public function getCustomPage($pageName) {
         return view('cmf::ui.default_page_header', [
-            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in' . static::class . '->getCustomPage()',
+            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in ' . static::class . '->getCustomPage($pageName = "' . $pageName . '")',
         ]);
+    }
+    
+    public function downloadFile($downloadName) {
+        return response(
+            'Handler for route [' . request()->getPathInfo() . '] is not defined in <b>' . static::class . '->downloadFile($downloadName = "' . $downloadName . '")</b>',
+        );
     }
 
     /**
@@ -730,18 +758,29 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @return CmfJsonResponse
      */
     public function performAction($actionName) {
+        $actionName = str_replace('-', '_', $actionName);
         if (method_exists($this, $actionName)) {
             return $this->$actionName();
+        }
+        $camelCaseActionName = Str::camel($actionName);
+        if (method_exists($this, $camelCaseActionName)) {
+            return $this->$camelCaseActionName();
         } else {
             return cmfJsonResponse(HttpCode::NOT_FOUND)
-                ->setMessage('Method [' . static::class . '->' . $actionName . '] is not defined');
+                ->setMessage('Method [' . static::class . '->' . $actionName . '()] or [' . static::class . '->' . $camelCaseActionName . '()] is not defined');
         }
     }
 
     public function getCustomPageForRecord($itemId, $pageName) {
         return view('cmf::ui.default_page_header', [
-            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in ' . static::class . '->getCustomPageForRecord()',
+            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in ' . static::class . '->getCustomPageForRecord($pkValue, $pageName = "' . $pageName . '")',
         ]);
+    }
+    
+    public function downloadFileForRecord($itemId, $downloadName) {
+        return response(
+            'Handler for route [' . request()->getPathInfo() . '] is not defined in <b>' . static::class . '->downloadFileForRecord($pkValue, $pageName = "' . $downloadName . '")</b>',
+        );
     }
 
     /**
@@ -751,11 +790,16 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @return CmfJsonResponse
      */
     public function performActionForRecord($itemId, $actionName) {
+        $actionName = str_replace('-', '_', $actionName);
         if (method_exists($this, $actionName)) {
             return $this->$actionName($itemId);
+        }
+        $camelCaseActionName = Str::camel($actionName);
+        if (method_exists($this, $camelCaseActionName)) {
+            return $this->$camelCaseActionName($itemId);
         } else {
             return cmfJsonResponse(HttpCode::NOT_FOUND)
-                ->setMessage('Method [' . static::class . '->' . $actionName . '] is not defined');
+                ->setMessage('Method [' . static::class . '->' . $actionName . '($pkValue)] or [' . static::class . '->' . $camelCaseActionName . '($pkValue)] is not defined');
         }
     }
 

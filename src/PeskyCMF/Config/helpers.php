@@ -385,6 +385,30 @@ if (!function_exists('routeToCmfResourceCustomPage')) {
     }
 }
 
+if (!function_exists('routeToCmfResourceCustomDownload')) {
+    /**
+     * @param string $resourceName
+     * @param string $downloadId
+     * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
+     * @param bool $absolute
+     * @param null|CmfConfig $cmfConfig
+     * @return string
+     */
+    function routeToCmfResourceCustomDownload(string $resourceName, string $downloadId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
+        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
+        $url = cmfRoute(
+            'cmf_resource_custom_download',
+            array_merge(
+                ['resource' => $resourceName, 'name' => $downloadId],
+                $replaces['data']
+            ),
+            $absolute,
+            $cmfConfig
+        );
+        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
+    }
+}
+
 if (!function_exists('routeToCmfItemCustomPage')) {
     /**
      * @param string $resourceName
@@ -406,6 +430,37 @@ if (!function_exists('routeToCmfItemCustomPage')) {
             'cmf_item_custom_page',
             array_merge(
                 ['resource' => $resourceName, 'id' => $itemDotJs, 'page' => $pageId],
+                $replaces['data']
+            ),
+            $absolute,
+            $cmfConfig
+        );
+        $url = str_replace('__dotjs_item_id_insert__', $itemId, $url);
+        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
+    }
+}
+
+if (!function_exists('routeToCmfItemCustomDownload')) {
+    /**
+     * @param string $resourceName
+     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
+     * @param string $downloadId
+     * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
+     * @param bool $absolute
+     * @param null|CmfConfig $cmfConfig
+     * @return string
+     */
+    function routeToCmfItemCustomDownload(string $resourceName, string $itemId, string $downloadId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
+        $itemDotJs = $itemId;
+        if (preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId)) {
+            $itemDotJs = '__dotjs_item_id_insert__';
+            $itemId = '{{' . trim($itemId, '{} ') . '}}';
+        }
+        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
+        $url = cmfRoute(
+            'cmf_item_custom_download',
+            array_merge(
+                ['resource' => $resourceName, 'id' => $itemDotJs, 'name' => $downloadId],
                 $replaces['data']
             ),
             $absolute,
