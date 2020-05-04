@@ -70,7 +70,10 @@ interface ScaffoldConfigInterface {
     public function getRecordsForDataGrid();
 
     public function getRecordValues($id = null);
-
+    
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getDefaultValuesForFormInputs();
 
     public function addRecord();
@@ -95,6 +98,6 @@ interface ScaffoldConfigInterface {
 
     public function getCustomPageForRecord($itemId, $pageName);
 
-    public function performActionForRecord($itemId, $actionName);
+    public function performCustomAjaxActionForRecord($itemId, $actionName);
 
 }

@@ -3,11 +3,11 @@
 
 namespace PeskyCMF\Scaffold;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
+use PeskyCMF\Http\Middleware\AjaxOnly;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\DataGrid\FilterConfig;
@@ -16,6 +16,7 @@ use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
@@ -183,16 +184,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     static public function getUrlCustomPage($pageId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfResourceCustomPage(static::getResourceName(), $pageId, $queryArgs, $absolute);
     }
-    
-    /**
-     * @param string $downloadId
-     * @param array $queryArgs
-     * @param bool $absolute
-     * @return string
-     */
-    static public function getUrlCustomDownload($downloadId, array $queryArgs = [], bool $absolute = false) {
-        return routeToCmfResourceCustomDownload(static::getResourceName(), $downloadId, $queryArgs, $absolute);
-    }
 
     /**
      * @param mixed $itemId
@@ -261,17 +252,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return routeToCmfItemCustomPage(static::getResourceName(), $itemId, $pageId, $queryArgs, $absolute);
     }
     
-    /**
-     * @param mixed $itemId
-     * @param string $downloadId
-     * @param array $queryArgs
-     * @param bool $absolute
-     * @return string
-     */
-    static public function getUrlToItemCustomDownload($itemId, $downloadId, array $queryArgs = [], bool $absolute = false) {
-        return routeToCmfItemCustomDownload(static::getResourceName(), $itemId, $downloadId, $queryArgs, $absolute);
-    }
-
     /**
      * @return Request
      */
@@ -524,7 +504,6 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             'itemFormDefaults' => false
         ];
         if (!$this instanceof KeyValueTableScaffoldConfig && ($this->isCreateAllowed() || $this->isEditAllowed())) {
-            /** @var JsonResponse $response */
             $response = $this->getDefaultValuesForFormInputs();
             $blocks['itemFormDefaults'] = $response->getData(true);
         }
@@ -612,7 +591,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      */
     protected function makeRecordNotFoundResponse($message = null) {
         if (empty($message)) {
-            $message = $this->translateGeneral('message.resource_item_not_found');
+            $message = (string)$this->translateGeneral('message.resource_item_not_found');
         }
         return cmfJsonResponseForHttp404(
             routeToCmfItemsTable(static::getResourceName()),
@@ -737,69 +716,84 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     }
 
     public function getCustomData($dataId) {
-        return cmfJsonResponse(HttpCode::NOT_FOUND);
+        return cmfJsonResponseForHttp404(null, 'Handler [' . static::class . '->getCustomData($dataId)] not defined');
     }
 
     public function getCustomPage($pageName) {
-        return view('cmf::ui.default_page_header', [
-            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in ' . static::class . '->getCustomPage($pageName = "' . $pageName . '")',
-        ]);
+        return $this->callMethodByCustomActionOrPageName($pageName, null);
     }
     
-    public function downloadFile($downloadName) {
-        return response(
-            'Handler for route [' . request()->getPathInfo() . '] is not defined in <b>' . static::class . '->downloadFile($downloadName = "' . $downloadName . '")</b>',
-        );
+    public function performCustomAjaxAction($actionName) {
+        return $this->callMethodByCustomActionOrPageName($actionName, null);
     }
-
-    /**
-     * Call scaffold's method called $actionName without arguments
-     * @param string $actionName
-     * @return CmfJsonResponse
-     */
-    public function performAction($actionName) {
-        $actionName = str_replace('-', '_', $actionName);
-        if (method_exists($this, $actionName)) {
-            return $this->$actionName();
+    
+    public function performCustomDirectAction($actionName) {
+        $response = $this->callMethodByCustomActionOrPageName($actionName, null);
+        if ($response instanceof JsonResponse) {
+            // better late then never
+            $this->ajaxOnlyCustomAction();
         }
-        $camelCaseActionName = Str::camel($actionName);
-        if (method_exists($this, $camelCaseActionName)) {
-            return $this->$camelCaseActionName();
-        } else {
-            return cmfJsonResponse(HttpCode::NOT_FOUND)
-                ->setMessage('Method [' . static::class . '->' . $actionName . '()] or [' . static::class . '->' . $camelCaseActionName . '()] is not defined');
-        }
+        return $response;
     }
 
     public function getCustomPageForRecord($itemId, $pageName) {
-        return view('cmf::ui.default_page_header', [
-            'header' => 'Handler for route [' . request()->getPathInfo() . '] is not defined in ' . static::class . '->getCustomPageForRecord($pkValue, $pageName = "' . $pageName . '")',
-        ]);
+        return $this->callMethodByCustomActionOrPageName($pageName, $this->getRequestedRecord($itemId));
     }
     
-    public function downloadFileForRecord($itemId, $downloadName) {
-        return response(
-            'Handler for route [' . request()->getPathInfo() . '] is not defined in <b>' . static::class . '->downloadFileForRecord($pkValue, $pageName = "' . $downloadName . '")</b>',
-        );
+    public function performCustomAjaxActionForRecord($itemId, $actionName) {
+        return $this->callMethodByCustomActionOrPageName($actionName, $this->getRequestedRecord($itemId));
     }
-
-    /**
-     * Call scaffold's method called $actionName with $itemId argument
-     * @param string $itemId
-     * @param string $actionName
-     * @return CmfJsonResponse
-     */
-    public function performActionForRecord($itemId, $actionName) {
-        $actionName = str_replace('-', '_', $actionName);
-        if (method_exists($this, $actionName)) {
-            return $this->$actionName($itemId);
+    
+    public function performCustomDirectActionForRecord($itemId, $actionName) {
+        $response = $this->callMethodByCustomActionOrPageName($actionName, $this->getRequestedRecord($itemId));
+        if ($response instanceof JsonResponse) {
+            // better late then never
+            $this->ajaxOnlyCustomAction();
         }
-        $camelCaseActionName = Str::camel($actionName);
-        if (method_exists($this, $camelCaseActionName)) {
-            return $this->$camelCaseActionName($itemId);
+        return $response;
+    }
+    
+    /**
+     * Check if request comes via ajax and block non-ajax requests
+     * Call this method in ajax-only custom actions methods to prevent non-ajax requests
+     */
+    protected function ajaxOnlyCustomAction() {
+        $middleware = new AjaxOnly();
+        abort($middleware->handle($this->getRequest(), function () {
+            return null;
+        }));
+    }
+    
+    protected function getRequestedRecord($itemId): RecordInterface {
+        $record = static::getTable()->newRecord()->fetchByPrimaryKey($itemId);
+        if (!$record->existsInDb()) {
+            if ($this->getRequest()->ajax()) {
+                abort($this->makeRecordNotFoundResponse());
+            } else {
+                abort(response((string)$this->translateGeneral('message.resource_item_not_found'), HttpCode::NOT_FOUND));
+            }
+        }
+        return $record;
+    }
+    
+    protected function callMethodByCustomActionOrPageName(string $methodName, ?RecordInterface $record = null) {
+        $methodName = str_replace('-', '_', $methodName);
+        if (method_exists($this, $methodName)) {
+            return $record ? $this->$methodName($record) : $this->$methodName();
+        }
+        $camelCaseMethodName = Str::camel($methodName);
+        if (method_exists($this, $camelCaseMethodName)) {
+            return $record ? $this->$camelCaseMethodName($record) : $this->$camelCaseMethodName();
         } else {
-            return cmfJsonResponse(HttpCode::NOT_FOUND)
-                ->setMessage('Method [' . static::class . '->' . $actionName . '($pkValue)] or [' . static::class . '->' . $camelCaseActionName . '($pkValue)] is not defined');
+            $args = $record ? '(' . get_class($record) . ' $record)' : '()';
+            $message = 'Method [' . static::class . '->' . $methodName . $args . '] or [' . static::class . '->' . $camelCaseMethodName . $args . '] is not defined';
+            if ($this->getRequest()->ajax()) {
+                return cmfJsonResponseForHttp404(null, $message);
+            } else {
+                return view('cmf::ui.default_page_header', [
+                    'header' => $message,
+                ]);
+            }
         }
     }
 

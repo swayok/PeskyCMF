@@ -134,24 +134,22 @@ class CmfScaffoldApiController extends CmfController {
         return $this->getScaffoldConfig()->getCustomPageForRecord($itemId, $pageName);
     }
 
-    public function performAction($resourceName, $actionName) {
+    public function performCustomAction($resourceName, $actionName) {
         $this->authorize('resource.custom_action', [$resourceName, $actionName]);
-        return $this->getScaffoldConfig()->performAction($actionName);
+        if (request()->ajax()) {
+            return $this->getScaffoldConfig()->performCustomAjaxAction($actionName);
+        } else {
+            return $this->getScaffoldConfig()->performCustomDirectAction($actionName);
+        }
     }
     
-    public function performActionForItem($resourceName, $itemId, $actionName) {
+    public function performCustomActionForItem($resourceName, $itemId, $actionName) {
         $this->authorize('resource.custom_action_for_item', [$resourceName, $actionName, $itemId]);
-        return $this->getScaffoldConfig()->performActionForRecord($itemId, $actionName);
+        if (request()->ajax()) {
+            return $this->getScaffoldConfig()->performCustomAjaxActionForRecord($itemId, $actionName);
+        } else {
+            return $this->getScaffoldConfig()->performCustomDirectActionForRecord($itemId, $actionName);;
+        }
     }
     
-    public function performDownload($resourceName, $downloadName) {
-        $this->authorize('resource.custom_page', [$resourceName, $downloadName]);
-        return $this->getScaffoldConfig()->downloadFile($downloadName);
-    }
-    
-    public function performDownloadForItem($resourceName, $itemId, $downloadName) {
-        $this->authorize('resource.custom_page_for_item', [$resourceName, $downloadName, $itemId]);
-        return $this->getScaffoldConfig()->downloadFileForRecord($itemId, $downloadName);
-    }
-
 }
