@@ -97,7 +97,7 @@ class CmfMakeScaffoldCommand extends Command {
     protected function getScaffoldClassName(TableInterface $table, ?string $resourceName = null) {
         $scaffoldClassName = $this->option('class-name');
         if (empty($scaffoldClassName)) {
-            return (empty($resourceName) ? $table::getAlias() : StringUtils::classify($resourceName)) . 'ScaffoldConfig';
+            return StringUtils::classify($resourceName ?: $table::getName()) . 'ScaffoldConfig';
         }
         return $scaffoldClassName;
     }
