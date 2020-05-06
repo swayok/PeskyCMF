@@ -336,14 +336,14 @@ VIEW;
     protected function makeFieldsListForDataGrid(TableInterface $table) {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
-            if ($column->isItAForeignKey()) {
-                $valueViewers[] = <<<VIEW
-'{$column->getName()}' => DataGridColumn::create()
-                    ->setType(DataGridColumn::TYPE_LINK),
-VIEW;
-            } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
+//            if ($column->isItAForeignKey()) {
+//                $valueViewers[] = <<<VIEW
+//'{$column->getName()}' => DataGridColumn::create()
+//                    ->setType(DataGridColumn::TYPE_LINK),
+//VIEW;
+//            } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
                 $valueViewers[] = "'{$column->getName()}',";
-            }
+//            }
         }
         return implode("\n                ", $valueViewers);
     }
@@ -361,14 +361,14 @@ VIEW;
     protected function makeFieldsListForItemDetailsViewer(TableInterface $table) {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
-            if ($column->isItAForeignKey()) {
-                $valueViewers[] = <<<VIEW
-'{$column->getName()}' => ValueCell::create()
-                    ->setType(ValueCell::TYPE_LINK),
-VIEW;
-            } else {
+//            if ($column->isItAForeignKey()) {
+//                $valueViewers[] = <<<VIEW
+//'{$column->getName()}' => ValueCell::create()
+//                    ->setType(ValueCell::TYPE_LINK),
+//VIEW;
+//            } else {
                 $valueViewers[] = "'{$column->getName()}',";
-            }
+//            }
         }
         return implode("\n                ", $valueViewers);
     }
