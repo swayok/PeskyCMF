@@ -40,4 +40,4 @@ $defaultName = $rendererConfig->getAttribute('name', $valueViewer->getName(true)
     <?php endforeach; ?>
     <?php echo $valueViewer->getFormattedTooltip(); ?>
 </div>
-<hr>
+<hr style="border-color: #ddd">

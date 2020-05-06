@@ -263,7 +263,8 @@ class {$className} extends {$parentClassShort} {
     }
     
     static protected function getIconForMenuItem() {
-        return ''; //< icon classes like: 'fa fa-cog' or just delete if you do not want an icon
+        // icon classes like: 'fa fa-cog' or just delete if you do not want an icon
+        return '';
     }
     
     protected function createDataGridConfig() {
