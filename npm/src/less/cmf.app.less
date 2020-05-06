@@ -1728,14 +1728,28 @@ aside.main-sidebar {
 
     #query-builder {
         position: absolute;
-        top: 10px;
+        max-width: 950px;
+        left: 15px;
+        z-index: 4; /* needed to fix strange z-index:3 in .pagination>.active>a in bootstrap.css */
+        top: -4px;
         width: 100%;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         background-color: #ffffff;
         .border-radius(5px);
 
+        h4 {
+            position: absolute;
+            z-index: 2;
+            right: 15px;
+            top: 0;
+            margin: 0;
+            text-align: right;
+            line-height: 43px;
+            display: none;
+        }
 
         #query-builder-content > .rules-group-container {
+            z-index: 1;
             margin: 0;
             .border-radius-bottom(0);
             border-width: 0;
@@ -1744,61 +1758,65 @@ aside.main-sidebar {
 
         #query-builder-controls {
             background-color: rgba(250, 240, 210, 0.5);
-            text-align: right;
+            text-align: center;
             padding: 5px;
 
             .btn {
                 margin: 0 5px 0 5px;
                 font-size: 12px;
+                min-width: 120px;
+            }
+
+            .btn-default {
+                float: left !important;
+            }
+
+            .btn-success {
+                float: none !important;
+            }
+
+            .btn-danger {
+                float: right !important;
             }
         }
-    }
-}
 
-#query-builder {
-    position: relative;
-    z-index: 4; /* needed to fix strange z-index:3 in .pagination>.active>a in bootstrap.css */
+        .rule-container {
+            input[type=text],
+            input[type=number] {
+                padding: 1px 1px 1px 6px;
+                font-size: 13px;
+                height: 26px;
+            }
 
-    h4 {
-        position: absolute;
-        z-index: 2;
-        width: 300px;
-        left: 50%;
-        top: 0;
-        margin: 0 0 0 -150px;
-        text-align: center;
-        line-height: 43px;
-    }
+            .bootstrap-select button,
+            select.form-control {
+                font-size: 13px;
+                height: 26px;
+            }
 
-    .query-builder .rules-group-container {
-        z-index: 1;
-    }
-
-    .query-builder .rule-container {
-        input[type=text],
-        input[type=number] {
-            padding: 1px 1px 1px 6px;
-            font-size: 13px;
-            height: 26px;
-        }
-
-        .bootstrap-select button,
-        select.form-control {
-            font-size: 13px;
-            height: 26px;
-        }
-
-        .radio {
-            label {
-                line-height: 17px;
+            .radio {
+                label {
+                    line-height: 17px;
+                }
             }
         }
-    }
 
-    .rules-group-footer {
-        position: absolute;
-        bottom: -30px;
-        right: 0;
+        .rules-group-header {
+            .group-actions {
+                float: none !important;
+                margin-left: 15px;
+            }
+
+            .group-conditions {
+                float: left !important;
+            }
+        }
+
+        .rules-group-footer {
+            position: absolute;
+            bottom: -30px;
+            right: 0;
+        }
     }
 }
 

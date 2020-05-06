@@ -320,7 +320,7 @@ VIEW;
         foreach ($this->getJoinableRelationNames($table) as $relationName) {
             $contains[] = "'{$relationName}' => ['*'],";
         }
-        return implode('\n                ', $contains);
+        return implode("\n                ", $contains);
     }
 
     protected function getJoinableRelationNames(TableInterface $table) {
