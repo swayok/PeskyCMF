@@ -354,7 +354,7 @@ class FormInput extends RenderableValueViewer {
         }
         $column = $this->getTableColumn();
         $columnName = $column->getName();
-        $rule = !$column->isValueCanBeNull() || ($column->isItPrimaryKey() && $isCreation) ? 'required|' : 'nullable|';
+        $rule = $column->isValueRequiredToBeNotEmpty() || ($column->isItPrimaryKey() && $isCreation) ? 'required|' : 'nullable|';
         if ($column->isValueMustBeUnique()) {
             $additionalColumns = $column->getUniqueContraintAdditonalColumns();
             $uniquenessValidator = Rule::unique($column->getTableStructure()->getTableName(), $columnName);

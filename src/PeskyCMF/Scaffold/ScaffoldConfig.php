@@ -6,6 +6,7 @@ namespace PeskyCMF\Scaffold;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Http\Middleware\AjaxOnly;
 use PeskyCMF\HttpCode;
@@ -14,6 +15,7 @@ use PeskyCMF\Scaffold\DataGrid\FilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Traits\DataValidationHelper;
+use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -80,6 +82,11 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @var null|array|false
      */
     protected $loggableRecordRelations = false;
+    
+    /**
+     * @var RecordInterface|Record|CmfDbRecord
+     */
+    private $optimizedTableRecord;
 
     /**
      * ScaffoldConfig constructor.
@@ -111,7 +118,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     static public function getResourceName() {
         return static::getTable()->getName();
     }
-
+    
     /**
      * @return array|null
      */
@@ -257,6 +264,18 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      */
     public function getRequest() {
         return request();
+    }
+    
+    public function getOptimizedTableRecord(?array $dbDataForRecord = null): RecordInterface {
+        if (!$this->optimizedTableRecord) {
+            $this->optimizedTableRecord = static::getTable()->newRecord()->enableReadOnlyMode()->enableTrustModeForDbData();
+        } else {
+            $this->optimizedTableRecord->reset();
+        }
+        if ($dbDataForRecord) {
+            $this->optimizedTableRecord->fromDbData($dbDataForRecord);
+        }
+        return $this->optimizedTableRecord;
     }
 
     /**
