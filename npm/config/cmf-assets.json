@@ -104,6 +104,7 @@
             "src/cmf-vendors/fonticons/font-awesome/css": "font-awesome/css",
             "src/cmf-vendors/fonticons/font-awesome/fonts": "font-awesome/fonts",
             "src/cmf-vendors/ckeditor": "ckeditor",
+            "src/cmf-vendors/jquery-json-tree": "jquery-json-tree",
             "src/css/fonts": "css/fonts",
             "src/img": "img",
             "node_modules/bootstrap-fileinput/img": "img"

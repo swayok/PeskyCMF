@@ -21,8 +21,8 @@ $pluginOptions = array_merge([
     $(function () {
         Utils
             .requireFiles(
-                ['/packages/cmf-vendors/jquery-json-tree/jquery-json-tree.js'],
-                ['/packages/cmf-vendors/jquery-json-tree/jquery-json-tree.css']
+                ['/packages/cmf/raw/jquery-json-tree/jquery-json-tree.js'],
+                ['/packages/cmf/raw/jquery-json-tree/jquery-json-tree.css']
             )
             .done(function () {
                 $('#<?php echo $id; ?>').jsonView(

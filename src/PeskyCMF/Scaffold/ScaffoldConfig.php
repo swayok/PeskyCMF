@@ -778,9 +778,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      */
     protected function ajaxOnlyCustomAction() {
         $middleware = new AjaxOnly();
-        abort($middleware->handle($this->getRequest(), function () {
+        $response = $middleware->handle($this->getRequest(), function () {
             return null;
-        }));
+        });
+        if ($response !== null) {
+            abort($response);
+        }
     }
     
     protected function getRequestedRecord($itemId): RecordInterface {
