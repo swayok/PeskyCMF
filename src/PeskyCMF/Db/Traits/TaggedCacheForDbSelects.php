@@ -14,7 +14,7 @@ trait TaggedCacheForDbSelects {
      * Detect if caching is possible
      * @return bool
      */
-    protected function cachingIsPossible() {
+    static protected function cachingIsPossible() {
         if (static::$_cachingIsPossible === null) {
             /** @var \AlternativeLaravelCache\Core\AlternativeCacheStore $cache */
             $storeClass = '\AlternativeLaravelCache\Core\AlternativeCacheStore';
@@ -33,10 +33,10 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public function cleanModelCache($cleanRelatedModelsCache = null) {
+    static public function cleanModelCache($cleanRelatedModelsCache = null) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        \Cache::tags($this->getModelCachePrefix())->flush();
-        $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
+        \Cache::tags(static::getModelCachePrefix())->flush();
+        static::cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
     
     /**
@@ -44,16 +44,16 @@ trait TaggedCacheForDbSelects {
      * @param bool|null|array|string $cleanRelatedModelsCache -
      *      - array: list of relations to clean
      *      - string: single relation to clean
-     *      - bool: true = clean all relations provided by $this->getDefaultRelationsForCacheCleaner(); false - don't clean relations
-     *      - null: if ($this->canCleanRelationsCache() === true) then clean $this->getDefaultRelationsForCacheCleaner()
+     *      - bool: true = clean all relations provided by static::getDefaultRelationsForCacheCleaner(); false - don't clean relations
+     *      - null: if (static::canCleanRelationsCache() === true) then clean static::getDefaultRelationsForCacheCleaner()
      *
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public function cleanRelatedModelsCache($cleanRelatedModelsCache = true) {
+    static public function cleanRelatedModelsCache($cleanRelatedModelsCache = true) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         if ($cleanRelatedModelsCache === null) {
-            $cleanRelatedModelsCache = $this->canCleanRelationsCache();
+            $cleanRelatedModelsCache = static::canCleanRelationsCache();
         }
         if ($cleanRelatedModelsCache) {
             if (is_array($cleanRelatedModelsCache)) {
@@ -61,16 +61,16 @@ trait TaggedCacheForDbSelects {
             } else if (is_string($cleanRelatedModelsCache)) {
                 $relationsToClean = [$cleanRelatedModelsCache];
             } else {
-                $relationsToClean = $this->getDefaultRelationsForCacheCleaner();
+                $relationsToClean = static::getDefaultRelationsForCacheCleaner();
             }
             $tags = [];
             foreach ($relationsToClean as $relationKey) {
-                if (!$this->getTableStructure()->hasRelation($relationKey)) {
+                if (!static::getStructure()->hasRelation($relationKey)) {
                     throw new \InvalidArgumentException("Model has no relation named $relationKey");
                 }
                 /** @var CmfDbTable|TaggedCacheForDbSelects $model */
-                $model = $this->getTableStructure()->getRelation($relationKey)->getForeignTable();
-                $tags[] = $model->getModelCachePrefix();
+                $model = static::getStructure()->getRelation($relationKey)->getForeignTable();
+                $tags[] = $model::getModelCachePrefix();
             }
             if (!empty($tags)) {
                 \Cache::tags($tags)->flush();
@@ -81,9 +81,8 @@ trait TaggedCacheForDbSelects {
     /**
      * @return array - relations names
      */
-    protected function getDefaultRelationsForCacheCleaner() {
-        /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        return array_keys($this->getTableStructure()->getRelations());
+    static protected function getDefaultRelationsForCacheCleaner() {
+        return array_keys(static::getStructure()->getRelations());
     }
     
     /**
@@ -91,10 +90,9 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public function cleanSelectManyCache($cleanRelatedModelsCache = null) {
-        /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        \Cache::tags($this->getSelectManyCacheTag())->flush();
-        $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
+    static public function cleanSelectManyCache($cleanRelatedModelsCache = null) {
+        \Cache::tags(static::getSelectManyCacheTag())->flush();
+        static::cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
     
     /**
@@ -102,10 +100,9 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public function cleanSelectOneCache($cleanRelatedModelsCache = null) {
-        /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        \Cache::tags($this->getSelectOneCacheTag())->flush();
-        $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
+    static public function cleanSelectOneCache($cleanRelatedModelsCache = null) {
+        \Cache::tags(static::getSelectOneCacheTag())->flush();
+        static::cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
     
     /**
@@ -114,35 +111,32 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public function cleanRecordCache($record, $cleanRelatedModelsCache = null) {
-        /** @var CmfDbTable|TaggedCacheForDbSelects $this */
+    static public function cleanRecordCache($record, $cleanRelatedModelsCache = null) {
         if (!($record instanceof Record) || $record->existsInDb()) {
-            \Cache::tags($this->getRecordCacheTag($record))->flush();
+            \Cache::tags(static::getRecordCacheTag($record))->flush();
         }
-        $this->cleanRelatedModelsCache($cleanRelatedModelsCache);
+        static::cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
     
     /**
      * @return string
      */
-    public function getSelectManyCacheTag() {
-        /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        return $this->getModelCachePrefix() . 'many';
+    static public function getSelectManyCacheTag() {
+        return static::getModelCachePrefix() . 'many';
     }
     
     /**
      * @return string
      */
-    public function getSelectOneCacheTag() {
-        /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        return $this->getModelCachePrefix() . 'one';
+    static public function getSelectOneCacheTag() {
+        return static::getModelCachePrefix() . 'one';
     }
     
     /**
      * @param mixed $record
      * @return string
      */
-    public function getRecordCacheTag($record) {
+    static public function getRecordCacheTag($record) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         if ($record instanceof Record) {
             $id = $record->existsInDb() ? $record->getPrimaryKeyValue() : null;
@@ -150,13 +144,13 @@ trait TaggedCacheForDbSelects {
             $id = $record;
         } else if (!empty($record[static::getPkColumnName()])) {
             $id = $record[static::getPkColumnName()];
-        } else if (!empty($record[$this->getTableAlias()]) && !empty($record[$this->getTableAlias()][static::getPkColumnName()])) {
-            $id = $record[$this->getTableAlias()][static::getPkColumnName()];
+        } else if (!empty($record[static::getAlias()]) && !empty($record[static::getAlias()][static::getPkColumnName()])) {
+            $id = $record[static::getAlias()][static::getPkColumnName()];
         }
         if (empty($id)) {
             throw new \UnexpectedValueException('Data passed to getRecordCacheTag() has no value for primary key');
         }
-        return $this->getModelCachePrefix() . 'id=' . $id;
+        return static::getModelCachePrefix() . 'id=' . $id;
     }
     
     /**
@@ -169,12 +163,10 @@ trait TaggedCacheForDbSelects {
      *      'recache' => 'bool, ignore cached data and replace it with fresh data'
      * ]
      * @param callable $callback
-     *
      * @return array
      * @throws \BadMethodCallException
      */
-    protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback) {
-        /** @var CmfDbTable|TaggedCacheForDbSelects $this */
+    static protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback) {
         $data = empty($cacheSettings['recache']) ? \Cache::get($cacheSettings['key'], '{!404!}') : '{!404!}';
         if ($data === '{!404!}') {
             $data = $callback();
@@ -182,15 +174,15 @@ trait TaggedCacheForDbSelects {
                 $data = $data->existsInDb() ? $data->toArray() : [];
             }
             $tags = $cacheSettings['tags'];
-            $tags[] = $this->getModelCachePrefix();
+            $tags[] = static::getModelCachePrefix();
             if ($affectsSingleRecord) {
-                $tags[] = $this->getSelectOneCacheTag();
+                $tags[] = static::getSelectOneCacheTag();
                 if (!empty($data) && is_array($data) && !empty($data[static::getPkColumnName()])) {
                     // create tag only for record with primary key value
-                    $tags[] = $this->getRecordCacheTag($data);
+                    $tags[] = static::getRecordCacheTag($data);
                 }
             } else {
-                $tags[] = $this->getSelectManyCacheTag();
+                $tags[] = static::getSelectManyCacheTag();
             }
             $cacher = \Cache::tags($tags);
             if (empty($cacheSettings['timeout'])) {
@@ -208,8 +200,8 @@ trait TaggedCacheForDbSelects {
      * @param null|array $conditionsAndOptions
      * @return string
      */
-    public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
-        $prefix = $affectsSingleRecord ? $this->getSelectOneCacheTag() : $this->getSelectManyCacheTag();
+    static public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
+        $prefix = $affectsSingleRecord ? static::getSelectOneCacheTag() : static::getSelectManyCacheTag();
         return $prefix . '.' . static::buildCacheKey($columns, $conditionsAndOptions);
     }
     

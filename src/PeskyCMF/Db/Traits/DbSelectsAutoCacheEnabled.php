@@ -10,7 +10,7 @@ trait DbSelectsAutoCacheEnabled {
      * Override to change default value
      * @return boolean
      */
-    public function canAutoCacheSelectOneQueries() {
+    static public function canAutoCacheSelectOneQueries() {
         return true;
     }
 
@@ -18,7 +18,7 @@ trait DbSelectsAutoCacheEnabled {
      * Override to change default value
      * @return boolean
      */
-    public function canAutoCacheSelectManyQueries() {
+    static public function canAutoCacheSelectManyQueries() {
         return true;
     }
 
@@ -27,7 +27,7 @@ trait DbSelectsAutoCacheEnabled {
      * This is used only when $this->isAutoCacheForSelectOneAllowed() === true
      * @return int
      */
-    public function getAutoCacheTimeoutForSelectOneInMinutes() {
+    static public function getAutoCacheTimeoutForSelectOneInMinutes() {
         return 10;
     }
 
@@ -36,7 +36,7 @@ trait DbSelectsAutoCacheEnabled {
      * This is used only when $this->isAutoCacheForSelectAllAllowed() === true
      * @return int
      */
-    public function getAutoCacheTimeoutForSelectManyInMinutes() {
+    static public function getAutoCacheTimeoutForSelectManyInMinutes() {
         return 10;
     }
 

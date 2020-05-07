@@ -10,7 +10,7 @@ trait DbSelectsCacheDefaults {
      * Default cache timeout for "select one" queries
      * @return int
      */
-    public function getDefaultCacheDurationForSelectOneInMinutes() {
+    static public function getDefaultCacheDurationForSelectOneInMinutes() {
         return 1440;
     }
 
@@ -20,7 +20,7 @@ trait DbSelectsCacheDefaults {
      * Default cache timeout for "select many" queries
      * @return int
      */
-    public function getDefaultCacheDurationForSelectManyInMinutes() {
+    static public function getDefaultCacheDurationForSelectManyInMinutes() {
         return 1440;
     }
 
@@ -28,7 +28,7 @@ trait DbSelectsCacheDefaults {
      * Override to change default value
      * @return boolean
      */
-    public function canCleanRelationsCache() {
+    static public function canCleanRelationsCache() {
         return true;
     }
 
@@ -36,7 +36,7 @@ trait DbSelectsCacheDefaults {
      * Override to change default value
      * @return boolean
      */
-    public function canAutoCacheSelectOneQueries() {
+    static public function canAutoCacheSelectOneQueries() {
         return false;
     }
 
@@ -44,7 +44,7 @@ trait DbSelectsCacheDefaults {
      * Override to change default value
      * @return boolean
      */
-    public function canAutoCacheSelectManyQueries() {
+    static public function canAutoCacheSelectManyQueries() {
         return false;
     }
 
@@ -53,7 +53,7 @@ trait DbSelectsCacheDefaults {
      * This is used only when $this->isAutoCacheForSelectOneAllowed() === true
      * @return int
      */
-    public function getAutoCacheTimeoutForSelectOneInMinutes() {
+    static public function getAutoCacheTimeoutForSelectOneInMinutes() {
         return 10;
     }
 
@@ -62,7 +62,7 @@ trait DbSelectsCacheDefaults {
      * This is used only when $this->isAutoCacheForSelectAllAllowed() === true
      * @return int
      */
-    public function getAutoCacheTimeoutForSelectManyInMinutes() {
+    static public function getAutoCacheTimeoutForSelectManyInMinutes() {
         return 10;
     }
 

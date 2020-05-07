@@ -527,7 +527,7 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function createValueViewer() {
         return FormInput::create();

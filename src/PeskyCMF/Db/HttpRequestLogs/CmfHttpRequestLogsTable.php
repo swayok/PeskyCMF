@@ -35,7 +35,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
     /**
      * @return string
      */
-    public function getTableAlias() {
+    public function getTableAlias(): string {
         return 'HttpRequestLogs';
     }
 

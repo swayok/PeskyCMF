@@ -2,8 +2,6 @@
 
 namespace PeskyCMF\Db\Traits;
 
-use PeskyCMF\Db\CmfDbRecord;
-
 trait CacheableRecord {
 
     protected $_cacheOnceTimeout = false;
@@ -14,9 +12,8 @@ trait CacheableRecord {
      * @return $this
      */
     public function withCacheTimeout($timeout = null) {
-        /** @var CmfDbRecord|CacheableRecord $this */
         $this->_cacheOnceTimeout = empty($timeout)
-            ? static::getTable()->getDefaultCacheDurationForSelectOneInMinutes()
+            ? static::getDefaultCacheDurationForSelectOneInMinutes()
             : $timeout;
         return $this;
     }

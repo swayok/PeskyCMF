@@ -5,8 +5,13 @@ namespace PeskyCMF\Db\Traits;
 use PeskyCMF\Db\CmfDbTable;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\Table;
+use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\Set;
 
+/**
+ * @method static Table|TableInterface|CacheForDbSelects getInstance()
+ */
 trait CacheForDbSelects {
     
     /**
@@ -25,7 +30,7 @@ trait CacheForDbSelects {
      * Default cache timeout for "select one" queries
      * @return int
      */
-    abstract public function getDefaultCacheDurationForSelectOneInMinutes();
+    abstract static public function getDefaultCacheDurationForSelectOneInMinutes();
     
     /**
      * Override to change default value
@@ -33,55 +38,55 @@ trait CacheForDbSelects {
      * Default cache timeout for "select many" queries
      * @return int
      */
-    abstract public function getDefaultCacheDurationForSelectManyInMinutes();
+    abstract static public function getDefaultCacheDurationForSelectManyInMinutes();
     
     /**
      * Override to change default value
      * @return boolean
      */
-    abstract public function canCleanRelationsCache();
+    abstract static public function canCleanRelationsCache();
     
     /**
      * Override to change default value
      * @return boolean
      */
-    abstract public function canAutoCacheSelectOneQueries();
+    abstract static public function canAutoCacheSelectOneQueries();
     
     /**
-     * Allow/disallow cache for DbModel->expression().
-     * Cache timeout provided by $this->getDefaultCacheDurationForSelectOneInMinutes()
+     * Allow/disallow cache for Table::expression().
+     * Cache timeout provided by static::getDefaultCacheDurationForSelectOneInMinutes()
      * Override to change default value
      * @return boolean
      */
-    public function canAutoCacheExpressionQueries() {
-        return $this->canAutoCacheSelectOneQueries();
+    static public function canAutoCacheExpressionQueries() {
+        return static::canAutoCacheSelectOneQueries();
     }
     
     /**
      * Override to change default value
      * @return boolean
      */
-    abstract public function canAutoCacheSelectManyQueries();
+    abstract static public function canAutoCacheSelectManyQueries();
     
     /**
      * Override to change default value
      * This is used only when $this->isAutoCacheForSelectOneAllowed() === true
      * @return int
      */
-    abstract public function getAutoCacheTimeoutForSelectOneInMinutes();
+    abstract static public function getAutoCacheTimeoutForSelectOneInMinutes();
     
     /**
      * Override to change default value
      * This is used only when $this->isAutoCacheForSelectAllAllowed() === true
      * @return int
      */
-    abstract public function getAutoCacheTimeoutForSelectManyInMinutes();
+    abstract static public function getAutoCacheTimeoutForSelectManyInMinutes();
     
     /**
      * Detect if caching is possible
      * @return bool
      */
-    abstract protected function cachingIsPossible();
+    abstract static protected function cachingIsPossible();
     
     /**
      * Cache key builder
@@ -152,9 +157,7 @@ trait CacheForDbSelects {
      */
     private function _getCacheDurationForSelectOneInMinutes() {
         /** @var CmfDbTable|CacheForDbSelects $this */
-        return $this->_cacheTimeoutForNextSelect === null
-            ? $this->getDefaultCacheDurationForSelectOneInMinutes() * 60
-            : $this->_cacheTimeoutForNextSelect;
+        return $this->_cacheTimeoutForNextSelect ?: static::getDefaultCacheDurationForSelectOneInMinutes() * 60;
     }
     
     /**
@@ -163,46 +166,40 @@ trait CacheForDbSelects {
      */
     private function _getCacheDurationForSelectManyInMinutes() {
         /** @var CmfDbTable|CacheForDbSelects $this */
-        return $this->_cacheTimeoutForNextSelect === null
-            ? $this->getDefaultCacheDurationForSelectManyInMinutes() * 60
-            : $this->_cacheTimeoutForNextSelect;
+        return $this->_cacheTimeoutForNextSelect ?: static::getDefaultCacheDurationForSelectManyInMinutes() * 60;
     }
     
     /**
      * @param bool|true $cleanRelatedModelsCache - true: clean cache for all related models
      */
-    abstract public function cleanModelCache($cleanRelatedModelsCache = null);
+    abstract static public function cleanModelCache($cleanRelatedModelsCache = null);
     
     /**
      * Clean cache for all related models
      * @param bool|null $cleanRelatedModelsCache
      */
-    abstract public function cleanRelatedModelsCache($cleanRelatedModelsCache = true);
+    abstract static public function cleanRelatedModelsCache($cleanRelatedModelsCache = true);
     
     /**
      * @param bool $cleanRelatedModelsCache
      */
-    abstract public function cleanSelectManyCache($cleanRelatedModelsCache = null);
+    abstract static public function cleanSelectManyCache($cleanRelatedModelsCache = null);
     
     /**
      * @param bool $cleanRelatedModelsCache
      */
-    abstract public function cleanSelectOneCache($cleanRelatedModelsCache = null);
+    abstract static public function cleanSelectOneCache($cleanRelatedModelsCache = null);
     
     /**
      * @param int|string|array|Object $record
      * @param bool $cleanRelatedModelsCache
      */
-    abstract public function cleanRecordCache($record, $cleanRelatedModelsCache = null);
+    abstract static public function cleanRecordCache($record, $cleanRelatedModelsCache = null);
     
-    /**
-     * @return string
-     */
-    public function getModelCachePrefix() {
-        /** @var CmfDbTable|CacheForDbSelects $this */
+    static public function getModelCachePrefix(): string {
         $parts = [
             static::getConnection()->getConnectionConfig()->getName(),
-            $this->getTableStructure()->getSchema(),
+            static::getStructure()->getSchema(),
             static::getConnection()->getConnectionConfig()->getDbName(),
             static::getAlias()
         ];
@@ -223,11 +220,11 @@ trait CacheForDbSelects {
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function getCachedData($affectsSingleRecord, $cacheSettings, callable $callback) {
+    static public function getCachedData($affectsSingleRecord, $cacheSettings, callable $callback) {
         $defaultTimeout = $affectsSingleRecord
-            ? $this->_getCacheDurationForSelectOneInMinutes() * 60
-            : $this->_getCacheDurationForSelectManyInMinutes() * 60;
-        $resolvedCacheSettings = $this->resolveCacheSettings(
+            ? static::getInstance()->_getCacheDurationForSelectOneInMinutes() * 60
+            : static::getInstance()->_getCacheDurationForSelectManyInMinutes() * 60;
+        $resolvedCacheSettings = static::resolveCacheSettings(
             $cacheSettings,
             $defaultTimeout,
             function () {
@@ -235,7 +232,7 @@ trait CacheForDbSelects {
             }
         );
         if (is_array($cacheSettings)) {
-            return $this->_getCachedData($affectsSingleRecord, $resolvedCacheSettings, $callback);
+            return static::_getCachedData($affectsSingleRecord, $resolvedCacheSettings, $callback);
         } else {
             return $callback();
         }
@@ -246,9 +243,9 @@ trait CacheForDbSelects {
      * @param bool $affectsSingleRecord
      * @param array $cacheSettings - prepared cache settings. Always contains 'key' key
      * @param callable $callback
-     * @return array
+     * @return mixed
      */
-    abstract protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback);
+    abstract static protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback);
     
     /**
      * @param bool $affectsSingleRecord
@@ -257,9 +254,9 @@ trait CacheForDbSelects {
      * @return string
      * @throws \InvalidArgumentException
      */
-    public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
+    static public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
         $mid = $affectsSingleRecord ? 'one.' : 'many.';
-        return $this->getModelCachePrefix() . $mid . static::buildCacheKey($columns, $conditionsAndOptions);
+        return static::getModelCachePrefix() . $mid . static::buildCacheKey($columns, $conditionsAndOptions);
     }
     
     /**
@@ -269,7 +266,7 @@ trait CacheForDbSelects {
      * @param bool $isAutoCache
      * @return array|bool - bool: false - when caching is not possible
      */
-    protected function resolveCacheSettings($cacheSettings, $defaultTimeout, callable $defaultCacheKey) {
+    static protected function resolveCacheSettings($cacheSettings, $defaultTimeout, callable $defaultCacheKey) {
         if (!is_array($cacheSettings)) {
             $tmp = [
                 'timeout' => $defaultTimeout,
@@ -293,62 +290,55 @@ trait CacheForDbSelects {
         if (in_array(request()->method(), ['POST', 'PUT', 'DELETE'], true)) {
             $cacheSettings['recache'] = true;
         }
-        $this->cleanCacheTimeout();
+        static::getInstance()->cleanCacheTimeout();
         return $cacheSettings;
     }
     
     /**
-     * @param string|array $columns
-     * @param null|array|string $conditions
-     *  special key: 'CACHE'. Accepted values:
-     *  - array: cache settings, accepted keys:
+     * @inheritDoc
+     *
+     * Special key for $conditions: 'CACHE'.
+     * Accepted values: array|true|numeric|string
+     *  - array
      *      'key' => optional
      *              string - cache key
-     *              Default: $this->buildDefaultCacheKey(false, $columns, $conditionsAndOptions)
+     *              Default: static::buildDefaultCacheKey(false, $columns, $conditionsAndOptions)
      *      'timeout' => optional
      *              int|DateTime - cache timeout
      *              false|null - cache for forever
      *              Default: $this->getCacheDurationForSelectAllInMinutes()
      *      'tags' => optional
      *              string|array - cache tags.
-     *              Default: $this->alias
      *  - true: cache with default settings
      *  - numeric or \DateTime: cache timeout, key and tags are set to default values
      *  - string: cache tag, timeout and tags are set to default
-     * @param bool $asObjects - true: return DbObject | false: return array
-     * @param bool $withRootAlias
-     * @return array|Object[]
-     * @throws \BadMethodCallException
      */
     static public function selectAsArray($columns = '*', array $conditions = [], ?\Closure $configurator = null): array {
-        /** @var CmfDbTable|CacheForDbSelects $model */
-        $model = static::getInstance();
-        if ($model->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
+        if (static::cachingIsPossible()) {
             $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
+            $timeout = static::getAutoCacheTimeoutForSelectManyInMinutes();
             if (
                 $hasCacheOption
                 || (
-                    $model->canAutoCacheSelectManyQueries()
-                    && $model->getAutoCacheTimeoutForSelectManyInMinutes() > 0
+                    static::canAutoCacheSelectManyQueries()
+                    && $timeout > 0
                 )
             ) {
                 $cacheSettings = $hasCacheOption
                     ? $conditions['CACHE']
-                    : ['timeout' => $model->getAutoCacheTimeoutForSelectManyInMinutes()];
+                    : ['timeout' => $timeout];
                 unset($conditions['CACHE']);
                 if ($cacheSettings !== false) {
-                    $cacheSettings = $model->resolveCacheSettings(
+                    $cacheSettings = static::resolveCacheSettings(
                         $cacheSettings,
-                        $model->_getCacheDurationForSelectManyInMinutes(),
+                        static::getInstance()->_getCacheDurationForSelectManyInMinutes(),
                         function () use ($columns, $conditions) {
-                            return $this->buildDefaultCacheKey(false, $columns, $conditions);
+                            return static::buildDefaultCacheKey(false, $columns, $conditions);
                         }
                     );
-                    $records = $model->_getCachedData(false, $cacheSettings, function () use ($configurator, $columns, $conditions) {
+                    return static::_getCachedData(false, $cacheSettings, function () use ($configurator, $columns, $conditions) {
                         return parent::selectAsArray($columns, $conditions, $configurator);
                     });
-                    return $records;
                 }
             }
         }
@@ -357,45 +347,30 @@ trait CacheForDbSelects {
     }
     
     /**
-     * @param string|array $columns
-     * @param null|array|string $conditionsAndOptions
-     * @param bool $asObjects - true: return DbObject | false: return array
-     * @param bool $withRootAlias
-     * @return array|Object[]
+     * @see selectAsArray()
      */
     public function selectFromCache($columns = '*', $conditionsAndOptions = null, ?\Closure $configurator = null) {
-        if ($this->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
+        if (static::cachingIsPossible()) {
             static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
         return static::selectAsArray($columns, $conditionsAndOptions, $configurator);
     }
     
     /**
-     * Selects only 1 column
-     * @param string $column
-     * @param null|array|string $conditionsAndOptions
-     * @return array
+     * @see selectColumn()
      */
     public function selectColumnFromCache($column, $conditionsAndOptions = null) {
-        if ($this->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
+        if (static::cachingIsPossible()) {
             static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
         return static::selectColumn($column, $conditionsAndOptions);
     }
     
     /**
-     * Select associative array
-     * Note: does not support columns from foreign models
-     * @param string $keysColumn
-     * @param string $valuesColumn
-     * @param null|array|string $conditionsAndOptions
-     * @return array
+     * @see selectAssoc()
      */
     public function selectAssocFromCache($keysColumn, $valuesColumn, $conditionsAndOptions = null) {
-        if ($this->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
+        if (static::cachingIsPossible()) {
             static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
         return static::selectAssoc($keysColumn, $valuesColumn, $conditionsAndOptions);
@@ -415,46 +390,41 @@ trait CacheForDbSelects {
     }
     
     /**
-     * @param null|array $conditions
-     * @param \Closure|null $configurator
-     * @param bool $removeNotInnerJoins
-     * @return int
+     * @inheritDoc
+     * Also you can use 'CACHE' option. See description of select() method
      */
     static public function count(array $conditions = [], ?\Closure $configurator = null, bool $removeNotInnerJoins = false): int {
-        /** @var CmfDbTable|CacheForDbSelects $model */
-        $model = static::getInstance();
-        if ($model->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
+        if (static::cachingIsPossible()) {
             $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
+            $timeout = static::getAutoCacheTimeoutForSelectManyInMinutes();
             if (
                 $hasCacheOption
                 || (
-                    $model->canAutoCacheSelectManyQueries()
-                    && $model->getAutoCacheTimeoutForSelectManyInMinutes() > 0
+                    static::canAutoCacheSelectManyQueries()
+                    && $timeout > 0
                 )
             ) {
                 $cacheSettings = $hasCacheOption
                     ? $conditions['CACHE']
-                    : ['timeout' => $model->getAutoCacheTimeoutForSelectManyInMinutes()];
+                    : ['timeout' => $timeout];
                 unset($conditions['CACHE']);
                 if ($cacheSettings !== false) {
                     /** @var array $cacheSettings */
-                    $cacheSettings = $model->resolveCacheSettings(
+                    $cacheSettings = static::resolveCacheSettings(
                         $cacheSettings,
-                        $model->_getCacheDurationForSelectManyInMinutes(),
+                        static::getInstance()->_getCacheDurationForSelectManyInMinutes(),
                         function () use ($conditions) {
-                            return $this->buildDefaultCacheKey(false, '__COUNT__', $conditions);
+                            return static::buildDefaultCacheKey(false, '__COUNT__', $conditions);
                         }
                     );
                     $cacheSettings['key'] .= '_count'; //< for DbModel->selectWithCount() method when cache key provided by user
-                    $count = $model->_getCachedData(
+                    return (int)static::_getCachedData(
                         false,
                         $cacheSettings,
                         function () use ($configurator, $conditions, $removeNotInnerJoins) {
                             return parent::count($conditions, $configurator, $removeNotInnerJoins);
                         }
                     );
-                    return $count;
                 }
             }
         }
@@ -463,57 +433,50 @@ trait CacheForDbSelects {
     }
     
     /**
-     * @param null|array $conditionsAndOptions
-     * @param bool $removeNotInnerJoins
-     * @return int
+     * @see count()
      */
-    public function countFromCache($conditionsAndOptions = null, ?\Closure $configurator = null, $removeNotInnerJoins = false) {
-        if ($this->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
+    static public function countFromCache(array $conditions = [], ?\Closure $configurator = null, $removeNotInnerJoins = false) {
+        if (static::cachingIsPossible()) {
+            static::addCacheOptionToConditionsAndOptions($conditions);
         }
-        return static::count($conditionsAndOptions, $configurator, $removeNotInnerJoins);
+        return static::count($conditions, $configurator, $removeNotInnerJoins);
     }
     
     /**
-     * @param string $expression - example: 'COUNT(*)', 'SUM(`field`)'
-     * @param array $conditions
-     * @return string|int|float|bool
+     * @inheritDoc
+     * Also you can use 'CACHE' option. See description of select() method
      */
     static public function selectValue(DbExpr $expression, array $conditions = [], ?\Closure $configurator = null): ?string {
-        /** @var CmfDbTable|CacheForDbSelects $model */
-        $model = static::getInstance();
-        if ($model->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
+        if (static::cachingIsPossible()) {
             $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
+            $timeout = static::getAutoCacheTimeoutForSelectOneInMinutes();
             if (
                 $hasCacheOption
                 || (
-                    $model->canAutoCacheExpressionQueries()
-                    && $model->getAutoCacheTimeoutForSelectOneInMinutes() > 0
+                    static::canAutoCacheExpressionQueries()
+                    && $timeout > 0
                 )
             ) {
                 $cacheSettings = $hasCacheOption
                     ? $conditions['CACHE']
-                    : ['timeout' => $model->getAutoCacheTimeoutForSelectOneInMinutes()];
+                    : ['timeout' => $timeout];
                 unset($conditions['CACHE']);
                 if ($cacheSettings !== false) {
                     /** @var array $cacheSettings */
-                    $cacheSettings = $model->resolveCacheSettings(
+                    $cacheSettings = static::resolveCacheSettings(
                         $cacheSettings,
-                        $model->getAutoCacheTimeoutForSelectOneInMinutes(),
+                        $timeout,
                         function () use ($expression, $conditions) {
-                            return $this->buildDefaultCacheKey(false, $expression, $conditions);
+                            return static::buildDefaultCacheKey(false, $expression, $conditions);
                         }
                     );
-                    $result = $model->_getCachedData(
+                    return static::_getCachedData(
                         false,
                         $cacheSettings,
                         function () use ($configurator, $expression, $conditions) {
                             return parent::selectValue($expression, $conditions, $configurator);
                         }
                     );
-                    return $result;
                 }
             }
         }
@@ -522,75 +485,48 @@ trait CacheForDbSelects {
     }
     
     /**
-     * @param string $expression - example: 'COUNT(*)', 'SUM(`field`)'
-     * @param array|string|null $conditionsAndOptions
-     * @return string|int|float|bool
+     * @see selectValue()
      */
-    public function selectValueFromCache(DbExpr $expression, array $conditions = [], ?\Closure $configurator = null): ?string {
-        if ($this->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
+    static public function selectValueFromCache(DbExpr $expression, array $conditions = [], ?\Closure $configurator = null): ?string {
+        if (static::cachingIsPossible()) {
             static::addCacheOptionToConditionsAndOptions($conditions);
         }
         return static::selectValue($expression, $conditions, $configurator);
     }
     
     /**
-     * Get 1 record from DB
-     * @param string|array $columns
-     * @param null|array|string|int $conditionsAndOptions -
-     *      array|string: conditions,
-     *      numeric|int: record's pk value, automatically converted to array($this->primaryKey => $where)
-     * @param bool $asObject - true: return DbObject | false: return array
-     * @param bool $withRootAlias
-     * @return array|bool|Object
-     */
-    public function selectOneFromCache($columns, $conditionsAndOptions = null) {
-        if ($this->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
-            if (is_numeric($conditionsAndOptions) || is_int($conditionsAndOptions)) {
-                $conditionsAndOptions = [static::getPkColumnName() => $conditionsAndOptions];
-            }
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions, true);
-        }
-        return static::selectOne($columns, $conditionsAndOptions);
-    }
-    
-    /**
-     * @inheritdoc
+     * @inheritDoc
      * Also you can use 'CACHE' option. See description of select() method
      */
     static public function selectOne($columns, array $conditions, ?\Closure $configurator = null): array {
-        /** @var CmfDbTable|CacheForDbSelects $model */
-        $model = static::getInstance();
-        if ($model->cachingIsPossible()) {
-            /** @var CmfDbTable|CacheForDbSelects $this */
+        if (static::cachingIsPossible()) {
             if (empty($conditions)) {
                 throw new \InvalidArgumentException('Selecting one record without conditions is not allowed');
             }
             $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
+            $timeout = static::getAutoCacheTimeoutForSelectOneInMinutes();
             if (
                 $hasCacheOption
                 || (
-                    $model->canAutoCacheSelectOneQueries()
-                    && $model->getAutoCacheTimeoutForSelectOneInMinutes() > 0
+                    static::canAutoCacheSelectOneQueries()
+                    && $timeout > 0
                 )
             ) {
                 $cacheSettings = $hasCacheOption
                     ? $conditions['CACHE']
-                    : ['timeout' => $model->getAutoCacheTimeoutForSelectOneInMinutes()];
+                    : ['timeout' => $timeout];
                 unset($conditions['CACHE']);
                 if ($cacheSettings !== false) {
-                    $cacheSettings = $model->resolveCacheSettings(
+                    $cacheSettings = static::resolveCacheSettings(
                         $cacheSettings,
-                        $model->_getCacheDurationForSelectOneInMinutes(),
+                        static::getInstance()->_getCacheDurationForSelectOneInMinutes(),
                         function () use ($columns, $conditions) {
-                            return $this->buildDefaultCacheKey(true, $columns, $conditions);
+                            return static::buildDefaultCacheKey(true, $columns, $conditions);
                         }
                     );
-                    $record = $model->_getCachedData(true, $cacheSettings, function () use ($columns, $conditions) {
+                    return static::_getCachedData(true, $cacheSettings, function () use ($columns, $conditions) {
                         return parent::selectOne($columns, $conditions, false, false);
                     });
-                    return $record;
                 }
             }
         }
@@ -598,54 +534,54 @@ trait CacheForDbSelects {
         return parent::selectOne($columns, $conditions, $configurator);
     }
     
+    /**
+     * @see selectOne()
+     */
+    static public function selectOneFromCache($columns, array $conditions, ?\Closure $configurator = null) {
+        if (static::cachingIsPossible()) {
+            static::addCacheOptionToConditionsAndOptions($conditions, true);
+        }
+        return static::selectOne($columns, $conditions, $configurator);
+    }
+    
+    /**
+     * @inheritDoc
+     * Also you can use 'CACHE' option. See description of select() method
+     */
     static public function selectOneAsDbRecord($columns, array $conditions, ?\Closure $configurator = null): RecordInterface {
-        /** @var CmfDbTable|CacheForDbSelects $model */
         $data = static::selectOne($columns, $conditions, $configurator);
         return static::getInstance()->newRecord()->fromData($data, true, false);
     }
     
     /**
-     * @inheritdoc
-     * @throws \BadMethodCallException
+     * @inheritDoc
      */
     static public function insert(array $data, $returning = false) {
         $ret = parent::insert($data, $returning);
-        /** @var CmfDbTable|CacheForDbSelects $model */
-        $model = static::getInstance();
-        if ($model->cachingIsPossible()) {
-            $model->cleanSelectManyCache();
+        if (static::cachingIsPossible()) {
+            static::cleanSelectManyCache();
         }
         return $ret;
     }
     
     /**
-     * Insert many records at once
-     * @param array $fieldNames - field names use
-     * @param array[] $rows - arrays of values for $fieldNames
-     * @param bool|string $returning - string: something compatible with RETURNING for postgresql query | false: do not return
-     * @return int|array - int: amount of rows created | array: records (when $returning !== false)
-     * @throws \BadMethodCallException
+     * @inheritDoc
      */
     static public function insertMany(array $columns, array $rows, $returning = false) {
         $ret = parent::insertMany($columns, $rows, $returning);
-        /** @var CmfDbTable|CacheForDbSelects $model */
-        $model = static::getInstance();
-        if ($model->cachingIsPossible()) {
-            $model->cleanSelectManyCache();
+        if (static::cachingIsPossible()) {
+            static::cleanSelectManyCache();
         }
         return $ret;
     }
     
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     static public function update(array $data, array $conditionsAndOptions, $returning = false) {
-        /** @var CmfDbTable|CacheForDbSelects $this */
         $ret = parent::update($data, $conditionsAndOptions, $returning);
-        /** @var CmfDbTable|CacheForDbSelects $model */
-        $model = static::getInstance();
-        if ($model->cachingIsPossible()) {
-            $pkColumnName = $model::getPkColumnName();
+        if (static::cachingIsPossible()) {
+            $pkColumnName = static::getPkColumnName();
             if (!empty($ret[$pkColumnName])) {
                 $ids = $ret[$pkColumnName];
             } else if (!empty($ret[0]) && !empty($ret[0][$pkColumnName])) {
@@ -660,26 +596,23 @@ trait CacheForDbSelects {
                     $ids = [$ids];
                 }
                 foreach ($ids as $id) {
-                    $model->cleanRecordCache($id);
+                    static::cleanRecordCache($id);
                 }
-                $model->cleanSelectManyCache();
+                static::cleanSelectManyCache();
             } else {
-                $model->cleanModelCache();
+                static::cleanModelCache();
             }
         }
         return $ret;
     }
     
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     static public function delete(array $conditionsAndOptions = [], $returning = false) {
-        /** @var CmfDbTable|CacheForDbSelects $this */
         $ret = parent::delete($conditionsAndOptions, $returning);
-        /** @var CmfDbTable|CacheForDbSelects $model */
-        $model = static::getInstance();
-        if ($model->cachingIsPossible()) {
-            $pkColumnName = $model::getPkColumnName();
+        if (static::cachingIsPossible()) {
+            $pkColumnName = static::getPkColumnName();
             if (!empty($ret[$pkColumnName])) {
                 $ids = $ret[$pkColumnName];
             } else if (!empty($ret[0]) && !empty($ret[0][$pkColumnName])) {
@@ -692,11 +625,11 @@ trait CacheForDbSelects {
                     $ids = [$ids];
                 }
                 foreach ($ids as $id) {
-                    $model->cleanRecordCache($id);
+                    static::cleanRecordCache($id);
                 }
-                $model->cleanSelectManyCache();
+                static::cleanSelectManyCache();
             } else {
-                $model->cleanModelCache();
+                static::cleanModelCache();
             }
         }
         return $ret;

@@ -575,7 +575,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function createValueViewer() {
         return DataGridColumn::create();

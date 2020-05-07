@@ -7,10 +7,9 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\PeskyCmfManager;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
-use PeskyORM\ORM\ClassBuilder;
 use PeskyORM\ORM\Column;
-use PeskyORM\ORM\Table;
 use PeskyORM\ORM\TableInterface;
+use PeskyORMLaravel\Db\OrmDbClassesUtils;
 use Swayok\Utils\File;
 use Swayok\Utils\StringUtils;
 
@@ -102,21 +101,15 @@ class CmfMakeScaffoldCommand extends Command {
         return $scaffoldClassName;
     }
 
-
-    protected function getTableObjectByTableName(string $tableName): TableInterface {
-        /** @var ClassBuilder $builderClass */
-        $builderClass = config('peskyorm.class_builder');
-        $dbClassesNamespace = rtrim(config('peskyorm.classes_namespace', 'App\\Db'), '\\') . '\\';
-        /** @var Table $className */
-        $className = $dbClassesNamespace . StringUtils::classify($tableName) . '\\' . $builderClass::makeTableClassName($tableName);
-        return $className::getInstance();
+    protected function getTableInstanceByTableName(string $tableName): TableInterface {
+        return OrmDbClassesUtils::getTableInstanceByTableNameInDb($tableName);
     }
 
     /**
      * Execute the console command.
      */
     public function handle() {
-        $table = $this->getTableObjectByTableName($this->argument('table_name'));
+        $table = $this->getTableInstanceByTableName($this->argument('table_name'));
 
         $namespace = $this->getScaffoldsNamespace();
         $className = $this->getScaffoldClassName($table, $this->option('resource'));
@@ -210,7 +203,7 @@ INFO
      */
     protected function getFolder($namespace) {
         $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->app_subfolder());
-        return static::getBasePathToApp() . DIRECTORY_SEPARATOR . $appSubfolder . DIRECTORY_SEPARATOR . $this->getScaffoldsFolderName() . DIRECTORY_SEPARATOR;
+        return $this->getBasePathToApp() . DIRECTORY_SEPARATOR . $appSubfolder . DIRECTORY_SEPARATOR . $this->getScaffoldsFolderName() . DIRECTORY_SEPARATOR;
         /*$folder = preg_replace(
             ['%[\\/]%', '%^/?App%'],
             [DIRECTORY_SEPARATOR, $this->getBasePathToApp()],
