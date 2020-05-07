@@ -10,7 +10,7 @@ use PeskyORM\ORM\TableInterface;
 use Swayok\Utils\Set;
 
 /**
- * @method static Table|TableInterface|CacheForDbSelects getInstance()
+ * @method static Table|TableInterface|CacheForDbSelects|self getInstance()
  */
 trait CacheForDbSelects {
     
