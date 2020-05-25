@@ -6,7 +6,7 @@
             <li><a href="https://almsaeedstudio.com/" target="_blank">AdminLTE Template by Almsaeed Studio</a></li>
             <li>
                 <a href="https://thenounproject.com/term/mosquito/34825/" target="_blank">Mosquito icon</a>
-                by <a href="https://thenounproject.com/audasamora/" target="_blank">AS Design</a> from the Noun Project</a>
+                by <a href="https://thenounproject.com/audasamora/" target="_blank">AS Design</a> from the Noun Project
             </li>
         </ul>
     </div>
