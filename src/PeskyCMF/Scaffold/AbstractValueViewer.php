@@ -320,7 +320,17 @@ abstract class AbstractValueViewer {
                 $value = $valueConverter($record, $this, $this->getScaffoldSectionConfig());
             }
         } else if (!empty($value) || is_bool($value)) {
-            if ($this->getType() === static::TYPE_LINK && $this->isLinkedToDbColumn()) {
+            if (
+                $this->isLinkedToDbColumn()
+                && (
+                    $this->getTableColumn()->getType() === Column::TYPE_PASSWORD
+                    || $this->getTableColumn()->isValuePrivate()
+                )
+            ) {
+                // Protect passwords and private values (Column::isValuePrivate())
+                // by default (only when no value converter provided)
+                return '';
+            } else if ($this->getType() === static::TYPE_LINK && $this->isLinkedToDbColumn()) {
                 return $this->buildLinkToExternalRecord($this->getTableColumn(), $record);
             } else {
                 return $this->doDefaultValueConversionByType($value, $this->type, $record);
