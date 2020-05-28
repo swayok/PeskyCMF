@@ -197,6 +197,10 @@ trait CacheForDbSelects {
     abstract static public function cleanRecordCache($record, $cleanRelatedModelsCache = null);
     
     static public function getModelCachePrefix(): string {
+        return static::getCacheTag();
+    }
+    
+    static public function getCacheTag(): string {
         $parts = [
             static::getConnection()->getConnectionConfig()->getName(),
             static::getStructure()->getSchema(),

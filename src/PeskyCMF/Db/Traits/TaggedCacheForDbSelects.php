@@ -35,7 +35,7 @@ trait TaggedCacheForDbSelects {
      */
     static public function cleanModelCache($cleanRelatedModelsCache = null) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
-        \Cache::tags(static::getModelCachePrefix())->flush();
+        \Cache::tags(static::getCacheTag())->flush();
         static::cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
     
@@ -70,7 +70,7 @@ trait TaggedCacheForDbSelects {
                 }
                 /** @var CmfDbTable|TaggedCacheForDbSelects $model */
                 $model = static::getStructure()->getRelation($relationKey)->getForeignTable();
-                $tags[] = $model::getModelCachePrefix();
+                $tags[] = $model::getCacheTag();
             }
             if (!empty($tags)) {
                 \Cache::tags($tags)->flush();
@@ -122,14 +122,14 @@ trait TaggedCacheForDbSelects {
      * @return string
      */
     static public function getSelectManyCacheTag() {
-        return static::getModelCachePrefix() . 'many';
+        return static::getCacheTag() . 'many';
     }
     
     /**
      * @return string
      */
     static public function getSelectOneCacheTag() {
-        return static::getModelCachePrefix() . 'one';
+        return static::getCacheTag() . 'one';
     }
     
     /**
@@ -150,7 +150,7 @@ trait TaggedCacheForDbSelects {
         if (empty($id)) {
             throw new \UnexpectedValueException('Data passed to getRecordCacheTag() has no value for primary key');
         }
-        return static::getModelCachePrefix() . 'id=' . $id;
+        return static::getCacheTag() . 'id=' . $id;
     }
     
     /**
@@ -174,7 +174,7 @@ trait TaggedCacheForDbSelects {
                 $data = $data->existsInDb() ? $data->toArray() : [];
             }
             $tags = $cacheSettings['tags'];
-            $tags[] = static::getModelCachePrefix();
+            $tags[] = static::getCacheTag();
             if ($affectsSingleRecord) {
                 $tags[] = static::getSelectOneCacheTag();
                 if (!empty($data) && is_array($data) && !empty($data[static::getPkColumnName()])) {
