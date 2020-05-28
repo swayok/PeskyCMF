@@ -582,6 +582,17 @@ trait CacheForDbSelects {
     /**
      * @inheritDoc
      */
+    static public function insertManyAsIs(array $columns, array $rows, $returning = false) {
+        $ret = parent::insertManyAsIs($columns, $rows, $returning);
+        if (static::cachingIsPossible()) {
+            static::cleanSelectManyCache();
+        }
+        return $ret;
+    }
+    
+    /**
+     * @inheritDoc
+     */
     static public function update(array $data, array $conditionsAndOptions, $returning = false) {
         $ret = parent::update($data, $conditionsAndOptions, $returning);
         if (static::cachingIsPossible()) {
