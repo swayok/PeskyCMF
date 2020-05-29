@@ -210,6 +210,11 @@ trait CacheForDbSelects {
         return implode('.', $parts) . '.';
     }
     
+    static public function makeCacheKeyFromConditions(string $prefix, array $conditions): string {
+        ksort($conditions);
+        return $prefix . '_' . sha1(json_encode($conditions, JSON_UNESCAPED_UNICODE));
+    }
+    
     /**
      * Get data from cache or put data from $callback to cache (for external use)
      * @param bool $affectsSingleRecord
