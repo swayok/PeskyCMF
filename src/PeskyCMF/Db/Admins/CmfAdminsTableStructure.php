@@ -38,7 +38,7 @@ class CmfAdminsTableStructure extends CmfDbTableStructure {
     /**
      * @return string
      */
-    static public function getTableName() {
+    static public function getTableName(): string {
         return 'admins';
     }
 

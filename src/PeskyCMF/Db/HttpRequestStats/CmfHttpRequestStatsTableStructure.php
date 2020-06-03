@@ -32,7 +32,7 @@ class CmfHttpRequestStatsTableStructure extends CmfDbTableStructure {
     /**
      * @return string
      */
-    static public function getTableName() {
+    static public function getTableName(): string {
         return 'http_request_stats';
     }
 
