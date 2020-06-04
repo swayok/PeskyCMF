@@ -179,6 +179,8 @@ QueryBuilder.defaults({ lang_code: 'bg' });
 })(window.jQuery);
 
 //! moment.js locale configuration
+//! locale : Bulgarian [bg]
+//! author : Krasen Borisov : https://github.com/kraz
 
 ;(function (global, factory) {
    typeof exports === 'object' && typeof module !== 'undefined'
@@ -187,59 +189,64 @@ QueryBuilder.defaults({ lang_code: 'bg' });
    factory(global.moment)
 }(this, (function (moment) { 'use strict';
 
+    //! moment.js locale configuration
 
     var bg = moment.defineLocale('bg', {
-        months : 'януари_февруари_март_април_май_юни_юли_август_септември_октомври_ноември_декември'.split('_'),
-        monthsShort : 'янр_фев_мар_апр_май_юни_юли_авг_сеп_окт_ное_дек'.split('_'),
-        weekdays : 'неделя_понеделник_вторник_сряда_четвъртък_петък_събота'.split('_'),
-        weekdaysShort : 'нед_пон_вто_сря_чет_пет_съб'.split('_'),
-        weekdaysMin : 'нд_пн_вт_ср_чт_пт_сб'.split('_'),
-        longDateFormat : {
-            LT : 'H:mm',
-            LTS : 'H:mm:ss',
-            L : 'D.MM.YYYY',
-            LL : 'D MMMM YYYY',
-            LLL : 'D MMMM YYYY H:mm',
-            LLLL : 'dddd, D MMMM YYYY H:mm'
+        months: 'януари_февруари_март_април_май_юни_юли_август_септември_октомври_ноември_декември'.split(
+            '_'
+        ),
+        monthsShort: 'яну_фев_мар_апр_май_юни_юли_авг_сеп_окт_ное_дек'.split('_'),
+        weekdays: 'неделя_понеделник_вторник_сряда_четвъртък_петък_събота'.split(
+            '_'
+        ),
+        weekdaysShort: 'нед_пон_вто_сря_чет_пет_съб'.split('_'),
+        weekdaysMin: 'нд_пн_вт_ср_чт_пт_сб'.split('_'),
+        longDateFormat: {
+            LT: 'H:mm',
+            LTS: 'H:mm:ss',
+            L: 'D.MM.YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY H:mm',
+            LLLL: 'dddd, D MMMM YYYY H:mm',
         },
-        calendar : {
-            sameDay : '[Днес в] LT',
-            nextDay : '[Утре в] LT',
-            nextWeek : 'dddd [в] LT',
-            lastDay : '[Вчера в] LT',
-            lastWeek : function () {
+        calendar: {
+            sameDay: '[Днес в] LT',
+            nextDay: '[Утре в] LT',
+            nextWeek: 'dddd [в] LT',
+            lastDay: '[Вчера в] LT',
+            lastWeek: function () {
                 switch (this.day()) {
                     case 0:
                     case 3:
                     case 6:
-                        return '[В изминалата] dddd [в] LT';
+                        return '[Миналата] dddd [в] LT';
                     case 1:
                     case 2:
                     case 4:
                     case 5:
-                        return '[В изминалия] dddd [в] LT';
+                        return '[Миналия] dddd [в] LT';
                 }
             },
-            sameElse : 'L'
+            sameElse: 'L',
         },
-        relativeTime : {
-            future : 'след %s',
-            past : 'преди %s',
-            s : 'няколко секунди',
-            ss : '%d секунди',
-            m : 'минута',
-            mm : '%d минути',
-            h : 'час',
-            hh : '%d часа',
-            d : 'ден',
-            dd : '%d дни',
-            M : 'месец',
-            MM : '%d месеца',
-            y : 'година',
-            yy : '%d години'
+        relativeTime: {
+            future: 'след %s',
+            past: 'преди %s',
+            s: 'няколко секунди',
+            ss: '%d секунди',
+            m: 'минута',
+            mm: '%d минути',
+            h: 'час',
+            hh: '%d часа',
+            d: 'ден',
+            dd: '%d дена',
+            M: 'месец',
+            MM: '%d месеца',
+            y: 'година',
+            yy: '%d години',
         },
         dayOfMonthOrdinalParse: /\d{1,2}-(ев|ен|ти|ви|ри|ми)/,
-        ordinal : function (number) {
+        ordinal: function (number) {
             var lastDigit = number % 10,
                 last2Digits = number % 100;
             if (number === 0) {
@@ -258,10 +265,10 @@ QueryBuilder.defaults({ lang_code: 'bg' });
                 return number + '-ти';
             }
         },
-        week : {
-            dow : 1, // Monday is the first day of the week.
-            doy : 7  // The week that contains Jan 7th is the first week of the year.
-        }
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 7, // The week that contains Jan 7th is the first week of the year.
+        },
     });
 
     return bg;
@@ -272,9 +279,9 @@ QueryBuilder.defaults({ lang_code: 'bg' });
 
 !function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var n=jQuery.fn.select2.amd;n.define("select2/i18n/bg",[],function(){return{inputTooLong:function(n){var e=n.input.length-n.maximum,u="Моля въведете с "+e+" по-малко символ";return e>1&&(u+="a"),u},inputTooShort:function(n){var e=n.minimum-n.input.length,u="Моля въведете още "+e+" символ";return e>1&&(u+="a"),u},loadingMore:function(){return"Зареждат се още…"},maximumSelected:function(n){var e="Можете да направите до "+n.maximum+" ";return n.maximum>1?e+="избора":e+="избор",e},noResults:function(){return"Няма намерени съвпадения"},searching:function(){return"Търсене…"},removeAllItems:function(){return"Премахнете всички елементи"}}}),n.define,n.require}();
 /*!
- * Bootstrap-select v1.13.12 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.17 (https://developer.snapappointments.com/bootstrap-select)
  *
- * Copyright 2012-2019 SnapAppointments, LLC
+ * Copyright 2012-2020 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
  */
 

@@ -91,6 +91,8 @@
 })(window.jQuery);
 
 //! moment.js locale configuration
+//! locale : Finnish [fi]
+//! author : Tarmo Aidantausta : https://github.com/bleadof
 
 ;(function (global, factory) {
    typeof exports === 'object' && typeof module !== 'undefined'
@@ -99,11 +101,22 @@
    factory(global.moment)
 }(this, (function (moment) { 'use strict';
 
+    //! moment.js locale configuration
 
-    var numbersPast = 'nolla yksi kaksi kolme neljä viisi kuusi seitsemän kahdeksan yhdeksän'.split(' '),
+    var numbersPast = 'nolla yksi kaksi kolme neljä viisi kuusi seitsemän kahdeksan yhdeksän'.split(
+            ' '
+        ),
         numbersFuture = [
-            'nolla', 'yhden', 'kahden', 'kolmen', 'neljän', 'viiden', 'kuuden',
-            numbersPast[7], numbersPast[8], numbersPast[9]
+            'nolla',
+            'yhden',
+            'kahden',
+            'kolmen',
+            'neljän',
+            'viiden',
+            'kuuden',
+            numbersPast[7],
+            numbersPast[8],
+            numbersPast[9],
         ];
     function translate(number, withoutSuffix, key, isFuture) {
         var result = '';
@@ -142,57 +155,67 @@
         return result;
     }
     function verbalNumber(number, isFuture) {
-        return number < 10 ? (isFuture ? numbersFuture[number] : numbersPast[number]) : number;
+        return number < 10
+            ? isFuture
+                ? numbersFuture[number]
+                : numbersPast[number]
+            : number;
     }
 
     var fi = moment.defineLocale('fi', {
-        months : 'tammikuu_helmikuu_maaliskuu_huhtikuu_toukokuu_kesäkuu_heinäkuu_elokuu_syyskuu_lokakuu_marraskuu_joulukuu'.split('_'),
-        monthsShort : 'tammi_helmi_maalis_huhti_touko_kesä_heinä_elo_syys_loka_marras_joulu'.split('_'),
-        weekdays : 'sunnuntai_maanantai_tiistai_keskiviikko_torstai_perjantai_lauantai'.split('_'),
-        weekdaysShort : 'su_ma_ti_ke_to_pe_la'.split('_'),
-        weekdaysMin : 'su_ma_ti_ke_to_pe_la'.split('_'),
-        longDateFormat : {
-            LT : 'HH.mm',
-            LTS : 'HH.mm.ss',
-            L : 'DD.MM.YYYY',
-            LL : 'Do MMMM[ta] YYYY',
-            LLL : 'Do MMMM[ta] YYYY, [klo] HH.mm',
-            LLLL : 'dddd, Do MMMM[ta] YYYY, [klo] HH.mm',
-            l : 'D.M.YYYY',
-            ll : 'Do MMM YYYY',
-            lll : 'Do MMM YYYY, [klo] HH.mm',
-            llll : 'ddd, Do MMM YYYY, [klo] HH.mm'
+        months: 'tammikuu_helmikuu_maaliskuu_huhtikuu_toukokuu_kesäkuu_heinäkuu_elokuu_syyskuu_lokakuu_marraskuu_joulukuu'.split(
+            '_'
+        ),
+        monthsShort: 'tammi_helmi_maalis_huhti_touko_kesä_heinä_elo_syys_loka_marras_joulu'.split(
+            '_'
+        ),
+        weekdays: 'sunnuntai_maanantai_tiistai_keskiviikko_torstai_perjantai_lauantai'.split(
+            '_'
+        ),
+        weekdaysShort: 'su_ma_ti_ke_to_pe_la'.split('_'),
+        weekdaysMin: 'su_ma_ti_ke_to_pe_la'.split('_'),
+        longDateFormat: {
+            LT: 'HH.mm',
+            LTS: 'HH.mm.ss',
+            L: 'DD.MM.YYYY',
+            LL: 'Do MMMM[ta] YYYY',
+            LLL: 'Do MMMM[ta] YYYY, [klo] HH.mm',
+            LLLL: 'dddd, Do MMMM[ta] YYYY, [klo] HH.mm',
+            l: 'D.M.YYYY',
+            ll: 'Do MMM YYYY',
+            lll: 'Do MMM YYYY, [klo] HH.mm',
+            llll: 'ddd, Do MMM YYYY, [klo] HH.mm',
         },
-        calendar : {
-            sameDay : '[tänään] [klo] LT',
-            nextDay : '[huomenna] [klo] LT',
-            nextWeek : 'dddd [klo] LT',
-            lastDay : '[eilen] [klo] LT',
-            lastWeek : '[viime] dddd[na] [klo] LT',
-            sameElse : 'L'
+        calendar: {
+            sameDay: '[tänään] [klo] LT',
+            nextDay: '[huomenna] [klo] LT',
+            nextWeek: 'dddd [klo] LT',
+            lastDay: '[eilen] [klo] LT',
+            lastWeek: '[viime] dddd[na] [klo] LT',
+            sameElse: 'L',
         },
-        relativeTime : {
-            future : '%s päästä',
-            past : '%s sitten',
-            s : translate,
-            ss : translate,
-            m : translate,
-            mm : translate,
-            h : translate,
-            hh : translate,
-            d : translate,
-            dd : translate,
-            M : translate,
-            MM : translate,
-            y : translate,
-            yy : translate
+        relativeTime: {
+            future: '%s päästä',
+            past: '%s sitten',
+            s: translate,
+            ss: translate,
+            m: translate,
+            mm: translate,
+            h: translate,
+            hh: translate,
+            d: translate,
+            dd: translate,
+            M: translate,
+            MM: translate,
+            y: translate,
+            yy: translate,
         },
         dayOfMonthOrdinalParse: /\d{1,2}\./,
-        ordinal : '%d.',
-        week : {
-            dow : 1, // Monday is the first day of the week.
-            doy : 4  // The week that contains Jan 4th is the first week of the year.
-        }
+        ordinal: '%d.',
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4, // The week that contains Jan 4th is the first week of the year.
+        },
     });
 
     return fi;
@@ -203,9 +226,9 @@
 
 !function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var n=jQuery.fn.select2.amd;n.define("select2/i18n/fi",[],function(){return{errorLoading:function(){return"Tuloksia ei saatu ladattua."},inputTooLong:function(n){return"Ole hyvä ja anna "+(n.input.length-n.maximum)+" merkkiä vähemmän"},inputTooShort:function(n){return"Ole hyvä ja anna "+(n.minimum-n.input.length)+" merkkiä lisää"},loadingMore:function(){return"Ladataan lisää tuloksia…"},maximumSelected:function(n){return"Voit valita ainoastaan "+n.maximum+" kpl"},noResults:function(){return"Ei tuloksia"},searching:function(){return"Haetaan…"},removeAllItems:function(){return"Poista kaikki kohteet"}}}),n.define,n.require}();
 /*!
- * Bootstrap-select v1.13.12 (https://developer.snapappointments.com/bootstrap-select)
+ * Bootstrap-select v1.13.17 (https://developer.snapappointments.com/bootstrap-select)
  *
- * Copyright 2012-2019 SnapAppointments, LLC
+ * Copyright 2012-2020 SnapAppointments, LLC
  * Licensed under MIT (https://github.com/snapappointments/bootstrap-select/blob/master/LICENSE)
  */
 

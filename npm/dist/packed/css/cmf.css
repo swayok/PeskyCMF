@@ -3278,7 +3278,11 @@ aside.main-sidebar .sidebar-menu li .badge {
 }
 #query-builder-container #query-builder {
   position: absolute;
-  top: 10px;
+  max-width: 950px;
+  left: 15px;
+  z-index: 4;
+  /* needed to fix strange z-index:3 in .pagination>.active>a in bootstrap.css */
+  top: -4px;
   width: 100%;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   background-color: #ffffff;
@@ -3286,7 +3290,18 @@ aside.main-sidebar .sidebar-menu li .badge {
   -webkit-border-radius: 5px;
   border-radius: 5px;
 }
+#query-builder-container #query-builder h4 {
+  position: absolute;
+  z-index: 2;
+  right: 15px;
+  top: 0;
+  margin: 0;
+  text-align: right;
+  line-height: 43px;
+  display: none;
+}
 #query-builder-container #query-builder #query-builder-content > .rules-group-container {
+  z-index: 1;
   margin: 0;
   -moz-border-radius: 0 0 0 0;
   -webkit-border-radius: 0 0 0 0;
@@ -3296,46 +3311,45 @@ aside.main-sidebar .sidebar-menu li .badge {
 }
 #query-builder-container #query-builder #query-builder-controls {
   background-color: rgba(250, 240, 210, 0.5);
-  text-align: right;
+  text-align: center;
   padding: 5px;
 }
 #query-builder-container #query-builder #query-builder-controls .btn {
   margin: 0 5px 0 5px;
   font-size: 12px;
+  min-width: 120px;
 }
-#query-builder {
-  position: relative;
-  z-index: 4;
-  /* needed to fix strange z-index:3 in .pagination>.active>a in bootstrap.css */
+#query-builder-container #query-builder #query-builder-controls .btn-default {
+  float: left !important;
 }
-#query-builder h4 {
-  position: absolute;
-  z-index: 2;
-  width: 300px;
-  left: 50%;
-  top: 0;
-  margin: 0 0 0 -150px;
-  text-align: center;
-  line-height: 43px;
+#query-builder-container #query-builder #query-builder-controls .btn-success {
+  float: none !important;
 }
-#query-builder .query-builder .rules-group-container {
-  z-index: 1;
+#query-builder-container #query-builder #query-builder-controls .btn-danger {
+  float: right !important;
 }
-#query-builder .query-builder .rule-container input[type=text],
-#query-builder .query-builder .rule-container input[type=number] {
+#query-builder-container #query-builder .rule-container input[type=text],
+#query-builder-container #query-builder .rule-container input[type=number] {
   padding: 1px 1px 1px 6px;
   font-size: 13px;
   height: 26px;
 }
-#query-builder .query-builder .rule-container .bootstrap-select button,
-#query-builder .query-builder .rule-container select.form-control {
+#query-builder-container #query-builder .rule-container .bootstrap-select button,
+#query-builder-container #query-builder .rule-container select.form-control {
   font-size: 13px;
   height: 26px;
 }
-#query-builder .query-builder .rule-container .radio label {
+#query-builder-container #query-builder .rule-container .radio label {
   line-height: 17px;
 }
-#query-builder .rules-group-footer {
+#query-builder-container #query-builder .rules-group-header .group-actions {
+  float: none !important;
+  margin-left: 15px;
+}
+#query-builder-container #query-builder .rules-group-header .group-conditions {
+  float: left !important;
+}
+#query-builder-container #query-builder .rules-group-footer {
   position: absolute;
   bottom: -30px;
   right: 0;
