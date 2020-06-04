@@ -10,13 +10,13 @@ use Symfony\Component\HttpFoundation\Response;
 class CmfHttpRequestLogsTable extends AbstractTable {
 
     /** @var CmfHttpRequestLog */
-    static private $currentLog;
+    protected $currentLog;
     /** @var RecordInterface|null */
-    static private $currentLogRecord;
+    protected $currentLogRecord;
     /** @var null|array */
-    static private $columnsToLog;
+    protected $columnsToLog;
     /** @var null|array */
-    static private $relationsToLog;
+    protected $relationsToLog;
 
     /**
      * @return CmfHttpRequestLogsTableStructure
@@ -43,17 +43,19 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @return CmfHttpRequestLog
      */
     static public function getCurrentLog() {
-        if (!static::$currentLog) {
-            static::$currentLog = static::getInstance()->newRecord();
+        $instance = static::getInstance();
+        if (!$instance->currentLog) {
+            $instance->currentLog = static::getInstance()->newRecord();
         }
-        return static::$currentLog;
+        return $instance->currentLog;
     }
 
     static public function resetCurrentLog() {
-        static::$currentLog = null;
-        static::$currentLogRecord = null;
-        static::$columnsToLog = null;
-        static::$relationsToLog = null;
+        $instance = static::getInstance();
+        $instance->currentLog = null;
+        $instance->currentLogRecord = null;
+        $instance->columnsToLog = null;
+        $instance->relationsToLog = null;
     }
 
     /**
@@ -91,7 +93,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param bool $force - log request even if route has no 'log' action in its config
      * @return CmfHttpRequestLog
      */
-    static public function logRequest(Request $request, $force = false) {
+    static public function logRequest(Request $request, bool $force = false) {
         return static::getCurrentLog()->fromRequest($request, $force);
     }
 
@@ -112,9 +114,10 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @return CmfHttpRequestLog
      */
     static public function logDbRecordBeforeChange(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
-        static::$currentLogRecord = $record;
-        static::$columnsToLog = $columnsToLog;
-        static::$relationsToLog = $relationsToLog;
+        $instance = static::getInstance();
+        $instance->currentLogRecord = $record;
+        $instance->columnsToLog = $columnsToLog;
+        $instance->relationsToLog = $relationsToLog;
         return static::getCurrentLog()->logDbRecordBeforeChange($record, null, $columnsToLog, $relationsToLog);
     }
 
@@ -122,7 +125,12 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @return CmfHttpRequestLog
      */
     static public function logDbRecordAfterChange() {
-        return static::getCurrentLog()->logDbRecordAfterChange(static::$currentLogRecord, static::$columnsToLog, static::$relationsToLog);
+        $instance = static::getInstance();
+        return static::getCurrentLog()->logDbRecordAfterChange(
+            $instance->currentLogRecord,
+            $instance->columnsToLog,
+            $instance->relationsToLog
+        );
     }
 
     /**
@@ -132,9 +140,10 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @return CmfHttpRequestLog
      */
     static public function logDbRecordCreation(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
-        static::$currentLogRecord = $record;
-        static::$columnsToLog = $columnsToLog;
-        static::$relationsToLog = $relationsToLog;
+        $instance = static::getInstance();
+        $instance->currentLogRecord = $record;
+        $instance->columnsToLog = $columnsToLog;
+        $instance->relationsToLog = $relationsToLog;
         return static::getCurrentLog()->logDbRecordAfterChange($record, $columnsToLog, $relationsToLog);
     }
 
@@ -151,7 +160,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param mixed $value - no objects supported!!
      * @return CmfHttpRequestLog
      */
-    static public function addDebugData($key, $value) {
+    static public function addDebugData(string $key, $value) {
         return static::getCurrentLog()->addDebugData($key, $value);
     }
 

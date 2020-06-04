@@ -6,16 +6,26 @@ use Illuminate\Http\Request;
 use PeskyCMF\Db\HttpRequestLogs\CmfHttpRequestLogsTable;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
+use PeskyORM\ORM\RecordInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class LogHttpRequest {
 
     /**
      * Middleware examples:
-     * 1. Use default auth guard and all HTTP methods: \PeskyCMF\Http\Middleware\LogHttpRequest::class
-     * 2. Use custom auth guard and all HTTP methods: \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api'
-     * 3. Use custom auth guard and custom HTTP methods list: \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,post,put,delete'
-     * 4. Use default auth guard and custom HTTP methods list: \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':,post,put,delete'
+     * 1. Use default auth guard and log all requests with any HTTP method:
+     *      \PeskyCMF\Http\Middleware\LogHttpRequest::class
+     * 2. Use custom auth guard and log all requests with any HTTP method:
+     *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api'
+     *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,1'
+     * 3. Use custom auth guard and log only requests with 'log' action in route with any HTTP method:
+     *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,0'
+     * 4. Use custom auth guard and log all requests with custom HTTP methods list:
+     *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,1,post,put,delete'
+     * 5. Use custom auth guard and log only requests with 'log' action in route and custom HTTP methods list:
+     *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,0,post,put,delete'
+     * 6. Use default auth guard and log all requests with custom HTTP methods list:
+     *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':,1,post,put,delete'
      *
      * If you use $enableByDefault = false then to activate logging for a route - add 'log' action to a route.
      * 'log' must be a string and will be recorded to DB in order to group requests by short name like 'user.me'.
@@ -35,11 +45,16 @@ class LogHttpRequest {
     public function handle($request, \Closure $next, $authGuard = null, $enableByDefault = true, ...$methods) {
         $isAllowed = empty($methods) || preg_match('%' . implode('|', $methods) . '%i', $request->getMethod());
         // reset logs to allow requests via test cases
-        CmfHttpRequestLogsTable::resetCurrentLog();
+        if (app()->bound(CmfHttpRequestLogsTable::class)) {
+            $logsTable = app()->make(CmfHttpRequestLogsTable::class);
+        } else {
+            $logsTable = CmfHttpRequestLogsTable::getInstance();
+        }
+        $logsTable::resetCurrentLog();
         app()->offsetUnset(ScaffoldLoggerInterface::class);
         if ($isAllowed) {
             try {
-                $log = CmfHttpRequestLogsTable::logRequest($request, (bool)$enableByDefault);
+                $log = $logsTable::logRequest($request, (bool)$enableByDefault);
                 app()->instance(ScaffoldLoggerInterface::class, $log);
             } catch (\Throwable $exception) {
                 \Log::error($exception);
@@ -57,8 +72,12 @@ class LogHttpRequest {
                         $user = null;
                     } else {
                         $user = \Auth::guard($authGuard ?: null)->user();
+                        if (!($user instanceof RecordInterface)) {
+                            $user = null;
+                        }
                     }
-                    CmfHttpRequestLogsTable::logResponse($request, $response, $user);
+                    /** @var RecordInterface|null $user */
+                    $logsTable::logResponse($request, $response, $user);
                 } catch (\Throwable $exception) {
                     \Log::error($exception);
                 }

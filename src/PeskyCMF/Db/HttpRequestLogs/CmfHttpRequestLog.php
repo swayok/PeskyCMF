@@ -64,15 +64,14 @@ use Symfony\Component\HttpFoundation\Response;
  * @method $this    setItemId($value, $isFromDb = false)
  * @method $this    setDataBefore($value, $isFromDb = false)
  * @method $this    setDataAfter($value, $isFromDb = false)
- * @method $this    setCreatedAt($value, $isFromDb = false)
  * @method $this    setRespondedAt($value, $isFromDb = false)
  */
 class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterface {
 
     /** @var \Closure[] */
-    protected static $requestDataMinifiers = [];
+    static protected $requestDataMinifiers = [];
 
-    static private $serverDataKeys = [
+    static protected $serverDataKeys = [
         'HTTP_USER_AGENT',
         'REQUEST_URI',
         'REQUEST_METHOD',
@@ -125,20 +124,9 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         }
         try {
             $route = $request->route();
-            $logName = $this->getLogName($route);
-            if (empty($logName)) {
-                // Situations:
-                // = false: do not log unless $force is true
-                // = null or empty string: could not get name using route params or 'log' action,
-                //      will use request URI as $logName when $enabledByDefault is true
-                if ($force) {
-                    $logName = $route->uri();
-                } else if ($logName === false || !$enabledByDefault) {
-                    // do not log
-                    return $this;
-                } else {
-                    $logName = $route->uri();
-                }
+            $logName = $this->getLogName($route, $force, $enabledByDefault);
+            if (!$logName) {
+                return null;
             }
 
             $files = array_map(function ($file) {
@@ -192,7 +180,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 ->setRequest($requestData)
                 ->setIp($request->ip())
                 ->setFilter($logName)
-                ->setSection($route->getAction('prefix') ?: 'web')
+                ->setSection($this->getSectionName($route))
                 ->save();
             $this->begin(); //< to start collecting changes untill logResponse() is called
         } catch (\Exception $exception) {
@@ -202,7 +190,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         return $this;
     }
 
-    protected function hidePasswords(array $data) {
+    protected function hidePasswords(array $data): array {
         return hidePasswords($data);
     }
 
@@ -217,7 +205,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         return $this;
     }
 
-    protected function getMinifiedRequestData(array $data) {
+    protected function getMinifiedRequestData(array $data): array {
         if ($this->requestDataMinifier !== null) {
             try {
                 return call_user_func($this->requestDataMinifier, $data);
@@ -238,12 +226,39 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         }
         return $data;
     }
+    
+    /**
+     * @param Route $route
+     * @param bool $forceLogging - true: ignores false returned from $this->getCustomLogName($route)
+     * @param bool $enabledByDefault - true: ignores false returned from $this->getCustomLogName($route)
+     * @return $this|string
+     */
+    protected function getLogName(Route $route, bool $forceLogging, bool $enabledByDefault): ?string {
+        $logName = $this->getLogNameFromRouteActions($route);
+        if (!empty($logName)) {
+            return $logName;
+        }
+        // Situations:
+        // = $logName === false: do not log unless $force is true
+        // = $logName === null or empty string: could not get name using route params or 'log' action,
+        //      will use request URI as $logName when $enabledByDefault is true
+        if (!$forceLogging && ($logName === false || !$enabledByDefault)) {
+            // do not log
+            return null;
+        } else {
+            return $this->normalizeDefaultLogName($route->uri());
+        }
+    }
+    
+    protected function normalizeDefaultLogName(string $logName): string {
+        return $logName;
+    }
 
     /**
      * @param Route $route
-     * @return string|null|false
+     * @return string|null|false - false - disable logging until forced; null: no custom log name; string: custom log name
      */
-    protected function getLogName(Route $route) {
+    protected function getLogNameFromRouteActions(Route $route) {
         return array_get($route->getAction(), 'log', function () use ($route) {
             if ($route->hasParameter('resource')) {
                 $logName = $route->parameter('resource');
@@ -260,6 +275,10 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
             return null;
         });
     }
+    
+    protected function getSectionName(Route $route): string {
+        return $route->getAction('prefix') ?: 'web';
+    }
 
     /**
      * Set minifier closure to reduce size of response content to be logged.
@@ -271,7 +290,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         return $this;
     }
 
-    protected function getMinifiedResponseContent(Response $response) {
+    protected function getMinifiedResponseContent(Response $response): string {
         if ($this->responseContentMinifier !== null) {
             try {
                 return call_user_func($this->responseContentMinifier, $response);
@@ -334,8 +353,10 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     /**
      * @param RecordInterface $user
      * @return null|string
+     * @noinspection PhpUndefinedFieldInspection
+     * @noinspection PhpPossiblePolymorphicInvocationInspection
      */
-    protected function findRequesterInfo(RecordInterface $user) {
+    protected function findRequesterInfo(RecordInterface $user): ?string {
         try {
             if ($user::hasColumn('email') && !empty($user->email)) {
                 return $user->email;
@@ -369,7 +390,12 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param array|null $relationsToLog - list of loaded relations to store within Log (default: all loaded relations)
      * @return $this
      */
-    public function logDbRecordBeforeChange(RecordInterface $record, $tableName = null, array $columnsToLog = null, array $relationsToLog = null) {
+    public function logDbRecordBeforeChange(
+        RecordInterface $record,
+        ?string $tableName = null,
+        array $columnsToLog = null,
+        array $relationsToLog = null
+    ) {
         if ($this->isAllowed()) {
             try {
                 if ($columnsToLog !== null) {
@@ -393,7 +419,11 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param array|null $relationsToLog - list of loaded relations to store within Log (default: all loaded relations)
      * @return $this
      */
-    public function logDbRecordAfterChange(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
+    public function logDbRecordAfterChange(
+        RecordInterface $record,
+        array $columnsToLog = null,
+        array $relationsToLog = null
+    ) {
         if ($this->isAllowed()) {
             try {
                 if ($columnsToLog !== null) {
@@ -408,13 +438,13 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         }
         return $this;
     }
-
+    
     /**
      * @param RecordInterface $record
      * @param null|string $tableName - for cases when table name differs from record's table name (so-called table name for routes)
      * @return $this
      */
-    public function logDbRecordUsage(RecordInterface $record, $tableName = null) {
+    public function logDbRecordUsage(RecordInterface $record, ?string $tableName = null) {
         if ($this->isAllowed()) {
             try {
                 if (empty($tableName)) {
@@ -433,10 +463,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isAllowed() {
+    public function isAllowed(): bool {
         return $this->hasValue('request');
     }
 
@@ -450,7 +477,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param mixed $value - no objects supported!!
      * @return $this
      */
-    public function addDebugData($key, $value) {
+    public function addDebugData(string $key, $value) {
         if ($this->isAllowed()) {
             try {
                 $debug = $this->hasValue('debug') ? $this->debug : '';
