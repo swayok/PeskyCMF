@@ -312,7 +312,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param RecordInterface $user
      * @return $this
      */
-    public function logResponse(Request $request, Response $response, RecordInterface $user = null) {
+    public function logResponse(Request $request, Response $response, ?RecordInterface $user = null) {
         if ($this->isAllowed() || ($response->getStatusCode() >= 500)) {
             if (!$this->hasValue('request')) {
                 // server error happened on not loggable request
@@ -322,22 +322,9 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 if ($this->hasValue('response') && !empty($this->response)) {
                     throw new \BadMethodCallException('You should not call this method twice');
                 }
-                if (!empty($user) && $user->existsInDb()) {
-                    $this
-                        ->setRequesterTable($user::getTable()->getTableStructure()->getTableName())
-                        ->setRequesterId($user->getPrimaryKeyValue())
-                        ->setRequesterInfo($this->findRequesterInfo($user));
-                } else {
-                    $this->setRequesterInfo(array_get(
-                        $this->request_as_array,
-                        'POST.email',
-                        function () {
-                            return array_get($this->request_as_array, 'POST.login');
-                        }
-                    ));
-                }
-
+                
                 $this
+                    ->logRequester($user)
                     ->setResponse($this->getMinifiedResponseContent($response))
                     ->setResponseCode($response->getStatusCode())
                     ->setResponseType(strtolower(preg_replace('%(Response|Cmf)%', '', class_basename($response))) ?: 'text')
@@ -345,6 +332,30 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                     ->commit();
             } catch (\Exception $exception) {
                 $this->logException($exception);
+            }
+        }
+        return $this;
+    }
+    
+    /**
+     * @param RecordInterface|null $user
+     * @return $this
+     */
+    public function logRequester(?RecordInterface $user = null) {
+        if ($this->isAllowed()) {
+            if (!empty($user) && $user->existsInDb()) {
+                $this
+                    ->setRequesterTable($user::getTable()->getTableStructure()->getTableName())
+                    ->setRequesterId($user->getPrimaryKeyValue())
+                    ->setRequesterInfo($this->findRequesterInfo($user));
+            } else if (!isset($this->requester_id)) {
+                $this->setRequesterInfo(array_get(
+                    $this->request_as_array,
+                    'POST.email',
+                    function () {
+                        return array_get($this->request_as_array, 'POST.login');
+                    }
+                ));
             }
         }
         return $this;

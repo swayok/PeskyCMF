@@ -103,8 +103,16 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param RecordInterface|null $user
      * @return CmfHttpRequestLog
      */
-    static public function logResponse(Request $request, Response $response, RecordInterface $user = null) {
+    static public function logResponse(Request $request, Response $response, ?RecordInterface $user = null) {
         return static::getCurrentLog()->logResponse($request, $response, $user);
+    }
+    
+    /**
+     * @param RecordInterface|null $user
+     * @return CmfHttpRequestLog
+     */
+    static public function logRequester(?RecordInterface $user = null) {
+        return static::getCurrentLog()->logRequester($user);
     }
 
     /**
