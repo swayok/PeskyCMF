@@ -489,5 +489,18 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
         }
         return $this;
     }
+    
+    /**
+     * @param array $data
+     * @return $this
+     */
+    public function addDebugDataFromArray(array $data) {
+        if ($this->isAllowed()) {
+            foreach ($data as $key => $value) {
+                $this->addDebugData($key, $value);
+            }
+        }
+        return $this;
+    }
 
 }
