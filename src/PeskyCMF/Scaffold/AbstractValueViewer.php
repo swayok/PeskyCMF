@@ -376,16 +376,14 @@ abstract class AbstractValueViewer {
         return $value;
     }
 
-    /**
-     * @param Column $columnConfig
-     * @param array $record
-     * @param null $linkLabel
-     * @return string
-     * @throws ValueViewerConfigException
-     */
-    public function buildLinkToExternalRecord(Column $columnConfig, array $record, $linkLabel = null) {
+    public function buildLinkToExternalRecord(
+        Column $columnConfig,
+        array $record,
+        ?string $linkLabel = null,
+        string $fallbackLabel = '-'
+    ): string {
         if (empty($record[$columnConfig->getName()])) {
-            return '-';
+            return $fallbackLabel;
         }
         $relationConfig = null;
         $relationAlias = null;

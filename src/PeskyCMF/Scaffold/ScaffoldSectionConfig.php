@@ -234,7 +234,7 @@ abstract class ScaffoldSectionConfig {
                 $config->setValueConverter(
                     function ($value, Column $columnConfig, array $record, AbstractValueViewer $valueViewer) use ($valueConverter) {
                         $linkLabel = $valueConverter($value, $columnConfig, $record, $valueViewer);
-                        if (!$linkLabel) {
+                        if (!$linkLabel || empty($record[$columnConfig->getName()])) {
                             // there is no related record
                             return $linkLabel;
                         }
@@ -242,7 +242,12 @@ abstract class ScaffoldSectionConfig {
                             // it is a link already
                             return $linkLabel;
                         }
-                        return $valueViewer->buildLinkToExternalRecord($valueViewer->getTableColumn(), $record, $linkLabel);
+                        return $valueViewer->buildLinkToExternalRecord(
+                            $valueViewer->getTableColumn(),
+                            $record,
+                            $linkLabel,
+                            $linkLabel
+                        );
                     }
                 );
             } else {
@@ -345,7 +350,7 @@ abstract class ScaffoldSectionConfig {
             && !$this->isValidComplexValueViewerName($name) //< $name is something like "column_name:key_name"
         ) {
             if ($this->allowRelationsInValueViewers) {
-                list($relation, $relationColumnName) = $this->validateRelationValueViewerName($name, !$autodetectIfLinkedToDbColumn);
+                [$relation, $relationColumnName] = $this->validateRelationValueViewerName($name, !$autodetectIfLinkedToDbColumn);
                 $usesRelation = $relation && $relationColumnName;
             } else {
                 throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
@@ -418,7 +423,7 @@ abstract class ScaffoldSectionConfig {
      */
     protected function isValidComplexValueViewerName($name) {
         if ($this->allowComplexValueViewerNames && AbstractValueViewer::isComplexViewerName($name)) {
-            list($colName, ) = AbstractValueViewer::splitComplexViewerName($name);
+            [$colName, ] = AbstractValueViewer::splitComplexViewerName($name);
             if ($this->getTable()->getTableStructure()->hasColumn($colName)) {
                 $type = $this->getTable()->getTableStructure()->getColumn($colName)->getType();
                 return in_array($type, [Column::TYPE_JSON, Column::TYPE_JSONB], true);
