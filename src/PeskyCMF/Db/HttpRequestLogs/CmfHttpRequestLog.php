@@ -70,6 +70,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
 
     /** @var \Closure[] */
     static protected $requestDataMinifiers = [];
+    static protected $responseContentMinifiers = [];
 
     static protected $serverDataKeys = [
         'HTTP_USER_AGENT',
@@ -110,6 +111,16 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      */
     static public function registerRequestDataMinifier(string $name, \Closure $minifier) {
         static::$requestDataMinifiers[$name] = $minifier;
+    }
+    
+    /**
+     * Register response data minifier that may be used by during request logging via
+     * route's 'log_response' action.
+     * @param string $name
+     * @param \Closure $minifier
+     */
+    static public function registerResponseContentMinifier(string $name, \Closure $minifier) {
+        static::$responseContentMinifiers[$name] = $minifier;
     }
 
     /**
@@ -159,6 +170,18 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 $requestMinifierName = array_get($route->getAction(), 'log_data_minifier');
                 if (!empty($requestMinifierName) && isset(static::$requestDataMinifiers[$requestMinifierName])) {
                     $this->setRequestDataMinifier(static::$requestDataMinifiers[$requestMinifierName]);
+                }
+            }
+            // set data minifier from rotute's 'log_response' action if provided and registered
+            if (!$this->responseContentMinifier) {
+                $responseMinifierName = array_get($route->getAction(), 'log_response');
+                if (!empty($responseMinifierName) && isset(static::$responseContentMinifiers[$responseMinifierName])) {
+                    $this->setResponseContentMinifier(static::$responseContentMinifiers[$responseMinifierName]);
+                } else if ($responseMinifierName === false) {
+                    // do not log response at all
+                    $this->setResponseContentMinifier(function () {
+                        return '[Response logging disabled]';
+                    });
                 }
             }
 
@@ -282,7 +305,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
 
     /**
      * Set minifier closure to reduce size of response content to be logged.
-     * @param \Closure $minifier - function (Request $request) { return $content; }
+     * @param \Closure $minifier - function (Symfony\Component\HttpFoundation\Response $response) { return $content; }
      * @return $this
      */
     public function setResponseContentMinifier(\Closure $minifier) {
