@@ -949,7 +949,7 @@ abstract class CmfConfig extends ConfigsContainer {
 
         $guardName = array_get($cmfAuthConfig, 'name') ?: static::url_prefix();
         if (array_key_exists($guardName, $config['guards'])) {
-            throw new \UnexpectedValueException('There is already an auth guard with name "' . $guardName . '"');
+            return; //< it is provided manually or cached
         }
         $provider = array_get($cmfAuthConfig, 'provider');
         if (is_array($provider)) {
