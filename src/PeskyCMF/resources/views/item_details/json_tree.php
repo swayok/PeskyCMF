@@ -26,7 +26,7 @@ $pluginOptions = array_merge([
             )
             .done(function () {
                 $('#<?php echo $id; ?>').jsonView(
-                    <?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode'); ?>,
+                    <?php echo $valueViewer->getDotJsInsertForValue([], 'string', '{}', false); ?>,
                     <?php echo json_encode($pluginOptions, JSON_UNESCAPED_UNICODE); ?>
                 );
             });
