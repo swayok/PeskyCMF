@@ -269,9 +269,10 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      */
     public function configureDefaultRenderer(ValueRenderer $renderer) {
         if ($this->templateForDefaultRenderer) {
-            $renderer
-                ->setTemplate($this->templateForDefaultRenderer)
-                ->mergeData($this->templateDataForDefaultRenderer);
+            $renderer->setTemplate($this->templateForDefaultRenderer);
+        }
+        if (!empty($this->templateDataForDefaultRenderer)) {
+            $renderer->mergeData($this->templateDataForDefaultRenderer);
         }
         return $this;
     }
