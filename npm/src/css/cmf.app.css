@@ -1044,6 +1044,29 @@ body[data-section="resource:table"].skin-black .section-content-wrapper .content
 body[data-section="resource:table"].skin-black-light .main-sidebar {
   border-right: 1px solid #d2d6de;
 }
+.content-header.stick-to-top {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 230px;
+  background-color: #FFFFFF;
+  min-height: 51px;
+  padding-top: 12px;
+  border-bottom: 1px solid #d2d6de;
+  z-index: 2;
+}
+.content-header.stick-to-top .breadcrumb {
+  top: 10px;
+}
+body.sb-l-c .content-header.stick-to-top {
+  left: 0;
+}
+body.sb-l-m .content-header.stick-to-top {
+  left: 60px;
+}
+.sticked-content-header-placeholder {
+  height: 51px;
+}
 .table-bordered > tr > th,
 .table-bordered > thead > tr > th,
 .table-bordered > tbody > tr > th,

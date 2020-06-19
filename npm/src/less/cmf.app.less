@@ -1071,6 +1071,34 @@ body[data-section="resource:table"] {
     }
 }
 
+.content-header.stick-to-top {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 230px;
+    background-color: #FFFFFF;
+    min-height: 51px;
+    padding-top: 12px;
+    border-bottom: 1px solid #d2d6de;
+    z-index: 2;
+
+    .breadcrumb {
+        top: 10px;
+    }
+
+    body.sb-l-c & {
+        left: 0;
+    }
+
+    body.sb-l-m & {
+        left: 60px;
+    }
+}
+
+.sticked-content-header-placeholder {
+    height: 51px;
+}
+
 .table-bordered {
     &,
     > thead,
