@@ -5,6 +5,7 @@
  * @var string|null $defaultBackUrl
  * @var bool|null $stickToTop
  */
+$stickToTop = !empty($stickToTop);
 ?>
 <div class="content-header {{ $stickToTop ? 'stick-to-top' : '' }}">
     <h1>{!! $header !!}</h1>
