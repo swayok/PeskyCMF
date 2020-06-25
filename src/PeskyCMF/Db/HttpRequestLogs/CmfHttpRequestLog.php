@@ -346,6 +346,10 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                     throw new \BadMethodCallException('You should not call this method twice');
                 }
                 
+                if (!$this->isCollectingUpdates()) {
+                    $this->begin();
+                }
+                
                 $this
                     ->logRequester($user)
                     ->setResponse($this->getMinifiedResponseContent($response))
