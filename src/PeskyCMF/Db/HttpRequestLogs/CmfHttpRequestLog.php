@@ -337,11 +337,16 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      */
     public function logResponse(Request $request, Response $response, ?RecordInterface $user = null) {
         if ($this->isAllowed() || ($response->getStatusCode() >= 500)) {
-            if (!$this->hasValue('request')) {
-                // server error happened on not loggable request
-                $this->fromRequest($request, true, true);
-            }
             try {
+                if (!$this->hasValue('request')) {
+                    // server error happened on not loggable request
+                    $this->fromRequest($request, true, true);
+                    if (!$this->existsInDb()) {
+                        // something wrong with database connection
+                        return $this;
+                    }
+                }
+            
                 if ($this->hasValue('response') && !empty($this->response)) {
                     throw new \BadMethodCallException('You should not call this method twice');
                 }
