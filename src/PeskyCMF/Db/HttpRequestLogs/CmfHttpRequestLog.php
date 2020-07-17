@@ -446,9 +446,11 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 } else {
                     $columnsToLog = [];
                 }
+                $data = $record->existsInDb() ? $record->toArray($columnsToLog, $relationsToLog ?: ['*']) : [];
+                ksort($data);
                 $this
                     ->logDbRecordUsage($record, $tableName)
-                    ->setDataBefore($record->existsInDb() ? $record->toArray($columnsToLog, $relationsToLog ?: ['*']) : []);
+                    ->setDataBefore($data);
             } catch (\Exception $exception) {
                 $this->logException($exception);
             }
@@ -474,7 +476,9 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 } else {
                     $columnsToLog = [];
                 }
-                $this->setDataAfter($record->existsInDb() ? $record->toArray($columnsToLog, $relationsToLog ?: ['*']) : []);
+                $data = $record->existsInDb() ? $record->toArray($columnsToLog, $relationsToLog ?: ['*']) : [];
+                ksort($data);
+                $this->setDataAfter($data);
             } catch (\Exception $exception) {
                 $this->logException($exception);
             }
