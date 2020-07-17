@@ -156,6 +156,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
         $instance->currentLogRecord = $record;
         $instance->columnsToLog = $columnsToLog;
         $instance->relationsToLog = $relationsToLog;
+        static::getCurrentLog()->logDbRecordUsage($record, null);
         return static::getCurrentLog()->logDbRecordAfterChange($record, $columnsToLog, $relationsToLog);
     }
 
