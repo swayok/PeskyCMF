@@ -281,10 +281,6 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             $this->getFilteredIncomingData($formConfig, false),
             false
         );
-        $errors = $formConfig->validateDataForEdit($data);
-        if (count($errors) !== 0) {
-            return $this->makeValidationErrorsJsonResponse($errors);
-        }
         if (!$this->getRequest()->input($table::getPkColumnName())) {
             return $this->makeRecordNotFoundResponse();
         }
@@ -301,6 +297,10 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isRecordEditAllowed($record->toArrayWithoutFiles())) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden_for_record'));
         }
+        $errors = $formConfig->validateDataForEdit($data, $record);
+        if (count($errors) !== 0) {
+            return $this->makeValidationErrorsJsonResponse($errors);
+        }
         if ($formConfig->hasBeforeSaveCallback()) {
             $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
             if (empty($data)) {
@@ -308,7 +308,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
             if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
                 // revalidate
-                $errors = $formConfig->validateDataForEdit($data, [], true);
+                $errors = $formConfig->validateDataForEdit($data, $record, [], true);
                 if (count($errors) !== 0) {
                     return $this->makeValidationErrorsJsonResponse($errors);
                 }

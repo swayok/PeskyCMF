@@ -8,6 +8,7 @@ use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 use PeskyCMF\Scaffold\ScaffoldSectionConfigException;
 use PeskyCMF\Scaffold\ValueRenderer;
+use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
@@ -547,21 +548,21 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param array $data
-     * @param mixed $itemId - primary key value for current item
+     * @param array $updates
+     * @param RecordInterface $record - record before editing
      * @return array
      */
-    public function getValidatorsForEdit(array $data, $itemId) {
+    public function getValidatorsForEdit(array $updates, RecordInterface $record) {
         return array_merge(
             $this->collectPresetValidators(false),
-            $this->validators ? call_user_func($this->validators, $data) : [],
-            $this->validatorsForEdit ? call_user_func($this->validatorsForEdit, $data, $itemId) : []
+            $this->validators ? call_user_func($this->validators, $updates) : [],
+            $this->validatorsForEdit ? call_user_func($this->validatorsForEdit, $updates, $record) : []
         );
     }
 
     /**
-     * @param \Closure $validatorsForEdit - function (array $data, $itemId) { return []; }
-     * Note: You can insert fields from received data via '{{field_name}}'
+     * @param \Closure $validatorsForEdit - function (array $updates, RecordInterface $record) { return []; }
+     * Note: You can insert fields from $updates using '{{field_name}}'
      * @return $this
      */
     public function addValidatorsForEdit(\Closure $validatorsForEdit) {
@@ -622,13 +623,10 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param bool $isRevalidation
      * @return array
      */
-    public function validateDataForEdit(array $data, array $messages = [], $isRevalidation = false) {
+    public function validateDataForEdit(array $data, RecordInterface $record, array $messages = [], $isRevalidation = false) {
         return $this->validateData(
             $data,
-            $this->getValidatorsForEdit(
-                $data,
-                array_get($data, $this->getTable()->getPkColumnName(), null)
-            ),
+            $this->getValidatorsForEdit($data, $record),
             $messages,
             $isRevalidation
         );
@@ -930,7 +928,7 @@ class FormConfig extends ScaffoldSectionConfig {
      * Callback is called after successfully saving data but before model's commit()
      * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
      * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
-     * @param \Closure $callback - function ($isCreation, array $validatedData, CmfDbRecord $object, FormConfig $formConfig) { return true; }
+     * @param \Closure $callback - function (bool $isCreation, array $validatedData, RecordInterface $record, FormConfig $formConfig) { return true; }
      * @return $this
      */
     public function setAfterSaveCallback(\Closure $callback) {

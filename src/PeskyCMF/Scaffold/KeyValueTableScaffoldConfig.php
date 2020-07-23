@@ -96,7 +96,6 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         $request = $this->getRequest();
         if (!empty($fkColumn) && empty($request->input($fkColumn))) {
             return $this->makeRecordNotFoundResponse(
-                $table,
                 $formConfig->translateGeneral('message.edit.key_value_table.no_foreign_key_value')
             );
         }
@@ -109,7 +108,9 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             array_intersect_key($this->getRequest()->all(), $inputConfigs),
             false
         );
-        $errors = $formConfig->validateDataForEdit($data);
+        $originalValues = $table::getValuesForForeignKey($fkValue, true);
+        $tempRecord = TempRecord::newTempRecord($originalValues, true);
+        $errors = $formConfig->validateDataForEdit($data, $tempRecord);
         if (count($errors) !== 0) {
             return $this->makeValidationErrorsJsonResponse($errors);
         }
@@ -120,7 +121,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             }
             if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
                 // revalidate
-                $errors = $formConfig->validateDataForEdit($data, [], true);
+                $errors = $formConfig->validateDataForEdit($data, $tempRecord, [], true);
                 if (count($errors) !== 0) {
                     return $this->makeValidationErrorsJsonResponse($errors);
                 }
@@ -129,9 +130,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         if (!empty($data)) {
             $table::beginTransaction();
             try {
-                $originalValues = $table::getValuesForForeignKey($fkValue, true);
                 if ($this->hasLogger()) {
-                    $tempRecord = TempRecord::newTempRecord($originalValues, true);
                     $this->logDbRecordBeforeChange($tempRecord, static::getResourceName());
                 }
                 KeyValueDataSaver::saveKeyValuePairs(
