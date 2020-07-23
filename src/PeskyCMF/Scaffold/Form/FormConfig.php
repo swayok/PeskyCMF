@@ -555,7 +555,7 @@ class FormConfig extends ScaffoldSectionConfig {
         return array_merge(
             $this->collectPresetValidators(false),
             $this->validators ? call_user_func($this->validators, $data) : [],
-            $this->validatorsForCreate ? call_user_func($this->validatorsForEdit, $data, $itemId) : []
+            $this->validatorsForEdit ? call_user_func($this->validatorsForEdit, $data, $itemId) : []
         );
     }
 
