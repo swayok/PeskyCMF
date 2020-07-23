@@ -131,7 +131,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             $table::beginTransaction();
             try {
                 if ($this->hasLogger()) {
-                    $this->logDbRecordBeforeChange($tempRecord, static::getResourceName());
+                    $this->logDbRecordBeforeChange($tempRecord);
                 }
                 KeyValueDataSaver::saveKeyValuePairs(
                     $table,

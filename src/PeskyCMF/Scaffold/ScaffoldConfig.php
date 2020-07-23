@@ -656,7 +656,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param null|string $tableName
      * @return $this
      */
-    public function logDbRecordBeforeChange(RecordInterface $record, $tableName = null) {
+    public function logDbRecordBeforeChange(RecordInterface $record, ? string $tableName = null) {
         if ($this->hasLogger()) {
             /** @noinspection NullPointerExceptionInspection */
             $this->getLogger()->logDbRecordBeforeChange(
@@ -690,7 +690,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param null|string $tableName
      * @return $this
      */
-    public function logDbRecordLoad(RecordInterface $record, $tableName = null) {
+    public function logDbRecordLoad(RecordInterface $record, ?string $tableName = null) {
         if ($this->hasLogger()) {
             /** @noinspection NullPointerExceptionInspection */
             $this->getLogger()->logDbRecordUsage($record, $tableName);

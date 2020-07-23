@@ -175,7 +175,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$object->fetch($conditions, array_unique($columnsToSelect), array_keys($relationsToRead))->existsInDb()) {
             return $this->makeRecordNotFoundResponse();
         }
-        $this->logDbRecordLoad($object, static::getResourceName());
+        $this->logDbRecordLoad($object);
         $data = $object->toArray([], $relationsToRead, true);
         if (
             (
@@ -237,7 +237,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             try {
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
                 $record = $table->newRecord()->fromData($dataToSave, false);
-                $this->logDbRecordBeforeChange($record, static::getResourceName());
+                $this->logDbRecordBeforeChange($record);
                 $table::beginTransaction();
                 $response = $this->doRecordSave($record, true);
                 if ($response) {
@@ -317,7 +317,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         unset($data[$table::getPkColumnName()]);
         if (!empty($data)) {
             try {
-                $this->logDbRecordBeforeChange($record, static::getResourceName());
+                $this->logDbRecordBeforeChange($record);
                 $dataToSave = $this->getDataToSaveIntoMainRecord($data, $formConfig);
                 $relationsData = array_intersect_key($dataToSave, $record::getRelations());
                 $dataToSave = array_diff_key($dataToSave, $relationsData);
@@ -631,7 +631,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isRecordDeleteAllowed($record->toArrayWithoutFiles())) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden_for_record'));
         }
-        $this->logDbRecordBeforeChange($record, static::getResourceName());
+        $this->logDbRecordBeforeChange($record);
         $response = $this->doRecordDelete($record);
         $this->logDbRecordAfterChange($record);
         if ($response instanceof Response) {
