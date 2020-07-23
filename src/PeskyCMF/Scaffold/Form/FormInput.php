@@ -15,6 +15,7 @@ class FormInput extends RenderableValueViewer {
     /** @var bool */
     protected $showOnEdit = true;
 
+    public const TYPE_READONLY_TEXT = 'readonly_text';
     public const TYPE_STRING = Column::TYPE_STRING;
     public const TYPE_PASSWORD = Column::TYPE_PASSWORD;
     public const TYPE_EMAIL = Column::TYPE_EMAIL;
@@ -721,7 +722,7 @@ class FormInput extends RenderableValueViewer {
                 case static::TYPE_PASSWORD:
                     $renderer->setTemplate('cmf::input.password');
                     break;
-                case static::TYPE_STRING:
+                case static::TYPE_READONLY_TEXT:
                     $renderer->setTemplate('cmf::input.readonly_text');
                     break;
                 default:
