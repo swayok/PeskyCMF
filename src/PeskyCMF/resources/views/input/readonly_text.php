@@ -9,6 +9,6 @@
 
 <div class="form-group">
     <label><?php echo $valueViewer->getLabel($rendererConfig); ?></label>
-    <div><?php echo $valueViewer->getDotJsInsertForValue([], 'json_encode'); ?></div>
+    <div><?php echo $valueViewer->getDotJsInsertForValue([], 'string', null, false); ?></div>
     <?php echo $valueViewer->getFormattedTooltip(); ?>
 </div>

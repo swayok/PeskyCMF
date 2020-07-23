@@ -721,6 +721,9 @@ class FormInput extends RenderableValueViewer {
                 case static::TYPE_PASSWORD:
                     $renderer->setTemplate('cmf::input.password');
                     break;
+                case static::TYPE_STRING:
+                    $renderer->setTemplate('cmf::input.readonly_text');
+                    break;
                 default:
                     $renderer->setTemplate('cmf::input.text');
             }

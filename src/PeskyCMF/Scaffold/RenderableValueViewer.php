@@ -28,7 +28,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @param string $name - something like 'RelationName.column_name' (Do not add 'it.' in the beginning!!!)
      * @return $this
      */
-    public function setVarNameForDotJs($name) {
+    public function setVarNameForDotJs(string $name) {
         $this->varNameForDotJs = $name;
         return $this;
     }
@@ -38,7 +38,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @param array $additionalVarNameParts - additional parts of var name
      * @return string
      */
-    public function getVarNameForDotJs($addIt = true, array $additionalVarNameParts = []) {
+    public function getVarNameForDotJs(bool $addIt = true, array $additionalVarNameParts = []): string {
         if ($this->varNameForDotJs === null) {
             $this->varNameForDotJs = preg_replace('%[^a-zA-Z0-9_]+%', '.', $this->getName());
         }
@@ -55,7 +55,11 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      *      - "[]" inserts array
      * @return string
      */
-    public function getFailsafeValueForDotJs(array $additionalVarNameParts = [], $type = 'string', $default = null) {
+    public function getFailsafeValueForDotJs(
+        array $additionalVarNameParts = [],
+        string $type = 'string',
+        ?string $default = null
+    ): string {
         $fullName = $this->getVarNameForDotJs();
         $parts = array_merge(explode('.', $fullName), $additionalVarNameParts);
         $conditions = [];
@@ -112,10 +116,15 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @param bool|null $encodeHtml
      *      - true: encode value to allow it to be inserten into HTML arguments;
      *      - false: insert as is
-     *      - null: uatodetect depending on $type
+     *      - null: autodetect depending on $type
      * @return string
      */
-    public function getDotJsInsertForValue(array $additionalVarNameParts = [], $type = 'string', $default = null, $encodeHtml = null) {
+    public function getDotJsInsertForValue(
+        array $additionalVarNameParts = [],
+        string $type = 'string',
+        ?string $default = null,
+        ?bool $encodeHtml = null
+    ): string {
         $jsonStringify = false;
         switch ($type) {
             case 'json_encode':
@@ -147,7 +156,11 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
      * @param array $additionalVarNameParts - additional parts of var name
      * @return string
      */
-    public function getConditionalDotJsInsertForValue($thenInsert, $elseInsert, array $additionalVarNameParts = []) {
+    public function getConditionalDotJsInsertForValue(
+        string $thenInsert,
+        string $elseInsert,
+        array $additionalVarNameParts = []
+    ): string {
         $fullName = $this->getVarNameForDotJs();
         $parts = array_merge(explode('.', $fullName), $additionalVarNameParts);
         $conditions = [];
@@ -243,7 +256,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
     /**
      * @return string
      */
-    public function getJavaScriptBlocks() {
+    public function getJavaScriptBlocks(): string {
         if (empty($this->jsBlocks)) {
             return '';
         } else {
