@@ -380,10 +380,10 @@ abstract class AbstractValueViewer {
         Column $columnConfig,
         array $record,
         ?string $linkLabel = null,
-        string $fallbackLabel = '-'
+        ?string $fallbackLabel = null
     ): string {
         if (empty($record[$columnConfig->getName()])) {
-            return $fallbackLabel;
+            return $fallbackLabel ?: '-';
         }
         $relationConfig = null;
         $relationAlias = null;
@@ -408,7 +408,7 @@ abstract class AbstractValueViewer {
         }
         $relationPkColumn = $relationConfig->getForeignTable()->getPkColumnName();
         if (empty($relationData) || empty($relationData[$relationPkColumn])) {
-            return $this->getScaffoldSectionConfig()->translateGeneral('field.no_relation');
+            return $fallbackLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('field.no_relation');
         } else {
             if (empty($linkLabel)) {
                 if ($relationColumn instanceof \Closure) {
