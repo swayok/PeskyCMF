@@ -108,6 +108,7 @@ return [
      * List of middleware for cmf routes and routes provided in 'routes_files'
      */
     'routes_middleware' => [
+        //\PeskyCMF\Http\Middleware\LogHttpRequest::class . ':admin,1,post,put,delete', //< http requests logging
         'web'
     ],
 
@@ -256,12 +257,6 @@ return [
     'locales' => [
         'en'
     ],
-
-    /**
-     * Class name for HTTP requests logger.
-     * Class must implement ScaffoldLoggerInterface
-     */
-    'http_requests_logger_class_name' => null,
 
     /**
      * API documentation settings
