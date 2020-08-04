@@ -567,7 +567,11 @@ abstract class ScaffoldSectionConfig {
             }
         }
         foreach ($valueViewers as $key => $valueViewer) {
-            if ($valueViewer->isLinkedToDbColumn() && $valueViewer::isComplexViewerName($key)) {
+            $safeKey = $valueViewer instanceof DataGridColumn ? $valueViewer::convertNameForDataTables($key) : $key;
+            if (
+                $valueViewer->isLinkedToDbColumn()
+                && $valueViewer::isComplexViewerName($safeKey)
+            ) {
                 $colName = $valueViewer->getTableColumn()->getName();
                 if (!array_has($recordWithBackup, $colName) && array_has($record, $colName)) {
                     $value = array_get($record, $colName);
@@ -587,11 +591,7 @@ abstract class ScaffoldSectionConfig {
                 ) {
                     $key = implode('.', $valueViewer::splitComplexViewerName($key));
                     $convertedValue = $valueViewer->convertValue(array_get($recordWithBackup, $key), $record);
-                    if ($valueViewer instanceof DataGridColumn) {
-                        array_set($recordWithBackup, $valueViewer::convertNameForDataTables($key), $convertedValue);
-                    } else {
-                        array_set($recordWithBackup, $key, $convertedValue);
-                    }
+                    array_set($recordWithBackup, $safeKey, $convertedValue);
                 }
             } else if (
                 !$valueViewer->isLinkedToDbColumn()
@@ -603,11 +603,7 @@ abstract class ScaffoldSectionConfig {
                 )
             ) {
                 $convertedValue = $valueViewer->convertValue(null, $record);
-                if ($valueViewer instanceof DataGridColumn) {
-                    $recordWithBackup[$valueViewer::convertNameForDataTables($key)] = $convertedValue;
-                } else {
-                    $recordWithBackup[$key] = $convertedValue;
-                }
+                $recordWithBackup[$safeKey] = $convertedValue;
             }
         }
         if (!empty($customData) && is_array($customData)) {

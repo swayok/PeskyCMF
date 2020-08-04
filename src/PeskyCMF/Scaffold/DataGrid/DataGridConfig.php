@@ -961,7 +961,10 @@ class DataGridConfig extends ScaffoldSectionConfig {
             if ($valueViewer->hasRelation()) {
                 // add special key for relation column that is not nested into sub object and datatables can find it
                 $path = $valueViewer->getRelation()->getName() . '.' . $valueViewer->getRelationColumn();
-                $data[$valueViewer::convertNameForDataTables($valueViewer->getName())] = array_get($data, $path);
+                $key = $valueViewer::convertNameForDataTables($valueViewer->getName());
+                if (!isset($data[$key])) {
+                    $data[] = array_get($data, $path);
+                }
             }
         }
         return $data;
