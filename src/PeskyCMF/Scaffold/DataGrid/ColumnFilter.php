@@ -734,7 +734,7 @@ class ColumnFilter {
                 if (empty($val)) {
                     unset($value[$i]);
                 } else {
-                    $this->validateValue(trim($val), null);
+                    $this->validateValue(trim($val), $operator);
                 }
             }
             unset($val);
