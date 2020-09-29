@@ -1638,7 +1638,7 @@ aside.main-sidebar .sidebar-menu li .badge {
   position: relative;
   height: 0 !important;
   overflow: visible;
-  z-index: 51;
+  z-index: 15;
 }
 #query-builder-container #query-builder {
   position: absolute;
