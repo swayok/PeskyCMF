@@ -789,7 +789,7 @@ class ColumnFilter {
     protected function convertRuleValueToConditionValue($value, string $operator) {
         if (is_array($value)) {
             foreach ($value as &$val) {
-                $val = trim($this->convertRuleValueToConditionValue($val, null));
+                $val = trim($this->convertRuleValueToConditionValue($val, $operator));
             }
             return array_values($value);
         }
@@ -817,15 +817,12 @@ class ColumnFilter {
             case static::OPERATOR_BEGINS_WITH:
             case static::OPERATOR_NOT_BEGINS_WITH:
                 return '^' . preg_quote($value, null);
-                break;
             case static::OPERATOR_ENDS_WITH:
             case static::OPERATOR_NOT_ENDS_WITH:
                 return preg_quote($value, null) . '$';
-                break;
             case static::OPERATOR_CONTAINS:
             case static::OPERATOR_NOT_CONTAINS:
                 return preg_quote($value, null);
-                break;
             case static::OPERATOR_EQUAL:
             case static::OPERATOR_NOT_EQUAL:
                 if ($this->getDataType() === static::TYPE_STRING && $this->getInputType() !== static::INPUT_TYPE_SELECT) {
