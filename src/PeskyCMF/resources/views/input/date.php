@@ -33,7 +33,6 @@ if (empty($config)) {
 }
 $config = array_merge([
     'useCurrent' => $rendererConfig->isRequired() ? true : false,
-    'minDate' => 'today',
     'format' => 'YYYY-MM-DD',
     'locale' => app()->getLocale(),
     'sideBySide' => false
