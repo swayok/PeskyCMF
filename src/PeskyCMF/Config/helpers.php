@@ -507,7 +507,8 @@ if (!function_exists('replaceUrlSafeInsertsInUrlByDotJsInsterts')) {
 
 if (!function_exists('transChoiceRu')) {
     /**
-     * @param string|array $idOrTranslations - array: translations for items count 1,4,5
+     * @param string|array $idOrTranslations - array: translations rray with 3 values:
+     *      array(0 => 'variant for 1', 1 => 'variant for 4', 2 => 'variant for 5')
      * @param int $itemsCount
      * @param array $parameters
      * @param string|null $locale
@@ -520,7 +521,8 @@ if (!function_exists('transChoiceRu')) {
 
 if (!function_exists('transChoiceAlt')) {
     /**
-     * @param string|array $idOrTranslations - array: translations for items count 1,4,5
+     * @param string|array $idOrTranslations - array: translations array with 3 values:
+     *      array(0 => 'variant for 1', 1 => 'variant for 4', 2 => 'variant for 5')
      * @param int $itemsCount
      * @param array $parameters
      * @param string|null $locale
