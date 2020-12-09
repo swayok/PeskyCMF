@@ -115,15 +115,32 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $columnsToSelect[$viewer->getRelation()->getName()] = ['*'];
             }
         }
-        $result = static::getTable()->select($columnsToSelect, $conditions);
         $records = [];
-        if ($result->count()) {
-            $records = $dataGridConfig->prepareRecords($result->toArrays(), $virtualColumns);
+        if ($dataGridConfig->isBigTable()) {
+            $pkColumnName = static::getTable()->getTableStructure()->getPkColumnName();
+            // note: joins will be automatically loaded from WHERE conditions in most cases
+            $idsSelect = static::getTable()->select([$pkColumnName], $conditions);
+            $totalCount = $idsSelect->totalCount();
+            if ($idsSelect->count()) {
+                $mainQueryConditions = array_intersect_key($conditions, ['ORDER' => '']);
+                $mainQueryConditions['id'] = $idsSelect->getValuesForColumn($pkColumnName);
+                $result = static::getTable()->select($columnsToSelect, $mainQueryConditions);
+                $records = $dataGridConfig->prepareRecords($result->toArrays(), $virtualColumns);
+            }
+            
+        } else {
+            $result = static::getTable()->select($columnsToSelect, $conditions);
+            $totalCount = $result->totalCount();
+            if ($result->count()) {
+                $records = $dataGridConfig->prepareRecords($result->toArrays(), $virtualColumns);
+            }
         }
+        
+        
         return cmfJsonResponse()->setData([
             'draw' => $request->query('draw'),
-            'recordsTotal' => $result->totalCount(),
-            'recordsFiltered' => $result->totalCount(),
+            'recordsTotal' => $totalCount,
+            'recordsFiltered' => $totalCount,
             'data' => $records,
         ]);
     }

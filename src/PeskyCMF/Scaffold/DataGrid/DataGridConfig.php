@@ -103,6 +103,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
     protected $rendererHelper;
     /** @var bool */
     protected $openInModal = false;
+    /** @var bool - optimize datagrid selects for usage in big tables so that it will be faster to select rows */
+    protected $isBigTable = false;
 
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         parent::__construct($table, $scaffoldConfig);
@@ -219,6 +221,22 @@ class DataGridConfig extends ScaffoldSectionConfig {
      */
     public function isFilterOpenedByDefault() {
         return $this->isFilterOpened;
+    }
+    
+    /**
+     * @param bool $isBigTable
+     * @return $this
+     */
+    public function setIsBigTable($isBigTable = true) {
+        $this->isBigTable = (bool)$isBigTable;
+        return $this;
+    }
+    
+    /**
+     * @return bool
+     */
+    public function isBigTable() {
+        return $this->isBigTable;
     }
 
     /**
