@@ -19,7 +19,7 @@ class JsonArrayFormInput extends FormInput {
     protected $deleteRowButtonLabel;
 
     /**
-     * @param FormInput[] $subInputs = ['name1', 'name2' => FormInput::create()]
+     * @param FormInput[]|string[] $subInputs = ['name1', 'name2' => FormInput::create()]
      * @return $this
      */
     public function setSubInputs(array $subInputs) {
