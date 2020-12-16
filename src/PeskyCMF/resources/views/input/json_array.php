@@ -53,8 +53,8 @@ $subInputs = $valueViewer->getSubInputs();
         </tr>
     </script>
     <div class="form-group">
-        <input type="hidden" name="<?php echo $inputName; ?>[]" id="<?php echo $defaultId; ?>" value="">
-        <input type="hidden" disabled name="<?php echo $inputName; ?>" id="<?php echo $defaultId; ?>-hidden">
+        <input type="hidden" name="<?php echo $inputName; ?>" id="<?php echo $defaultId; ?>" value="">
+        <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $defaultId; ?>" value="">
     </div>
     <table class="table table-condensed table-bordered table-striped mbn json-array-input-table">
         <thead>

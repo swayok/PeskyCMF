@@ -17,7 +17,9 @@ class JsonArrayFormInput extends FormInput {
     protected $addRowButtonLabel;
     /** @var string */
     protected $deleteRowButtonLabel;
-
+    /** @var \Closure */
+    protected $submittedRowsFilter;
+    
     /**
      * @param FormInput[]|string[] $subInputs = ['name1', 'name2' => FormInput::create()]
      * @return $this
@@ -86,7 +88,7 @@ class JsonArrayFormInput extends FormInput {
     }
 
     /**
-     * @param \Closure $validators = function (bool $isCreation, array $defaultValidators) { return []; }
+     * @param \Closure $validators = function (bool $isCreation, array $defaultValidators) { return ['input_name.*.subinput_name' => 'required']; }
      * @return $this
      */
     public function setValidatorsForSubInputs(\Closure $validators) {
@@ -203,7 +205,7 @@ class JsonArrayFormInput extends FormInput {
         return array_merge(
             [
                 $this->getName() => ($this->getMinValuesCount() > 0 ? 'required' : 'nullable') . '|array|min:' . $this->getMinValuesCount() . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
-                $this->getName() . '.*' => 'nullable|array',
+                $this->getName() . '.*' => 'required|array',
             ],
             $this->getValidatorsForSubInputs($isCreation)
         );
@@ -221,7 +223,29 @@ class JsonArrayFormInput extends FormInput {
         }
         return $value;
     }
-
+    
+    /**
+     * @param \Closure $filter = function($row): bool { return true; }
+     * @return $this
+     */
+    public function setSubmittedRowsFilter(\Closure $filter) {
+        $this->submittedRowsFilter = $filter;
+        return $this;
+    }
+    
+    public function modifySubmitedValueBeforeValidation($value, array $data) {
+        if ($this->submittedRowsFilter && is_array($value)) {
+            $filteredRows = [];
+            foreach ($value as $index => $row) {
+                if (call_user_func($this->submittedRowsFilter, $row)) {
+                    $filteredRows[] = $row;
+                }
+            }
+            $value = $filteredRows;
+        }
+        return parent::modifySubmitedValueBeforeValidation($value, $data);
+    }
+    
     protected function hasName(): bool {
         return !empty($this->name);
     }
