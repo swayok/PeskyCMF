@@ -97,7 +97,9 @@ $subInputs = $valueViewer->getSubInputs();
             }
             tplData = $.extend({}, defaultTplData, tplData, {index: rowIndex});
             rowIndex++;
-            $rowsContainer.append(rowTpl(tplData));
+            var $tr = $(rowTpl(tplData));
+            $rowsContainer.append($tr);
+            FormHelper.initInputPlugins($tr);
             rowsCount++;
             return true;
         };
