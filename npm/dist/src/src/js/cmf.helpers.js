@@ -324,6 +324,7 @@ FormHelper.inputsDisablers.init = function (formSelector, disablers, runDisabler
     var findInput = function (name) {
         var $matchingInputs = $form
             .find('[name="' + name + '[]"], [name="' + name + '"]')
+            .not('[data-disabler-ignore-this-input="1"]')
             .filter('input, select, textarea');
         if ($matchingInputs.length === 0) {
             return null;
@@ -440,6 +441,7 @@ FormHelper.inputsDisablers.setDisablerInputValueChangeEventHandlers = function (
         if ($disablerInput.not('[type="checkbox"], [type="radio"]').length > 0) {
             // input (excluding checkbox and radio) or textarea
             $disablerInput.on('run-disabler.cmfform change blur keyup', function () {
+
                 FormHelper.inputsDisablers.handleDisablerInputValueChange(disablerConfig);
             });
         } else {
@@ -449,11 +451,39 @@ FormHelper.inputsDisablers.setDisablerInputValueChangeEventHandlers = function (
             });
         }
     }
+    disablerConfig.$targetInput.on('run-disabler-on-target.cmfform', function () {
+        FormHelper.inputsDisablers.handleDisablerInputValueChange(disablerConfig);
+    });
 };
+
+FormHelper.inputsDisablers.runDisablerOnTargetInput = function ($targetInput) {
+    $targetInput.trigger('run-disabler-on-target.cmfform');
+}
 
 FormHelper.inputsDisablers.handleDisablerInputValueChange = function (disablerConfig) {
     var $targetInput = disablerConfig.$targetInput;
     var disablerCondition = FormHelper.inputsDisablers.isInputMustBeDisabled(disablerConfig);
+
+    if ($targetInput.attr('data-disabler-mode') === 'nested-inputs') {
+        var $container = $targetInput.closest('form').find($targetInput.attr('data-disabler-inputs-container'));
+        $targetInput = $container.find('input, select, textarea').not('[data-disabler-ignore-this-input="1"]');
+        $container.find('[data-disabler-on-disable]').each(function (i, element) {
+            var $el = $(element);
+            switch ($el.attr('data-disabler-on-disable')) {
+                case 'hide':
+                    if (disablerCondition) {
+                        $el.addClass('hidden');
+                    } else {
+                        $el.removeClass('hidden');
+                    }
+                    break;
+                case 'disable':
+                    $el.prop('disabled', !!disablerCondition);
+                    break;
+            }
+        })
+    }
+
     if (disablerCondition && typeof disablerCondition.set_readonly_value !== 'undefined' && disablerCondition.set_readonly_value !== null) {
         if ($targetInput.not('[type="checkbox"], [type="radio"]').length > 0) {
             $targetInput.val(disablerCondition.set_readonly_value).change();
@@ -476,31 +506,36 @@ FormHelper.inputsDisablers.handleDisablerInputValueChange = function (disablerCo
             }
         }
     }
-    if ($targetInput.hasClass('selectpicker')) {
+    var $selectPickers = $targetInput.filter('.selectpicker');
+    if ($selectPickers.length > 0) {
+        $targetInput.prop({disabled: false, readOnly: false});
         if (disablerCondition) {
-            $targetInput.prop({disabled: true, readOnly: true});
-        } else {
-            $targetInput.prop({disabled: false, readOnly: false});
+            $targetInput.prop('disabled', true); //< selectpicker does not support readonly mode
         }
         $targetInput.selectpicker('refresh');
-    } else if ($targetInput.attr('data-editor-name')) {
+    }
+    var $ckeditors = $targetInput.filter('[data-editor-name]');
+    if ($ckeditors.length > 0) {
         var editor = CKEDITOR.instances[$targetInput.attr('data-editor-name')];
         if (editor) {
             editor.setReadOnly(!!disablerCondition);
         }
-    } else if ($targetInput.hasClass('switch')) {
+    }
+    var $switches = $targetInput.filter('.switch');
+    if ($switches.length > 0) {
+        $targetInput.bootstrapSwitch('readonly', false);
+        $targetInput.bootstrapSwitch('disabled', false);
         if (disablerCondition) {
             $targetInput.bootstrapSwitch(disablerCondition.attribute, true)
-        } else {
-            $targetInput.bootstrapSwitch('readonly', false);
-            $targetInput.bootstrapSwitch('disabled', false);
         }
     }
-    $targetInput.prop({disabled: false, readOnly: false});
-    if (disablerCondition) {
-        $targetInput.prop(disablerCondition.attribute, true);
+    var $normalInputs = $targetInput.not('.switch, .selectpicker, [data-editor-name]')
+    if ($normalInputs.length > 0) {
+        $targetInput.prop({disabled: false, readOnly: false});
+        if (disablerCondition) {
+            $targetInput.prop(disablerCondition.attribute, true);
+        }
     }
-    $targetInput.change();
 };
 
 /**

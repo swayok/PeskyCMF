@@ -45,16 +45,37 @@ $subInputs = $valueViewer->getSubInputs();
                 </td>
             <?php endforeach; ?>
             <td class="delete text-center">
-                <a href="javascript: void(0)" class="text-danger delete-row" data-toggle="tooltip"
-                 title="<?php echo $valueViewer->getDeleteRowButtonLabel() ?>">
+                <a
+                    href="javascript: void(0)"
+                    class="text-danger delete-row"
+                    data-toggle="tooltip"
+                    title="<?php echo $valueViewer->getDeleteRowButtonLabel() ?>"
+                    data-disabler-on-disable="hide"
+                >
                     <i class="glyphicon glyphicon-remove fs16 lh30"></i>
                 </a>
             </td>
         </tr>
     </script>
     <div class="form-group">
-        <input type="hidden" name="<?php echo $inputName; ?>" id="<?php echo $defaultId; ?>" value="">
-        <input type="hidden" disabled name="<?php echo $inputName; ?>[]" id="<?php echo $defaultId; ?>" value="">
+        <input
+            type="hidden"
+            name="<?php echo $inputName; ?>"
+            id="<?php echo $defaultId; ?>-hidden1"
+            value=""
+            data-disabler-mode="nested-inputs"
+            data-disabler-inputs-container="#<?php echo $defaultId; ?>-container"
+        >
+        <input
+            type="hidden"
+            disabled
+            name="<?php echo $inputName; ?>[]"
+            id="<?php echo $defaultId; ?>-hidden2"
+            value=""
+            data-disabler-mode="nested-inputs"
+            data-disabler-inputs-container="#<?php echo $defaultId; ?>-container"
+            data-disabler-ignore-this-input="1"
+        >
     </div>
     <table class="table table-condensed table-bordered table-striped mbn json-array-input-table">
         <thead>
@@ -70,7 +91,12 @@ $subInputs = $valueViewer->getSubInputs();
         </tbody>
     </table>
     <div class="mv15 text-center">
-        <button type="button" class="btn btn-default btn-sm" id="<?php echo $defaultId; ?>-add-row">
+        <button
+            type="button"
+            class="btn btn-default btn-sm"
+            id="<?php echo $defaultId; ?>-add-row"
+            data-disabler-on-disable="hide"
+        >
             <?php echo $valueViewer->getAddRowButtonLabel() ?>
         </button>
     </div>
@@ -88,6 +114,7 @@ $subInputs = $valueViewer->getSubInputs();
         var minRows = <?php echo $valueViewer->getMinValuesCount(); ?>;
         var rowIndex = 0;
         var rowsCount = 0;
+        var $disablerTargetInput = $('#<?php echo $defaultId; ?>-hidden1');
         var addRow = function (tplData) {
             if (maxRows > 0 && rowsCount + 1 > maxRows) {
                 return false;
@@ -100,6 +127,7 @@ $subInputs = $valueViewer->getSubInputs();
             var $tr = $(rowTpl(tplData));
             $rowsContainer.append($tr);
             FormHelper.initInputPlugins($tr);
+            FormHelper.inputsDisablers.runDisablerOnTargetInput($disablerTargetInput);
             rowsCount++;
             return true;
         };
