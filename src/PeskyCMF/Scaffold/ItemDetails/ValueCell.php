@@ -126,5 +126,12 @@ class ValueCell extends RenderableValueViewer {
     public function hideLabel() {
         return $this->setLabel('');
     }
+    
+    /**
+     * @return string
+     */
+    public function getHtmlElementId() {
+        return str_slug($this->getScaffoldSectionConfig()->getScaffoldConfig()->getResourceName() . '-value-viewer-' . $this->getName());
+    }
 
 }
