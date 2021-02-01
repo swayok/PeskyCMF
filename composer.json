@@ -37,7 +37,7 @@
         "laravel/framework": ">=5.3",
 
         "swayok/utils": "master@dev",
-        "swayok/peskyorm": "v2.x-dev",
+        "swayok/peskyorm": "dev-amed",
         "swayok/peskyorm-laravel": "master@dev",
         "swayok/html-tag-helper": "master@dev",
         "vluzrmos/language-detector": "1.*"
