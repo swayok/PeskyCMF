@@ -36,10 +36,10 @@
         "php": ">=7.0",
         "laravel/framework": ">=5.3",
 
-        "swayok/utils": "master@dev",
+        "swayok/utils": "dev-master",
         "swayok/peskyorm": "dev-amed",
-        "swayok/peskyorm-laravel": "master@dev",
-        "swayok/html-tag-helper": "master@dev",
+        "swayok/peskyorm-laravel": "dev-amed",
+        "swayok/html-tag-helper": "dev-master",
         "vluzrmos/language-detector": "1.*"
     },
     "scripts": {
