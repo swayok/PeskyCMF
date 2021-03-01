@@ -597,34 +597,35 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
         }
         $conditions = $this->getSelectConditionsForBulkActions('_');
-        if (!is_array($conditions)) {
-            return $conditions; //< response
-        }
-        if (\Gate::denies('resource.update_bulk', [static::getResourceName(), $conditions])) {
-            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('bulk_edit.message.forbidden'));
-        }
-        $table::beginTransaction();
-        $updatedCount = $table::update($data, $conditions);
-        if ($formConfig->hasAfterBulkEditDataAfterSaveCallback()) {
-            $success = call_user_func($formConfig->getAfterBulkEditDataAfterSaveCallback(), $data);
-            if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
-                if ($success->getStatusCode() < 400) {
-                    $table::commitTransaction();
-                } else {
-                    $table::rollBackTransaction();
-                }
-                return $success;
-            } else if ($success !== true) {
-                $table::rollBackTransaction();
-                throw new ScaffoldException(
-                    'afterBulkEditDataAfterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
-                );
+        if ($conditions === null) {
+            $message = $formConfig->translateGeneral('bulk_edit.message.nothing_updated');
+        } else {
+            if (\Gate::denies('resource.update_bulk', [static::getResourceName(), $conditions])) {
+                return $this->makeAccessDeniedReponse($formConfig->translateGeneral('bulk_edit.message.forbidden'));
             }
+            $table::beginTransaction();
+            $updatedCount = $table::update($data, $conditions);
+            if ($formConfig->hasAfterBulkEditDataAfterSaveCallback()) {
+                $success = call_user_func($formConfig->getAfterBulkEditDataAfterSaveCallback(), $data);
+                if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
+                    if ($success->getStatusCode() < 400) {
+                        $table::commitTransaction();
+                    } else {
+                        $table::rollBackTransaction();
+                    }
+                    return $success;
+                } else if ($success !== true) {
+                    $table::rollBackTransaction();
+                    throw new ScaffoldException(
+                        'afterBulkEditDataAfterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
+                    );
+                }
+            }
+            $table::commitTransaction();
+            $message = $updatedCount
+                ? $formConfig->translateGeneral('bulk_edit.message.success', ['count' => $updatedCount])
+                : $formConfig->translateGeneral('bulk_edit.message.nothing_updated');
         }
-        $table::commitTransaction();
-        $message = $updatedCount
-            ? $formConfig->translateGeneral('bulk_edit.message.success', ['count' => $updatedCount])
-            : $formConfig->translateGeneral('bulk_edit.message.nothing_updated');
         return cmfJsonResponse()
             ->setMessage($message)
             ->goBack(routeToCmfItemsTable(static::getResourceName()));
@@ -675,18 +676,19 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden'));
         }
         $conditions = $this->getSelectConditionsForBulkActions();
-        if (!is_array($conditions)) {
-            return $conditions; //< response
+        if ($conditions === null) {
+            $message = $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.nothing_deleted');
+        } else {
+            if (\Gate::denies('resource.delete_bulk', [static::getResourceName(), $conditions])) {
+                return $this->makeAccessDeniedReponse(
+                    $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.forbidden')
+                );
+            }
+            $deletedCount = static::getTable()->delete($conditions);
+            $message = $deletedCount
+                ? $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.success', ['count' => $deletedCount])
+                : $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.nothing_deleted');
         }
-        if (\Gate::denies('resource.delete_bulk', [static::getResourceName(), $conditions])) {
-            return $this->makeAccessDeniedReponse(
-                $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.forbidden')
-            );
-        }
-        $deletedCount = static::getTable()->delete($conditions);
-        $message = $deletedCount
-            ? $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.success', ['count' => $deletedCount])
-            : $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.nothing_deleted');
         return cmfJsonResponse()
             ->setMessage($message)
             ->goBack(routeToCmfItemsTable(static::getResourceName()));
@@ -695,25 +697,21 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
     /**
      * @param string $inputNamePrefix - input name prefix
      *      For example if you use '_ids' instead of 'ids' - use prefix '_'
-     * @return array|Response
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
+     * @return array
      */
-    protected function getSelectConditionsForBulkActions($inputNamePrefix = '') {
-        $formConfig = $this->getFormConfig();
-        $specialConditions = $formConfig->getSpecialConditions();
-        $conditions = $specialConditions;
+    protected function getSelectConditionsForBulkActions($inputNamePrefix = ''): ?array {
+        $specialConditions = $this->getDataGridConfig()->getSpecialConditions();
         $idsField = $inputNamePrefix . 'ids';
         $conditionsField = $inputNamePrefix . 'conditions';
+        $pkColumnName = static::getTable()->getPkColumnName();
         if ($this->getRequest()->has($idsField)) {
             $this->validate($this->getRequest(), [
                 $idsField => 'required|array',
                 $idsField . '.*' => 'integer|min:1',
             ]);
-            $conditions[static::getTable()->getPkColumnName()] = $this->getRequest()->input($idsField);
+            $conditions = $specialConditions;
+            $conditions[$pkColumnName] = $this->getRequest()->input($idsField);
+            return $conditions;
         } else if ($this->getRequest()->has($conditionsField)) {
             $this->validate($this->getRequest(), [
                 $conditionsField => 'string|regex:%^[\{\[].*[\}\]]$%s',
@@ -722,27 +720,34 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 ? json_decode($this->getRequest()->input($conditionsField), true)
                 : [];
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
-                return cmfJsonResponseForValidationErrors(
+                abort(cmfJsonResponseForValidationErrors(
                     [$conditionsField => 'JSON expected'],
-                    $formConfig->translateGeneral('message.validation_errors')
-                );
+                    $this->translateGeneral('message.validation_errors')
+                ));
             }
-            if (!empty($encodedConditions)) {
-                $filterConditions = $this
-                    ->getDataGridFilterConfig()
-                    ->buildConditionsFromSearchRules($encodedConditions);
-                $conditions = array_merge($filterConditions, $specialConditions);
+            if (empty($encodedConditions)) {
+                return $specialConditions;
             }
+            $filterConditions = $this
+                ->getDataGridFilterConfig()
+                ->buildConditionsFromSearchRules($encodedConditions);
+            $ids = static::getTable()->selectColumn(
+                $pkColumnName,
+                array_merge($filterConditions, $specialConditions)
+            );
+            return empty($ids)
+                ? null
+                : [$pkColumnName => $ids];
         } else {
-            return cmfJsonResponseForValidationErrors(
+            abort(cmfJsonResponseForValidationErrors(
                 [
                     $idsField => 'List of items IDs of filtering conditions expected',
                     $conditionsField => 'List of items IDs of filtering conditions expected',
                 ],
-                $formConfig->translateGeneral('message.validation_errors')
-            );
+                $this->translateGeneral('message.validation_errors')
+            ));
         }
-        return $conditions;
+        return null;
     }
 
     public function changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection) {
