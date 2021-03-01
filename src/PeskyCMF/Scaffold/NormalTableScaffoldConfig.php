@@ -61,7 +61,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $conditions['ORDER'][] = DbExpr::create($config['column']->get() . ' ' . $config['dir'], false);
                 } else {
                     if (AbstractValueViewer::isComplexViewerName($config['column'])) {
-                        list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($config['column']);
+                        [$colName, $keyName] = AbstractValueViewer::splitComplexViewerName($config['column']);
                         $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$config['dir']}", false);
                     } else if (
                         $defaultDirectionWithNulls
@@ -86,7 +86,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $columnsToSelect = [];
         $virtualColumns = [];
         foreach (array_keys($dataGridConfig->getViewersLinkedToDbColumns(false)) as $originalColName) {
-            list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($originalColName);
+            [$colName, $keyName] = AbstractValueViewer::splitComplexViewerName($originalColName);
             if (array_key_exists($colName, $dbColumns)) {
                 if ($dbColumns[$colName]->isItExistsInDb()) {
                     if ($keyName) {
@@ -377,7 +377,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         foreach ($formConfig->getValueViewers() as $valueViewer) {
             if (($isCreation && $valueViewer->isShownOnCreate()) || (!$isCreation && $valueViewer->isShownOnEdit())) {
                 if ($valueViewer::isComplexViewerName($valueViewer->getName())) {
-                    list($colName, ) = $valueViewer::splitComplexViewerName($valueViewer->getName());
+                    [$colName, ] = $valueViewer::splitComplexViewerName($valueViewer->getName());
                     $expectedDataKeys[] = $colName;
                 } else {
                     $expectedDataKeys[] = $valueViewer->getName();
@@ -677,17 +677,18 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
      * @throws \BadMethodCallException
      */
     protected function getSelectConditionsForBulkActions($inputNamePrefix = '') {
-        $formConfig = $this->getFormConfig();
-        $specialConditions = $formConfig->getSpecialConditions();
+        $dataGridConfig = $this->getDataGridConfig();
+        $specialConditions = $dataGridConfig->getSpecialConditions();
         $conditions = $specialConditions;
         $idsField = $inputNamePrefix . 'ids';
         $conditionsField = $inputNamePrefix . 'conditions';
+        $pkColumnName = static::getTable()->getPkColumnName();
         if ($this->getRequest()->has($idsField)) {
             $this->validate($this->getRequest(), [
                 $idsField => 'required|array',
                 $idsField . '.*' => 'integer|min:1',
             ]);
-            $conditions[static::getTable()->getPkColumnName()] = $this->getRequest()->input($idsField);
+            $conditions[$pkColumnName] = $this->getRequest()->input($idsField);
         } else if ($this->getRequest()->has($conditionsField)) {
             $this->validate($this->getRequest(), [
                 $conditionsField => 'string|regex:%^[\{\[].*[\}\]]$%s',
@@ -698,14 +699,22 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
                 return cmfJsonResponseForValidationErrors(
                     [$conditionsField => 'JSON expected'],
-                    $formConfig->translateGeneral('message.validation_errors')
+                    $this->translateGeneral('message.validation_errors')
                 );
             }
             if (!empty($encodedConditions)) {
                 $filterConditions = $this
                     ->getDataGridFilterConfig()
                     ->buildConditionsFromSearchRules($encodedConditions);
-                $conditions = array_merge($filterConditions, $specialConditions);
+                $ids = static::getTable()->selectColumn(
+                    $pkColumnName,
+                    array_merge($filterConditions, $specialConditions)
+                );
+                if (!empty($ids)) {
+                    $conditions[$pkColumnName] = $ids;
+                } else {
+                    $conditions[$pkColumnName] = null;
+                }
             }
         } else {
             return cmfJsonResponseForValidationErrors(
@@ -713,7 +722,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     $idsField => 'List of items IDs of filtering conditions expected',
                     $conditionsField => 'List of items IDs of filtering conditions expected',
                 ],
-                $formConfig->translateGeneral('message.validation_errors')
+                $this->translateGeneral('message.validation_errors')
             );
         }
         return $conditions;
