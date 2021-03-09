@@ -127,7 +127,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param Request $request
      * @param bool $enabledByDefault - create log even when log name not provided via route's 'log' action
      * @param bool $force - create log forcefully ignoring all restrictions
-     * @return $this
+     * @return $this|null
      */
     public function fromRequest(Request $request, bool $enabledByDefault = false, bool $force = false) {
         if ($this->hasValue('request')) {

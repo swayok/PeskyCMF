@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Http\Middleware;
 
+use App\Db\HttpRequestLogs\HttpRequestLog;
 use Illuminate\Http\Request;
 use PeskyCMF\Db\HttpRequestLogs\CmfHttpRequestLogsTable;
 use PeskyCMF\HttpCode;
@@ -10,6 +11,12 @@ use PeskyORM\ORM\RecordInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class LogHttpRequest {
+    
+    /**
+     * list of logs with urls
+     * @var HttpRequestLog[]
+     */
+    static private array $logs = [];
 
     /**
      * Middleware examples:
@@ -50,42 +57,56 @@ class LogHttpRequest {
         } else {
             $logsTable = CmfHttpRequestLogsTable::getInstance();
         }
+        $logKey = $request->getMethod() . ': ' . $request->fullUrl();
+        if (isset(static::$logs[$logKey])) {
+            // request already logged (sitaution when middleware was declared 2 times - in Kernel and in route)
+            // unexpectedly when you use middleware with parameters - each one is called resulting in duplicate logs
+            if ($isAllowed && !static::$logs[$logKey]->hasValue('request')) {
+                // start logging of existing request if it was not logged yet (in previous call it was not allowed)
+                $this->logRequest(static::$logs[$logKey], $request, $enableByDefault);
+            }
+            // stop here because previous instance of this middleware will handle the rest
+            return $next($request);
+        }
         $logsTable::resetCurrentLog();
         app()->offsetUnset(ScaffoldLoggerInterface::class);
+        $log = $logsTable::getCurrentLog();
+        app()->instance(ScaffoldLoggerInterface::class, $log);
+        static::$logs[$logKey] = $log;
         if ($isAllowed) {
-            try {
-                $log = $logsTable::logRequest($request, (bool)$enableByDefault);
-                app()->instance(ScaffoldLoggerInterface::class, $log);
-            } catch (\Throwable $exception) {
-                \Log::error($exception);
-            }
+            $this->logRequest($log, $request, $enableByDefault);
         }
         $response = $next($request);
         if ($response instanceof Response) {
-            if (!$isAllowed && $response->getStatusCode() >= 400) {
-                // now we can wrap into if ($isAllowed) {} and will not lose server errors logging
-                $isAllowed = true;
-            }
-            if ($isAllowed) {
-                try {
-                    if ($response->getStatusCode() === HttpCode::UNAUTHORISED) {
+            try {
+                if ($response->getStatusCode() === HttpCode::UNAUTHORISED) {
+                    $user = null;
+                } else {
+                    $user = \Auth::guard($authGuard ?: null)->user();
+                    if (!($user instanceof RecordInterface)) {
                         $user = null;
-                    } else {
-                        $user = \Auth::guard($authGuard ?: null)->user();
-                        if (!($user instanceof RecordInterface)) {
-                            $user = null;
-                        }
                     }
-                    /** @var RecordInterface|null $user */
-                    $logsTable::logResponse($request, $response, $user);
-                } catch (\Throwable $exception) {
-                    \Log::error($exception);
                 }
+                /** @var RecordInterface|null $user */
+                $log->logResponse($request, $response, $user);
+            } catch (\Throwable $exception) {
+                \Log::error($exception);
             }
         } else {
             \Log::error('LogHttpRequest: cannot log this response (not a Symfony response)', ['response' => $response]);
         }
         return $response;
+    }
+    
+    /**
+     * @param HttpRequestLog $log
+     */
+    protected function logRequest($log, $request, bool $enableByDefault) {
+        try {
+            $log->fromRequest($request, $enableByDefault);
+        } catch (\Throwable $exception) {
+            \Log::error($exception);
+        }
     }
 
 }

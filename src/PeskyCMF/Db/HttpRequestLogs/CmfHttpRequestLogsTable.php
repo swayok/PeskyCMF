@@ -91,7 +91,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
     /**
      * @param Request $request
      * @param bool $force - log request even if route has no 'log' action in its config
-     * @return CmfHttpRequestLog
+     * @return CmfHttpRequestLog|null
      */
     static public function logRequest(Request $request, bool $force = false) {
         return static::getCurrentLog()->fromRequest($request, $force);
