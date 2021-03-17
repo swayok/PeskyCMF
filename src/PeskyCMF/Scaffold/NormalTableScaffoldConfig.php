@@ -189,7 +189,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $columnsToSelect[] = $valueViewer->getTableColumn()->getName();
             }
         }
-        if (!$object->fetch($conditions, array_unique($columnsToSelect), array_keys($relationsToRead))->existsInDb()) {
+        if (!$object->fetch($conditions, array_unique($columnsToSelect), $relationsToRead)->existsInDb()) {
             return $this->makeRecordNotFoundResponse();
         }
         $this->logDbRecordLoad($object);
