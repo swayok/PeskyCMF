@@ -300,8 +300,8 @@ class ColumnFilter {
     public function getColumnNameForTranslation(): string {
         if ($this->columnNameForTranslation === null) {
             $this->columnNameForTranslation = strtolower(trim(preg_replace(
-                ['%([A-Z])%', '%[^a-zA-Z0-9.-]+%'],
-                ['_$1', '_'],
+                ['%([A-Z])%', '%[^a-zA-Z0-9.-]+%', '%\._%'],
+                ['_$1', '_', '.'],
                 $this->columnName
             ), '_-.'));
         }
