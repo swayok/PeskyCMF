@@ -675,7 +675,9 @@ class ColumnFilter {
         switch ($operator) {
             case static::OPERATOR_IN_ARRAY:
             case static::OPERATOR_NOT_IN_ARRAY:
-                $value = preg_split('%\s*,\s*%', $value);
+                if (is_string($value)) {
+                    $value = preg_split('%\s*,\s*%', $value);
+                }
                 break;
         }
         $value = $this->modifyIncomingValue($value, $operator);
