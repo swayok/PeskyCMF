@@ -549,10 +549,10 @@ class FormConfig extends ScaffoldSectionConfig {
 
     /**
      * @param array $updates
-     * @param RecordInterface $record - record before editing
+     * @param RecordInterface|null $record - RecordInterface: record before editing | null: used for bulk editing
      * @return array
      */
-    public function getValidatorsForEdit(array $updates, RecordInterface $record) {
+    public function getValidatorsForEdit(array $updates, ?RecordInterface $record) {
         return array_merge(
             $this->collectPresetValidators(false),
             $this->validators ? call_user_func($this->validators, $updates) : [],
@@ -561,7 +561,7 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param \Closure $validatorsForEdit - function (array $updates, RecordInterface $record) { return []; }
+     * @param \Closure $validatorsForEdit - function (array $updates, ?RecordInterface $record) { return []; }
      * Note: You can insert fields from $updates using '{{field_name}}'
      * @return $this
      */
