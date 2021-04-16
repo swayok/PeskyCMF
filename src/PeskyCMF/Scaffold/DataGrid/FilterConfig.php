@@ -73,7 +73,7 @@ class FilterConfig {
     }
 
     /**
-     * @param string $columnName - 'col_name' or 'RelationAlias.col_name'
+     * @param string $columnName - 'col_name' or 'RelationAlias.col_name' or 'RelationAlias.SubRelation.col_name'
      * @param null|ColumnFilter $config
      * @return $this
      */
@@ -139,12 +139,16 @@ class FilterConfig {
 
     public function findTableColumn(string $columnName): Column {
         $table = $this->getTable();
-        $colNameParts = explode('.', $columnName, 2);
-        if (count($colNameParts) === 2) {
-            $columnName = $colNameParts[1];
-            if ($colNameParts[0] !== $table::getAlias()) {
+        $colNameParts = explode('.', $columnName);
+        if (count($colNameParts) > 1) {
+            $columnName = $colNameParts[count($colNameParts) - 1];
+            array_pop($colNameParts);
+            if ($colNameParts[0] === $table::getAlias()) {
+                array_shift($colNameParts);
+            }
+            foreach ($colNameParts as $relationName) {
                 // recursively find related table
-                $table = $this->findRelatedTable($table, $colNameParts[0]);
+                $table = $this->findRelatedTable($table, $relationName);
             }
         }
         return $table::getStructure()->getColumn($columnName);
