@@ -845,13 +845,13 @@ class ColumnFilter {
         switch ($operator) {
             case static::OPERATOR_EQUAL:
             case static::OPERATOR_IN_ARRAY:
-                if ($this->getDataType() === static::TYPE_STRING) {
+                if ($this->getDataType() === static::TYPE_STRING && $this->getInputType() !== static::INPUT_TYPE_SELECT) {
                     return static::$ruleOperatorToDbOperator[static::OPERATOR_CONTAINS]; //< for case-insensitive search
                 }
                 break;
             case static::OPERATOR_NOT_EQUAL:
             case static::OPERATOR_NOT_IN_ARRAY:
-                if ($this->getDataType() === static::TYPE_STRING) {
+                if ($this->getDataType() === static::TYPE_STRING && $this->getInputType() !== static::INPUT_TYPE_SELECT) {
                     return static::$ruleOperatorToDbOperator[static::OPERATOR_NOT_CONTAINS]; //< for case-insensitive search
                 }
                 break;
