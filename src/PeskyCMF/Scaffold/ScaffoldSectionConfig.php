@@ -528,9 +528,13 @@ abstract class ScaffoldSectionConfig {
         // backup values
         $recordWithBackup = [];
         foreach ($record as $key => $value) {
-            $recordWithBackup[$key] = $recordWithBackup['__' . $key] = $value;
+            $recordWithBackup[$key] = $value;
+            if (is_resource($value)) {
+                $value = '[resource]';
+            }
+            $recordWithBackup['__' . $key] = $value;
         }
-        foreach ($record as $key => $value) {
+        foreach ($record as $key => $_) {
             if (!$this->hasValueViewer($key) && $this->getTable()->getTableStructure()->hasRelation($key)) {
                 unset($recordWithBackup['__' . $key]);
                 if ($this->getTable()->getTableStructure()->getRelation($key)->getType() === Relation::HAS_MANY) {

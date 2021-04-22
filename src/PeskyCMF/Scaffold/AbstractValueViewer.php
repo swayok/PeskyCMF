@@ -320,7 +320,9 @@ abstract class AbstractValueViewer {
                 $value = $valueConverter($record, $this, $this->getScaffoldSectionConfig());
             }
         } else if (!empty($value) || is_bool($value)) {
-            if (
+            if (is_resource($value)) {
+                return '[resource]';
+            } else if (
                 $this->isLinkedToDbColumn()
                 && (
                     $this->getTableColumn()->getType() === Column::TYPE_PASSWORD
