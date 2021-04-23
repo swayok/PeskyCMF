@@ -981,7 +981,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
                 $path = $valueViewer->getRelation()->getName() . '.' . $valueViewer->getRelationColumn();
                 $key = $valueViewer::convertNameForDataTables($valueViewer->getName());
                 if (!isset($data[$key])) {
-                    $data[] = array_get($data, $path);
+                    $data[$key] = array_get($data, $path);
                 }
             }
         }
