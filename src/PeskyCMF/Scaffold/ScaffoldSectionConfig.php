@@ -633,7 +633,8 @@ abstract class ScaffoldSectionConfig {
                 array_key_exists($viewerName, $valueViewers)
                 && $valueViewers[$viewerName]->getRelation()->getName() === $relationName
             ) {
-                $recordWithBackup[$columnName] = $recordWithBackup['__' . $columnName] = $value;
+                $recordWithBackup[$columnName] = $value;
+                $recordWithBackup['__' . $columnName] = is_resource($value) ? '[resource]' : $value;
                 $valueViewer = $valueViewers[$viewerName];
                 if (
                     is_object($valueViewer)
@@ -644,10 +645,14 @@ abstract class ScaffoldSectionConfig {
                     )
                 ) {
                     $recordWithBackup[$columnName] = $valueViewer->convertValue(
-                        $recordWithBackup[$columnName],
+                        $value,
                         $relationRecordData
                     );
+                } else if (is_resource($value)) {
+                    $recordWithBackup[$columnName] = '[resource]';
                 }
+            } else if (is_resource($value)) {
+                $recordWithBackup[$columnName] = '[resource]';
             }
         }
         return $recordWithBackup;
