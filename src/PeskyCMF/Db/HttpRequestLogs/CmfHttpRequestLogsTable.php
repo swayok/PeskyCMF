@@ -112,6 +112,15 @@ class CmfHttpRequestLogsTable extends AbstractTable {
     }
     
     /**
+     * Response will not be logged
+     * @return CmfHttpRequestLog
+     */
+    static public function ignoreResponseLogging() {
+        $currentLog = static::getCurrentLog();
+        return $currentLog->ignoreResponseLogging();
+    }
+    
+    /**
      * @param RecordInterface|null $user
      * @return CmfHttpRequestLog
      */

@@ -95,7 +95,9 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     protected $responseContentMinifier;
     /** @var \Closure|null */
     protected $requestDataMinifier;
-
+    /** * @var bool */
+    protected $ignoreResponseLogging = false;
+    
     /**
      * @return CmfHttpRequestLogsTable
      */
@@ -328,6 +330,11 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
             ? mb_substr($responseContent, 0, $maxSize) . ' ( value length limit reached )'
             : $responseContent;
     }
+    
+    public function ignoreResponseLogging() {
+        $this->ignoreResponseLogging = true;
+        return $this;
+    }
 
     /**
      * @param Request $request
@@ -336,6 +343,9 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @return $this
      */
     public function logResponse(Request $request, Response $response, ?RecordInterface $user = null) {
+        if ($this->ignoreResponseLogging) {
+            return $this;
+        }
         if ($this->isAllowed() || ($response->getStatusCode() >= 500)) {
             try {
                 if (!$this->hasValue('request')) {
