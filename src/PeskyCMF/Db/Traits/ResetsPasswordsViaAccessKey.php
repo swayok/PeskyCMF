@@ -44,23 +44,18 @@ trait ResetsPasswordsViaAccessKey {
     }
 
     /**
-     * Vlidate access key and find user
+     * Validate access key and find user
      * @param string $accessKey
-     * @return CmfDbRecord|bool - false = failed to parse access key, validate data or load user
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\OrmException
-     * @throws \PDOException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
+     * @return CmfDbRecord|null - null = failed to parse access key, validate data or load user
      */
     static public function loadFromPasswordRecoveryAccessKey(string $accessKey) {
         try {
             $data = \Crypt::decrypt($accessKey);
         } catch (DecryptException $exc) {
-            return false;
+            return null;
         }
         if (empty($data)) {
-            return false;
+            return null;
         }
         $data = json_decode($data, true);
         $now = new \DateTime('now', new \DateTimeZone('UTC'));
@@ -73,7 +68,7 @@ trait ResetsPasswordsViaAccessKey {
             || empty($data['expires_at'])
             || $data['expires_at'] < $now->getTimestamp()
         ) {
-            return false;
+            return null;
         }
         /** @var ResetsPasswordsViaAccessKey|CmfDbRecord $user */
         $user = static::newEmptyRecord();
@@ -83,7 +78,7 @@ trait ResetsPasswordsViaAccessKey {
         $additionalColumns = $data['added_keys'];
         foreach ($additionalColumns as $columnName) {
             if (!array_key_exists($columnName, $data)) {
-                return false;
+                return null;
             }
             $fieldType = $user::getColumn($columnName)->getType();
             switch ($fieldType) {
@@ -101,7 +96,7 @@ trait ResetsPasswordsViaAccessKey {
             }
         }
         if (!$user->fetch($conditions)->existsInDb()) {
-            return false;
+            return null;
         }
         return $user;
     }
