@@ -7,9 +7,10 @@ use PeskyORM\ORM\RecordInterface;
 use PeskyORMLaravel\Db\Column\Utils\FileConfig;
 use PeskyORMLaravel\Db\Column\Utils\FileInfo;
 use Ramsey\Uuid\Uuid;
+use Swayok\Utils\File;
 use Swayok\Utils\Folder;
 
-class UploadedTempFileInfo {
+class UploadedTempFileInfo extends \SplFileInfo {
 
     protected $name;
     protected $type;
@@ -30,8 +31,10 @@ class UploadedTempFileInfo {
     /**
      * @param UploadedFile|string|array $file
      * @param bool $save - true: if $file is UploadedFile or array - save it to disk
+     * @param bool $makeCopy - true: create a copy of uploaded file and return it instead of original
+     *      (use to create multiple records with same files attached)
      */
-    public function __construct($file, bool $save = false) {
+    public function __construct($file, bool $save = false, bool $makeCopy = false) {
         if (is_string($file)) {
             $this->decode($file);
         } else if (is_array($file)) {
@@ -46,17 +49,38 @@ class UploadedTempFileInfo {
         if (!$this->relativePath) {
             $this->relativePath = $this->makeRelativeFilePath();
         }
+        if ($makeCopy) {
+            $this->useCopiedFile();
+        }
         if ($save) {
             $this->save();
         }
+        parent::__construct($this->realPath);
+    }
+    
+    /**
+     * Replace real path by copied file real path returning modified instance
+     */
+    public function useCopiedFile() {
+        $copiedFilePath = $this->realPath . '.' . microtime(true);
+        File::load($this->getRealPath())->copy($copiedFilePath, true, 0666);
+        $this->realPath = $copiedFilePath;
+        return $this;
+    }
+    
+    /**
+     * Create a copy of this instance that uses a copy of original file
+     */
+    public function makeCopy() {
+        $copy = clone $this;
+        return $copy->useCopiedFile();
     }
 
     public function save() {
         if (!$this->isSaved) {
             $this->createSubfolder();
             $newRealPath = $this->makeAbsolutePath($this->getRelativePath());
-            move_uploaded_file($this->getRealPath(), $newRealPath);
-            chmod($newRealPath, 0666);
+            File::load($this->getRealPath())->move($newRealPath, 0666);
             $this->realPath = $newRealPath;
         }
         return $this;
@@ -81,6 +105,10 @@ class UploadedTempFileInfo {
     }
 
     public function getName(): string {
+        return $this->name;
+    }
+    
+    public function getFilename(): string {
         return $this->name;
     }
 
