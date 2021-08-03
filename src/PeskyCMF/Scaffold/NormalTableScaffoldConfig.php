@@ -62,7 +62,11 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 } else {
                     if (AbstractValueViewer::isComplexViewerName($config['column'])) {
                         [$colName, $keyName] = AbstractValueViewer::splitComplexViewerName($config['column']);
-                        $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$config['dir']}", false);
+                        if (static::getTable()->getTableStructure()->hasRelation($colName)) {
+                            $conditions['ORDER'][$colName . '.' . $keyName] = $config['dir'];
+                        } else {
+                            $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$config['dir']}", false);
+                        }
                     } else if (
                         $defaultDirectionWithNulls
                         && $config['column'] === $defaultOrderByColumn
