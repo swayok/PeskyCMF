@@ -309,9 +309,10 @@ abstract class AbstractValueViewer {
      * @param mixed $value
      * @param array $record
      * @param bool $ignoreValueConverter
+     * @param null|string $relationKey
      * @return mixed
      */
-    public function convertValue($value, array $record, $ignoreValueConverter = false) {
+    public function convertValue($value, array $record, $ignoreValueConverter = false, $relationKey = null) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
         if (!empty($valueConverter)) {
             if ($this->isLinkedToDbColumn()) {
@@ -333,9 +334,9 @@ abstract class AbstractValueViewer {
                 // by default (only when no value converter provided)
                 return '';
             } else if ($this->getType() === static::TYPE_LINK && $this->isLinkedToDbColumn()) {
-                return $this->buildLinkToExternalRecord($this->getTableColumn(), $record);
+                return $this->buildLinkToExternalRecord($this->getTableColumn(), $relationKey ? $record[$relationKey] : $record);
             } else {
-                return $this->doDefaultValueConversionByType($value, $this->type, $record);
+                return $this->doDefaultValueConversionByType($value, $this->type, $relationKey ? $record[$relationKey] : $record);
             }
         }
         return $value;

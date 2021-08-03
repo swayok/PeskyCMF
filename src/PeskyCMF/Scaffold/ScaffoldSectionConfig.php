@@ -540,10 +540,10 @@ abstract class ScaffoldSectionConfig {
                 if ($this->getTable()->getTableStructure()->getRelation($key)->getType() === Relation::HAS_MANY) {
                     $recordWithBackup[$key] = [];
                     foreach ($record[$key] as $index => $relationData) {
-                        $recordWithBackup[$key][$index] = $this->prepareRelatedRecord($key, $relationData, $index);
+                        $recordWithBackup[$key][$index] = $this->prepareRelatedRecord($key, $record, $index);
                     }
                 } else {
-                    $recordWithBackup[$key] = $this->prepareRelatedRecord($key, $record[$key]);
+                    $recordWithBackup[$key] = $this->prepareRelatedRecord($key, $record);
                 }
                 continue;
             }
@@ -621,13 +621,13 @@ abstract class ScaffoldSectionConfig {
      * Process related record's data by viewers attached to it
      * @param string $relationName
      * @param array $relationRecordData
-     * @param null|string $index - string: passed for HAS_MANY relation | null: for relations other then HAS_MANY
+     * @param null|string $index - string: passed for HAS_MANY relation | null: for relations other than HAS_MANY
      * @return array
      */
-    protected function prepareRelatedRecord($relationName, array $relationRecordData, $index = null) {
-        $recordWithBackup = $relationRecordData;
+    protected function prepareRelatedRecord($relationName, array $recordData, $index = null) {
+        $recordWithBackup = $recordData[$relationName];
         $valueViewers = $this->getViewersForRelations();
-        foreach ($relationRecordData as $columnName => $value) {
+        foreach ($recordData[$relationName] as $columnName => $value) {
             $viewerName = $relationName . '.' . ($index === null ? '' : $index . '.') . $columnName;
             if (
                 array_key_exists($viewerName, $valueViewers)
@@ -646,7 +646,9 @@ abstract class ScaffoldSectionConfig {
                 ) {
                     $recordWithBackup[$columnName] = $valueViewer->convertValue(
                         $value,
-                        $relationRecordData
+                        $recordData,
+                        false,
+                        $relationName
                     );
                 } else if (is_resource($value)) {
                     $recordWithBackup[$columnName] = '[resource]';
