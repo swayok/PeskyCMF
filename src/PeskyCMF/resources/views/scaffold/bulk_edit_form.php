@@ -49,7 +49,7 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                             <input type="hidden" name="_conditions" value="{{! it._conditions }}">
                         {{?}}
                     {{?}}
-                    <?php include __DIR__ . '/../input/password_inputs_autofill_disabler.php'; ?>
+                    <?php include __DIR__ . '/../input/login_inputs_autofill_disabler.php'; ?>
                     <div class="modal-body">
                     <?php
                         $enablerTooltip = $formConfig->translateGeneral('bulk_edit.enabler.tooltip');

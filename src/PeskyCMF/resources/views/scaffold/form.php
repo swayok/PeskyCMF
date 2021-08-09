@@ -148,7 +148,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                 <input type="hidden" name="_clone" value="{{= it.___pk_value }}">
             <?php echo $endIf; ?>
         <?php echo $endIf; ?>
-        <?php include __DIR__ . '/../input/password_inputs_autofill_disabler.php'; ?>
+        <?php include __DIR__ . '/../input/login_inputs_autofill_disabler.php'; ?>
         <div class="nav-tabs-custom mbn">
             <?php if ($hasTabs): ?>
                 <ul class="nav nav-tabs">
