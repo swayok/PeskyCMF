@@ -32,16 +32,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
         <div class="box box-primary">
             <form role="form" method="post" action="{{ cmfRoute('cmf_profile', [], false, $cmfConfig) }}" id="cmf-user-profile-form">
                 <input type="hidden" name="_method" value="PUT">
-                <!-- disable chrome email & password autofill -->
-                <input type="text" name="login" class="hidden" formnovalidate disabled>
-                <input type="password" class="hidden" formnovalidate disabled>
-                <input type="text" name="email" class="hidden" formnovalidate value="test@test.com" disabled>
-                <input type="password" class="hidden" formnovalidate disabled>
-                <input type="email" name="email" class="hidden" formnovalidate value="test@test.com" disabled>
-                <input type="password" class="hidden" formnovalidate disabled>
-                <input type="email" formnovalidate style="display: block; width: 0; height: 0; margin: 0; padding: 0; border: 0;" value="test@test.com">
-                <input type="password" formnovalidate style="display: block; width: 0; height: 0; margin: 0; padding: 0; border: 0;">
-                <!-- end of autofill disabler -->
+                <?php include __DIR__ . '/../input/password_inputs_autofill_disabler.php'; ?>
                 <div class="box-body">
                     @php($loginColumn = $authModule->getUserLoginColumnName())
                     @if ($loginColumn !== 'email')
