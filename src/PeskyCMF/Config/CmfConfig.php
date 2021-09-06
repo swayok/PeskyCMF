@@ -107,6 +107,10 @@ abstract class CmfConfig extends ConfigsContainer {
             __DIR__ . '/peskycmf.routes.php',
         ];
     }
+    
+    final static public function cmf_views_dir(): string {
+        return __DIR__ . '/../resources/views';
+    }
 
     /**
      * @return array

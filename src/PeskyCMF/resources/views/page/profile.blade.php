@@ -32,7 +32,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
         <div class="box box-primary">
             <form role="form" method="post" action="{{ cmfRoute('cmf_profile', [], false, $cmfConfig) }}" id="cmf-user-profile-form">
                 <input type="hidden" name="_method" value="PUT">
-                <?php include __DIR__ . '/../input/password_inputs_autofill_disabler.php'; ?>
+                <?php include $cmfConfig::cmf_views_dir() . '/input/password_inputs_autofill_disabler.php'; ?>
                 <div class="box-body">
                     @php($loginColumn = $authModule->getUserLoginColumnName())
                     @if ($loginColumn !== 'email')
