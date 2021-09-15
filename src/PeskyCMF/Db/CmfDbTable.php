@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Db;
 
-use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
 use PeskyORM\ORM\Record;
@@ -12,16 +11,12 @@ use Swayok\Utils\StringUtils;
 
 abstract class CmfDbTable extends Table {
 
-    /** @var null|ScaffoldConfig */
-    private $scaffoldConfig;
     /** @var null|string */
     private $recordClass;
     /** @var array */
     static private $timeZonesList;
     /** @var array */
     static private $timeZonesOptions;
-    /** @var int */
-    static private $currentTime;
 
     static public function getTimezonesList($asOptions = false) {
         if (self::$timeZonesList === null) {
@@ -41,23 +36,20 @@ abstract class CmfDbTable extends Table {
     }
 
     public function getCurrentTime() {
-        if (self::$currentTime === null) {
-            self::$currentTime = strtotime(static::selectValue(static::getCurrentTimeDbExpr()));
-        }
-        return self::$currentTime;
+        $result = static::selectValue(static::getCurrentTimeDbExpr());
+        return $result ? strtotime($result) : time();
     }
 
-    static public function getCurrentTimeDbExpr() {
+    static public function getCurrentTimeDbExpr(): DbExpr {
         return DbExpr::create('NOW()');
     }
 
     static public function _getCurrentTime() {
-        if (empty(self::$currentTime)) {
-            $ds = self::getConnection(false);
-            $query = 'SELECT ' . $ds->quoteDbExpr(static::getCurrentTimeDbExpr());
-            self::$currentTime = strtotime($ds->query($query, Utils::FETCH_VALUE));
-        }
-        return self::$currentTime;
+        $ds = self::getConnection(false);
+        $query = 'SELECT ' . $ds->quoteDbExpr(static::getCurrentTimeDbExpr());
+        /** @var string $result */
+        $result = $ds->query($query, Utils::FETCH_VALUE);
+        return $result ? strtotime($result) : time();
     }
 
     /**
