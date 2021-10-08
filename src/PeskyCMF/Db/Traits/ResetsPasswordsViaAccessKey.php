@@ -14,7 +14,7 @@ trait ResetsPasswordsViaAccessKey {
      * @param array|null $additionalColumns - additional columns to encode. Default: $this->getAdditionalColumnsForPasswordRecoveryAccessKey()
      * @return string
      */
-    public function getPasswordRecoveryAccessKey(?int $expiresIn = null, ?array $additionalColumns = null) {
+    public function getPasswordRecoveryAccessKey(?int $expiresIn = null, ?array $additionalColumns = null): string {
         /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
         $expiresInMinutes = $expiresIn > 0 ? $expiresIn : (int)config('auth.passwords.' . \Auth::getDefaultDriver() . '.expire', 60);
         $data = [
@@ -46,9 +46,10 @@ trait ResetsPasswordsViaAccessKey {
     /**
      * Validate access key and find user
      * @param string $accessKey
+     * @param null|array $requiredAdditionalColumns - list of $additionalColumns (see getPasswordRecoveryAccessKey) which must be present in $accessKey
      * @return CmfDbRecord|null - null = failed to parse access key, validate data or load user
      */
-    static public function loadFromPasswordRecoveryAccessKey(string $accessKey) {
+    static public function loadFromPasswordRecoveryAccessKey(string $accessKey, ?array $requiredAdditionalColumns = null) {
         try {
             $data = \Crypt::decrypt($accessKey);
         } catch (DecryptException $exc) {
@@ -76,6 +77,10 @@ trait ResetsPasswordsViaAccessKey {
             $user::getPrimaryKeyColumnName() => $data['account_id'],
         ];
         $additionalColumns = $data['added_keys'];
+        if ($requiredAdditionalColumns && empty(array_intersect($requiredAdditionalColumns, $additionalColumns))) {
+            // there are not enough required additional columns in this key
+            return null;
+        }
         foreach ($additionalColumns as $columnName) {
             if (!array_key_exists($columnName, $data)) {
                 return null;
