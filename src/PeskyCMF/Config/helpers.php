@@ -485,7 +485,7 @@ if (!function_exists('replaceDotJsInstertsInArrayValuesByUrlSafeInserts')) {
                 // there are dotJs inserts inside filters
                 foreach ($matches[1] as $i => $dotJsInsert) {
                     $replace = '__dotjs_' . $i . '_insert__';
-                    $ret['replaces'][$replace] = '{{' . trim($matches[$i][0], '{} ') . '}}';
+                    $ret['replaces'][$replace] = '{{' . trim($matches[0][$i], '{} ') . '}}';
                     $json = str_replace($dotJsInsert, $replace, $json);
                 }
                 $ret['data'] = json_decode($json, true);
