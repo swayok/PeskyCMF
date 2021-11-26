@@ -87,7 +87,9 @@ class CmfHttpRequestLogsTableStructure extends TableStructure {
 
     private function request() {
         return Column::create(Column::TYPE_JSON)
-            ->disallowsNullValues();
+            ->disallowsNullValues()
+            ->convertsEmptyStringToNull()
+            ->setDefaultValue('{}');
     }
 
     private function response() {
