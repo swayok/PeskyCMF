@@ -50,7 +50,11 @@ class LogHttpRequest {
      * @return mixed
      */
     public function handle($request, \Closure $next, $authGuard = null, $enableByDefault = true, ...$methods) {
-        $isAllowed = empty($methods) || preg_match('%' . implode('|', $methods) . '%i', $request->getMethod());
+        $isAllowed = (
+            empty($methods)
+            || preg_match('%' . implode('|', $methods) . '%i', $request->getMethod())
+            || !empty(array_get($request->route()->getAction(), 'log'))
+        );
         // reset logs to allow requests via test cases
         if (app()->bound(CmfHttpRequestLogsTable::class)) {
             $logsTable = app()->make(CmfHttpRequestLogsTable::class);
