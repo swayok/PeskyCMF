@@ -5944,6 +5944,7 @@ var DataGridSearchHelper = {
 
 var ScaffoldFormHelper = {
     loadOptions: function (resourceName, itemId, ignoreCache) {
+        ignoreCache = true;
         var deferred = $.Deferred();
         var query = itemId ? '?id=' + itemId : '';
         var cacheKey = resourceName + (itemId ? '' : String(itemId));
