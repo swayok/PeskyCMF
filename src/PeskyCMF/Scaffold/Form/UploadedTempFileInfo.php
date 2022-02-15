@@ -2,6 +2,10 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
+use App\Db\DbFileInfo;
+use App\Db\DbFileInfoV2;
+use App\Db\DbImageFileInfo;
+use App\Db\DbImageFileInfoV2;
 use Illuminate\Http\UploadedFile;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORMLaravel\Db\Column\Utils\FileConfig;
@@ -29,7 +33,7 @@ class UploadedTempFileInfo extends \SplFileInfo {
     }
 
     /**
-     * @param UploadedFile|string|array $file
+     * @param UploadedFile|string|array|DbFileInfo|DbFileInfoV2|DbImageFileInfo|DbImageFileInfoV2 $file
      * @param bool $save - true: if $file is UploadedFile or array - save it to disk
      * @param bool $makeCopy - true: create a copy of uploaded file and return it instead of original
      *      (use to create multiple records with same files attached)
@@ -41,6 +45,11 @@ class UploadedTempFileInfo extends \SplFileInfo {
             $this->name = $file['name'];
             $this->type = $file['type'];
             $this->realPath = $file['tmp_name'];
+        } else if ($file instanceof DbFileInfo) {
+            $this->name = $file->getFileNameWithExtension();
+            $this->type = $file->getMimeType();
+            $this->realPath = $file->getFilePath(array_keys($file->getColumn()->getImageVersionsConfigs())[0]);
+            $this->isSaved = true;
         } else {
             $this->name = $file->getClientOriginalName();
             $this->type = $file->getClientMimeType();
