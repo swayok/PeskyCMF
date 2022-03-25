@@ -17,6 +17,9 @@ use PeskyORMLaravel\Db\Column\RecordPositionColumn;
 use Symfony\Component\HttpFoundation\Response;
 
 abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
+    
+    protected $goBackAfterCreation = false;
+    protected $goBackAfterEditing = false;
 
     public function getRecordsForDataGrid() {
         if (!$this->isSectionAllowed()) {
@@ -561,9 +564,10 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
      * @return string|null - null will close modal or return to previous page
      */
     protected function getRedirectUrlAfterDataSaved(bool $created, RecordInterface $object): ?string {
-        $url = 'reload';
         if ($created && empty($this->getRequest()->input('create_another'))) {
-            $url = static::getUrlToItemEditForm($object->getPrimaryKeyValue());
+            $url = $this->goBackAfterCreation ? 'back' : static::getUrlToItemEditForm($object->getPrimaryKeyValue());
+        } else {
+            $url = (!$created && $this->goBackAfterEditing) ? 'back' : 'reload';
         }
         return $url;
     }
