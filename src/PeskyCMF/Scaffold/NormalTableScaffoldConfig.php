@@ -402,17 +402,18 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             if (($isCreation && $valueViewer->isShownOnCreate()) || (!$isCreation && $valueViewer->isShownOnEdit())) {
                 if ($valueViewer::isComplexViewerName($valueViewer->getName())) {
                     [$colName, ] = $valueViewer::splitComplexViewerName($valueViewer->getName());
-                    $expectedDataKeys[] = $colName;
+                    $expectedDataKeys[$colName] = $colName;
                 } else {
-                    $expectedDataKeys[] = $valueViewer->getName();
+                    $expectedDataKeys[$valueViewer->getName()] = $valueViewer->getName();
                 }
             }
         }
         if (!$isCreation) {
-            $expectedDataKeys[] = static::getTable()->getPkColumnName();
+            $expectedDataKeys[static::getTable()->getPkColumnName()] = static::getTable()->getPkColumnName();
         }
 
-        return $this->getRequest()->only($expectedDataKeys);
+        $data = $this->getRequest()->all();
+        return array_intersect_key($data, $expectedDataKeys);
     }
 
     /**

@@ -688,7 +688,7 @@ class FormConfig extends ScaffoldSectionConfig {
             if ($formInput::isComplexViewerName($inputName)) {
                 $inputName = implode('.', $formInput::splitComplexViewerName($inputName));
             }
-            if (!$isBulkEdit || array_has($data, $inputName)) {
+            if (array_has($data, $inputName)) {
                 array_set($data, $inputName, $formInput->modifySubmitedValueBeforeValidation(array_get($data, $inputName, ''), $data));
             }
         }
