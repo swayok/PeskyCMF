@@ -456,16 +456,26 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 } else {
                     $columnsToLog = [];
                 }
-                $data = $record->existsInDb() ? $record->toArray($columnsToLog, $relationsToLog ?: ['*']) : [];
-                ksort($data);
                 $this
                     ->logDbRecordUsage($record, $tableName)
-                    ->setDataBefore($data);
+                    ->setDataBefore(
+                        $record->existsInDb()
+                            ? $this->normalizeDbRecordData($record->toArray($columnsToLog, $relationsToLog ?: ['*']))
+                            : []
+                    );
             } catch (\Exception $exception) {
                 $this->logException($exception);
             }
         }
         return $this;
+    }
+    
+    private function normalizeDbRecordData(array $data): array {
+        $data = array_filter($data, function ($value) {
+            return !is_resource($value);
+        });
+        ksort($data);
+        return $data;
     }
 
     /**
@@ -486,9 +496,11 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
                 } else {
                     $columnsToLog = [];
                 }
-                $data = $record->existsInDb() ? $record->toArray($columnsToLog, $relationsToLog ?: ['*']) : [];
-                ksort($data);
-                $this->setDataAfter($data);
+                $this->setDataAfter(
+                    $record->existsInDb()
+                        ? $this->normalizeDbRecordData($record->toArray($columnsToLog, $relationsToLog ?: ['*']))
+                        : []
+                );
             } catch (\Exception $exception) {
                 $this->logException($exception);
             }
