@@ -346,23 +346,13 @@ trait CacheForDbSelects {
                         }
                     );
                     return static::_getCachedData(false, $cacheSettings, function () use ($configurator, $columns, $conditions) {
-                        return parent::selectAsArrayFromCache($columns, $conditions, $configurator);
+                        return parent::select($columns, $conditions, $configurator)->toArrays();
                     });
                 }
             }
         }
         unset($conditions['CACHE']);
-        return parent::selectAsArrayFromCache($columns, $conditions, $configurator);
-    }
-    
-    /**
-     * @see selectAsArrayFromCache()
-     */
-    public function selectFromCache($columns = '*', $conditionsAndOptions = null, ?\Closure $configurator = null) {
-        if (static::cachingIsPossible()) {
-            static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
-        }
-        return static::selectAsArrayFromCache($columns, $conditionsAndOptions, $configurator);
+        return parent::select($columns, $conditions, $configurator)->toArrays();
     }
     
     /**
