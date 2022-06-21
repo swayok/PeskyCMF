@@ -657,7 +657,7 @@ if (!function_exists('formatDate')) {
      * @param string|int|CarbonInterface|null $date
      * @param bool $addTime
      * @param string $yearSuffix - 'none', 'full', 'short' or custom value
-     * @param bool|string|integer $ignoreYear
+     * @param bool|string|int $ignoreYear
      *      - false: year will be added
      *      - true: year will not be added;
      *      - 'current': drop year only when it is same as current
@@ -665,9 +665,15 @@ if (!function_exists('formatDate')) {
      *      - other values: year will be added
      * @return string
      */
-    function formatDate(string|int|CarbonInterface|null $date, bool $addTime = false, string $yearSuffix = 'full', $ignoreYear = false): string {
+    function formatDate(
+        string|int|CarbonInterface|null $date,
+        bool $addTime = false,
+        string $yearSuffix = 'full',
+        bool|string|int $ignoreYear = false,
+        ?string $default = ''
+    ): string | null {
         if (!$date) {
-            return '';
+            return $default;
         }
         if (!($date instanceof CarbonInterface)) {
             if (is_numeric($date)) {
