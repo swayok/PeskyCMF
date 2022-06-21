@@ -322,7 +322,7 @@ trait CacheForDbSelects {
      *  - numeric or \DateTime: cache timeout, key and tags are set to default values
      *  - string: cache tag, timeout and tags are set to default
      */
-    static public function selectAsArray($columns = '*', array $conditions = [], ?\Closure $configurator = null): array {
+    static public function selectAsArrayFromCache($columns = '*', array $conditions = [], ?\Closure $configurator = null): array {
         if (static::cachingIsPossible()) {
             $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
             $timeout = static::getAutoCacheTimeoutForSelectManyInMinutes();
@@ -346,23 +346,23 @@ trait CacheForDbSelects {
                         }
                     );
                     return static::_getCachedData(false, $cacheSettings, function () use ($configurator, $columns, $conditions) {
-                        return parent::selectAsArray($columns, $conditions, $configurator);
+                        return parent::selectAsArrayFromCache($columns, $conditions, $configurator);
                     });
                 }
             }
         }
         unset($conditions['CACHE']);
-        return parent::selectAsArray($columns, $conditions, $configurator);
+        return parent::selectAsArrayFromCache($columns, $conditions, $configurator);
     }
     
     /**
-     * @see selectAsArray()
+     * @see selectAsArrayFromCache()
      */
     public function selectFromCache($columns = '*', $conditionsAndOptions = null, ?\Closure $configurator = null) {
         if (static::cachingIsPossible()) {
             static::addCacheOptionToConditionsAndOptions($conditionsAndOptions);
         }
-        return static::selectAsArray($columns, $conditionsAndOptions, $configurator);
+        return static::selectAsArrayFromCache($columns, $conditionsAndOptions, $configurator);
     }
     
     /**
@@ -399,11 +399,11 @@ trait CacheForDbSelects {
     }
     
     /**
-     * @inheritDoc
      * Also you can use 'CACHE' option. See description of select() method
      */
-    static public function count(array $conditions = [], ?\Closure $configurator = null, bool $removeNotInnerJoins = false): int {
+    static public function countFromCache(array $conditions = [], ?\Closure $configurator = null, bool $removeNotInnerJoins = false): int {
         if (static::cachingIsPossible()) {
+            static::addCacheOptionToConditionsAndOptions($conditions);
             $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
             $timeout = static::getAutoCacheTimeoutForSelectManyInMinutes();
             if (
@@ -442,21 +442,11 @@ trait CacheForDbSelects {
     }
     
     /**
-     * @see count()
-     */
-    static public function countFromCache(array $conditions = [], ?\Closure $configurator = null, $removeNotInnerJoins = false) {
-        if (static::cachingIsPossible()) {
-            static::addCacheOptionToConditionsAndOptions($conditions);
-        }
-        return static::count($conditions, $configurator, $removeNotInnerJoins);
-    }
-    
-    /**
-     * @inheritDoc
      * Also you can use 'CACHE' option. See description of select() method
      */
-    static public function selectValue(DbExpr $expression, array $conditions = [], ?\Closure $configurator = null): ?string {
+    static public function selectValueFromCache(DbExpr $expression, array $conditions = [], ?\Closure $configurator = null): ?string {
         if (static::cachingIsPossible()) {
+            static::addCacheOptionToConditionsAndOptions($conditions);
             $hasCacheOption = is_array($conditions) && array_key_exists('CACHE', $conditions);
             $timeout = static::getAutoCacheTimeoutForSelectOneInMinutes();
             if (
@@ -494,21 +484,12 @@ trait CacheForDbSelects {
     }
     
     /**
-     * @see selectValue()
-     */
-    static public function selectValueFromCache(DbExpr $expression, array $conditions = [], ?\Closure $configurator = null): ?string {
-        if (static::cachingIsPossible()) {
-            static::addCacheOptionToConditionsAndOptions($conditions);
-        }
-        return static::selectValue($expression, $conditions, $configurator);
-    }
-    
-    /**
      * @inheritDoc
      * Also you can use 'CACHE' option. See description of select() method
      */
-    static public function selectOne($columns, array $conditions, ?\Closure $configurator = null): array {
+    static public function selectOneFromCache($columns, array $conditions, ?\Closure $configurator = null): array {
         if (static::cachingIsPossible()) {
+            static::addCacheOptionToConditionsAndOptions($conditions, true);
             if (empty($conditions)) {
                 throw new \InvalidArgumentException('Selecting one record without conditions is not allowed');
             }
@@ -543,22 +524,8 @@ trait CacheForDbSelects {
         return parent::selectOne($columns, $conditions, $configurator);
     }
     
-    /**
-     * @see selectOne()
-     */
-    static public function selectOneFromCache($columns, array $conditions, ?\Closure $configurator = null) {
-        if (static::cachingIsPossible()) {
-            static::addCacheOptionToConditionsAndOptions($conditions, true);
-        }
-        return static::selectOne($columns, $conditions, $configurator);
-    }
-    
-    /**
-     * @inheritDoc
-     * Also you can use 'CACHE' option. See description of select() method
-     */
-    static public function selectOneAsDbRecord($columns, array $conditions, ?\Closure $configurator = null): RecordInterface {
-        $data = static::selectOne($columns, $conditions, $configurator);
+    static public function selectOneFromCacheAsDbRecord($columns, array $conditions, ?\Closure $configurator = null): RecordInterface {
+        $data = static::selectOneFromCache($columns, $conditions, $configurator);
         return static::getInstance()->newRecord()->fromData($data, true, false);
     }
     
