@@ -48,7 +48,11 @@ class UploadedTempFileInfo extends \SplFileInfo {
         } else if ($file instanceof DbFileInfo) {
             $this->name = $file->getFileNameWithExtension();
             $this->type = $file->getMimeType();
-            $this->realPath = $file->getFilePath(array_keys($file->getColumn()->getImageVersionsConfigs())[0]);
+            if ($file instanceof DbImageFileInfo) {
+                $this->realPath = $file->getFilePath(array_keys($file->getColumn()->getImageVersionsConfigs())[0]);
+            } else {
+                $this->realPath = $file->getFilePath();
+            }
             $this->isSaved = true;
         } else {
             $this->name = $file->getClientOriginalName();
