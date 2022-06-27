@@ -46,7 +46,7 @@ class UploadedTempFileInfo extends \SplFileInfo {
             $this->type = $file['type'];
             $this->realPath = $file['tmp_name'];
         } else if ($file instanceof DbFileInfo) {
-            $this->name = $file->getFileNameWithExtension();
+            $this->name = $file->getOriginalFileNameWithExtension();
             $this->type = $file->getMimeType();
             if ($file instanceof DbImageFileInfo) {
                 $this->realPath = $file->getFilePath(array_keys($file->getColumn()->getImageVersionsConfigs())[0]);
