@@ -713,20 +713,32 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $idsField = $inputNamePrefix . 'ids';
         $conditionsField = $inputNamePrefix . 'conditions';
         $pkColumnName = static::getTable()->getPkColumnName();
-        if ($this->getRequest()->has($idsField)) {
-            $this->validate($this->getRequest(), [
+        $request = $this->getRequest();
+        if ($request->has($idsField)) {
+            if (is_string($request->get($idsField))) {
+                $this->validate($request, [
+                    $idsField => 'required|json'
+                ]);
+                $ids = json_decode($request->get($idsField), true);
+                if ($request->query($idsField)) {
+                    $request->query->set($idsField, $ids);
+                } else {
+                    $request->request->set($idsField, $ids);
+                }
+            }
+            $this->validate($request, [
                 $idsField => 'required|array',
                 $idsField . '.*' => 'integer|min:1',
             ]);
             $conditions = $specialConditions;
-            $conditions[$pkColumnName] = $this->getRequest()->input($idsField);
+            $conditions[$pkColumnName] = $request->input($idsField);
             return $conditions;
-        } else if ($this->getRequest()->has($conditionsField)) {
-            $this->validate($this->getRequest(), [
-                $conditionsField => 'string|regex:%^[\{\[].*[\}\]]$%s',
+        } else if ($request->has($conditionsField)) {
+            $this->validate($request, [
+                $conditionsField => 'string|json$%s',
             ]);
-            $encodedConditions = $this->getRequest()->input($conditionsField) !== ''
-                ? json_decode($this->getRequest()->input($conditionsField), true)
+            $encodedConditions = $request->input($conditionsField) !== ''
+                ? json_decode($request->input($conditionsField), true)
                 : [];
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
                 abort(cmfJsonResponseForValidationErrors(
