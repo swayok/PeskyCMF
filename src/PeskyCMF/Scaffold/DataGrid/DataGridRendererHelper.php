@@ -181,25 +181,10 @@ class DataGridRendererHelper {
     public function getBulkActions() {
         $bulkActions = [];
         $placeFirst = [];
-        if ($this->dataGridConfig->isAllowedMultiRowSelection()) {
+        $pkName = $this->table->getPkColumnName();
+        $isAllowedMultiRowSelection = $this->dataGridConfig->isAllowedMultiRowSelection();
+        if ($isAllowedMultiRowSelection) {
             /** @noinspection StaticInvocationViaThisInspection */
-            $pkName = $this->table->getPkColumnName();
-            foreach ($this->dataGridConfig->getBulkActionsToolbarItems() as $key => $bulkAction) {
-                if ($bulkAction instanceof Tag) {
-                    $bulkAction = $bulkAction->build();
-                } else if ($bulkAction instanceof CmfMenuItem) {
-                    /** @var CmfBulkActionMenuItem $bulkAction */
-                    if (empty($bulkAction->getPrimaryKeyColumnName())) {
-                        $bulkAction->setPrimaryKeyColumnName($pkName);
-                    }
-                    $bulkAction = $bulkAction->renderAsBootstrapDropdownMenuItem();
-                }
-                if (is_string($key)) {
-                    $bulkActions[$key] = $bulkAction;
-                } else {
-                    $bulkActions[] = $bulkAction;
-                }
-            }
             if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isBulkItemsDeleteAllowed()) {
                 $action = CmfMenuItem::bulkActionOnSelectedRows(cmfRoute('cmf_api_delete_bulk', [$this->resourceName]), 'delete')
                     ->setTitle($this->dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
@@ -250,6 +235,25 @@ class DataGridRendererHelper {
                 $bulkActions['edit_filtered'] = $action;
             } else {
                 $placeFirst[] = $action;
+            }
+        }
+        foreach ($this->dataGridConfig->getBulkActionsToolbarItems() as $key => $bulkAction) {
+            if ($bulkAction instanceof Tag) {
+                $bulkAction = $bulkAction->build();
+            } else if ($bulkAction instanceof CmfBulkActionMenuItem) {
+                if (!$isAllowedMultiRowSelection && $bulkAction->getActionType() === CmfBulkActionMenuItem::ACTION_TYPE_BULK_SELECTED) {
+                    // it is imposible to use bulk action on selected rows while there are no checkboxes to select rows
+                    continue;
+                }
+                if (empty($bulkAction->getPrimaryKeyColumnName())) {
+                    $bulkAction->setPrimaryKeyColumnName($pkName);
+                }
+                $bulkAction = $bulkAction->renderAsBootstrapDropdownMenuItem();
+            }
+            if (is_string($key)) {
+                $bulkActions[$key] = $bulkAction;
+            } else {
+                $bulkActions[] = $bulkAction;
             }
         }
         return array_merge($placeFirst, array_values($bulkActions));

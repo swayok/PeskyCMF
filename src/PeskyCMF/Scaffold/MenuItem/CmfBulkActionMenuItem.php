@@ -10,6 +10,9 @@ class CmfBulkActionMenuItem extends CmfRequestMenuItem {
     protected $sendSelectedItemsList = true;
     /** @var string  */
     protected $primaryKeyColumnName = 'id';
+    
+    public const ACTION_TYPE_BULK_SELECTED = 'bulk-selected';
+    public const ACTION_TYPE_BULK_FILTERED = 'bulk-filtered';
 
     /**
      * CmfRequestMenuItem constructor.
@@ -27,7 +30,7 @@ class CmfBulkActionMenuItem extends CmfRequestMenuItem {
      * @return string
      */
     public function getActionType(): string {
-        return $this->sendSelectedItemsList ? 'bulk-selected' : 'bulk-filtered';
+        return $this->sendSelectedItemsList ? static::ACTION_TYPE_BULK_SELECTED : static::ACTION_TYPE_BULK_FILTERED;
     }
 
     /**
