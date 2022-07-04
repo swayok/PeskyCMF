@@ -4,15 +4,15 @@ namespace PeskyCMF\Scaffold\MenuItem;
 
 use Swayok\Html\Tag;
 
-class CmfBulkActionMenuItem extends CmfRequestMenuItem {
+class CmfBulkActionRedirectMenuItem extends CmfRedirectMenuItem {
 
     /** @var bool */
     protected $sendSelectedItemsList = true;
     /** @var string  */
     protected $primaryKeyColumnName = 'id';
     
-    public const ACTION_TYPE_BULK_SELECTED = 'bulk-selected';
-    public const ACTION_TYPE_BULK_FILTERED = 'bulk-filtered';
+    public const ACTION_TYPE_BULK_SELECTED = CmfBulkActionMenuItem::ACTION_TYPE_BULK_SELECTED;
+    public const ACTION_TYPE_BULK_FILTERED = CmfBulkActionMenuItem::ACTION_TYPE_BULK_FILTERED;
     
     /**
      * CmfRequestMenuItem constructor.
@@ -21,8 +21,8 @@ class CmfBulkActionMenuItem extends CmfRequestMenuItem {
      * @param bool $sendSelectedItemsList
      * @throws \InvalidArgumentException
      */
-    protected function __construct(string $url, string $httpMethod, bool $sendSelectedItemsList = true) {
-        parent::__construct($url, $httpMethod);
+    protected function __construct(string $url, bool $sendSelectedItemsList = true) {
+        parent::__construct($url);
         $this->sendSelectedItemsList = $sendSelectedItemsList;
     }
 
@@ -54,9 +54,14 @@ class CmfBulkActionMenuItem extends CmfRequestMenuItem {
      * @param Tag $tag
      * @return Tag
      */
-    protected function modifyTagBeforeRendering(Tag $tag) {
+    protected function addCommonAttributes(Tag $tag): Tag {
+        parent::addCommonAttributes($tag);
+        $tag->setDataAttr('action', $this->getActionType() . '-redirect');
         if ($this->sendSelectedItemsList) {
             $tag->setDataAttr('id-field', $this->getPrimaryKeyColumnName());
+        }
+        if ($this->openOnNewTab) {
+            $tag->setTarget('_blank');
         }
         return $tag;
     }

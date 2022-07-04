@@ -3,6 +3,7 @@
 namespace PeskyCMF\Scaffold\DataGrid;
 
 use PeskyCMF\Scaffold\MenuItem\CmfBulkActionMenuItem;
+use PeskyCMF\Scaffold\MenuItem\CmfBulkActionRedirectMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRedirectMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRequestMenuItem;
@@ -181,10 +182,10 @@ class DataGridRendererHelper {
     public function getBulkActions() {
         $bulkActions = [];
         $placeFirst = [];
+        /** @noinspection StaticInvocationViaThisInspection */
         $pkName = $this->table->getPkColumnName();
         $isAllowedMultiRowSelection = $this->dataGridConfig->isAllowedMultiRowSelection();
         if ($isAllowedMultiRowSelection) {
-            /** @noinspection StaticInvocationViaThisInspection */
             if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isBulkItemsDeleteAllowed()) {
                 $action = CmfMenuItem::bulkActionOnSelectedRows(cmfRoute('cmf_api_delete_bulk', [$this->resourceName]), 'delete')
                     ->setTitle($this->dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
@@ -240,8 +241,8 @@ class DataGridRendererHelper {
         foreach ($this->dataGridConfig->getBulkActionsToolbarItems() as $key => $bulkAction) {
             if ($bulkAction instanceof Tag) {
                 $bulkAction = $bulkAction->build();
-            } else if ($bulkAction instanceof CmfBulkActionMenuItem) {
-                if (!$isAllowedMultiRowSelection && $bulkAction->getActionType() === CmfBulkActionMenuItem::ACTION_TYPE_BULK_SELECTED) {
+            } else if ($bulkAction instanceof CmfBulkActionMenuItem || $bulkAction instanceof CmfBulkActionRedirectMenuItem) {
+                if (!$isAllowedMultiRowSelection && $bulkAction->getActionType() === $bulkAction::ACTION_TYPE_BULK_SELECTED) {
                     // it is imposible to use bulk action on selected rows while there are no checkboxes to select rows
                     continue;
                 }

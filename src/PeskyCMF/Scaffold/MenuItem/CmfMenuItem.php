@@ -61,6 +61,24 @@ abstract class CmfMenuItem {
     static public function bulkActionOnFilteredRows(string $url, string $method = 'post') {
         return new CmfBulkActionMenuItem($url, $method, false);
     }
+    
+    /**
+     * @param string $url
+     * @param string $method
+     * @return CmfBulkActionRedirectMenuItem
+     */
+    static public function bulkActionRedirectOnSelectedRows(string $url) {
+        return new CmfBulkActionRedirectMenuItem($url, true);
+    }
+    
+    /**
+     * @param string $url
+     * @param string $method
+     * @return CmfBulkActionRedirectMenuItem
+     */
+    static public function bulkActionRedirectOnFilteredRows(string $url) {
+        return new CmfBulkActionRedirectMenuItem($url, false);
+    }
 
     /**
      * Render menu item as <a> or <button>

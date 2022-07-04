@@ -881,19 +881,44 @@ var ScaffoldDataGridHelper = {
     initClickEvents: function ($tableWrapper, $table, configs) {
         var api = $table.dataTable().api();
         $tableWrapper.on('click tap', '[data-action]', function (event) {
-            event.preventDefault();
             var $el = $(this);
+            var action = String($el.attr('data-action')).toLowerCase();
+            if (action.match(/redirect/i) === null) {
+                event.preventDefault();
+            }
             if ($el.hasClass('disabled')) {
                 return false;
             }
             if (ScaffoldActionsHelper.beforeDataActionHandling($el, $table) === false) {
                 return false;
             }
-            var action = String($el.attr('data-action')).toLowerCase();
+
             switch (action) {
                 case 'reload':
                     api.ajax.reload(null, false);
                     break;
+                case 'bulk-filtered-redirect':
+                case 'bulk-selected-redirect':
+                    if (!$el.attr('href')) {
+                        return false;
+                    }
+                    var url;
+                    if (!$el.data('original-url')) {
+                        url = $el.attr('href');
+                        $el.data('original-url', url);
+                    } else {
+                        url = $el.data('original-url');
+                    }
+                    if (action === 'bulk-filtered-redirect') {
+                        $el.attr('href', url + '?conditions=' + encodeURIComponent(JSON.stringify(api.search())));
+                    } else {
+                        var data = $(this).data('data');
+                        if (!data.ids || !$.isArray(data.ids) || data.ids.length === 0) {
+                            return false;
+                        }
+                        $el.attr('href', url + '?ids=' + encodeURIComponent(JSON.stringify(data.ids)));
+                    }
+                    return true;
                 case 'bulk-filtered':
                     $el.data('data', {conditions: api.search()});
                     $el.attr('data-block-datagrid', '1');
@@ -1062,10 +1087,10 @@ var ScaffoldDataGridHelper = {
     },
     initBulkLinks: function ($table, $tableWrapper, configs) {
         var $selectionLinks = $tableWrapper.find(
-            '[data-action="bulk-selected"], [data-action="bulk-edit-selected"], [data-type="bulk-selected"], [data-type="bulk-edit-selected"]'
+            '[data-action="bulk-selected"], [data-action="bulk-edit-selected"], [data-action="bulk-selected-redirect"], [data-type="bulk-selected"], [data-type="bulk-edit-selected"], [data-type="bulk-selected-redirect"]'
         );
         var $fitleringLinks = $tableWrapper.find(
-            '[data-action="bulk-filtered"], [data-action="bulk-edit-filtered"], [data-type="bulk-filtered"], [data-type="bulk-edit-filtered"]'
+            '[data-action="bulk-filtered"], [data-action="bulk-filtered-redirect"], [data-action="bulk-edit-filtered"], [data-type="bulk-filtered"], [data-type="bulk-edit-filtered"], [data-type="bulk-filtered-redirect"]'
         );
         if (!$selectionLinks.length && !$fitleringLinks.length) {
             return;
