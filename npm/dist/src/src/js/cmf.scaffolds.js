@@ -910,7 +910,7 @@ var ScaffoldDataGridHelper = {
                         url = $el.data('original-url');
                     }
                     if (action === 'bulk-filtered-redirect') {
-                        $el.attr('href', url + '?conditions=' + encodeURIComponent(JSON.stringify(api.search())));
+                        $el.attr('href', url + '?conditions=' + encodeURIComponent(api.search()));
                     } else {
                         var data = $(this).data('data');
                         if (!data.ids || !$.isArray(data.ids) || data.ids.length === 0) {

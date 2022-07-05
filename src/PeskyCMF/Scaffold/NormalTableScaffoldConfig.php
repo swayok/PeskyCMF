@@ -731,15 +731,13 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $idsField . '.*' => 'integer|min:1',
             ]);
             $conditions = $specialConditions;
-            $conditions[$pkColumnName] = $request->input($idsField);
+            $conditions[$pkColumnName] = $request->get($idsField);
             return $conditions;
         } else if ($request->has($conditionsField)) {
             $this->validate($request, [
                 $conditionsField => 'string|json',
             ]);
-            $encodedConditions = $request->input($conditionsField) !== ''
-                ? json_decode($request->input($conditionsField), true)
-                : [];
+            $encodedConditions = json_decode($request->get($conditionsField), true);
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
                 abort(cmfJsonResponseForValidationErrors(
                     [$conditionsField => 'Not empty JSON array expected'],
