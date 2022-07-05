@@ -735,14 +735,14 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $conditions;
         } else if ($request->has($conditionsField)) {
             $this->validate($request, [
-                $conditionsField => 'string|json$%s',
+                $conditionsField => 'string|json',
             ]);
             $encodedConditions = $request->input($conditionsField) !== ''
                 ? json_decode($request->input($conditionsField), true)
                 : [];
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
                 abort(cmfJsonResponseForValidationErrors(
-                    [$conditionsField => 'JSON expected'],
+                    [$conditionsField => 'Not empty JSON array expected'],
                     $this->translateGeneral('message.validation_errors')
                 ));
             }
