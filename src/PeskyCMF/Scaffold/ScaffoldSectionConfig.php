@@ -584,7 +584,6 @@ abstract class ScaffoldSectionConfig {
                     }
                     array_set($recordWithBackup, $colName, $value);
                     array_set($recordWithBackup, '__' . $colName, $value);
-
                 }
                 if (
                     method_exists($valueViewer, 'convertValue')
@@ -607,7 +606,7 @@ abstract class ScaffoldSectionConfig {
                 )
             ) {
                 $convertedValue = $valueViewer->convertValue(null, $record);
-                $recordWithBackup[$safeKey] = $convertedValue;
+                array_set($recordWithBackup, $safeKey, $convertedValue);
             }
         }
         if (!empty($customData) && is_array($customData)) {
