@@ -27,7 +27,9 @@ class CmfAuth
                 : new RedirectResponse($loginUrl);
         } else {
             /** @var RecordInterface|Authenticatable $user */
-            $cmfConfig->getLaravelApp()->make('events')->dispatch(new CmfUserAuthenticated($cmfConfig::getUser()));
+            $cmfConfig->getLaravelApp()
+                ->make('events')
+                ->dispatch(new CmfUserAuthenticated($cmfConfig::getUser(), $cmfConfig));
             
             $response = $next($request);
             if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
