@@ -3,3 +3,6 @@
 /npm/package-lock.json
 /npm/yarn.lock
 /npm/mix.js.map
+composer.lock
+/vendor
+/.idea
