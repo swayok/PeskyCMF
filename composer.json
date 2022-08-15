@@ -25,12 +25,6 @@
             "PeskyCMF\\": "src"
         }
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
-        }
-    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
@@ -42,7 +36,9 @@
         "swayok/laravel-language-detector": "dev-master"
     },
     "suggest": {
-        "swayok/laravel-antihack-tool": "master@dev - active hack protection tool",
+        "swayok/laravel-antihack-tool": "active hack protection tool (dev-master branch)",
+        "swayok/alternative-laravel-cache": "alternative tagged and hierarchial cache drivers for Laravel",
+        "swayok/laravel-extended-errors": "faster and more informative replacement for Laravel's Whoops",
         "npm or yarn": "Install node.js and yarn"
     }
 }
