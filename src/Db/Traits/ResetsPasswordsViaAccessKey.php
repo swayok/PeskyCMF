@@ -1,22 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
 use PeskyCMF\Db\CmfDbRecord;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\RecordInterface;
 
-trait ResetsPasswordsViaAccessKey {
-
+trait ResetsPasswordsViaAccessKey
+{
+    
     /**
-     * @param int|null $expiresIn - minutes until expiration. Default: config('auth.passwords.' . \Auth::getDefaultDriver() . '.expire', 60)
+     * @param int|null $expiresIn - minutes until expiration. Default: config('auth.passwords.' . app('auth')->getDefaultDriver() . '.expire', 60)
      * @param array|null $additionalColumns - additional columns to encode. Default: $this->getAdditionalColumnsForPasswordRecoveryAccessKey()
      * @return string
      */
-    public function getPasswordRecoveryAccessKey(?int $expiresIn = null, ?array $additionalColumns = null): string {
+    public function getPasswordRecoveryAccessKey(?int $expiresIn = null, ?array $additionalColumns = null): string
+    {
         /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
-        $expiresInMinutes = $expiresIn > 0 ? $expiresIn : (int)config('auth.passwords.' . \Auth::getDefaultDriver() . '.expire', 60);
+        $expiresInMinutes = $expiresIn > 0 ? $expiresIn : (int)config('auth.passwords.' . app('auth')->getDefaultDriver() . '.expire', 60);
         $data = [
             'account_id' => $this->getPrimaryKeyValue(),
             'expires_at' => (new \DateTime('now', new \DateTimeZone('UTC')))->getTimestamp() + $expiresInMinutes * 60,
@@ -29,29 +35,31 @@ trait ResetsPasswordsViaAccessKey {
         foreach ($additionalColumns as $columnName) {
             $data[$columnName] = $this->getValue($columnName);
         }
-        return \Crypt::encrypt(json_encode($data));
+        return Crypt::encrypt(json_encode($data));
     }
-
-    public function getAdditionalColumnsForPasswordRecoveryAccessKey() {
+    
+    public function getAdditionalColumnsForPasswordRecoveryAccessKey(): array
+    {
         /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
         $columns = [];
         if ($this::hasColumn('updated_at')) {
             $columns[] = 'updated_at';
-        } else if ($this::hasColumn('password')) {
+        } elseif ($this::hasColumn('password')) {
             $columns[] = 'password';
         }
         return $columns;
     }
-
+    
     /**
      * Validate access key and find user
      * @param string $accessKey
      * @param null|array $requiredAdditionalColumns - list of $additionalColumns (see getPasswordRecoveryAccessKey) which must be present in $accessKey
-     * @return CmfDbRecord|null - null = failed to parse access key, validate data or load user
+     * @return RecordInterface|null - null = failed to parse access key, validate data or load user
      */
-    public static function loadFromPasswordRecoveryAccessKey(string $accessKey, ?array $requiredAdditionalColumns = null) {
+    public static function loadFromPasswordRecoveryAccessKey(string $accessKey, ?array $requiredAdditionalColumns = null): ?RecordInterface
+    {
         try {
-            $data = \Crypt::decrypt($accessKey);
+            $data = Crypt::decrypt($accessKey);
         } catch (DecryptException $exc) {
             return null;
         }

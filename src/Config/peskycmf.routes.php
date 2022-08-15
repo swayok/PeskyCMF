@@ -1,5 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\Middleware\AjaxOnly;
 
@@ -82,7 +85,7 @@ Route::get('logout', [
 /**
  * @see \PeskyCMF\Http\Controllers\CmfGeneralController::ping()
  */
-\Route::post('/ping', [
+Route::post('/ping', [
     'as' => $routeNamePrefix . 'ping',
     'uses' => $generalControllerClass . '@ping',
     'log' => false
@@ -148,7 +151,7 @@ Route::get('replace_password/{access_key}', [
 /**
  * @see \PeskyCMF\Http\Controllers\CmfGeneralController::getCachedUiTemplatesJs()
  */
-\Route::get('ui/templates.js', [
+Route::get('ui/templates.js', [
     'as' => $routeNamePrefix . 'cmf_cached_templates_js',
     'uses' => $generalControllerClass . '@getCachedUiTemplatesJs',
 ]);

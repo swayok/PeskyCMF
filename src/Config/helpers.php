@@ -1,10 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
+use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
+use PeskyCMF\HttpCode;
+use PeskyCMF\PeskyCmfAppSettings;
+use Swayok\Utils\StringUtils;
 
 if (!defined('t')) {
     define('t', true);
@@ -27,481 +34,209 @@ if (!defined('DOTJS_INSERT_REGEXP_FOR_ROUTES')) {
 }
 
 if (!function_exists('cmfConfig')) {
-
-    /**
-     * @return CmfConfig
-     */
-    function cmfConfig() {
+    function cmfConfig(): CmfConfig
+    {
         return CmfConfig::getPrimary();
     }
 }
 
 if (!function_exists('cmfRoute')) {
-    /**
-     * @param string $routeName
-     * @param array $parameters
-     * @param bool $absolute
-     * @param null|CmfConfig|string $cmfConfig
-     * @return string
-     */
-    function cmfRoute(string $routeName, array $parameters = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
-        if (!$cmfConfig) {
-            $cmfConfig = cmfConfig();
-        }
-        return $cmfConfig::route($routeName, $parameters, $absolute);
+    function cmfRoute(string $routeName, array $parameters = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string
+    {
+        return CmfUrl::route($routeName, $parameters, $absolute, $cmfConfig);
     }
 }
 
 if (!function_exists('cmfRouteTpl')) {
-    /**
-     * @param string $routeName
-     * @param array $parameters
-     * @param array $tplParams where
-     *  - key - parameter or query argument name;
-     *  - value is optional an should be set to valid dotjs insert without a wrapper,
-     *      for example: ['id' => 'it.some_id'] will generate '{{= it.some_id }}' insert for 'id' parameter
-     *      while ['other_id'] will generate '{{= it.other_id }}' insert for 'other_id' parameter
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @return string
-     */
-    function cmfRouteTpl(string $routeName, array $parameters = [], array $tplParams = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
-        $replaces = [];
-        $i = 1;
-        foreach ($tplParams as $name => $tplName) {
-            $dotJsVarPrefix = '';
-            if (is_numeric($name)) {
-                $name = $tplName;
-                $dotJsVarPrefix = 'it.';
-            }
-            $parameters[$name] = '__dotjs_' . (string)$i . '_insert__';
-            $i++;
-            $replaces[$parameters[$name]] = "{{= {$dotJsVarPrefix}{$tplName} }}";
-        }
-
-        $url = cmfRoute($routeName, $parameters, $absolute, $cmfConfig);
-        return str_replace(array_keys($replaces), array_values($replaces), $url);
+    function cmfRouteTpl(
+        string $routeName,
+        array $parameters = [],
+        array $tplParams = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null
+    ): string {
+        return CmfUrl::routeTpl($routeName, $parameters, $tplParams, $absolute, $cmfConfig);
     }
 }
 
 if (!function_exists('routeToCmfPage')) {
-    /**
-     * @param string $pageId
-     * @param array $queryArgs
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeToCmfPage(string $pageId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('cmf_page', [$pageId])) {
-            return null;
-        }
-        return cmfRoute('cmf_page', array_merge(['page' => $pageId], $queryArgs), $absolute, $cmfConfig);
+    function routeToCmfPage(
+        string $pageId,
+        array $queryArgs = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toPage($pageId, $queryArgs, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('redirectToCmfPage')) {
-    /**
-     * @param string $pageId
-     * @param array $queryArgs
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @return RedirectResponse
-     */
-    function redirectToCmfPage(string $pageId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): RedirectResponse {
-        $url = routeToCmfPage($pageId, $queryArgs, $absolute, $cmfConfig);
-        if (!$url) {
-            abort(\PeskyCMF\HttpCode::FORBIDDEN);
-        }
-        return \Redirect::to($url);
+    function redirectToCmfPage(
+        string $pageId,
+        array $queryArgs = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null
+    ): RedirectResponse {
+        return CmfUrl::redirectToPage($pageId, $queryArgs, $absolute, $cmfConfig);
     }
 }
 
 if (!function_exists('routeToCmfItemsTable')) {
-    /**
-     * @param string $resourceName
-     * @param array $filters - key-value array where key is column name to add to filter and value is column's value.
-     *      Values may contain dotjs inserts in format: {{= it.id }} or {= it.id }
-     *      Note: Operator is 'equals' (col1 = val1). Multiple filters joined by 'AND' (col1 = val1 AND col2 = val2)
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeToCmfItemsTable(string $resourceName, array $filters = [], bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.view', [$resourceName])) {
-            return null;
-        }
-        $params = [
-            'resource' => $resourceName,
-        ];
-        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($filters);
-        if (!empty($filters)) {
-            $params['filter'] = json_encode($replaces['data']);
-        }
-        $url = cmfRoute('cmf_items_table', $params, $absolute, $cmfConfig);
-        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
+    function routeToCmfItemsTable(
+        string $resourceName,
+        array $filters = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemsTable($resourceName, $filters, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeToCmfTableCustomData')) {
-    /**
-     * @param string $resourceName
-     * @param string $dataId - identifier of data to be returned. For example: 'special_options'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeToCmfTableCustomData(string $resourceName, string $dataId, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.view', [$resourceName])) {
-            return null;
-        }
-        return cmfRoute(
-            'cmf_api_get_custom_data',
-            array_merge(['resource' => $resourceName, 'data_id' => $dataId]),
-            $absolute,
-            $cmfConfig
-        );
+    function routeToCmfTableCustomData(
+        string $resourceName,
+        string $dataId,
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toTableCustomData($resourceName, $dataId, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeToCmfItemAddForm')) {
-    /**
-     * @param string $resourceName
-     * @param array $data - data for form inputs to be used as default values; may contain dotjs inserts
-     *       as values in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeToCmfItemAddForm(string $resourceName, array $data = [], bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.create', [$resourceName])) {
-            return null;
-        }
-        $params = ['resource' => $resourceName];
-        $replaces = [];
-        foreach ($data as $key => $value) {
-            if (!is_string($key)) {
-                throw new \InvalidArgumentException('$data argument contains non-string key. All keys must be a strings');
-            }
-            if (!is_scalar($value) && !is_array($value)) {
-                throw new \InvalidArgumentException(
-                    '$data argument must be a scalar value or array. ' . gettype($value) . ' received.'
-                );
-            }
-            if (!is_array($value) && preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $value, $matches)) {
-                $value = '__dotjs_' . (count($replaces) + 1) . '_insert__';
-                $replaces[$value] = '{{' . trim($matches[0], '{} ') . '}}';
-            }
-            $params[$key] = $value;
-        }
-        $url = cmfRoute('cmf_item_add_form', $params, $absolute, $cmfConfig);
-        return str_replace(array_keys($replaces), array_values($replaces), $url);
-    }
-}
-
-if (!function_exists('cmfRouteWithPossibleItemIdDotJsInsert')) {
-    /**
-     * @param string $route
-     * @param string|int|float $itemId
-     * @param array $parameters
-     * @param bool $absolute
-     * @param CmfConfig|null|string $cmfConfig
-     * @return string
-     */
-    function cmfRouteWithPossibleItemIdDotJsInsert(string $route, string $itemId, array $parameters, bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
-        if (preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId)) {
-            $parameters['id'] = '__dotjs_item_id_insert__';
-            $url = cmfRoute($route, $parameters, $absolute, $cmfConfig);
-            $itemId = '{{' . trim($itemId, '{}') . '}}'; //< normalize inserts like '{= it.id }'
-            return str_replace('__dotjs_item_id_insert__', $itemId, $url);
-        } else {
-            $parameters['id'] = $itemId;
-            return cmfRoute($route, $parameters, $absolute, $cmfConfig);
-        }
+    function routeToCmfItemAddForm(
+        string $resourceName,
+        array $data = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemAddForm($resourceName, $data, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeToCmfItemEditForm')) {
-    /**
-     * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeToCmfItemEditForm(string $resourceName, string $itemId, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.update', [$resourceName, $itemId])) {
-            return null;
-        }
-        return cmfRouteWithPossibleItemIdDotJsInsert(
-            'cmf_item_edit_form',
-            $itemId,
-            ['resource' => $resourceName],
-            $absolute,
-            $cmfConfig
-        );
+    function routeToCmfItemEditForm(
+        string $resourceName,
+        string $itemId,
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemEditForm($resourceName, $itemId, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeForCmfTempFileUpload')) {
-    /**
-     * @param string $resourceName
-     * @param string $inputName
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeForCmfTempFileUpload(string $resourceName, string $inputName, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.create', [$resourceName])) {
-            return null;
-        }
-        return cmfRoute(
-            'cmf_upload_temp_file_for_input',
-            ['resource' => $resourceName, 'input' => $inputName],
-            $absolute,
-            $cmfConfig
-        );
+    function routeForCmfTempFileUpload(
+        string $resourceName,
+        string $inputName,
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toTempFileUpload($resourceName, $inputName, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeForCmfTempFileDelete')) {
-    /**
-     * @param string $resourceName
-     * @param string $inputName
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeForCmfTempFileDelete(string $resourceName, string $inputName, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.create', [$resourceName])) {
-            return null;
-        }
-        return cmfRoute(
-            'cmf_delete_temp_file_for_input',
-            ['resource' => $resourceName, 'input' => $inputName],
-            $absolute,
-            $cmfConfig
-        );
+    function routeForCmfTempFileDelete(
+        string $resourceName,
+        string $inputName,
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toTempFileDelete($resourceName, $inputName, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeToCmfItemCloneForm')) {
-    /**
-     * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeToCmfItemCloneForm(string $resourceName, string $itemId, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.create', [$resourceName, $itemId])) {
-            return null;
-        }
-        return cmfRouteWithPossibleItemIdDotJsInsert(
-            'cmf_item_clone_form',
-            $itemId,
-            ['resource' => $resourceName],
-            $absolute,
-            $cmfConfig
-        );
+    function routeToCmfItemCloneForm(
+        string $resourceName,
+        string $itemId,
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemCloneForm($resourceName, $itemId, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeToCmfItemDetails')) {
-    /**
-     * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeToCmfItemDetails(string $resourceName, string $itemId, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.details', [$resourceName, $itemId])) {
-            return null;
-        }
-        return cmfRouteWithPossibleItemIdDotJsInsert(
-            'cmf_item_details',
-            $itemId,
-            ['resource' => $resourceName],
-            $absolute,
-            $cmfConfig
-        );
+    function routeToCmfItemDetails(
+        string $resourceName,
+        string $itemId,
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemDetails($resourceName, $itemId, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeToCmfItemDelete')) {
-    /**
-     * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @param bool $ignoreAccessPolicy - true: will not run Gate::denies('resource.*') test
-     * @return string|null
-     */
-    function routeToCmfItemDelete(string $resourceName, string $itemId, bool $absolute = false, ?CmfConfig $cmfConfig = null, bool $ignoreAccessPolicy = false): ?string {
-        if (!$ignoreAccessPolicy && Gate::denies('resource.delete', [$resourceName, $itemId])) {
-            return null;
-        }
-        return cmfRouteWithPossibleItemIdDotJsInsert(
-            'cmf_api_delete_item',
-            $itemId,
-            ['resource' => $resourceName],
-            $absolute,
-            $cmfConfig
-        );
+    function routeToCmfItemDelete(
+        string $resourceName,
+        string $itemId,
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemDelete($resourceName, $itemId, $absolute, $cmfConfig, $ignoreAccessPolicy);
     }
 }
 
 if (!function_exists('routeToCmfResourceCustomPage')) {
-    /**
-     * @param string $resourceName
-     * @param string $pageId
-     * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @return string
-     */
-    function routeToCmfResourceCustomPage(string $resourceName, string $pageId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
-        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
-        $url = cmfRoute(
-            'cmf_resource_custom_page',
-            array_merge(
-                ['resource' => $resourceName, 'page' => $pageId],
-                $replaces['data']
-            ),
-            $absolute,
-            $cmfConfig
-        );
-        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
+    function routeToCmfResourceCustomPage(
+        string $resourceName,
+        string $pageId,
+        array $queryArgs = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null
+    ): string {
+        return CmfUrl::toResourceCustomPage($resourceName, $pageId, $queryArgs, $absolute, $cmfConfig);
     }
 }
 
 if (!function_exists('routeToCmfItemCustomPage')) {
-    /**
-     * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
-     * @param string $pageId
-     * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @return string
-     */
-    function routeToCmfItemCustomPage(string $resourceName, string $itemId, string $pageId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
-        $itemDotJs = $itemId;
-        if (preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId)) {
-            $itemDotJs = '__dotjs_item_id_insert__';
-            $itemId = '{{' . trim($itemId, '{} ') . '}}';
-        }
-        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
-        $url = cmfRoute(
-            'cmf_item_custom_page',
-            array_merge(
-                ['resource' => $resourceName, 'id' => $itemDotJs, 'page' => $pageId],
-                $replaces['data']
-            ),
-            $absolute,
-            $cmfConfig
-        );
-        $url = str_replace('__dotjs_item_id_insert__', $itemId, $url);
-        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
+    function routeToCmfItemCustomPage(
+        string $resourceName,
+        string $itemId,
+        string $pageId,
+        array $queryArgs = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null
+    ): string {
+        return CmfUrl::toItemCustomPage($resourceName, $itemId, $pageId, $queryArgs, $absolute, $cmfConfig);
     }
 }
 
 if (!function_exists('routeToCmfItemCustomAction')) {
-    /**
-     * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
-     * @param string $actionId
-     * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @return string
-     */
-    function routeToCmfItemCustomAction(string $resourceName, string $itemId, string $actionId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
-        $itemDotJs = $itemId;
-        if (preg_match('%^\s*' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '\s*$%s', $itemId)) {
-            $itemDotJs = '__dotjs_item_id_insert__';
-            $itemId = '{{' . trim($itemId, '{} ') . '}}';
-        }
-        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
-        $url = cmfRoute(
-            'cmf_api_item_custom_action',
-            array_merge(
-                ['resource' => $resourceName, 'id' => $itemDotJs, 'action' => $actionId],
-                $replaces['data']
-            ),
-            $absolute,
-            $cmfConfig
-        );
-        $url = str_replace('__dotjs_item_id_insert__', $itemId, $url);
-        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
+    function routeToCmfItemCustomAction(
+        string $resourceName,
+        string $itemId,
+        string $actionId,
+        array $queryArgs = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null
+    ): string {
+        return CmfUrl::toItemCustomAction($resourceName, $itemId, $actionId, $queryArgs, $absolute, $cmfConfig);
     }
 }
 
 if (!function_exists('routeToCmfResourceCustomAction')) {
-    /**
-     * @param string $resourceName
-     * @param string $actionId
-     * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
-     * @param bool $absolute
-     * @param null|CmfConfig $cmfConfig
-     * @return string
-     */
-    function routeToCmfResourceCustomAction(string $resourceName, string $actionId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string {
-        $replaces = replaceDotJsInstertsInArrayValuesByUrlSafeInserts($queryArgs);
-        $url = cmfRoute(
-            'cmf_api_resource_custom_action',
-            array_merge(
-                ['resource' => $resourceName, 'action' => $actionId],
-                $replaces['data']
-            ),
-            $absolute,
-            $cmfConfig
-        );
-        return replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
-    }
-}
-
-if (!function_exists('replaceDotJsInstertsInArrayValuesByUrlSafeInserts')) {
-
-    /**
-     * @param array $data - array with values that contain dotJs insterts
-     * @return array - ['replaces' => $replaces, 'data' => $escapedData]
-     */
-    function replaceDotJsInstertsInArrayValuesByUrlSafeInserts(array $data): array {
-        $ret = ['replaces' => [], 'data' => $data];
-        if (!empty($data)) {
-            $json = json_encode($data, JSON_UNESCAPED_UNICODE);
-            if (preg_match_all('%' . DOTJS_INSERT_REGEXP_FOR_ROUTES . '%s', $json, $matches) > 0) {
-                // there are dotJs inserts inside filters
-                foreach ($matches[1] as $i => $dotJsInsert) {
-                    $replace = '__dotjs_' . $i . '_insert__';
-                    $ret['replaces'][$replace] = '{{' . trim($matches[0][$i], '{} ') . '}}';
-                    $json = str_replace($dotJsInsert, $replace, $json);
-                }
-                $ret['data'] = json_decode($json, true);
-            }
-        }
-        return $ret;
-    }
-}
-
-if (!function_exists('replaceUrlSafeInsertsInUrlByDotJsInsterts')) {
-
-    function replaceUrlSafeInsertsInUrlByDotJsInsterts(string $url, array $replaces): string {
-        if (!empty($replaces)) {
-            $url = str_replace(array_keys($replaces), array_values($replaces), $url);
-        }
-        return $url;
+    function routeToCmfResourceCustomAction(
+        string $resourceName,
+        string $actionId,
+        array $queryArgs = [],
+        bool $absolute = false,
+        ?CmfConfig $cmfConfig = null
+    ): string {
+        return CmfUrl::toResourceCustomAction($resourceName, $actionId, $queryArgs, $absolute, $cmfConfig);
     }
 }
 
@@ -514,7 +249,8 @@ if (!function_exists('transChoiceRu')) {
      * @param string|null $locale
      * @return string
      */
-    function transChoiceRu($idOrTranslations, int $itemsCount, array $parameters = [], string $locale = 'ru') {
+    function transChoiceRu($idOrTranslations, int $itemsCount, array $parameters = [], string $locale = 'ru'): string
+    {
         return transChoiceAlt($idOrTranslations, $itemsCount, $parameters, $locale);
     }
 }
@@ -528,53 +264,49 @@ if (!function_exists('transChoiceAlt')) {
      * @param string|null $locale
      * @return string
      */
-    function transChoiceAlt($idOrTranslations, int $itemsCount, array $parameters = [], ?string $locale = null) {
-        $trans = \Swayok\Utils\StringUtils::pluralizeRu(
+    function transChoiceAlt($idOrTranslations, int $itemsCount, array $parameters = [], ?string $locale = null): string
+    {
+        $trans = StringUtils::pluralizeRu(
             $itemsCount,
             is_array($idOrTranslations) ? $idOrTranslations : trans($idOrTranslations, [], $locale)
         );
         if (!empty($parameters)) {
-            $trans = \Swayok\Utils\StringUtils::insert($trans, $parameters, ['before' => ':']);
+            $trans = StringUtils::insert($trans, $parameters, ['before' => ':']);
         }
         return $trans;
     }
 }
 
 if (!function_exists('cmfTransGeneral')) {
-
     /**
      * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
      * @param array $parameters
      * @param null|string $locale
      * @return string|array
      */
-    function cmfTransGeneral(string $path, array $parameters = [], ?string $locale = null) {
+    function cmfTransGeneral(string $path, array $parameters = [], ?string $locale = null)
+    {
         return CmfConfig::transGeneral($path, $parameters, $locale);
     }
 }
 
 if (!function_exists('cmfTransCustom')) {
-
     /**
      * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
      * @param array $parameters
      * @param null|string $locale
      * @return string|array
      */
-    function cmfTransCustom(string $path, array $parameters = [], ?string $locale = null) {
+    function cmfTransCustom(string $path, array $parameters = [], ?string $locale = null)
+    {
         return CmfConfig::transCustom($path, $parameters, $locale);
     }
 }
 
 if (!function_exists('cmfJsonResponse')) {
-    /**
-     * @param int $httpCode
-     * @param array $headers
-     * @param int $options
-     * @return CmfJsonResponse
-     */
-    function cmfJsonResponse(int $httpCode = \PeskyCMF\HttpCode::OK, array $headers = [], $options = 0): CmfJsonResponse {
-        return new CmfJsonResponse([], $httpCode, $headers, $options);
+    function cmfJsonResponse(int $httpCode = HttpCode::OK, array $headers = [], int $jsonOptions = 0): CmfJsonResponse
+    {
+        return new CmfJsonResponse([], $httpCode, $headers, $jsonOptions);
     }
 }
 
@@ -584,11 +316,12 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
      * @param null|string $message
      * @return CmfJsonResponse
      */
-    function cmfJsonResponseForValidationErrors(array $errors = [], ?string $message = null): CmfJsonResponse {
+    function cmfJsonResponseForValidationErrors(array $errors = [], ?string $message = null): CmfJsonResponse
+    {
         if (empty($message)) {
             $message = (string)cmfTransGeneral('.form.message.validation_errors');
         }
-        return cmfJsonResponse(\PeskyCMF\HttpCode::CANNOT_PROCESS)
+        return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
             ->setErrors($errors, $message);
     }
 }
@@ -599,14 +332,15 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
      * @param null|string $message
      * @return CmfJsonResponse
      */
-    function cmfJsonResponseForHttp404(?string $fallbackUrl = null, ?string $message = null): CmfJsonResponse {
+    function cmfJsonResponseForHttp404(?string $fallbackUrl = null, ?string $message = null): CmfJsonResponse
+    {
         if (empty($message)) {
             $message = (string)cmfTransGeneral('.message.http404');
         }
         if (empty($fallbackUrl)) {
             $fallbackUrl = cmfConfig()->home_page_url();
         }
-        return cmfJsonResponse(\PeskyCMF\HttpCode::NOT_FOUND)
+        return cmfJsonResponse(HttpCode::NOT_FOUND)
             ->setMessage($message)
             ->goBack($fallbackUrl);
     }
@@ -614,21 +348,30 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
 
 if (!function_exists('cmfRedirectResponseWithMessage')) {
     /**
-     * @param string $url
-     * @param string $message
-     * @param string $type
      * @return RedirectResponse|CmfJsonResponse
      */
-    function cmfRedirectResponseWithMessage(string $url, string $message, string $type = 'info') {
-        if (request()->ajax()) {
+    function cmfRedirectResponseWithMessage(
+        bool $isAjax,
+        string $url,
+        string $message,
+        string $type = 'info',
+        ?CmfConfig $cmfConfig = null
+    ): Response {
+        if ($isAjax) {
             return cmfJsonResponse()
                 ->setMessage($message)
                 ->setRedirect($url);
         } else {
-            return Redirect::to($url)->with(cmfConfig()->session_message_key(), [
-                'message' => $message,
-                'type' => $type
-            ]);
+            if (!$cmfConfig) {
+                $cmfConfig = cmfConfig();
+            }
+            return (new RedirectResponse($url))->with(
+                $cmfConfig->session_message_key(),
+                [
+                    'message' => $message,
+                    'type' => $type,
+                ]
+            );
         }
     }
 }
@@ -638,7 +381,8 @@ if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
      * @param string $dotJsTemplate
      * @return string
      */
-    function modifyDotJsTemplateToAllowInnerScriptsAndTemplates(string $dotJsTemplate): string {
+    function modifyDotJsTemplateToAllowInnerScriptsAndTemplates(string $dotJsTemplate): string
+    {
         return preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
             if (preg_match('%type="text/html"%i', $matches[1])) {
                 // inner dotjs template - needs to be encoded and decoded later
@@ -666,12 +410,12 @@ if (!function_exists('formatDate')) {
      * @return string
      */
     function formatDate(
-        string|int|CarbonInterface|null $date,
+        $date,
         bool $addTime = false,
         string $yearSuffix = 'full',
-        bool|string|int $ignoreYear = false,
+        $ignoreYear = false,
         ?string $default = ''
-    ): string | null {
+    ): ?string {
         if (!$date) {
             return $default;
         }
@@ -720,7 +464,8 @@ if (!function_exists('formatMoney')) {
      * @param string $thousandsSeparator
      * @return string
      */
-    function formatMoney(float $number, int $decimals = 2, string $thousandsSeparator = ' '): string {
+    function formatMoney(float $number, int $decimals = 2, string $thousandsSeparator = ' '): string
+    {
         return number_format($number, $decimals, '.', $thousandsSeparator);
     }
 }
@@ -732,34 +477,35 @@ if (!function_exists('formatSeconds')) {
      * @param bool $shortLabels - true: use shortened labels (min, sec, hr, d) | false: user full lables (days, hours, minutes, seconds)
      * @return string
      */
-    function formatSeconds(int $seconds, bool $displaySeconds = true, bool $shortLabels = true): string {
+    function formatSeconds(int $seconds, bool $displaySeconds = true, bool $shortLabels = true): string
+    {
         $ret = '';
         if ($seconds >= 86400) {
             $days = floor($seconds / 86400);
             $seconds -= 86400 * $days;
             $ret .= $shortLabels
                 ? cmfTransGeneral('.format_seconds.days_short', ['days' => $days])
-                : transChoiceAlt(cmfTransGeneral('.format_seconds.days'), $days, ['days' => $days]);
+                : transChoiceAlt(cmfTransGeneral('.format_seconds.days'), (int)$days, ['days' => $days]);
         }
         if ($seconds >= 3600 || !empty($days)) {
             $hours = floor($seconds / 3600);
             $seconds -= 3600 * $hours;
             $ret .= $shortLabels
                 ? cmfTransGeneral('.format_seconds.hours_short', ['hours' => $hours])
-                : transChoiceAlt(cmfTransGeneral('.format_seconds.hours'), $hours, ['hours' => $hours]);
+                : transChoiceAlt(cmfTransGeneral('.format_seconds.hours'), (int)$hours, ['hours' => $hours]);
         }
         if ($seconds >= 60 || !empty($days) || !empty($hours)) {
             $minutes = floor($seconds / 60);
             $seconds -= 60 * $minutes;
             $ret .= $shortLabels
                 ? cmfTransGeneral('.format_seconds.minutes_short', ['minutes' => $minutes])
-                : transChoiceAlt(cmfTransGeneral('.format_seconds.minutes'), $minutes, ['minutes' => $minutes]);
+                : transChoiceAlt(cmfTransGeneral('.format_seconds.minutes'), (int)$minutes, ['minutes' => $minutes]);
         }
         if ($displaySeconds) {
             $ret .= $shortLabels
                 ? cmfTransGeneral('.format_seconds.seconds_short', ['seconds' => $seconds])
                 : transChoiceAlt(cmfTransGeneral('.format_seconds.seconds'), $seconds, ['seconds' => $seconds]);
-        } else if (empty($days) && empty($hours) && empty($minutes)) {
+        } elseif (empty($days) && empty($hours) && empty($minutes)) {
             $ret = cmfTransGeneral('.format_seconds.less_then_a_minute');
         }
         return $ret;
@@ -779,7 +525,8 @@ if (!function_exists('pickLocalization')) {
      *      - false: $translations values = arrays with 2 keys: 'key' and 'value';
      * @return string|null
      */
-    function pickLocalization(array $translations, $default = null, bool $isAssociativeArray = true): ?string {
+    function pickLocalization(array $translations, $default = null, bool $isAssociativeArray = true): ?string
+    {
         $langCodes = [app()->getLocale(), cmfConfig()->default_locale()];
         foreach ($langCodes as $langCode) {
             if ($isAssociativeArray) {
@@ -805,7 +552,6 @@ if (!function_exists('pickLocalization')) {
         }
         return $default;
     }
-
 }
 
 if (!function_exists('pickLocalizationFromJson')) {
@@ -817,25 +563,25 @@ if (!function_exists('pickLocalizationFromJson')) {
      * @param bool $isAssociativeArray
      *      - true: $translations keys = language codes, values = translations;
      *      - false: $translations values = arrays with 2 keys: 'key' and 'value';
-     * @see pickLocalization()
      * @return string|null
+     * @see pickLocalization()
      */
-    function pickLocalizationFromJson($translationsJson, $default = null, bool $isAssociativeArray = true): ?string {
+    function pickLocalizationFromJson($translationsJson, $default = null, bool $isAssociativeArray = true): ?string
+    {
         $translations = is_array($translationsJson) ? $translationsJson : json_decode($translationsJson, true);
         return is_array($translations) ? $default : pickLocalization($translations, $default, $isAssociativeArray);
     }
-
 }
 
 if (!function_exists('setting')) {
-
     /**
      * Get value for CmfSetting called $name (CmfSetting->key === $name)
-     * @param string $name - setting name
+     * @param string|null $name - setting name
      * @param mixed $default - default value
-     * @return mixed|\PeskyCMF\PeskyCmfAppSettings|\App\AppSettings
+     * @return mixed|PeskyCmfAppSettings
      */
-    function setting(?string $name = null, $default = null) {
+    function setting(?string $name = null, $default = null)
+    {
         $appSettings = cmfConfig()->getAppSettings();
         if ($name === null) {
             return $appSettings;
@@ -846,12 +592,12 @@ if (!function_exists('setting')) {
 }
 
 if (!function_exists('hidePasswords')) {
-
     /**
      * @param array $data
      * @return array
      */
-    function hidePasswords(array $data): array {
+    function hidePasswords(array $data): array
+    {
         foreach ($data as $key => &$value) {
             if (!empty($value) && preg_match('(pass(word|phrase|wd)?|pwd)', $key)) {
                 $value = '******';

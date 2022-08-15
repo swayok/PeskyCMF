@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Config;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Traversable;
 
-abstract class ConfigsContainer implements \IteratorAggregate, \Countable, Arrayable {
-
+abstract class ConfigsContainer implements \IteratorAggregate, \Countable, Arrayable
+{
+    
     private $array = null;
-
+    
     /**
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
@@ -16,19 +19,21 @@ abstract class ConfigsContainer implements \IteratorAggregate, \Countable, Array
      * <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator() {
+    public function getIterator()
+    {
         return new \ArrayIterator($this->toArray());
     }
-
+    
     /**
      * Count elements of an object
      * @link http://php.net/manual/en/countable.count.php
      * @return int The custom count as an integer.
      */
-    public function count() {
+    public function count()
+    {
         return count($this->toArray());
     }
-
+    
     /**
      * Get the instance as an array.
      * Note 1: it collects returns from all "static public" methods that do not have parameters
@@ -36,7 +41,8 @@ abstract class ConfigsContainer implements \IteratorAggregate, \Countable, Array
      * Note 2: array does not contain key "getInstance" but contains key "config_instance" instead
      * @return array
      */
-    public function toArray() {
+    public function toArray()
+    {
         if ($this->array === null) {
             $this->array = [];
             $reflection = new \ReflectionClass($this);

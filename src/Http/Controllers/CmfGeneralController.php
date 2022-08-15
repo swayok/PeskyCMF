@@ -172,9 +172,9 @@ class CmfGeneralController extends CmfController
         return static::getCmfConfig()->getAuthModule()->processLoginAsOtherUserRequest($otherUserId);
     }
     
-    public function logout()
+    public function logout(Request $request)
     {
-        return static::getCmfConfig()->getAuthModule()->processUserLogoutRequest();
+        return static::getCmfConfig()->getAuthModule()->processUserLogoutRequest($request);
     }
     
     public function getUserProfileData()

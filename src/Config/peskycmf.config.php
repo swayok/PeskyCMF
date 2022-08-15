@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     /**
      * Default cmf config to use (name of a key from 'cmf_configs')

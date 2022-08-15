@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /**
@@ -32,14 +34,16 @@ return [
      * Used by OrmMakeDbClassesCommand command (passed to class_builder during table structure class generation)
      */
     'table_structure_traits' => [
-        \PeskyORMLaravel\Db\TableStructureTraits\IdColumn::class,              // id
-        \PeskyORMLaravel\Db\TableStructureTraits\IsActiveColumn::class,        // is_active
-        \PeskyORMLaravel\Db\TableStructureTraits\IsPublishedColumn::class,     // is_published
-        \PeskyORMLaravel\Db\TableStructureTraits\UserAuthColumns::class,       // password and remember_token
-        \PeskyORMLaravel\Db\TableStructureTraits\PasswordColumn::class,        // password
-        \PeskyORMLaravel\Db\TableStructureTraits\TimestampColumns::class,      // created_at and updated_at
-        \PeskyORMLaravel\Db\TableStructureTraits\CreatedAtColumn::class,       // created_at
-        \PeskyORMLaravel\Db\TableStructureTraits\PositionColumn::class,       // position
-    ]
+        \PeskyORMColumns\TableStructureTraits\IdColumn::class,              // id
+        \PeskyORMColumns\TableStructureTraits\IsActiveColumn::class,        // is_active
+        \PeskyORMColumns\TableStructureTraits\IsPublishedColumn::class,     // is_published
+        \PeskyORMColumns\TableStructureTraits\IsDeletedColumn::class,       // is_deleted
+        \PeskyORMColumns\TableStructureTraits\UserAuthColumns::class,       // password and remember_token
+        \PeskyORMColumns\TableStructureTraits\PasswordColumn::class,        // password
+        \PeskyORMColumns\TableStructureTraits\TimestampColumns::class,      // created_at and updated_at
+        \PeskyORMColumns\TableStructureTraits\CreatedAtColumn::class,       // created_at
+        \PeskyORMColumns\TableStructureTraits\PositionColumn::class,        // position
+        \PeskyORMColumns\TableStructureTraits\FilesMetadataColumn::class,   // files_metadata
+    ],
 
 ];

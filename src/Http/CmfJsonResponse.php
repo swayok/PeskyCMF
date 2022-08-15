@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Http;
 
 use Illuminate\Http\JsonResponse;
@@ -7,64 +9,69 @@ use Illuminate\Http\JsonResponse;
 /**
  * @method CmfJsonResponse setData($data = [])
  */
-class CmfJsonResponse extends JsonResponse {
-
-    protected static $messageKey = '_message';
-    protected static $redirectKey = 'redirect';
-    protected static $forcedRedirectKey = 'redirect_with_reload';
-    protected static $redirectFallbakKey = 'redirect_fallback';
-    protected static $errorsKey = 'errors';
-    protected static $modalKey = 'modal';
-    protected static $modalTitleKey = 'title';
-    protected static $modalContentKey = 'content';
-    protected static $modalFooterKey = 'footer';
-    protected static $modalUrlKey = 'url';
-    protected static $modalSizeKey = 'size';
-
-    const MODAL_SIZE_MEDIUM = 'medium';
-    const MODAL_SIZE_SMALL = 'small';
-    const MODAL_SIZE_LARGE = 'large';
-
+class CmfJsonResponse extends JsonResponse
+{
+    
+    public static $messageKey = '_message';
+    public static $messageTypeKey = '_message_type';
+    public static $redirectKey = 'redirect';
+    public static $forcedRedirectKey = 'redirect_with_reload';
+    public static $redirectFallbakKey = 'redirect_fallback';
+    public static $errorsKey = 'errors';
+    public static $modalKey = 'modal';
+    public static $modalTitleKey = 'title';
+    public static $modalContentKey = 'content';
+    public static $modalFooterKey = 'footer';
+    public static $modalUrlKey = 'url';
+    public static $modalSizeKey = 'size';
+    
+    public const MODAL_SIZE_MEDIUM = 'medium';
+    public const MODAL_SIZE_SMALL = 'small';
+    public const MODAL_SIZE_LARGE = 'large';
+    
+    public const MESSAGE_TYPE_INFO = 'info';
+    public const MESSAGE_TYPE_SUCCESS = 'success';
+    public const MESSAGE_TYPE_WARNING = 'warning';
+    public const MESSAGE_TYPE_ERROR = 'error';
+    
+    public static function create(int $status = 200, array $headers = [], int $options = JSON_UNESCAPED_UNICODE): CmfJsonResponse
+    {
+        return new static([], $status, $headers, $options);
+    }
+    
     /**
-     * CmfJsonResponse constructor.
      * @param array $data
      * @param int $status
      * @param array $headers
      * @param int $options
      */
-    public function __construct(array $data = null, $status = 200, array $headers = [], $options = 0) {
-        parent::__construct($data === null ? [] : $data, $status, $headers, $options);
+    public function __construct($data = null, $status = 200, $headers = [], $options = JSON_UNESCAPED_UNICODE)
+    {
+        parent::__construct($data ?? [], $status, $headers, $options, false);
     }
-
-    /**
-     * @param array $additionalData
-     * @return CmfJsonResponse
-     */
-    public function addData(array $additionalData) {
+    
+    public function addData(array $additionalData): CmfJsonResponse
+    {
         $data = $this->getData(true);
         $data = array_merge($data, $additionalData);
         return $this->setData($data);
     }
-
-    /**
-     * @param string $message
-     * @return $this
-     */
-    public function setMessage($message) {
+    
+    public function setMessage(string $message, ?string $messageType = null): CmfJsonResponse
+    {
         if (!empty($message)) {
             $data = $this->getData(true);
             $data[static::$messageKey] = $message;
+            if ($messageType) {
+                $data[static::$messageTypeKey] = $messageType;
+            }
             $this->setData($data);
         }
         return $this;
     }
-
-    /**
-     * @param string $url
-     * @param string|null $fallbackUrl
-     * @return $this
-     */
-    public function setRedirect($url, $fallbackUrl = null) {
+    
+    public function setRedirect($url, ?string $fallbackUrl = null): CmfJsonResponse
+    {
         $data = $this->getData(true);
         $data[static::$redirectKey] = $url;
         if (!empty($fallbackUrl)) {
@@ -72,39 +79,31 @@ class CmfJsonResponse extends JsonResponse {
         }
         return $this->setData($data);
     }
-
-    /**
-     * Redirect using document.location instead of JS router
-     * @param string $url
-     * @return $this
-     */
-    public function setForcedRedirect($url) {
+    
+    public function setForcedRedirect(string $url): CmfJsonResponse
+    {
         $data = $this->getData(true);
         $data[static::$forcedRedirectKey] = $url;
         return $this->setData($data);
     }
-
-    /**
-     * @param string|null $fallbakUrl
-     * @return $this
-     */
-    public function goBack($fallbakUrl = null) {
-        return $this->setRedirect('back', $fallbakUrl);
+    
+    public function goBack(?string $fallbackUrl = null): CmfJsonResponse
+    {
+        return $this->setRedirect('back', $fallbackUrl);
     }
-
-    /**
-     * @return $this
-     */
-    public function reloadPage() {
+    
+    public function reloadPage(): CmfJsonResponse
+    {
         return $this->setRedirect('reload');
     }
-
+    
     /**
      * @param array $errors
-     * @param null|string $message
+     * @param string|null $message
      * @return $this
      */
-    public function setErrors(array $errors, $message = null) {
+    public function setErrors(array $errors, ?string $message = null): CmfJsonResponse
+    {
         $data = $this->getData(true);
         if (!empty($message)) {
             $data[static::$messageKey] = $message;
@@ -112,31 +111,37 @@ class CmfJsonResponse extends JsonResponse {
         $data[static::$errorsKey] = $errors;
         return $this->setData($data);
     }
-
+    
     /**
      * @param string $title
      * @param string $content
-     * @param string $footer
-     * @param null|string $url
+     * @param string|null $footer
+     * @param string|null $url
      * @param string $modalSize
      * @return $this
      */
-    public function setModalContent($title, $content, $footer = null, $url = null, $modalSize = self::MODAL_SIZE_MEDIUM) {
+    public function setModalContent(
+        string $title,
+        string $content,
+        string $footer = null,
+        string $url = null,
+        string $modalSize = self::MODAL_SIZE_MEDIUM
+    ): CmfJsonResponse {
         $data = $this->getData(true);
         $data[static::$modalKey] = [
-            static::$modalTitleKey => (string)$title,
-            static::$modalContentKey => (string)$content,
+            static::$modalTitleKey => $title,
+            static::$modalContentKey => $content,
         ];
         if (!empty($footer)) {
-            $data[static::$modalKey][static::$modalFooterKey] = (string)$footer;
+            $data[static::$modalKey][static::$modalFooterKey] = $footer;
         }
         if ($modalSize !== self::MODAL_SIZE_MEDIUM) {
             $data[static::$modalKey][static::$modalSizeKey] = $modalSize;
         }
         if (!empty($url)) {
-            $data[static::$modalKey][static::$modalUrlKey] = (string)$url;
+            $data[static::$modalKey][static::$modalUrlKey] = $url;
         }
         return $this->setData($data);
     }
-
+    
 }
