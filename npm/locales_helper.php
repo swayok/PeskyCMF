@@ -52,15 +52,11 @@ $defaultSuffixes = [
     'zh' => 'CN'
 ];
 
-function array_get($array, $key, $default = null) {
-    return Arr::get($array, $key, $default);
-}
-
 foreach ($locales as $locale => $details) {
     $localeWithDefaultSuffix = $locale . '_' . strtoupper(isset($defaultSuffixes[$locale]) ? $defaultSuffixes[$locale] : $locale);
     $baseFiles = array_merge(
-        array_get($details['versions'], $locale, []),
-        array_get($details['versions'], $localeWithDefaultSuffix, [])
+        Arr::get($details['versions'], $locale, []),
+        Arr::get($details['versions'], $localeWithDefaultSuffix, [])
     );
     // fix situations like ja_JP where only 1 suffix exists while there are not enough files in $baseFiles
     $differentLocales = array_values(array_diff(
