@@ -6,9 +6,10 @@
         "php",
         "cmf",
         "laravel",
-        "admin",
+        "admin-ui",
         "database",
-        "web"
+        "web",
+        "scaffolding"
     ],
     "authors": [
         {
@@ -20,8 +21,8 @@
         "issues": "https://github.com/swayok/PeskyCMF/issues"
     },
     "autoload": {
-        "psr-0": {
-            "PeskyCMF": "/src"
+        "psr-4": {
+            "PeskyCMF\\": "src"
         }
     },
     "repositories": [
