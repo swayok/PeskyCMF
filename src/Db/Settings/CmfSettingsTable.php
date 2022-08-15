@@ -11,15 +11,15 @@ class CmfSettingsTable extends CmfDbTable implements KeyValueTableInterface {
     use KeyValueTableHelpers;
 
     /** @var CmfSettingsTableStructure */
-    static private $tableStructure;
+    private static $tableStructure;
     /** @var CmfSetting */
-    static private $recordClass;
+    private static $recordClass;
 
     public function getMainForeignKeyColumnName(): ?string {
         return null;
     }
 
-    static public function getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue = null): ?string {
+    public static function getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue = null): ?string {
         return 'app-settings';
     }
 

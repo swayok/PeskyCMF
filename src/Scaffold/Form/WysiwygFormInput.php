@@ -140,7 +140,7 @@ class WysiwygFormInput extends FormInput {
      * @return array
      * @throws \InvalidArgumentException
      */
-    static public function createDataInsertConfig($phpCode, $title, $showAsBlock = false) {
+    public static function createDataInsertConfig($phpCode, $title, $showAsBlock = false) {
         if (!is_string($phpCode) || empty(trim($phpCode))) {
             throw new \InvalidArgumentException('$phpCode argument must be a not empty string');
         }
@@ -198,7 +198,7 @@ class WysiwygFormInput extends FormInput {
      * @return array
      * @throws \InvalidArgumentException
      */
-    static public function createDataInsertConfigWithArguments($phpCode, $title, $showAsBlock = false, array $optionsForArguments, $widgetTitleTpl = null) {
+    public static function createDataInsertConfigWithArguments($phpCode, $title, $showAsBlock = false, array $optionsForArguments, $widgetTitleTpl = null) {
         $config = static::createDataInsertConfig($phpCode, $title, $showAsBlock);
         $config['args_options'] = $optionsForArguments;
         $config['widget_title_tpl'] = $widgetTitleTpl;
@@ -239,7 +239,7 @@ class WysiwygFormInput extends FormInput {
      * @return array
      * @throws \InvalidArgumentException
      */
-    static public function createHtmlInsertConfig($html, $title, $isBlock = true) {
+    public static function createHtmlInsertConfig($html, $title, $isBlock = true) {
         if (!is_string($html) || empty(trim($html))) {
             throw new \InvalidArgumentException('$html argument must be a not empty string');
         }

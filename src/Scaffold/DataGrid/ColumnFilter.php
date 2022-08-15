@@ -17,7 +17,7 @@ class ColumnFilter {
     public const TYPE_TIMESTAMP = 'datetime';
     public const TYPE_BOOL = 'boolean';
 
-    static protected $dataTypeDefaultOperatorsGroup = [
+    protected static $dataTypeDefaultOperatorsGroup = [
         self::TYPE_STRING => self::OPERATOR_GROUP_STRINGS,
         self::TYPE_INTEGER => self::OPERATOR_GROUP_NUMBERS,
         self::TYPE_FLOAT => self::OPERATOR_GROUP_NUMBERS,
@@ -27,7 +27,7 @@ class ColumnFilter {
         self::TYPE_BOOL => self::OPERATOR_GROUP_BOOL,
     ];
 
-    static protected $dataTypeToDefaultInputType = [
+    protected static $dataTypeToDefaultInputType = [
         self::TYPE_STRING => self::INPUT_TYPE_STRING,
         self::TYPE_INTEGER => self::INPUT_TYPE_STRING,
         self::TYPE_FLOAT => self::INPUT_TYPE_STRING,
@@ -67,7 +67,7 @@ class ColumnFilter {
     public const OPERATOR_IS_NULL = 'is_null';
     public const OPERATOR_IS_NOT_NULL = 'is_not_null';
 
-    static protected $operatorGroups = [
+    protected static $operatorGroups = [
         self::OPERATOR_GROUP_NULLS => [
             self::OPERATOR_IS_NULL,
             self::OPERATOR_IS_NOT_NULL,
@@ -141,7 +141,7 @@ class ColumnFilter {
         ],
     ];
 
-    static protected $ruleOperatorToDbOperator = [
+    protected static $ruleOperatorToDbOperator = [
         self::OPERATOR_EQUAL => '=',
         self::OPERATOR_NOT_EQUAL => '!=',
         self::OPERATOR_IN_ARRAY => 'IN',
@@ -171,7 +171,7 @@ class ColumnFilter {
     public const INPUT_TYPE_SELECT = 'select';
     public const INPUT_TYPE_MULTISELECT = 'multselect';
 
-    static protected $inputTypes = [
+    protected static $inputTypes = [
         self::INPUT_TYPE_STRING,
         self::INPUT_TYPE_TEXT,
         self::INPUT_TYPE_SELECT,
@@ -228,7 +228,7 @@ class ColumnFilter {
      * @param null|string $columnName
      * @return ColumnFilter
      */
-    static public function create($dataType = self::TYPE_STRING, $canBeNull = false, $columnName = null) {
+    public static function create($dataType = self::TYPE_STRING, $canBeNull = false, $columnName = null) {
         return new static($dataType, $canBeNull, $columnName);
     }
 
@@ -239,7 +239,7 @@ class ColumnFilter {
      * @param null|string $columnName
      * @return ColumnFilter
      */
-    static public function forPositiveInteger($excludeZero = false, $canBeNull = false, $columnName = null) {
+    public static function forPositiveInteger($excludeZero = false, $canBeNull = false, $columnName = null) {
         return static::create(static::TYPE_INTEGER, $canBeNull, $columnName)->setMin($excludeZero ? 1 : 0);
     }
 
@@ -268,7 +268,7 @@ class ColumnFilter {
         return $this->filterConfig;
     }
 
-    static public function hasOperator(string $operator): bool {
+    public static function hasOperator(string $operator): bool {
         return in_array($operator, static::$operatorGroups[static::OPERATOR_GROUP_ALL], true);
     }
 
@@ -654,7 +654,7 @@ class ColumnFilter {
         ], $this->otherSettings);
     }
 
-    static public function buildFilterId(string $columnName): string {
+    public static function buildFilterId(string $columnName): string {
         return 'filter-for-' . strtolower(preg_replace('%[^a-zA-Z0-9]+%i', '-', $columnName));
     }
 

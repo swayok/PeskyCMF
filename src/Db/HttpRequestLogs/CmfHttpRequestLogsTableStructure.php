@@ -35,7 +35,7 @@ class CmfHttpRequestLogsTableStructure extends TableStructure {
     /**
      * @return string
      */
-    static public function getTableName(): string {
+    public static function getTableName(): string {
         return 'http_request_logs';
     }
 

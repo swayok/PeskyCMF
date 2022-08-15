@@ -31,7 +31,7 @@ abstract class CmfMenuItem {
      * @param string $url
      * @return CmfRedirectMenuItem
      */
-    static public function redirect(string $url) {
+    public static function redirect(string $url) {
         return new CmfRedirectMenuItem($url);
     }
 
@@ -40,7 +40,7 @@ abstract class CmfMenuItem {
      * @param string $method
      * @return CmfRequestMenuItem
      */
-    static public function request(string $url, string $method = 'post') {
+    public static function request(string $url, string $method = 'post') {
         return new CmfRequestMenuItem($url, $method);
     }
 
@@ -49,7 +49,7 @@ abstract class CmfMenuItem {
      * @param string $method
      * @return CmfBulkActionMenuItem
      */
-    static public function bulkActionOnSelectedRows(string $url, string $method = 'post') {
+    public static function bulkActionOnSelectedRows(string $url, string $method = 'post') {
         return new CmfBulkActionMenuItem($url, $method, true);
     }
 
@@ -58,7 +58,7 @@ abstract class CmfMenuItem {
      * @param string $method
      * @return CmfBulkActionMenuItem
      */
-    static public function bulkActionOnFilteredRows(string $url, string $method = 'post') {
+    public static function bulkActionOnFilteredRows(string $url, string $method = 'post') {
         return new CmfBulkActionMenuItem($url, $method, false);
     }
     
@@ -67,7 +67,7 @@ abstract class CmfMenuItem {
      * @param string $method
      * @return CmfBulkActionRedirectMenuItem
      */
-    static public function bulkActionRedirectOnSelectedRows(string $url) {
+    public static function bulkActionRedirectOnSelectedRows(string $url) {
         return new CmfBulkActionRedirectMenuItem($url, true);
     }
     
@@ -76,7 +76,7 @@ abstract class CmfMenuItem {
      * @param string $method
      * @return CmfBulkActionRedirectMenuItem
      */
-    static public function bulkActionRedirectOnFilteredRows(string $url) {
+    public static function bulkActionRedirectOnFilteredRows(string $url) {
         return new CmfBulkActionRedirectMenuItem($url, false);
     }
 

@@ -24,11 +24,11 @@ class UploadedTempFileInfo extends \SplFileInfo {
     protected $isValid = true;
     protected $size;
 
-    static public function getUploadsTempFolder(): string {
+    public static function getUploadsTempFolder(): string {
         return storage_path('app' . DIRECTORY_SEPARATOR . 'temp');
     }
 
-    static public function getSubfolderName(): string {
+    public static function getSubfolderName(): string {
         return date('Y-m-d');
     }
 

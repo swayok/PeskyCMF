@@ -10,7 +10,7 @@ trait DbSelectOneAutoCacheEnabled {
      * Override to change default value
      * @return boolean
      */
-    static public function canAutoCacheSelectOneQueries() {
+    public static function canAutoCacheSelectOneQueries() {
         return true;
     }
 
@@ -19,7 +19,7 @@ trait DbSelectOneAutoCacheEnabled {
      * This is used only when $this->isAutoCacheForSelectOneAllowed() === true
      * @return int
      */
-    static public function getAutoCacheTimeoutForSelectOneInMinutes() {
+    public static function getAutoCacheTimeoutForSelectOneInMinutes() {
         return 10;
     }
 

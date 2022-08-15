@@ -12,7 +12,7 @@ abstract class ValueRenderer {
      * @param null $view
      * @return $this
      */
-    static public function create($view = null) {
+    public static function create($view = null) {
         $class = get_called_class();
         return new $class($view);
     }

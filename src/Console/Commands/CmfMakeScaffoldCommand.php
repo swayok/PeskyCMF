@@ -251,11 +251,11 @@ class {$className} extends {$parentClassShort} {
     protected \$isCloningAllowed = false;
     protected \$isDeleteAllowed = true;
     
-    static public function getTable() {
+    public static function getTable() {
         return {$tableClassShort}::getInstance();
     }
     
-    static protected function getIconForMenuItem() {
+    protected static function getIconForMenuItem() {
         // icon classes like: 'fa fa-cog' or just delete if you do not want an icon
         return '';
     }

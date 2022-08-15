@@ -101,28 +101,28 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return CmfConfig
      */
-    static public function getCmfConfig() {
+    public static function getCmfConfig() {
         return CmfConfig::getPrimary();
     }
 
     /**
      * @return \App\Db\Admins\Admin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Admins\CmfAdmin|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
      */
-    static public function getUser() {
+    public static function getUser() {
         return static::getCmfConfig()->getUser();
     }
 
     /**
      * @return string
      */
-    static public function getResourceName() {
+    public static function getResourceName() {
         return static::getTable()->getName();
     }
     
     /**
      * @return array|null
      */
-    static public function getMainMenuItem() {
+    public static function getMainMenuItem() {
         $resoureName = static::getResourceName();
         $url = routeToCmfItemsTable(static::getResourceName());
         if ($url === null) {
@@ -140,14 +140,14 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return null|string
      */
-    static protected function getIconForMenuItem() {
+    protected static function getIconForMenuItem() {
         return null;
     }
 
     /**
      * @return string
      */
-    static public function getMenuItemCounterName() {
+    public static function getMenuItemCounterName() {
         return static::getMenuItemCounterValue() ? static::getResourceName() . '_count' : null;
     }
 
@@ -159,7 +159,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * If you want to return HTML string consider overwriting of self::getMenuItemCounterName()
      * @return null|\Closure|string
      */
-    static public function getMenuItemCounterValue() {
+    public static function getMenuItemCounterValue() {
         return null;
     }
 
@@ -168,7 +168,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemsTable(array $filters = [], bool $absolute = false) {
+    public static function getUrlToItemsTable(array $filters = [], bool $absolute = false) {
         return routeToCmfItemsTable(static::getResourceName(), $filters, $absolute);
     }
 
@@ -178,7 +178,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlCustomAction($actionId, array $queryArgs = [], bool $absolute = false) {
+    public static function getUrlCustomAction($actionId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfResourceCustomAction(static::getResourceName(), $actionId, $queryArgs, $absolute);
     }
 
@@ -188,7 +188,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlCustomPage($pageId, array $queryArgs = [], bool $absolute = false) {
+    public static function getUrlCustomPage($pageId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfResourceCustomPage(static::getResourceName(), $pageId, $queryArgs, $absolute);
     }
 
@@ -197,7 +197,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemDetails($itemId, bool $absolute = false) {
+    public static function getUrlToItemDetails($itemId, bool $absolute = false) {
         return routeToCmfItemDetails(static::getResourceName(), $itemId, $absolute);
     }
 
@@ -206,7 +206,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemAddForm(array $data = [], bool $absolute = false) {
+    public static function getUrlToItemAddForm(array $data = [], bool $absolute = false) {
         return routeToCmfItemAddForm(static::getResourceName(), $data, $absolute);
     }
 
@@ -215,7 +215,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemEditForm($itemId, bool $absolute = false) {
+    public static function getUrlToItemEditForm($itemId, bool $absolute = false) {
         return routeToCmfItemEditForm(static::getResourceName(), $itemId, $absolute);
     }
 
@@ -224,7 +224,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlForTempFileUpload(string $inputName, bool $absolute = false) {
+    public static function getUrlForTempFileUpload(string $inputName, bool $absolute = false) {
         return routeForCmfTempFileUpload(static::getResourceName(), $inputName, $absolute);
     }
 
@@ -233,7 +233,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlForTempFileDelete(string $inputName, bool $absolute = false) {
+    public static function getUrlForTempFileDelete(string $inputName, bool $absolute = false) {
         return routeForCmfTempFileDelete(static::getResourceName(), $inputName, $absolute);
     }
 
@@ -244,7 +244,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemCustomAction($itemId, $actionId, array $queryArgs = [], bool $absolute = false) {
+    public static function getUrlToItemCustomAction($itemId, $actionId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfItemCustomAction(static::getResourceName(), $itemId, $actionId, $queryArgs, $absolute);
     }
 
@@ -255,7 +255,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param bool $absolute
      * @return string
      */
-    static public function getUrlToItemCustomPage($itemId, $pageId, array $queryArgs = [], bool $absolute = false) {
+    public static function getUrlToItemCustomPage($itemId, $pageId, array $queryArgs = [], bool $absolute = false) {
         return routeToCmfItemCustomPage(static::getResourceName(), $itemId, $pageId, $queryArgs, $absolute);
     }
     

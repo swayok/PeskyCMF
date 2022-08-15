@@ -35,7 +35,7 @@ class InputRenderer extends ValueRenderer {
      * @param array $attributes
      * @return InputRenderer
      */
-    static public function create($view = null, array $attributes = []) {
+    public static function create($view = null, array $attributes = []) {
         return new InputRenderer($view, $attributes);
     }
 

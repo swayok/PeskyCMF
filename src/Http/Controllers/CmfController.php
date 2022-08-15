@@ -12,14 +12,14 @@ class CmfController extends Controller {
     use DataValidationHelper,
         AuthorizesRequests;
 
-    static public function getAuthGuard() {
+    public static function getAuthGuard() {
         return static::getCmfConfig()->getAuthGuard();
     }
 
     /**
      * @return \App\Db\Admins\Admin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Admins\CmfAdmin|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
      */
-    static public function getUser() {
+    public static function getUser() {
         $user = static::getCmfConfig()->getUser();
         if (empty($user)) {
             throw new \BadMethodCallException(
@@ -29,14 +29,14 @@ class CmfController extends Controller {
         return $user;
     }
 
-    static public function isUserAuthenticated(): bool {
+    public static function isUserAuthenticated(): bool {
         return static::getCmfConfig()->getUser() !== null;
     }
 
     /**
      * @return CmfConfig
      */
-    static public function getCmfConfig() {
+    public static function getCmfConfig() {
         return CmfConfig::getPrimary();
     }
 }

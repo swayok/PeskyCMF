@@ -148,7 +148,7 @@ class FileFormInput extends FormInput {
      * @param FileInfo $fileInfo
      * @return string
      */
-    static protected function getUploaderPreviewTypeFromFileInfo(FileInfo $fileInfo) {
+    protected static function getUploaderPreviewTypeFromFileInfo(FileInfo $fileInfo) {
         $type = $fileInfo->getFileType();
         switch ($type) {
             case FileConfig::TYPE_IMAGE:

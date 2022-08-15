@@ -20,7 +20,7 @@ abstract class CmfApiDocumentation
      * Used only by CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem().
      * @var int|null
      */
-    static protected $position;
+    protected static $position;
     
     /**
      * Base path to translations for current api method documentation

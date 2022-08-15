@@ -13,12 +13,12 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
     protected $isDeleteAllowed = false;
 
     /** @var CmfSettingsTable */
-    static private $table;
+    private static $table;
 
     /**
      * @return CmfSettingsTable|\PeskyORM\ORM\TableInterface|\PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface
      */
-    static public function getTable() {
+    public static function getTable() {
         if (static::$table === null) {
             static::$table = app()->bound(CmfSettingsTable::class)
                 ? app(CmfSettingsTable::class)
@@ -27,7 +27,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         return static::$table;
     }
 
-    static public function getMainMenuItem() {
+    public static function getMainMenuItem() {
         $resoureName = static::getResourceName();
         $url = routeToCmfItemEditForm(static::getResourceName(), 'all');
         if ($url === null) {
@@ -41,7 +41,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         ];
     }
 
-    static public function getIconForMenuItem() {
+    public static function getIconForMenuItem() {
         return 'fa fa-cog';
     }
 

@@ -16,7 +16,7 @@ class CmfSettingsTableStructure extends CmfDbTableStructure {
 
     use IdColumn;
 
-    static public function getTableName(): string {
+    public static function getTableName(): string {
         return 'settings';
     }
 

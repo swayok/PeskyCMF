@@ -106,7 +106,7 @@ class FormInput extends RenderableValueViewer {
      * @param string $tableName
      * @return string
      */
-    static public function makeDefaultId($formInputName, $tableName) {
+    public static function makeDefaultId($formInputName, $tableName) {
         return 't-' . $tableName . '-c-' . preg_replace('%[^a-zA-Z0-9-]+%', '_', $formInputName) . '-input';
     }
 

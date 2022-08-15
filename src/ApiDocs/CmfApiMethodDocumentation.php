@@ -15,7 +15,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
     
     // override next properties and methods
     
-    //static protected $position = 10;
+    //protected static $position = 10;
     
     //protected $translationsBasePath = 'group.method';
     //protected $title = '{group.method.title}';
@@ -152,7 +152,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         return $errors;
     }
     
-    static protected $authFailError = [
+    protected static $authFailError = [
         'code' => HttpCode::UNAUTHORISED,
         'title' => '{error.auth_failure.title}',
         'description' => '{error.auth_failure.description}',
@@ -161,7 +161,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    static protected $accessDeniedError = [
+    protected static $accessDeniedError = [
         'code' => HttpCode::FORBIDDEN,
         'title' => '{error.access_denied.title}',
         'description' => '{error.auth_failure.description}',
@@ -170,7 +170,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    static protected $dataValidationError = [
+    protected static $dataValidationError = [
         'code' => HttpCode::CANNOT_PROCESS,
         'title' => '{error.validation_errors.title}',
         'description' => '{error.auth_failure.description}',
@@ -180,7 +180,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    static protected $serverError = [
+    protected static $serverError = [
         'code' => HttpCode::SERVER_ERROR,
         'title' => '{error.server_error.title}',
         'description' => '{error.auth_failure.description}',
@@ -189,7 +189,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    static protected $itemNotFound = [
+    protected static $itemNotFound = [
         'code' => HttpCode::NOT_FOUND,
         'title' => '{error.item_not_found.title}',
         'description' => '{error.item_not_found.description}',

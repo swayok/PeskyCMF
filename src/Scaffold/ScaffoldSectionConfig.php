@@ -105,7 +105,7 @@ abstract class ScaffoldSectionConfig {
      * @param ScaffoldConfig $scaffoldConfig
      * @return $this
      */
-    static public function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
+    public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         $class = static::class;
         return new $class($table, $scaffoldConfig);
     }

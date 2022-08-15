@@ -11,24 +11,24 @@ interface ScaffoldConfigInterface {
     /**
      * @return TableInterface|KeyValueTableInterface
      */
-    static public function getTable();
+    public static function getTable();
 
     /**
      * @return string
      */
-    static public function getResourceName();
+    public static function getResourceName();
 
     /**
      * Main menu item info. Return null if you do not want to add item to menu
      * Details in CmfConfig::menu()
      * @return array|null
      */
-    static public function getMainMenuItem();
+    public static function getMainMenuItem();
 
     /**
      * @return string
      */
-    static public function getMenuItemCounterName();
+    public static function getMenuItemCounterName();
 
     /**
      * Get value for menu item counter (some html code to display near menu item button: new items count, etc)
@@ -38,7 +38,7 @@ interface ScaffoldConfigInterface {
      * If you want to return HTML string consider overwriting of self::getMenuItemCounterName()
      * @return null|\Closure|string
      */
-    static public function getMenuItemCounterValue();
+    public static function getMenuItemCounterValue();
 
     /**
      * @return DataGridConfig

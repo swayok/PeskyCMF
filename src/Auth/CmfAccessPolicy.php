@@ -34,7 +34,7 @@ class CmfAccessPolicy {
      * To allow access for all roles use 'true' intead of roles array.
      * @var array
      */
-    static protected $resources = [
+    protected static $resources = [
         'buildings' => [
             'others' => true,
         ],
@@ -56,7 +56,7 @@ class CmfAccessPolicy {
      * Note that if resource does not have "owner id column name" - access to its items will be allowed to any role.
      * @var array
      */
-    static protected $resourcesWithOwnershipValidation = [
+    protected static $resourcesWithOwnershipValidation = [
 
     ];
 
@@ -69,7 +69,7 @@ class CmfAccessPolicy {
         ]
      * @var array
      */
-    static protected $ownerColumnForTable = [
+    protected static $ownerColumnForTable = [
 
     ];
 
@@ -77,7 +77,7 @@ class CmfAccessPolicy {
      * Default "owner id column name"
      * @var string
      */
-    static protected $defaultOwnerIdColumnName = 'admin_id';
+    protected static $defaultOwnerIdColumnName = 'admin_id';
 
     /**
      * Access to CMF pages: routeToCmfPage('page_name')
@@ -89,7 +89,7 @@ class CmfAccessPolicy {
      * To allow access for all roles use 'true' intead of roles array.
      * @var array
      */
-    static protected $cmfPages = [
+    protected static $cmfPages = [
         'login_as' => false,
     ];
 
@@ -103,7 +103,7 @@ class CmfAccessPolicy {
      * To allow access for all roles use 'true' intead of roles array.
      * @var array
      */
-    static protected $defaults = [
+    protected static $defaults = [
         'others' => true,
     ];
 

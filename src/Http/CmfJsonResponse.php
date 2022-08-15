@@ -9,17 +9,17 @@ use Illuminate\Http\JsonResponse;
  */
 class CmfJsonResponse extends JsonResponse {
 
-    static protected $messageKey = '_message';
-    static protected $redirectKey = 'redirect';
-    static protected $forcedRedirectKey = 'redirect_with_reload';
-    static protected $redirectFallbakKey = 'redirect_fallback';
-    static protected $errorsKey = 'errors';
-    static protected $modalKey = 'modal';
-    static protected $modalTitleKey = 'title';
-    static protected $modalContentKey = 'content';
-    static protected $modalFooterKey = 'footer';
-    static protected $modalUrlKey = 'url';
-    static protected $modalSizeKey = 'size';
+    protected static $messageKey = '_message';
+    protected static $redirectKey = 'redirect';
+    protected static $forcedRedirectKey = 'redirect_with_reload';
+    protected static $redirectFallbakKey = 'redirect_fallback';
+    protected static $errorsKey = 'errors';
+    protected static $modalKey = 'modal';
+    protected static $modalTitleKey = 'title';
+    protected static $modalContentKey = 'content';
+    protected static $modalFooterKey = 'footer';
+    protected static $modalUrlKey = 'url';
+    protected static $modalSizeKey = 'size';
 
     const MODAL_SIZE_MEDIUM = 'medium';
     const MODAL_SIZE_SMALL = 'small';

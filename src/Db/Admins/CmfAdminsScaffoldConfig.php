@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Db\Admins;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormConfig;
@@ -26,11 +25,11 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
     /**
      * @return CmfAdminsTable|TableInterface
      */
-    static public function getTable() {
+    public static function getTable() {
         return static::getCmfConfig()->getAuthModule()->getUsersTable();
     }
 
-    static protected function getIconForMenuItem() {
+    protected static function getIconForMenuItem() {
         return 'fa fa-group';
     }
 

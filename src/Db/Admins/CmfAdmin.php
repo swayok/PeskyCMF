@@ -54,7 +54,7 @@ class CmfAdmin extends CmfDbRecord implements AuthenticatableContract {
     /**
      * @return CmfAdminsTable
      */
-    static public function getTable() {
+    public static function getTable() {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return CmfAdminsTable::getInstance();
     }

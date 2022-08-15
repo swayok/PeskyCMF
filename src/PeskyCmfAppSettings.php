@@ -24,7 +24,7 @@ class PeskyCmfAppSettings
 {
     
     /** @var $this */
-    static protected $instance;
+    protected static $instance;
     
     public const DEFAULT_BROWSER_TITLE = 'default_browser_title';
     public const BROWSER_TITLE_ADDITION = 'browser_title_addition';
@@ -32,7 +32,7 @@ class PeskyCmfAppSettings
     public const DEFAULT_LANGUAGE = 'default_language';
     public const FALLBACK_LANGUAGES = 'fallback_languages';
     
-    static protected $settingsForWysiwygDataIsnserts = [
+    protected static $settingsForWysiwygDataIsnserts = [
     
     ];
     

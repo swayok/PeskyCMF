@@ -16,7 +16,7 @@ class LogHttpRequest {
      * list of logs with urls
      * @var HttpRequestLog[]
      */
-    static private array $logs = [];
+    private static array $logs = [];
 
     /**
      * Middleware examples:

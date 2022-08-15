@@ -61,7 +61,7 @@ abstract class AbstractValueViewer {
     /**
      * @return $this
      */
-    static public function create() {
+    public static function create() {
         $classname = static::class;
         return new $classname();
     }
@@ -175,7 +175,7 @@ abstract class AbstractValueViewer {
      * @param string $name
      * @return bool
      */
-    final static public function isComplexViewerName($name) {
+    final public static function isComplexViewerName($name) {
         return (bool)preg_match('%^[^:]+?:[^:]+?$%', $name);
     }
 
@@ -183,7 +183,7 @@ abstract class AbstractValueViewer {
      * @param string $name - something like "column_name:key_name"
      * @return array - 0 - column name; 1 = key name or null
      */
-    final static public function splitComplexViewerName($name) {
+    final public static function splitComplexViewerName($name) {
         $parts = explode(':', $name, 2);
         if (count($parts) === 1) {
             $parts[1] = null;

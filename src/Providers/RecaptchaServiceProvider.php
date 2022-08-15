@@ -51,7 +51,7 @@ class RecaptchaServiceProvider extends ServiceProvider {
      * - false: invalid or failed to validate
      * - array: ['success' => bool, 'challenge_ts' => string, 'host_name' => string]
      */
-    static public function validate($secret, $answer, $clientIp = null) {
+    public static function validate($secret, $answer, $clientIp = null) {
         $data = [
             'secret' => $secret,
             'response' => $answer,

@@ -50,7 +50,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
     public const ORDER_DESC_NULLS_FIRST = 'desc nulls first';
     public const ORDER_DESC_NULLS_LAST = 'desc nulls last';
 
-    static protected $orderOptions = [
+    protected static $orderOptions = [
         self::ORDER_ASC,
         self::ORDER_DESC,
         self::ORDER_ASC_NULLS_FIRST,

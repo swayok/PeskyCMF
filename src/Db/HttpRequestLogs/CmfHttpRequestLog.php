@@ -69,10 +69,10 @@ use Symfony\Component\HttpFoundation\Response;
 class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterface {
 
     /** @var \Closure[] */
-    static protected $requestDataMinifiers = [];
-    static protected $responseContentMinifiers = [];
+    protected static $requestDataMinifiers = [];
+    protected static $responseContentMinifiers = [];
 
-    static protected $serverDataKeys = [
+    protected static $serverDataKeys = [
         'HTTP_USER_AGENT',
         'REQUEST_URI',
         'REQUEST_METHOD',
@@ -101,7 +101,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     /**
      * @return CmfHttpRequestLogsTable
      */
-    static public function getTable() {
+    public static function getTable() {
         return CmfHttpRequestLogsTable::getInstance();
     }
 
@@ -111,7 +111,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param string $name
      * @param \Closure $minifier
      */
-    static public function registerRequestDataMinifier(string $name, \Closure $minifier) {
+    public static function registerRequestDataMinifier(string $name, \Closure $minifier) {
         static::$requestDataMinifiers[$name] = $minifier;
     }
     
@@ -121,7 +121,7 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
      * @param string $name
      * @param \Closure $minifier
      */
-    static public function registerResponseContentMinifier(string $name, \Closure $minifier) {
+    public static function registerResponseContentMinifier(string $name, \Closure $minifier) {
         static::$responseContentMinifiers[$name] = $minifier;
     }
 

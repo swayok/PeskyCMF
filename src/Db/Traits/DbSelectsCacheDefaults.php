@@ -10,7 +10,7 @@ trait DbSelectsCacheDefaults {
      * Default cache timeout for "select one" queries
      * @return int
      */
-    static public function getDefaultCacheDurationForSelectOneInMinutes() {
+    public static function getDefaultCacheDurationForSelectOneInMinutes() {
         return 1440;
     }
 
@@ -20,7 +20,7 @@ trait DbSelectsCacheDefaults {
      * Default cache timeout for "select many" queries
      * @return int
      */
-    static public function getDefaultCacheDurationForSelectManyInMinutes() {
+    public static function getDefaultCacheDurationForSelectManyInMinutes() {
         return 1440;
     }
 
@@ -28,7 +28,7 @@ trait DbSelectsCacheDefaults {
      * Override to change default value
      * @return boolean
      */
-    static public function canCleanRelationsCache() {
+    public static function canCleanRelationsCache() {
         return true;
     }
 
@@ -36,7 +36,7 @@ trait DbSelectsCacheDefaults {
      * Override to change default value
      * @return boolean
      */
-    static public function canAutoCacheSelectOneQueries() {
+    public static function canAutoCacheSelectOneQueries() {
         return false;
     }
 
@@ -44,7 +44,7 @@ trait DbSelectsCacheDefaults {
      * Override to change default value
      * @return boolean
      */
-    static public function canAutoCacheSelectManyQueries() {
+    public static function canAutoCacheSelectManyQueries() {
         return false;
     }
 
@@ -53,7 +53,7 @@ trait DbSelectsCacheDefaults {
      * This is used only when $this->isAutoCacheForSelectOneAllowed() === true
      * @return int
      */
-    static public function getAutoCacheTimeoutForSelectOneInMinutes() {
+    public static function getAutoCacheTimeoutForSelectOneInMinutes() {
         return 10;
     }
 
@@ -62,7 +62,7 @@ trait DbSelectsCacheDefaults {
      * This is used only when $this->isAutoCacheForSelectAllAllowed() === true
      * @return int
      */
-    static public function getAutoCacheTimeoutForSelectManyInMinutes() {
+    public static function getAutoCacheTimeoutForSelectManyInMinutes() {
         return 10;
     }
 

@@ -2,7 +2,6 @@
 
 namespace PeskyCMF\Db\HttpRequestLogs;
 
-use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
@@ -17,11 +16,11 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig {
     protected $isEditAllowed = false;
     protected $isDeleteAllowed = false;
 
-    static public function getTable() {
+    public static function getTable() {
         return CmfHttpRequestLogsTable::getInstance();
     }
 
-    static public function getIconForMenuItem() {
+    public static function getIconForMenuItem() {
         return 'fa fa-exchange';
     }
 

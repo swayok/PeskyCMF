@@ -14,11 +14,11 @@ abstract class CmfDbTable extends Table {
     /** @var null|string */
     private $recordClass;
     /** @var array */
-    static private $timeZonesList;
+    private static $timeZonesList;
     /** @var array */
-    static private $timeZonesOptions;
+    private static $timeZonesOptions;
 
-    static public function getTimezonesList($asOptions = false) {
+    public static function getTimezonesList($asOptions = false) {
         if (self::$timeZonesList === null) {
             self::$timeZonesList = \DateTimeZone::listIdentifiers();
         }
@@ -40,11 +40,11 @@ abstract class CmfDbTable extends Table {
         return $result ? strtotime($result) : time();
     }
 
-    static public function getCurrentTimeDbExpr(): DbExpr {
+    public static function getCurrentTimeDbExpr(): DbExpr {
         return DbExpr::create('NOW()');
     }
 
-    static public function _getCurrentTime() {
+    public static function _getCurrentTime() {
         $ds = self::getConnection(false);
         $query = 'SELECT ' . $ds->quoteDbExpr(static::getCurrentTimeDbExpr());
         /** @var string $result */

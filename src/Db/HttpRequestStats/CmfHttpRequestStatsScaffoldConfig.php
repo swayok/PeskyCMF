@@ -14,11 +14,11 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
     protected $isCloningAllowed = false;
     protected $isDeleteAllowed = true;
     
-    static public function getTable() {
+    public static function getTable() {
         return CmfHttpRequestStatsTable::getInstance();
     }
     
-    static protected function getIconForMenuItem() {
+    protected static function getIconForMenuItem() {
         return 'fa fa-area-chart'; //< icon classes like: 'fa fa-cog' or just delete if you do not want an icon
     }
     

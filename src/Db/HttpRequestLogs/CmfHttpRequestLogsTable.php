@@ -42,7 +42,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
     /**
      * @return CmfHttpRequestLog
      */
-    static public function getCurrentLog() {
+    public static function getCurrentLog() {
         $instance = static::getInstance();
         if (!$instance->currentLog) {
             $instance->currentLog = static::getInstance()->newRecord();
@@ -50,7 +50,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
         return $instance->currentLog;
     }
 
-    static public function resetCurrentLog() {
+    public static function resetCurrentLog() {
         $instance = static::getInstance();
         $instance->currentLog = null;
         $instance->currentLogRecord = null;
@@ -64,7 +64,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param \Closure $minifier - function (Request $request) { return $content; }
      * @return CmfHttpRequestLog
      */
-    static public function setResponseContentMinifier(\Closure $minifier) {
+    public static function setResponseContentMinifier(\Closure $minifier) {
         return static::getCurrentLog()->setResponseContentMinifier($minifier);
     }
 
@@ -74,7 +74,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param \Closure $minifier - function (array $data) { return $data; }
      * @return CmfHttpRequestLog
      */
-    static public function setRequestDataMinifier(\Closure $minifier) {
+    public static function setRequestDataMinifier(\Closure $minifier) {
         return static::getCurrentLog()->setRequestDataMinifier($minifier);
     }
 
@@ -84,7 +84,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param string $name
      * @param \Closure $minifier
      */
-    static public function registerRequestDataMinifier(string $name, \Closure $minifier) {
+    public static function registerRequestDataMinifier(string $name, \Closure $minifier) {
         static::getCurrentLog()->registerRequestDataMinifier($name, $minifier);
     }
 
@@ -93,7 +93,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param bool $force - log request even if route has no 'log' action in its config
      * @return CmfHttpRequestLog|null
      */
-    static public function logRequest(Request $request, bool $force = false) {
+    public static function logRequest(Request $request, bool $force = false) {
         return static::getCurrentLog()->fromRequest($request, $force);
     }
 
@@ -103,7 +103,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param RecordInterface|null $user
      * @return CmfHttpRequestLog
      */
-    static public function logResponse(Request $request, Response $response, ?RecordInterface $user = null) {
+    public static function logResponse(Request $request, Response $response, ?RecordInterface $user = null) {
         $currentLog = static::getCurrentLog();
         if (isset(static::getInstance()->currentLogRecord) && !isset($currentLog->data_after)) {
             static::logDbRecordAfterChange();
@@ -115,7 +115,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * Response will not be logged
      * @return CmfHttpRequestLog
      */
-    static public function ignoreResponseLogging() {
+    public static function ignoreResponseLogging() {
         $currentLog = static::getCurrentLog();
         return $currentLog->ignoreResponseLogging();
     }
@@ -124,7 +124,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param RecordInterface|null $user
      * @return CmfHttpRequestLog
      */
-    static public function logRequester(?RecordInterface $user = null) {
+    public static function logRequester(?RecordInterface $user = null) {
         return static::getCurrentLog()->logRequester($user);
     }
 
@@ -134,7 +134,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param array|null $relationsToLog
      * @return CmfHttpRequestLog
      */
-    static public function logDbRecordBeforeChange(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
+    public static function logDbRecordBeforeChange(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
         $instance = static::getInstance();
         $instance->currentLogRecord = $record;
         $instance->columnsToLog = $columnsToLog;
@@ -145,7 +145,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
     /**
      * @return CmfHttpRequestLog
      */
-    static public function logDbRecordAfterChange() {
+    public static function logDbRecordAfterChange() {
         $instance = static::getInstance();
         return static::getCurrentLog()->logDbRecordAfterChange(
             $instance->currentLogRecord,
@@ -160,7 +160,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param array|null $relationsToLog
      * @return CmfHttpRequestLog
      */
-    static public function logDbRecordCreation(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
+    public static function logDbRecordCreation(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null) {
         $instance = static::getInstance();
         $instance->currentLogRecord = $record;
         $instance->columnsToLog = $columnsToLog;
@@ -173,7 +173,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param RecordInterface $record
      * @return CmfHttpRequestLog
      */
-    static public function logDbRecordUsage(RecordInterface $record) {
+    public static function logDbRecordUsage(RecordInterface $record) {
         return static::getCurrentLog()->logDbRecordUsage($record);
     }
 
@@ -182,7 +182,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param mixed $value - no objects supported!!
      * @return CmfHttpRequestLog
      */
-    static public function addDebugData(string $key, $value) {
+    public static function addDebugData(string $key, $value) {
         return static::getCurrentLog()->addDebugData($key, $value);
     }
     
@@ -191,7 +191,7 @@ class CmfHttpRequestLogsTable extends AbstractTable {
      * @param mixed $value - no objects supported!!
      * @return CmfHttpRequestLog
      */
-    static public function addDebugDataFromArray(array $data) {
+    public static function addDebugDataFromArray(array $data) {
         return static::getCurrentLog()->addDebugDataFromArray($data);
     }
 

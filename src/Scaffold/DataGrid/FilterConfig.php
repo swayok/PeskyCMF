@@ -15,7 +15,7 @@ class FilterConfig {
     protected $filters = [];
     protected $defaultConditions = ['condition' => 'AND', 'rules' => []];
     
-    static public $columnTypeToFilterType = [
+    public static $columnTypeToFilterType = [
         Column::TYPE_INT => ColumnFilter::TYPE_INTEGER,
         Column::TYPE_FLOAT => ColumnFilter::TYPE_FLOAT,
         Column::TYPE_BOOL => ColumnFilter::TYPE_BOOL,
@@ -34,7 +34,7 @@ class FilterConfig {
      * @param ScaffoldConfig $scaffoldConfig
      * @return $this
      */
-    static public function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
+    public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
         return new static($table, $scaffoldConfig);
     }
 

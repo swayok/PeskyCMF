@@ -119,7 +119,7 @@ trait DataValidationHelper {
      * @param array $errors
      * @return array
      */
-    static public function fixValidationErrorsKeys(array $errors) {
+    public static function fixValidationErrorsKeys(array $errors) {
         foreach ($errors as $key => $messages) {
             if (strpos($key, '.') !== false) {
                 $newKey = preg_replace(

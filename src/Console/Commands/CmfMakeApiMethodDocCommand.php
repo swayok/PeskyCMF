@@ -35,8 +35,8 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
         $translationGroup .= '.' . $translationSubGroup;
         $httpMethod = 'GET';
         if (!$this->option('auto') && $this->confirm('Do you want to configure documentation class?', true)) {
-            list($url, $httpMethod, $translationGroup) = $this->askQuestions($url, $translationGroup);
-            list($urlParams, $urlQueryParams, $postParams, $validationErrors) = $this->askParams($url, $httpMethod);
+            [$url, $httpMethod, $translationGroup] = $this->askQuestions($url, $translationGroup);
+            [$urlParams, $urlQueryParams, $postParams, $validationErrors] = $this->askParams($url, $httpMethod);
             if (!in_array($httpMethod, ['GET', 'POST'], true)) {
                 $httpMethod = in_array($httpMethod, ['PUT', 'DELETE'], true) ? 'POST' : 'GET';
             }
@@ -57,7 +57,7 @@ use PeskyCMF\ApiDocs\ApiMethodErrorResponseInfo;
 
 class {$className} extends {$baseClassName} {
 
-    //static protected \$position = 10;
+    //protected static \$position = 10;
 
     protected \$translationsBasePath = '{$translationGroup}';
 
@@ -154,11 +154,11 @@ CLASS;
         if (!in_array($httpMethod, ['GET', 'POST'], true)) {
             $urlQueryParams['_method'] = $httpMethod;
         }
-        list($urlQueryParams, $validationErrors) = $this->askParamsFor('URL Query', $urlQueryParams);
+        [$urlQueryParams, $validationErrors] = $this->askParamsFor('URL Query', $urlQueryParams);
         $urlQueryParams = '    public $urlQueryParameters = ' . rtrim($this->arrayToString($urlQueryParams, 1), " ,\n") . ";\n";
         // post params
         if (in_array($httpMethod, ['POST', 'PUT'], true)) {
-            list($postParams, $validationErrors) = $this->askParamsFor('POST');
+            [$postParams, $validationErrors] = $this->askParamsFor('POST');
             $postParams = '    public $postParameters = ' . rtrim($this->arrayToString($postParams, 1), " ,\n") . ";\n";
         }
         $validationErrors = '    protected $validationErrors = ' . rtrim($this->arrayToString($validationErrors, 1), " ,\n") . ";\n";

@@ -49,7 +49,7 @@ trait ResetsPasswordsViaAccessKey {
      * @param null|array $requiredAdditionalColumns - list of $additionalColumns (see getPasswordRecoveryAccessKey) which must be present in $accessKey
      * @return CmfDbRecord|null - null = failed to parse access key, validate data or load user
      */
-    static public function loadFromPasswordRecoveryAccessKey(string $accessKey, ?array $requiredAdditionalColumns = null) {
+    public static function loadFromPasswordRecoveryAccessKey(string $accessKey, ?array $requiredAdditionalColumns = null) {
         try {
             $data = \Crypt::decrypt($accessKey);
         } catch (DecryptException $exc) {

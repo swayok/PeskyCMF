@@ -26,7 +26,7 @@ class DataGridColumn extends RenderableValueViewer {
      */
     protected $additionalOrderBy = [];
 
-    static public function convertNameForDataTables($name) {
+    public static function convertNameForDataTables($name) {
         return str_replace('.', ':', $name);
     }
 

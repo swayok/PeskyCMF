@@ -57,10 +57,10 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CmfHttpRequestStat extends AbstractRecord {
 
-    static protected $startedAt;
-    static protected $checkpointsStack = [];
+    protected static $startedAt;
+    protected static $checkpointsStack = [];
     protected $accumulatedDurationError = 0;
-    static protected $current;
+    protected static $current;
 
     /**
      * @return CmfHttpRequestStatsTable
@@ -69,7 +69,7 @@ class CmfHttpRequestStat extends AbstractRecord {
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    static public function getTable() {
+    public static function getTable() {
         return CmfHttpRequestStatsTable::getInstance();
     }
 
@@ -77,7 +77,7 @@ class CmfHttpRequestStat extends AbstractRecord {
      * @param float $startedAt
      * @return static
      */
-    static public function createForProfiling(float $startedAt = null) {
+    public static function createForProfiling(float $startedAt = null) {
         static::$current = static::new1()->setCreatedAt(date('Y-m-d H:i:s'));
         static::$startedAt = $startedAt === null ? microtime(true) : $startedAt;
         return static::$current;
@@ -86,7 +86,7 @@ class CmfHttpRequestStat extends AbstractRecord {
     /**
      * @return static
      */
-    static public function getCurrent() {
+    public static function getCurrent() {
         if (!static::$current) {
             static::$current = static::new1();
         }
@@ -98,7 +98,7 @@ class CmfHttpRequestStat extends AbstractRecord {
      * @param string|null $descrption
      * @throws \InvalidArgumentException
      */
-    static public function startCheckpoint(string $key, string $descrption = null) {
+    public static function startCheckpoint(string $key, string $descrption = null) {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -132,7 +132,7 @@ class CmfHttpRequestStat extends AbstractRecord {
      * @param array $data
      * @throws \InvalidArgumentException
      */
-    static public function endCheckpoint(string $key, array $data = []) {
+    public static function endCheckpoint(string $key, array $data = []) {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -161,14 +161,14 @@ class CmfHttpRequestStat extends AbstractRecord {
         }
     }
 
-    static public function profileClosure(string $checkpointKey, \Closure $closure): mixed {
+    public static function profileClosure(string $checkpointKey, \Closure $closure): mixed {
         static::startCheckpoint($checkpointKey);
         $ret = value($closure);
         static::endCheckpoint($checkpointKey);
         return $ret;
     }
 
-    static public function setCounterValue(string $counterName, float $value) {
+    public static function setCounterValue(string $counterName, float $value) {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -179,7 +179,7 @@ class CmfHttpRequestStat extends AbstractRecord {
         }
     }
 
-    static public function increment(string $counterName, float $increment = 1) {
+    public static function increment(string $counterName, float $increment = 1) {
         if (static::$startedAt) {
             $time = microtime(true);
             $stat = static::getCurrent();
@@ -190,11 +190,11 @@ class CmfHttpRequestStat extends AbstractRecord {
         }
     }
 
-    static public function decrement(string $counterName, float $increment = 1) {
+    public static function decrement(string $counterName, float $increment = 1) {
         static::increment($counterName, -$increment);
     }
 
-    static public function requestUsesCachedData() {
+    public static function requestUsesCachedData() {
         if (static::$startedAt) {
             static::getCurrent()->setIsCache(true);
         }
@@ -295,7 +295,7 @@ class CmfHttpRequestStat extends AbstractRecord {
      * @param float $startedAt
      * @return array
      */
-    static protected function processSqlProfiling(array $sqlProfilingData, float $startedAt) {
+    protected static function processSqlProfiling(array $sqlProfilingData, float $startedAt) {
         $ret = [
             'statements_count' => $sqlProfilingData['statements_count'],
             'failed_statements_count' => $sqlProfilingData['failed_statements_count'],

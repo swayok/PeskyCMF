@@ -17,7 +17,7 @@ class {{ $cmfConfigClassName }} extends CmfConfig {
      * File name for this site section in 'configs' folder of project's root directory (without '.php' extension)
      * Example: 'admin' for config/admin.php;
      */
-    static protected function configsFileName(): string {
+    protected static function configsFileName(): string {
         return '{{ $configsFileName }}';
     }
 
@@ -38,7 +38,7 @@ class {{ $cmfConfigClassName }} extends CmfConfig {
      *         ),
      *    )
      */
-    static public function menu(): array {
+    public static function menu(): array {
         return array_merge(
             [
                 [
@@ -71,7 +71,7 @@ class {{ $cmfConfigClassName }} extends CmfConfig {
      * How much rows to display in data tables
      * @return int
      */
-    /*static public function rows_per_page(): int {
+    /*public static function rows_per_page(): int {
         return 25;
     }*/
 

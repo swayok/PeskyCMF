@@ -15,7 +15,7 @@ abstract class CmfDbTableStructure extends TableStructure {
         return $this;
     }
     
-    static public function getConnectionName(bool $writable): string {
+    public static function getConnectionName(bool $writable): string {
         return $writable ? static::getInstance()->writableConnection : static::getInstance()->readonlyConnection;
     }
 }

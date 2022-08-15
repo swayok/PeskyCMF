@@ -10,7 +10,7 @@ trait DbSelectsAutoCacheDisabled {
      * Override to change default value
      * @return boolean
      */
-    static public function canAutoCacheSelectOneQueries() {
+    public static function canAutoCacheSelectOneQueries() {
         return false;
     }
 
@@ -18,7 +18,7 @@ trait DbSelectsAutoCacheDisabled {
      * Override to change default value
      * @return boolean
      */
-    static public function canAutoCacheSelectManyQueries() {
+    public static function canAutoCacheSelectManyQueries() {
         return false;
     }
 

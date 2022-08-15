@@ -14,7 +14,7 @@ trait TaggedCacheForDbSelects {
      * Detect if caching is possible
      * @return bool
      */
-    static protected function cachingIsPossible() {
+    protected static function cachingIsPossible() {
         if (static::$_cachingIsPossible === null) {
             /** @var \AlternativeLaravelCache\Core\AlternativeCacheStore $cache */
             $storeClass = '\AlternativeLaravelCache\Core\AlternativeCacheStore';
@@ -33,7 +33,7 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    static public function cleanModelCache($cleanRelatedModelsCache = null) {
+    public static function cleanModelCache($cleanRelatedModelsCache = null) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         \Cache::tags(static::getCacheTag())->flush();
         static::cleanRelatedModelsCache($cleanRelatedModelsCache);
@@ -50,7 +50,7 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    static public function cleanRelatedModelsCache($cleanRelatedModelsCache = true) {
+    public static function cleanRelatedModelsCache($cleanRelatedModelsCache = true) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         if ($cleanRelatedModelsCache === null) {
             $cleanRelatedModelsCache = static::canCleanRelationsCache();
@@ -81,7 +81,7 @@ trait TaggedCacheForDbSelects {
     /**
      * @return array - relations names
      */
-    static protected function getDefaultRelationsForCacheCleaner() {
+    protected static function getDefaultRelationsForCacheCleaner() {
         return array_keys(static::getStructure()->getRelations());
     }
     
@@ -90,7 +90,7 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    static public function cleanSelectManyCache($cleanRelatedModelsCache = null) {
+    public static function cleanSelectManyCache($cleanRelatedModelsCache = null) {
         \Cache::tags(static::getSelectManyCacheTag())->flush();
         static::cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
@@ -100,7 +100,7 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    static public function cleanSelectOneCache($cleanRelatedModelsCache = null) {
+    public static function cleanSelectOneCache($cleanRelatedModelsCache = null) {
         \Cache::tags(static::getSelectOneCacheTag())->flush();
         static::cleanRelatedModelsCache($cleanRelatedModelsCache);
     }
@@ -111,7 +111,7 @@ trait TaggedCacheForDbSelects {
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    static public function cleanRecordCache($record, $cleanRelatedModelsCache = null) {
+    public static function cleanRecordCache($record, $cleanRelatedModelsCache = null) {
         if (!($record instanceof Record) || $record->existsInDb()) {
             \Cache::tags(static::getRecordCacheTag($record))->flush();
         }
@@ -121,14 +121,14 @@ trait TaggedCacheForDbSelects {
     /**
      * @return string
      */
-    static public function getSelectManyCacheTag() {
+    public static function getSelectManyCacheTag() {
         return static::getCacheTag() . 'many';
     }
     
     /**
      * @return string
      */
-    static public function getSelectOneCacheTag() {
+    public static function getSelectOneCacheTag() {
         return static::getCacheTag() . 'one';
     }
     
@@ -136,7 +136,7 @@ trait TaggedCacheForDbSelects {
      * @param mixed $record
      * @return string
      */
-    static public function getRecordCacheTag($record) {
+    public static function getRecordCacheTag($record) {
         /** @var CmfDbTable|TaggedCacheForDbSelects $this */
         if ($record instanceof Record) {
             $id = $record->existsInDb() ? $record->getPrimaryKeyValue() : null;
@@ -166,7 +166,7 @@ trait TaggedCacheForDbSelects {
      * @return array
      * @throws \BadMethodCallException
      */
-    static protected function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback) {
+    protected static function _getCachedData($affectsSingleRecord, array $cacheSettings, callable $callback) {
         $data = empty($cacheSettings['recache']) ? \Cache::get($cacheSettings['key'], '{!404!}') : '{!404!}';
         if ($data === '{!404!}') {
             $data = $callback();
@@ -200,7 +200,7 @@ trait TaggedCacheForDbSelects {
      * @param null|array $conditionsAndOptions
      * @return string
      */
-    static public function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
+    public static function buildDefaultCacheKey($affectsSingleRecord, $columns, $conditionsAndOptions) {
         $prefix = $affectsSingleRecord ? static::getSelectOneCacheTag() : static::getSelectManyCacheTag();
         return $prefix . '.' . static::buildCacheKey($columns, $conditionsAndOptions);
     }
