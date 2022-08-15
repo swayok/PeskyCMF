@@ -1,50 +1,58 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\ApiDocs;
 
+use Illuminate\Support\Str;
 use PeskyCMF\Config\CmfConfig;
 use Swayok\Utils\Folder;
 
-class CmfApiDocumentationModule {
-
+class CmfApiDocumentationModule
+{
+    
     protected $cmfConfig;
-
-    public function __construct(CmfConfig $cmfConfig) {
+    
+    public function __construct(CmfConfig $cmfConfig)
+    {
         $this->cmfConfig = $cmfConfig;
     }
-
+    
     /**
      * @return CmfConfig
      */
-    public function getCmfConfig(): CmfConfig {
+    public function getCmfConfig(): CmfConfig
+    {
         return $this->cmfConfig;
     }
-
+    
     /**
      * Menu item for api logs page.
      * Note: it is not added automatically to menu items - you need to add it manually to static::menu()
      * @return array
      */
-    public function getMenuItem(): array {
+    public function getMenuItem(): array
+    {
         return [
             'label' => cmfTransCustom('api_docs.menu_title'),
             'icon' => 'glyphicon glyphicon-book',
             'url' => routeToCmfPage('api_docs'),
         ];
     }
-
+    
     /**
      * Provides sections with list of objects of classes that extend CmfApiMethodDocumentation class to be displayed in api docs section
      * @return array - key - section name, value - array that contains names of classes that extend CmfApiDocumentation class
      */
-    public function getDocumentationClassesList(): array {
+    public function getDocumentationClassesList(): array
+    {
         $classNames = $this->getCmfConfig()->config('api_documentation.classes', []);
         if (empty($classNames)) {
             $classNames = $this->loadClassesFromFileSystem();
         }
         return $classNames;
     }
-
+    
     /**
      * Load api dosc sections from files in static::api_methods_documentation_classes_folder() and its subfolders.
      * Should be used only when static::config('api_docs_class_names') not provided.
@@ -55,7 +63,8 @@ class CmfApiDocumentationModule {
      *  - static::api_method_documentation_base_class()
      * @return array
      */
-    protected function loadClassesFromFileSystem(): array {
+    protected function loadClassesFromFileSystem(): array
+    {
         $rootFolderPath = $this->getClassesFolderPath();
         $folder = Folder::load($rootFolderPath);
         if (!$folder->exists()) {
@@ -86,9 +95,9 @@ class CmfApiDocumentationModule {
                 $pos2 = $class2::getPosition();
                 if ($pos1 === null) {
                     return $pos2 === null ? 0 : 1;
-                } else if ($pos2 === null) {
-                    return $pos1 === null ? 0 : -1;
-                } else if ($pos1 === $pos2) {
+                } elseif ($pos2 === null) {
+                    return -1;
+                } elseif ($pos1 === $pos2) {
                     return 0;
                 } else {
                     return $pos1 > $pos2;
@@ -96,7 +105,7 @@ class CmfApiDocumentationModule {
             });
             return $classes;
         };
-        list($subFolders, $files) = $folder->read();
+        [$subFolders, $files] = $folder->read();
         $withoutSection = $classFinder($folder->pwd(), $files);
         if (!empty($withoutSection)) {
             $ret[(string)$this->getCmfConfig()->transCustom('api_docs.section.no_section')] = $withoutSection;
@@ -110,21 +119,24 @@ class CmfApiDocumentationModule {
             $files = $subFolder->find('.*\.php');
             $classes = $classFinder($subFolder->pwd(), $files);
             if (!empty($classes)) {
-                $ret[(string)$this->getCmfConfig()->transApiDoc('section.' . snake_case($subFolderName))] = $classes;
+                $ret[(string)$this->getCmfConfig()->transApiDoc('section.' . Str::snake($subFolderName))] = $classes;
             }
         }
         return $ret;
     }
-
-    public function getClassesFolderPath(): string {
+    
+    public function getClassesFolderPath(): string
+    {
         return $this->getCmfConfig()->config('api_documentation.folder') ?: app_path('Api/Docs');
     }
-
-    public function getMethodBaseClass(): string {
+    
+    public function getMethodBaseClass(): string
+    {
         return $this->getCmfConfig()->config('api_documentation.base_class_for_method') ?: CmfApiMethodDocumentation::class;
     }
-
-    public function getClassNameSuffix(): string {
+    
+    public function getClassNameSuffix(): string
+    {
         return $this->getCmfConfig()->config('api_documentation.class_suffix', 'Documentation');
     }
 }

@@ -16,23 +16,26 @@ use Swayok\Utils\Folder;
 use Swayok\Utils\ValidateValue;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class CmfGeneralController extends CmfController {
-
+class CmfGeneralController extends CmfController
+{
+    
     use DataValidationHelper,
         AuthorizesRequests;
-
-    public function __construct() {
-
+    
+    public function __construct()
+    {
     }
-
-    public function loadJsApp(Request $request) {
+    
+    public function loadJsApp(Request $request)
+    {
         if ($request->ajax()) {
             return response()->json([], 404);
         }
         return static::getCmfConfig()->getUiModule()->renderLayoutView();
     }
-
-    public function getPage(Request $request, $name) {
+    
+    public function getPage(Request $request, $name)
+    {
         if (!$request->ajax()) {
             return static::getCmfConfig()->getUiModule()->renderLayoutView();
         }
@@ -47,52 +50,60 @@ class CmfGeneralController extends CmfController {
         ];
         if (\View::exists($primaryView)) {
             return view($primaryView, $dataForView)->render();
-        } else if ($altName !== $name && \View::exists($viewsPrefix . 'page.' . $altName)) {
+        } elseif ($altName !== $name && \View::exists($viewsPrefix . 'page.' . $altName)) {
             return view($viewsPrefix . 'page.' . $altName, $dataForView)->render();
-        } else if (\View::exists('cmf::page.' . $name)) {
+        } elseif (\View::exists('cmf::page.' . $name)) {
             return view('cmf::page.' . $name, $dataForView)->render();
         }
         return $this->pageViewNotFoundResponse($request, $name, $primaryView);
     }
-
-    protected function pageViewNotFoundResponse(Request $request, $pageName, $primaryView) {
+    
+    protected function pageViewNotFoundResponse(Request $request, $pageName, $primaryView)
+    {
         return cmfJsonResponseForHttp404(
             static::getCmfConfig()->home_page_url(),
             'View file not found at ' . $primaryView
         );
     }
-
-    public function getCustomUiView($viewName) {
+    
+    public function getCustomUiView($viewName)
+    {
         return static::getCmfConfig()->getUiModule()->renderUIView($viewName);
     }
-
-    public function redirectToUserProfile() {
+    
+    public function redirectToUserProfile()
+    {
         return redirect()->route(static::getCmfConfig()->getRouteName('cmf_profile'));
     }
-
-    public function renderUserProfileView() {
+    
+    public function renderUserProfileView()
+    {
         return static::getCmfConfig()->getAuthModule()->renderUserProfilePageView();
     }
-
-    public function updateUserProfile(Request $request) {
+    
+    public function updateUserProfile(Request $request)
+    {
         return static::getCmfConfig()->getAuthModule()->processUserProfileUpdateRequest($request);
     }
-
-    public function getBasicUiView() {
+    
+    public function getBasicUiView()
+    {
         return static::getCmfConfig()->getUiModule()->renderBasicUIView();
     }
-
+    
     /**
      * @param null|string $locale
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function switchLocale($locale = null) {
+    public function switchLocale($locale = null)
+    {
         static::getCmfConfig()->setLocale($locale);
-
+        
         return \Redirect::back();
     }
-
-    public function ping(Request $request) {
+    
+    public function ping(Request $request)
+    {
         $url = $request->input('url');
         $request = Request::create($url, 'GET');
         try {
@@ -112,87 +123,102 @@ class CmfGeneralController extends CmfController {
                 }
             }
         } catch (NotFoundHttpException $exc) {
-
         }
         return cmfJsonResponse();
     }
-
-    public function getLoginTpl() {
+    
+    public function getLoginTpl()
+    {
         return static::getCmfConfig()->getAuthModule()->renderUserLoginPageView();
     }
-
-    public function doLogin(Request $request) {
+    
+    public function doLogin(Request $request)
+    {
         return static::getCmfConfig()->getAuthModule()->processUserLoginRequest($request);
     }
-
-    public function getRegistrationTpl() {
+    
+    public function getRegistrationTpl()
+    {
         return static::getCmfConfig()->getAuthModule()->renderUserRegistrationPageView();
     }
-
-    public function doRegister(Request $request) {
+    
+    public function doRegister(Request $request)
+    {
         return static::getCmfConfig()->getAuthModule()->processUserRegistrationRequest($request);
     }
-
-    public function getForgotPasswordTpl() {
+    
+    public function getForgotPasswordTpl()
+    {
         return static::getCmfConfig()->getAuthModule()->renderForgotPasswordPageView();
     }
-
-    public function sendPasswordReplacingInstructions(Request $request) {
+    
+    public function sendPasswordReplacingInstructions(Request $request)
+    {
         return static::getCmfConfig()->getAuthModule()->startPasswordRecoveryProcess($request);
     }
-
-    public function getReplacePasswordTpl($accessKey) {
+    
+    public function getReplacePasswordTpl($accessKey)
+    {
         return static::getCmfConfig()->getAuthModule()->renderReplaceUserPasswordPageView($accessKey);
     }
-
-    public function replacePassword(Request $request, $accessKey) {
+    
+    public function replacePassword(Request $request, $accessKey)
+    {
         return static::getCmfConfig()->getAuthModule()->finishPasswordRecoveryProcess($request, $accessKey);
     }
-
-    public function loginAsOtherUser($otherUserId) {
+    
+    public function loginAsOtherUser($otherUserId)
+    {
         return static::getCmfConfig()->getAuthModule()->processLoginAsOtherUserRequest($otherUserId);
     }
-
-    public function logout() {
+    
+    public function logout()
+    {
         return static::getCmfConfig()->getAuthModule()->processUserLogoutRequest();
     }
-
-    public function getUserProfileData() {
+    
+    public function getUserProfileData()
+    {
         return cmfJsonResponse()->setData(static::getCmfConfig()->getAuthModule()->getDataForUserProfileForm());
     }
-
-    public function getMenuCounters() {
+    
+    public function getMenuCounters()
+    {
         $user = static::getCmfConfig()->getUser();
         $this->authorize('resource.details', ['cmf_profile', $user]);
         return cmfJsonResponse()->setData(static::getCmfConfig()->getValuesForMenuItemsCounters());
     }
-
-    public function cleanCache() {
+    
+    public function cleanCache()
+    {
         \Cache::flush();
     }
-
-    public function getCkeditorConfigJs() {
+    
+    public function getCkeditorConfigJs()
+    {
         return view(
             'cmf::ui.ckeditor_config',
             ['configs' => static::getCmfConfig()->ckeditor_config()]
         )->render();
     }
-
-    public function ckeditorUploadImage(Request $request) {
+    
+    public function ckeditorUploadImage(Request $request)
+    {
         $column = $this->validateImageUpload($request);
         $url = $message = '';
         if (!is_object($column)) {
             $message = (string)$column;
         } else {
-            list($url, $message) = $this->saveUploadedImage($column, $request->file('upload'));
+            [$url, $message] = $this->saveUploadedImage($column, $request->file('upload'));
         }
         $editorNum = (int)$request->input('CKEditorFuncNum');
         $message = addslashes($message);
-
+        
         return "<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction({$editorNum}, '{$url}', '{$message}');</script>";
     }
-
-    protected function validateImageUpload(Request $request) {
+    
+    protected function validateImageUpload(Request $request)
+    {
         $errors = $this->validateAndReturnErrors($request->all(), [
             'CKEditorFuncNum' => 'required|int',
             'CKEditor' => 'required|string',
@@ -204,16 +230,16 @@ class CmfGeneralController extends CmfController {
             foreach ($errors as $param => $errorsForParam) {
                 $ret[] = $param . ': ' . (is_array($errorsForParam) ? implode(', ', $errorsForParam) : (string)$errorsForParam);
             }
-
+            
             return implode('<br>', $ret);
         }
-
+        
         $editorId = $request->input('CKEditor');
-
+        
         if (preg_match('%^([^:]+):(.+)$%', $editorId, $matches)) {
-            list(, $resourceName, $columnName) = $matches;
-        } else if (preg_match('%^t-(.+?)-c-(.+?)-input$%', $matches)) {
-            list(, $resourceName, $columnName) = $matches;
+            [, $resourceName, $columnName] = $matches;
+        } elseif (preg_match('%^t-(.+?)-c-(.+?)-input$%', $matches)) {
+            [, $resourceName, $columnName] = $matches;
         } else {
             return cmfTransGeneral('.ckeditor.fileupload.cannot_detect_resource_and_field', ['editor_name' => $editorId]);
         }
@@ -238,7 +264,7 @@ class CmfGeneralController extends CmfController {
                     'scaffold_class' => get_class($scaffoldConfig),
                 ]
             );
-        } else if (!($column instanceof WysiwygFormInput)) {
+        } elseif (!($column instanceof WysiwygFormInput)) {
             return cmfTransGeneral(
                 '.ckeditor.fileupload.is_not_wysiwyg_field_config',
                 [
@@ -258,17 +284,18 @@ class CmfGeneralController extends CmfController {
                 ]
             );
         }
-
+        
         return $column;
     }
-
+    
     /**
      * @param WysiwygFormInput $formInput
      * @param UploadedFile $uploadedFile
      * @return array - 0: url to file; 1: message
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      */
-    protected function saveUploadedImage(WysiwygFormInput $formInput, UploadedFile $uploadedFile) {
+    protected function saveUploadedImage(WysiwygFormInput $formInput, UploadedFile $uploadedFile)
+    {
         /** @var UploadedFile $uploadedFile */
         Folder::load($formInput->getAbsoluteImageUploadsFolder(), true, 0755);
         $newFileName = Uuid::uuid4()->toString() . ($uploadedFile->getExtension() ?: $uploadedFile->getClientOriginalExtension());
@@ -303,11 +330,12 @@ class CmfGeneralController extends CmfController {
             return ['', cmfTransGeneral('.ckeditor.fileupload.failed_to_save_image_to_fs')];
         }
         $url = $formInput->getRelativeImageUploadsUrl() . $newFileName;
-
+        
         return [$url, ''];
     }
-
-    public function downloadApiRequestsCollectionForPostman() {
+    
+    public function downloadApiRequestsCollectionForPostman()
+    {
         $host = \request()->getHttpHost();
         $fileName = cmfTransCustom('.api_docs.postman_collection_file_name', [
             'http_host' => $host,
@@ -334,18 +362,19 @@ class CmfGeneralController extends CmfController {
         }
         return response(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), HttpCode::OK, [
             'Content-type' => 'application/json',
-            'Content-Disposition' => "attachment; filename=\"{$fileName}.json\""
+            'Content-Disposition' => "attachment; filename=\"{$fileName}.json\"",
         ]);
     }
-
-    public function getCachedUiTemplatesJs() {
+    
+    public function getCachedUiTemplatesJs(): string
+    {
         return view(
             'cmf::ui.cached_templates',
             [
                 'pages' => static::getCmfConfig()->getCachedPagesTemplates(),
-                'resources' => static::getCmfConfig()->getCachedResourcesTemplates()
+                'resources' => static::getCmfConfig()->getCachedResourcesTemplates(),
             ]
         )->render();
     }
-
+    
 }

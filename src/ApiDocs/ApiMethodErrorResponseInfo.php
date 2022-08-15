@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\ApiDocs;
 
-class ApiMethodErrorResponseInfo {
-
+class ApiMethodErrorResponseInfo
+{
+    
     /**
      * @var int
      */
@@ -24,123 +27,107 @@ class ApiMethodErrorResponseInfo {
      * @var array
      */
     protected $extraData = [];
-
+    
     /**
-     * @param int $httpCode
      * @return static
      */
-    static public function create($httpCode = null) {
+    public static function create(?int $httpCode = null)
+    {
         return new static($httpCode);
     }
-
-    /**
-     * ApiMethodErrorResponseInfo constructor.
-     * @param int $httpCode
-     */
-    public function __construct($httpCode = null) {
+    
+    public function __construct(?int $httpCode = null)
+    {
         if ($httpCode !== null) {
             $this->setHttpCode($httpCode);
         }
     }
-
-    /**
-     * @return int
-     */
-    public function getHttpCode(): int {
+    
+    public function getHttpCode(): int
+    {
         return $this->httpCode;
     }
-
+    
     /**
-     * @param int $httpCode
      * @return $this
      */
-    public function setHttpCode($httpCode) {
+    public function setHttpCode(int $httpCode)
+    {
         $this->httpCode = $httpCode;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getTitle(): string {
+    
+    public function getTitle(): string
+    {
         return $this->title;
     }
-
+    
     /**
-     * @param string $description
      * @return $this
      */
-    public function setTitle($description) {
+    public function setTitle(string $description)
+    {
         $this->title = $description;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getDescription(): string {
+    
+    public function getDescription(): string
+    {
         return $this->description;
     }
-
+    
     /**
-     * @param string $description
      * @return $this
      */
-    public function setDescription($description) {
+    public function setDescription(string $description)
+    {
         $this->description = $description;
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getResponse(): array {
+    
+    public function getResponse(): array
+    {
         return $this->response;
     }
-
+    
     /**
-     * @param array $response
      * @return $this
      */
-    public function setResponse(array $response) {
+    public function setResponse(array $response)
+    {
         $this->response = $response;
         return $this;
     }
-
+    
     /**
      * Additional data to be added to response info
-     * @param array $data
      * @return $this
      */
-    public function setExtraData(array $data) {
+    public function setExtraData(array $data)
+    {
         $this->extraData = $data;
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getExtraData() {
+    
+    public function getExtraData(): array
+    {
         return $this->extraData;
     }
-
-    /**
-     * @return array
-     */
-    public function toArray() {
+    
+    public function toArray(): array
+    {
         $ret = [
             'code' => $this->getHttpCode(),
             'title' => $this->getTitle(),
             'response' => $this->getResponse(),
             'extra' => $this->getExtraData(),
-            'description' => $this->getDescription()
+            'description' => $this->getDescription(),
         ];
         if (empty($ret['extra'])) {
             unset($ret['extra']);
         }
         return $ret;
     }
-
-
-
+    
+    
 }

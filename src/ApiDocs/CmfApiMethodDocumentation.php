@@ -1,22 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\ApiDocs;
 
+use Illuminate\Support\Arr;
 use PeskyCMF\HttpCode;
 
 /**
  * Extend this class to describe an API method
  */
-abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
-
+abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
+{
+    
     // override next properties and methods
-
+    
     //static protected $position = 10;
-
+    
     //protected $translationsBasePath = 'group.method';
     //protected $title = '{group.method.title}';
     //protected $description = '{group.method.description}';
-
+    
     /**
      * You can use simple string or translation path in format: '{method.some_name.title_for_postman}'
      * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
@@ -27,7 +31,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
      */
     protected $titleForPostman;
     //protected $titleForPostman = '{group.method.title_for_postman}';
-
+    
     /**
      * You can use '{url_parameter}' or ':url_parameter' to insert parameters into url and be able to
      * export it to postman properly (postman uses ':url_parameter' format but it is not expressive
@@ -36,11 +40,11 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
      */
     protected $url = '/api/example/{url_parameter}/list';
     protected $httpMethod = 'GET';
-
+    
     protected $headers = [
         'Accept' => 'application/json',
         'Accept-Language' => '{{language}}',
-        'Authorization' => 'Bearer {{auth_token}}'
+        'Authorization' => 'Bearer {{auth_token}}',
     ];
     /**
      * List of parameters used inside URL
@@ -61,15 +65,16 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
 //        'token' => ['required', 'string'],
 //        'id' => ['required', 'integer', 'min:1']
     ];
-
+    
     protected $onSuccess = [
 //        'name' => 'string',
     ];
-
+    
     /**
      * @return array
      */
-    protected function getPossibleErrors() {
+    protected function getPossibleErrors(): array
+    {
         /* Example:
             ApiMethodErrorResponseInfo::create()
                 ->setTitle('Not found')
@@ -111,28 +116,24 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
         */
         return [];
     }
-
+    
     // service properties and methods
-
-    /**
-     * @return array
-     */
-    protected function getCommonErrors() {
+    
+    protected function getCommonErrors(): array
+    {
         return [
             static::$authFailError,
             static::$accessDeniedError,
             static::$serverError,
         ];
     }
-
-    /**
-     * @return array
-     */
-    public function getErrors() {
+    
+    public function getErrors(): array
+    {
         $additionalErrors = [];
         if (count($this->validationErrors)) {
             $error = static::$dataValidationError;
-            array_set($error, 'response.errors', $this->getValidationErrors());
+            Arr::set($error, 'response.errors', $this->getValidationErrors());
             $additionalErrors[] = $error;
         }
         $errors = array_merge($this->getCommonErrors(), $additionalErrors, $this->getPossibleErrors());
@@ -150,146 +151,153 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
         });
         return $errors;
     }
-
+    
     static protected $authFailError = [
         'code' => HttpCode::UNAUTHORISED,
         'title' => '{error.auth_failure.title}',
         'description' => '{error.auth_failure.description}',
         'response' => [
-            'message' => 'Unauthenticated.'
-        ]
+            'message' => 'Unauthenticated.',
+        ],
     ];
-
+    
     static protected $accessDeniedError = [
         'code' => HttpCode::FORBIDDEN,
         'title' => '{error.access_denied.title}',
         'description' => '{error.auth_failure.description}',
         'response' => [
-            'message' => 'Unauthorized.'
-        ]
+            'message' => 'Unauthorized.',
+        ],
     ];
-
+    
     static protected $dataValidationError = [
         'code' => HttpCode::CANNOT_PROCESS,
         'title' => '{error.validation_errors.title}',
         'description' => '{error.auth_failure.description}',
         'response' => [
             'message' => 'The given data was invalid.',
-            'errors' => []
-        ]
+            'errors' => [],
+        ],
     ];
-
+    
     static protected $serverError = [
         'code' => HttpCode::SERVER_ERROR,
         'title' => '{error.server_error.title}',
         'description' => '{error.auth_failure.description}',
         'response' => [
             'message' => 'Server error.',
-        ]
+        ],
     ];
-
+    
     static protected $itemNotFound = [
         'code' => HttpCode::NOT_FOUND,
         'title' => '{error.item_not_found.title}',
         'description' => '{error.item_not_found.description}',
         'response' => [
             'message' => 'Record not found in DB.',
-        ]
+        ],
     ];
-
-    public function getTitleForPostman() {
+    
+    public function getTitleForPostman()
+    {
         $title = $this->titleForPostman
             ? $this->translateInserts($this->titleForPostman)
             : $this->translatePath(rtrim($this->translationsBasePath, '.') . '.title_for_postman');
         return !empty(trim($title)) && stripos($title, '.title_for_postman') === false ? $title : $this->getUrl();
     }
-
-    public function getUrl() {
-        return trim((string)$this->url);
+    
+    public function getUrl(): string
+    {
+        return trim($this->url);
     }
-
-    public function getHttpMethod() {
+    
+    public function getHttpMethod(): string
+    {
         return $this->httpMethod;
     }
-
-    public function getHttpMethodForPostman() {
+    
+    public function getHttpMethodForPostman(): string
+    {
         return strtoupper(
             preg_replace('%^\s*(get|post|put|delete|patch|head|options|connect|trace).*$%i', '$1', $this->httpMethod)
         );
     }
-
-    public function getHeaders() {
+    
+    public function getHeaders(): array
+    {
         return $this->prepareUrlVarsForTable(
             rtrim($this->translationsBasePath, '.') . '.header',
             $this->headers,
             []
         );
     }
-
-    public function getUrlParameters() {
+    
+    public function getUrlParameters(): array
+    {
         return $this->prepareUrlVarsForTable(
             rtrim($this->translationsBasePath, '.') . '.params.url',
             $this->urlParameters,
             $this->getDefaultParamsValuesForPostman('url')
         );
     }
-
-    public function getUrlQueryParameters() {
+    
+    public function getUrlQueryParameters(): array
+    {
         return $this->prepareUrlVarsForTable(
             rtrim($this->translationsBasePath, '.') . '.params.url_query',
             $this->urlQueryParameters,
             $this->getDefaultParamsValuesForPostman('url_query')
         );
     }
-
-    public function getPostParameters() {
+    
+    public function getPostParameters(): array
+    {
         return $this->prepareUrlVarsForTable(
             rtrim($this->translationsBasePath, '.') . '.params.post',
             $this->postParameters,
             $this->getDefaultParamsValuesForPostman('post')
         );
     }
-
-    public function getValidationErrors() {
+    
+    public function getValidationErrors(): array
+    {
         return $this->translateArrayValues($this->validationErrors);
     }
-
-    public function getOnSuccessData() {
+    
+    public function getOnSuccessData(): array
+    {
         return $this->translateArrayValues($this->onSuccess);
     }
-
+    
     /**
      * @param string $group - one of: 'url', 'url_query', 'post'
      * @return array
      */
-    public function getDefaultParamsValuesForPostman(string $group): array {
+    public function getDefaultParamsValuesForPostman(string $group): array
+    {
         return [];
     }
-
+    
     /**
      * Translate values of the $array recursively
-     * @param array $array
-     * @return array
      */
-    protected function translateArrayValues(array $array) {
+    protected function translateArrayValues(array $array): array
+    {
         foreach ($array as &$value) {
             if (is_string($value)) {
                 $value = $this->translateInserts($value);
-            } else if (is_array($value)) {
+            } elseif (is_array($value)) {
                 $value = $this->translateArrayValues($value);
             }
         }
         return $array;
     }
-
+    
     /**
      * Prepare url variables to be displayed in docs as table with 3 columns: name, type, description
-     * @param string $group
-     * @param array $params
-     * @param array $defaultValues
-     * @return array
      */
-    protected function prepareUrlVarsForTable(string $group, array $params, array $defaultValues) {
+    protected function prepareUrlVarsForTable(string $group, array $params, array $defaultValues): array
+    {
         $params = $this->translateArrayValues($params);
         $ret = [];
         $descriptions = $this->translatePath($group);
@@ -301,17 +309,19 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
                 'name' => $key,
                 'type' => $value,
                 'description' => array_get($descriptions, $key, ''),
-                'value' => array_get($defaultValues, $key, '')
+                'value' => array_get($defaultValues, $key, ''),
             ];
         }
         return $ret;
     }
-
-    final public function isMethodDocumentation() {
+    
+    final public function isMethodDocumentation(): bool
+    {
         return true;
     }
-
-    public function getConfigForPostman(): array {
+    
+    public function getConfigForPostman(): array
+    {
         $queryParams = [];
         foreach ($this->getUrlQueryParameters() as $name => $info) {
             if ($name === '_method') {
@@ -333,17 +343,17 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
                 'body' => [
                     'mode' => 'formdata',
                     'formdata' => [
-                    ]
+                    ],
                 ],
-
+            
             ],
-            'response' => []
+            'response' => [],
         ];
         foreach ($this->getHeaders() as $key => $info) {
             $item['request']['header'][] = [
                 'key' => $key,
                 'value' => $info['type'],
-                'description' => $this->cleanTextForPostman($info['description'])
+                'description' => $this->cleanTextForPostman($info['description']),
             ];
         }
         foreach ($this->getPostParameters() as $key => $info) {
@@ -352,24 +362,27 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation {
                 'value' => ($key === '_method') ? $info['type'] : array_get($info, 'value', ''),
                 'description' => $this->cleanTextForPostman($info['description']),
                 'type' => 'text',
-                'enabled' => true
+                'enabled' => true,
             ];
         }
         return $item;
     }
-
-    protected function cleanTextForPostman(string $text): string {
+    
+    protected function cleanTextForPostman(string $text): string
+    {
         return preg_replace(
             ['% +%', "%\n\s+%s"],
             [' ', "\n"],
-            trim(strip_tags(
-                preg_replace(
-                    ["%\n+%m", '%</(p|div|li|ul)>|<br>%'],
-                    [' ', "\n"],
-                    $text
+            trim(
+                strip_tags(
+                    preg_replace(
+                        ["%\n+%m", '%</(p|div|li|ul)>|<br>%'],
+                        [' ', "\n"],
+                        $text
+                    )
                 )
-            ))
+            )
         );
     }
-
+    
 }

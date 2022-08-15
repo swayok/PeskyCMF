@@ -1,23 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\ApiDocs;
 
+use Illuminate\Support\Str;
 use PeskyCMF\Config\CmfConfig;
 
 /**
  * Extend this class to show description for some topic that is not an API method (like wiki page)
  */
-abstract class CmfApiDocumentation {
-
+abstract class CmfApiDocumentation
+{
+    
     // override next properties and methods
-
+    
     /**
      * Position of this method within the group.
      * Used only by CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem().
      * @var int|null
      */
     static protected $position;
-
+    
     /**
      * Base path to translations for current api method documentation
      * Mostly used to get descriptions for headers, url params, url query params, post params and errors
@@ -25,7 +29,7 @@ abstract class CmfApiDocumentation {
      * @var string
      */
     protected $translationsBasePath = '';
-
+    
     /**
      * You can use simple string or translation path in format: '{method.some_name.title}'
      * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
@@ -35,7 +39,7 @@ abstract class CmfApiDocumentation {
      * @var string|null
      */
     protected $title;
-
+    
     /**
      * You can use simple string or translation path in format: '{method.some_name.description}'
      * Note that translation path will be passed to CmfConfig::transCustom() so you do not need to add dictionary name
@@ -45,86 +49,98 @@ abstract class CmfApiDocumentation {
      * @var string|null
      */
     protected $description;
-
-    /**
-     * @return array
-     */
-    public function getErrors() {
+    
+    public function getErrors(): array
+    {
         return [];
     }
-
-    static public function create() {
+    
+    public static function create()
+    {
         return new static();
     }
-
+    
     protected $uuid;
-
-    public function __construct() {
-        $this->uuid = 'doc-' . snake_case(str_replace('\\', '', get_class($this)), '-');
+    
+    public function __construct()
+    {
+        $this->uuid = 'doc-' . Str::snake(str_replace('\\', '', get_class($this)), '-');
     }
-
-    static public function getPosition() {
+    
+    public static function getPosition(): ?int
+    {
         return static::$position;
     }
-
-    public function getTitle() {
+    
+    public function getTitle(): string
+    {
         return $this->title
             ? $this->translateInserts($this->title)
             : $this->translatePath(rtrim($this->translationsBasePath, '.') . '.title');
     }
-
-    public function getDescription() {
+    
+    public function getDescription(): string
+    {
         return $this->description
             ? $this->translateInserts($this->description)
             : $this->translatePath(rtrim($this->translationsBasePath, '.') . '.description');
     }
-
-    public function hasDescription() {
+    
+    public function hasDescription(): bool
+    {
         return trim(preg_replace('%</?[^>]+>%', '', $this->getDescription())) !== '';
     }
-
-    public function getUuid() {
+    
+    public function getUuid(): string
+    {
         return $this->uuid;
     }
-
-    public function getUrl() {
+    
+    public function getUrl(): string
+    {
         return '';
     }
-
-    public function getHttpMethod() {
+    
+    public function getHttpMethod(): string
+    {
         return '';
     }
-
-    public function getHeaders() {
+    
+    public function getHeaders(): array
+    {
         return [];
     }
-
-    public function getUrlParameters() {
+    
+    public function getUrlParameters(): array
+    {
         return [];
     }
-
-    public function getUrlQueryParameters() {
+    
+    public function getUrlQueryParameters(): array
+    {
         return [];
     }
-
-    public function getPostParameters() {
+    
+    public function getPostParameters(): array
+    {
         return [];
     }
-
-    public function getValidationErrors() {
+    
+    public function getValidationErrors(): array
+    {
         return [];
     }
-
-    public function getOnSuccessData() {
+    
+    public function getOnSuccessData(): array
+    {
         return [];
     }
-
+    
     /**
      * Translate blocks like "{method.name.title}" placed inside the $string
-     * @param string $text
-     * @return string
      */
-    protected function translateInserts(string $text) {
+    protected function translateInserts(string $text): string
+    {
         return preg_replace_callback(
             '%\{([^{}]*)\}%',
             function ($matches) {
@@ -133,17 +149,20 @@ abstract class CmfApiDocumentation {
             $text
         );
     }
-
-    protected function translatePath(string $path) {
+    
+    protected function translatePath(string $path)
+    {
         return CmfConfig::transApiDoc($path);
     }
-
-    public function isMethodDocumentation() {
+    
+    public function isMethodDocumentation(): bool
+    {
         return false;
     }
-
-    public function getConfigForPostman() {
+    
+    public function getConfigForPostman(): ?array
+    {
         return null;
     }
-
+    
 }

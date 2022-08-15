@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF;
 
 use Illuminate\Foundation\Application;
 use PeskyCMF\Config\CmfConfig;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-class PeskyCmfManager {
-
+class PeskyCmfManager
+{
+    
     protected $currentCmfSectionName;
     /** @var CmfConfig */
     protected $currentCmfConfig;
@@ -15,51 +18,42 @@ class PeskyCmfManager {
     protected $app;
     /** @var \Closure[] */
     protected $callbacks = [];
-
+    
     /**
      * @param Application $app
      */
-    public function __construct($app) {
+    public function __construct($app)
+    {
         $this->app = $app;
     }
-
-    protected function config($key) {
+    
+    protected function config($key)
+    {
         return $this->appConfigs()->get('peskycmf.' . $key);
     }
-
-    /**
-     * @return ParameterBag
-     */
-    protected function appConfigs() {
+    
+    protected function appConfigs(): ParameterBag
+    {
         return $this->app['config'];
     }
-
-    /**
-     * @return CmfConfig|null
-     */
-    public function getCurrentCmfConfig() {
+    
+    public function getCurrentCmfConfig(): ?CmfConfig
+    {
         return $this->currentCmfConfig;
     }
-
-    /**
-     * @return CmfConfig|null
-     */
-    public function getDefaultCmfConfig() {
+    
+    public function getDefaultCmfConfig(): ?CmfConfig
+    {
         return CmfConfig::getDefault();
     }
-
-    /**
-     * @return string|null
-     */
-    public function getCurrentCmfSection() {
+    
+    public function getCurrentCmfSection(): ?string
+    {
         return $this->currentCmfSectionName;
     }
-
-    /**
-     * @param string $cmfSectionName
-     * @return CmfConfig
-     */
-    public function getCmfConfigForSection($cmfSectionName = null) {
+    
+    public function getCmfConfigForSection(?string $cmfSectionName = null): CmfConfig
+    {
         if ($cmfSectionName === null) {
             $cmfSectionName = $this->config('default_cmf_config');
             if (!$cmfSectionName) {
@@ -82,37 +76,36 @@ class PeskyCmfManager {
         /** @var CmfConfig $className */
         return $className::getInstance();
     }
-
+    
     /**
      * Key from config('peskycmf.cmf_configs') array
-     * @param string $cmfSectionName
-     * @return $this
+     * @return static
      */
-    public function setCurrentCmfSection($cmfSectionName) {
+    public function setCurrentCmfSection(string $cmfSectionName)
+    {
         if ($cmfSectionName !== $this->currentCmfSectionName) {
             $this->currentCmfConfig = $this->getCmfConfigForSection($cmfSectionName);
             $this->currentCmfSectionName = $cmfSectionName;
-
+            
             $this->currentCmfConfig->initSection($this->app);
-
+            
             foreach ($this->callbacks as $closure) {
                 $closure($this->currentCmfConfig);
             }
         }
         return $this;
     }
-
+    
     /**
      * Add Closure to be evaluated after setCurrentCmfSection() call.
      * CmfConfig instance will be passed to closure.
-     * @param \Closure $callback
-     * @return $this
+     * @return static
      */
-    public function onSectionSet(\Closure $callback) {
+    public function onSectionSet(\Closure $callback)
+    {
         $this->callbacks[] = $callback;
         return $this;
     }
-
-
-
+    
+    
 }
