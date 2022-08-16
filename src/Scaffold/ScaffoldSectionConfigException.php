@@ -1,26 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold;
 
-class ScaffoldSectionConfigException extends ScaffoldException {
-    /** @var ScaffoldSectionConfig|null */
-    private $scaffoldSectionConfig;
-
+class ScaffoldSectionConfigException extends ScaffoldException
+{
+    
+    private ScaffoldSectionConfig $scaffoldSectionConfig;
+    
     /**
-     * ScaffoldSectionConfigException constructor.
      * @param ScaffoldSectionConfig|null $config
      * @param string $message
      */
-    public function __construct($config, $message) {
+    public function __construct($config, $message)
+    {
         $this->scaffoldSectionConfig = $config;
         parent::__construct($message);
     }
-
-    /**
-     * @return ScaffoldSectionConfig
-     */
-    public function getScaffoldSectionConfig() {
+    
+    public function getScaffoldSectionConfig(): ScaffoldSectionConfig
+    {
         return $this->scaffoldSectionConfig;
     }
-
+    
 }

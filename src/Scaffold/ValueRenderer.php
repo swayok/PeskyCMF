@@ -1,93 +1,90 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold;
 
-abstract class ValueRenderer {
-    /** @var string */
-    protected $template = null;
-    /** @var array */
-    protected $data = [];
+use Illuminate\Support\Arr;
 
-    /**
-     * @param null $view
-     * @return $this
-     */
-    public static function create($view = null) {
-        $class = get_called_class();
-        return new $class($view);
+abstract class ValueRenderer
+{
+    
+    protected ?string $template = null;
+    protected array $data = [];
+    
+    public static function create(?string $view = null): ValueRenderer
+    {
+        return new static($view);
     }
-
-    /**
-     * @param string $view
-     */
-    public function __construct($view = null) {
+    
+    public function __construct(?string $view = null)
+    {
         if (!empty($view)) {
             $this->template = $view;
         }
     }
-
+    
     /**
-     * @param null|string $key - string: get value for a key or default one | null: get all data
+     * @param string|null $key - string: get value for a key or default one | null: get all data
      * @param mixed $default
      * @return array|mixed
      */
-    public function getData($key = null, $default = null) {
-        return $key === null ? $this->data : array_get($this->data, $key, $default);
+    public function getData(string $key = null, $default = null)
+    {
+        return $key === null ? $this->data : Arr::get($this->data, $key, $default);
     }
-
+    
     /**
      * @param array $data
-     * @return $this
+     * @return static
      */
-    public function setData(array $data) {
+    public function setData(array $data)
+    {
         $this->data = $data;
         return $this;
     }
-
+    
     /**
-     * @param $key
-     * @param $value
-     * @return $this
+     * @param string|int|float $key
+     * @param mixed $value
+     * @return static
      * @throws ScaffoldException
      */
-    public function addData($key, $value) {
+    public function addData($key, $value)
+    {
         if (empty($key)) {
             throw new ScaffoldException('$key cannot be empty');
         }
         $this->data[$key] = $value;
         return $this;
     }
-
+    
     /**
-     * @param array $data
-     * @return $this
+     * @return static
      */
-    public function mergeData(array $data) {
+    public function mergeData(array $data)
+    {
         $this->data = array_merge($this->data, $data);
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getTemplate() {
+    
+    public function getTemplate(): ?string
+    {
         return $this->template;
     }
-
+    
     /**
-     * @param string $template
-     * @return $this
+     * @return static
      */
-    public function setTemplate($template) {
+    public function setTemplate(string $template)
+    {
         $this->template = $template;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasTemplate() {
+    
+    public function hasTemplate(): bool
+    {
         return !empty($this->template);
     }
-
+    
 }

@@ -1,22 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold;
 
-class ValueViewerConfigException extends ScaffoldSectionConfigException {
-
-    /** @var AbstractValueViewer */
-    private $valueViewer;
-
-    public function __construct(AbstractValueViewer $viewer, $message) {
+class ValueViewerConfigException extends ScaffoldSectionConfigException
+{
+    
+    private AbstractValueViewer $valueViewer;
+    
+    public function __construct(AbstractValueViewer $viewer, $message)
+    {
         $this->valueViewer = $viewer;
         parent::__construct($viewer->getScaffoldSectionConfig(), $message);
     }
-
-    /**
-     * @return AbstractValueViewer
-     */
-    public function getValueViewer() {
+    
+    public function getValueViewer(): AbstractValueViewer
+    {
         return $this->valueViewer;
     }
-
+    
 }

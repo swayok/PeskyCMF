@@ -30,21 +30,11 @@ class InputRenderer extends ValueRenderer {
     /** @var string */
     protected $suffix = '';
 
-    /**
-     * @param null $view
-     * @param array $attributes
-     * @return InputRenderer
-     */
-    public static function create($view = null, array $attributes = []) {
+    public static function create(?string $view = null, array $attributes = []): InputRenderer {
         return new InputRenderer($view, $attributes);
     }
 
-    /**
-     * InputRenderer constructor.
-     * @param string $view
-     * @param array $attributes
-     */
-    public function __construct($view = null, array $attributes = []) {
+    public function __construct(?string $view = null, array $attributes = []) {
         parent::__construct($view);
         $this->attributes = $attributes;
     }
