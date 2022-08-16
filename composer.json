@@ -36,7 +36,7 @@
         "swayok/utils": "^1.7",
         "swayok/peskyorm-laravel": "dev-orm_v2_1",
         "swayok/html-tag-helper": "^1.0",
-        "swayok/laravel-language-detector": "dev-master",
+        "swayok/laravel-language-detector": "dev-master"
     },
     "suggest": {
         "swayok/laravel-antihack-tool": "active hack protection tool (dev-master branch)",
