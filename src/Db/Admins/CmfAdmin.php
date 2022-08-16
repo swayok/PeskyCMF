@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Db\Admins;
 
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -51,11 +53,8 @@ class CmfAdmin extends CmfDbRecord implements AuthenticatableContract {
     use Authenticatable,
         ResetsPasswordsViaAccessKey;
 
-    /**
-     * @return CmfAdminsTable
-     */
-    public static function getTable() {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+    public static function getTable(): CmfAdminsTable
+    {
         return CmfAdminsTable::getInstance();
     }
 

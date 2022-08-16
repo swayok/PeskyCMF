@@ -4,6 +4,7 @@ namespace PeskyCMF\Db\Settings;
 
 use Illuminate\Http\JsonResponse;
 use PeskyCMF\PeskyCmfAppSettings;
+use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyORM\ORM\TableInterface;
 
@@ -50,7 +51,8 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         return 'fa fa-cog';
     }
 
-    protected function createFormConfig() {
+    protected function createFormConfig(): FormConfig
+    {
         $formConfig = parent::createFormConfig()
             ->setWidth(50)
             ->setModalConfig(false);

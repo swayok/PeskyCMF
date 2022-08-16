@@ -3,17 +3,19 @@
 namespace PeskyCMF\Db\Settings;
 
 use PeskyCMF\Db\CmfDbTable;
-use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableHelpers;
-use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
+use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\TableStructureInterface;
+use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableHelpers;
+use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface;
 
-class CmfSettingsTable extends CmfDbTable implements KeyValueTableInterface {
+class CmfSettingsTable extends CmfDbTable implements LaravelKeyValueTableInterface {
 
-    use KeyValueTableHelpers;
+    use LaravelKeyValueTableHelpers;
 
     /** @var CmfSettingsTableStructure */
-    private static $tableStructure;
+    private static TableStructureInterface $tableStructure;
     /** @var CmfSetting */
-    private static $recordClass;
+    private static RecordInterface $recordClass;
 
     public function getMainForeignKeyColumnName(): ?string {
         return null;
@@ -33,7 +35,7 @@ class CmfSettingsTable extends CmfDbTable implements KeyValueTableInterface {
     /**
      * @return CmfSettingsTableStructure
      */
-    public function getTableStructure() {
+    public function getTableStructure(): TableStructureInterface {
         if (static::$tableStructure === null) {
             static::$tableStructure = app()->bound(CmfSettingsTableStructure::class)
                 ? app(CmfSettingsTableStructure::class)
@@ -45,7 +47,7 @@ class CmfSettingsTable extends CmfDbTable implements KeyValueTableInterface {
     /**
      * @return CmfSetting
      */
-    public function newRecord() {
+    public function newRecord(): RecordInterface {
         if (static::$recordClass === null) {
             static::$recordClass = app()->bound(CmfSetting::class)
                 ? app(CmfSetting::class)

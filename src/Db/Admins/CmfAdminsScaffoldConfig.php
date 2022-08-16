@@ -1,41 +1,48 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Db\Admins;
 
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
+use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
+use PeskyCMF\Scaffold\DataGrid\FilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\Form\InputRenderer;
+use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 
-class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
-
+class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
+{
+    
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = true;
     protected $isEditAllowed = true;
     protected $isDeleteAllowed = true;
-
+    
     protected $notLoggableRecordColumns = ['password'];
-
+    
     /**
-     * @return TableInterface
+     * @return TableInterface|CmfAdminsTable
      */
     public static function getTable(): TableInterface
     {
         return static::getCmfConfig()->getAuthModule()->getUsersTable();
     }
-
+    
     protected static function getIconForMenuItem(): ?string
     {
         return 'fa fa-group';
     }
-
-    protected function createDataGridConfig() {
+    
+    protected function createDataGridConfig(): DataGridConfig
+    {
         $loginColumn = $this->getUserLoginColumnName();
         return parent::createDataGridConfig()
             ->readRelations(['ParentAdmin' => ['id', 'email']])
@@ -53,7 +60,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                     }),
                 'parent_id' => DataGridColumn::create()
                     ->setType(ValueCell::TYPE_LINK),
-                'created_at'
+                'created_at',
             ])
             ->setRowActions(function () {
                 $actions = [];
@@ -72,8 +79,9 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                 return $actions;
             });
     }
-
-    protected function createDataGridFilterConfig() {
+    
+    protected function createDataGridFilterConfig(): FilterConfig
+    {
         $loginColumn = $this->getUserLoginColumnName();
         $filters = [
             'id',
@@ -82,7 +90,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
             'role' => ColumnFilter::create()
                 ->setInputType(ColumnFilter::INPUT_TYPE_SELECT)
                 ->setAllowedValues(function () {
-                    $options = array();
+                    $options = [];
                     foreach (static::getCmfConfig()->getAuthModule()->getUserRolesList() as $roleId) {
                         $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
                     }
@@ -102,8 +110,9 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
         return parent::createDataGridFilterConfig()
             ->setFilters($filters);
     }
-
-    protected function createItemDetailsConfig() {
+    
+    protected function createItemDetailsConfig(): ItemDetailsConfig
+    {
         $loginColumn = $this->getUserLoginColumnName();
         $valueCells = [
             'id',
@@ -146,8 +155,9 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                 return $actions;
             });
     }
-
-    protected function createFormConfig() {
+    
+    protected function createFormConfig(): FormConfig
+    {
         $loginColumn = $this->getUserLoginColumnName();
         $formInputs = [
             $loginColumn,
@@ -161,7 +171,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
             'name',
             'language' => FormInput::create()
                 ->setOptions(function () {
-                    $options = array();
+                    $options = [];
                     foreach (static::getCmfConfig()->locales() as $lang) {
                         $options[$lang] = cmfTransCustom(".language.$lang");
                     }
@@ -177,7 +187,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                 ->setType(static::getCmfConfig()->getUser()->is_superadmin ? FormInput::TYPE_BOOL : FormInput::TYPE_HIDDEN),
             'role' => FormInput::create()
                 ->setOptions(function () {
-                    $options = array();
+                    $options = [];
                     foreach (static::getCmfConfig()->getAuthModule()->getUserRolesList() as $roleId) {
                         $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
                     }
@@ -197,7 +207,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
                     } else {
                         return $value;
                     }
-                })
+                }),
         ];
         if ($loginColumn === 'email') {
             unset($formInputs['email']);
@@ -223,11 +233,11 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
             })
             ->addValidatorsForEdit(function () {
                 return $this->getValidatorsForEdit();
-            })
-            ;
+            });
     }
-
-    protected function getBaseValidators() {
+    
+    protected function getBaseValidators(): array
+    {
         return [
             'role' => 'required|in:' . implode(',', static::getCmfConfig()->getAuthModule()->getUserRolesList()),
             'language' => 'required|in:' . implode(',', static::getCmfConfig()->locales()),
@@ -235,8 +245,9 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
             'is_superadmin' => 'boolean',
         ];
     }
-
-    protected function getValidatorsForEdit() {
+    
+    protected function getValidatorsForEdit(): array
+    {
         $validators = [
             'id' => FormConfig::VALIDATOR_FOR_ID,
             'password' => 'nullable|min:6',
@@ -250,8 +261,9 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
         }
         return $validators;
     }
-
-    protected function getValidatorsForCreate() {
+    
+    protected function getValidatorsForCreate(): array
+    {
         $validators = [
             'password' => 'required|min:6',
             'email' => 'email|min:4|max:100|unique:' . static::getTable()->getName() . ',email',
@@ -264,9 +276,10 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
         }
         return $validators;
     }
-
-    protected function getUserLoginColumnName() {
+    
+    protected function getUserLoginColumnName(): string
+    {
         return static::getCmfConfig()->getAuthModule()->getUserLoginColumnName();
     }
-
+    
 }

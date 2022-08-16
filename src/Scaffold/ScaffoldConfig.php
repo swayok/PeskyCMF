@@ -3,11 +3,14 @@
 
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
+use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Http\Middleware\AjaxOnly;
 use PeskyCMF\HttpCode;
@@ -106,9 +109,9 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     }
 
     /**
-     * @return \App\Db\Admins\Admin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Admins\CmfAdmin|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey
+     * @return Authenticatable|CmfAdmin|ResetsPasswordsViaAccessKey|RecordInterface
      */
-    public static function getUser() {
+    public static function getUser(): RecordInterface {
         return static::getCmfConfig()->getUser();
     }
 
@@ -272,7 +275,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @return array
      * @throws ScaffoldSectionConfigException
      */
-    public function getConfigsForTemplatesRendering() {
+    public function getConfigsForTemplatesRendering(): array
+    {
         $configs = [
             'table' => static::getTable(),
             'scaffoldConfig' => $this
@@ -300,31 +304,23 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return $configs;
     }
 
-    /**
-     * @return DataGridConfig
-     */
-    protected function createDataGridConfig() {
+    protected function createDataGridConfig(): DataGridConfig
+    {
         return DataGridConfig::create(static::getTable(), $this);
     }
 
-    /**
-     * @return FilterConfig
-     */
-    protected function createDataGridFilterConfig() {
+    protected function createDataGridFilterConfig(): FilterConfig
+    {
         return FilterConfig::create(static::getTable(), $this);
     }
 
-    /**
-     * @return ItemDetailsConfig
-     */
-    protected function createItemDetailsConfig() {
+    protected function createItemDetailsConfig(): ItemDetailsConfig
+    {
         return ItemDetailsConfig::create(static::getTable(), $this);
     }
 
-    /**
-     * @return FormConfig
-     */
-    protected function createFormConfig() {
+    protected function createFormConfig(): FormConfig
+    {
         return FormConfig::create(static::getTable(), $this);
     }
 

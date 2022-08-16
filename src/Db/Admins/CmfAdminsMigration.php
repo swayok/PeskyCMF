@@ -1,15 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Db\Admins;
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-class CmfAdminsMigration extends Migration {
-
-    public function up() {
-        if (!\Schema::hasTable(CmfAdminsTableStructure::getTableName())) {
-            \Schema::create(CmfAdminsTableStructure::getTableName(), function (Blueprint $table) {
+class CmfAdminsMigration extends Migration
+{
+    
+    public function up(): void
+    {
+        if (!Schema::hasTable(CmfAdminsTableStructure::getTableName())) {
+            Schema::create(CmfAdminsTableStructure::getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('parent_id')->nullable()->unsigned();
                 $table->string('name')->default('');
@@ -21,16 +27,16 @@ class CmfAdminsMigration extends Migration {
                 $table->boolean('is_active')->default(true);
                 $table->string('role', 50)->default(CmfAdminsTableStructure::getColumn('role')->getDefaultValueAsIs());
                 $table->char('language', 2)->default(CmfAdminsTableStructure::getColumn('language')->getDefaultValueAsIs());
-                $table->timestampTz('created_at')->default(\DB::raw('NOW()'));
-                $table->timestampTz('updated_at')->default(\DB::raw('NOW()'));
+                $table->timestampTz('created_at')->default(DB::raw('NOW()'));
+                $table->timestampTz('updated_at')->default(DB::raw('NOW()'));
                 $table->string('timezone')->nullable();
                 $table->rememberToken();
-
+                
                 $table->index('parent_id');
                 $table->index('is_active');
                 $table->unique('email');
                 $table->unique('login');
-
+                
                 $table->foreign('parent_id')
                     ->references('id')
                     ->on(CmfAdminsTableStructure::getTableName())
@@ -39,8 +45,9 @@ class CmfAdminsMigration extends Migration {
             });
         }
     }
-
-    public function down() {
-        \Schema::dropIfExists(CmfAdminsTableStructure::getTableName());
+    
+    public function down(): void
+    {
+        Schema::dropIfExists(CmfAdminsTableStructure::getTableName());
     }
 }

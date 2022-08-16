@@ -28,14 +28,16 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
     /**
      * @return FormConfig
      */
-    protected function createFormConfig() {
+    protected function createFormConfig(): FormConfig
+    {
         return parent::createFormConfig()->thereIsNoDbColumns();
     }
 
     /**
      * @return ItemDetailsConfig
      */
-    protected function createItemDetailsConfig() {
+    protected function createItemDetailsConfig(): ItemDetailsConfig
+    {
         return parent::createItemDetailsConfig()->thereIsNoDbColumns();
     }
 

@@ -1,21 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Db\HttpRequestStats;
 
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
+use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
+use PeskyCMF\Scaffold\DataGrid\FilterConfig;
+use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
-use PeskyORM\ORM\TableInterface;
 
-class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
-
+class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig
+{
+    
     protected $isDetailsViewerAllowed = true;
     protected $isCreateAllowed = false;
     protected $isEditAllowed = false;
     protected $isCloningAllowed = false;
     protected $isDeleteAllowed = true;
     
-    public static function getTable(): TableInterface
+    public static function getTable(): CmfHttpRequestStatsTable
     {
         return CmfHttpRequestStatsTable::getInstance();
     }
@@ -25,8 +30,8 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         return 'fa fa-area-chart'; //< icon classes like: 'fa fa-cog' or just delete if you do not want an icon
     }
     
-    protected function createDataGridConfig() {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+    protected function createDataGridConfig(): DataGridConfig
+    {
         return parent::createDataGridConfig()
             ->setOrderBy('created_at', 'desc')
             ->setInvisibleColumns('http_method', 'route', 'duration_sql', 'duration_error', 'id', 'sql:failed_statements_count', 'sql:rows_affected')
@@ -69,8 +74,8 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
             ->setIsRowActionsEnabled(false);
     }
     
-    protected function createDataGridFilterConfig() {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+    protected function createDataGridFilterConfig(): FilterConfig
+    {
         return parent::createDataGridFilterConfig()
             ->setFilters([
                 'id',
@@ -85,9 +90,9 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                 'created_at',
             ]);
     }
-
-    protected function createItemDetailsConfig() {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+    
+    protected function createItemDetailsConfig(): ItemDetailsConfig
+    {
         return parent::createItemDetailsConfig()
             ->setWidth(100)
             ->setAdditionalColumnsToSelect('sql')
@@ -122,14 +127,16 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                 'counters',
                 'checkpoints' => ValueCell::create()
                     ->setValueConverter(function ($_, $__, $record) {
+                        /** @noinspection JsonEncodingApiUsageInspection */
                         $sqlCheckpoints = json_decode($record['sql'], true);
+                        /** @noinspection JsonEncodingApiUsageInspection */
                         $phpCheckpoints = json_decode($record['checkpoints'], true);
                         if (!is_array($phpCheckpoints) || empty($phpCheckpoints)) {
                             $ret = is_array($sqlCheckpoints)
                                 ? $this->buildSqlQueriesLog($sqlCheckpoints, $record['duration'])
                                 : '<pre class="json-text">' . $sqlCheckpoints . '</pre>';
                             if (!empty($phpCheckpoints)) {
-                                $ret .= '<pre class="json-text">' . (string)$phpCheckpoints . '</pre>';
+                                $ret .= '<pre class="json-text">' . $phpCheckpoints . '</pre>';
                             }
                             return $ret;
                         } else {
@@ -139,7 +146,7 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                                     'statements_count_str' => "0",
                                     'total_duration' => '0s',
                                     'max_memory_usage' => '0 MB',
-                                    'statements' => []
+                                    'statements' => [],
                                 ];
                             }
                             return $this->buildMergedSqlAndCheckpointsLog(
@@ -151,12 +158,13 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
                     }),
             ]);
     }
-
-    protected function buildSqlQueriesLog(array $data, $totalDuration) {
+    
+    protected function buildSqlQueriesLog(array $data, $totalDuration): string
+    {
         $ret = $this->buildSqlLogIntro($data);
         $index = 1;
         $prevStatement = [
-            'started_at' => 0.00
+            'started_at' => 0.00,
         ];
         foreach ($data['statements'] as $statement) {
             $delta = (float)$statement['started_at'] - (float)$prevStatement['started_at'];
@@ -168,11 +176,12 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         }
         $diffToEnd = (float)$totalDuration - (float)$prevStatement['started_at'];
         $precent = round($diffToEnd / $totalDuration, 2) * 100;
-        $ret .= "<hr class='mv10'>PHP: <b>{$diffToEnd}s ~ {$precent}%</b> ({$prevStatement['started_at']} -> {$totalDuration}s)" ;
+        $ret .= "<hr class='mv10'>PHP: <b>{$diffToEnd}s ~ {$precent}%</b> ({$prevStatement['started_at']} -> {$totalDuration}s)";
         return $ret;
     }
-
-    protected function buildMergedSqlAndCheckpointsLog(array $phpCheckpoints, array $sqlCheckpoints, array $record) {
+    
+    protected function buildMergedSqlAndCheckpointsLog(array $phpCheckpoints, array $sqlCheckpoints, array $record): string
+    {
         $errorPercentage = round($record['duration_error'] / $record['duration'], 4) * 100;
         $ret = "<div>
                 Total duration: {$record['duration']}s 
@@ -185,8 +194,9 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         $log = $this->normalizeMergedCheckpoints($checkpoints, 0, $record['duration']);
         return $ret . $this->buildMergedCheckpointsLog($log, (float)$record['duration']);
     }
-
-    protected function injectSqlCheckpoints(array $phpCheckpoints, array $sqlCheckpoints): array {
+    
+    protected function injectSqlCheckpoints(array $phpCheckpoints, array $sqlCheckpoints): array
+    {
         $ret = [];
         foreach ($phpCheckpoints as $checkpoint) {
             $sqlBefore = [];
@@ -195,7 +205,7 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
             foreach ($sqlCheckpoints as $sqlCheckpoint) {
                 if ((float)$sqlCheckpoint['ended_at'] < $checkpoint['started_at']) {
                     $sqlBefore[] = $sqlCheckpoint;
-                } else if (
+                } elseif (
                     (float)$sqlCheckpoint['started_at'] >= $checkpoint['started_at']
                     && (float)$sqlCheckpoint['ended_at'] <= $checkpoint['ended_at']
                 ) {
@@ -213,7 +223,7 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         }
         return $ret;
     }
-
+    
     protected function normalizeMergedCheckpoints(
         array $checkpoints,
         float $prevCheckpointEndsAt,
@@ -244,8 +254,9 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         }
         return $log;
     }
-
-    protected function makeNotTracedPhpCheckpoint(float $startsAt, float $endsAt): array {
+    
+    protected function makeNotTracedPhpCheckpoint(float $startsAt, float $endsAt): array
+    {
         return [
             'started_at' => $startsAt,
             'ended_at' => $endsAt,
@@ -255,11 +266,12 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
             'memory_after' => null,
             'memory_usage' => null,
             'data' => [],
-            'checkpoints' => []
+            'checkpoints' => [],
         ];
     }
-
-    protected function buildMergedCheckpointsLog(array $checkpoints, float $totalDuration) {
+    
+    protected function buildMergedCheckpointsLog(array $checkpoints, float $totalDuration): string
+    {
         $ret = '';
         foreach ($checkpoints as $checkpoint) {
             if (array_key_exists('query', $checkpoint)) {
@@ -270,8 +282,9 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         }
         return '<ul>' . $ret . '</ul>';
     }
-
-    protected function buildSqlLogIntro(array $data): string {
+    
+    protected function buildSqlLogIntro(array $data): string
+    {
         return "
             <div>
                 SQL queries executed: {$data['statements_count_str']} 
@@ -280,13 +293,16 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
             </div>
             ";
     }
-
-    protected function buildSqlQueryLog(array $statement, string $numeration = '', float $totalDuration): string {
-        $query = trim(preg_replace(
-            '%(?: |^)(WITH|SELECT|INSERT|UPDATE|DELETE|FROM|ORDER BY|WHERE|GROUP BY|HAVING|SET|VALUES|INTO|LIMIT|OFFSET|(?:INNER|OUTER|LEFT|RIGHT)? ?JOIN) %is',
-            "\n  <b>$1</b> ",
-            htmlentities($statement['query'])
-        ));
+    
+    protected function buildSqlQueryLog(array $statement, string $numeration, float $totalDuration): string
+    {
+        $query = trim(
+            preg_replace(
+                '%(?: |^)(WITH|SELECT|INSERT|UPDATE|DELETE|FROM|ORDER BY|WHERE|GROUP BY|HAVING|SET|VALUES|INTO|LIMIT|OFFSET|(?:INNER|OUTER|LEFT|RIGHT)? ?JOIN) %i',
+                "\n  <b>$1</b> ",
+                htmlentities($statement['query'])
+            )
+        );
         $durationPercent = round((float)$statement['duration'] / $totalDuration, 4) * 100;
         $ret = "
             <div>
@@ -305,8 +321,9 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
         }
         return $ret;
     }
-
-    protected function buildPhpCheckpointLog(array $checkpoint, float $totalDuration): string {
+    
+    protected function buildPhpCheckpointLog(array $checkpoint, float $totalDuration): string
+    {
         $ret = '';
         if (!empty($checkpoint['description']) && trim($checkpoint['description']) !== '') {
             $ret .= '<div>' . $checkpoint['description'] . '</div>';
@@ -325,9 +342,15 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
             $ret .= "<div>Memory: {$checkpoint['memory_usage']} MB ({$checkpoint['memory_before']} MB -> {$checkpoint['memory_after']} MB)</div>";
         }
         if (!empty($checkpoint['data'])) {
-            $ret .= '<pre class="json-text">'
-                    . htmlentities(stripslashes(json_encode($checkpoint['data'], JSON_UNESCAPED_UNICODE, JSON_PRETTY_PRINT)))
-                . '</pre>';
+            $content = htmlentities(
+                stripslashes(
+                    json_encode(
+                        $checkpoint['data'],
+                        JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+                    )
+                )
+            );
+            $ret .= "<pre class=\"json-text\">{$content}</pre>";
         }
         if (!empty($checkpoint['checkpoints'])) {
             $ret .= $this->buildMergedCheckpointsLog($checkpoint['checkpoints'], $totalDuration);

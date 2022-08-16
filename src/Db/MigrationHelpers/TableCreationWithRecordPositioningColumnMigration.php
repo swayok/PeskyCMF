@@ -1,120 +1,129 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Db\MigrationHelpers;
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use PeskyORM\Core\DbConnectionsManager;
 use PeskyORM\Core\DbExpr;
 
-abstract class TableCreationWithRecordPositioningColumnMigration extends Migration {
-
+abstract class TableCreationWithRecordPositioningColumnMigration extends Migration
+{
+    
     /**
      * Name of the table to create
-     * @return string
      */
-    abstract public function getTableName();
-
+    abstract public function getTableName(): string;
+    
     /**
      * Declare all columns you need in table except for the column used for positioning
-     * @param Blueprint $table
      */
     abstract public function declareTableStructure(Blueprint $table);
-
-    public function getPositionColumnName() {
+    
+    public function getPositionColumnName(): string
+    {
         return 'position';
     }
-
+    
     /**
      * Primary key column name to use in triggger function
-     * @return string
      */
-    public function getPrimaryKeyColumnName() {
+    public function getPrimaryKeyColumnName(): string
+    {
         return 'id';
     }
-
-    public function getSequenceStep() {
+    
+    public function getSequenceStep(): int
+    {
         return 100;
     }
-
-    protected function getDbSchemaName() {
+    
+    protected function getDbSchemaName(): ?string
+    {
         return config('database.connections.' . $this->getConnectionName() . '.schema', function () {
             throw new \UnexpectedValueException('Connection ' . $this->getConnectionName() . ' not exists or has empty schema name');
         });
     }
-
-    public function up() {
+    
+    public function up(): void
+    {
         $tableName = $this->getTableName();
-        if (!\Schema::hasTable($tableName)) {
+        if (!Schema::hasTable($tableName)) {
             $schema = $this->getDbSchemaName();
             $step = $this->getSequenceStep();
             $columnName = $this->getPositionColumnName();
             $seqName = $this->getSequenceName();
-            \DB::statement(\DB::raw(
-                $this->quoteDbExpr(DbExpr::create(
+            $dbExpr = $this->quoteDbExpr(
+                DbExpr::create(
                     "CREATE SEQUENCE IF NOT EXISTS `{$schema}`.`{$seqName}` INCREMENT {$step} START {$step}"
-                ))
-            ));
-
-            \Schema::create($tableName, function (Blueprint $table) use ($columnName, $tableName, $schema) {
+                )
+            );
+            DB::statement($dbExpr);
+            
+            Schema::create($tableName, function (Blueprint $table) {
                 $this->declareTableStructure($table);
                 $this->declarePositioningColumn($table);
             });
-
-            $query = $this->quoteDbExpr(DbExpr::create(
-                "ALTER SEQUENCE `{$schema}`.`{$seqName}`
-                OWNED BY `{$schema}`.`{$tableName}`.`{$columnName}`"
-            ));
-            $success = \DB::statement(\DB::raw($query));
+            
+            $query = $this->quoteDbExpr(
+                DbExpr::create(
+                    "ALTER SEQUENCE `{$schema}`.`{$seqName}` OWNED BY `{$schema}`.`{$tableName}`.`{$columnName}`"
+                )
+            );
+            $success = DB::statement($query);
             if (!$success) {
                 throw new \UnexpectedValueException(
                     'Query execuition returned negative result for query ' . $query
                 );
             }
-
+            
             $this->addPositioningUpdateTrigger();
         }
     }
-
-    public function down() {
-        \Schema::dropIfExists($this->getTableName());
+    
+    public function down(): void
+    {
+        Schema::dropIfExists($this->getTableName());
         $schema = $this->getDbSchemaName();
         $seqName = $this->getSequenceName();
-        \DB::statement(\DB::raw(
+        DB::statement(
             $this->quoteDbExpr(DbExpr::create("DROP SEQUENCE IF EXISTS `{$schema}`.`{$seqName}`"))
-        ));
+        );
         try {
             $triggerFunctionName = $this->getTriggerFunctionName();
-            \DB::statement(\DB::raw(
-                $this->quoteDbExpr(DbExpr::create("DROP FUNCTION IF EXISTS `{$schema}`.`{$triggerFunctionName}`() RESTRICT"))
-            ));
+            DB::statement(
+                    $this->quoteDbExpr(DbExpr::create("DROP FUNCTION IF EXISTS `{$schema}`.`{$triggerFunctionName}`() RESTRICT"))
+            );
         } catch (\PDOException $exc) {
-             // ignore
+            // ignore
         }
     }
-
-    protected function declarePositioningColumn(Blueprint $table) {
+    
+    protected function declarePositioningColumn(Blueprint $table): void
+    {
         $columnName = $this->getPositionColumnName();
-        if (!in_array($columnName, $table->getColumns())) {
+        if (!in_array($columnName, $table->getColumns(), true)) {
             $seqName = $this->getSequenceName();
             $schema = $this->getDbSchemaName();
             $seqNameQuoted = $this->quoteDbExpr(DbExpr::create("`{$schema}`.`{$seqName}`", false));
-            $table->integer($columnName)->default(\DB::raw($this->quoteDbExpr(DbExpr::create("nextval(``{$seqNameQuoted}``::regclass)", false))));
+            $table->integer($columnName)->default(DB::raw($this->quoteDbExpr(DbExpr::create("nextval(``{$seqNameQuoted}``::regclass)", false))));
             $table->index($columnName);
         }
     }
-
-    /**
-     * DO NOT MODIFY THIS OR TRIGGER FUNCTION WILL
-     * @return string
-     */
-    final protected function getSequenceName() {
+    
+    final protected function getSequenceName(): string
+    {
         $tableName = $this->getTableName();
         $columnName = $this->getPositionColumnName();
         return "{$tableName}_{$columnName}_seq";
     }
-
-    protected function addPositioningUpdateTrigger() {
+    
+    protected function addPositioningUpdateTrigger(): void
+    {
         $schema = $this->getDbSchemaName();
         $tableName = $this->getTableName();
         $columnName = $this->getPositionColumnName();
@@ -128,12 +137,13 @@ CREATE TRIGGER `trigger_after_{$columnName}_update_in_{$tableName}`
 AFTER UPDATE OF `{$columnName}` ON `{$schema}`.`{$tableName}`
 FOR EACH ROW EXECUTE PROCEDURE `{$schema}`.`{$triggerFunctionName}`(``{$columnName}``,``{$pkName}``,``{$seqName}``,``{$seqStep}``);
 QUERY;
-        \DB::statement(\DB::raw(
+        DB::statement(
             $this->quoteDbExpr(DbExpr::create($query))
-        ));
+        );
     }
-
-    protected function createTriggerFunctionIfNotExists() {
+    
+    protected function createTriggerFunctionIfNotExists(): void
+    {
         $schema = $this->getDbSchemaName();
         $funcName = $this->getTriggerFunctionName();
         $query = <<<QUERY
@@ -174,20 +184,23 @@ END;
     LANGUAGE ``plpgsql`` VOLATILE COST 100
 ;
 QUERY;
-        \DB::statement(\DB::raw(
+        DB::statement(
             $this->quoteDbExpr(DbExpr::create($query))
-        ));
+        );
     }
-
-    protected function getTriggerFunctionName() {
+    
+    protected function getTriggerFunctionName(): string
+    {
         return 'trigger_fn_for_row_repositioning';
     }
-
-    protected function getConnectionName() {
+    
+    protected function getConnectionName()
+    {
         return $this->getConnection() ?: config('database.default');
     }
-
-    protected function quoteDbExpr(DbExpr $expr) {
+    
+    protected function quoteDbExpr(DbExpr $expr): string
+    {
         return DbConnectionsManager::getConnection($this->getConnectionName())->quoteDbExpr($expr);
     }
 }

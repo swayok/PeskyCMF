@@ -2,29 +2,24 @@
 
 namespace PeskyCMF\Db\HttpRequestStats;
 
-use App\Db\AbstractTable;
+use PeskyCMF\Db\CmfDbTable;
 
-class CmfHttpRequestStatsTable extends AbstractTable {
-
-    /**
-     * @return CmfHttpRequestStatsTableStructure
-     */
-    public function getTableStructure() {
+class CmfHttpRequestStatsTable extends CmfDbTable
+{
+    
+    public function getTableStructure(): CmfHttpRequestStatsTableStructure
+    {
         return CmfHttpRequestStatsTableStructure::getInstance();
     }
-
-    /**
-     * @return CmfHttpRequestStat
-     */
-    public function newRecord() {
+    
+    public function newRecord(): CmfHttpRequestStat
+    {
         return new CmfHttpRequestStat();
     }
-
-    /**
-     * @return string
-     */
-    public function getTableAlias() {
+    
+    public function getTableAlias(): string
+    {
         return 'HttpRequestStats';
     }
-
+    
 }
