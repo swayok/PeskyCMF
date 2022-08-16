@@ -6,6 +6,7 @@ use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
+use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
 
@@ -16,11 +17,13 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig {
     protected $isEditAllowed = false;
     protected $isDeleteAllowed = false;
 
-    public static function getTable() {
+    public static function getTable(): TableInterface
+    {
         return CmfHttpRequestLogsTable::getInstance();
     }
 
-    public static function getIconForMenuItem() {
+    public static function getIconForMenuItem(): ?string
+    {
         return 'fa fa-exchange';
     }
 

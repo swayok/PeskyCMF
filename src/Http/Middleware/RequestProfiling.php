@@ -1,14 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Http\Middleware;
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use PeskyCMF\Db\HttpRequestStats\CmfHttpRequestStat;
 use PeskyORM\Profiling\PeskyOrmPdoProfiler;
 use Symfony\Component\HttpFoundation\Response;
 
-class RequestProfiling {
-
+class RequestProfiling
+{
+    
+    /**
+     * @var ExceptionHandler
+     */
+    protected $exceptionHandler;
+    
+    public function __construct(ExceptionHandler $exceptionHandler)
+    {
+        $this->exceptionHandler = $exceptionHandler;
+    }
+    
     /**
      * Middleware examples:
      * 1. Use default arguments: \PeskyCMF\Http\Middleware\RequestProfiling::class
@@ -40,21 +55,17 @@ class RequestProfiling {
      * @param float $minDuration - do not record profiling if duration is less then specified
      * @param int $minDbQueries - do not record profiling if min amount of queries is lee then specified
      * @return mixed
-     * @throws \LogicException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\DbException
-     * @throws \PDOException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
      */
-    public function handle(Request $request, \Closure $next, bool $enabledByDefault = true, float $minDuration = 0, int $minDbQueries = 0) {
-        $config = array_get($request->route()->getAction(), 'profiler');
+    public function handle(Request $request, \Closure $next, bool $enabledByDefault = true, float $minDuration = 0, int $minDbQueries = 0)
+    {
+        $route = $request->route();
+        $config = Arr::get($route->getAction(), 'profiler');
         if ($config === null) {
             $enabled = $enabledByDefault;
             $config = [];
-        } else if (empty($config)) {
+        } elseif (empty($config)) {
             $enabled = false;
-        } else if (is_array($config)) {
+        } elseif (is_array($config)) {
             $enabled = true;
         } else {
             $enabled = true;
@@ -82,10 +93,10 @@ class RequestProfiling {
                         ->addSqlProfilingData();
                     if (
                         $hasCheckpoints
-                        || $stat->duration >= (float)array_get($config, 'min_duration', $minDuration)
+                        || $stat->duration >= (float)Arr::get($config, 'min_duration', $minDuration)
                         || (
                             $stat->duration_sql > 0
-                            && (int)array_get($stat->sql_as_array, 'statements_count', 999) >= (int)array_get($config, 'min_queries', $minDbQueries)
+                            && (int)Arr::get($stat->sql_as_array, 'statements_count', 999) >= (int)Arr::get($config, 'min_queries', $minDbQueries)
                         )
                     ) {
                         $stat
@@ -93,7 +104,7 @@ class RequestProfiling {
                             ->finishAndSave();
                     }
                 } catch (\Exception $exception) {
-                    $this->logException($exception);
+                    $this->exceptionHandler->report($exception);
                 }
             }
             // save results to DB
@@ -102,10 +113,5 @@ class RequestProfiling {
             return $next($request);
         }
     }
-
-    protected function logException(\Exception $exception, array $context = []) {
-        $context['exception'] = $exception;
-        \Log::critical($exception->getMessage(), $context);
-    }
-
+    
 }

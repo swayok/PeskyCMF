@@ -1,18 +1,23 @@
 <?php
+
+declare(strict_types=1);
+
 namespace PeskyCMF\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\Exception\InvalidDataException;
 use Swayok\Utils\StringUtils;
 
-class AjaxOnly {
-
+class AjaxOnly
+{
+    
     use DataValidationHelper;
-
+    
     /**
      * Request must be done via ajax
      * You can specify a fallback url OR 'route' with optional 'params' via 'fallback' key in route config:
@@ -38,23 +43,27 @@ class AjaxOnly {
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    public function handle(Request $request, Closure $next) {
+    public function handle(Request $request, Closure $next)
+    {
         if (!$request->ajax()) {
+            $route = $request->route();
             // maybe there is a fallback?
-            $fallback = array_get($request->route()->getAction(), 'fallback', []);
+            $fallback = Arr::get($route->getAction(), 'fallback', []);
             if (!empty($fallback) && is_string($fallback)) {
-                return new RedirectResponse(StringUtils::insert(
-                    $fallback,
-                    $request->route()->parameters(),
-                    ['before' => '{', 'after' => '}']
-                ));
-            } else if (!empty($fallback['route'])) {
-                $passParams = (bool)array_get($fallback, 'use_params', true);
+                return new RedirectResponse(
+                    StringUtils::insert(
+                        $fallback,
+                        $route->parameters(),
+                        ['before' => '{', 'after' => '}']
+                    )
+                );
+            } elseif (!empty($fallback['route'])) {
+                $passParams = (bool)Arr::get($fallback, 'use_params', true);
                 $params = [];
                 if ($passParams === true) {
-                    $params = $request->route()->parameters();
+                    $params = $route->parameters();
                 }
-                $addParams = array_get($fallback, 'add_params', true);
+                $addParams = Arr::get($fallback, 'add_params', true);
                 if (is_array($addParams)) {
                     $params = array_merge($params, $addParams);
                 }
@@ -69,5 +78,5 @@ class AjaxOnly {
             return $this->makeValidationErrorsJsonResponse($exc->getErrors(true));
         }
     }
-
+    
 }

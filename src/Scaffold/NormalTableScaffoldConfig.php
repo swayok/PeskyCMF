@@ -3,6 +3,7 @@
 namespace PeskyCMF\Scaffold;
 
 use Illuminate\Http\JsonResponse;
+use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
@@ -21,7 +22,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
     protected $goBackAfterCreation = false;
     protected $goBackAfterEditing = false;
 
-    public function getRecordsForDataGrid() {
+    public function getRecordsForDataGrid(): JsonResponse
+    {
         if (!$this->isSectionAllowed()) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
         }
@@ -144,7 +146,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         
         
-        return cmfJsonResponse()->setData([
+        return new CmfJsonResponse([
             'draw' => $request->query('draw'),
             'recordsTotal' => $totalCount,
             'recordsFiltered' => $totalCount,
@@ -152,7 +154,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         ]);
     }
 
-    public function getRecordValues($id = null) {
+    public function getRecordValues(?string $id = null): JsonResponse
+    {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
         $table = static::getTable();
         if ($isItemDetails) {
@@ -219,7 +222,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         return cmfJsonResponse()->setData($sectionConfig->prepareRecord($data));
     }
 
-    public function getDefaultValuesForFormInputs() {
+    public function getDefaultValuesForFormInputs(): JsonResponse
+    {
         $formConfig = $this->getFormConfig();
         if (!$this->isCreateAllowed() && !$this->isEditAllowed()) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.create.forbidden'));
@@ -228,7 +232,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         return cmfJsonResponse()->setData($formConfig->prepareRecord($data));
     }
 
-    public function addRecord() {
+    public function addRecord(): JsonResponse
+    {
         $formConfig = $this->getFormConfig();
         if (!$this->isCreateAllowed()) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.create.forbidden'));
@@ -295,7 +300,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         throw new \BadMethodCallException('There is no data to save');
     }
 
-    public function updateRecord() {
+    public function updateRecord(string $id): JsonResponse
+    {
         $formConfig = $this->getFormConfig();
         if (!$this->isEditAllowed()) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden'));
@@ -573,7 +579,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         return $url;
     }
 
-    public function updateBulkOfRecords() {
+    public function updateBulkOfRecords(): JsonResponse
+    {
         $formConfig = $this->getFormConfig();
         if (!$this->isEditAllowed()) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.forbidden'));
@@ -640,7 +647,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             ->goBack(routeToCmfItemsTable(static::getResourceName()));
     }
 
-    public function deleteRecord($id) {
+    public function deleteRecord(string $id): JsonResponse
+    {
         if (!$this->isDeleteAllowed()) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden'));
         }
@@ -680,7 +688,8 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         return null;
     }
 
-    public function deleteBulkOfRecords() {
+    public function deleteBulkOfRecords(): JsonResponse
+    {
         if (!$this->isDeleteAllowed()) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.delete.forbidden'));
         }
@@ -766,10 +775,10 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $this->translateGeneral('message.validation_errors')
             ));
         }
-        return null;
     }
 
-    public function changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection) {
+    public function changeItemPosition(string $id, string $beforeOrAfter, string $otherId, string $columnName, string $sortDirection): JsonResponse
+    {
         $dataGridConfig = $this->getDataGridConfig();
         if (
             !$dataGridConfig->isRowsReorderingEnabled()

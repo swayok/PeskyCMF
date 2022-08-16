@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Mail\Message;
 use Illuminate\Session\Store;
+use Illuminate\Support\Arr;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\Admins\CmfAdminsTable;
@@ -187,23 +188,20 @@ class CmfAuthModule
         return $this->getCmfConfig()->config('auth.is_registration_allowed', true);
     }
     
-    /**
-     * @return CmfJsonResponse|string
-     */
-    public function renderUserRegistrationPageView()
+    public function renderUserRegistrationPageView(): string
     {
         if (!$this->isRegistrationAllowed()) {
-            return cmfJsonResponse(HttpCode::NOT_FOUND);
+            abort(new JsonResponse([], HttpCode::NOT_FOUND));
         }
         return view($this->registrationPageViewPath, [
             'authModule' => $this,
         ])->render();
     }
     
-    public function processUserRegistrationRequest(Request $request): CmfJsonResponse
+    public function processUserRegistrationRequest(Request $request): JsonResponse
     {
         if (!$this->isRegistrationAllowed()) {
-            return cmfJsonResponse(HttpCode::NOT_FOUND);
+            return new JsonResponse([], HttpCode::NOT_FOUND);
         }
         $data = $this->validateAndGetDataForRegistration($request);
         $user = $this->getUsersTable()->newRecord();
@@ -212,7 +210,7 @@ class CmfAuthModule
         $user->save();
         $this->afterRegistration($user);
         $this->getAuthGuard()->login($user, true);
-        return cmfJsonResponse()
+        return CmfJsonResponse::create()
             ->setForcedRedirect($this->getCmfConfig()->home_page_url());
     }
     
@@ -308,7 +306,7 @@ class CmfAuthModule
         ) {
             $this->onUserEmailAddressChange($user, $oldEmail);
         }
-        return cmfJsonResponse()
+        return CmfJsonResponse::create()
             ->setData(['_reload_user' => true])
             ->setMessage($this->getCmfConfig()->transCustom('page.profile.saved'))
             ->reloadPage();
@@ -324,9 +322,9 @@ class CmfAuthModule
     
     /**
      * @param Request $request
-     * @return CmfJsonResponse
+     * @return JsonResponse
      */
-    public function processUserLoginRequest(Request $request): CmfJsonResponse
+    public function processUserLoginRequest(Request $request): JsonResponse
     {
         $userLoginColumn = $this->getUserLoginColumnName();
         $data = $this->validate($request, [
@@ -338,15 +336,15 @@ class CmfAuthModule
             'password' => $data['password'],
         ];
         if (!$this->getAuthGuard()->attempt($credentials)) {
-            return cmfJsonResponse(HttpCode::INVALID)
+            return CmfJsonResponse::create(HttpCode::INVALID)
                 ->setMessage($this->getCmfConfig()->transCustom('.login_form.login_failed'));
         } else {
-            return cmfJsonResponse()->setRedirect($this->getIntendedUrl());
+            return CmfJsonResponse::create()->setRedirect($this->getIntendedUrl());
         }
     }
     
     /**
-     * @return RedirectResponse|CmfJsonResponse
+     * @return RedirectResponse|JsonResponse
      */
     public function processUserLogoutRequest(Request $request): Response
     {
@@ -355,21 +353,21 @@ class CmfAuthModule
             // logout to original account after 'login_as'
             $userInfo = $this->getSessionStore()->pull($this->originalUserFromLoginAsActionSessionKey);
             $user = $this->getAuthGuard()->getProvider()->retrieveByToken(
-                array_get($userInfo, 'id', -1),
-                array_get($userInfo, 'token', -1)
+                Arr::get($userInfo, 'id', -1),
+                Arr::get($userInfo, 'token', -1)
             );
             if ($user) {
                 // Warning: do not use Auth->login($user) - it will fail to login previous user
                 $this->getAuthGuard()->loginUsingId($user->getAuthIdentifier(), false);
-                $redirectTo = array_get($userInfo, 'url') ?: $loginPageUrl;
+                $redirectTo = Arr::get($userInfo, 'url') ?: $loginPageUrl;
                 return $request->ajax()
-                    ? cmfJsonResponse()->setForcedRedirect($redirectTo)
+                    ? CmfJsonResponse::create()->setForcedRedirect($redirectTo)
                     : new RedirectResponse($redirectTo);
             }
         }
         $this->logoutCurrentUser();
         return $request->ajax()
-            ? cmfJsonResponse()->setForcedRedirect($loginPageUrl)
+            ? CmfJsonResponse::create()->setForcedRedirect($loginPageUrl)
             : new RedirectResponse($loginPageUrl);
     }
     
@@ -385,7 +383,7 @@ class CmfAuthModule
     
     /**
      * @param int|string $otherUserId
-     * @return CmfJsonResponse
+     * @return JsonResponse
      */
     public function processLoginAsOtherUserRequest($otherUserId): JsonResponse
     {
@@ -393,12 +391,12 @@ class CmfAuthModule
         $currentUser = $this->getUser();
         $currentUserId = $currentUser->getAuthIdentifier();
         if ($currentUserId === $otherUserId || $currentUserId === (int)$otherUserId) {
-            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
+            return CmfJsonResponse::create(HttpCode::CANNOT_PROCESS)
                 ->setMessage($this->getCmfConfig()->transCustom('admins.login_as.same_user'));
         }
         $token = $currentUser->getRememberToken();
         if (!$token) {
-            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
+            return CmfJsonResponse::create(HttpCode::CANNOT_PROCESS)
                 ->setMessage($this->getCmfConfig()->transCustom('admins.login_as.no_auth_token'));
         }
         /** @var CmfAdmin|RecordInterface $otherUser */
@@ -406,7 +404,7 @@ class CmfAuthModule
         if (!is_object($otherUser)) {
             // Warning: do not use Auth->login($currentUser) - it might fail
             $this->getAuthGuard()->loginUsingId($currentUserId, false);
-            return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
+            return CmfJsonResponse::create(HttpCode::CANNOT_PROCESS)
                 ->setMessage($this->getCmfConfig()->transCustom('admins.login_as.fail', ['id' => $otherUserId]));
         }
         $this->getSessionStore()->put([
@@ -420,14 +418,14 @@ class CmfAuthModule
                 ['user' => $otherUser->getValue($this->getUserLoginColumnName())]
             ),
         ]);
-        return cmfJsonResponse()
+        return CmfJsonResponse::create()
             ->setRedirect($this->getCmfConfig()->home_page_url());
     }
     
     public function startPasswordRecoveryProcess(Request $request): JsonResponse
     {
         if (!$this->isPasswordRestoreAllowed()) {
-            return cmfJsonResponse(HttpCode::NOT_FOUND);
+            return new JsonResponse([], HttpCode::NOT_FOUND);
         }
         $validators = [
             'email' => 'required|email',
@@ -449,7 +447,7 @@ class CmfAuthModule
             $this->sendPasswordRecoveryInstructionsEmail($user);
         }
         
-        return cmfJsonResponse()
+        return CmfJsonResponse::create()
             ->setMessage($this->getCmfConfig()->transCustom('.forgot_password.instructions_sent'))
             ->setRedirect($this->getLoginPageUrl());
     }
@@ -457,7 +455,7 @@ class CmfAuthModule
     public function finishPasswordRecoveryProcess(Request $request, string $accessKey): JsonResponse
     {
         if (!$this->isPasswordRestoreAllowed()) {
-            return cmfJsonResponse(HttpCode::NOT_FOUND);
+            return new JsonResponse([], HttpCode::NOT_FOUND);
         }
         $data = $this->validate($request, [
             'id' => 'required|integer|min:1',
@@ -472,11 +470,11 @@ class CmfAuthModule
                 ->begin()
                 ->updateValue('password', $data['password'], false)
                 ->commit();
-            return cmfJsonResponse()
+            return CmfJsonResponse::create()
                 ->setMessage($this->getCmfConfig()->transCustom('.replace_password.password_replaced'))
                 ->setForcedRedirect($this->getLoginPageUrl());
         } else {
-            return cmfJsonResponse(HttpCode::FORBIDDEN)
+            return CmfJsonResponse::create(HttpCode::FORBIDDEN)
                 ->setMessage($this->getCmfConfig()->transCustom('.replace_password.invalid_access_key'))
                 ->setForcedRedirect($this->getLoginPageUrl());
         }
@@ -490,7 +488,7 @@ class CmfAuthModule
     public function renderReplaceUserPasswordPageView(string $accessKey): string
     {
         if (!$this->isPasswordRestoreAllowed()) {
-            abort(cmfJsonResponse(HttpCode::NOT_FOUND));
+            abort(new JsonResponse([], HttpCode::NOT_FOUND));
         }
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if ($user) {
@@ -502,7 +500,7 @@ class CmfAuthModule
             ])->render();
         } else {
             abort(
-                cmfJsonResponse(HttpCode::FORBIDDEN)
+                CmfJsonResponse::create(HttpCode::FORBIDDEN)
                     ->setMessage($this->getCmfConfig()->transCustom('.replace_password.invalid_access_key'))
                     ->setRedirect($this->getLoginPageUrl())
             );

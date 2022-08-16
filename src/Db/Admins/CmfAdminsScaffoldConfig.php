@@ -23,13 +23,15 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig {
     protected $notLoggableRecordColumns = ['password'];
 
     /**
-     * @return CmfAdminsTable|TableInterface
+     * @return TableInterface
      */
-    public static function getTable() {
+    public static function getTable(): TableInterface
+    {
         return static::getCmfConfig()->getAuthModule()->getUsersTable();
     }
 
-    protected static function getIconForMenuItem() {
+    protected static function getIconForMenuItem(): ?string
+    {
         return 'fa fa-group';
     }
 

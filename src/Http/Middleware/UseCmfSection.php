@@ -1,21 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Http\Middleware;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use PeskyCMF\PeskyCmfManager;
 
-class UseCmfSection {
-
+class UseCmfSection
+{
+    
+    /**
+     * @var Application
+     */
+    protected $app;
+    
+    public function __construct(Application $app) {
+        $this->app = $app;
+    }
+    
     /**
      * @param Request $request
      * @param \Closure $next
-     * @param $cmfSectionName - name of a key from config('peskycmf.cmf_configs')
+     * @param string $cmfSectionName - name of a key from config('peskycmf.cmf_configs')
      * @return mixed
      */
-    public function handle(Request $request, \Closure $next, $cmfSectionName) {
+    public function handle(Request $request, \Closure $next, string $cmfSectionName)
+    {
         /** @var PeskyCmfManager $cmfManager */
-        $cmfManager = app(PeskyCmfManager::class);
+        $cmfManager = $this->app->make(PeskyCmfManager::class);
         $cmfManager->setCurrentCmfSection($cmfSectionName);
         return $next($request);
     }

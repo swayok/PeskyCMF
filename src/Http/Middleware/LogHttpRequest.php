@@ -1,23 +1,60 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Http\Middleware;
 
-use App\Db\HttpRequestLogs\HttpRequestLog;
+use Illuminate\Contracts\Auth\Factory as AuthFactory;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use PeskyCMF\Db\HttpRequestLogs\CmfHttpRequestLog;
 use PeskyCMF\Db\HttpRequestLogs\CmfHttpRequestLogsTable;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\ORM\RecordInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class LogHttpRequest {
+class LogHttpRequest
+{
     
     /**
      * list of logs with urls
-     * @var HttpRequestLog[]
+     * @var CmfHttpRequestLog[]
      */
-    private static array $logs = [];
-
+    private static $logs = [];
+    
+    /**
+     * @var Application
+     */
+    protected $app;
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+    /**
+     * @var AuthFactory
+     */
+    protected $auth;
+    /**
+     * @var ExceptionHandler
+     */
+    protected $exceptionHandler;
+    
+    public function __construct(
+        Application $app,
+        LoggerInterface $logger,
+        AuthFactory $auth,
+        ExceptionHandler $exceptionHandler
+    ) {
+        $this->app = $app;
+        $this->logger = $logger;
+        $this->auth = $auth;
+        $this->exceptionHandler = $exceptionHandler;
+    }
+    
     /**
      * Middleware examples:
      * 1. Use default auth guard and log all requests with any HTTP method:
@@ -44,20 +81,22 @@ class LogHttpRequest {
      * Note: if there was a server error during any request - it will be forcefully logged ignoring any restrictions.
      * @param Request $request
      * @param \Closure $next
-     * @param null|string $authGuard
+     * @param string|null $authGuard
      * @param bool $enableByDefault - true: logs requests even if route has no 'log' action in its description
      * @param array $methods - list of HTTP methods to log. If empty - log all methods
      * @return mixed
      */
-    public function handle($request, \Closure $next, $authGuard = null, $enableByDefault = true, ...$methods) {
+    public function handle(Request $request, \Closure $next, ?string $authGuard = null, bool $enableByDefault = true, ...$methods)
+    {
+        $route = $request->route();
         $isAllowed = (
             empty($methods)
             || preg_match('%' . implode('|', $methods) . '%i', $request->getMethod())
-            || !empty(array_get($request->route()->getAction(), 'log'))
+            || !empty(Arr::get($route->getAction(), 'log'))
         );
         // reset logs to allow requests via test cases
-        if (app()->bound(CmfHttpRequestLogsTable::class)) {
-            $logsTable = app()->make(CmfHttpRequestLogsTable::class);
+        if ($this->app->bound(CmfHttpRequestLogsTable::class)) {
+            $logsTable = $this->app->make(CmfHttpRequestLogsTable::class);
         } else {
             $logsTable = CmfHttpRequestLogsTable::getInstance();
         }
@@ -73,9 +112,9 @@ class LogHttpRequest {
             return $next($request);
         }
         $logsTable::resetCurrentLog();
-        app()->offsetUnset(ScaffoldLoggerInterface::class);
+        $this->app->offsetUnset(ScaffoldLoggerInterface::class);
         $log = $logsTable::getCurrentLog();
-        app()->instance(ScaffoldLoggerInterface::class, $log);
+        $this->app->instance(ScaffoldLoggerInterface::class, $log);
         static::$logs[$logKey] = $log;
         if ($isAllowed) {
             $this->logRequest($log, $request, $enableByDefault);
@@ -86,7 +125,7 @@ class LogHttpRequest {
                 if ($response->getStatusCode() === HttpCode::UNAUTHORISED) {
                     $user = null;
                 } else {
-                    $user = \Auth::guard($authGuard ?: null)->user();
+                    $user = $this->auth->guard($authGuard ?: null)->user();
                     if (!($user instanceof RecordInterface)) {
                         $user = null;
                     }
@@ -94,23 +133,23 @@ class LogHttpRequest {
                 /** @var RecordInterface|null $user */
                 $log->logResponse($request, $response, $user);
             } catch (\Throwable $exception) {
-                \Log::error($exception);
+                $this->exceptionHandler->report($exception);
             }
         } else {
-            \Log::error('LogHttpRequest: cannot log this response (not a Symfony response)', ['response' => $response]);
+            $this->logger->error('LogHttpRequest: cannot log this response (not a Symfony response)', ['response' => $response]);
         }
         return $response;
     }
     
     /**
-     * @param HttpRequestLog $log
+     * @param CmfHttpRequestLog|ScaffoldLoggerInterface $log
      */
-    protected function logRequest($log, $request, bool $enableByDefault) {
+    protected function logRequest(ScaffoldLoggerInterface $log, $request, bool $enableByDefault): void
+    {
         try {
             $log->fromRequest($request, $enableByDefault);
         } catch (\Throwable $exception) {
-            \Log::error($exception);
+            $this->exceptionHandler->report($exception);
         }
     }
-
 }

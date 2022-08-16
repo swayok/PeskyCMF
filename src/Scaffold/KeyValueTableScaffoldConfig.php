@@ -3,13 +3,12 @@
 
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Http\JsonResponse;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\TempRecord;
-use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueDataSaver;
-use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
 
 abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
 
@@ -43,7 +42,8 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
     /**
      * @return FormConfig
      */
-    public function getFormConfig() {
+    public function getFormConfig(): FormConfig
+    {
         $formConfig = parent::getFormConfig();
         $fkName = static::getTable()->getMainForeignKeyColumnName();
         if ($fkName && !$formConfig->hasFormInput($fkName)) {
@@ -53,7 +53,8 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         return $formConfig;
     }
 
-    public function getRecordValues($ownerRecordId = null) {
+    public function getRecordValues(?string $ownerRecordId = null): JsonResponse
+    {
         $isItemDetails = (bool)$this->getRequest()->query('details', false);
         $table = static::getTable();
         if ($isItemDetails) {
@@ -78,15 +79,18 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
         return cmfJsonResponse()->setData($sectionConfig->prepareRecord($keysAndValues));
     }
 
-    public function getDefaultValuesForFormInputs() {
+    public function getDefaultValuesForFormInputs(): JsonResponse
+    {
         throw new \BadMethodCallException('Default values getter is not allowed for ' . self::class);
     }
 
-    public function addRecord() {
+    public function addRecord(): JsonResponse
+    {
         return $this->updateRecord();
     }
 
-    public function updateRecord() {
+    public function updateRecord(string $id): JsonResponse
+    {
         $formConfig = $this->getFormConfig();
         if (!$this->isEditAllowed()) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden'));
@@ -178,7 +182,8 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig {
             ->setRedirect('reload');
     }
 
-    public function changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection) {
+    public function changeItemPosition(string $id, string $beforeOrAfter, string $otherId, string $columnName, string $sortDirection): JsonResponse
+    {
         throw new \BadMethodCallException('Rows reordering is not allowed for ' . self::class);
     }
 

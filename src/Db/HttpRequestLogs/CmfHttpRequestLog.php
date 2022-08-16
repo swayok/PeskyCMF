@@ -6,6 +6,7 @@ use App\Db\AbstractRecord;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
+use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
 use Swayok\Utils\File;
@@ -66,7 +67,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @method $this    setDataAfter($value, $isFromDb = false)
  * @method $this    setRespondedAt($value, $isFromDb = false)
  */
-class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterface {
+class CmfHttpRequestLog extends Record implements ScaffoldLoggerInterface {
 
     /** @var \Closure[] */
     protected static $requestDataMinifiers = [];
@@ -406,8 +407,6 @@ class CmfHttpRequestLog extends AbstractRecord implements ScaffoldLoggerInterfac
     /**
      * @param RecordInterface $user
      * @return null|string
-     * @noinspection PhpUndefinedFieldInspection
-     * @noinspection PhpPossiblePolymorphicInvocationInspection
      */
     protected function findRequesterInfo(RecordInterface $user): ?string {
         try {

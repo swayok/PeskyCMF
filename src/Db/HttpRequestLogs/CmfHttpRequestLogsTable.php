@@ -2,12 +2,12 @@
 
 namespace PeskyCMF\Db\HttpRequestLogs;
 
-use App\Db\AbstractTable;
 use Illuminate\Http\Request;
 use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\Table;
 use Symfony\Component\HttpFoundation\Response;
 
-class CmfHttpRequestLogsTable extends AbstractTable {
+class CmfHttpRequestLogsTable extends Table {
 
     /** @var CmfHttpRequestLog */
     protected $currentLog;

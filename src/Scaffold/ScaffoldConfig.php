@@ -3,6 +3,7 @@
 
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use PeskyCMF\Config\CmfConfig;
@@ -18,7 +19,6 @@ use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 abstract class ScaffoldConfig implements ScaffoldConfigInterface {
 
@@ -115,14 +115,16 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return string
      */
-    public static function getResourceName() {
+    public static function getResourceName(): string
+    {
         return static::getTable()->getName();
     }
     
     /**
      * @return array|null
      */
-    public static function getMainMenuItem() {
+    public static function getMainMenuItem(): ?array
+    {
         $resoureName = static::getResourceName();
         $url = routeToCmfItemsTable(static::getResourceName());
         if ($url === null) {
@@ -137,28 +139,16 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         ];
     }
 
-    /**
-     * @return null|string
-     */
-    protected static function getIconForMenuItem() {
+    protected static function getIconForMenuItem(): ?string
+    {
         return null;
     }
 
-    /**
-     * @return string
-     */
-    public static function getMenuItemCounterName() {
+    public static function getMenuItemCounterName(): ?string
+    {
         return static::getMenuItemCounterValue() ? static::getResourceName() . '_count' : null;
     }
 
-    /**
-     * Get value for menu item counter (some html code to display near menu item button: new items count, etc)
-     * More info: CmfConfig::menu()
-     * You may return an HTML string or \Closure that returns that string.
-     * Note that self::getMenuItemCounterName() uses this method to decide if it should return null or counter name.
-     * If you want to return HTML string consider overwriting of self::getMenuItemCounterName()
-     * @return null|\Closure|string
-     */
     public static function getMenuItemCounterValue() {
         return null;
     }
@@ -338,10 +328,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return FormConfig::create(static::getTable(), $this);
     }
 
-    /**
-     * @return DataGridConfig
-     */
-    public function getDataGridConfig() {
+    public function getDataGridConfig(): DataGridConfig
+    {
         if (empty($this->dataGridConfig)) {
             $this->dataGridConfig = $this->createDataGridConfig();
             $this->dataGridConfig->finish();
@@ -349,10 +337,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return $this->dataGridConfig;
     }
 
-    /**
-     * @return FilterConfig
-     */
-    public function getDataGridFilterConfig() {
+    public function getDataGridFilterConfig(): FilterConfig
+    {
         if (empty($this->dataGridFilterConfig)) {
             $this->dataGridFilterConfig = $this->createDataGridFilterConfig();
             $this->dataGridFilterConfig->finish();
@@ -363,7 +349,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return ItemDetailsConfig
      */
-    public function getItemDetailsConfig() {
+    public function getItemDetailsConfig(): ItemDetailsConfig
+    {
         if (empty($this->itemDetailsConfig)) {
             $this->itemDetailsConfig = $this->createItemDetailsConfig();
             $this->itemDetailsConfig->finish();
@@ -374,7 +361,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return FormConfig
      */
-    public function getFormConfig() {
+    public function getFormConfig(): FormConfig
+    {
         if (empty($this->formConfig)) {
             $this->formConfig = $this->createFormConfig();
             $this->formConfig->finish();
@@ -385,14 +373,16 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return bool
      */
-    public function isSectionAllowed() {
+    public function isSectionAllowed(): bool
+    {
         return \Gate::allows('resource.view', [static::getResourceName()]);
     }
 
     /**
      * @return boolean
      */
-    public function isCreateAllowed() {
+    public function isCreateAllowed(): bool
+    {
         return (
             $this->isCreateAllowed
             && $this->isSectionAllowed()
@@ -403,7 +393,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return boolean
      */
-    public function isEditAllowed() {
+    public function isEditAllowed(): bool
+    {
         return $this->isEditAllowed && $this->isSectionAllowed();
     }
 
@@ -417,14 +408,16 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @return boolean
      */
-    public function isDetailsViewerAllowed() {
+    public function isDetailsViewerAllowed(): bool
+    {
         return $this->isDetailsViewerAllowed && $this->isSectionAllowed();
     }
 
     /**
      * @return boolean
      */
-    public function isDeleteAllowed() {
+    public function isDeleteAllowed(): bool
+    {
         return $this->isDeleteAllowed && $this->isSectionAllowed();
     }
 
@@ -434,7 +427,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param array $record
      * @return bool
      */
-    public function isRecordDeleteAllowed(array $record) {
+    public function isRecordDeleteAllowed(array $record): bool
+    {
         return $this->isDeleteAllowed() && \Gate::allows('resource.delete', [static::getResourceName(), $record]);
     }
 
@@ -444,7 +438,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param array $record
      * @return bool
      */
-    public function isRecordEditAllowed(array $record) {
+    public function isRecordEditAllowed(array $record): bool
+    {
         return $this->isEditAllowed() && \Gate::allows('resource.update', [static::getResourceName(), $record]);
     }
 
@@ -454,7 +449,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * @param array $record
      * @return bool
      */
-    public function isRecordDetailsAllowed(array $record) {
+    public function isRecordDetailsAllowed(array $record): bool
+    {
         return (
             $this->isDetailsViewerAllowed()
             && \Gate::allows('resource.details', [static::getResourceName(), $record])
@@ -504,9 +500,10 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return $text;
     }
 
-    public function renderTemplates() {
+    public function renderTemplates(): string
+    {
         if (!$this->isSectionAllowed()) {
-            return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
+            abort($this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold')));
         }
         return static::getCmfConfig()->getUiModule()->renderScaffoldTemplates($this);
     }
@@ -539,7 +536,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return $blocks;
     }
 
-    public function getHtmlOptionsForFormInputs() {
+    public function getHtmlOptionsForFormInputs(): JsonResponse
+    {
         if (!$this->isSectionAllowed()) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
         }
@@ -558,10 +556,11 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
                 unset($columnsOptions[$columnName]);
             }
         }
-        return cmfJsonResponse()->setData($columnsOptions);
+        return new CmfJsonResponse($columnsOptions);
     }
 
-    public function getJsonOptionsForFormInput($inputName) {
+    public function getJsonOptionsForFormInput(string $inputName): JsonResponse
+    {
         if (!$this->isSectionAllowed()) {
             return $this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold'));
         }
@@ -574,7 +573,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             $this->getRequest()->query('id'),
             $this->getRequest()->query('keywords')
         );
-        return cmfJsonResponse()->setData($options);
+        return new CmfJsonResponse($options);
     }
 
     /**
@@ -734,11 +733,13 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
     }
 
-    public function getCustomData($dataId) {
+    public function getCustomData(string $dataId)
+    {
         return cmfJsonResponseForHttp404(null, 'Handler [' . static::class . '->getCustomData($dataId)] not defined');
     }
 
-    public function getCustomPage($pageName) {
+    public function getCustomPage(string $pageName)
+    {
         return $this->callMethodByCustomActionOrPageName($pageName, null);
     }
     
@@ -755,11 +756,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return $response;
     }
 
-    public function getCustomPageForRecord($itemId, $pageName) {
+    public function getCustomPageForRecord(string $itemId, string $pageName)
+    {
         return $this->callMethodByCustomActionOrPageName($pageName, $this->getRequestedRecord($itemId));
     }
     
-    public function performCustomAjaxActionForRecord($itemId, $actionName) {
+    public function performCustomAjaxActionForRecord(string $itemId, string $actionName) {
         return $this->callMethodByCustomActionOrPageName($actionName, $this->getRequestedRecord($itemId));
     }
     
@@ -819,7 +821,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
     }
 
-    public function uploadTempFileForInput(string $inputName) {
+    public function uploadTempFileForInput(string $inputName): \Illuminate\Http\JsonResponse
+    {
         $input = $this->getFormConfig()->getValueViewer($inputName);
         if (method_exists($input, 'uploadTempFile')) {
             return $input->uploadTempFile($this->getRequest());
@@ -828,7 +831,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             ->setMessage("Input $inputName does not support temp files uploading: method uploadTempFile does not exist");
     }
 
-    public function deleteTempFileForInput(string $inputName) {
+    public function deleteTempFileForInput(string $inputName): \Illuminate\Http\JsonResponse
+    {
         $input = $this->getFormConfig()->getValueViewer($inputName);
         if (method_exists($input, 'deleteTempFile')) {
             return $input->deleteTempFile($this->getRequest());

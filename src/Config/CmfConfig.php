@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeskyCMF\Config;
 
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Application;
 use Illuminate\View\View;
@@ -12,6 +13,8 @@ use PeskyCMF\ApiDocs\CmfApiDocumentationModule;
 use PeskyCMF\Auth\CmfAccessPolicy;
 use PeskyCMF\Auth\CmfAuthModule;
 use PeskyCMF\Auth\Middleware\CmfAuth;
+use PeskyCMF\Db\Admins\CmfAdmin;
+use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Providers\PeskyCmfLanguageDetectorServiceProvider;
@@ -164,7 +167,7 @@ abstract class CmfConfig extends ConfigsContainer
     }
     
     /**
-     * @return \PeskyCMF\Db\Admins\CmfAdmin|\Illuminate\Contracts\Auth\Authenticatable|\PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey|\App\Db\Admins\Admin|null
+     * @return CmfAdmin|Authenticatable|ResetsPasswordsViaAccessKey|RecordInterface|null
      */
     public static function getUser(): ?RecordInterface
     {
@@ -294,11 +297,7 @@ abstract class CmfConfig extends ConfigsContainer
         return static::url_prefix() . '/';
     }
     
-    /**
-     * @param string $routeAlias
-     * @return string
-     */
-    public static function getRouteName($routeAlias): string
+    public static function getRouteName(string $routeAlias): string
     {
         return static::routes_names_prefix() . $routeAlias;
     }
@@ -769,7 +768,6 @@ abstract class CmfConfig extends ConfigsContainer
      * Get ScaffoldConfig instance
      * @param string $resourceName
      * @return ScaffoldConfig|ScaffoldConfigInterface
-     * @throws \InvalidArgumentException
      */
     public static function getScaffoldConfig(string $resourceName): ScaffoldConfigInterface
     {

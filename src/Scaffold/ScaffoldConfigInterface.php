@@ -1,35 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
+use PeskyCMF\Scaffold\DataGrid\FilterConfig;
+use PeskyCMF\Scaffold\Form\FormConfig;
+use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
+use PeskyORM\ORM\KeyValueTableHelpers\KeyValueTableInterface;
 use PeskyORM\ORM\TableInterface;
-use PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface;
+use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface;
 
-interface ScaffoldConfigInterface {
-
+interface ScaffoldConfigInterface
+{
+    
     /**
-     * @return TableInterface|KeyValueTableInterface
+     * @return TableInterface|KeyValueTableInterface|LaravelKeyValueTableInterface
      */
-    public static function getTable();
-
-    /**
-     * @return string
-     */
-    public static function getResourceName();
-
+    public static function getTable(): TableInterface;
+    
+    public static function getResourceName(): string;
+    
     /**
      * Main menu item info. Return null if you do not want to add item to menu
      * Details in CmfConfig::menu()
-     * @return array|null
      */
-    public static function getMainMenuItem();
-
-    /**
-     * @return string
-     */
-    public static function getMenuItemCounterName();
-
+    public static function getMainMenuItem(): ?array;
+    
+    public static function getMenuItemCounterName(): ?string;
+    
     /**
      * Get value for menu item counter (some html code to display near menu item button: new items count, etc)
      * More info: CmfConfig::menu()
@@ -39,65 +42,87 @@ interface ScaffoldConfigInterface {
      * @return null|\Closure|string
      */
     public static function getMenuItemCounterValue();
-
-    /**
-     * @return DataGridConfig
-     */
-    public function getDataGridConfig();
-
-    public function getDataGridFilterConfig();
-
-    public function getItemDetailsConfig();
-
-    public function getFormConfig();
-
-    public function isSectionAllowed();
-
-    public function isCreateAllowed();
-
-    public function isEditAllowed();
-
-    public function isDetailsViewerAllowed();
-
-    public function isDeleteAllowed();
-
-    public function isRecordDeleteAllowed(array $record);
-
-    public function isRecordEditAllowed(array $record);
-
-    public function isRecordDetailsAllowed(array $record);
-
-    public function getRecordsForDataGrid();
-
-    public function getRecordValues($id = null);
+    
+    public function getDataGridConfig(): DataGridConfig;
+    
+    public function getDataGridFilterConfig(): FilterConfig;
+    
+    public function getItemDetailsConfig(): ItemDetailsConfig;
+    
+    public function getFormConfig(): FormConfig;
+    
+    public function isSectionAllowed(): bool;
+    
+    public function isCreateAllowed(): bool;
+    
+    public function isEditAllowed(): bool;
+    
+    public function isDetailsViewerAllowed(): bool;
+    
+    public function isDeleteAllowed(): bool;
+    
+    public function isRecordDeleteAllowed(array $record): bool;
+    
+    public function isRecordEditAllowed(array $record): bool;
+    
+    public function isRecordDetailsAllowed(array $record): bool;
+    
+    public function getRecordsForDataGrid(): JsonResponse;
+    
+    public function getRecordValues(?string $id = null): JsonResponse;
+    
+    public function getDefaultValuesForFormInputs(): JsonResponse;
+    
+    public function addRecord(): JsonResponse;
+    
+    public function updateRecord(string $id): JsonResponse;
+    
+    public function uploadTempFileForInput(string $inputName): JsonResponse;
+    
+    public function deleteTempFileForInput(string $inputName): JsonResponse;
+    
+    public function changeItemPosition(
+        string $id,
+        string $beforeOrAfter,
+        string $otherId,
+        string $columnName,
+        string $sortDirection
+    ): JsonResponse;
+    
+    public function updateBulkOfRecords(): JsonResponse;
+    
+    public function deleteRecord(string $id): JsonResponse;
+    
+    public function deleteBulkOfRecords(): JsonResponse;
     
     /**
-     * @return \Illuminate\Http\JsonResponse
+     * @return Response|string|View
      */
-    public function getDefaultValuesForFormInputs();
-
-    public function addRecord();
-
-    public function updateRecord();
-
-    public function uploadTempFileForInput(string $inputName);
-
-    public function deleteTempFileForInput(string $inputName);
-
-    public function changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection);
-
-    public function updateBulkOfRecords();
-
-    public function deleteRecord($id);
-
-    public function deleteBulkOfRecords();
-
-    public function getCustomData($dataId);
-
-    public function getCustomPage($pageName);
-
-    public function getCustomPageForRecord($itemId, $pageName);
-
-    public function performCustomAjaxActionForRecord($itemId, $actionName);
-
+    public function getCustomData(string $dataId);
+    
+    /**
+     * @return Response|string|View
+     */
+    public function getCustomPage(string $pageName);
+    
+    /**
+     * @return Response|string|View
+     */
+    public function getCustomPageForRecord(string $itemId, string $pageName);
+    
+    /**
+     * @return Response|string|View
+     */
+    public function performCustomAjaxActionForRecord(string $itemId, string $actionName);
+    
+    /**
+     * Get selects options as html for each select-like input in form
+     */
+    public function getHtmlOptionsForFormInputs(): JsonResponse;
+    
+    /**
+     * Get select options as arrays for $inputName in form
+     */
+    public function getJsonOptionsForFormInput(string $inputName): JsonResponse;
+    
 }

@@ -7,6 +7,7 @@ namespace PeskyCMF\Traits;
 use Illuminate\Contracts\Validation\Factory as ValidationFactoryContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use PeskyCMF\Http\CmfJsonResponse;
@@ -16,9 +17,15 @@ use Swayok\Utils\Set;
 trait DataValidationHelper
 {
     
+    protected $validator;
+    
     protected function getValidator(): ValidationFactoryContract
     {
-        return app(ValidationFactoryContract::class);
+        if (!$this->validator) {
+            $app = $this->app ?? app();
+            $this->validator = $app->make(ValidationFactoryContract::class);
+        }
+        return $this->validator;
     }
     
     /**
@@ -71,11 +78,14 @@ trait DataValidationHelper
      */
     protected function extractInputFromRules($data, array $rules): array
     {
-        $keys = collect($rules)->keys()->map(function ($rule) {
-            return explode('.', $rule)[0];
-        })->unique()->toArray();
+        $keys = (new Collection($rules))->keys()
+            ->map(function ($rule) {
+                return explode('.', $rule)[0];
+            })
+            ->unique()
+            ->toArray();
         if (!($data instanceof Request)) {
-            $data = collect($data);
+            $data = new Collection($data);
         }
         return $data->only($keys);
     }
@@ -94,14 +104,14 @@ trait DataValidationHelper
      * @param array $errors
      * @throws ValidationException
      */
-    public function throwValidationErrorsResponse(array $errors)
+    public function throwValidationErrorsResponse(array $errors): void
     {
         throw new ValidationException($this->getValidator()->make([], []), $this->makeValidationErrorsJsonResponse($errors));
     }
     
     public function prepareDataForValidationErrorsResponse(array $errors): array
     {
-        $message = array_get($errors, CmfJsonResponse::$messageKey, $this->getValidationErrorsResponseMessage());
+        $message = Arr::get($errors, CmfJsonResponse::$messageKey, $this->getValidationErrorsResponseMessage());
         unset($errors[CmfJsonResponse::$messageKey]);
         
         return [

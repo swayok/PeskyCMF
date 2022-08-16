@@ -2,8 +2,10 @@
 
 namespace PeskyCMF\Db\Settings;
 
+use Illuminate\Http\JsonResponse;
 use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
+use PeskyORM\ORM\TableInterface;
 
 class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
 
@@ -16,9 +18,10 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
     private static $table;
 
     /**
-     * @return CmfSettingsTable|\PeskyORM\ORM\TableInterface|\PeskyORMLaravel\Db\KeyValueTableUtils\KeyValueTableInterface
+     * @return TableInterface
      */
-    public static function getTable() {
+    public static function getTable(): TableInterface
+    {
         if (static::$table === null) {
             static::$table = app()->bound(CmfSettingsTable::class)
                 ? app(CmfSettingsTable::class)
@@ -27,7 +30,8 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         return static::$table;
     }
 
-    public static function getMainMenuItem() {
+    public static function getMainMenuItem(): ?array
+    {
         $resoureName = static::getResourceName();
         $url = routeToCmfItemEditForm(static::getResourceName(), 'all');
         if ($url === null) {
@@ -41,7 +45,8 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         ];
     }
 
-    public static function getIconForMenuItem() {
+    public static function getIconForMenuItem(): ?string
+    {
         return 'fa fa-cog';
     }
 
@@ -62,7 +67,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         return $formConfig;
     }
 
-    public function renderTemplates() {
+    public function renderTemplates(): string {
         return view(
             'cmf::scaffold.templates_for_settings',
             array_merge(
@@ -72,29 +77,35 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         )->render();
     }
 
-    public function getRecordsForDataGrid() {
+    public function getRecordsForDataGrid(): JsonResponse
+    {
         throw new \BadMethodCallException('Section is not allowed');
     }
 
-    public function getDefaultValuesForFormInputs() {
+    public function getDefaultValuesForFormInputs(): JsonResponse
+    {
         return $this->getRecordValues('all');
     }
 
-    public function getRecordValues($ownerRecordId = null) {
+    public function getRecordValues(?string $id = null): JsonResponse
+    {
         $settings = static::getCmfConfig()->getAppSettings()->getAllValues(true);
         $settings[static::getTable()->getPkColumnName()] = 0;
         return cmfJsonResponse()->setData($this->getFormConfig()->prepareRecord($settings));
     }
 
-    public function updateBulkOfRecords() {
+    public function updateBulkOfRecords(): JsonResponse
+    {
         throw new \BadMethodCallException('Action is not allowed');
     }
 
-    public function deleteRecord($id) {
+    public function deleteRecord(string $id): JsonResponse
+    {
         throw new \BadMethodCallException('Action is not allowed');
     }
 
-    public function deleteBulkOfRecords() {
+    public function deleteBulkOfRecords(): JsonResponse
+    {
         throw new \BadMethodCallException('Action is not allowed');
     }
 }

@@ -30,6 +30,7 @@
     "require": {
         "php": ">=7.2.0",
         "ext-json": "*",
+        "ext-imagick": "*",
         "laravel/framework": ">=5.3",
         "swayok/utils": "^1.7",
         "swayok/peskyorm-laravel": "dev-orm_v2_1",

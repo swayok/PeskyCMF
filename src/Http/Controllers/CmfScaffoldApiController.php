@@ -1,154 +1,167 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Http\Controllers;
 
-use PeskyCMF\Scaffold\ScaffoldConfig;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyORM\ORM\TableInterface;
 
-class CmfScaffoldApiController extends CmfController {
-
-    protected $requestedResourceName;
-    protected $table;
-    protected $scaffoldConfig;
-
+class CmfScaffoldApiController extends CmfController
+{
+    
     /**
-     * @return TableInterface
-     * @throws \UnexpectedValueException
-     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
-     * @throws \InvalidArgumentException
+     * @var string
      */
-    public function getTable() {
+    private $requestedResourceName;
+    /**
+     * @var ScaffoldConfigInterface
+     */
+    private $scaffoldConfig;
+    
+    public function __construct(CmfConfig $cmfConfig, Application $app, Request $request)
+    {
+        parent::__construct($cmfConfig, $app);
+    
+        $route = $request->route();
+        $resourceName = $route->parameter('resource');
+        if (empty($resourceName)) {
+            abort(404, 'Resource name not found in route');
+        }
+        $this->requestedResourceName = $resourceName;
+        $this->scaffoldConfig = $this->getCmfConfig()->getScaffoldConfig($this->getRequestedResourceName());
+    }
+    
+    public function getTable(): TableInterface
+    {
         return $this->getScaffoldConfig()->getTable();
     }
-
-    /**
-     * @return ScaffoldConfig
-     * @throws \Symfony\Component\Debug\Exception\ClassNotFoundException
-     * @throws \InvalidArgumentException
-     * @throws \UnexpectedValueException
-     */
-    public function getScaffoldConfig() {
-        if ($this->scaffoldConfig === null) {
-            $cmfConfig = static::getCmfConfig();
-            $customScaffoldConfig = $cmfConfig::getScaffoldConfig($this->getRequestedResourceName());
-            if ($customScaffoldConfig instanceof ScaffoldConfig) {
-                $this->scaffoldConfig = $customScaffoldConfig;
-            } else {
-                throw new \UnexpectedValueException(
-                    get_class($cmfConfig) . '::getScaffoldConfig() must instance of ScaffoldConfig class. '
-                        . (is_object($customScaffoldConfig) ? get_class($customScaffoldConfig) : gettype($customScaffoldConfig))
-                        . ' Received'
-                );
-            }
-        }
+    
+    public function getScaffoldConfig(): ScaffoldConfigInterface
+    {
         return $this->scaffoldConfig;
     }
-
-    /**
-     * @return string
-     * @throws \UnexpectedValueException
-     */
-    public function getRequestedResourceName() {
-        if ($this->requestedResourceName === null) {
-            $resourceName = request()->route()->parameter('resource');
-            if (empty($resourceName)) {
-                abort(404, 'Resource name not found in route');
-            }
-            $this->requestedResourceName = $resourceName;
-        }
+    
+    public function getRequestedResourceName(): string
+    {
         return $this->requestedResourceName;
     }
-
-    public function __construct() {
-
-    }
-
-    public function getTemplates() {
+    
+    public function getTemplates(): string
+    {
         return $this->getScaffoldConfig()->renderTemplates();
     }
-
-    public function getItemsList() {
+    
+    public function getItemsList(): JsonResponse
+    {
         return $this->getScaffoldConfig()->getRecordsForDataGrid();
     }
-
-    public function getItem($resourceName, $id = null) {
+    
+    public function getItem(string $resourceName, string $id): JsonResponse
+    {
         return $this->getScaffoldConfig()->getRecordValues($id);
     }
-
-    public function getItemDefaults() {
+    
+    public function getItemDefaults(): JsonResponse
+    {
         return $this->getScaffoldConfig()->getDefaultValuesForFormInputs();
     }
-
-    public function getOptions() {
+    
+    public function getOptions(): JsonResponse
+    {
         return $this->getScaffoldConfig()->getHtmlOptionsForFormInputs();
     }
-
-    public function getOptionsAsJson($resourceName, $inputName) {
+    
+    public function getOptionsAsJson(string $resourceName, string $inputName): JsonResponse
+    {
         return $this->getScaffoldConfig()->getJsonOptionsForFormInput($inputName);
     }
-
-    public function addItem() {
+    
+    public function addItem(): JsonResponse
+    {
         return $this->getScaffoldConfig()->addRecord();
     }
-
-    public function updateItem() {
-        return $this->getScaffoldConfig()->updateRecord();
+    
+    public function updateItem(string $resourceName, string $id): JsonResponse
+    {
+        return $this->getScaffoldConfig()->updateRecord($id);
     }
-
-    public function uploadTempFileForInput($resourceName, $inputName) {
+    
+    public function uploadTempFileForInput(string $resourceName, $inputName): JsonResponse
+    {
         return $this->getScaffoldConfig()->uploadTempFileForInput($inputName);
     }
-
-    public function deleteTempFileForInput($resourceName, $inputName) {
+    
+    public function deleteTempFileForInput(string $resourceName, $inputName): JsonResponse
+    {
         return $this->getScaffoldConfig()->deleteTempFileForInput($inputName);
     }
-
-    public function changeItemPosition($resourceName, $id, $beforeOrAfter, $otherId, $columnName, $sortDirection) {
+    
+    public function changeItemPosition(
+        string $resourceName,
+        string $id,
+        string $beforeOrAfter,
+        string $otherId,
+        string $columnName,
+        string $sortDirection
+    ): JsonResponse {
         return $this->getScaffoldConfig()->changeItemPosition($id, $beforeOrAfter, $otherId, $columnName, $sortDirection);
     }
-
-    public function updateBulk() {
+    
+    public function updateBulk(): JsonResponse
+    {
         return $this->getScaffoldConfig()->updateBulkOfRecords();
     }
-
-    public function deleteItem($resourceName, $id) {
+    
+    public function deleteItem(string $resourceName, string $id): JsonResponse
+    {
         return $this->getScaffoldConfig()->deleteRecord($id);
     }
-
-    public function deleteBulk() {
+    
+    public function deleteBulk(): JsonResponse
+    {
         return $this->getScaffoldConfig()->deleteBulkOfRecords();
     }
-
-    public function getCustomData($resourceName, $dataId) {
+    
+    public function getCustomData(string $resourceName, string $dataId)
+    {
         $this->authorize('resource.view', [$resourceName]);
         return $this->getScaffoldConfig()->getCustomData($dataId);
     }
-
-    public function getCustomPage($resourceName, $pageName) {
+    
+    public function getCustomPage(string $resourceName, string $pageName)
+    {
         $this->authorize('resource.custom_page', [$resourceName, $pageName]);
         return $this->getScaffoldConfig()->getCustomPage($pageName);
     }
-
-    public function getCustomPageForItem($resourceName, $itemId, $pageName) {
+    
+    public function getCustomPageForItem(string $resourceName, string $itemId, string $pageName)
+    {
         $this->authorize('resource.custom_page_for_item', [$resourceName, $pageName, $itemId]);
         return $this->getScaffoldConfig()->getCustomPageForRecord($itemId, $pageName);
     }
-
-    public function performCustomAction($resourceName, $actionName) {
+    
+    public function performCustomAction(Request $request, string $resourceName, string $actionName)
+    {
         $this->authorize('resource.custom_action', [$resourceName, $actionName]);
-        if (request()->ajax()) {
+        if ($request->ajax()) {
             return $this->getScaffoldConfig()->performCustomAjaxAction($actionName);
         } else {
             return $this->getScaffoldConfig()->performCustomDirectAction($actionName);
         }
     }
     
-    public function performCustomActionForItem($resourceName, $itemId, $actionName) {
+    public function performCustomActionForItem(Request $request, string $resourceName, string $itemId, string $actionName)
+    {
         $this->authorize('resource.custom_action_for_item', [$resourceName, $actionName, $itemId]);
-        if (request()->ajax()) {
+        if ($request->ajax()) {
             return $this->getScaffoldConfig()->performCustomAjaxActionForRecord($itemId, $actionName);
         } else {
-            return $this->getScaffoldConfig()->performCustomDirectActionForRecord($itemId, $actionName);;
+            return $this->getScaffoldConfig()->performCustomDirectActionForRecord($itemId, $actionName);
         }
     }
     

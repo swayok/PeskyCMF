@@ -1,32 +1,45 @@
 <?php
+
+declare(strict_types=1);
+
 namespace PeskyCMF\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
 use PeskyCMF\Traits\DataValidationHelper;
 
-class ValidateData {
-
+class ValidateData
+{
+    
     use DataValidationHelper;
-
-    protected $errorMessage;
-
-    protected function getValidationErrorsResponseMessage() {
-        return isset($this->errorMessage)
-            ? trans($this->errorMessage)
-            : cmfTransGeneral('.message.invalid_data_received');
+    
+    /**
+     * @var Application
+     */
+    protected $app;
+    
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
     }
-
+    
+    /* override this to chnage error message
+    protected function getValidationErrorsResponseMessage()
+    {
+        return 'validation error'
+    }
+    */
+    
     /**
      * Handle an incoming request.
      *
-     * @param  Request $request
-     * @param  \Closure $next
+     * @param Request $request
+     * @param \Closure $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next) {
-        /** @var Route $route */
+    public function handle(Request $request, Closure $next)
+    {
         $route = $request->route();
         $actionInfo = $route->getAction();
         if (!empty($actionInfo['validate'])) {
@@ -44,5 +57,5 @@ class ValidateData {
         }
         return $next($request);
     }
-
+    
 }

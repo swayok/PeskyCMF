@@ -5,6 +5,7 @@ namespace PeskyCMF\Db\HttpRequestStats;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
+use PeskyORM\ORM\TableInterface;
 
 class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
 
@@ -14,11 +15,13 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
     protected $isCloningAllowed = false;
     protected $isDeleteAllowed = true;
     
-    public static function getTable() {
+    public static function getTable(): TableInterface
+    {
         return CmfHttpRequestStatsTable::getInstance();
     }
     
-    protected static function getIconForMenuItem() {
+    protected static function getIconForMenuItem(): ?string
+    {
         return 'fa fa-area-chart'; //< icon classes like: 'fa fa-cog' or just delete if you do not want an icon
     }
     
