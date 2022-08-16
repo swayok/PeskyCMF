@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
 class CmfSettingsMigration extends Migration
 {
     
-    public function up()
+    public function up(): void
     {
         if (!Schema::hasTable(CmfSettingsTableStructure::getTableName())) {
             Schema::create(CmfSettingsTableStructure::getTableName(), function (Blueprint $table) {
@@ -29,7 +29,7 @@ class CmfSettingsMigration extends Migration
         }
     }
     
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists(CmfSettingsTableStructure::getTableName());
     }
