@@ -86,7 +86,7 @@ class DataGridColumn extends RenderableValueViewer {
         return $this;
     }
 
-    public function setType($type) {
+    public function setType(string $type) {
         switch ($type) {
             case static::TYPE_TEXT:
             case static::TYPE_MULTILINE:
@@ -127,10 +127,8 @@ class DataGridColumn extends RenderableValueViewer {
         return $this->columnWidth;
     }
 
-    /**
-     * @return \Closure|null
-     */
-    public function getValueConverter() {
+    public function getValueConverter(): ?\Closure
+    {
         if (empty($this->valueConverter)) {
             switch ($this->getType()) {
                 case self::TYPE_BOOL:
@@ -150,7 +148,7 @@ class DataGridColumn extends RenderableValueViewer {
         return $this->valueConverter;
     }
 
-    public function setIsLinkedToDbColumn($isDbColumn) {
+    public function setIsLinkedToDbColumn(bool $isDbColumn) {
         if (!$isDbColumn) {
             $this->setIsSortable(false);
         }
@@ -175,10 +173,7 @@ class DataGridColumn extends RenderableValueViewer {
         return $this->additionalOrderBy;
     }
 
-    /**
-     * @return int
-     */
-    public function getPosition() {
+    public function getPosition(): int {
         if (
             $this->getName() === DataGridConfig::ROW_ACTIONS_COLUMN_NAME
             && $this->getScaffoldSectionConfig()->isRowActionsEnabled()

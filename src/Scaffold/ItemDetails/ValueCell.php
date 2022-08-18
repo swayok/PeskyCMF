@@ -22,14 +22,7 @@ class ValueCell extends RenderableValueViewer {
         return [];
     }
 
-    /**
-     * @return \Closure|null
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \UnexpectedValueException
-     */
-    public function getValueConverter() {
+    public function getValueConverter(): ?\Closure {
         if (empty(parent::getValueConverter())) {
             switch ($this->getType()) {
                 case static::TYPE_IMAGE:

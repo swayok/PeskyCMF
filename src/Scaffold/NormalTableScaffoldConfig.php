@@ -1,27 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
+use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Exception\DbException;
 use PeskyORM\Exception\InvalidDataException;
-use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\RecordValueHelpers;
 use PeskyORM\ORM\TableInterface;
-use PeskyORMLaravel\Db\Column\RecordPositionColumn;
+use PeskyORMColumns\Column\RecordPositionColumn;
 use Symfony\Component\HttpFoundation\Response;
 
-abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
+abstract class NormalTableScaffoldConfig extends ScaffoldConfig
+{
     
-    protected $goBackAfterCreation = false;
-    protected $goBackAfterEditing = false;
-
+    protected bool $goBackAfterCreation = false;
+    protected bool $goBackAfterEditing = false;
+    
     public function getRecordsForDataGrid(): JsonResponse
     {
         if (!$this->isSectionAllowed()) {
@@ -51,11 +55,13 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $defaultOrderByColumn = $dataGridConfig->getOrderBy();
         $defaultOrderByDirection = $dataGridConfig->getOrderDirection();
         $defaultDirectionWithNulls = stripos($defaultOrderByDirection, ' nulls ') !== false;
-        $order = $request->query('order', [[
-            'column' => $defaultOrderByColumn,
-            'dir' => $defaultOrderByDirection,
-        ]]);
-        $columns = $request->query('columns', array());
+        $order = $request->query('order', [
+            [
+                'column' => $defaultOrderByColumn,
+                'dir' => $defaultOrderByDirection,
+            ],
+        ]);
+        $columns = $request->query('columns', []);
         /** @var array $order */
         foreach ($order as $config) {
             if (is_numeric($config['column']) && !empty($columns[$config['column']])) {
@@ -72,7 +78,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                         } else {
                             $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$config['dir']}", false);
                         }
-                    } else if (
+                    } elseif (
                         $defaultDirectionWithNulls
                         && $config['column'] === $defaultOrderByColumn
                         && stripos($defaultOrderByDirection, $config['dir']) !== false
@@ -81,7 +87,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     } else {
                         $conditions['ORDER'][$config['column']] = $config['dir'];
                     }
-
+                    
                     if ($dataGridConfig->hasValueViewer($config['column'])) {
                         $additionalOrders = $dataGridConfig->getValueViewer($config['column'])->getAdditionalOrderBy();
                         if (!empty($additionalOrders)) {
@@ -112,18 +118,10 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 );
             }
         }
-        foreach ($dataGridConfig->getRelationsToRead() as $relationName => $columns) {
-            if (is_int($relationName)) {
-                $relationName = $columns;
-                $columns = ['*'];
-            }
-            $columnsToSelect[$relationName] = $columns;
-        }
-        foreach ($dataGridConfig->getViewersForRelations() as $viewer) {
-            if (!array_key_exists($viewer->getRelation()->getName(), $columnsToSelect)) {
-                $columnsToSelect[$viewer->getRelation()->getName()] = ['*'];
-            }
-        }
+        $columnsToSelect = array_merge(
+            $columnsToSelect,
+            $this->getRelationsToRead($dataGridConfig)
+        );
         $records = [];
         if ($dataGridConfig->isBigTable()) {
             $pkColumnName = static::getTable()->getTableStructure()->getPkColumnName();
@@ -136,7 +134,6 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $result = static::getTable()->select($columnsToSelect, $mainQueryConditions);
                 $records = $dataGridConfig->prepareRecords($result->toArrays(), $virtualColumns);
             }
-            
         } else {
             $result = static::getTable()->select($columnsToSelect, $conditions);
             $totalCount = $result->totalCount();
@@ -153,45 +150,18 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             'data' => $records,
         ]);
     }
-
+    
     public function getRecordValues(?string $id = null): JsonResponse
     {
-        $isItemDetails = (bool)$this->getRequest()->query('details', false);
+        $sectionConfig = $this->getScaffoldSectionConfigForRecordInfoAndValidateAccess();
         $table = static::getTable();
-        if ($isItemDetails) {
-            $sectionConfig = $this->getItemDetailsConfig();
-        } else {
-            $sectionConfig = $this->getFormConfig();
-        }
-        if (
-            ($isItemDetails && !$this->isDetailsViewerAllowed())
-            || (!$isItemDetails && !$this->isEditAllowed())
-        ) {
-            return $this->makeAccessDeniedReponse(
-                $sectionConfig->translateGeneral($isItemDetails ? 'message.forbidden' : 'message.edit.forbidden')
-            );
-        }
         $object = $table->newRecord();
         if (count($object::getPrimaryKeyColumn()->validateValue($id, false, false)) > 0) {
             return $this->makeRecordNotFoundResponse();
         }
         $conditions = $sectionConfig->getSpecialConditions();
         $conditions[$table::getPkColumnName()] = $id;
-        $relationsToRead = [];
-        if ($id !== null) {
-            foreach ($sectionConfig->getRelationsToRead() as $relationName => $columns) {
-                if (is_int($relationName)) {
-                    $relationName = $columns;
-                    $columns = ['*'];
-                }
-                $relationsToRead[$relationName] = $columns;
-            }
-            foreach ($sectionConfig->getViewersForRelations() as $viewer) {
-                if (!array_key_exists($viewer->getRelation()->getName(), $relationsToRead)) {
-                    $relationsToRead[$viewer->getRelation()->getName()] = ['*'];
-                }
-            }
-        }
+        $relationsToRead = $id !== null ? $this->getRelationsToRead($sectionConfig) : [];
         $columnsToSelect = $sectionConfig->getAdditionalColumnsToSelect();
         /** @var RenderableValueViewer $valueViewer */
         foreach ($sectionConfig->getViewersLinkedToDbColumns(false) as $valueViewer) {
@@ -204,6 +174,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $this->logDbRecordLoad($object);
         $data = $object->toArray([], $relationsToRead, true);
+        $isItemDetails = $sectionConfig instanceof ItemDetailsConfig;
         if (
             (
                 $isItemDetails
@@ -219,9 +190,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $sectionConfig->translateGeneral($isItemDetails ? 'message.forbidden_for_record' : 'message.edit.forbidden_for_record')
             );
         }
-        return cmfJsonResponse()->setData($sectionConfig->prepareRecord($data));
+        return new CmfJsonResponse($sectionConfig->prepareRecord($data));
     }
-
+    
     public function getDefaultValuesForFormInputs(): JsonResponse
     {
         $formConfig = $this->getFormConfig();
@@ -229,9 +200,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.create.forbidden'));
         }
         $data = $formConfig->alterDefaultValues(static::getTable()->newRecord()->getDefaults([], false, true));
-        return cmfJsonResponse()->setData($formConfig->prepareRecord($data));
+        return new CmfJsonResponse($formConfig->prepareRecord($data));
     }
-
+    
     public function addRecord(): JsonResponse
     {
         $formConfig = $this->getFormConfig();
@@ -292,15 +263,16 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             } finally {
                 if ($table::inTransaction()) {
                     $table::rollBackTransaction();
-                    /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                    throw new DbException('Transaction was not closed. Check if afterDataSaved method called and transaction is closed within it.');
+                    throw new DbException(
+                        'Transaction was not closed. Check if afterDataSaved method called and transaction is closed within it.'
+                    );
                 }
             }
         }
         throw new \BadMethodCallException('There is no data to save');
     }
-
-    public function updateRecord(string $id): JsonResponse
+    
+    public function updateRecord(string $idFromRoute): JsonResponse
     {
         $formConfig = $this->getFormConfig();
         if (!$this->isEditAllowed()) {
@@ -315,6 +287,9 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             return $this->makeRecordNotFoundResponse();
         }
         $id = $this->getRequest()->input($table::getPkColumnName());
+        if ($idFromRoute !== (string)$id) {
+            return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.ids_missmatch'));
+        }
         $record = $table->newRecord();
         if (count($record::getPrimaryKeyColumn()->validateValue($id, false, false)) > 0) {
             return $this->makeRecordNotFoundResponse();
@@ -327,23 +302,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$this->isRecordEditAllowed($record->toArrayWithoutFiles())) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden_for_record'));
         }
-        $errors = $formConfig->validateDataForEdit($data, $record);
-        if (count($errors) !== 0) {
-            return $this->makeValidationErrorsJsonResponse($errors);
-        }
-        if ($formConfig->hasBeforeSaveCallback()) {
-            $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
-            if (empty($data)) {
-                throw new ScaffoldException('Empty $data received from beforeSave callback');
-            }
-            if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
-                // revalidate
-                $errors = $formConfig->validateDataForEdit($data, $record, [], true);
-                if (count($errors) !== 0) {
-                    return $this->makeValidationErrorsJsonResponse($errors);
-                }
-            }
-        }
+        $this->validateDataForEdit($formConfig, $data, $record);
         unset($data[$table::getPkColumnName()]);
         if (!empty($data)) {
             try {
@@ -378,21 +337,20 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             } finally {
                 if ($table::inTransaction()) {
                     $table::rollBackTransaction();
-                    /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                    throw new DbException('Transaction was not closed. Check if afterDataSaved method called and transaction is closed within it.');
+                    throw new DbException(
+                        'Transaction was not closed. Check if afterDataSaved method called and transaction is closed within it.'
+                    );
                 }
             }
         }
         throw new \BadMethodCallException('There is no data to save');
     }
-
+    
     /**
-     * You may return instance of Response to immediately finish request (for example when validation error happens)
-     * @param RecordInterface $record
-     * @param bool $isCreation
-     * @return null|Response
+     * You may return instance of JsonResponse to immediately finish request (for example when validation error happens)
      */
-    protected function doRecordSave(RecordInterface $record, bool $isCreation): ?Response {
+    protected function doRecordSave(RecordInterface $record, bool $isCreation): ?JsonResponse
+    {
         if ($isCreation) {
             $record->save(['*'], true);
         } else {
@@ -400,14 +358,15 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         return null;
     }
-
-    protected function getFilteredIncomingData(FormConfig $formConfig, bool $isCreation): array {
+    
+    protected function getFilteredIncomingData(FormConfig $formConfig, bool $isCreation): array
+    {
         $expectedDataKeys = [];
         /** @var FormInput $valueViewer */
         foreach ($formConfig->getValueViewers() as $valueViewer) {
             if (($isCreation && $valueViewer->isShownOnCreate()) || (!$isCreation && $valueViewer->isShownOnEdit())) {
                 if ($valueViewer::isComplexViewerName($valueViewer->getName())) {
-                    [$colName, ] = $valueViewer::splitComplexViewerName($valueViewer->getName());
+                    [$colName,] = $valueViewer::splitComplexViewerName($valueViewer->getName());
                     $expectedDataKeys[$colName] = $colName;
                 } else {
                     $expectedDataKeys[$valueViewer->getName()] = $valueViewer->getName();
@@ -417,25 +376,19 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if (!$isCreation) {
             $expectedDataKeys[static::getTable()->getPkColumnName()] = static::getTable()->getPkColumnName();
         }
-
+        
         $data = $this->getRequest()->all();
         return array_intersect_key($data, $expectedDataKeys);
     }
-
-    /**
-     * @param Record $object
-     * @param array $updatesForRelations
-     * @throws InvalidDataException
-     * @throws \PeskyORM\Exception\InvalidTableColumnConfigException
-     * @throws \PeskyORM\Exception\OrmException
-     */
-    protected function updateRelatedRecords(Record $object, array $updatesForRelations) {
+    
+    protected function updateRelatedRecords(RecordInterface $object, array $updatesForRelations): void
+    {
         foreach ($updatesForRelations as $relationName => $relationUpdates) {
             $relation = $object::getRelation($relationName);
             if ($relation->getType() === $relation::HAS_ONE) {
                 $relatedRecord = $object->getRelatedRecord($relationName, true);
                 $relationPk = RecordValueHelpers::normalizeValue(
-                    array_get($relationUpdates, $relatedRecord::getPrimaryKeyColumnName()),
+                    Arr::get($relationUpdates, $relatedRecord::getPrimaryKeyColumnName()),
                     $relatedRecord::getPrimaryKeyColumn()->getType()
                 );
                 unset($relationUpdates[$relatedRecord::getPrimaryKeyColumnName()]);
@@ -445,7 +398,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                         // same related record - just update
                         $relatedRecord->begin()->updateValues($relationUpdates, true)->commit();
                         continue;
-                    } else if (!$relationPk || $relationPk !== $relatedRecord->getPrimaryKeyValue()) {
+                    } elseif (!$relationPk || $relationPk !== $relatedRecord->getPrimaryKeyValue()) {
                         // related record changed - unset existing and proceed to attach new one
                         $relatedRecord
                             ->begin()
@@ -465,10 +418,10 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                     // create new related record and attach it
                     $relatedRecord->reset()->updateValues($relationUpdates, false)->save();
                 }
-            } else if ($relation->getType() === $relation::BELONGS_TO) {
+            } elseif ($relation->getType() === $relation::BELONGS_TO) {
                 $relatedRecord = $object->getRelatedRecord($relationName, true);
                 $relationPk = RecordValueHelpers::normalizeValue(
-                    array_get($relationUpdates, $relatedRecord::getPrimaryKeyColumnName()),
+                    Arr::get($relationUpdates, $relatedRecord::getPrimaryKeyColumnName()),
                     $relatedRecord::getPrimaryKeyColumn()->getType()
                 );
                 unset($relationUpdates[$relatedRecord::getPrimaryKeyColumnName()]);
@@ -503,74 +456,63 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             }
         }
     }
-
-    /**
-     * @param array $data
-     * @param FormConfig $formConfig
-     * @return array
-     */
-    protected function getDataToSaveIntoMainRecord(array $data, FormConfig $formConfig) {
+    
+    protected function getDataToSaveIntoMainRecord(array $data, FormConfig $formConfig): array
+    {
         $viewersWithOwnValueSavingMethods = $formConfig->getInputsWithOwnValueSavingMethods();
         /** @var FormInput $viewer */
         foreach ($formConfig->getStandaloneViewers() as $key => $viewer) {
-            array_forget($data, $key);
-            if ($viewer->hasRelation() && empty($data[$viewer->getRelation()->getName()])) {
-                unset($data[$viewer->getRelation()->getName()]);
+            Arr::forget($data, $key);
+            $relation = $viewer->getRelation();
+            if ($relation && empty($data[$relation->getName()])) {
+                unset($data[$relation->getName()]);
             }
         }
-        /** @var FormInput $viewer */
         foreach ($viewersWithOwnValueSavingMethods as $key => $viewer) {
-            array_forget($data, $key);
-            if ($viewer->hasRelation() && empty($data[$viewer->getRelation()->getName()])) {
-                unset($data[$viewer->getRelation()->getName()]);
+            Arr::forget($data, $key);
+            $relation = $viewer->getRelation();
+            if ($relation && empty($data[$relation->getName()])) {
+                unset($data[$relation->getName()]);
             }
         }
         return $data;
     }
-
+    
     /**
      * @param array $data
-     * @param RecordInterface $object
-     * @param bool $created
+     * @param RecordInterface $record
+     * @param bool $isCreated
      * @param TableInterface $table
      * @param FormConfig $formConfig
      * @return JsonResponse
      * @throws ScaffoldException
      */
-    protected function afterDataSaved(array $data, RecordInterface $object, $created, TableInterface $table, FormConfig $formConfig) {
+    protected function afterDataSaved(
+        array $data,
+        RecordInterface $record,
+        bool $isCreated,
+        TableInterface $table,
+        FormConfig $formConfig
+    ): JsonResponse {
         foreach ($formConfig->getInputsWithOwnValueSavingMethods() as $formInput) {
-            call_user_func($formInput->getValueSaver(), array_get($data, $formInput->getName()), $object, $created);
+            call_user_func($formInput->getValueSaver(), Arr::get($data, $formInput->getName()), $record, $isCreated);
         }
-        if ($formConfig->hasAfterSaveCallback()) {
-            $success = call_user_func($formConfig->getAfterSaveCallback(), $created, $data, $object, $formConfig);
-            if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
-                if ($success->getStatusCode() < 400) {
-                    $table::commitTransaction();
-                } else {
-                    $table::rollBackTransaction();
-                }
-                return $success;
-            } else if ($success !== true) {
-                $table::rollBackTransaction();
-                throw new ScaffoldException(
-                    'afterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
-                );
-            }
-        }
+        $this->runAfterSaveCallback($formConfig, $isCreated, $data, $record);
         $table::commitTransaction();
-        return cmfJsonResponse()
+        return CmfJsonResponse::create()
             ->setMessage(
-                $formConfig->translateGeneral($created ? 'message.create.success' : 'message.edit.success')
+                $formConfig->translateGeneral($isCreated ? 'message.create.success' : 'message.edit.success')
             )
-            ->setRedirect($this->getRedirectUrlAfterDataSaved($created, $object) ?: 'back', static::getUrlToItemsTable());
+            ->setRedirect($this->getRedirectUrlAfterDataSaved($isCreated, $record) ?: 'back', static::getUrlToItemsTable());
     }
-
+    
     /**
      * @param bool $created
      * @param RecordInterface $object
      * @return string|null - null will close modal or return to previous page
      */
-    protected function getRedirectUrlAfterDataSaved(bool $created, RecordInterface $object): ?string {
+    protected function getRedirectUrlAfterDataSaved(bool $created, RecordInterface $object): ?string
+    {
         if ($created && empty($this->getRequest()->input('create_another'))) {
             $url = $this->goBackAfterCreation ? 'back' : static::getUrlToItemEditForm($object->getPrimaryKeyValue());
         } else {
@@ -578,7 +520,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         return $url;
     }
-
+    
     public function updateBulkOfRecords(): JsonResponse
     {
         $formConfig = $this->getFormConfig();
@@ -592,7 +534,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             true
         );
         if (empty($data)) {
-            return cmfJsonResponse(HttpCode::INVALID)
+            return CmfJsonResponse::create(HttpCode::INVALID)
                 ->setMessage($formConfig->translateGeneral('bulk_edit.message.no_data_to_save'));
         }
         $errors = $formConfig->validateDataForBulkEdit($data);
@@ -616,37 +558,22 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if ($conditions === null) {
             $message = $formConfig->translateGeneral('bulk_edit.message.nothing_updated');
         } else {
-            if (\Gate::denies('resource.update_bulk', [static::getResourceName(), $conditions])) {
+            if (static::getAuthGate()->denies('resource.update_bulk', [static::getResourceName(), $conditions])) {
                 return $this->makeAccessDeniedReponse($formConfig->translateGeneral('bulk_edit.message.forbidden'));
             }
             $table::beginTransaction();
             $updatedCount = $table::update($data, $conditions);
-            if ($formConfig->hasAfterBulkEditDataAfterSaveCallback()) {
-                $success = call_user_func($formConfig->getAfterBulkEditDataAfterSaveCallback(), $data);
-                if ($success instanceof \Symfony\Component\HttpFoundation\JsonResponse) {
-                    if ($success->getStatusCode() < 400) {
-                        $table::commitTransaction();
-                    } else {
-                        $table::rollBackTransaction();
-                    }
-                    return $success;
-                } else if ($success !== true) {
-                    $table::rollBackTransaction();
-                    throw new ScaffoldException(
-                        'afterBulkEditDataAfterSave callback must return true or instance of \Symfony\Component\HttpFoundation\JsonResponse'
-                    );
-                }
-            }
+            $this->runBulkEditDataAfterSaveCallback($formConfig, $data);
             $table::commitTransaction();
             $message = $updatedCount
                 ? $formConfig->translateGeneral('bulk_edit.message.success', ['count' => $updatedCount])
                 : $formConfig->translateGeneral('bulk_edit.message.nothing_updated');
         }
-        return cmfJsonResponse()
+        return CmfJsonResponse::create()
             ->setMessage($message)
-            ->goBack(routeToCmfItemsTable(static::getResourceName()));
+            ->goBack(static::getUrlToItemsTable());
     }
-
+    
     public function deleteRecord(string $id): JsonResponse
     {
         if (!$this->isDeleteAllowed()) {
@@ -669,25 +596,24 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         $this->logDbRecordBeforeChange($record);
         $response = $this->doRecordDelete($record);
         $this->logDbRecordAfterChange($record);
-        if ($response instanceof Response) {
+        if ($response) {
             return $response;
         }
-
-        return cmfJsonResponse()
+        
+        return CmfJsonResponse::create()
             ->setMessage($this->translateGeneral('message.delete.success'))
-            ->goBack(routeToCmfItemsTable(static::getResourceName()));
+            ->goBack(static::getUrlToItemsTable());
     }
-
+    
     /**
      * You may return instance of Response to immediately finish request (for example when validation error happens)
-     * @param RecordInterface $record
-     * @return null|Response
      */
-    protected function doRecordDelete(RecordInterface $record): ?Response {
+    protected function doRecordDelete(RecordInterface $record): ?JsonResponse
+    {
         $record->delete();
         return null;
     }
-
+    
     public function deleteBulkOfRecords(): JsonResponse
     {
         if (!$this->isDeleteAllowed()) {
@@ -697,7 +623,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if ($conditions === null) {
             $message = $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.nothing_deleted');
         } else {
-            if (\Gate::denies('resource.delete_bulk', [static::getResourceName(), $conditions])) {
+            if (static::getAuthGate()->denies('resource.delete_bulk', [static::getResourceName(), $conditions])) {
                 return $this->makeAccessDeniedReponse(
                     $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.forbidden')
                 );
@@ -707,17 +633,18 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 ? $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.success', ['count' => $deletedCount])
                 : $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.nothing_deleted');
         }
-        return cmfJsonResponse()
+        return CmfJsonResponse::create()
             ->setMessage($message)
-            ->goBack(routeToCmfItemsTable(static::getResourceName()));
+            ->goBack(static::getUrlToItemsTable());
     }
-
+    
     /**
      * @param string $inputNamePrefix - input name prefix
      *      For example if you use '_ids' instead of 'ids' - use prefix '_'
      * @return array
      */
-    protected function getSelectConditionsForBulkActions($inputNamePrefix = ''): ?array {
+    protected function getSelectConditionsForBulkActions(string $inputNamePrefix = ''): ?array
+    {
         $specialConditions = $this->getDataGridConfig()->getSpecialConditions();
         $idsField = $inputNamePrefix . 'ids';
         $conditionsField = $inputNamePrefix . 'conditions';
@@ -726,7 +653,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         if ($request->has($idsField)) {
             if (is_string($request->get($idsField))) {
                 $this->validate($request, [
-                    $idsField => 'required|json'
+                    $idsField => 'required|json',
                 ]);
                 $ids = json_decode($request->get($idsField), true);
                 if ($request->query($idsField)) {
@@ -742,16 +669,19 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
             $conditions = $specialConditions;
             $conditions[$pkColumnName] = $request->get($idsField);
             return $conditions;
-        } else if ($request->has($conditionsField)) {
+        } elseif ($request->has($conditionsField)) {
             $this->validate($request, [
                 $conditionsField => 'string|json',
             ]);
             $encodedConditions = json_decode($request->get($conditionsField), true);
             if ($encodedConditions === false || !is_array($encodedConditions) || empty($encodedConditions['r'])) {
-                abort(cmfJsonResponseForValidationErrors(
-                    [$conditionsField => 'Not empty JSON array expected'],
-                    $this->translateGeneral('message.validation_errors')
-                ));
+                abort(
+                    CmfJsonResponse::create()
+                        ->setErrors(
+                            [$conditionsField => 'Not empty JSON array expected'],
+                            $this->translateGeneral('message.validation_errors')
+                        )
+                );
             }
             if (empty($encodedConditions)) {
                 return $specialConditions;
@@ -767,18 +697,26 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 ? null
                 : [$pkColumnName => $ids];
         } else {
-            abort(cmfJsonResponseForValidationErrors(
-                [
-                    $idsField => 'List of items IDs of filtering conditions expected',
-                    $conditionsField => 'List of items IDs of filtering conditions expected',
-                ],
-                $this->translateGeneral('message.validation_errors')
-            ));
+            abort(
+                CmfJsonResponse::create()
+                    ->setErrors(
+                        [
+                            $idsField => 'List of items IDs of filtering conditions expected',
+                            $conditionsField => 'List of items IDs of filtering conditions expected',
+                        ],
+                        $this->translateGeneral('message.validation_errors')
+                    )
+            );
         }
     }
-
-    public function changeItemPosition(string $id, string $beforeOrAfter, string $otherId, string $columnName, string $sortDirection): JsonResponse
-    {
+    
+    public function changeItemPosition(
+        string $id,
+        string $beforeOrAfter,
+        string $otherId,
+        string $columnName,
+        string $sortDirection
+    ): JsonResponse {
         $dataGridConfig = $this->getDataGridConfig();
         if (
             !$dataGridConfig->isRowsReorderingEnabled()
@@ -855,8 +793,27 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
         }
         $movedRecord->begin()->updateValue($columnConfig, $newPosition, false)->commit();
         $table::commitTransaction();
-        return cmfJsonResponse()
+        return CmfJsonResponse::create()
             ->setMessage($dataGridConfig->translateGeneral('message.change_position.success'));
     }
-
+    
+    public function getRelationsToRead(ScaffoldSectionConfig $sectionConfig): array
+    {
+        $relationsToRead = [];
+        foreach ($sectionConfig->getRelationsToRead() as $relationName => $columns) {
+            if (is_int($relationName)) {
+                $relationName = $columns;
+                $columns = ['*'];
+            }
+            $relationsToRead[$relationName] = $columns;
+        }
+        foreach ($sectionConfig->getViewersForRelations() as $viewer) {
+            $relation = $viewer->getRelation();
+            if ($relation && !array_key_exists($relation->getName(), $relationsToRead)) {
+                $relationsToRead[$relation->getName()] = ['*'];
+            }
+        }
+        return $relationsToRead;
+    }
+    
 }

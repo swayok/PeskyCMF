@@ -14,7 +14,7 @@ class ImageValueCell extends ValueCell {
     /** @var FilesGroupConfig[]|null */
     protected $fileConfigsToShow;
     /** @var string  */
-    protected $templateForDefaultRenderer = 'cmf::item_details.image';
+    protected ?string $templateForDefaultRenderer = 'cmf::item_details.image';
 
     public function doDefaultValueConversionByType($value, $type, array $record) {
         if (empty($value) || !is_array($value)) {

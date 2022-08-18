@@ -15,7 +15,7 @@ class ImagesValueCell extends ValueCell {
     /** @var FilesGroupConfig[]|null */
     protected $fileConfigsToShow;
     /** @var string  */
-    protected $templateForDefaultRenderer = 'cmf::item_details.images';
+    protected ?string $templateForDefaultRenderer = 'cmf::item_details.images';
 
     /**
      * List of image names to display.

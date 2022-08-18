@@ -16,23 +16,15 @@ class FormInput extends RenderableValueViewer {
     protected $showOnEdit = true;
 
     public const TYPE_READONLY_TEXT = 'readonly_text';
-    public const TYPE_STRING = Column::TYPE_STRING;
     public const TYPE_PASSWORD = Column::TYPE_PASSWORD;
     public const TYPE_EMAIL = Column::TYPE_EMAIL;
-    public const TYPE_TEXT = Column::TYPE_TEXT;
     public const TYPE_WYSIWYG = 'wysiwyg';
-    public const TYPE_BOOL = Column::TYPE_BOOL;
     public const TYPE_SELECT = 'select';
     public const TYPE_MULTISELECT = 'multiselect';
     public const TYPE_TAGS = 'tags';
     public const TYPE_HIDDEN = 'hidden';
-    public const TYPE_IMAGE = 'image';
-    public const TYPE_FILE = 'file';
-    public const TYPE_DATE = Column::TYPE_DATE;
-    public const TYPE_DATETIME = Column::TYPE_TIMESTAMP;
     public const TYPE_DATE_RANGE = 'daterange';
     public const TYPE_DATETIME_RANGE = 'datetimerange';
-    public const TYPE_TIME = Column::TYPE_TIME;
     public const TYPE_TIME_RANGE = 'timerange';
 
     /**
@@ -264,11 +256,7 @@ class FormInput extends RenderableValueViewer {
         return $this;
     }
 
-    /**
-     * @param null|InputRenderer $renderer
-     * @return string
-     */
-    public function getLabel(InputRenderer $renderer = null) {
+    public function getLabel(?InputRenderer $renderer = null): string {
         $isRequired = '';
         if ($renderer === null) {
             $isRequired = $this->getTableColumn()->isValueRequiredToBeNotEmpty() ? '*' : '';

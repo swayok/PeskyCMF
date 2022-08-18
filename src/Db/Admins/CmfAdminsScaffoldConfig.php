@@ -21,12 +21,12 @@ use Swayok\Html\Tag;
 class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
 {
     
-    protected $isDetailsViewerAllowed = true;
-    protected $isCreateAllowed = true;
-    protected $isEditAllowed = true;
-    protected $isDeleteAllowed = true;
+    protected bool $isDetailsViewerAllowed = true;
+    protected bool $isCreateAllowed = true;
+    protected bool $isEditAllowed = true;
+    protected bool $isDeleteAllowed = true;
     
-    protected $notLoggableRecordColumns = ['password'];
+    protected ?array $notLoggableRecordColumns = ['password'];
     
     /**
      * @return TableInterface|CmfAdminsTable

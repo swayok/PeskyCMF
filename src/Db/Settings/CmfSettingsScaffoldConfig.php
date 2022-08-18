@@ -10,10 +10,10 @@ use PeskyORM\ORM\TableInterface;
 
 class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
 
-    protected $isDetailsViewerAllowed = false;
-    protected $isCreateAllowed = false;
-    protected $isEditAllowed = true;
-    protected $isDeleteAllowed = false;
+    protected bool $isDetailsViewerAllowed = false;
+    protected bool $isCreateAllowed = false;
+    protected bool $isEditAllowed = true;
+    protected bool $isDeleteAllowed = false;
 
     /** @var CmfSettingsTable */
     private static $table;

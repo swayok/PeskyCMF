@@ -84,7 +84,10 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('cmf_page', [$pageId])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('cmf_page', [$pageId])
+        ) {
             return null;
         }
         return static::route('cmf_page', array_merge(['page' => $pageId], $queryArgs), $absolute, $cmfConfig);
@@ -123,7 +126,10 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.view', [$resourceName])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.view', [$resourceName])
+        ) {
             return null;
         }
         $params = [
@@ -152,7 +158,10 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.view', [$resourceName])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.view', [$resourceName])
+        ) {
             return null;
         }
         return static::route(
@@ -179,7 +188,10 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.create', [$resourceName])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.create', [$resourceName])
+        ) {
             return null;
         }
         $params = ['resource' => $resourceName];
@@ -218,7 +230,10 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.update', [$resourceName, $itemId])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.update', [$resourceName, $itemId])
+        ) {
             return null;
         }
         return static::routeWithPossibleItemIdDotJsInsert(
@@ -245,7 +260,11 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.create', [$resourceName])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.create', [$resourceName])
+            && static::getAuthGate($cmfConfig)->denies('resource.update', [$resourceName])
+        ) {
             return null;
         }
         return static::route(
@@ -271,7 +290,11 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.create', [$resourceName])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.create', [$resourceName])
+            && static::getAuthGate($cmfConfig)->denies('resource.update', [$resourceName])
+        ) {
             return null;
         }
         return static::route(
@@ -297,7 +320,10 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.create', [$resourceName, $itemId])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.create', [$resourceName, $itemId])
+        ) {
             return null;
         }
         return static::routeWithPossibleItemIdDotJsInsert(
@@ -324,7 +350,10 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.details', [$resourceName, $itemId])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.details', [$resourceName, $itemId])
+        ) {
             return null;
         }
         return static::routeWithPossibleItemIdDotJsInsert(
@@ -352,7 +381,10 @@ abstract class CmfUrl
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
     ): ?string {
-        if (!$ignoreAccessPolicy && static::getAuthGate($cmfConfig)->denies('resource.delete', [$resourceName, $itemId])) {
+        if (
+            !$ignoreAccessPolicy
+            && static::getAuthGate($cmfConfig)->denies('resource.delete', [$resourceName, $itemId])
+        ) {
             return null;
         }
         return static::routeWithPossibleItemIdDotJsInsert(

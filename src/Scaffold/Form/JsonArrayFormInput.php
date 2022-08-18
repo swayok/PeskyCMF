@@ -3,6 +3,7 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Scaffold\AbstractValueViewer;
+use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 
 class JsonArrayFormInput extends FormInput {
 
@@ -64,10 +65,9 @@ class JsonArrayFormInput extends FormInput {
     }
 
     /**
-     * @param string|null $name
      * @return $this
      */
-    public function setName($name) {
+    public function setName(string $name) {
         parent::setName($name);
         foreach ($this->subInputs as $inputName => $input) {
             $input->setName($this->makeFullSubInputName($inputName));
@@ -76,10 +76,10 @@ class JsonArrayFormInput extends FormInput {
     }
 
     /**
-     * @param \PeskyCMF\Scaffold\ScaffoldSectionConfig|null $scaffoldSectionConfig
+     * @param ScaffoldSectionConfig|null $scaffoldSectionConfig
      * @return $this
      */
-    public function setScaffoldSectionConfig($scaffoldSectionConfig) {
+    public function setScaffoldSectionConfig(?ScaffoldSectionConfig $scaffoldSectionConfig) {
         parent::setScaffoldSectionConfig($scaffoldSectionConfig);
         foreach ($this->subInputs as $input) {
             $input->setScaffoldSectionConfig($scaffoldSectionConfig);
@@ -175,7 +175,8 @@ class JsonArrayFormInput extends FormInput {
     /**
      * @return string
      */
-    public function getType() {
+    public function getType(): string
+    {
         return static::TYPE_HIDDEN;
     }
 

@@ -57,6 +57,8 @@ interface ScaffoldConfigInterface
     
     public function isEditAllowed(): bool;
     
+    public function isCloningAllowed(): bool;
+    
     public function isDetailsViewerAllowed(): bool;
     
     public function isDeleteAllowed(): bool;
@@ -108,12 +110,27 @@ interface ScaffoldConfigInterface
     /**
      * @return Response|string|View
      */
+    public function performCustomAjaxAction(string $actionName);
+    
+    /**
+     * @return Response|string|View
+     */
+    public function performCustomDirectAction(string $actionName);
+    
+    /**
+     * @return Response|string|View
+     */
     public function getCustomPageForRecord(string $itemId, string $pageName);
     
     /**
      * @return Response|string|View
      */
     public function performCustomAjaxActionForRecord(string $itemId, string $actionName);
+    
+    /**
+     * @return Response|string|View
+     */
+    public function performCustomDirectActionForRecord(string $itemId, string $actionName);
     
     /**
      * Get selects options as html for each select-like input in form

@@ -1,7 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Support\Arr;
+use PeskyCMF\CmfUrl;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
@@ -9,16 +14,9 @@ use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 use Swayok\Html\Tag;
 
-abstract class AbstractValueViewer {
-
-    /** @var null|ScaffoldSectionConfig */
-    protected $scaffoldSectionConfig;
-
-    /** @var string|null */
-    protected $name;
-
-    /** @var string */
-    protected $type;
+abstract class AbstractValueViewer
+{
+    
     public const TYPE_STRING = Column::TYPE_STRING;
     public const TYPE_DATE = Column::TYPE_DATE;
     public const TYPE_TIME = Column::TYPE_TIME;
@@ -27,65 +25,62 @@ abstract class AbstractValueViewer {
     public const TYPE_TEXT = Column::TYPE_TEXT;
     public const TYPE_MULTILINE = 'multiline'; //< for non-html multiline text
     public const TYPE_IMAGE = 'image';
+    public const TYPE_FILE = 'file';
     public const TYPE_JSON = Column::TYPE_JSON;
     public const TYPE_JSONB = Column::TYPE_JSONB;
     public const TYPE_LINK = 'link';
-    /**
-     * @var null|string
-     */
-    protected $label;
-    /**
-     * Position
-     * @var null|int
-     */
-    protected $position;
-
-    /**
-     * @var null|\Closure
-     */
-    protected $valueConverter;
+    
     public const FORMAT_DATE = 'Y-m-d';
     public const FORMAT_TIME = 'H:i:s';
     public const FORMAT_DATETIME = 'Y-m-d H:i:s';
-    /** @var bool */
-    protected $isLinkedToDbColumn = true;
-    /** @var Relation */
-    protected $relation;
-    /** @var string */
-    protected $relationColumn;
-    /** @var string|null */
-    protected $nameForTranslation;
-    /** @var string|null */
-    protected $tableNameForRouteToRelatedRecord;
-
+    
+    protected ?ScaffoldSectionConfig $scaffoldSectionConfig = null;
+    
+    protected ?string $name = null;
+    protected ?string $type = null;
+    protected ?string $label = null;
+    protected ?int $position = null;
+    protected ?string $nameForTranslation = null;
+    protected bool $isLinkedToDbColumn = true;
+    
+    protected ?\Closure $valueConverter = null;
+    
+    protected ?Relation $relation = null;
+    protected ?string $relationColumn = null;
+    protected ?string $tableNameForRouteToRelatedRecord = null;
+    
     /**
-     * @return $this
+     * @return static
      */
-    public static function create() {
-        $classname = static::class;
-        return new $classname();
+    public static function create()
+    {
+        return new static();
     }
-
+    
     /**
      * @return ScaffoldSectionConfig|DataGridConfig|ItemDetailsConfig|FormConfig
      */
-    public function getScaffoldSectionConfig() {
+    public function getScaffoldSectionConfig(): ScaffoldSectionConfig
+    {
         return $this->scaffoldSectionConfig;
     }
-
+    
     /**
-     * @param ScaffoldSectionConfig|null $scaffoldSectionConfig
-     * @return $this
+     * @return static
      */
-    public function setScaffoldSectionConfig($scaffoldSectionConfig) {
+    public function setScaffoldSectionConfig(ScaffoldSectionConfig $scaffoldSectionConfig)
+    {
         $this->scaffoldSectionConfig = $scaffoldSectionConfig;
         return $this;
     }
-
-    /**
-     * @return Column
-     */
-    public function getTableColumn() {
+    
+    public function getCmfConfig(): CmfConfig
+    {
+        return $this->getScaffoldSectionConfig()->getCmfConfig();
+    }
+    
+    public function getTableColumn(): Column
+    {
         if ($this->relation) {
             return $this->relation->getForeignTable()->getTableStructure()->getColumn($this->relationColumn);
         } else {
@@ -93,133 +88,121 @@ abstract class AbstractValueViewer {
             return $this->getScaffoldSectionConfig()->getTable()->getTableStructure()->getColumn($parts[0]);
         }
     }
-
+    
     /**
-     * @param Relation $relation
-     * @param string $columnName
-     * @return $this
+     * @return static
      */
-    public function setRelation(Relation $relation, $columnName) {
+    public function setRelation(Relation $relation, string $columnName)
+    {
         $this->relation = $relation;
         $this->relationColumn = $columnName;
         return $this;
     }
-
-    /**
-     * @return Relation
-     */
-    public function getRelation() {
+    
+    public function getRelation(): ?Relation
+    {
         return $this->relation;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasRelation() {
+    
+    public function hasRelation(): bool
+    {
         return !empty($this->relation);
     }
-
-    /**
-     * @return string
-     */
-    public function getRelationColumn() {
+    
+    public function getRelationColumn(): ?string
+    {
         return $this->relationColumn;
     }
-
+    
     /**
      * Used only for value cells that make <a> tags to generate valid urls to related records
-     * @param string $tableName
-     * @return $this
+     * @return static
      */
-    public function setTableNameForRouteToRelatedRecord($tableName) {
+    public function setTableNameForRouteToRelatedRecord(string $tableName)
+    {
         $this->tableNameForRouteToRelatedRecord = $tableName;
         return $this;
     }
-
-    /**
-     * @return null|string
-     */
-    public function getTableNameForRouteToRelatedRecord() {
+    
+    public function getTableNameForRouteToRelatedRecord(): ?string
+    {
         return $this->tableNameForRouteToRelatedRecord;
     }
-
+    
     /**
-     * @param bool $isDbColumn
-     * @return $this
+     * @return static
      */
-    public function setIsLinkedToDbColumn($isDbColumn) {
+    public function setIsLinkedToDbColumn(bool $isDbColumn)
+    {
         $this->isLinkedToDbColumn = $isDbColumn;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isLinkedToDbColumn() {
+    
+    public function isLinkedToDbColumn(): bool
+    {
         return $this->isLinkedToDbColumn;
     }
-
+    
     /**
-     * @return null|string
      * @throws ValueViewerConfigException
      */
-    public function getName() {
+    public function getName(): ?string
+    {
         if (empty($this->name)) {
             throw new ValueViewerConfigException($this, 'Value viewer name not provided');
         }
         return $this->name;
     }
-
+    
     /**
      * Check if name is something like "column_name:key_name"
-     * @param string $name
-     * @return bool
      */
-    final public static function isComplexViewerName($name) {
+    final public static function isComplexViewerName(string $name): bool
+    {
         return (bool)preg_match('%^[^:]+?:[^:]+?$%', $name);
     }
-
+    
     /**
      * @param string $name - something like "column_name:key_name"
      * @return array - 0 - column name; 1 = key name or null
      */
-    final public static function splitComplexViewerName($name) {
+    final public static function splitComplexViewerName(string $name): array
+    {
         $parts = explode(':', $name, 2);
         if (count($parts) === 1) {
             $parts[1] = null;
         }
         return $parts;
     }
-
+    
     /**
-     * @param null|string $name
-     * @return $this
+     * @return static
      */
-    public function setName($name) {
+    public function setName(string $name)
+    {
         $this->name = $name;
         if ($this->nameForTranslation === null) {
             $this->nameForTranslation = rtrim($name, '[]');
         }
         return $this;
     }
-
-    public function getNameForTranslation() {
+    
+    public function getNameForTranslation(): ?string
+    {
         return $this->nameForTranslation;
     }
-
+    
     /**
-     * @param string $name
-     * @return $this
+     * @return static
      */
-    public function setNameForTranslation($name) {
+    public function setNameForTranslation(string $name)
+    {
         $this->nameForTranslation = $name;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getType() {
+    
+    public function getType(): string
+    {
         if (empty($this->type)) {
             if ($this->isLinkedToDbColumn() && !static::isComplexViewerName($this->getName())) {
                 $this->setType($this->getTableColumn()->getType());
@@ -229,21 +212,21 @@ abstract class AbstractValueViewer {
         }
         return $this->type;
     }
-
+    
     /**
-     * @param string $type
-     * @return $this
+     * @return static
      */
-    public function setType($type) {
+    public function setType(string $type)
+    {
         $this->type = $type;
         return $this;
     }
-
+    
     /**
-     * @return string
      * @throws \UnexpectedValueException
      */
-    public function getLabel() {
+    public function getLabel(): string
+    {
         if ($this->label === null) {
             $this->label = $this->getScaffoldSectionConfig()->translate($this);
             if (!is_string($this->label)) {
@@ -254,65 +237,65 @@ abstract class AbstractValueViewer {
         }
         return $this->label;
     }
-
+    
     /**
-     * @param null|string $label
-     * @return $this
+     * @return static
      */
-    public function setLabel($label) {
+    public function setLabel(string $label)
+    {
         $this->label = $label;
         return $this;
     }
-
-    /**
-     * @return int|null
-     */
-    public function getPosition() {
+    
+    public function getPosition(): ?int
+    {
         return $this->position;
     }
-
+    
     /**
-     * @param int|null $position
-     * @return $this
+     * @return static
      */
-    public function setPosition($position) {
+    public function setPosition(int $position)
+    {
         $this->position = $position;
         return $this;
     }
-
-    /**
-     * @return boolean
-     */
-    public function hasValueConverter() {
+    
+    public function hasValueConverter(): bool
+    {
         return !empty($this->valueConverter);
     }
-
-    /**
-     * @return \Closure|null
-     */
-    public function getValueConverter() {
+    
+    public function getValueConverter(): ?\Closure
+    {
         return $this->valueConverter;
     }
-
+    
     /**
      * @param \Closure $valueConverter
      *      - when $this->isDbField() === true: function ($value, Column $columnConfig, array $record, AbstractValueViewer $valueViewer) { return 'value' }
      *      - when $this->isDbField() === false: function (array $record, AbstractValueViewer $valueViewer, ScaffoldSectionConfig $scaffoldSectionConfig) { return 'value' }
-     * @return $this
+     * @return static
      */
-    public function setValueConverter(\Closure $valueConverter) {
+    public function setValueConverter(\Closure $valueConverter)
+    {
         $this->valueConverter = $valueConverter;
         return $this;
     }
-
+    
     /**
      * @param mixed $value
      * @param array $record
      * @param bool $ignoreValueConverter
-     * @param null|string $relationKey
+     * @param string|null $relationKey
      * @return mixed
      */
-    public function convertValue($value, array $record, $ignoreValueConverter = false, $relationKey = null) {
+    public function convertValue(
+        $value,
+        array $record,
+        bool $ignoreValueConverter = false,
+        ?string $relationKey = null
+    ) {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
         if (!empty($valueConverter)) {
             if ($this->isLinkedToDbColumn()) {
@@ -320,10 +303,10 @@ abstract class AbstractValueViewer {
             } else {
                 $value = $valueConverter($record, $this, $this->getScaffoldSectionConfig());
             }
-        } else if (!empty($value) || is_bool($value)) {
+        } elseif (!empty($value) || is_bool($value)) {
             if (is_resource($value)) {
                 return '[resource]';
-            } else if (
+            } elseif (
                 $this->isLinkedToDbColumn()
                 && (
                     $this->getTableColumn()->getType() === Column::TYPE_PASSWORD
@@ -333,7 +316,7 @@ abstract class AbstractValueViewer {
                 // Protect passwords and private values (Column::isValuePrivate())
                 // by default (only when no value converter provided)
                 return '';
-            } else if ($this->getType() === static::TYPE_LINK && $this->isLinkedToDbColumn()) {
+            } elseif ($this->getType() === static::TYPE_LINK && $this->isLinkedToDbColumn()) {
                 return $this->buildLinkToExternalRecord($this->getTableColumn(), $relationKey ? $record[$relationKey] : $record);
             } else {
                 return $this->doDefaultValueConversionByType($value, $this->type, $relationKey ? $record[$relationKey] : $record);
@@ -341,7 +324,7 @@ abstract class AbstractValueViewer {
         }
         return $value;
     }
-
+    
     /**
      * Default value converter by value type
      * @param mixed $value
@@ -349,7 +332,8 @@ abstract class AbstractValueViewer {
      * @param array $record
      * @return mixed
      */
-    public function doDefaultValueConversionByType($value, $type, array $record) {
+    public function doDefaultValueConversionByType($value, string $type, array $record)
+    {
         switch ($type) {
             case static::TYPE_DATETIME:
                 return date(static::FORMAT_DATETIME, is_numeric($value) ? $value : strtotime($value));
@@ -363,22 +347,23 @@ abstract class AbstractValueViewer {
             case static::TYPE_JSONB:
                 if (!is_array($value) && $value !== null) {
                     if (is_string($value) || is_numeric($value) || is_bool($value)) {
-                        $value = json_decode($value, true);
-                        if ($value === null && strtolower($value) !== 'null') {
+                        $json = json_decode($value, true);
+                        if ($json === null && strtolower($value) !== 'null') {
                             $value = 'Failed to decode JSON: ' . print_r($value, true);
+                        } else {
+                            $value = $json;
                         }
                     } else {
                         $value = 'Invalid value for JSON: ' . print_r($value, true);
                     }
                 }
                 return '<pre class="json-text">'
-                        . htmlentities(stripslashes(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)))
+                    . htmlentities(stripslashes(json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)))
                     . '</pre>';
-                break;
         }
         return $value;
     }
-
+    
     public function buildLinkToExternalRecord(
         Column $columnConfig,
         array $record,
@@ -389,19 +374,18 @@ abstract class AbstractValueViewer {
             return $fallbackLabel ?: '-';
         }
         $relationConfig = null;
-        $relationAlias = null;
         $relationColumn = null;
         $relationData = [];
         if ($this->hasRelation()) {
             $relationConfig = $this->getRelation();
             $relationColumn = $relationConfig->getDisplayColumnName();
-            $relationData = array_get($record, $relationConfig->getName(), $record);
+            $relationData = Arr::get($record, $relationConfig->getName(), $record);
         } else {
             foreach ($columnConfig->getRelations() as $relation) {
                 if (in_array($relation->getType(), [Relation::BELONGS_TO, Relation::HAS_ONE], true)) {
                     $relationConfig = $relation;
                     $relationColumn = $relationConfig->getDisplayColumnName();
-                    $relationData = array_get($record, $relationConfig->getName());
+                    $relationData = Arr::get($record, $relationConfig->getName());
                     break;
                 }
             }
@@ -422,26 +406,29 @@ abstract class AbstractValueViewer {
                             $linkLabel = $relationConfig
                                 ->getForeignTable()
                                 ->newRecord()
-                                    ->enableTrustModeForDbData()
-                                    ->fromData($relationData, true, false)
-                                    ->getValue($relationColumn);
+                                ->enableTrustModeForDbData()
+                                ->fromData($relationData, true, false)
+                                ->getValue($relationColumn);
                         } else {
                             $relationColumn = $relationPkColumn;
                         }
                     }
-                    /** @noinspection NotOptimalIfConditionsInspection */
                     if (empty($linkLabel)) {
                         $linkLabel = $relationData[$relationColumn];
                     }
                 }
             }
             return Tag::a($linkLabel)
-                ->setHref(routeToCmfItemDetails(
-                    $this->getTableNameForRouteToRelatedRecord() ?: $relationConfig->getForeignTable()->getName(),
-                    $relationData[$relationPkColumn]
-                ))
+                ->setHref(
+                    CmfUrl::toItemDetails(
+                        $this->getTableNameForRouteToRelatedRecord() ?: $relationConfig->getForeignTable()->getName(),
+                        $relationData[$relationPkColumn],
+                        false,
+                        $this->getCmfConfig()
+                    )
+                )
                 ->build();
         }
     }
-
+    
 }

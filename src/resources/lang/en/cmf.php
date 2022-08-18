@@ -63,6 +63,7 @@ return [
         'invalid_date_received' => 'Invalid date',
         'delete' => [
             'success' => 'Item deleted',
+            'ids_missmatch' => 'Record ID in URL path does not match Record ID in request data',
             'forbidden_for_record' => 'This item cannot be deleted',
             'forbidden' => 'Items deletion in this section is forbidden'
         ]
@@ -271,6 +272,7 @@ return [
             'edit' => [
                 'forbidden' => 'It is forbidden to edit Items in this section',
                 'forbidden_for_record' => 'It is forbidden to edit this Item',
+                'ids_missmatch' => 'Record ID in URL path does not match Record ID in request data',
                 'key_value_table' => [
                     'no_foreign_key_value' => 'There is no ID for object that should be an owner of received values'
                 ],

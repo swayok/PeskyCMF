@@ -14,11 +14,11 @@ use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig
 {
     
-    protected $isDetailsViewerAllowed = true;
-    protected $isCreateAllowed = false;
-    protected $isEditAllowed = false;
-    protected $isCloningAllowed = false;
-    protected $isDeleteAllowed = true;
+    protected bool $isDetailsViewerAllowed = true;
+    protected bool $isCreateAllowed = false;
+    protected bool $isEditAllowed = false;
+    protected bool $isCloningAllowed = false;
+    protected bool $isDeleteAllowed = true;
     
     public static function getTable(): CmfHttpRequestStatsTable
     {

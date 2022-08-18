@@ -1,50 +1,52 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold;
 
-abstract class RenderableValueViewer extends AbstractValueViewer {
-
+abstract class RenderableValueViewer extends AbstractValueViewer
+{
+    
     /**
      * function (FormInput $config, FormConfig $formConfig) {
      *      return InputRenderer::create();
      *      // -- or --
      *      return 'string'; //< rendered input
      * }
-     * @var null|\Closure
      */
-    protected $renderer;
-    /** @var null|\Closure */
-    protected $defaultRendererConfigurator;
-    /** @var array  */
-    protected $jsBlocks = [];
-    /** @var string|null */
-    protected $varNameForDotJs;
-    /** @var string|null */
-    protected $templateForDefaultRenderer;
-    /** @var array */
-    protected $templateDataForDefaultRenderer = [];
-
+    protected ?\Closure $renderer = null;
+    
+    protected ?\Closure $defaultRendererConfigurator = null;
+    
+    protected array $jsBlocks = [];
+    protected ?string $varNameForDotJs = null;
+    
+    protected ?string $templateForDefaultRenderer = null;
+    protected array $templateDataForDefaultRenderer = [];
+    
     /**
      * @param string $name - something like 'RelationName.column_name' (Do not add 'it.' in the beginning!!!)
-     * @return $this
+     * @return static
      */
-    public function setVarNameForDotJs(string $name) {
+    public function setVarNameForDotJs(string $name)
+    {
         $this->varNameForDotJs = $name;
         return $this;
     }
-
+    
     /**
      * @param bool $addIt - true: adds 'it.' before var name ('it' is name of var that contains template data in doT.js)
      * @param array $additionalVarNameParts - additional parts of var name
      * @return string
      */
-    public function getVarNameForDotJs(bool $addIt = true, array $additionalVarNameParts = []): string {
+    public function getVarNameForDotJs(bool $addIt = true, array $additionalVarNameParts = []): string
+    {
         if ($this->varNameForDotJs === null) {
             $this->varNameForDotJs = preg_replace('%[^a-zA-Z0-9_]+%', '.', $this->getName());
         }
         return ($addIt ? 'it.' : '') . rtrim($this->varNameForDotJs . implode('.', $additionalVarNameParts), '.');
     }
-
+    
     /**
      * @param array $additionalVarNameParts - additional parts of var name
      * @param string|null $type - forces value to be converted to specific type.
@@ -100,7 +102,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
         }
         return '(' . implode(' && ', $conditions) . " ? $value : $default" . ')';
     }
-
+    
     /**
      * Get failsafe value insert for doT.js
      * Normal insert looks like:
@@ -146,7 +148,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
             return "{{{$encoding} " . $this->getFailsafeValueForDotJs($additionalVarNameParts, $type, $default) . ' }}';
         }
     }
-
+    
     /**
      * Get failsafe conditional value insert for doT.js
      * Conditional insert looks like:
@@ -169,14 +171,14 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
             $chain .= '.' . $parts[$i];
             $conditions[] = '!!' . $chain;
         }
-        return '{{? ' . implode(' && ', $conditions) . '}}' . $thenInsert  . '{{??}}' . $elseInsert . '{{?}}';
+        return '{{? ' . implode(' && ', $conditions) . '}}' . $thenInsert . '{{??}}' . $elseInsert . '{{?}}';
     }
-
+    
     /**
-     * @return \Closure
      * @throws ValueViewerConfigException
      */
-    public function getRenderer() {
+    public function getRenderer(): ?\Closure
+    {
         if (empty($this->renderer)) {
             $defaultRenderer = $this->getScaffoldSectionConfig()->getDefaultValueRenderer();
             if (!empty($defaultRenderer)) {
@@ -186,77 +188,76 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
         }
         return $this->renderer;
     }
-
+    
     /**
      * @param \Closure $renderer - function (RenderableValueViewer $valueViewer, ScaffoldSectionConfig $sectionConfig, array $dataForTemplate) {}
      *      function may return either string or instance of ValueRenderer
-     * @return $this
+     * @return static
      */
-    public function setRenderer(\Closure $renderer) {
+    public function setRenderer(\Closure $renderer)
+    {
         $this->renderer = $renderer;
         return $this;
     }
-
+    
     /**
-     * @param array $dataForTemplate
-     * @return string
      * @throws ValueViewerConfigException
      */
-    public function render(array $dataForTemplate = []) {
+    public function render(array $dataForTemplate = []): string
+    {
         $configOrString = call_user_func($this->getRenderer(), $this, $this->getScaffoldSectionConfig(), $dataForTemplate);
         if (is_string($configOrString)) {
             $rendered = $configOrString;
-        } else if ($configOrString instanceof ValueRenderer) {
-            $rendered = view($configOrString->getTemplate(), array_merge($configOrString->getData(), $dataForTemplate, [
-                'valueViewer' => $this,
-                'rendererConfig' => $configOrString,
-                'sectionConfig' => $this->getScaffoldSectionConfig(),
-                'table' => $this->getScaffoldSectionConfig()->getTable(),
-            ]))->render();
+        } elseif ($configOrString instanceof ValueRenderer) {
+            $rendered = view(
+                $configOrString->getTemplate(),
+                array_merge($configOrString->getData(), $dataForTemplate, [
+                    'valueViewer' => $this,
+                    'rendererConfig' => $configOrString,
+                    'sectionConfig' => $this->getScaffoldSectionConfig(),
+                    'table' => $this->getScaffoldSectionConfig()->getTable(),
+                ])
+            )->render();
         } else {
             throw new ValueViewerConfigException($this, 'Renderer function returned unsopported result. String or ValueRenderer object expected');
         }
         // replace <script> tags to be able to render that template
         return modifyDotJsTemplateToAllowInnerScriptsAndTemplates($rendered . $this->getJavaScriptBlocks());
     }
-
+    
     /**
      * @param \Closure $configurator = function (ValueRenderer $renderer, RenderableValueViewer $valueViewer) {}
-     * @return $this
+     * @return static
      */
-    public function setDefaultRendererConfigurator(\Closure $configurator) {
+    public function setDefaultRendererConfigurator(\Closure $configurator)
+    {
         $this->defaultRendererConfigurator = $configurator;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasDefaultRendererConfigurator() {
+    
+    public function hasDefaultRendererConfigurator(): bool
+    {
         return !empty($this->defaultRendererConfigurator);
     }
-
-    /**
-     * @return null|\Closure
-     */
-    public function getDefaultRendererConfigurator() {
+    
+    public function getDefaultRendererConfigurator(): ?\Closure
+    {
         return $this->defaultRendererConfigurator;
     }
-
+    
     /**
      * Note: input jQuery object is tored in $input variable
      * @param string|\Closure $jsBlockContents - \Closure: function (RenderableValueViewer $valueViewer) { return 'js code'; }
-     * @return $this
+     * @return static
      */
-    public function addJavaScriptBlock($jsBlockContents) {
+    public function addJavaScriptBlock($jsBlockContents)
+    {
         $this->jsBlocks[] = $jsBlockContents;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getJavaScriptBlocks(): string {
+    
+    public function getJavaScriptBlocks(): string
+    {
         if (empty($this->jsBlocks)) {
             return '';
         } else {
@@ -270,17 +271,17 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
             }
             return '<script type="application/javascript">'
                 . '$(function() {'
-                    . $jsCode
+                . $jsCode
                 . '});'
                 . '</script>';
         }
     }
-
+    
     /**
-     * @param ValueRenderer $renderer
-     * @return $this
+     * @return static
      */
-    public function configureDefaultRenderer(ValueRenderer $renderer) {
+    public function configureDefaultRenderer(ValueRenderer $renderer)
+    {
         if ($this->templateForDefaultRenderer) {
             $renderer->setTemplate($this->templateForDefaultRenderer);
         }
@@ -289,23 +290,25 @@ abstract class RenderableValueViewer extends AbstractValueViewer {
         }
         return $this;
     }
-
+    
     /**
      * @param string $template - path to template (in Laravel templates stored in /resources/views by default)
-     * @return $this
+     * @return static
      */
-    public function setTemplateForDefaultRenderer(string $template) {
+    public function setTemplateForDefaultRenderer(string $template)
+    {
         $this->templateForDefaultRenderer = $template;
         return $this;
     }
-
+    
     /**
      * @param array $data
-     * @return $this
+     * @return static
      */
-    public function setAdditionalTemplateDataForDefaultRenderer(array $data) {
+    public function setAdditionalTemplateDataForDefaultRenderer(array $data)
+    {
         $this->templateDataForDefaultRenderer = $data;
         return $this;
     }
-
+    
 }

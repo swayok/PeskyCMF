@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
+use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
@@ -23,60 +28,45 @@ use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
 
-abstract class ScaffoldConfig implements ScaffoldConfigInterface {
-
+abstract class ScaffoldConfig implements ScaffoldConfigInterface
+{
+    
     use DataValidationHelper;
-
-    /** @var DataGridConfig */
-    protected $dataGridConfig = null;
-    /** @var FilterConfig */
-    protected $dataGridFilterConfig = null;
-    /** @var ItemDetailsConfig */
-    protected $itemDetailsConfig = null;
-    /** @var FormConfig */
-    protected $formConfig = null;
-
-    /** @var bool */
-    protected $isDetailsViewerAllowed = true;
-    /** @var bool */
-    protected $isCreateAllowed = true;
-    /** @var bool */
-    protected $isEditAllowed = true;
-    /** @var bool */
-    protected $isCloningAllowed = false;
-    /** @var bool */
-    protected $isDeleteAllowed = true;
+    
+    protected ?DataGridConfig $dataGridConfig = null;
+    protected ?FilterConfig $dataGridFilterConfig = null;
+    protected ?ItemDetailsConfig $itemDetailsConfig = null;
+    protected ?FormConfig $formConfig = null;
+    
+    protected bool $isDetailsViewerAllowed = true;
+    protected bool $isCreateAllowed = true;
+    protected bool $isEditAllowed = true;
+    protected bool $isCloningAllowed = false;
+    protected bool $isDeleteAllowed = true;
     /**
      * Path to localization of views.
      * Usage: see $this->getLocalizationBasePath() method.
      * By default if $viewsBaseTranslationKey is empty - static::getResourceName() will be used
-     * @return null|string
      */
-    protected $viewsBaseTranslationKey = null;
-
-    /**
-     * @var null|ScaffoldLoggerInterface
-     */
-    protected $logger;
-
+    protected ?string $viewsBaseTranslationKey = null;
+    
+    protected ?ScaffoldLoggerInterface $logger = null;
+    
     /**
      * List of record's columns to log on record usage/modification
-     * @var null|array
      */
-    protected $loggableRecordColumns = null;
-
+    protected ?array $loggableRecordColumns = null;
+    
     /**
      * List of record's columns that should not be logged on record usage/modification
-     * @var null|array
      */
-    protected $notLoggableRecordColumns = null;
-
+    protected ?array $notLoggableRecordColumns = null;
+    
     /**
      * Should record's file columns be logged on record usage/modification?
-     * @var bool
      */
-    protected $logFileColumns = true;
-
+    protected bool $logFileColumns = true;
+    
     /**
      * List of record's relations and their columns to log together with record's data
      * Note: relation's data will be logged only when it is already loaded (no additional DB queries wil be done)
@@ -89,32 +79,37 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
     /**
      * @var RecordInterface|Record|CmfDbRecord
      */
-    private $optimizedTableRecord;
-
+    private ?RecordInterface $optimizedTableRecord = null;
+    
     /**
      * ScaffoldConfig constructor.
      */
-    public function __construct() {
+    public function __construct()
+    {
         if ($this->viewsBaseTranslationKey === null) {
             $this->viewsBaseTranslationKey = static::getResourceName();
         }
         $this->setLogger(static::getCmfConfig()->getHttpRequestsLogger());
     }
-
-    /**
-     * @return CmfConfig
-     */
-    public static function getCmfConfig() {
+    
+    public static function getCmfConfig(): CmfConfig
+    {
         return CmfConfig::getPrimary();
     }
-
+    
+    public static function getAuthGate(): Gate
+    {
+        return static::getCmfConfig()->getAuthModule()->getAuthGate();
+    }
+    
     /**
      * @return Authenticatable|CmfAdmin|ResetsPasswordsViaAccessKey|RecordInterface
      */
-    public static function getUser(): RecordInterface {
+    public static function getUser(): RecordInterface
+    {
         return static::getCmfConfig()->getUser();
     }
-
+    
     /**
      * @return string
      */
@@ -123,145 +118,219 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return static::getTable()->getName();
     }
     
-    /**
-     * @return array|null
-     */
     public static function getMainMenuItem(): ?array
     {
-        $resoureName = static::getResourceName();
-        $url = routeToCmfItemsTable(static::getResourceName());
-        if ($url === null) {
+        $resourceName = static::getResourceName();
+        if (static::getAuthGate()->denies('resource.view', [$resourceName])) {
             // access to this menu item was denied
             return null;
         }
         return [
-            'label' => cmfTransCustom($resoureName . '.menu_title'),
+            'label' => static::getCmfConfig()->transCustom($resourceName . '.menu_title'),
             'icon' => static::getIconForMenuItem(),
-            'url' => $url,
-            'counter' => static::getMenuItemCounterName()
+            'url' => static::getUrlToItemsTable(),
+            'counter' => static::getMenuItemCounterName(),
         ];
     }
-
+    
     protected static function getIconForMenuItem(): ?string
     {
         return null;
     }
-
+    
     public static function getMenuItemCounterName(): ?string
     {
         return static::getMenuItemCounterValue() ? static::getResourceName() . '_count' : null;
     }
-
-    public static function getMenuItemCounterValue() {
+    
+    public static function getMenuItemCounterValue()
+    {
         return null;
     }
-
-    /**
-     * @param array $filters
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlToItemsTable(array $filters = [], bool $absolute = false) {
-        return routeToCmfItemsTable(static::getResourceName(), $filters, $absolute);
-    }
-
-    /**
-     * @param string $actionId
-     * @param array $queryArgs
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlCustomAction($actionId, array $queryArgs = [], bool $absolute = false) {
-        return routeToCmfResourceCustomAction(static::getResourceName(), $actionId, $queryArgs, $absolute);
-    }
-
-    /**
-     * @param string $pageId
-     * @param array $queryArgs
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlCustomPage($pageId, array $queryArgs = [], bool $absolute = false) {
-        return routeToCmfResourceCustomPage(static::getResourceName(), $pageId, $queryArgs, $absolute);
-    }
-
-    /**
-     * @param mixed $itemId
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlToItemDetails($itemId, bool $absolute = false) {
-        return routeToCmfItemDetails(static::getResourceName(), $itemId, $absolute);
-    }
-
-    /**
-     * @param array $data
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlToItemAddForm(array $data = [], bool $absolute = false) {
-        return routeToCmfItemAddForm(static::getResourceName(), $data, $absolute);
-    }
-
-    /**
-     * @param mixed $itemId
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlToItemEditForm($itemId, bool $absolute = false) {
-        return routeToCmfItemEditForm(static::getResourceName(), $itemId, $absolute);
-    }
-
-    /**
-     * @param string $inputName
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlForTempFileUpload(string $inputName, bool $absolute = false) {
-        return routeForCmfTempFileUpload(static::getResourceName(), $inputName, $absolute);
-    }
-
-    /**
-     * @param string $inputName
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlForTempFileDelete(string $inputName, bool $absolute = false) {
-        return routeForCmfTempFileDelete(static::getResourceName(), $inputName, $absolute);
-    }
-
-    /**
-     * @param mixed $itemId
-     * @param string $actionId
-     * @param array $queryArgs
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlToItemCustomAction($itemId, $actionId, array $queryArgs = [], bool $absolute = false) {
-        return routeToCmfItemCustomAction(static::getResourceName(), $itemId, $actionId, $queryArgs, $absolute);
-    }
-
-    /**
-     * @param mixed $itemId
-     * @param string $pageId
-     * @param array $queryArgs
-     * @param bool $absolute
-     * @return string
-     */
-    public static function getUrlToItemCustomPage($itemId, $pageId, array $queryArgs = [], bool $absolute = false) {
-        return routeToCmfItemCustomPage(static::getResourceName(), $itemId, $pageId, $queryArgs, $absolute);
+    
+    public static function getUrlToItemsTable(
+        array $filters = [],
+        bool $absolute = false,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemsTable(
+            static::getResourceName(),
+            $filters,
+            $absolute,
+            static::getCmfConfig(),
+            $ignoreAccessPolicy
+        );
     }
     
-    /**
-     * @return Request
-     */
-    public function getRequest() {
-        return request();
+    public static function getUrlCustomAction(
+        string $actionId,
+        array $queryArgs = [],
+        bool $absolute = false
+    ): string {
+        return CmfUrl::toResourceCustomAction(
+            static::getResourceName(),
+            $actionId,
+            $queryArgs,
+            $absolute,
+            static::getCmfConfig()
+        );
     }
     
-    public function getOptimizedTableRecord(?array $dbDataForRecord = null): RecordInterface {
+    public static function getUrlCustomPage(
+        string $pageId,
+        array $queryArgs = [],
+        bool $absolute = false
+    ): string {
+        return CmfUrl::toResourceCustomPage(
+            static::getResourceName(),
+            $pageId,
+            $queryArgs,
+            $absolute,
+            static::getCmfConfig()
+        );
+    }
+    
+    public static function getUrlToItemDetails(
+        string $itemId,
+        bool $absolute = false,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemDetails(
+            static::getResourceName(),
+            $itemId,
+            $absolute,
+            static::getCmfConfig(),
+            $ignoreAccessPolicy
+        );
+    }
+    
+    public static function getUrlToItemAddForm(
+        array $data = [],
+        bool $absolute = false,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemAddForm(
+            static::getResourceName(),
+            $data,
+            $absolute,
+            static::getCmfConfig(),
+            $ignoreAccessPolicy
+        );
+    }
+    
+    public static function getUrlToItemEditForm(
+        string $itemId,
+        bool $absolute = false,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemEditForm(
+            static::getResourceName(),
+            $itemId,
+            $absolute,
+            static::getCmfConfig(),
+            $ignoreAccessPolicy
+        );
+    }
+    
+    public static function getUrlToItemCloneForm(
+        string $itemId,
+        bool $absolute = false,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemCloneForm(
+            static::getResourceName(),
+            $itemId,
+            $absolute,
+            static::getCmfConfig(),
+            $ignoreAccessPolicy
+        );
+    }
+    
+    public static function getUrlToItemDelete(
+        string $itemId,
+        bool $absolute = false,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toItemDelete(
+            static::getResourceName(),
+            $itemId,
+            $absolute,
+            static::getCmfConfig(),
+            $ignoreAccessPolicy
+        );
+    }
+    
+    public static function getUrlForTempFileUpload(
+        string $inputName,
+        bool $absolute = false,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toTempFileUpload(
+            static::getResourceName(),
+            $inputName,
+            $absolute,
+            static::getCmfConfig(),
+            $ignoreAccessPolicy
+        );
+    }
+    
+    public static function getUrlForTempFileDelete(
+        string $inputName,
+        bool $absolute = false,
+        bool $ignoreAccessPolicy = false
+    ): ?string {
+        return CmfUrl::toTempFileDelete(
+            static::getResourceName(),
+            $inputName,
+            $absolute,
+            static::getCmfConfig(),
+            $ignoreAccessPolicy
+        );
+    }
+    
+    public static function getUrlToItemCustomAction(
+        string $itemId,
+        string $actionId,
+        array $queryArgs = [],
+        bool $absolute = false
+    ): string {
+        return CmfUrl::toItemCustomAction(
+            static::getResourceName(),
+            $itemId,
+            $actionId,
+            $queryArgs,
+            $absolute,
+            static::getCmfConfig()
+        );
+    }
+    
+    public static function getUrlToItemCustomPage(
+        string $itemId,
+        string $pageId,
+        array $queryArgs = [],
+        bool $absolute = false
+    ): string {
+        return CmfUrl::toItemCustomPage(
+            static::getResourceName(),
+            $itemId,
+            $pageId,
+            $queryArgs,
+            $absolute,
+            static::getCmfConfig()
+        );
+    }
+    
+    public function getRequest(): Request
+    {
+        return static::getCmfConfig()->getLaravelApp()->make('request');
+    }
+    
+    public function getOptimizedTableRecord(?array $dbDataForRecord = null): RecordInterface
+    {
         if (!$this->optimizedTableRecord) {
-            $this->optimizedTableRecord = static::getTable()->newRecord()->enableReadOnlyMode()->enableTrustModeForDbData();
+            $this->optimizedTableRecord = static::getTable()->newRecord()
+                ->enableReadOnlyMode()
+                ->enableTrustModeForDbData();
         } else {
             $this->optimizedTableRecord->reset();
         }
@@ -270,60 +339,44 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $this->optimizedTableRecord;
     }
-
-    /**
-     * @return array
-     * @throws ScaffoldSectionConfigException
-     */
+    
     public function getConfigsForTemplatesRendering(): array
     {
         $configs = [
             'table' => static::getTable(),
-            'scaffoldConfig' => $this
+            'scaffoldConfig' => $this,
         ];
         $configs['dataGridConfig'] = $this->getDataGridConfig();
-        if (!($configs['dataGridConfig'] instanceof DataGridConfig)) {
-            throw new ScaffoldSectionConfigException(null, 'createDataGridConfig() should return instance of DataGridConfig class');
-        }
         $configs['dataGridFilterConfig'] = $this->getDataGridFilterConfig();
-        if (!($configs['dataGridFilterConfig'] instanceof FilterConfig)) {
-            throw new ScaffoldSectionConfigException(null, 'createDataGridFilterConfig() should return instance of FilterConfig class');
-        }
         $configs['itemDetailsConfig'] = $this->getItemDetailsConfig();
-        if (!($configs['itemDetailsConfig'] instanceof ItemDetailsConfig)) {
-            throw new ScaffoldSectionConfigException(null, 'createItemDetailsConfig() should return instance of ItemDetailsConfig class');
-        }
         $configs['formConfig'] = $this->getFormConfig();
-        if (!($configs['formConfig'] instanceof FormConfig)) {
-            throw new ScaffoldSectionConfigException(null, 'createFormConfig() should return instance of FormConfig class');
-        }
         $configs['dataGridConfig']->beforeRender();
         $configs['dataGridFilterConfig']->beforeRender();
         $configs['itemDetailsConfig']->beforeRender();
         $configs['formConfig']->beforeRender();
         return $configs;
     }
-
+    
     protected function createDataGridConfig(): DataGridConfig
     {
         return DataGridConfig::create(static::getTable(), $this);
     }
-
+    
     protected function createDataGridFilterConfig(): FilterConfig
     {
         return FilterConfig::create(static::getTable(), $this);
     }
-
+    
     protected function createItemDetailsConfig(): ItemDetailsConfig
     {
         return ItemDetailsConfig::create(static::getTable(), $this);
     }
-
+    
     protected function createFormConfig(): FormConfig
     {
         return FormConfig::create(static::getTable(), $this);
     }
-
+    
     public function getDataGridConfig(): DataGridConfig
     {
         if (empty($this->dataGridConfig)) {
@@ -332,7 +385,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $this->dataGridConfig;
     }
-
+    
     public function getDataGridFilterConfig(): FilterConfig
     {
         if (empty($this->dataGridFilterConfig)) {
@@ -341,10 +394,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $this->dataGridFilterConfig;
     }
-
-    /**
-     * @return ItemDetailsConfig
-     */
+    
     public function getItemDetailsConfig(): ItemDetailsConfig
     {
         if (empty($this->itemDetailsConfig)) {
@@ -353,10 +403,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $this->itemDetailsConfig;
     }
-
-    /**
-     * @return FormConfig
-     */
+    
     public function getFormConfig(): FormConfig
     {
         if (empty($this->formConfig)) {
@@ -365,137 +412,110 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $this->formConfig;
     }
-
-    /**
-     * @return bool
-     */
+    
     public function isSectionAllowed(): bool
     {
-        return \Gate::allows('resource.view', [static::getResourceName()]);
+        return static::getAuthGate()->allows('resource.view', [static::getResourceName()]);
     }
-
-    /**
-     * @return boolean
-     */
+    
     public function isCreateAllowed(): bool
     {
         return (
             $this->isCreateAllowed
             && $this->isSectionAllowed()
-            && \Gate::allows('resource.create', [static::getResourceName()])
+            && static::getAuthGate()->allows('resource.create', [static::getResourceName()])
         );
     }
-
-    /**
-     * @return boolean
-     */
+    
     public function isEditAllowed(): bool
     {
         return $this->isEditAllowed && $this->isSectionAllowed();
     }
-
-    /**
-     * @return bool
-     */
-    public function isCloningAllowed() {
+    
+    public function isCloningAllowed(): bool
+    {
         return $this->isCloningAllowed && $this->isCreateAllowed();
     }
-
-    /**
-     * @return boolean
-     */
+    
     public function isDetailsViewerAllowed(): bool
     {
         return $this->isDetailsViewerAllowed && $this->isSectionAllowed();
     }
-
-    /**
-     * @return boolean
-     */
+    
     public function isDeleteAllowed(): bool
     {
         return $this->isDeleteAllowed && $this->isSectionAllowed();
     }
-
+    
     /**
      * Detects if $record deletable or not.
      * Used in child classes to add possibility to disable action depending on record data
-     * @param array $record
-     * @return bool
      */
     public function isRecordDeleteAllowed(array $record): bool
     {
-        return $this->isDeleteAllowed() && \Gate::allows('resource.delete', [static::getResourceName(), $record]);
+        return $this->isDeleteAllowed() && static::getAuthGate()->allows('resource.delete', [static::getResourceName(), $record]);
     }
-
+    
     /**
      * Detects if $record editable or not.
      * Used in child classes to add possibility to disable action depending on record data
-     * @param array $record
-     * @return bool
      */
     public function isRecordEditAllowed(array $record): bool
     {
-        return $this->isEditAllowed() && \Gate::allows('resource.update', [static::getResourceName(), $record]);
+        return $this->isEditAllowed() && static::getAuthGate()->allows('resource.update', [static::getResourceName(), $record]);
     }
-
+    
     /**
      * Detects if $record details can be displayed or not.
      * Used in child classes to add possibility to disable action depending on record data
-     * @param array $record
-     * @return bool
      */
     public function isRecordDetailsAllowed(array $record): bool
     {
         return (
             $this->isDetailsViewerAllowed()
-            && \Gate::allows('resource.details', [static::getResourceName(), $record])
+            && static::getAuthGate()->allows('resource.details', [static::getResourceName(), $record])
         );
     }
-
+    
     /**
      * @param string $section - main sections are: 'datagrid.column', 'item_details.field', 'form.input'
      * @param AbstractValueViewer $viewer
-     * @param string|array $suffix - pass array here to be used as $parameters but $parameters should be empty
+     * @param string $suffix
      * @param array $parameters
-     * @return string
+     * @return string|array
      */
-    public function translateForViewer($section, AbstractValueViewer $viewer, $suffix = '', array $parameters = []) {
-        if (is_array($suffix) && empty($parameters)) {
-            $parameters = $suffix;
-            $suffix = '';
-        }
+    public function translateForViewer(string $section, AbstractValueViewer $viewer, string $suffix = '', array $parameters = [])
+    {
         return $this->translate($section, rtrim("{$viewer->getNameForTranslation()}_{$suffix}", '_'), $parameters);
     }
-
+    
     /**
      * @param string $section - main sections are: 'form.tooltip'
-     * @param string|array $suffix - pass array here to be used as $parameters but $parameters should be empty
+     * @param string $suffix
      * @param array $parameters
-     * @return array|string
+     * @return string|array
      */
-    public function translate($section, $suffix = '', array $parameters = []) {
-        if (is_array($suffix) && empty($parameters)) {
-            $parameters = $suffix;
-            $suffix = '';
-        }
-        return cmfTransCustom(rtrim(".{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'), $parameters);
+    public function translate(string $section, string $suffix = '', array $parameters = [])
+    {
+        return static::getCmfConfig()->transCustom(
+            rtrim(".{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'),
+            $parameters
+        );
     }
-
+    
     /**
      * Translate general UI elements (button labels, tooltips, messages, etc..)
-     * @param $path
-     * @param array $parameters
-     * @return mixed
+     * @return string|array
      */
-    public function translateGeneral($path, array $parameters = []) {
+    public function translateGeneral(string $path, array $parameters = [])
+    {
         $text = $this->translate($path, '', $parameters);
         if (preg_match('%\.' . preg_quote($path, '%') . '$%', $text)) {
-            $text = cmfTransGeneral($path, $parameters);
+            $text = static::getCmfConfig()->transGeneral($path, $parameters);
         }
         return $text;
     }
-
+    
     public function renderTemplates(): string
     {
         if (!$this->isSectionAllowed()) {
@@ -503,17 +523,15 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return static::getCmfConfig()->getUiModule()->renderScaffoldTemplates($this);
     }
-
-    /**
-     * @return array
-     */
-    public function renderTemplatesAndSplit() {
+    
+    public function renderTemplatesAndSplit(): array
+    {
         $blocks = [
             'datagrid' => false,
             'itemForm' => false,
             'bulkEditForm' => false,
             'itemDetails' => false,
-            'itemFormDefaults' => false
+            'itemFormDefaults' => false,
         ];
         if (!$this instanceof KeyValueTableScaffoldConfig && ($this->isCreateAllowed() || $this->isEditAllowed())) {
             $response = $this->getDefaultValuesForFormInputs();
@@ -522,16 +540,21 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         $html = $this->renderTemplates();
         foreach ($blocks as $block => &$template) {
             if (preg_match("%<!--\s*{$block}\s*start\s*-->(?:\s*\n*)*(.*?)<!--\s*{$block}\s*end\s*-->%is", $html, $matches)) {
-                $template = trim(preg_replace(
-                    ['%^\s*<(div|script)[^>]+id="(data-grid-tpl|item-form-tpl|item-details-tpl|bulk-edit-form-tpl)"[^>]*>\s*(.*)\s*</\1>\s*$%is', '%^\s+%im'],
-                    ['$3', ' '],
-                    $matches[1]
-                ));
+                $template = trim(
+                    preg_replace(
+                        [
+                            '%^\s*<(div|script)[^>]+id="(data-grid-tpl|item-form-tpl|item-details-tpl|bulk-edit-form-tpl)"[^>]*>\s*(.*)\s*</\1>\s*$%is',
+                            '%^\s+%im',
+                        ],
+                        ['$3', ' '],
+                        $matches[1]
+                    )
+                );
             }
         }
         return $blocks;
     }
-
+    
     public function getHtmlOptionsForFormInputs(): JsonResponse
     {
         if (!$this->isSectionAllowed()) {
@@ -548,13 +571,13 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
                     $options,
                     $formConfig->getValueViewer($columnName)->getEmptyOptionLabel()
                 );
-            } else if (!is_string($options)) {
+            } elseif (!is_string($options)) {
                 unset($columnsOptions[$columnName]);
             }
         }
         return new CmfJsonResponse($columnsOptions);
     }
-
+    
     public function getJsonOptionsForFormInput(string $inputName): JsonResponse
     {
         if (!$this->isSectionAllowed()) {
@@ -571,13 +594,14 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         );
         return new CmfJsonResponse($options);
     }
-
+    
     /**
      * @param array $options
-     * @param bool|string $addEmptyOption - false: do not add default empty option | string: add default empty option
+     * @param bool|string $addEmptyOption - false: do not add default empty option | true: add | string: empty option label
      * @return string
      */
-    protected function renderOptionsForSelectInput(array $options, $addEmptyOption = false) {
+    protected function renderOptionsForSelectInput(array $options, $addEmptyOption = false): string
+    {
         $ret = '';
         $hasEmptyOption = array_key_exists('', $options);
         if ($addEmptyOption !== false || $hasEmptyOption) {
@@ -598,60 +622,48 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $ret;
     }
-
-    /**
-     * @param null|string $message
-     * @return CmfJsonResponse
-     */
-    protected function makeRecordNotFoundResponse($message = null) {
+    
+    protected function makeRecordNotFoundResponse(string $message = null): JsonResponse
+    {
         if (empty($message)) {
             $message = (string)$this->translateGeneral('message.resource_item_not_found');
         }
-        return cmfJsonResponseForHttp404(
-            routeToCmfItemsTable(static::getResourceName()),
-            $message
-        );
-    }
-
-    /**
-     * @param string $message
-     * @return CmfJsonResponse
-     */
-    protected function makeAccessDeniedReponse($message) {
-        return cmfJsonResponse(HttpCode::FORBIDDEN)
+        return CmfJsonResponse::create(HttpCode::NOT_FOUND)
             ->setMessage($message)
-            ->goBack(routeToCmfItemsTable(static::getResourceName()));
+            ->goBack(static::getUrlToItemsTable());
     }
-
+    
+    protected function makeAccessDeniedReponse(string $message): JsonResponse
+    {
+        return CmfJsonResponse::create(HttpCode::FORBIDDEN)
+            ->setMessage($message)
+            ->goBack(static::getUrlToItemsTable());
+    }
+    
     /**
-     * @param ScaffoldLoggerInterface $logger
-     * @return $this
+     * @return static
      */
-    public function setLogger(ScaffoldLoggerInterface $logger = null) {
+    public function setLogger(ScaffoldLoggerInterface $logger)
+    {
         $this->logger = $logger;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasLogger() {
+    
+    public function hasLogger(): bool
+    {
         return $this->logger !== null;
     }
-
-    /**
-     * @return null|ScaffoldLoggerInterface
-     */
-    public function getLogger() {
+    
+    public function getLogger(): ?ScaffoldLoggerInterface
+    {
         return $this->logger;
     }
-
+    
     /**
-     * @param RecordInterface $record
-     * @param null|string $tableName
-     * @return $this
+     * @return static
      */
-    public function logDbRecordBeforeChange(RecordInterface $record, ? string $tableName = null) {
+    public function logDbRecordBeforeChange(RecordInterface $record, ?string $tableName = null)
+    {
         if ($this->hasLogger()) {
             /** @noinspection NullPointerExceptionInspection */
             $this->getLogger()->logDbRecordBeforeChange(
@@ -663,12 +675,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $this;
     }
-
+    
     /**
-     * @param RecordInterface $record
-     * @return $this
+     * @return static
      */
-    public function logDbRecordAfterChange(RecordInterface $record) {
+    public function logDbRecordAfterChange(RecordInterface $record)
+    {
         if ($this->hasLogger()) {
             /** @noinspection NullPointerExceptionInspection */
             $this->getLogger()->logDbRecordAfterChange(
@@ -679,28 +691,24 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $this;
     }
-
+    
     /**
-     * @param RecordInterface $record
-     * @param null|string $tableName
-     * @return $this
+     * @return static
      */
-    public function logDbRecordLoad(RecordInterface $record, ?string $tableName = null) {
+    public function logDbRecordLoad(RecordInterface $record, ?string $tableName = null)
+    {
         if ($this->hasLogger()) {
             /** @noinspection NullPointerExceptionInspection */
             $this->getLogger()->logDbRecordUsage($record, $tableName);
         }
         return $this;
     }
-
-    /**
-     * @param RecordInterface $record
-     * @return array
-     */
-    protected function getLoggableRecordColumns(RecordInterface $record) {
+    
+    protected function getLoggableRecordColumns(RecordInterface $record): ?array
+    {
         if (is_array($this->loggableRecordColumns)) {
             $fields = $this->loggableRecordColumns;
-        } else if ($record instanceof TempRecord) {
+        } elseif ($record instanceof TempRecord) {
             return null;
         } else {
             $fields = array_keys($record::getTable()->getTableStructure()->getColumns());
@@ -714,36 +722,37 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         $fields[] = $record::getTable()->getTableStructure()->getPkColumnName();
         return array_unique($fields);
     }
-
-    /**
-     * @param RecordInterface $record
-     * @return array
-     */
-    protected function getLoggableRecordRelations(RecordInterface $record) {
+    
+    protected function getLoggableRecordRelations(RecordInterface $record): array
+    {
         if ($this->loggableRecordRelations === false || $record instanceof TempRecord) {
             return [];
-        } else if (is_array($this->loggableRecordRelations)) {
+        } elseif (is_array($this->loggableRecordRelations)) {
             return $this->loggableRecordRelations;
         } else {
             return array_keys($record::getTable()->getTableStructure()->getRelations());
         }
     }
-
+    
     public function getCustomData(string $dataId)
     {
-        return cmfJsonResponseForHttp404(null, 'Handler [' . static::class . '->getCustomData($dataId)] not defined');
+        return CmfJsonResponse::create(HttpCode::NOT_FOUND)
+            ->setMessage('Handler [' . static::class . '->getCustomData($dataId)] not defined')
+            ->goBack(static::getUrlToItemsTable());
     }
-
+    
     public function getCustomPage(string $pageName)
     {
         return $this->callMethodByCustomActionOrPageName($pageName, null);
     }
     
-    public function performCustomAjaxAction($actionName) {
+    public function performCustomAjaxAction(string $actionName)
+    {
         return $this->callMethodByCustomActionOrPageName($actionName, null);
     }
     
-    public function performCustomDirectAction($actionName) {
+    public function performCustomDirectAction(string $actionName)
+    {
         $response = $this->callMethodByCustomActionOrPageName($actionName, null);
         if ($response instanceof JsonResponse) {
             // better late then never
@@ -751,17 +760,19 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
         return $response;
     }
-
+    
     public function getCustomPageForRecord(string $itemId, string $pageName)
     {
         return $this->callMethodByCustomActionOrPageName($pageName, $this->getRequestedRecord($itemId));
     }
     
-    public function performCustomAjaxActionForRecord(string $itemId, string $actionName) {
+    public function performCustomAjaxActionForRecord(string $itemId, string $actionName)
+    {
         return $this->callMethodByCustomActionOrPageName($actionName, $this->getRequestedRecord($itemId));
     }
     
-    public function performCustomDirectActionForRecord($itemId, $actionName) {
+    public function performCustomDirectActionForRecord(string $itemId, string $actionName)
+    {
         $response = $this->callMethodByCustomActionOrPageName($actionName, $this->getRequestedRecord($itemId));
         if ($response instanceof JsonResponse) {
             // better late then never
@@ -774,7 +785,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
      * Check if request comes via ajax and block non-ajax requests
      * Call this method in ajax-only custom actions methods to prevent non-ajax requests
      */
-    protected function ajaxOnlyCustomAction() {
+    protected function ajaxOnlyCustomAction(): void
+    {
         $middleware = new AjaxOnly();
         $response = $middleware->handle($this->getRequest(), function () {
             return null;
@@ -784,7 +796,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         }
     }
     
-    protected function getRequestedRecord($itemId): RecordInterface {
+    protected function getRequestedRecord(string $itemId): RecordInterface
+    {
         $record = static::getTable()->newRecord()->fetchByPrimaryKey($itemId);
         if (!$record->existsInDb()) {
             if ($this->getRequest()->ajax()) {
@@ -796,7 +809,11 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
         return $record;
     }
     
-    protected function callMethodByCustomActionOrPageName(string $methodName, ?RecordInterface $record = null) {
+    /**
+     * @return Response|string|View
+     */
+    protected function callMethodByCustomActionOrPageName(string $methodName, ?RecordInterface $record = null)
+    {
         $methodName = str_replace('-', '_', $methodName);
         if (method_exists($this, $methodName)) {
             return $record ? $this->$methodName($record) : $this->$methodName();
@@ -808,7 +825,9 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             $args = $record ? '(' . get_class($record) . ' $record)' : '()';
             $message = 'Method [' . static::class . '->' . $methodName . $args . '] or [' . static::class . '->' . $camelCaseMethodName . $args . '] is not defined';
             if ($this->getRequest()->ajax()) {
-                return cmfJsonResponseForHttp404(null, $message);
+                return CmfJsonResponse::create(HttpCode::NOT_FOUND)
+                    ->setMessage($message)
+                    ->goBack(static::getUrlToItemsTable());
             } else {
                 return view('cmf::ui.default_page_header', [
                     'header' => $message,
@@ -816,25 +835,117 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface {
             }
         }
     }
-
-    public function uploadTempFileForInput(string $inputName): \Illuminate\Http\JsonResponse
+    
+    public function uploadTempFileForInput(string $inputName): JsonResponse
     {
         $input = $this->getFormConfig()->getValueViewer($inputName);
         if (method_exists($input, 'uploadTempFile')) {
             return $input->uploadTempFile($this->getRequest());
         }
-        return cmfJsonResponse(HttpCode::FORBIDDEN)
+        return CmfJsonResponse::create(HttpCode::FORBIDDEN)
             ->setMessage("Input $inputName does not support temp files uploading: method uploadTempFile does not exist");
     }
-
-    public function deleteTempFileForInput(string $inputName): \Illuminate\Http\JsonResponse
+    
+    public function deleteTempFileForInput(string $inputName): JsonResponse
     {
         $input = $this->getFormConfig()->getValueViewer($inputName);
         if (method_exists($input, 'deleteTempFile')) {
             return $input->deleteTempFile($this->getRequest());
         }
-        return cmfJsonResponse(HttpCode::FORBIDDEN)
+        return CmfJsonResponse::create(HttpCode::FORBIDDEN)
             ->setMessage("Input $inputName does not support temp files delete: method deleteTempFile does not exist");
     }
-
+    
+    /**
+     * Returns FormConfig for editing form or ItemDetailsConfig for details viewer
+     * depending on 'details' URL query arg + validates access
+     */
+    protected function getScaffoldSectionConfigForRecordInfoAndValidateAccess(): ScaffoldSectionConfig
+    {
+        $isItemDetails = (bool)$this->getRequest()->query('details', false);
+        if ($isItemDetails) {
+            $sectionConfig = $this->getItemDetailsConfig();
+        } else {
+            $sectionConfig = $this->getFormConfig();
+        }
+        if (
+            ($isItemDetails && !$this->isDetailsViewerAllowed())
+            || (!$isItemDetails && !$this->isEditAllowed())
+        ) {
+            abort(
+                $this->makeAccessDeniedReponse(
+                    $sectionConfig->translateGeneral($isItemDetails ? 'message.forbidden' : 'message.edit.forbidden')
+                )
+            );
+        }
+        return $sectionConfig;
+    }
+    
+    protected function validateDataForEdit(FormConfig $formConfig, array $data, RecordInterface $record): void
+    {
+        $errors = $formConfig->validateDataForEdit($data, $record);
+        if (count($errors) !== 0) {
+            abort($this->makeValidationErrorsJsonResponse($errors));
+        }
+        if ($formConfig->hasBeforeSaveCallback()) {
+            $data = call_user_func($formConfig->getBeforeSaveCallback(), false, $data, $formConfig);
+            if (empty($data)) {
+                throw new ScaffoldException('Empty $data received from beforeSave callback');
+            }
+            if ($formConfig->shouldRevalidateDataAfterBeforeSaveCallback(false)) {
+                // revalidate
+                $errors = $formConfig->validateDataForEdit($data, $record, [], true);
+                if (count($errors) !== 0) {
+                    abort($this->makeValidationErrorsJsonResponse($errors));
+                }
+            }
+        }
+    }
+    
+    protected function runAfterSaveCallback(
+        FormConfig $formConfig,
+        bool $isCreated,
+        array $data,
+        RecordInterface $record
+    ): void {
+        if ($formConfig->hasAfterSaveCallback()) {
+            $table = static::getTable();
+            $success = call_user_func($formConfig->getAfterSaveCallback(), $isCreated, $data, $record, $formConfig);
+            if ($success instanceof JsonResponse) {
+                if ($success->getStatusCode() < 400) {
+                    $table::commitTransaction();
+                } else {
+                    $table::rollBackTransaction();
+                }
+                abort($success);
+            } elseif ($success !== true) {
+                $table::rollBackTransaction();
+                throw new ScaffoldException(
+                    'afterSaveCallback must return true or instance of \Illuminate\Http\JsonResponse'
+                );
+            }
+        }
+    }
+    
+    protected function runBulkEditDataAfterSaveCallback(FormConfig $formConfig, array $data): void
+    {
+        if ($formConfig->hasBulkEditAfterSaveCallback()) {
+            $table = static::getTable();
+            $success = call_user_func($formConfig->getBulkEditAfterSaveCallback(), $data);
+            if ($success instanceof JsonResponse) {
+                if ($success->getStatusCode() < 400) {
+                    $table::commitTransaction();
+                } else {
+                    $table::rollBackTransaction();
+                }
+                abort($success);
+            } elseif ($success !== true) {
+                $table::rollBackTransaction();
+                throw new ScaffoldException(
+                    'bulkEditAfterSaveCallback must return true or instance of \Illuminate\Http\JsonResponse'
+                );
+            }
+        }
+    }
+    
 }

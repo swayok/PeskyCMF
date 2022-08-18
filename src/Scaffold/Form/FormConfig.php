@@ -15,11 +15,11 @@ use Swayok\Utils\StringUtils;
 
 class FormConfig extends ScaffoldSectionConfig {
 
-    protected $template = 'cmf::scaffold.form';
+    protected string $template = 'cmf::scaffold.form';
     protected $bulkEditingTemplate = 'cmf::scaffold.bulk_edit_form';
 
-    protected $allowRelationsInValueViewers = true;
-    protected $allowComplexValueViewerNames = true;
+    protected bool $allowRelationsInValueViewers = true;
+    protected bool $allowComplexValueViewerNames = true;
 
     /**
      * Fields list that can be edited in bulk (for many records at once)
@@ -69,7 +69,7 @@ class FormConfig extends ScaffoldSectionConfig {
     /** @var \Closure|null */
     protected $beforeBulkEditDataSaveCallback;
     /** @var \Closure|null */
-    protected $afterBulkEditDataSaveCallback;
+    protected $bulkEditAfterSaveCallback;
 
     /** @var array */
     protected $tabs = [];
@@ -103,10 +103,7 @@ class FormConfig extends ScaffoldSectionConfig {
         return $this->bulkEditingTemplate;
     }
 
-    /**
-     * @return InputRenderer
-     */
-    protected function createValueRenderer() {
+    protected function createValueRenderer(): InputRenderer {
         return InputRenderer::create();
     }
 
@@ -339,19 +336,20 @@ class FormConfig extends ScaffoldSectionConfig {
         }
     }
 
-    protected function configureDefaultValueRenderer(ValueRenderer $renderer, RenderableValueViewer $formInput) {
-        parent::configureDefaultValueRenderer($renderer, $formInput);
+    protected function configureDefaultValueRenderer(ValueRenderer $renderer, RenderableValueViewer $valueViewer): void
+    {
+        parent::configureDefaultValueRenderer($renderer, $valueViewer);
         if (
-            $formInput->isLinkedToDbColumn()
+            $valueViewer->isLinkedToDbColumn()
             && (
-                !$formInput->hasRelation()
-                || $formInput->getRelation()->getType() !== Relation::HAS_MANY
+                !$valueViewer->hasRelation()
+                || $valueViewer->getRelation()->getType() !== Relation::HAS_MANY
             )
         ) {
-            $this->configureRendererByColumnConfig($renderer, $formInput);
+            $this->configureRendererByColumnConfig($renderer, $valueViewer);
         }
-        if ($formInput->hasDefaultRendererConfigurator()) {
-            call_user_func($formInput->getDefaultRendererConfigurator(), $renderer, $formInput);
+        if ($valueViewer->hasDefaultRendererConfigurator()) {
+            call_user_func($valueViewer->getDefaultRendererConfigurator(), $renderer, $valueViewer);
         }
     }
 
@@ -527,10 +525,7 @@ class FormConfig extends ScaffoldSectionConfig {
         return $options;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function createValueViewer() {
+    public function createValueViewer(): FormInput {
         return FormInput::create();
     }
 
@@ -602,13 +597,7 @@ class FormConfig extends ScaffoldSectionConfig {
         return $this;
     }
 
-    /**
-     * @param array $data
-     * @param array $messages
-     * @param bool $isRevalidation
-     * @return array
-     */
-    public function validateDataForCreate(array $data, array $messages = [], $isRevalidation = false) {
+    public function validateDataForCreate(array $data, array $messages = [], bool $isRevalidation = false): array {
         return $this->validateData(
             $data,
             $this->getValidatorsForCreate($data),
@@ -617,13 +606,7 @@ class FormConfig extends ScaffoldSectionConfig {
         );
     }
 
-    /**
-     * @param array $data
-     * @param array $messages
-     * @param bool $isRevalidation
-     * @return array
-     */
-    public function validateDataForEdit(array $data, RecordInterface $record, array $messages = [], $isRevalidation = false) {
+    public function validateDataForEdit(array $data, RecordInterface $record, array $messages = [], bool $isRevalidation = false): array {
         return $this->validateData(
             $data,
             $this->getValidatorsForEdit($data, $record),
@@ -957,23 +940,19 @@ class FormConfig extends ScaffoldSectionConfig {
      * @param \Closure $callback - function (array $validatedData, FormConfig $formConfig) { return []; }
      * @return $this
      */
-    public function setAfterBulkEditDataSaveCallback(\Closure $callback) {
-        $this->afterBulkEditDataSaveCallback = $callback;
+    public function setBulkEditAfterSaveCallback(\Closure $callback) {
+        $this->bulkEditAfterSaveCallback = $callback;
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasAfterBulkEditDataAfterSaveCallback() {
-        return !empty($this->afterBulkEditDataSaveCallback);
+    public function hasBulkEditAfterSaveCallback(): bool
+    {
+        return !empty($this->bulkEditAfterSaveCallback);
     }
 
-    /**
-     * @return \Closure
-     */
-    public function getAfterBulkEditDataAfterSaveCallback() {
-        return $this->afterBulkEditDataSaveCallback;
+    public function getBulkEditAfterSaveCallback(): ?\Closure
+    {
+        return $this->bulkEditAfterSaveCallback;
     }
 
     /**
@@ -1035,7 +1014,8 @@ class FormConfig extends ScaffoldSectionConfig {
         }
     }
 
-    public function beforeRender() {
+    public function beforeRender(): void
+    {
         foreach ($this->getTooltipsForInputs() as $inputName => $tooltip) {
             if ($this->hasFormInput($inputName)) {
                 $input = $this->getFormInput($inputName);
@@ -1046,7 +1026,7 @@ class FormConfig extends ScaffoldSectionConfig {
         }
     }
 
-    protected function getSectionTranslationsPrefix($subtype = null) {
+    protected function getSectionTranslationsPrefix(?string $subtype = null): string {
         return $subtype === 'value_viewer' ? 'form.input' : 'form';
     }
 

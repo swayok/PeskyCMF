@@ -26,7 +26,7 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
         return $this;
     }
 
-    public function setRelation(Relation $relation, $columnName) {
+    public function setRelation(Relation $relation, string $columnName) {
         $this->relation = $relation;
         if ($columnName !== $relation->getForeignColumnName()) {
             $this->relationColumn = $columnName;
@@ -35,7 +35,7 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
         return $this;
     }
 
-    public function getRelationColumn() {
+    public function getRelationColumn(): ?string {
         if (empty($this->relationColumn)) {
             throw new \UnexpectedValueException(
                 "Relations linking column was not provided for '{$this->getName()}' input. "

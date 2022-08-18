@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold;
 
+use Illuminate\Support\Arr;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ValueCell;
@@ -15,66 +17,50 @@ use PeskyORM\ORM\Relation;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 
-abstract class ScaffoldSectionConfig {
-    /**
-     * @var TableInterface
-     */
-    protected $table;
+abstract class ScaffoldSectionConfig
+{
+    
+    protected TableInterface $table;
+    protected ScaffoldConfig $scaffoldConfig;
+    
+    protected ?string $title = null;
+    
     /**
      * This scaffold config uses no db columns
-     * @var bool
      */
-    protected $thereIsNoDbColumns = false;
-    /**
-     * @var array
-     */
-    protected $fieldsConfigs = [];
+    protected bool $thereIsNoDbColumns = false;
+    
     /**
      * Fields list
      * @var array|AbstractValueViewer[]
      */
-    protected $valueViewers = [];
-    /**
-     * @var string
-     */
-    protected $title;
-    /**
-     * @var array
-     */
-    protected $relationsToRead = [];
-    /**
-     * @var null|\Closure
-     */
-    protected $defaultFieldRenderer;
-    /**
-     * @var null|\Closure
-     */
-    protected $rawRecordDataModifier;
+    protected array $valueViewers = [];
+    
+    protected array $relationsToRead = [];
+    
+    protected ?\Closure $defaultFieldRenderer = null;
+    protected ?\Closure $rawRecordDataModifier = null;
+    
     /**
      * Container width (percents)
-     * @var int
      */
-    protected $width = 100;
-    /**
-     * @var bool
-     */
-    protected $openInModal = true;
+    protected int $width = 100;
+    
+    protected bool $openInModal = true;
     /**
      * @var string|null - 'sm', 'md', 'lg', 'xl' | null - autodetect depending on $this->width
      */
-    protected $modalSize;
-    /**
-     * @var \Closure|null
-     */
-    protected $toolbarItems;
+    protected ?string $modalSize;
+    
+    protected ?\Closure $toolbarItems = null;
+    
     /**
      * @var array|\Closure
      */
     protected $specialConditions = [];
-    /**
-     * @var ScaffoldConfig
-     */
-    protected $scaffoldConfig;
+    
+    protected array $additionalColumnsToSelect = [];
+    
     /**
      * @var array|\Closure
      */
@@ -83,76 +69,67 @@ abstract class ScaffoldSectionConfig {
      * @var array|\Closure
      */
     protected $dataToSendToTemplate;
-    /**
-     * @var string
-     */
-    protected $template;
-    /**
-     * @var string
-     */
-    protected $jsInitiator;
-    protected $isFinished = false;
-    /** @var  bool */
-    protected $allowRelationsInValueViewers = false;
+    
+    protected ?string $template = null;
+    protected ?string $jsInitiator = null;
+    protected bool $isFinished = false;
+    protected bool $allowRelationsInValueViewers = false;
     /**
      * Allow viewer names like "column_name:key_name" for json/jsonb DB columns
-     * @var bool
      */
-    protected $allowComplexValueViewerNames = false;
-    /** @var array */
-    protected $additionalColumnsToSelect = [];
-
+    protected bool $allowComplexValueViewerNames = false;
+    
     /**
-     * @param TableInterface $table
-     * @param ScaffoldConfig $scaffoldConfig
-     * @return $this
+     * @return static
      */
-    public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
+    public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig)
+    {
         $class = static::class;
         return new $class($table, $scaffoldConfig);
     }
-
-    /**
-     * ScaffoldSectionConfig constructor.
-     * @param TableInterface $table
-     * @param ScaffoldConfig $scaffoldConfig
-     */
-    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
+    
+    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig)
+    {
         $this->table = $table;
         $this->scaffoldConfig = $scaffoldConfig;
     }
-
-    /**
-     * @return ScaffoldConfig
-     */
-    public function getScaffoldConfig() {
+    
+    public function getScaffoldConfig(): ScaffoldConfig
+    {
         return $this->scaffoldConfig;
     }
-
-    public function setTemplate($template) {
+    
+    public function getCmfConfig(): CmfConfig
+    {
+        return $this->getScaffoldConfig()->getCmfConfig();
+    }
+    
+    /**
+     * @return static
+     */
+    public function setTemplate(string $template)
+    {
         $this->template = $template;
         return $this;
     }
-
+    
     /**
-     * @return string
      * @throws ScaffoldSectionConfigException
      */
-    public function getTemplate() {
+    public function getTemplate(): string
+    {
         if (empty($this->template)) {
             throw new ScaffoldSectionConfigException($this, 'Scaffold section view file not set');
         }
         return $this->template;
     }
-
+    
     /**
      * Translate resource-related items (column names, input labels, etc.)
-     * @param AbstractValueViewer|null $viewer
-     * @param string $suffix
-     * @param array $parameters
-     * @return string
+     * @return string|array
      */
-    public function translate(AbstractValueViewer $viewer = null, $suffix = '', array $parameters = []) {
+    public function translate(?AbstractValueViewer $viewer = null, string $suffix = '', array $parameters = [])
+    {
         if ($viewer) {
             return $this
                 ->getScaffoldConfig()
@@ -163,70 +140,75 @@ abstract class ScaffoldSectionConfig {
                 ->translate($this->getSectionTranslationsPrefix(), $suffix, $parameters);
         }
     }
-
+    
     /**
      * Translate general UI elements (button labels, tooltips, messages, etc..)
-     * @param $path
-     * @param array $parameters
-     * @return mixed
+     * @return array|string
      */
-    public function translateGeneral($path, array $parameters = []) {
+    public function translateGeneral(string $path, array $parameters = [])
+    {
         $prefix = $this->getSectionTranslationsPrefix();
         $text = $this->getScaffoldConfig()->translate($prefix, $path, $parameters);
         if (preg_match('%\.' . preg_quote($prefix . '.' . $path, '%') . '$%', $text)) {
-            $text = cmfTransGeneral($this->getSectionTranslationsPrefix('general') . '.' . $path, $parameters);
+            $text = $this->getCmfConfig()->transGeneral(
+                $this->getSectionTranslationsPrefix('general') . '.' . $path,
+                $parameters
+            );
         }
         return $text;
     }
-
+    
     /**
      * Prefix for this section's translations (ex: 'datagrid', 'item_details', 'form')
      * Will be used in $this->translate() and $this->translateGeneral()
-     * @param bool $subtype - null, 'value_viewer', 'general'.
+     * @param string|null $subtype - null, 'value_viewer', 'general'.
      *      - null - common translations for section. Path will be like 'resource.{section}.translation'
      *      - 'value_viewer' - translations for value viewers labels. It is preferred to nest
      *          value viewer labels deeper in section (ex: 'datagrid.columns') or outside of section (ex: 'columns').
      *          Path will be like 'resource.{section}.value_viewers.translation'
      *      - 'general' - translations for general UI elements ($this->translateGeneral()). Used only when there is
      *          no custom translation (example path: 'resource.{section}.translation') and system needs to get
-     *          translation from cmfTransGeneral(). By default it should be same as for $subtype = null
+     *          translation from $this->getCmfConfig()->transGeneral(). By default it should be same as for $subtype = null
      * @return string
      */
-    abstract protected function getSectionTranslationsPrefix($subtype = null);
-
+    abstract protected function getSectionTranslationsPrefix(?string $subtype = null): string;
+    
     /**
      * Disables any usage of TableStructure (validation, automatic field type guessing, etc)
-     * @return $this
+     * @return static
      */
-    public function thereIsNoDbColumns() {
+    public function thereIsNoDbColumns()
+    {
         $this->thereIsNoDbColumns = true;
         return $this;
     }
-
+    
     /**
      * @param array $viewers
-     * @return $this
+     * @return static
      */
-    protected function setValueViewers(array $viewers) {
+    protected function setValueViewers(array $viewers)
+    {
         /** @var AbstractValueViewer|null $config */
         foreach ($viewers as $name => $config) {
             $this->normalizeAndAddValueViewer($name, $config);
         }
         return $this;
     }
-
+    
     /**
      * @param string|int $name
      * @param \Closure|string|AbstractValueViewer|null $config
-     * @return $this
+     * @return static
      */
-    protected function normalizeAndAddValueViewer($name, $config) {
+    protected function normalizeAndAddValueViewer($name, $config)
+    {
         $valueConverter = null;
         if (is_int($name)) {
             /** @noinspection CallableParameterUseCaseInTypeContextInspection */
             $name = $config;
             $config = null;
-        } else if ($config instanceof \Closure) {
+        } elseif ($config instanceof \Closure) {
             $valueConverter = $config;
             $config = null;
         }
@@ -258,20 +240,22 @@ abstract class ScaffoldSectionConfig {
         }
         return $this;
     }
-
+    
     /**
      * @return AbstractValueViewer[]
      */
-    public function getValueViewers() {
+    public function getValueViewers(): array
+    {
         return $this->valueViewers;
     }
-
+    
     /**
      * Get only viewers that are linked to table columns defined in TableConfig class ($valueViewer->isDbColumn() === true)
      * @param bool $includeViewersForRelations - false: only vievers linked to main table's columns will be returned
      * @return AbstractValueViewer[]|DataGridColumn[]|FormInput[]|ValueCell[]
      */
-    public function getViewersLinkedToDbColumns($includeViewersForRelations = false) {
+    public function getViewersLinkedToDbColumns(bool $includeViewersForRelations = false): array
+    {
         $ret = [];
         foreach ($this->getValueViewers() as $key => $viewer) {
             if ($viewer->isLinkedToDbColumn() && ($includeViewersForRelations || !$viewer->hasRelation())) {
@@ -280,12 +264,13 @@ abstract class ScaffoldSectionConfig {
         }
         return $ret;
     }
-
+    
     /**
      * Get only viewers that are not linked to columns defined in TableConfig class ($valueViewer->isDbColumn() === false)
      * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
      */
-    public function getStandaloneViewers() {
+    public function getStandaloneViewers(): array
+    {
         $ret = [];
         foreach ($this->getValueViewers() as $key => $viewer) {
             if (!$viewer->isLinkedToDbColumn()) {
@@ -294,12 +279,13 @@ abstract class ScaffoldSectionConfig {
         }
         return $ret;
     }
-
+    
     /**
      * Get only viewers that are linked to main table's relation
      * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
      */
-    public function getViewersForRelations() {
+    public function getViewersForRelations(): array
+    {
         $ret = [];
         foreach ($this->getValueViewers() as $key => $viewer) {
             if ($viewer->isLinkedToDbColumn() && $viewer->hasRelation()) {
@@ -308,40 +294,36 @@ abstract class ScaffoldSectionConfig {
         }
         return $ret;
     }
-
-    /**
-     * @return AbstractValueViewer
-     */
-    abstract public function createValueViewer();
-
+    
+    abstract public function createValueViewer(): AbstractValueViewer;
+    
     /**
      * @param string $name
      * @return DataGridColumn|ValueCell|FormInput|AbstractValueViewer
      * @throws \InvalidArgumentException
      */
-    public function getValueViewer($name) {
+    public function getValueViewer(string $name): AbstractValueViewer
+    {
         if (!$this->hasValueViewer($name)) {
             throw new \InvalidArgumentException('Scaffold ' . get_class($this) . " has no viewer with name [$name]");
         }
         return $this->valueViewers[$name];
     }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasValueViewer($name) {
+    
+    public function hasValueViewer(string $name): bool
+    {
         return !empty($name) && !empty($this->valueViewers[$name]);
     }
-
+    
     /**
-     * @param string $name
-     * @param null|AbstractValueViewer $viewer
-     * @param bool $autodetectIfLinkedToDbColumn
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function addValueViewer($name, ?AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false) {
+    public function addValueViewer(
+        string $name,
+        ?AbstractValueViewer &$viewer = null,
+        bool $autodetectIfLinkedToDbColumn = false
+    ) {
         $usesRelation = false;
         $hasColumnWithViewerName = $this->getTable()->getTableStructure()->hasColumn($name);
         $isAutocreated = !$viewer;
@@ -383,7 +365,7 @@ abstract class ScaffoldSectionConfig {
         $this->valueViewers[$name] = $viewer;
         return $this;
     }
-
+    
     /**
      * @param string $name
      * @param bool $throwErrorIfLocalColumnNotFound
@@ -392,7 +374,8 @@ abstract class ScaffoldSectionConfig {
      * @return array - array(Relation, column_name)
      * @throws \InvalidArgumentException
      */
-    protected function validateRelationValueViewerName(string $name, bool $throwErrorIfLocalColumnNotFound = true): array {
+    protected function validateRelationValueViewerName(string $name, bool $throwErrorIfLocalColumnNotFound = true): array
+    {
         $nameParts = explode('.', $name);
         $hasRelation = $this->getTable()->getTableStructure()->hasRelation($nameParts[0]);
         if (!$hasRelation && count($nameParts) === 1) {
@@ -401,7 +384,7 @@ abstract class ScaffoldSectionConfig {
             } else {
                 return [null, null];
             }
-        } else if (!$hasRelation) {
+        } elseif (!$hasRelation) {
             throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no relation '{$nameParts[0]}'");
         }
         $relation = $this->getTable()->getTableStructure()->getRelation($nameParts[0]);
@@ -417,15 +400,14 @@ abstract class ScaffoldSectionConfig {
         }
         return [$relation, $columnName];
     }
-
+    
     /**
      * Check if $name is complex column name like "column_name:key_name"
-     * @param string $name
-     * @return bool
      */
-    protected function isValidComplexValueViewerName($name) {
+    protected function isValidComplexValueViewerName(string $name): bool
+    {
         if ($this->allowComplexValueViewerNames && AbstractValueViewer::isComplexViewerName($name)) {
-            [$colName, ] = AbstractValueViewer::splitComplexViewerName($name);
+            [$colName,] = AbstractValueViewer::splitComplexViewerName($name);
             if ($this->getTable()->getTableStructure()->hasColumn($colName)) {
                 $type = $this->getTable()->getTableStructure()->getColumn($colName)->getType();
                 return in_array($type, [Column::TYPE_JSON, Column::TYPE_JSONB], true);
@@ -433,45 +415,36 @@ abstract class ScaffoldSectionConfig {
         }
         return false;
     }
-
-    /**
-     * @param AbstractValueViewer $viewer
-     * @return int
-     */
-    protected function getNextValueViewerPosition(AbstractValueViewer $viewer) {
+    
+    protected function getNextValueViewerPosition(AbstractValueViewer $viewer): int
+    {
         return count($this->valueViewers);
     }
-
-    /**
-     * @return TableInterface
-     */
-    public function getTable() {
+    
+    public function getTable(): TableInterface
+    {
         return $this->table;
     }
-
-    /**
-     * @param string $default
-     * @return string
-     */
-    public function getTitle($default = '') {
+    
+    public function getTitle(string $default = ''): ?string
+    {
         return empty($this->title) ? $default : $this->title;
     }
-
+    
     /**
-     * @param string $title
-     * @return $this
+     * @return static
      */
-    public function setTitle($title) {
+    public function setTitle(string $title)
+    {
         $this->title = $title;
         return $this;
     }
-
+    
     /**
-     * @param array $record
-     * @return array
      * @throws \UnexpectedValueException
      */
-    protected function modifyRawRecordData(array $record) {
+    protected function modifyRawRecordData(array $record): array
+    {
         if ($this->rawRecordDataModifier !== null) {
             $record = call_user_func($this->rawRecordDataModifier, $record, $this);
             if (!is_array($record)) {
@@ -480,24 +453,27 @@ abstract class ScaffoldSectionConfig {
         }
         return $record;
     }
-
+    
     /**
      * Modify record's data before it is processed by ScaffoldSectionConfig->prepareRecord()
      * Must return array
      * @param \Closure $modifier - function (array $record, ScaffoldSectionConfig $sectionConfig) { return $record }
-     * @return $this
+     * @return static
      */
-    public function setRawRecordDataModifier(\Closure $modifier) {
+    public function setRawRecordDataModifier(\Closure $modifier)
+    {
         $this->rawRecordDataModifier = $modifier;
         return $this;
     }
-
+    
     /**
      * @param array $record
      * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
      * @return array
+     * @noinspection NotOptimalIfConditionsInspection
      */
-    public function prepareRecord(array $record, array $virtualColumns = []) {
+    public function prepareRecord(array $record, array $virtualColumns = []): array
+    {
         $pkKey = $this->getTable()->getPkColumnName();
         $permissionsAndServiceData = [
             '___create_allowed' => $this->isCreateAllowed(),
@@ -516,7 +492,7 @@ abstract class ScaffoldSectionConfig {
             '___cloning_allowed' => $this->isCloningAllowed(),
             '__modal' => $this->isUsingModal(),
             'DT_RowId' => 'item-' . preg_replace('%[^a-zA-Z0-9_-]+%', '-', $record[$pkKey]),
-            '___pk_value' => $record[$pkKey]
+            '___pk_value' => $record[$pkKey],
         ];
         if (!empty($virtualColumns)) {
             $recordObj = $this->getTable()->newRecord()->enableTrustModeForDbData()->fromDbData($record);
@@ -536,12 +512,12 @@ abstract class ScaffoldSectionConfig {
             }
             $recordWithBackup['__' . $key] = $value;
         }
-        foreach ($record as $key => $_) {
+        foreach ($record as $key => $originalData) {
             if (!$this->hasValueViewer($key) && $this->getTable()->getTableStructure()->hasRelation($key)) {
                 unset($recordWithBackup['__' . $key]);
                 if ($this->getTable()->getTableStructure()->getRelation($key)->getType() === Relation::HAS_MANY) {
                     $recordWithBackup[$key] = [];
-                    foreach ($record[$key] as $index => $relationData) {
+                    foreach ($originalData as $index => $relationData) {
                         $recordWithBackup[$key][$index] = $this->prepareRelatedRecord($key, $record, $index);
                     }
                 } else {
@@ -579,13 +555,13 @@ abstract class ScaffoldSectionConfig {
                 && $valueViewer::isComplexViewerName($safeKey)
             ) {
                 $colName = $valueViewer->getTableColumn()->getName();
-                if (!array_has($recordWithBackup, $colName) && array_has($record, $colName)) {
-                    $value = array_get($record, $colName);
+                if (!Arr::has($recordWithBackup, $colName) && Arr::has($record, $colName)) {
+                    $value = Arr::get($record, $colName);
                     if (is_string($value) && mb_strlen($value) >= 2) {
                         $value = json_decode($value, true);
                     }
-                    array_set($recordWithBackup, $colName, $value);
-                    array_set($recordWithBackup, '__' . $colName, $value);
+                    Arr::set($recordWithBackup, $colName, $value);
+                    Arr::set($recordWithBackup, '__' . $colName, $value);
                 }
                 if (
                     method_exists($valueViewer, 'convertValue')
@@ -595,10 +571,10 @@ abstract class ScaffoldSectionConfig {
                     )
                 ) {
                     $key = implode('.', $valueViewer::splitComplexViewerName($key));
-                    $convertedValue = $valueViewer->convertValue(array_get($recordWithBackup, $key), $record);
-                    array_set($recordWithBackup, $safeKey, $convertedValue);
+                    $convertedValue = $valueViewer->convertValue(Arr::get($recordWithBackup, $key), $record);
+                    Arr::set($recordWithBackup, $safeKey, $convertedValue);
                 }
-            } else if (
+            } elseif (
                 !$valueViewer->isLinkedToDbColumn()
                 && !array_key_exists($key, $recordWithBackup)
                 && method_exists($valueViewer, 'convertValue')
@@ -608,28 +584,29 @@ abstract class ScaffoldSectionConfig {
                 )
             ) {
                 $convertedValue = $valueViewer->convertValue(null, $record);
-                array_set($recordWithBackup, $safeKey, $convertedValue);
+                Arr::set($recordWithBackup, $safeKey, $convertedValue);
             }
         }
         if (!empty($customData) && is_array($customData)) {
             $recordWithBackup = array_merge($recordWithBackup, $customData);
         }
-        $recordWithBackup = array_merge($recordWithBackup, $permissionsAndServiceData);
-        return $recordWithBackup;
+        return array_merge($recordWithBackup, $permissionsAndServiceData);
     }
-
+    
     /**
      * Process related record's data by viewers attached to it
      * @param string $relationName
-     * @param array $relationRecordData
+     * @param array $recordData
      * @param null|string $index - string: passed for HAS_MANY relation | null: for relations other than HAS_MANY
      * @return array
      */
-    protected function prepareRelatedRecord($relationName, array $recordData, $index = null) {
+    protected function prepareRelatedRecord(string $relationName, array $recordData, ?string $index = null): array
+    {
         $recordWithBackup = $recordData[$relationName];
         $valueViewers = $this->getViewersForRelations();
         foreach ($recordData[$relationName] as $columnName => $value) {
             $viewerName = $relationName . '.' . ($index === null ? '' : $index . '.') . $columnName;
+            /** @noinspection NullPointerExceptionInspection */
             if (
                 array_key_exists($viewerName, $valueViewers)
                 && $valueViewers[$viewerName]->getRelation()->getName() === $relationName
@@ -651,153 +628,135 @@ abstract class ScaffoldSectionConfig {
                         false,
                         $relationName
                     );
-                } else if (is_resource($value)) {
+                } elseif (is_resource($value)) {
                     $recordWithBackup[$columnName] = '[resource]';
                 }
-            } else if (is_resource($value)) {
+            } elseif (is_resource($value)) {
                 $recordWithBackup[$columnName] = '[resource]';
             }
         }
         return $recordWithBackup;
     }
-
+    
     /**
      * @param array|\Closure $arrayOrClosure
      *      - \Closure: funciton (array $record, ScaffoldSectionConfig $scaffoldSectionConfig) { return []; }
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setDataToAddToRecord($arrayOrClosure) {
+    public function setDataToAddToRecord($arrayOrClosure)
+    {
         if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
             throw new \InvalidArgumentException('$arrayOrClosure argument must be an array or \Closure');
         }
         $this->dataToAddToRecord = $arrayOrClosure;
         return $this;
     }
-
-    /**
-     * @param array $record
-     * @return array|mixed
-     */
-    public function getCustomDataForRecord(array $record) {
+    
+    public function getCustomDataForRecord(array $recordData): array
+    {
         if (empty($this->dataToAddToRecord)) {
             return [];
-        } else if ($this->dataToAddToRecord instanceof \Closure) {
-            return call_user_func($this->dataToAddToRecord, $record, $this);
+        } elseif ($this->dataToAddToRecord instanceof \Closure) {
+            return call_user_func($this->dataToAddToRecord, $recordData, $this);
         } else {
             return $this->dataToAddToRecord;
         }
     }
-
+    
     /**
      * @param array|\Closure $arrayOrClosure - function (ScaffoldSectionConfig $sectionConfig) { return [] }
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function sendDataToTemplate($arrayOrClosure) {
+    public function sendDataToTemplate($arrayOrClosure)
+    {
         if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
             throw new \InvalidArgumentException('$arrayOrClosure argument must be an array or \Closure');
         }
         $this->dataToSendToTemplate = $arrayOrClosure;
         return $this;
     }
-
-    /**
-     * @return array|mixed
-     */
-    public function getAdditionalDataForTemplate() {
+    
+    public function getAdditionalDataForTemplate(): array
+    {
         if (empty($this->dataToSendToTemplate)) {
             return [];
-        } else if ($this->dataToSendToTemplate instanceof \Closure) {
+        } elseif ($this->dataToSendToTemplate instanceof \Closure) {
             return call_user_func($this->dataToSendToTemplate, $this);
         } else {
             return $this->dataToSendToTemplate;
         }
     }
-
-    /**
-     * @return array
-     */
-    public function getRelationsToRead() {
+    
+    public function getRelationsToRead(): array
+    {
         return $this->relationsToRead;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasRelationsToRead() {
+    
+    public function hasRelationsToRead(): bool
+    {
         return !empty($this->relationsToRead);
     }
-
+    
     /**
      * Set relations to join.
      * Notes:
      * - For data grid you need to provide key-value pairs in same format as for columns selection:
-     *   ['Relation' => ['col1', 'col2', ...]]. More info: @see AbstractSelect::columns()
+     *   ['Relation' => ['col1', 'col2', ...]]. More info: @param array $relationNames
+     * @return static
+     * @see AbstractSelect::columns()
      *   HAS MANY relations are forbidden.
      * - For item edit form and item details view you need to provide only names of the relations you need to read
      *   with the item. All types of relations allowed but there is no automatic possibility to get deeper relations
-     * @param array $relationNames
-     * @return $this
      */
-    public function readRelations(array $relationNames) {
+    public function readRelations(array $relationNames)
+    {
         $this->relationsToRead = $relationNames;
         return $this;
     }
-
-    /**
-     * @return \Closure|null
-     */
-    public function getDefaultValueRenderer() {
-        if (!empty($this->defaultFieldRenderer)) {
-            return $this->defaultFieldRenderer;
-        } else {
+    
+    public function getDefaultValueRenderer(): ?\Closure
+    {
+        if (empty($this->defaultFieldRenderer)) {
             $this->setDefaultValueRenderer(function (RenderableValueViewer $valueViewer, $sectionConfig, array $dataForView) {
                 $rendererConfig = $this->createValueRenderer()->setData($dataForView);
                 $this->configureDefaultValueRenderer($rendererConfig, $valueViewer);
                 return $rendererConfig;
             });
-            return $this->defaultFieldRenderer;
         }
+        return $this->defaultFieldRenderer;
     }
-
-    /**
-     * @return ValueRenderer
-     */
-    abstract protected function createValueRenderer();
-
-    /**
-     * @param ValueRenderer $renderer
-     * @param RenderableValueViewer $valueViewer
-     */
+    
+    abstract protected function createValueRenderer(): ValueRenderer;
+    
     protected function configureDefaultValueRenderer(
         ValueRenderer $renderer,
         RenderableValueViewer $valueViewer
-    ) {
+    ): void {
         $valueViewer->configureDefaultRenderer($renderer);
     }
-
+    
     /**
-     * @param \Closure $defaultFieldRenderer
-     * @return $this
+     * @return static
      */
-    public function setDefaultValueRenderer(\Closure $defaultFieldRenderer) {
+    public function setDefaultValueRenderer(\Closure $defaultFieldRenderer)
+    {
         $this->defaultFieldRenderer = $defaultFieldRenderer;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasDefaultValueRenderer() {
+    
+    public function hasDefaultValueRenderer(): bool
+    {
         return !empty($this->defaultFieldRenderer);
     }
-
+    
     /**
      * @return string[]
      * @throws \UnexpectedValueException
      */
-    public function getToolbarItems() {
+    public function getToolbarItems(): array
+    {
         if (empty($this->toolbarItems)) {
             return [];
         }
@@ -815,16 +774,16 @@ abstract class ScaffoldSectionConfig {
                 /** @noinspection PhpStatementHasEmptyBodyInspection */
                 if ($item instanceof CmfMenuItem) {
                     // do nothing
-                } else if (method_exists($item, 'build')) {
+                } elseif (method_exists($item, 'build')) {
                     $item = $item->build();
-                } else if (method_exists($item, '__toString')) {
-                    $item = (string) $item;
+                } elseif (method_exists($item, '__toString')) {
+                    $item = (string)$item;
                 } else {
                     throw new \UnexpectedValueException(
                         get_class($this) . '->toolbarItems: array may contain only strings and objects with build() or __toString() methods'
                     );
                 }
-            } else if (!is_string($item)) {
+            } elseif (!is_string($item)) {
                 throw new \UnexpectedValueException(
                     get_class($this) . '->toolbarItems: array may contain only strings and objects with build() or __toString() methods'
                 );
@@ -832,7 +791,7 @@ abstract class ScaffoldSectionConfig {
         }
         return $toolbarItems;
     }
-
+    
     /**
      * Note: common actions: 'details', 'edit', 'clone', 'delete', 'create' will be added automatically
      * before custom menu items. You can manipulate positioning of common items using actions names as keys
@@ -846,226 +805,213 @@ abstract class ScaffoldSectionConfig {
      * Examples:
      * 1. ToolbarItem:
      * a. Preferred usage:
-     * - CmfMenuItem::redirect(cmfRoute('route', [], false))
-            ->setTitle($this->translate('action.details'))
-     * - CmfMenuItem::request(cmfRoute('route', [], false), 'delete')
-            ->setTitle($this->translate('action.delete'))
-            ->setConfirm($this->translate('message.delete_confirm'));
-     * - CmfMenuItem::bulkActionOnSelectedRows(cmfRoute('route', [], false), 'delete')
-            ->setTitle($this->translate('action.delete'))
-            ->setPrimaryKeyColumnName('id')
-            ->setConfirm($this->translate('message.delete_confirm'));
-     * - CmfMenuItem::bulkActionOnFilteredRows(cmfRoute('route', [], false), 'delete')
-            ->setTitle($this->translate('action.delete'))
-            ->setConfirm($this->translate('message.delete_confirm'));
+     * - CmfMenuItem::redirect($this->getCmfConfig()->route('route', [], false))
+     * ->setTitle($this->translate('action.details'))
+     * - CmfMenuItem::request($this->getCmfConfig()->route('route', [], false), 'delete')
+     * ->setTitle($this->translate('action.delete'))
+     * ->setConfirm($this->translate('message.delete_confirm'));
+     * - CmfMenuItem::bulkActionOnSelectedRows($this->getCmfConfig()->route('route', [], false), 'delete')
+     * ->setTitle($this->translate('action.delete'))
+     * ->setPrimaryKeyColumnName('id')
+     * ->setConfirm($this->translate('message.delete_confirm'));
+     * - CmfMenuItem::bulkActionOnFilteredRows($this->getCmfConfig()->route('route', [], false), 'delete')
+     * ->setTitle($this->translate('action.delete'))
+     * ->setConfirm($this->translate('message.delete_confirm'));
      * b. Alternative usage:
      * - call some url via ajax and then run "callback(json)"
-         Tag::a()
-             ->setContent(trans('path.to.translation'))
-             ->setClass('btn btn-warning')
-             ->setDataAttr('action', 'request')
-             ->setDataAttr('url', cmfRoute('route', [], false))
-             ->setDataAttr('method', 'put')
-             ->setDataAttr('data', 'id={{= it.id }}')
-             ->setDataAttr('on-success', 'callbackFuncitonName')
-             //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-             //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-             ->setHref('javascript: void(0)');
+     * Tag::a()
+     * ->setContent(trans('path.to.translation'))
+     * ->setClass('btn btn-warning')
+     * ->setDataAttr('action', 'request')
+     * ->setDataAttr('url', $this->getCmfConfig()->route('route', [], false))
+     * ->setDataAttr('method', 'put')
+     * ->setDataAttr('data', 'id={{= it.id }}')
+     * ->setDataAttr('on-success', 'callbackFuncitonName')
+     * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+     * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+     * ->setHref('javascript: void(0)');
      * - redirect to other url
-         Tag::a()
-             ->setContent(trans('path.to.translation'))
-             ->setClass('btn btn-warning')
-             ->setHref(cmfRoute('route', [], false))
-             ->setTarget('_blank')
+     * Tag::a()
+     * ->setContent(trans('path.to.translation'))
+     * ->setClass('btn btn-warning')
+     * ->setHref($this->getCmfConfig()->route('route', [], false))
+     * ->setTarget('_blank')
      * c. ONLY FOR DATA GRIDS:
      * - call some url via ajax passing all selected ids and then run "callback(json)"
-         Tag::a()
-             ->setContent(trans('path.to.translation'))
-             //^ you can use ':count' in label to insert selected items count
-             ->setDataAttr('action', 'bulk-selected')
-             ->setDataAttr('confirm', trans('path.to.translation'))
-             //^ confirm action before sending request to server
-             ->setDataAttr('url', cmfRoute('route', [], false))
-             ->setDataAttr('method', 'delete')
-             //^ can be 'post', 'put', 'delete' depending on action type
-             ->setDataAttr('id-field', 'id')
-             //^ for bulk actions on selected items id field name to use to get rows ids, default: 'id'
-             ->setDataAttr('on-success', 'callbackFuncitonName')
-             //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-             //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-             ->setDataAttr('response-type', 'json')
-             //^ one of: json, html, xml. Default: 'json'
-             ->setHref('javascript: void(0)');
+     * Tag::a()
+     * ->setContent(trans('path.to.translation'))
+     * //^ you can use ':count' in label to insert selected items count
+     * ->setDataAttr('action', 'bulk-selected')
+     * ->setDataAttr('confirm', trans('path.to.translation'))
+     * //^ confirm action before sending request to server
+     * ->setDataAttr('url', $this->getCmfConfig()->route('route', [], false))
+     * ->setDataAttr('method', 'delete')
+     * //^ can be 'post', 'put', 'delete' depending on action type
+     * ->setDataAttr('id-field', 'id')
+     * //^ for bulk actions on selected items id field name to use to get rows ids, default: 'id'
+     * ->setDataAttr('on-success', 'callbackFuncitonName')
+     * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+     * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+     * ->setDataAttr('response-type', 'json')
+     * //^ one of: json, html, xml. Default: 'json'
+     * ->setHref('javascript: void(0)');
      * Values will be received in the 'ids' key of the request as array
      * - call some url via ajax passing filter conditions and then run "callback(json)"
-         Tag::a()
-             ->setContent(trans('path.to.translation'))
-             //^ you can use ':count' in label to insert filtered items count
-             ->setDataAttr('action', 'bulk-filtered')
-             ->setDataAttr('confirm', trans('path.to.translation'))
-             //^ confirm action before sending request to server
-             ->setDataAttr('url', cmfRoute('route', [], false))
-             ->setDataAttr('method', 'put')
-             //^ can be 'post', 'put', 'delete' depending on action type
-             ->setDataAttr('on-success', 'callbackFuncitonName')
-             //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-             //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-             ->setDataAttr('response-type', 'json')
-             //^ one of: json, html, xml. Default: 'json'
-             ->setHref('javascript: void(0)');
+     * Tag::a()
+     * ->setContent(trans('path.to.translation'))
+     * //^ you can use ':count' in label to insert filtered items count
+     * ->setDataAttr('action', 'bulk-filtered')
+     * ->setDataAttr('confirm', trans('path.to.translation'))
+     * //^ confirm action before sending request to server
+     * ->setDataAttr('url', $this->getCmfConfig()->route('route', [], false))
+     * ->setDataAttr('method', 'put')
+     * //^ can be 'post', 'put', 'delete' depending on action type
+     * ->setDataAttr('on-success', 'callbackFuncitonName')
+     * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+     * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+     * ->setDataAttr('response-type', 'json')
+     * //^ one of: json, html, xml. Default: 'json'
+     * ->setHref('javascript: void(0)');
      * - bulk actions with custom on-click handler
-         Tag::button()
-             ->setContent(trans('path.to.translation'))
-             //^ you can use ':count' in label to insert selected items count or filtered items count
-             //^ depending on 'data-type' attribute
-             ->setClass('btn btn-success')
-             ->setDataAttr('type', 'bulk-selected')
-             //^ 'bulk-selected' or 'bulk-filtered'
-             ->setDataAttr('url', cmfRoute('route', [], false))
-             ->setDataAttr('id-field', 'id')
-             //^ id field name to use to get rows ids, default: 'id'
-             ->setOnClick('someFunction(this)')
-             //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
+     * Tag::button()
+     * ->setContent(trans('path.to.translation'))
+     * //^ you can use ':count' in label to insert selected items count or filtered items count
+     * //^ depending on 'data-type' attribute
+     * ->setClass('btn btn-success')
+     * ->setDataAttr('type', 'bulk-selected')
+     * //^ 'bulk-selected' or 'bulk-filtered'
+     * ->setDataAttr('url', $this->getCmfConfig()->route('route', [], false))
+     * ->setDataAttr('id-field', 'id')
+     * //^ id field name to use to get rows ids, default: 'id'
+     * ->setOnClick('someFunction(this)')
+     * //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
      * 2. List of toolbar items:
      *      [
      *          ToolbarItem1,
      *          ToolbarItem2,
      *          'delete' => null
      *      ]
-     * @return $this
+     * @return static
      */
-    public function setToolbarItems(\Closure $callback) {
+    public function setToolbarItems(\Closure $callback)
+    {
         $this->toolbarItems = $callback;
         return $this;
     }
-
-    /**
-     * @return boolean
-     */
-    public function isCreateAllowed() {
+    
+    public function isCreateAllowed(): bool
+    {
         return $this->getScaffoldConfig()->isCreateAllowed();
     }
-
-    /**
-     * @return boolean
-     */
-    public function isEditAllowed() {
+    
+    public function isEditAllowed(): bool
+    {
         return $this->getScaffoldConfig()->isEditAllowed();
     }
-
-    /**
-     * @return boolean
-     */
-    public function isCloningAllowed() {
+    
+    public function isCloningAllowed(): bool
+    {
         return $this->getScaffoldConfig()->isCloningAllowed();
     }
-
-    /**
-     * @return boolean
-     */
-    public function isDeleteAllowed() {
+    
+    public function isDeleteAllowed(): bool
+    {
         return $this->getScaffoldConfig()->isDeleteAllowed();
     }
-
-    /**
-     * @return boolean
-     */
-    public function isDetailsViewerAllowed() {
+    
+    public function isDetailsViewerAllowed(): bool
+    {
         return $this->getScaffoldConfig()->isDetailsViewerAllowed();
     }
-
-    /**
-     * @return bool
-     */
-    public function hasSpecialConditions() {
+    
+    public function hasSpecialConditions(): bool
+    {
         return !empty($this->specialConditions);
     }
-
-    /**
-     * @return array
-     */
-    public function getSpecialConditions() {
+    
+    public function getSpecialConditions(): array
+    {
         return $this->specialConditions instanceof \Closure
             ? call_user_func($this->specialConditions, $this)
             : $this->specialConditions;
     }
-
+    
     /**
      * @param array|\Closure $specialConditions - array or function (ScaffoldSectionConfig $scaffoldSectionConfig) {}
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setSpecialConditions($specialConditions) {
+    public function setSpecialConditions($specialConditions)
+    {
         if (!is_array($specialConditions) && !($specialConditions instanceof \Closure)) {
             throw new \InvalidArgumentException('$specialConditions argument must be an array or \Closure');
         }
         $this->specialConditions = $specialConditions;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getWidth() {
+    
+    public function getWidth(): int
+    {
         return min($this->width, 100);
     }
-
+    
     /**
-     * @param $percents
-     * @return $this
+     * @return static
      */
-    public function setWidth($percents) {
+    public function setWidth(int $percents)
+    {
         $this->width = $percents;
         return $this;
     }
-
+    
     /**
      * Get css classes for content container.
      * Uses witdh to collect col-??-?? and col-??-offset?? classes
-     * @return string
      */
-    public function getCssClassesForContainer() {
+    public function getCssClassesForContainer(): string
+    {
         $colsXl = $this->getWidth() >= 100 ? 12 : ceil(12 * ($this->getWidth() / 100));
         $colsXlLeft = floor((12 - $colsXl) / 2);
         $colsLg = $colsXl >= 10 ? 12 : $colsXl + 2;
         $colsLgLeft = floor((12 - $colsLg) / 2);
         return "col-xs-12 col-xl-{$colsXl} col-lg-{$colsLg} col-xl-offset-{$colsXlLeft} col-lg-offset-{$colsLgLeft}";
     }
-
+    
     /**
      * @param bool $isEnabled
      * @param string|null $size - 'sm', 'md', 'lg', 'xl' | null - autodetect depending on $this->width
-     * @return $this
+     * @return static
      */
-    public function setModalConfig(bool $isEnabled = true, ?string $size = null) {
+    public function setModalConfig(bool $isEnabled = true, ?string $size = null)
+    {
         $this->openInModal = $isEnabled;
         $this->modalSize = in_array($size, ['sm', 'md', 'lg', 'xl']) ? $size : null;
         return $this;
     }
-
-    public function getModalSize() {
-        /** @noinspection NestedTernaryOperatorInspection */
-        return $this->modalSize ?: ($this->getWidth() > 60 ? 'lg' : 'md');
+    
+    public function getModalSize(): string
+    {
+        if ($this->modalSize) {
+            return $this->modalSize;
+        }
+        return $this->getWidth() > 60 ? 'lg' : 'md';
     }
-
-    public function isUsingModal() {
+    
+    public function isUsingModal(): bool
+    {
         return $this->openInModal;
     }
-
-    /**
-     * @return string
-     */
-    public function getJsInitiator() {
+    
+    public function getJsInitiator(): ?string
+    {
         return $this->jsInitiator;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasJsInitiator() {
+    
+    public function hasJsInitiator(): bool
+    {
         return !empty($this->jsInitiator);
     }
-
+    
     /**
      * For data grids:
      * - JS function will be called instead of ScaffoldDataGridHelper.init()
@@ -1082,62 +1028,64 @@ abstract class ScaffoldSectionConfig {
      * - JS function will be called after data was loaded and content rendered
      * - JS function will receive 1 argument depending on situation: $content or $modal
      * @param string $jsFunctionName - name of existing JS function without braces, for example: 'initSomething' or 'SomeVar.init'
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setJsInitiator($jsFunctionName) {
+    public function setJsInitiator(string $jsFunctionName)
+    {
         if (!is_string($jsFunctionName) && !preg_match('%^[$_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%', $jsFunctionName)) {
             throw new \InvalidArgumentException("Invalid JavaScript funciton name: [$jsFunctionName]");
         }
         $this->jsInitiator = $jsFunctionName;
         return $this;
     }
-
+    
     /**
      * Called before scaffold template rendering
      */
-    public function beforeRender() {
-
+    public function beforeRender(): void
+    {
     }
-
+    
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
      * @throws \BadMethodCallException
      */
-    public function finish() {
+    public function finish(): void
+    {
         if ($this->isFinished) {
             throw new \BadMethodCallException('Attempt to call ' . get_class($this) . '->finish() twice');
         } else {
             $this->isFinished = true;
         }
     }
-
+    
     /**
      * @param array $columnNames
-     * @return $this
+     * @return static
      */
-    public function setAdditionalColumnsToSelect(...$columnNames) {
+    public function setAdditionalColumnsToSelect(...$columnNames)
+    {
         if (count($columnNames) && is_array($columnNames[0])) {
             $columnNames = $columnNames[0];
         }
         $this->additionalColumnsToSelect = $columnNames;
         return $this;
     }
-
+    
     /**
      * @return array
      */
-    public function getAdditionalColumnsToSelect() {
+    public function getAdditionalColumnsToSelect(): array
+    {
         return $this->additionalColumnsToSelect;
     }
-
-    /**
-     * @param string $section
-     * @return CmfRedirectMenuItem
-     */
-    public function getItemEditMenuItem($section = 'toolbar') {
-        return CmfMenuItem::redirect(routeToCmfItemEditForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}', false, null, true))
+    
+    public function getItemEditMenuItem(string $section = 'toolbar'): CmfRedirectMenuItem
+    {
+        $url = $this->getScaffoldConfig()->getUrlToItemEditForm('{{= it.___pk_value}}', false, true);
+        return CmfMenuItem::redirect($url)
             ->setTitle($this->translateGeneral($section . '.edit_item'))
             ->setIconClasses('glyphicon glyphicon-edit')
             ->setIconColorClass('text-green')
@@ -1147,13 +1095,11 @@ abstract class ScaffoldSectionConfig {
             })
             ->setConditionToShow('it.___edit_allowed');
     }
-
-    /**
-     * @param string $section
-     * @return CmfRedirectMenuItem
-     */
-    public function getItemCloneMenuItem($section = 'toolbar') {
-        return CmfMenuItem::redirect(routeToCmfItemCloneForm($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}', false, null, true))
+    
+    public function getItemCloneMenuItem(string $section = 'toolbar'): CmfRedirectMenuItem
+    {
+        $url = $this->getScaffoldConfig()->getUrlToItemCloneForm('{{= it.___pk_value}}', false, true);
+        return CmfMenuItem::redirect($url)
             ->setTitle($this->translateGeneral($section . '.clone_item'))
             ->setIconClasses('fa fa-copy')
             ->setIconColorClass('text-primary')
@@ -1163,13 +1109,11 @@ abstract class ScaffoldSectionConfig {
             })
             ->setConditionToShow('it.___cloning_allowed');
     }
-
-    /**
-     * @param string $section
-     * @return CmfRedirectMenuItem
-     */
-    public function getItemCreateMenuItem($section = 'toolbar') {
-        return CmfMenuItem::redirect(routeToCmfItemAddForm($this->getScaffoldConfig()->getResourceName(), [], false, null, true))
+    
+    public function getItemCreateMenuItem(string $section = 'toolbar'): CmfRedirectMenuItem
+    {
+        $url = $this->getScaffoldConfig()->getUrlToItemAddForm([], false, true);
+        return CmfMenuItem::redirect($url)
             ->setTitle($this->translateGeneral($section . '.create_item'))
             ->setIconClasses('fa fa-file-o')
             ->setIconColorClass('text-primary')
@@ -1178,15 +1122,12 @@ abstract class ScaffoldSectionConfig {
                 return $this->isCreateAllowed();
             })
             ->setConditionToShow('it.___create_allowed');
-
     }
-
-    /**
-     * @param string $section
-     * @return CmfRedirectMenuItem
-     */
-    public function getItemDetailsMenuItem($section = 'toolbar') {
-        return CmfMenuItem::redirect(routeToCmfItemDetails($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}', false, null, true))
+    
+    public function getItemDetailsMenuItem(string $section = 'toolbar'): CmfRedirectMenuItem
+    {
+        $url = $this->getScaffoldConfig()->getUrlToItemDetails('{{= it.___pk_value}}', false, true);
+        return CmfMenuItem::redirect($url)
             ->setTitle($this->translateGeneral($section . '.view_item'))
             ->setIconClasses('glyphicon glyphicon-info-sign')
             ->setIconColorClass('text-light-blue')
@@ -1196,13 +1137,11 @@ abstract class ScaffoldSectionConfig {
             })
             ->setConditionToShow('it.___details_allowed');
     }
-
-    /**
-     * @param string $section
-     * @return CmfRequestMenuItem
-     */
-    public function getItemDeleteMenuItem($section = 'toolbar') {
-        return CmfMenuItem::request(routeToCmfItemDelete($this->getScaffoldConfig()->getResourceName(), '{{= it.___pk_value}}', false, null, true), 'delete')
+    
+    public function getItemDeleteMenuItem(string $section = 'toolbar'): CmfRequestMenuItem
+    {
+        $url = $this->getScaffoldConfig()->getUrlToItemDelete('{{= it.___pk_value}}', false, true);
+        return CmfMenuItem::request($url, 'delete')
             ->setTitle($this->translateGeneral($section . '.delete_item'))
             ->setIconClasses('glyphicon glyphicon-trash')
             ->setIconColorClass('text-red')
@@ -1214,5 +1153,5 @@ abstract class ScaffoldSectionConfig {
             })
             ->setConditionToShow('it.___delete_allowed');
     }
-
+    
 }

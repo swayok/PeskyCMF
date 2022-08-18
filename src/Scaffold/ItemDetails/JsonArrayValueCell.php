@@ -5,7 +5,7 @@ namespace PeskyCMF\Scaffold\ItemDetails;
 class JsonArrayValueCell extends ValueCell {
     
     /** @var string  */
-    protected $templateForDefaultRenderer = 'cmf::item_details.json_array_table';
+    protected ?string $templateForDefaultRenderer = 'cmf::item_details.json_array_table';
     /** @var array */
     protected $jsonKeys = [];
 

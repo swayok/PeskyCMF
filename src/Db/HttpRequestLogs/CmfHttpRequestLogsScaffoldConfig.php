@@ -16,10 +16,10 @@ use Swayok\Html\Tag;
 class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
 {
     
-    protected $isDetailsViewerAllowed = true;
-    protected $isCreateAllowed = false;
-    protected $isEditAllowed = false;
-    protected $isDeleteAllowed = false;
+    protected bool $isDetailsViewerAllowed = true;
+    protected bool $isCreateAllowed = false;
+    protected bool $isEditAllowed = false;
+    protected bool $isDeleteAllowed = false;
     
     public static function getTable(): CmfHttpRequestLogsTable
     {

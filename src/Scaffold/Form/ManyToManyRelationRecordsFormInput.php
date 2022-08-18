@@ -3,7 +3,6 @@
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyORM\Core\DbExpr;
-use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
 
@@ -35,7 +34,8 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
     /**
      * @return string
      */
-    public function getType() {
+    public function getType(): string
+    {
         return static::TYPE_MULTISELECT;
     }
 
@@ -46,7 +46,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         ];
     }
 
-    public function setRelation(Relation $relation, $columnName) {
+    public function setRelation(Relation $relation, string $columnName) {
         $this->relation = $relation;
         if ($columnName !== $relation->getForeignColumnName()) {
             $this->relationColumn = $columnName;
@@ -54,7 +54,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         return $this;
     }
 
-    public function getRelationColumn() {
+    public function getRelationColumn(): ?string {
         if (empty($this->relationColumn)) {
             throw new \UnexpectedValueException(
                 "Relations linking column was not provided for '{$this->getName()}' input. "

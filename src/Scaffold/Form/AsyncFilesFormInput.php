@@ -40,10 +40,8 @@ class AsyncFilesFormInput extends FormInput {
         return $this->jsPluginOptions;
     }
 
-    /**
-     * @return string
-     */
-    public function getType() {
+    public function getType(): string
+    {
         return static::TYPE_HIDDEN;
     }
 
@@ -130,11 +128,12 @@ class AsyncFilesFormInput extends FormInput {
         }
     }
 
-    public function hasLabel() {
+    public function hasLabel(): bool
+    {
         return true;
     }
 
-    public function getLabel(InputRenderer $renderer = null) {
+    public function getLabel(?InputRenderer $renderer = null): string {
         return '';
     }
 
@@ -166,7 +165,7 @@ class AsyncFilesFormInput extends FormInput {
                     'uploaded_file_info' => 'uuid:' . $fileInfo->getUuid(),
                 ];
                 if ($info['is_image']) {
-                    list($info['width'], $info['height']) = getimagesize($fileInfo->getAbsoluteFilePath());
+                    [$info['width'], $info['height']] = getimagesize($fileInfo->getAbsoluteFilePath());
                 }
                 $ret[$groupName][] = $info;
             }

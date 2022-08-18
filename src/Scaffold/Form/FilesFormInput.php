@@ -45,7 +45,8 @@ class FilesFormInput extends FormInput {
     /**
      * @return string
      */
-    public function getType() {
+    public function getType(): string
+    {
         return static::TYPE_HIDDEN;
     }
 
@@ -133,11 +134,12 @@ class FilesFormInput extends FormInput {
         }
     }
 
-    public function hasLabel() {
+    public function hasLabel(): bool
+    {
         return true;
     }
 
-    public function getLabel(InputRenderer $renderer = null) {
+    public function getLabel(?InputRenderer $renderer = null): string {
         return '';
     }
 

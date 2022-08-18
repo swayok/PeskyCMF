@@ -85,7 +85,7 @@ class CmfAuthModule
         return $this->getLaravelApp()->make('mailer');
     }
     
-    protected function getAuthGate(): GateContract
+    public function getAuthGate(): GateContract
     {
         return $this->getLaravelApp()->make(GateContract::class);
     }

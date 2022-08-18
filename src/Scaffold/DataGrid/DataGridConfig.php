@@ -18,11 +18,11 @@ class DataGridConfig extends ScaffoldSectionConfig {
 
     public const ROW_ACTIONS_COLUMN_NAME = '__actions';
 
-    protected $allowRelationsInValueViewers = true;
+    protected bool $allowRelationsInValueViewers = true;
 
-    protected $allowComplexValueViewerNames = true;
+    protected bool $allowComplexValueViewerNames = true;
 
-    protected $template = 'cmf::scaffold.datagrid';
+    protected string $template = 'cmf::scaffold.datagrid';
     /**
      * @var int
      */
@@ -102,7 +102,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
     /** @var DataGridRendererHelper|null */
     protected $rendererHelper;
     /** @var bool */
-    protected $openInModal = false;
+    protected bool $openInModal = false;
     /** @var bool - optimize datagrid selects for usage in big tables so that it will be faster to select rows */
     protected $isBigTable = false;
 
@@ -146,7 +146,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
         return $this->hasValueViewer($name);
     }
 
-    protected function createValueRenderer() {
+    protected function createValueRenderer(): DataGridCellRenderer {
         return DataGridCellRenderer::create();
     }
 
@@ -592,10 +592,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
         return $records;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function createValueViewer() {
+    public function createValueViewer(): DataGridColumn {
         return DataGridColumn::create();
     }
 
@@ -808,7 +805,8 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @throws \UnexpectedValueException
      * @throws NotFoundException
      */
-    public function finish() {
+    public function finish(): void
+    {
         parent::finish();
         if ($this->isRowActionsEnabled() && !$this->hasValueViewer(static::ROW_ACTIONS_COLUMN_NAME)) {
             $this->addValueViewer(static::ROW_ACTIONS_COLUMN_NAME);
@@ -844,7 +842,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
         }
     }
 
-    protected function getSectionTranslationsPrefix($subtype = null) {
+    protected function getSectionTranslationsPrefix(?string $subtype = null): string {
         return $subtype === 'value_viewer' ? 'datagrid.column' : 'datagrid';
     }
 

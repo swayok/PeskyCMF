@@ -119,7 +119,8 @@ class JsonListFormInput extends FormInput {
     /**
      * @return string
      */
-    public function getType() {
+    public function getType(): string
+    {
         return static::TYPE_TEXT;
     }
 

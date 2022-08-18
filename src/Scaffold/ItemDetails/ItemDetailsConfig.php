@@ -7,11 +7,11 @@ use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 
 class ItemDetailsConfig extends ScaffoldSectionConfig {
 
-    protected $allowRelationsInValueViewers = true;
+    protected bool $allowRelationsInValueViewers = true;
 
-    protected $allowComplexValueViewerNames = true;
+    protected bool $allowComplexValueViewerNames = true;
 
-    protected $template = 'cmf::scaffold.item_details';
+    protected string $template = 'cmf::scaffold.item_details';
 
     /** @var array */
     protected $tabs = [];
@@ -44,17 +44,11 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         return $relations;
     }
 
-    /**
-     * @return ValueCell;
-     */
-    public function createValueViewer() {
+    public function createValueViewer(): ValueCell {
         return ValueCell::create();
     }
 
-    /**
-     * @return ItemDetailsValueRenderer
-     */
-    protected function createValueRenderer() {
+    protected function createValueRenderer(): ItemDetailsValueRenderer {
         return ItemDetailsValueRenderer::create();
     }
 
@@ -183,7 +177,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         return $this->rowsGroups;
     }
 
-    protected function getSectionTranslationsPrefix($subtype = null) {
+    protected function getSectionTranslationsPrefix(?string $subtype = null): string {
         return $subtype === 'value_viewer' ? 'item_details.field' : 'item_details';
     }
 
