@@ -47,8 +47,7 @@ class FormInput extends RenderableValueViewer {
     /** @var null|string */
     protected $emptyOptionLabel;
 
-    /** @var null|string */
-    protected $tooltip;
+    protected ?string $tooltip = null;
     /** @var null|array */
     protected $disablersConfigs = [];
     /** @var null|\Closure */
@@ -287,10 +286,7 @@ class FormInput extends RenderableValueViewer {
         return $this->additionalHtml;
     }
 
-    /**
-     * @return null|string|array
-     */
-    public function getTooltip() {
+    public function getTooltip(): ?string {
         return $this->tooltip;
     }
 

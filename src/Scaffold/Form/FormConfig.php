@@ -1,117 +1,101 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold\Form;
 
+use Illuminate\Contracts\Validation\Factory as ValidationFactoryContract;
+use Illuminate\Support\Arr;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
-use PeskyCMF\Scaffold\ScaffoldSectionConfigException;
 use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
 use Swayok\Utils\Set;
 use Swayok\Utils\StringUtils;
 
-class FormConfig extends ScaffoldSectionConfig {
-
+class FormConfig extends ScaffoldSectionConfig
+{
+    
+    public const VALIDATOR_FOR_ID = 'required|integer|min:1';
+    
     protected string $template = 'cmf::scaffold.form';
-    protected $bulkEditingTemplate = 'cmf::scaffold.bulk_edit_form';
-
+    protected string $bulkEditingTemplate = 'cmf::scaffold.bulk_edit_form';
+    
     protected bool $allowRelationsInValueViewers = true;
     protected bool $allowComplexValueViewerNames = true;
-
+    
     /**
      * Fields list that can be edited in bulk (for many records at once)
      * @var FormInput[]
      */
-    protected $bulkEditableColumns = [];
+    protected array $bulkEditableColumns = [];
     /**
-     * @var null|mixed
+     * @var int|string|null
      */
     protected $itemId;
+    
+    protected ?bool $hasFiles = null;
+    protected ?bool $hasOptionsLoader = null;
+    
+    protected ?\Closure $validators = null;
+    protected ?\Closure $validatorsForCreate = null;
+    protected ?\Closure $validatorsForEdit = null;
+    
+    protected ?\Closure $defaultValuesModifier = null;
+    protected ?\Closure $additionalHtmlForForm = null;
+    protected ?\Closure $incomingDataModifier = null;
+    protected ?\Closure $incomingDataModifierForBulkEdit = null;
+    protected ?\Closure $beforeSaveCallback = null;
+    protected ?\Closure $afterSaveCallback = null;
+    protected bool $revalidateDataAfterBeforeSaveCallbackForCreation = false;
+    protected bool $revalidateDataAfterBeforeSaveCallbackForUpdate = false;
+    protected ?\Closure $beforeValidateCallback = null;
+    protected ?\Closure $validationSuccessCallback = null;
+    protected ?\Closure $beforeBulkEditDataSaveCallback = null;
+    protected ?\Closure $bulkEditAfterSaveCallback = null;
+    
+    protected array $tabs = [];
+    protected ?int $currentTab = null;
+    protected array $inputGroups = [];
+    protected ?int $currentInputsGroup = null;
+    
+    protected ?array $tooltips = null;
+    
+    protected function getValidator(): ValidationFactoryContract
+    {
+        return $this->getCmfConfig()->getLaravelApp()->make('validator');
+    }
+    
     /**
-     * @var bool
+     * @return static
      */
-    protected $hasFiles = false;
-
-    /** @var bool */
-    protected $hasOptionsLoader;
-    /** @var \Closure */
-    protected $validators;
-    /** @var \Closure */
-    protected $validatorsForCreate;
-    /** @var \Closure */
-    protected $validatorsForEdit;
-    /** @var array|\Closure|null */
-    protected $defaultValuesModifier = [];
-
-    /** @var string|\Closure */
-    protected $additionalHtmlForForm = '';
-
-    public const VALIDATOR_FOR_ID = 'required|integer|min:1';
-    /** @var \Closure|null */
-    protected $incomingDataModifier;
-    /** @var \Closure|null */
-    protected $incomingDataModifierForBulkEdit;
-    /** @var \Closure|null */
-    protected $beforeSaveCallback;
-     /** @var \Closure|null */
-    protected $afterSaveCallback;
-    /** @var bool */
-    protected $revalidateDataAfterBeforeSaveCallbackForCreation = false;
-    /** @var bool */
-    protected $revalidateDataAfterBeforeSaveCallbackForUpdate = false;
-    /** @var \Closure|null */
-    protected $beforeValidateCallback;
-    /** @var \Closure|null */
-    protected $validationSuccessCallback;
-    /** @var \Closure|null */
-    protected $beforeBulkEditDataSaveCallback;
-    /** @var \Closure|null */
-    protected $bulkEditAfterSaveCallback;
-
-    /** @var array */
-    protected $tabs = [];
-    /** @var null|int */
-    protected $currentTab;
-    /** @var array */
-    protected $inputGroups = [];
-    /** @var null|int */
-    protected $currentInputsGroup;
-
-    /** @var array|null */
-    protected $tooltips;
-
-    /**
-     * @param string $laravelViewPath
-     * @return $this
-     */
-    public function setBulkEditingTemplate($laravelViewPath) {
+    public function setBulkEditingTemplate(string $laravelViewPath)
+    {
         $this->bulkEditingTemplate = $laravelViewPath;
         return $this;
     }
-
-    /**
-     * @return string
-     * @throws ScaffoldSectionConfigException
-     */
-    public function getBulkEditingTemplate() {
+    
+    public function getBulkEditingTemplate(): string
+    {
         if (empty($this->bulkEditingTemplate)) {
-            throw new ScaffoldSectionConfigException($this, 'The view file for bulk editing is not set');
+            throw new \UnexpectedValueException('The view file for bulk editing is not set');
         }
         return $this->bulkEditingTemplate;
     }
-
-    protected function createValueRenderer(): InputRenderer {
+    
+    protected function createValueRenderer(): InputRenderer
+    {
         return InputRenderer::create();
     }
-
+    
     /**
      * @param FormInput[] $formInputs
-     * @return $this
+     * @return static
      */
-    public function setValueViewers(array $formInputs) {
+    public function setValueViewers(array $formInputs)
+    {
         /** @var AbstractValueViewer|null $config */
         foreach ($formInputs as $name => $config) {
             if (is_array($config)) {
@@ -135,44 +119,43 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $this;
     }
-
+    
     /**
      * Alias for setValueViewers
      * @param array $formInputs - formats:
      * - ['name1', 'name2' => FormInput::create(), ...]
      * - ['group lablel' => ['name1', 'name2' => FormInput::create(), ...]
      * Also you may use '/' as value to separate inputs with <hr>
-     * @return $this
+     * @return static
      */
-    public function setFormInputs(array $formInputs) {
+    public function setFormInputs(array $formInputs)
+    {
         return $this->setValueViewers($formInputs);
     }
-
+    
     /**
-     * @param string $tabLabel
-     * @param array $formInputs
-     * @return $this
+     * @return static
      */
-    public function addTab($tabLabel, array $formInputs) {
+    public function addTab(string $tabLabel, array $formInputs)
+    {
         $this->newTab($tabLabel);
         $this->setFormInputs($formInputs);
         $this->currentTab = null;
         return $this;
     }
-
+    
     /**
      * Add inputs to existing tab. If tab not exists - new one will be created
-     * @param $tabLabel
-     * @param array $formInputs
-     * @return $this
+     * @return static
      */
-    public function updateTab($tabLabel, array $formInputs) {
+    public function updateTab(string $tabLabel, array $formInputs)
+    {
         $tabExists = false;
         foreach ($this->getTabs() as $tabIndex => $tabInfo) {
-            if (array_get($tabInfo, 'label') === $tabLabel) {
+            if (Arr::get($tabInfo, 'label') === $tabLabel) {
                 $this->currentTab = $tabIndex;
                 $this->currentInputsGroup = null;
-                if (count((array)array_get($tabInfo, 'groups', [])) === 1 && is_int(array_keys($tabInfo['groups'])[0])) {
+                if (count((array)Arr::get($tabInfo, 'groups', [])) === 1 && is_int(array_keys($tabInfo['groups'])[0])) {
                     $this->currentInputsGroup = array_keys($tabInfo['groups'])[0];
                 }
                 $tabExists = true;
@@ -187,11 +170,9 @@ class FormConfig extends ScaffoldSectionConfig {
         $this->currentInputsGroup = null;
         return $this;
     }
-
-    /**
-     * @param $label
-     */
-    protected function newInputsGroup($label) {
+    
+    protected function newInputsGroup(string $label): void
+    {
         if ($this->currentTab === null) {
             $this->newTab('');
         }
@@ -199,66 +180,53 @@ class FormConfig extends ScaffoldSectionConfig {
         $this->tabs[$this->currentTab]['groups'][] = $this->currentInputsGroup;
         $this->inputGroups[] = [
             'label' => $label,
-            'inputs_names' => []
+            'inputs_names' => [],
         ];
     }
-
-    /**
-     * @param $label
-     */
-    protected function newTab($label) {
+    
+    protected function newTab(string $label): void
+    {
         $this->currentTab = count($this->tabs);
         $this->tabs[] = [
             'label' => $label,
-            'groups' => []
+            'groups' => [],
         ];
         $this->currentInputsGroup = null;
     }
-
+    
     /**
-     * @return FormInput[]|AbstractValueViewer[]
+     * @return FormInput[]
      */
-    public function getFormInputs() {
+    public function getFormInputs(): array
+    {
         return $this->getValueViewers();
     }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasFormInput($name) {
+    
+    public function hasFormInput(string $name): bool
+    {
         return $this->hasValueViewer($name);
     }
-
-    /**
-     * @param string $name
-     * @return FormInput|AbstractValueViewer
-     */
-    public function getFormInput($name) {
+    
+    public function getFormInput(string $name): FormInput
+    {
         return $this->getValueViewer($name);
     }
-
-    /**
-     * @return array
-     */
-    public function getTabs() {
+    
+    public function getTabs(): array
+    {
         return $this->tabs;
     }
-
-    /**
-     * @return array
-     */
-    public function getInputsGroups() {
+    
+    public function getInputsGroups(): array
+    {
         return $this->inputGroups;
     }
-
+    
     /**
-     * @param string $name
-     * @param AbstractValueViewer|null $viewer
-     * @param bool $autodetectIfLinkedToDbColumn
-     * @return $this
+     * @return static
      */
-    public function addValueViewer($name, AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false) {
+    public function addValueViewer(string $name, ?AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false)
+    {
         parent::addValueViewer($name, $viewer, $autodetectIfLinkedToDbColumn);
         if ($this->currentInputsGroup === null) {
             $this->newInputsGroup('');
@@ -266,12 +234,9 @@ class FormConfig extends ScaffoldSectionConfig {
         $this->inputGroups[$this->currentInputsGroup]['inputs_names'][] = $name;
         return $this;
     }
-
-    /**
-     * @param bool $isCreation
-     * @return array
-     */
-    protected function collectPresetValidators($isCreation) {
+    
+    protected function collectPresetValidators(bool $isCreation): array
+    {
         $validators = [];
         foreach ($this->getFormInputs() as $formInput) {
             if (($isCreation && !$formInput->isShownOnCreate()) || (!$isCreation && !$formInput->isShownOnEdit())) {
@@ -282,27 +247,25 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $validators;
     }
-
+    
     /**
      * @param array $tooltips - anything except array will be ignored so it won't crash when there is no
      *      translations for tooltips in dictionaries (ex: trans('cmf.admins.form.tooltip') may be array or string)
-     * @return $this
+     * @return static
      */
-    public function setTooltipsForInputs($tooltips) {
+    public function setTooltipsForInputs(array $tooltips)
+    {
         if (is_array($tooltips)) {
             $this->tooltips = $tooltips;
         }
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getTooltipsForInputs() {
+    
+    public function getTooltipsForInputs(): array
+    {
         if ($this->tooltips === null) {
             $resourceName = $this->getScaffoldConfig()->getResourceName();
             if (!empty($resourceName)) {
-                /** @noinspection PhpParamsInspection */
                 $this->setTooltipsForInputs($this->translate(null, 'tooltip'));
             }
             // make sure tooltips is always an array
@@ -312,38 +275,42 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $this->tooltips;
     }
-
-    /**
-     * @param string $inputName
-     * @return bool
-     */
-    public function hasTooltipForInput($inputName) {
+    
+    public function hasTooltipForInput(string $inputName): bool
+    {
         return (
             ($this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip())
             || !empty($this->getTooltipsForInputs()[$inputName])
         );
     }
-
+    
     /**
      * @param string $inputName
      * @return mixed
      */
-    public function getTooltipForInput($inputName) {
+    public function getTooltipForInput(string $inputName): string
+    {
         if ($this->hasFormInput($inputName) && $this->getFormInput($inputName)->hasTooltip()) {
-            return $this->getFormInput($inputName)->hasTooltip();
+            return $this->getFormInput($inputName)->getTooltip();
         } else {
-            return array_get($this->getTooltipsForInputs(), $inputName, '');
+            return Arr::get($this->getTooltipsForInputs(), $inputName, '');
         }
     }
-
+    
+    /**
+     * @param InputRenderer $renderer
+     * @param FormInput $valueViewer
+     * @return void
+     */
     protected function configureDefaultValueRenderer(ValueRenderer $renderer, RenderableValueViewer $valueViewer): void
     {
         parent::configureDefaultValueRenderer($renderer, $valueViewer);
+        $relation = $valueViewer->getRelation();
         if (
             $valueViewer->isLinkedToDbColumn()
             && (
-                !$valueViewer->hasRelation()
-                || $valueViewer->getRelation()->getType() !== Relation::HAS_MANY
+                !$relation
+                || $relation->getType() !== Relation::HAS_MANY
             )
         ) {
             $this->configureRendererByColumnConfig($renderer, $valueViewer);
@@ -352,25 +319,22 @@ class FormConfig extends ScaffoldSectionConfig {
             call_user_func($valueViewer->getDefaultRendererConfigurator(), $renderer, $valueViewer);
         }
     }
-
-    /**
-     * @param InputRenderer|ValueRenderer $renderer
-     * @param FormInput|RenderableValueViewer $formInput
-     */
-    protected function configureRendererByColumnConfig(ValueRenderer $renderer, FormInput $formInput) {
+    
+    protected function configureRendererByColumnConfig(InputRenderer $renderer, FormInput $formInput): void
+    {
         if ($formInput::isComplexViewerName($formInput->getName())) {
             $renderer->setIsRequired(false);
         } else {
             $renderer->setIsRequired($formInput->getTableColumn()->isValueRequiredToBeNotEmpty());
         }
     }
-
+    
     /**
-     * @param array $columns
-     * @return $this
+     * @return static
      * @throws \BadMethodCallException
      */
-    public function setBulkEditableColumns(array $columns) {
+    public function setBulkEditableColumns(array $columns)
+    {
         if (empty($this->valueViewers)) {
             throw new \BadMethodCallException('setValueViewers() method must be called before');
         }
@@ -383,20 +347,20 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $this;
     }
-
+    
     /**
      * @param string $name
      * @param null|FormInput $formInput - null: FormInput will be imported from $this->fields or created default one
-     * @return $this
-     * @throws ScaffoldSectionConfigException
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function addBulkEditableColumn($name, FormInput $formInput = null) {
-        if ((!$formInput || $formInput->isLinkedToDbColumn()) && !$this->getTable()->getTableStructure()->hasColumn($name)) {
-            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$name]");
-        } else if ($this->getTable()->getTableStructure()->getColumn($name)->isItAFile()) {
-            throw new ScaffoldSectionConfigException(
-                $this,
+    public function addBulkEditableColumn(string $name, FormInput $formInput = null)
+    {
+        $tableStructure = $this->getTable()->getTableStructure();
+        if ((!$formInput || $formInput->isLinkedToDbColumn()) && !$tableStructure::hasColumn($name)) {
+            throw new \InvalidArgumentException(get_class($tableStructure) . " has no column [$name]");
+        } elseif ($tableStructure::getColumn($name)->isItAFile()) {
+            throw new \InvalidArgumentException(
                 "Attaching files in bulk editing form is not suppoted. Table column: [$name]"
             );
         }
@@ -411,54 +375,52 @@ class FormConfig extends ScaffoldSectionConfig {
         $this->bulkEditableColumns[$name] = $formInput;
         return $this;
     }
-
+    
     /**
      * @return FormInput[]
      */
-    public function getBulkEditableColumns() {
+    public function getBulkEditableColumns(): array
+    {
         return $this->bulkEditableColumns;
     }
-
-    /**
-     * @param FormInput $formInput
-     * @return int
-     */
-    protected function getNextBulkEditableColumnPosition(FormInput $formInput) {
+    
+    protected function getNextBulkEditableColumnPosition(FormInput $formInput): int
+    {
         return count($this->bulkEditableColumns);
     }
-
+    
     /**
-     * @return mixed|null
+     * @return int|string|null
      */
-    public function getItemId() {
+    public function getItemId()
+    {
         return $this->itemId;
     }
-
+    
     /**
-     * @param mixed $itemId
-     * @return $this
+     * @param int|string $itemId
+     * @return static
      */
-    public function setItemId($itemId) {
+    public function setItemId($itemId)
+    {
         $this->itemId = $itemId;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasFiles() {
+    
+    public function hasFiles(): bool
+    {
         if ($this->hasFiles === null) {
-            $this->hasFiles = !empty(
-                array_intersect($this->getValueViewers(), $this->getTable()->getTableStructure()->getFileColumns())
+            $filesViewers = array_intersect(
+                $this->getValueViewers(),
+                $this->getTable()->getTableStructure()->getFileColumns()
             );
+            $this->hasFiles = !empty($filesViewers);
         }
         return $this->hasFiles;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasOptionsLoader() {
+    
+    public function hasOptionsLoader(): bool
+    {
         if ($this->hasOptionsLoader === null) {
             $this->hasOptionsLoader = false;
             /** @var FormInput $viewer */
@@ -471,13 +433,15 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $this->hasOptionsLoader;
     }
-
+    
     /**
      * @param int|string|null $pkValue - primary key value
      * @return array[]
      */
-    public function loadOptions($pkValue) {
-        $options = array();
+    public function loadOptions($pkValue): array
+    {
+        // todo: maybe use $this->itemId ???
+        $options = [];
         /** @var FormInput $viewer */
         foreach ($this->getValueViewers() as $viewer) {
             if ($viewer->hasOptionsLoader()) {
@@ -492,14 +456,16 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $options;
     }
-
+    
     /**
      * @param string $inputName
      * @param int|string|null $pkValue - primary key value
      * @param string|null $keywords - keywords for filtering
      * @return array
      */
-    public function loadOptionsForInput($inputName, $pkValue, $keywords) {
+    public function loadOptionsForInput(string $inputName, $pkValue, ?string $keywords): array
+    {
+        // todo: maybe use $this->itemId ???
         $viewer = $this->getValueViewer($inputName);
         if (!$viewer->hasOptionsLoader()) {
             return [];
@@ -524,15 +490,17 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $options;
     }
-
-    public function createValueViewer(): FormInput {
+    
+    public function createValueViewer(): FormInput
+    {
         return FormInput::create();
     }
-
+    
     /**
      * @return FormInput[]
      */
-    public function getInputsWithOwnValueSavingMethods() {
+    public function getInputsWithOwnValueSavingMethods(): array
+    {
         $ret = [];
         foreach ($this->getFormInputs() as $key => $viewer) {
             if ($viewer->hasOwnValueSavingMethod()) {
@@ -541,63 +509,65 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $ret;
     }
-
+    
     /**
      * @param array $updates
      * @param RecordInterface|null $record - RecordInterface: record before editing | null: used for bulk editing
      * @return array
      */
-    public function getValidatorsForEdit(array $updates, ?RecordInterface $record) {
+    public function getValidatorsForEdit(array $updates, ?RecordInterface $record): array
+    {
         return array_merge(
             $this->collectPresetValidators(false),
             $this->validators ? call_user_func($this->validators, $updates) : [],
             $this->validatorsForEdit ? call_user_func($this->validatorsForEdit, $updates, $record) : []
         );
     }
-
+    
     /**
      * @param \Closure $validatorsForEdit - function (array $updates, ?RecordInterface $record) { return []; }
      * Note: You can insert fields from $updates using '{{field_name}}'
-     * @return $this
+     * @return static
      */
-    public function addValidatorsForEdit(\Closure $validatorsForEdit) {
+    public function addValidatorsForEdit(\Closure $validatorsForEdit)
+    {
         $this->validatorsForEdit = $validatorsForEdit;
         return $this;
     }
-
-    /**
-     * @param array $data
-     * @return array
-     */
-    public function getValidatorsForCreate(array $data) {
+    
+    public function getValidatorsForCreate(array $data): array
+    {
         return array_merge(
             $this->collectPresetValidators(true),
             $this->validators ? call_user_func($this->validators, $data) : [],
             $this->validatorsForCreate ? call_user_func($this->validatorsForCreate, $data) : []
         );
     }
-
+    
     /**
      * @param \Closure $validatorsForCreate = function (array $data) { return []; }
      * Note: You can insert fields from received data via '{{field_name}}'
-     * @return $this
+     * @return static
      */
-    public function addValidatorsForCreate(\Closure $validatorsForCreate) {
+    public function addValidatorsForCreate(\Closure $validatorsForCreate)
+    {
         $this->validatorsForCreate = $validatorsForCreate;
         return $this;
     }
-
+    
     /**
      * @param \Closure $validators = function (array $data) { return []; }
      * Note: You can insert fields from received data via '{{field_name}}'
-     * @return $this
+     * @return static
      */
-    public function setValidators(\Closure $validators) {
+    public function setValidators(\Closure $validators)
+    {
         $this->validators = $validators;
         return $this;
     }
-
-    public function validateDataForCreate(array $data, array $messages = [], bool $isRevalidation = false): array {
+    
+    public function validateDataForCreate(array $data, array $messages = [], bool $isRevalidation = false): array
+    {
         return $this->validateData(
             $data,
             $this->getValidatorsForCreate($data),
@@ -605,8 +575,9 @@ class FormConfig extends ScaffoldSectionConfig {
             $isRevalidation
         );
     }
-
-    public function validateDataForEdit(array $data, RecordInterface $record, array $messages = [], bool $isRevalidation = false): array {
+    
+    public function validateDataForEdit(array $data, RecordInterface $record, array $messages = [], bool $isRevalidation = false): array
+    {
         return $this->validateData(
             $data,
             $this->getValidatorsForEdit($data, $record),
@@ -614,55 +585,51 @@ class FormConfig extends ScaffoldSectionConfig {
             $isRevalidation
         );
     }
-
-    /**
-     * @param array $data
-     * @param array $messages
-     * @param bool $isRevalidation
-     * @return array
-     */
-    public function validateDataForBulkEdit(array $data, array $messages = [], $isRevalidation = false) {
+    
+    public function validateDataForBulkEdit(array $data, array $messages = [], bool $isRevalidation = false): array
+    {
         $rules = array_intersect_key($this->getValidatorsForEdit($data, null), $data);
         if (empty($rules)) {
             return [];
         }
         return $this->validateData($data, $rules, $messages, $isRevalidation, true);
     }
-
+    
     /**
-     * @param \Closure $callback - function (array $data, $isRevalidation) { return true; }
-     * Note: callback MUST return true if everything is ok, otherwise - returned values treated as error
-     * @return $this
+     * @param \Closure $callback - function (array $data, $isRevalidation): ?array { return null; }
+     * Note: callback MUST return empty value if everything is ok or array with errors
+     * @return static
      */
-    public function setBeforeValidateCallback(\Closure $callback) {
+    public function setBeforeValidateCallback(\Closure $callback)
+    {
         $this->beforeValidateCallback = $callback;
         return $this;
     }
-
+    
     /**
-     * @param array $data
-     * @param $isRevalidation
-     * @return array|bool|string - true: no errors | other: errors detected
+     * @return array - errors (empty array - no errors)
      */
-    public function beforeValidate(array $data, $isRevalidation) {
+    public function beforeValidate(array $data, bool $isRevalidation): array
+    {
         if (!empty($this->beforeValidateCallback)) {
-            $success = call_user_func($this->beforeValidateCallback, $data, $isRevalidation);
-            if ($success !== true) {
-                return (array)$success;
+            $errors = call_user_func($this->beforeValidateCallback, $data, $isRevalidation);
+            if (empty($errors)) {
+                return [];
+            } else if (is_array($errors)) {
+                return $errors;
             }
+            throw new \UnexpectedValueException(
+                'beforeValidateCallback must return array with key-value pairs (errors list) or null (no errors)'
+            );
         }
-        return true;
+        return [];
     }
-
+    
     /**
-     * @param array $data
-     * @param bool $isCreation
-     * @param bool $isBulkEdit
-     * @return array
      * @throws \UnexpectedValueException
      */
-    public function modifyIncomingDataBeforeValidation(array $data, $isCreation, $isBulkEdit = false) {
-        /** @var FormInput[] $inputs */
+    public function modifyIncomingDataBeforeValidation(array $data, bool $isCreation, bool $isBulkEdit = false): array
+    {
         $inputs = $isBulkEdit ? $this->getBulkEditableColumns() : $this->getFormInputs();
         foreach ($inputs as $inputName => $formInput) {
             if (($isCreation && !$formInput->isShownOnCreate()) || (!$isCreation && !$formInput->isShownOnEdit())) {
@@ -671,8 +638,12 @@ class FormConfig extends ScaffoldSectionConfig {
             if ($formInput::isComplexViewerName($inputName)) {
                 $inputName = implode('.', $formInput::splitComplexViewerName($inputName));
             }
-            if (array_has($data, $inputName)) {
-                array_set($data, $inputName, $formInput->modifySubmitedValueBeforeValidation(array_get($data, $inputName, ''), $data));
+            if (Arr::has($data, $inputName)) {
+                Arr::set(
+                    $data,
+                    $inputName,
+                    $formInput->modifySubmitedValueBeforeValidation(Arr::get($data, $inputName, ''), $data)
+                );
             }
         }
         if ($isBulkEdit) {
@@ -682,7 +653,7 @@ class FormConfig extends ScaffoldSectionConfig {
                     throw new \UnexpectedValueException('incomingDataModifierForBulkEdit closure must return an array');
                 }
             }
-        } else if ($this->incomingDataModifier) {
+        } elseif ($this->incomingDataModifier) {
             $data = call_user_func($this->incomingDataModifier, $data, $isCreation, $this);
             if (!is_array($data)) {
                 throw new \UnexpectedValueException('incomingDataModifier closure must return an array');
@@ -690,51 +661,53 @@ class FormConfig extends ScaffoldSectionConfig {
         }
         return $data;
     }
-
+    
     /**
      * @param \Closure $modifier - function (array $data, $isCreation, FormConfig $formConfig) { return $data; }
-     * @return $this
+     * @return static
      */
-    public function setIncomingDataModifier(\Closure $modifier) {
+    public function setIncomingDataModifier(\Closure $modifier)
+    {
         $this->incomingDataModifier = $modifier;
         return $this;
     }
-
+    
     /**
      * @param \Closure $modifier - function (array $data, FormConfig $formConfig) { return $data; }
-     * @return $this
+     * @return static
      */
-    public function setIncomingDataModifierForBulkEdit(\Closure $modifier) {
+    public function setIncomingDataModifierForBulkEdit(\Closure $modifier)
+    {
         $this->incomingDataModifierForBulkEdit = $modifier;
         return $this;
     }
-
+    
     /**
      * @param array $data
      * @param array $validators - supports inserts in format "{{id}}" where "id" can be any key from $data
      * @param array $messages
      * @param bool $isRevalidation
      * @param bool $isBulkEdit
-     * @return array|string|bool
+     * @return array - array: errors (empty array - no errors)
      */
     public function validateData(
         array $data,
         array $validators,
         array $messages = [],
-        $isRevalidation = false,
-        $isBulkEdit = false
-    ) {
-        $success = $this->beforeValidate($data, $isRevalidation);
-        if ($success !== true) {
-            return $success;
+        bool $isRevalidation = false,
+        bool $isBulkEdit = false
+    ): array {
+        $errors = $this->beforeValidate($data, $isRevalidation);
+        if (!empty($errors)) {
+            return $errors;
         }
-
+        
         if (empty($validators)) {
             return [];
         }
         if (empty($messages)) {
             /** @noinspection CallableParameterUseCaseInTypeContextInspection */
-            $messages = cmfTransCustom('.' . $this->getTable()->getName() . '.form.validation');
+            $messages = $this->translate(null, 'validation');
         }
         if (!is_array($messages)) {
             $messages = [];
@@ -760,8 +733,7 @@ class FormConfig extends ScaffoldSectionConfig {
                 if (preg_match('%(^|\|)array%i', $value)) {
                     $columnsWithArrayType[] = $key;
                 }
-            } else if (is_array($value)) {
-                /** @var array $value */
+            } elseif (is_array($value)) {
                 foreach ($value as &$validator) {
                     if (is_string($validator)) {
                         $validator = StringUtils::insert($validator, $dataForInserts, ['before' => '{{', 'after' => '}}']);
@@ -774,7 +746,7 @@ class FormConfig extends ScaffoldSectionConfig {
             }
         }
         unset($value);
-        $validator = \Validator::make($data, $validators, $messages);
+        $validator = $this->getValidator()->make($data, $validators, $messages);
         if ($validator->fails()) {
             $errors = $validator->getMessageBag()->toArray();
             foreach ($errors as $viewerName => $error) {
@@ -785,88 +757,78 @@ class FormConfig extends ScaffoldSectionConfig {
             }
             return $errors;
         }
-
-        $success = $this->onValidationSuccess($data, $isRevalidation, $isBulkEdit);
-        if ($success !== true) {
-            return $success;
+        
+        $errors = $this->onValidationSuccess($data, $isRevalidation, $isBulkEdit);
+        if (!empty($errors)) {
+            return $errors;
         }
-
+        
         return [];
     }
-
+    
     /**
      * Called after request data validation and before specific callbacks and data saving.
      * Note: if you need to revalidate data after callback - use setRevalidateDataAfterBeforeSaveCallback() method
      * Note: is not applied to bulk edit!
      * @param \Closure $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
-     * @return $this
+     * @return static
      */
-    public function setBeforeSaveCallback(\Closure $callback) {
+    public function setBeforeSaveCallback(\Closure $callback)
+    {
         $this->beforeSaveCallback = $callback;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasBeforeSaveCallback() {
+    
+    public function hasBeforeSaveCallback(): bool
+    {
         return !empty($this->beforeSaveCallback);
     }
-
-    /**
-     * @return \Closure
-     */
-    public function getBeforeSaveCallback() {
+    
+    public function getBeforeSaveCallback(): ?\Closure
+    {
         return $this->beforeSaveCallback;
     }
-
+    
     /**
      * Called after request data validation and before specific callbacks and data saving.
      * Note: if you need to revalidate data after callback - use setRevalidateDataAfterBeforeSaveCallback() method
      * Note: is not applied to bulk edit!
      * @param \Closure $callback = function (array $validatedData, FormConfig $formConfig) { return $validatedData; }
-     * @return $this
+     * @return static
      */
-    public function setBeforeBulkEditDataSaveCallback(\Closure $callback) {
+    public function setBeforeBulkEditDataSaveCallback(\Closure $callback)
+    {
         $this->beforeBulkEditDataSaveCallback = $callback;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasBeforeBulkEditDataSaveCallback() {
+    
+    public function hasBeforeBulkEditDataSaveCallback(): bool
+    {
         return !empty($this->beforeBulkEditDataSaveCallback);
     }
-
-    /**
-     * @return \Closure
-     */
-    public function getBeforeBulkEditDataSaveCallback() {
+    
+    public function getBeforeBulkEditDataSaveCallback(): ?\Closure
+    {
         return $this->beforeBulkEditDataSaveCallback;
     }
-
+    
     /**
-     * @param bool $forCreation
-     * @param bool $forUpdate
-     * @return $this
+     * @return static
      */
-    public function setRevalidateDataAfterBeforeSaveCallback($forCreation, $forUpdate) {
-        $this->revalidateDataAfterBeforeSaveCallbackForCreation = (bool)$forCreation;
-        $this->revalidateDataAfterBeforeSaveCallbackForUpdate = (bool)$forUpdate;
+    public function setRevalidateDataAfterBeforeSaveCallback(bool $forCreation, bool $forUpdate)
+    {
+        $this->revalidateDataAfterBeforeSaveCallbackForCreation = $forCreation;
+        $this->revalidateDataAfterBeforeSaveCallbackForUpdate = $forUpdate;
         return $this;
     }
-
-    /**
-     * @param bool $isCreation
-     * @return bool
-     */
-    public function shouldRevalidateDataAfterBeforeSaveCallback($isCreation) {
+    
+    public function shouldRevalidateDataAfterBeforeSaveCallback(bool $isCreation): bool
+    {
         return $isCreation
             ? $this->revalidateDataAfterBeforeSaveCallbackForCreation
             : $this->revalidateDataAfterBeforeSaveCallbackForUpdate;
     }
-
+    
     /**
      * @param \Closure $calback = function (array $data, $isRevalidation, $isBulkEdit) { return true }
      * Note: callback MUST return true if everything is ok, otherwise - returned values treated as error
@@ -875,145 +837,129 @@ class FormConfig extends ScaffoldSectionConfig {
      *      - string: custom "validation failed" message (without errors for certain fields)
      *      - array: validation errors for certain fields, may contain "_mesasge" key to be displayed instead of
      *               default "validation failed" message
-     * @return $this
+     * @return static
      */
-    public function setValidationSuccessCallback(\Closure $calback) {
+    public function setValidationSuccessCallback(\Closure $calback)
+    {
         $this->validationSuccessCallback = $calback;
         return $this;
     }
-
+    
     /**
-     * @param array $data
-     * @param bool $isRevalidation
-     * @param bool $isBulkEdit
-     * @return array|bool - true: no errors | other - validation errors
+     * @return array - validation errors (empty array - no errors)
      * @throws \UnexpectedValueException
      */
-    protected function onValidationSuccess(array $data, $isRevalidation, $isBulkEdit) {
+    protected function onValidationSuccess(array $data, bool $isRevalidation, bool $isBulkEdit): array
+    {
         if (!empty($this->validationSuccessCallback)) {
-            $success = call_user_func($this->validationSuccessCallback, $data, $isRevalidation, $isBulkEdit);
-            if ($success !== true) {
-                if (is_string($success)) {
-                    return ['_message' => $success];
-                } else if (is_array($success)) {
-                    return $success;
-                } else {
-                    throw new \UnexpectedValueException(
-                        'validationSuccessCallback must return true, string or array with key-value pairs'
-                    );
-                }
+            $errors = call_user_func($this->validationSuccessCallback, $data, $isRevalidation, $isBulkEdit);
+            if (empty($errors)) {
+                return [];
+            } else if (is_array($errors)) {
+                return $errors;
             }
+            throw new \UnexpectedValueException(
+                'validationSuccessCallback must return array with key-value pairs (errors list) or null (no errors)'
+            );
         }
-        return true;
+        return [];
     }
-
+    
     /**
      * Callback is called after successfully saving data but before model's commit()
      * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
      * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
      * @param \Closure $callback - function (bool $isCreation, array $validatedData, RecordInterface $record, FormConfig $formConfig) { return true; }
-     * @return $this
+     * @return static
      */
-    public function setAfterSaveCallback(\Closure $callback) {
+    public function setAfterSaveCallback(\Closure $callback)
+    {
         $this->afterSaveCallback = $callback;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasAfterSaveCallback() {
+    
+    public function hasAfterSaveCallback(): bool
+    {
         return !empty($this->afterSaveCallback);
     }
-
-    /**
-     * @return \Closure
-     */
-    public function getAfterSaveCallback() {
+    
+    public function getAfterSaveCallback(): ?\Closure
+    {
         return $this->afterSaveCallback;
     }
-
+    
     /**
      * Callback is called after successfully saving data but before model's commit()
      * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
      * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
      * @param \Closure $callback - function (array $validatedData, FormConfig $formConfig) { return []; }
-     * @return $this
+     * @return static
      */
-    public function setBulkEditAfterSaveCallback(\Closure $callback) {
+    public function setBulkEditAfterSaveCallback(\Closure $callback)
+    {
         $this->bulkEditAfterSaveCallback = $callback;
         return $this;
     }
-
+    
     public function hasBulkEditAfterSaveCallback(): bool
     {
         return !empty($this->bulkEditAfterSaveCallback);
     }
-
+    
     public function getBulkEditAfterSaveCallback(): ?\Closure
     {
         return $this->bulkEditAfterSaveCallback;
     }
-
+    
     /**
      * @param array|\Closure $arrayOrClosure
-     *      - \Closure: funciton (array $defaults, FormConfig $formConfig) { return $defaults; }
-     * @return $this
+     *      - \Closure: funciton (array $defaults, FormConfig $formConfig): array { return $defaults; }
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setDefaultValuesModifier($arrayOrClosure) {
-        if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
-            throw new \InvalidArgumentException('$stringOfFunction argument must be a string or \Closure');
-        }
+    public function setDefaultValuesModifier(\Closure $arrayOrClosure)
+    {
         $this->defaultValuesModifier = $arrayOrClosure;
         return $this;
     }
-
+    
     /**
-     * @param array $defaults
-     * @return array
      * @throws \UnexpectedValueException
      */
-    public function alterDefaultValues(array $defaults) {
+    public function alterDefaultValues(array $defaults): array
+    {
         if (!empty($this->defaultValuesModifier)) {
-            if ($this->defaultValuesModifier instanceof \Closure) {
-                $defaults = call_user_func($this->defaultValuesModifier, $defaults, $this);
-                if (!is_array($defaults)) {
-                    throw new \UnexpectedValueException('Default values modifier must return array');
-                }
-            } else {
-                return array_merge($defaults, $this->defaultValuesModifier);
+            $defaults = call_user_func($this->defaultValuesModifier, $defaults, $this);
+            if (!is_array($defaults)) {
+                throw new \UnexpectedValueException('defaultValuesModifier closure must return array');
             }
         }
         return $defaults;
     }
-
+    
     /**
-     * @param $stringOfClosure - function (FormConfig $formConfig) { return '<div>'; }
-     * @return $this
-     * @throws \InvalidArgumentException
+     * @param \Closure $stringOfClosure - function (FormConfig $formConfig): string { return '<div>'; }
+     * @return static
      */
-    public function setAdditionalHtmlForForm($stringOfClosure) {
-        if (!is_string($stringOfClosure) && !($stringOfClosure instanceof \Closure)) {
-            throw new \InvalidArgumentException('$stringOfFunction argument must be a string or \Closure');
-        }
+    public function setAdditionalHtmlForForm(\Closure $stringOfClosure)
+    {
         $this->additionalHtmlForForm = $stringOfClosure;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getAdditionalHtmlForForm() {
+    
+    public function getAdditionalHtmlForForm(): string
+    {
         if (empty($this->additionalHtmlForForm)) {
             return '';
-        } else if (is_string($this->additionalHtmlForForm)) {
-            return $this->additionalHtmlForForm;
         } else {
-            return call_user_func($this->additionalHtmlForForm, $this);
+            $html = call_user_func($this->additionalHtmlForForm, $this);
+            if (!is_string($html)) {
+                throw new \UnexpectedValueException('additionalHtmlForForm closure must return string');
+            }
+            return $html;
         }
     }
-
+    
     public function beforeRender(): void
     {
         foreach ($this->getTooltipsForInputs() as $inputName => $tooltip) {
@@ -1025,9 +971,10 @@ class FormConfig extends ScaffoldSectionConfig {
             }
         }
     }
-
-    protected function getSectionTranslationsPrefix(?string $subtype = null): string {
+    
+    protected function getSectionTranslationsPrefix(?string $subtype = null): string
+    {
         return $subtype === 'value_viewer' ? 'form.input' : 'form';
     }
-
+    
 }
