@@ -1,7 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\DataGrid;
 
+use Illuminate\Support\Str;
+use PeskyCMF\CmfUrl;
+use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\MenuItem\CmfBulkActionMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfBulkActionRedirectMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
@@ -11,70 +17,66 @@ use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
 
-class DataGridRendererHelper {
-
-    /** @var DataGridConfig  */
-    protected $dataGridConfig;
-    /** @var string */
-    protected $resourceName;
-    /** @var TableInterface  */
-    protected $table;
-    /** @var FilterConfig */
-    protected $dataGridFilterConfig;
-    /** @var DataGridColumn */
-    protected $sortedColumnConfigs;
-    /** @var string */
-    protected $idSuffix;
-    /** @var string */
-    protected $id;
-    /** @var int */
-    protected $rowActionsCount = 0;
-
+class DataGridRendererHelper
+{
+    
+    protected DataGridConfig $dataGridConfig;
+    protected string $resourceName;
+    protected TableInterface $table;
+    protected FilterConfig $dataGridFilterConfig;
+    protected CmfConfig $cmfConfig;
+    /** @var DataGridColumn[] */
+    protected ?array $sortedColumnConfigs = null;
+    protected ?string $idSuffix = null;
+    protected ?string $id = null;
+    protected int $rowActionsCount = 0;
+    
     /**
      * DataGridRendererHelper constructor.
      * @param DataGridConfig $dataGridConfig
      */
-    public function __construct(DataGridConfig $dataGridConfig) {
+    public function __construct(DataGridConfig $dataGridConfig)
+    {
         $this->dataGridConfig = $dataGridConfig;
         $this->dataGridFilterConfig = $dataGridConfig->getScaffoldConfig()->getDataGridFilterConfig();
         $this->table = $dataGridConfig->getScaffoldConfig()->getTable();
         $this->resourceName = $dataGridConfig->getScaffoldConfig()->getResourceName();
+        $this->cmfConfig = $dataGridConfig->getCmfConfig();
     }
-
-    /**
-     * @return string
-     */
-    public function getIdSuffix() {
+    
+    public function getIdSuffix(): string
+    {
         if (!$this->idSuffix) {
-            $this->idSuffix = str_slug(strtolower($this->resourceName));
+            $this->idSuffix = Str::slug(strtolower($this->resourceName));
         }
         return $this->idSuffix;
     }
-
-    /**
-     * @return string
-     */
-    public function getId() {
+    
+    public function getId(): string
+    {
         if (!$this->id) {
             $this->id = 'scaffold-data-grid-' . $this->getIdSuffix();
         }
         return $this->id;
     }
-
-    /**
-     * @return string;
-     * @throws \Swayok\Html\HtmlTagException
-     */
-    public function getHtmlTableMultiselectColumnHeader() {
+    
+    protected function getPkColumnName(): string
+    {
+        /** @noinspection StaticInvocationViaThisInspection */
+        return $this->table->getPkColumnName();
+    }
+    
+    public function getHtmlTableMultiselectColumnHeader(): string
+    {
         $dropdownBtn = Tag::button()
             ->setType('button')
             ->setClass('rows-selection-options-dropdown-btn')
-            ->setDataAttr('toggle' , 'dropdown')
+            ->setDataAttr('toggle', 'dropdown')
             ->setAttribute('aria-haspopup', 'true')
             ->setAttribute('aria-expanded', 'false')
             ->setContent('<span class="glyphicon glyphicon-menu-hamburger fs15"></span>')
             ->build();
-
+        
         $selectionActions = [
             Tag::a()
                 ->setContent($this->dataGridConfig->translateGeneral('actions.select_all'))
@@ -90,13 +92,13 @@ class DataGridRendererHelper {
                 ->setContent($this->dataGridConfig->translateGeneral('actions.invert_selection'))
                 ->setClass('invert-selection')
                 ->setHref('javascript: void(0)')
-                ->build()
+                ->build(),
         ];
         $dropdownMenu = Tag::ul()
             ->setClass('dropdown-menu')
             ->setContent('<li>' . implode('</li><li>', $selectionActions) . '</li>')
             ->build();
-
+        
         return Tag::th()
             ->setContent(
                 Tag::div()
@@ -107,43 +109,34 @@ class DataGridRendererHelper {
             ->setClass('text-nowrap text-center')
             ->build();
     }
-
-    /**
-     * @return string
-     */
-    public function getHtmlTableNestedViewsColumnHeader() {
+    
+    public function getHtmlTableNestedViewsColumnHeader(): string
+    {
         return Tag::th()
             ->setContent('&nbsp;')
             ->setDataAttr('visible', 'true')
             ->setDataAttr('orderable', 'false')
-            ->setDataAttr('name', $this->table->getPkColumnName())
-            ->setDataAttr('data', $this->table->getPkColumnName())
+            ->setDataAttr('name', $this->getPkColumnName())
+            ->setDataAttr('data', $this->getPkColumnName())
             ->build();
     }
-
+    
     /**
-     * @return \PeskyCMF\Scaffold\AbstractValueViewer[]|DataGridColumn|DataGridColumn[]
+     * @return AbstractValueViewer[]|DataGridColumn[]
      */
-    public function getSortedColumnConfigs() {
+    public function getSortedColumnConfigs(): array
+    {
         if (!$this->sortedColumnConfigs) {
             $this->sortedColumnConfigs = $this->dataGridConfig->getDataGridColumns();
-            uasort($this->sortedColumnConfigs, function ($a, $b) {
-                /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $a */
-                /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $b */
-                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            uasort($this->sortedColumnConfigs, function (DataGridColumn $a, DataGridColumn $b) {
                 return ($a->getPosition() > $b->getPosition());
             });
         }
         return $this->sortedColumnConfigs;
     }
-
-    /**
-     * @return string;
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \Swayok\Html\HtmlTagException
-     */
-    public function getHtmlTableColumnsHeaders() {
+    
+    public function getHtmlTableColumnsHeaders(): string
+    {
         $invisibleColumns = '';
         $visibleColumns = '';
         if ($this->dataGridConfig->isAllowedMultiRowSelection()) {
@@ -153,7 +146,6 @@ class DataGridRendererHelper {
             $visibleColumns .= $this->getHtmlTableNestedViewsColumnHeader() . "\n";
         }
         $columns = $this->getSortedColumnConfigs();
-        /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $config */
         foreach ($columns as $config) {
             $dtName = $config::convertNameForDataTables($config->getName());
             $th = Tag::th()
@@ -173,31 +165,20 @@ class DataGridRendererHelper {
         }
         return $visibleColumns . $invisibleColumns;
     }
-
-    /**
-     * @return array
-     * @throws \InvalidArgumentException
-     * @throws \UnexpectedValueException
-     */
-    public function getBulkActions() {
+    
+    public function getBulkActions(): array
+    {
         $bulkActions = [];
-        $placeFirst = [];
-        /** @noinspection StaticInvocationViaThisInspection */
-        $pkName = $this->table->getPkColumnName();
+        $pkName = $this->getPkColumnName();
         $isAllowedMultiRowSelection = $this->dataGridConfig->isAllowedMultiRowSelection();
         if ($isAllowedMultiRowSelection) {
             if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isBulkItemsDeleteAllowed()) {
-                $action = CmfMenuItem::bulkActionOnSelectedRows(cmfRoute('cmf_api_delete_bulk', [$this->resourceName]), 'delete')
+                $url = CmfUrl::route('cmf_api_delete_bulk', ['resource' => $this->resourceName], false, $this->cmfConfig);
+                $bulkActions['delete_selected'] = CmfMenuItem::bulkActionOnSelectedRows($url, 'delete')
                     ->setTitle($this->dataGridConfig->translateGeneral('bulk_actions.delete_selected'))
                     ->setConfirm($this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_selected_confirm'))
                     ->setPrimaryKeyColumnName($pkName)
                     ->renderAsBootstrapDropdownMenuItem();
-
-                if (array_key_exists('delete_selected', $bulkActions)) {
-                    $bulkActions['delete_selected'] = $action;
-                } else {
-                    $placeFirst[] = $action;
-                }
             }
             if ($this->dataGridConfig->isEditAllowed() && $this->dataGridConfig->isBulkItemsEditingAllowed()) {
                 $action = Tag::a()
@@ -206,24 +187,15 @@ class DataGridRendererHelper {
                     ->setDataAttr('id-field', $pkName)
                     ->setHref('javascript: void(0)')
                     ->build();
-                $action = '<li>' . $action . '</li>';
-                if (array_key_exists('edit_selected', $bulkActions)) {
-                    $bulkActions['edit_selected'] = $action;
-                } else {
-                    $placeFirst[] = $action;
-                }
+                $bulkActions['edit_selected'] = '<li>' . $action . '</li>';
             }
         }
         if ($this->dataGridConfig->isDeleteAllowed() && $this->dataGridConfig->isFilteredItemsDeleteAllowed()) {
-            $action = CmfMenuItem::bulkActionOnFilteredRows(cmfRoute('cmf_api_delete_bulk', [$this->resourceName]), 'delete')
+            $url = CmfUrl::route('cmf_api_delete_bulk', ['resource' => $this->resourceName], false, $this->cmfConfig);
+            $bulkActions['delete_filtered'] = CmfMenuItem::bulkActionOnFilteredRows($url, 'delete')
                 ->setTitle($this->dataGridConfig->translateGeneral('bulk_actions.delete_filtered'))
                 ->setConfirm($this->dataGridConfig->translateGeneral('bulk_actions.message.delete_bulk.delete_filtered_confirm'))
                 ->renderAsBootstrapDropdownMenuItem();
-            if (array_key_exists('delete_filtered', $bulkActions)) {
-                $bulkActions['delete_filtered'] = $action;
-            } else {
-                $placeFirst[] = $action;
-            }
         }
         if ($this->dataGridConfig->isEditAllowed() && $this->dataGridConfig->isFilteredItemsEditingAllowed()) {
             $action = Tag::a()
@@ -231,17 +203,12 @@ class DataGridRendererHelper {
                 ->setDataAttr('action', 'bulk-edit-filtered')
                 ->setHref('javascript: void(0)')
                 ->build();
-            $action = '<li>' . $action . '</li>';
-            if (array_key_exists('edit_filtered', $bulkActions)) {
-                $bulkActions['edit_filtered'] = $action;
-            } else {
-                $placeFirst[] = $action;
-            }
+            $bulkActions['edit_filtered'] = '<li>' . $action . '</li>';
         }
         foreach ($this->dataGridConfig->getBulkActionsToolbarItems() as $key => $bulkAction) {
             if ($bulkAction instanceof Tag) {
                 $bulkAction = $bulkAction->build();
-            } else if ($bulkAction instanceof CmfBulkActionMenuItem || $bulkAction instanceof CmfBulkActionRedirectMenuItem) {
+            } elseif ($bulkAction instanceof CmfBulkActionMenuItem || $bulkAction instanceof CmfBulkActionRedirectMenuItem) {
                 if (!$isAllowedMultiRowSelection && $bulkAction->getActionType() === $bulkAction::ACTION_TYPE_BULK_SELECTED) {
                     // it is imposible to use bulk action on selected rows while there are no checkboxes to select rows
                     continue;
@@ -257,20 +224,19 @@ class DataGridRendererHelper {
                 $bulkActions[] = $bulkAction;
             }
         }
-        return array_merge($placeFirst, array_values($bulkActions));
+        return array_values($bulkActions);
     }
-
+    
     /**
      * @return array
-     * @throws \UnexpectedValueException
-     * @throws \Swayok\Html\HtmlTagException
      */
-    public function getToolbarItems() {
+    public function getToolbarItems(): array
+    {
         $toolbar = [];
         foreach ($this->dataGridConfig->getToolbarItems() as $key => $toolbarItem) {
             if ($toolbarItem instanceof Tag) {
                 $toolbarItem = $toolbarItem->build();
-            } else if ($toolbarItem instanceof CmfMenuItem) {
+            } elseif ($toolbarItem instanceof CmfMenuItem) {
                 $toolbarItem = $toolbarItem->renderAsButton();
             }
             if (is_string($key)) {
@@ -284,18 +250,18 @@ class DataGridRendererHelper {
             $dropdownBtn = Tag::button()
                 ->setType('button')
                 ->setClass('btn btn-default dropdown-toggle')
-                ->setDataAttr('toggle' , 'dropdown')
+                ->setDataAttr('toggle', 'dropdown')
                 ->setAttribute('aria-haspopup', 'true')
                 ->setAttribute('aria-expanded', 'false')
                 ->setContent($this->dataGridConfig->translateGeneral('bulk_actions.dropdown_label'))
                 ->append('&nbsp;<span class="caret"></span>')
                 ->build();
-
+            
             $dropdownMenu = Tag::ul()
                 ->setClass('dropdown-menu dropdown-menu-right')
                 ->setContent(implode('', $bulkActions))
                 ->build();
-
+            
             $item = Tag::div()
                 ->setClass('btn-group bulk-actions float-none')
                 ->setContent($dropdownBtn . $dropdownMenu)
@@ -319,11 +285,9 @@ class DataGridRendererHelper {
         }
         return array_values($toolbar);
     }
-
-    /**
-     * @return string
-     */
-    public function getNestedViewTriggerCellTemplate() {
+    
+    public function getNestedViewTriggerCellTemplate(): string
+    {
         $showChildren = Tag::a()
             ->setClass('row-action link-muted show-children')
             ->setContent('<i class="glyphicon glyphicon-folder-close"></i>')
@@ -340,20 +304,21 @@ class DataGridRendererHelper {
             ->build();
         $buttons =
             '{{? it.___max_nesting_depth <= 0 || it.___max_nesting_depth > (parseInt(it.___nesting_depth) || 0) }}'
-                . $showChildren . $hideChildren
+            . $showChildren . $hideChildren
             . '{{?}}';
         return Tag::div()
             ->setClass('row-actions text-nowrap')
             ->setContent($buttons)
             ->build();
     }
-
+    
     /**
      * @param string $actionKey - one of 'edit', 'delete', 'clode', 'details' or key from $this->dataGridConfig->getRowActions()
      * @param bool $render - render row action if it is an object or not
      * @return CmfRedirectMenuItem|CmfRequestMenuItem|Tag|string
      */
-    public function getRowActionDotJsTemplate($actionKey, $render = true) {
+    public function getRowActionDotJsTemplate(string $actionKey, bool $render = true)
+    {
         switch ($actionKey) {
             case 'details':
                 $rowAction = $this->dataGridConfig->getItemDetailsMenuItem('actions');
@@ -375,30 +340,27 @@ class DataGridRendererHelper {
                 $rowAction = $customActions[$actionKey];
                 if (!$render) {
                     return $rowAction;
-                } else if ($rowAction instanceof Tag) {
+                } elseif ($rowAction instanceof Tag) {
                     return $rowAction->build();
-                } else if ($rowAction instanceof CmfMenuItem) {
+                } elseif ($rowAction instanceof CmfMenuItem) {
                     return $rowAction->renderAsButton();
                 } else {
                     return $rowAction;
                 }
         }
     }
-
-    /**
-     * @return string
-     * @throws \InvalidArgumentException
-     */
-    public function getRowActionsDotJsTemplate() {
+    
+    public function getRowActionsDotJsTemplate(): string
+    {
         $this->rowActionsCount = 0;
         $rowActions = [];
         $placeFirst = [];
-
-
+        
+        
         foreach ($this->dataGridConfig->getRowActions() as $key => $rowAction) {
             if ($rowAction instanceof Tag) {
                 $rowAction = $rowAction->build();
-            } else if ($rowAction instanceof CmfMenuItem) {
+            } elseif ($rowAction instanceof CmfMenuItem) {
                 $rowAction = $rowAction->renderAsIcon('row-action');
             }
             if (is_string($key)) {
@@ -407,7 +369,7 @@ class DataGridRendererHelper {
                 $rowActions[] = $rowAction;
             }
         }
-
+        
         if ($this->dataGridConfig->isDetailsViewerAllowed()) {
             $rowAction = $this->getRowActionDotJsTemplate('details', true);
             if (array_key_exists('details', $rowActions)) {
@@ -446,43 +408,34 @@ class DataGridRendererHelper {
             ->setContent(implode('', array_merge($placeFirst, array_values($rowActions))))
             ->build();
     }
-
-    /**
-     * @return int
-     */
-    public function getRowActionsCount() {
+    
+    public function getRowActionsCount(): int
+    {
         return $this->rowActionsCount;
     }
-
-    /**
-     * @return null|string
-     */
-    public function getDoubleClickUrl() {
-        $doubleClickUrl = null;
+    
+    public function getDoubleClickUrl(): ?string
+    {
         if ($this->dataGridConfig->isEditAllowed()) {
-            return routeToCmfItemEditForm($this->resourceName, '{{= it.___pk_value }}');
-        } else if ($this->dataGridConfig->isDetailsViewerAllowed()) {
+            return $this->dataGridConfig->getScaffoldConfig()->getUrlToItemEditForm('{{= it.___pk_value }}');
+        } elseif ($this->dataGridConfig->isDetailsViewerAllowed()) {
             return '{{= it.___details_url }}';
         }
         return null;
     }
-
-    /**
-     *
-     * @throws \UnexpectedValueException
-     * @throws \Swayok\Html\HtmlTagException
-     * @throws \InvalidArgumentException
-     */
-    public function getDataTablesConfig() {
+    
+    public function getDataTablesConfig(): array
+    {
+        /** @noinspection StaticInvocationViaThisInspection */
         $dataTablesConfig = array_replace(
-            $this->dataGridConfig->getScaffoldConfig()->getCmfConfig()->data_tables_config(),
+            $this->cmfConfig->data_tables_config(),
             $this->dataGridConfig->getAdditionalDataTablesConfig(),
             [
                 'resourceName' => $this->resourceName,
-                'pkColumnName' => $this->table->getPkColumnName(),
+                'pkColumnName' => $this->getPkColumnName(),
                 'processing' => true,
                 'serverSide' => true,
-                'ajax' => cmfRoute('cmf_api_get_items', ['resource' => $this->resourceName], false),
+                'ajax' => CmfUrl::route('cmf_api_get_items', ['resource' => $this->resourceName], false, $this->cmfConfig),
                 'pageLength' => $this->dataGridConfig->getRecordsPerPage(),
                 'toolbarItems' => $this->getToolbarItems(),
                 'order' => [],
@@ -493,20 +446,20 @@ class DataGridRendererHelper {
             $dataTablesConfig['order'] = [
                 [
                     $this->dataGridConfig->getValueViewer($this->dataGridConfig->getOrderBy())->getPosition(),
-                    preg_replace('%^\s*(asc|desc).*$%i', '$1', $this->dataGridConfig->getOrderDirection())
-                ]
+                    preg_replace('%^\s*(asc|desc).*$%i', '$1', $this->dataGridConfig->getOrderDirection()),
+                ],
             ];
         }
         if ($this->dataGridConfig->isNestedViewEnabled()) {
             $dataTablesConfig['nested_data_grid'] = [
-                'value_column' => '__' . $this->table->getPkColumnName(),
-                'filter_column' => '__' . $this->dataGridConfig->getColumnNameForNestedView()
+                'value_column' => '__' . $this->getPkColumnName(),
+                'filter_column' => '__' . $this->dataGridConfig->getColumnNameForNestedView(),
             ];
         }
         if ($this->dataGridConfig->isRowsReorderingEnabled()) {
             $dataTablesConfig['rowsReordering'] = [
                 'columns' => $this->dataGridConfig->getRowsPositioningColumns(),
-                'url' => cmfRouteTpl(
+                'url' => CmfUrl::routeTpl(
                     'cmf_api_change_item_position',
                     ['resource' => $this->resourceName],
                     [
@@ -514,50 +467,49 @@ class DataGridRendererHelper {
                         'before_or_after',
                         'other_id' => 'it.other_row.___pk_value || 0',
                         'sort_column',
-                        'sort_direction'
-                    ]
-                )
+                        'sort_direction',
+                    ],
+                    false,
+                    $this->cmfConfig
+                ),
             ];
         }
         if ($this->dataGridConfig->isContextMenuEnabled()) {
             $dataTablesConfig['contextMenuTpl'] = $this->getContextMenuDotJsTemplate();
         }
-
+        
         return $dataTablesConfig;
     }
-
-    /**
-     * @return string
-     * @throws \Throwable
-     */
-    public function getAdditionalViews() {
+    
+    public function getAdditionalViews(): string
+    {
         $ret = '';
         $dataForViews = [
             'idSuffix' => $this->getIdSuffix(),
             'table' => $this->table,
-            'dataGridConfig' => $this->dataGridConfig
+            'dataGridConfig' => $this->dataGridConfig,
         ];
         foreach ($this->dataGridConfig->getAdditionalViewsForTemplate() as $view => $data) {
             if (is_int($view)) {
                 $view = $data;
                 $data = [];
-            } else if (!is_array($data)) {
+            } elseif (!is_array($data)) {
                 $data = [];
             }
             $ret .= view($view, $dataForViews, $data)->render() . "\n\n";
         }
         return $ret;
     }
-
+    
     /**
-     * @return string
      * @throws \UnexpectedValueException
      */
-    public function getContextMenuDotJsTemplate() {
+    public function getContextMenuDotJsTemplate(): string
+    {
         $contextMenuItems = [
-            'common' => []
+            'common' => [],
         ];
-
+        
         if ($this->dataGridConfig->isDetailsViewerAllowed()) {
             $contextMenuItems['common']['details'] = $this->dataGridConfig->getItemDetailsMenuItem('context_menu');
         }
@@ -579,14 +531,15 @@ class DataGridRendererHelper {
                     $freeFormGroup[] = $contextMenuItems['common'][$key];
                     unset($contextMenuItems['common'][$key]);
                 }
+                /** @noinspection PhpUnnecessaryStopStatementInspection */
                 continue;
-            } else if ($menuItem instanceof Tag) {
+            } elseif ($menuItem instanceof Tag) {
                 $freeFormGroup[] = $menuItem->build();
-            } else if ($menuItem instanceof CmfMenuItem) {
+            } elseif ($menuItem instanceof CmfMenuItem) {
                 $freeFormGroup[] = $menuItem->renderAsBootstrapDropdownMenuItem();
-            } else if (is_string($menuItem)) {
+            } elseif (is_string($menuItem)) {
                 $freeFormGroup[] = $menuItem;
-            } else if (is_array($menuItem)) {
+            } elseif (is_array($menuItem)) {
                 // group of menu items
                 if (count($freeFormGroup) > 0) {
                     $contextMenuItems[] = $freeFormGroup;
@@ -614,9 +567,9 @@ class DataGridRendererHelper {
             foreach ($group as &$menuItem) {
                 if ($menuItem instanceof Tag) {
                     $menuItem = $menuItem->build();
-                } else if ($menuItem instanceof CmfMenuItem) {
+                } elseif ($menuItem instanceof CmfMenuItem) {
                     $menuItem = $menuItem->renderAsBootstrapDropdownMenuItem();
-                } else if (!is_string($menuItem)) {
+                } elseif (!is_string($menuItem)) {
                     throw new \UnexpectedValueException(
                         '$menuItem must be an string or instance of Tag or CmfMenuItem class. ' . gettype($menuItem) . ' received'
                     );
@@ -627,7 +580,7 @@ class DataGridRendererHelper {
             $template[] = $groupTemplate;
         }
         return '<ul class="dropdown-menu datagrid-context-menu">'
-                . implode('<li role="separator" class="divider"></li>', $template)
+            . implode('<li role="separator" class="divider"></li>', $template)
             . '</ul>';
     }
 }

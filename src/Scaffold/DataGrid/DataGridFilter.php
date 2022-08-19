@@ -1,7 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\DataGrid;
 
-class DataGridFilter extends ColumnFilter {
+/**
+ * @deprecated
+ */
+class DataGridFilter extends ColumnFilter
+{
 
 }

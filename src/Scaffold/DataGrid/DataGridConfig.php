@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use Exceptions\Data\NotFoundException;
+use Illuminate\Support\Arr;
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\RenderableValueViewer;
@@ -12,45 +14,20 @@ use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
 use Swayok\Html\Tag;
-use Swayok\Utils\ValidateValue;
 
-class DataGridConfig extends ScaffoldSectionConfig {
-
+class DataGridConfig extends ScaffoldSectionConfig
+{
+    
     public const ROW_ACTIONS_COLUMN_NAME = '__actions';
-
-    protected bool $allowRelationsInValueViewers = true;
-
-    protected bool $allowComplexValueViewerNames = true;
-
-    protected string $template = 'cmf::scaffold.datagrid';
-    /**
-     * @var int
-     */
-    protected $recordsPerPage = 25;
-    /**
-     * @var int
-     */
-    protected $offset = 0;
-    /**
-     * @var int
-     */
-    protected $maxLimit = 100;
-    /**
-     * @var string
-     */
-    protected $orderBy;
-    /**
-     * @var string
-     */
-    protected $orderDirection = self::ORDER_ASC;
+    
     public const ORDER_ASC = 'asc';
     public const ORDER_DESC = 'desc';
     public const ORDER_ASC_NULLS_FIRST = 'asc nulls first';
     public const ORDER_ASC_NULLS_LAST = 'asc nulls last';
     public const ORDER_DESC_NULLS_FIRST = 'desc nulls first';
     public const ORDER_DESC_NULLS_LAST = 'desc nulls last';
-
-    protected static $orderOptions = [
+    
+    protected static array $orderOptions = [
         self::ORDER_ASC,
         self::ORDER_DESC,
         self::ORDER_ASC_NULLS_FIRST,
@@ -58,112 +35,113 @@ class DataGridConfig extends ScaffoldSectionConfig {
         self::ORDER_DESC_NULLS_FIRST,
         self::ORDER_DESC_NULLS_LAST,
     ];
+    
+    protected bool $allowRelationsInValueViewers = true;
+    
+    protected bool $allowComplexValueViewerNames = true;
+    
+    protected ?string $template = 'cmf::scaffold.datagrid';
+    protected int $recordsPerPage = 25;
+    protected int $offset = 0;
+    protected int $maxLimit = 100;
+    /**
+     * @var string|DbExpr
+     */
+    protected $orderBy;
+    protected ?string $orderDirection = self::ORDER_ASC;
+    
     /**
      * Add a checkboxes column to datagrid so user can select several rows and perform bulk-actions
-     * @var bool
      */
-    protected $allowMultiRowSelection = false;
-    /** @var bool */
-    protected $allowBulkItemsEditing = false;
-    /** @var bool */
-    protected $allowBulkItemsDelete = true;
-    /** @var bool */
-    protected $allowFilteredItemsEditing = false;
-    /** @var bool */
-    protected $allowFilteredItemsDelete = false;
-    /** @var \Closure|null */
-    protected $bulkActionsToolbarItems;
-    /** @var bool */
-    protected $isRowActionsEnabled = true;
-    /** @var \Closure|null */
-    protected $rowActions;
-    /** @var array */
-    protected $additionalDataTablesConfig = [];
-    /** @var bool */
-    protected $isRowActionsColumnFixed = true;
-    /** @var bool */
-    protected $isFilterOpened = false;
-    /** @var string|null */
-    protected $enableNestedViewBasedOnColumn;
-    /** @var int */
-    protected $nestedViewsDepthLimit = -1;
-    /** @var array */
-    protected $rowsPositioningColumns = [];
-    /** @var int|float */
-    protected $rowsPosittioningStep = 100;
-    /** @var \Closure|null */
-    protected $contextMenuItems;
-    /** @var bool */
-    protected $isContextMenuEnabled = true;
-    /** @var bool */
-    protected $isMultiRowSelectionColumnFixed = true;
-    /** @var array */
+    protected bool $allowMultiRowSelection = false;
+    protected bool $allowBulkItemsEditing = false;
+    protected bool $allowBulkItemsDelete = true;
+    protected bool $allowFilteredItemsEditing = false;
+    protected bool $allowFilteredItemsDelete = false;
+    protected ?\Closure $bulkActionsToolbarItems = null;
+    protected bool $isRowActionsEnabled = true;
+    protected ?\Closure $rowActions = null;
+    protected array $additionalDataTablesConfig = [];
+    protected bool $isRowActionsColumnFixed = true;
+    protected bool $isFilterOpened = false;
+    protected ?string $enableNestedViewBasedOnColumn = null;
+    protected int $nestedViewsDepthLimit = -1;
+    protected array $rowsPositioningColumns = [];
+    protected ?\Closure $contextMenuItems = null;
+    protected bool $isContextMenuEnabled = true;
+    protected bool $isMultiRowSelectionColumnFixed = true;
+    /**
+     * @var array|\Closure
+     */
     protected $additionalViewsForTemplate = [];
-    /** @var DataGridRendererHelper|null */
-    protected $rendererHelper;
-    /** @var bool */
+    protected ?DataGridRendererHelper $rendererHelper = null;
     protected bool $openInModal = false;
-    /** @var bool - optimize datagrid selects for usage in big tables so that it will be faster to select rows */
-    protected $isBigTable = false;
-
-    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig) {
+    /**
+     * optimize datagrid selects for usage in big tables so that it will be faster to select rows
+     */
+    protected bool $isBigTable = false;
+    
+    public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig)
+    {
         parent::__construct($table, $scaffoldConfig);
-        $this->recordsPerPage = $scaffoldConfig::getCmfConfig()->rows_per_page();
+        $this->recordsPerPage = $this->getCmfConfig()->rows_per_page();
         $this->setOrderBy($table->getPkColumnName());
     }
-
+    
     /**
      * @private
      * @param bool $isEnabled
      * @param string|null $size
+     * @return static
      * @throws \BadMethodCallException
      */
-    public function setModalConfig(bool $isEnabled = false, ?string $size = null) {
+    public function setModalConfig(bool $isEnabled = false, ?string $size = null)
+    {
         throw new \BadMethodCallException('Data grid cannot be opened in modal');
     }
-
+    
     /**
      * Alias for setValueViewers
      * @param array $datagridColumns
-     * @return $this
+     * @return static
      */
-    public function setColumns(array $datagridColumns) {
+    public function setColumns(array $datagridColumns)
+    {
         return $this->setValueViewers($datagridColumns);
     }
-
+    
     /**
      * @return DataGridColumn[]|AbstractValueViewer[]
      */
-    public function getDataGridColumns() {
+    public function getDataGridColumns(): array
+    {
         return $this->getValueViewers();
     }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasDataGridColumn($name) {
+    
+    public function hasDataGridColumn(string $name): bool
+    {
         return $this->hasValueViewer($name);
     }
-
-    protected function createValueRenderer(): DataGridCellRenderer {
+    
+    protected function createValueRenderer(): DataGridCellRenderer
+    {
         return DataGridCellRenderer::create();
     }
-
+    
     /**
-     * @param array $columnNames
-     * @return $this
+     * @return static
      */
-    public function setInvisibleColumns(...$columnNames) {
-        return call_user_func_array(array($this, 'setAdditionalColumnsToSelect'), $columnNames);
+    public function setInvisibleColumns(...$columnNames)
+    {
+        return call_user_func_array([$this, 'setAdditionalColumnsToSelect'], $columnNames);
     }
-
+    
     /**
      * Mimics setInvisibleColumns()
-     * @param array $columnNames
-     * @return $this
+     * @return static
      */
-    public function setAdditionalColumnsToSelect(...$columnNames) {
+    public function setAdditionalColumnsToSelect(...$columnNames)
+    {
         parent::setAdditionalColumnsToSelect($columnNames);
         foreach ($this->getAdditionalColumnsToSelect() as $name) {
             $valueViewer = DataGridColumn::create()->setIsVisible(false);
@@ -171,12 +149,13 @@ class DataGridConfig extends ScaffoldSectionConfig {
         }
         return $this;
     }
-
+    
     /**
      * @param AbstractValueViewer|DataGridColumn $viewer
      * @return int
      */
-    protected function getNextValueViewerPosition(AbstractValueViewer $viewer) {
+    protected function getNextValueViewerPosition(AbstractValueViewer $viewer): int
+    {
         if ($viewer->isVisible()) {
             /** @var DataGridColumn $otherValueViewer */
             $count = 0;
@@ -190,138 +169,117 @@ class DataGridConfig extends ScaffoldSectionConfig {
             return -1;
         }
     }
-
+    
     /**
      * @param bool $shown - true: filter will be opened on data grid load | false: filter will be hidden
-     * @return $this
+     * @return static
      */
-    public function setFilterIsOpenedByDefault($shown = true) {
+    public function setFilterIsOpenedByDefault(bool $shown = true): DataGridConfig
+    {
         $this->isFilterOpened = $shown;
         return $this;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function openFilterByDefault() {
+    public function openFilterByDefault()
+    {
         $this->isFilterOpened = true;
         return $this;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function closeFilterByDefault() {
+    public function closeFilterByDefault()
+    {
         $this->isFilterOpened = false;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isFilterOpenedByDefault() {
+    
+    public function isFilterOpenedByDefault(): bool
+    {
         return $this->isFilterOpened;
     }
     
     /**
-     * @param bool $isBigTable
-     * @return $this
+     * @return static
      */
-    public function setIsBigTable($isBigTable = true) {
-        $this->isBigTable = (bool)$isBigTable;
+    public function setIsBigTable(bool $isBigTable = true)
+    {
+        $this->isBigTable = $isBigTable;
         return $this;
     }
     
-    /**
-     * @return bool
-     */
-    public function isBigTable() {
+    public function isBigTable(): bool
+    {
         return $this->isBigTable;
     }
-
-    /**
-     * @return int
-     */
-    public function getRecordsPerPage() {
+    
+    public function getRecordsPerPage(): int
+    {
         return $this->recordsPerPage;
     }
-
+    
     /**
-     * @param int $recordsPerPage
-     * @return $this
-     * @throws \InvalidArgumentException
+     * @return static
      */
-    public function setRecordsPerPage($recordsPerPage) {
-        if (!ValidateValue::isInteger($recordsPerPage, true)) {
-            throw new \InvalidArgumentException('$recordsPerPage argument must be an integer value');
-        }
+    public function setRecordsPerPage(int $recordsPerPage)
+    {
         $this->recordsPerPage = min($this->maxLimit, $recordsPerPage);
         return $this;
     }
-
-    /**
-     * @return int
-     */
-    public function getOffset() {
+    
+    public function getOffset(): int
+    {
         return $this->offset;
     }
-
+    
     /**
-     * @param int $offset
-     * @return $this
-     * @throws \InvalidArgumentException
+     * @return static
      */
-    public function setOffset($offset) {
-        if (!ValidateValue::isInteger($offset, true)) {
-            throw new \InvalidArgumentException('$offset argument must be an integer value');
-        }
+    public function setOffset(int $offset)
+    {
         $this->offset = max($offset, 0);
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getOrderBy() {
+    
+    public function getOrderBy(): string
+    {
         return $this->orderBy;
     }
-
+    
     /**
-     * @param string $orderBy
-     * @param null $direction - 'asc', 'desc', 'asc nulls first' or 'desc nulls last' in any case
-     * @return $this
+     * @param string|DbExpr $orderBy
+     * @param null|string $direction - 'asc', 'desc', 'asc nulls first' or 'desc nulls last' in any case or DataGridConfig::ORDER_* constants
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setOrderBy($orderBy, $direction = null) {
+    public function setOrderBy($orderBy, ?string $direction = null)
+    {
         if (!($orderBy instanceof DbExpr) && !$this->getTable()->getTableStructure()->hasColumn($orderBy)) {
-            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column [$orderBy]");
+            throw new \InvalidArgumentException(get_class($this->getTable()->getTableStructure()) . " has no column [$orderBy]");
         }
         if ($orderBy instanceof DbExpr) {
             $orderBy->setWrapInBrackets(false);
-            if (empty($direction)) {
-                $this->orderDirection = null;
-            }
         }
-        if (!empty($direction)) {
-            $this->setOrderDirection($direction);
-        }
+        $this->setOrderDirection($direction ?? static::ORDER_ASC);
         $this->orderBy = $orderBy;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getOrderDirection() {
+    
+    public function getOrderDirection(): ?string
+    {
         return $this->orderDirection;
     }
-
+    
     /**
-     * @param string $orderDirection
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setOrderDirection($orderDirection) {
+    public function setOrderDirection(string $orderDirection)
+    {
         $orderDirection = strtolower($orderDirection);
         if (!in_array($orderDirection, static::$orderOptions, true)) {
             throw new \InvalidArgumentException(
@@ -331,113 +289,102 @@ class DataGridConfig extends ScaffoldSectionConfig {
         $this->orderDirection = $orderDirection;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isAllowedMultiRowSelection() {
+    
+    public function isAllowedMultiRowSelection(): bool
+    {
         return $this->allowMultiRowSelection;
     }
-
+    
     /**
-     * @param bool $allowMultiRowSelection
-     * @return $this
+     * @return static
      */
-    public function setMultiRowSelection($allowMultiRowSelection) {
-        $this->allowMultiRowSelection = (bool)$allowMultiRowSelection;
+    public function setMultiRowSelection(bool $allowMultiRowSelection)
+    {
+        $this->allowMultiRowSelection = $allowMultiRowSelection;
         return $this;
     }
-
+    
     /**
      * Pass 'true' to fix/stick multi-row selection column in data grid so it will not move during
      * horisontal scrolling of data grid
-     * @param bool $isFixed
-     * @return $this
+     * @return static
      */
-    public function setIsMultiRowSelectionColumnFixed($isFixed) {
-        $this->isMultiRowSelectionColumnFixed = (bool)$isFixed;
+    public function setIsMultiRowSelectionColumnFixed(bool $isFixed)
+    {
+        $this->isMultiRowSelectionColumnFixed = $isFixed;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isMultiRowSelectionColumnFixed() {
+    
+    public function isMultiRowSelectionColumnFixed(): bool
+    {
         return $this->isMultiRowSelectionColumnFixed;
     }
-
+    
     /**
-     * @param bool $isAllowed - default: true
-     * @return $this
+     * @return static
      */
-    public function setIsBulkItemsDeleteAllowed($isAllowed) {
-        $this->allowBulkItemsDelete = (bool)$isAllowed;
+    public function setIsBulkItemsDeleteAllowed(bool $isAllowed)
+    {
+        $this->allowBulkItemsDelete = $isAllowed;
         $this->setMultiRowSelection(true);
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isBulkItemsDeleteAllowed() {
+    
+    public function isBulkItemsDeleteAllowed(): bool
+    {
         return $this->allowBulkItemsDelete;
     }
-
+    
     /**
      * Bulk editable columns provided via FormConfig->setBulkEditableColumns() or FormConfig->addBulkEditableColumns()
-     * @param bool $isAllowed - default: false
-     * @return $this
+     * @return static
      */
-    public function setIsBulkItemsEditingAllowed($isAllowed) {
-        $this->allowBulkItemsEditing = (bool)$isAllowed;
+    public function setIsBulkItemsEditingAllowed(bool $isAllowed)
+    {
+        $this->allowBulkItemsEditing = $isAllowed;
         $this->setMultiRowSelection(true);
         return $this;
     }
-
-     /**
-     * @return bool
-     */
-    public function isBulkItemsEditingAllowed() {
+    
+    public function isBulkItemsEditingAllowed(): bool
+    {
         return $this->allowBulkItemsEditing;
     }
-
+    
     /**
-     * @param bool $isAllowed - default: false
-     * @return $this
+     * @return static
      */
-    public function setIsFilteredItemsDeleteAllowed($isAllowed) {
-        $this->allowFilteredItemsDelete = (bool)$isAllowed;
+    public function setIsFilteredItemsDeleteAllowed(bool $isAllowed)
+    {
+        $this->allowFilteredItemsDelete = $isAllowed;
         return $this;
     }
-
-     /**
-     * @return bool
-     */
-    public function isFilteredItemsDeleteAllowed() {
+    
+    public function isFilteredItemsDeleteAllowed(): bool
+    {
         return $this->allowFilteredItemsDelete;
     }
-
+    
     /**
-     * @param bool $isAllowed - default: false
-     * @return $this
+     * @return static
      */
-    public function setIsFilteredItemsEditingAllowed($isAllowed) {
-        $this->allowFilteredItemsEditing = (bool)$isAllowed;
+    public function setIsFilteredItemsEditingAllowed(bool $isAllowed)
+    {
+        $this->allowFilteredItemsEditing = $isAllowed;
         return $this;
     }
-
-     /**
-     * @return bool
-     */
-    public function isFilteredItemsEditingAllowed() {
+    
+    public function isFilteredItemsEditingAllowed(): bool
+    {
         return $this->allowFilteredItemsEditing;
     }
-
+    
     /**
      * @return string[]
      * @throws \UnexpectedValueException
      */
-    public function getBulkActionsToolbarItems() {
+    public function getBulkActionsToolbarItems(): array
+    {
         if (empty($this->bulkActionsToolbarItems)) {
             return [];
         }
@@ -453,16 +400,18 @@ class DataGridConfig extends ScaffoldSectionConfig {
                 /** @noinspection PhpStatementHasEmptyBodyInspection */
                 if ($item instanceof CmfMenuItem) {
                     // do nothing
-                } else if (method_exists($item, 'build')) {
+                } elseif (method_exists($item, 'build')) {
                     $item = $item->build();
-                } else if (method_exists($item, '__toString')) {
-                    $item = (string) $item;
+                } elseif (method_exists($item, '__toString')) {
+                    $item = (string)$item;
                 } else {
                     throw new \UnexpectedValueException(
-                        get_class($this) . '->bulkActionsToolbarItems: array may contain only strings and objects with build() or __toString() methods'
+                        get_class(
+                            $this
+                        ) . '->bulkActionsToolbarItems: array may contain only strings and objects with build() or __toString() methods'
                     );
                 }
-            } else if (!is_string($item)) {
+            } elseif (!is_string($item)) {
                 throw new \UnexpectedValueException(
                     get_class($this) . '->bulkActionsToolbarItems: array may contain only strings and objects with build() or __toString() methods'
                 );
@@ -470,139 +419,143 @@ class DataGridConfig extends ScaffoldSectionConfig {
         }
         return $bulkActionsToolbarItems;
     }
-
+    
     /**
      * @param \Closure $callback - function (ScaffoldSectionConfig $scaffoldSectionConfig) { return []; }
      * Callback must return an array.
      * Array may contain only strings, Tag class instances, or any object with build() or __toString() method
      * Examples:
      * - call some url via ajax passing all selected ids and then run "callback(json)"
-        CmfRequestMenuItem::bulkActionOnSelectedRows(static::getUrlCustomAction('bulk_action_name'), 'delete')
-            // use ':count' in setTitle() to insert selected items count
-            ->setTitle('<span class="label label-primary">:count</span> ' . $this->translate('datagrid.bulk_action.action_name'))
-            ->setTooltip($this->translate('datagrid.bulk_action.action_name_tooltip'))
-            // ask user to confirm action
-            ->setConfirm($this->translate('datagrid.bulk_action.action_name_confirmation'))
-            // use this when you need to receive data from column other then primary key (default: current table's primary key column name)
-            ->setPrimaryKeyColumnName('parent_id')
-            // one of: json, html, xml. Default: 'json' (may be useful for your custom response handler)
-            ->setResponseDataType('json')
-            // set custom response handler function.
-            // callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            // It will receive 3 args: data, $link, defaultOnSuccessCallback
-            ->setOnSuccess('callbackFuncitonName');
+     * CmfRequestMenuItem::bulkActionOnSelectedRows(static::getUrlCustomAction('bulk_action_name'), 'delete')
+     * // use ':count' in setTitle() to insert selected items count
+     * ->setTitle('<span class="label label-primary">:count</span> ' . $this->translate('datagrid.bulk_action.action_name'))
+     * ->setTooltip($this->translate('datagrid.bulk_action.action_name_tooltip'))
+     * // ask user to confirm action
+     * ->setConfirm($this->translate('datagrid.bulk_action.action_name_confirmation'))
+     * // use this when you need to receive data from column other then primary key (default: current table's primary key column name)
+     * ->setPrimaryKeyColumnName('parent_id')
+     * // one of: json, html, xml. Default: 'json' (may be useful for your custom response handler)
+     * ->setResponseDataType('json')
+     * // set custom response handler function.
+     * // callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+     * // It will receive 3 args: data, $link, defaultOnSuccessCallback
+     * ->setOnSuccess('callbackFuncitonName');
      * or
-        Tag::li(
-            Tag::a()
-                ->setContent(trans('path.to.translation'))
-                //^ you can use ':count' in label to insert selected items count
-                ->setDataAttr('action', 'bulk-selected')
-                ->setDataAttr('confirm', trans('path.to.translation'))
-                //^ confirm action before sending request to server
-                ->setDataAttr('url', cmfRoute('route', [], false))
-                ->setDataAttr('method', 'delete')
-                //^ can be 'post', 'put', 'delete' depending on action type
-                ->setDataAttr('id-field', 'id')
-                //^ id field name to use to get rows ids, default: 'id'
-                ->setDataAttr('on-success', 'callbackFuncitonName')
-                //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-                //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-                ->setDataAttr('response-type', 'json')
-                //^ one of: json, html, xml. Default: 'json'
-                ->setHref('javascript: void(0)');
-        )
+     * Tag::li(
+     * Tag::a()
+     * ->setContent(trans('path.to.translation'))
+     * //^ you can use ':count' in label to insert selected items count
+     * ->setDataAttr('action', 'bulk-selected')
+     * ->setDataAttr('confirm', trans('path.to.translation'))
+     * //^ confirm action before sending request to server
+     * ->setDataAttr('url', $this->getCmfConfig()->route('route', [], false))
+     * ->setDataAttr('method', 'delete')
+     * //^ can be 'post', 'put', 'delete' depending on action type
+     * ->setDataAttr('id-field', 'id')
+     * //^ id field name to use to get rows ids, default: 'id'
+     * ->setDataAttr('on-success', 'callbackFuncitonName')
+     * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+     * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+     * ->setDataAttr('response-type', 'json')
+     * //^ one of: json, html, xml. Default: 'json'
+     * ->setHref('javascript: void(0)');
+     * )
      * Values will be received in the 'ids' key of the request as array
      * - call some url via ajax passing filter conditions and then run "callback(json)"
-        CmfRequestMenuItem::bulkActionOnFilteredRows(static::getUrlCustomAction('bulk_action_name'), 'put')
-            // use ':count' in setTitle() to insert selected items count
-            ->setTitle('<span class="label label-primary">:count</span> ' . $this->translate('datagrid.bulk_action.action_name'))
-            ->setTooltip($this->translate('datagrid.bulk_action.action_name_tooltip'))
-            // ask user to confirm action
-            ->setConfirm($this->translate('datagrid.bulk_action.action_name_confirmation'))
-            // one of: json, html, xml. Default: 'json' (may be useful for your custom response handler)
-            ->setResponseDataType('json')
-            // set custom response handler function.
-            // callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            // It will receive 3 args: data, $link, defaultOnSuccessCallback
-            ->setOnSuccess('callbackFuncitonName');
+     * CmfRequestMenuItem::bulkActionOnFilteredRows(static::getUrlCustomAction('bulk_action_name'), 'put')
+     * // use ':count' in setTitle() to insert selected items count
+     * ->setTitle('<span class="label label-primary">:count</span> ' . $this->translate('datagrid.bulk_action.action_name'))
+     * ->setTooltip($this->translate('datagrid.bulk_action.action_name_tooltip'))
+     * // ask user to confirm action
+     * ->setConfirm($this->translate('datagrid.bulk_action.action_name_confirmation'))
+     * // one of: json, html, xml. Default: 'json' (may be useful for your custom response handler)
+     * ->setResponseDataType('json')
+     * // set custom response handler function.
+     * // callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+     * // It will receive 3 args: data, $link, defaultOnSuccessCallback
+     * ->setOnSuccess('callbackFuncitonName');
      * or
-        Tag::li(
-            Tag::a()
-                ->setContent(trans('path.to.translation'))
-                //^ you can use ':count' in label to insert filtered items count
-                ->setDataAttr('action', 'bulk-filtered')
-                ->setDataAttr('confirm', trans('path.to.translation'))
-                //^ confirm action before sending request to server
-                ->setDataAttr('url', cmfRoute('route', [], false))
-                ->setDataAttr('method', 'put')
-                //^ can be 'post', 'put', 'delete' depending on action type
-                ->setDataAttr('on-success', 'callbackFuncitonName')
-                //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-                //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-                ->setDataAttr('response-type', 'json')
-                //^ one of: json, html, xml. Default: 'json'
-                ->setHref('javascript: void(0)');
-        )
+     * Tag::li(
+     * Tag::a()
+     * ->setContent(trans('path.to.translation'))
+     * //^ you can use ':count' in label to insert filtered items count
+     * ->setDataAttr('action', 'bulk-filtered')
+     * ->setDataAttr('confirm', trans('path.to.translation'))
+     * //^ confirm action before sending request to server
+     * ->setDataAttr('url', $this->getCmfConfig()->route('route', [], false))
+     * ->setDataAttr('method', 'put')
+     * //^ can be 'post', 'put', 'delete' depending on action type
+     * ->setDataAttr('on-success', 'callbackFuncitonName')
+     * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+     * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+     * ->setDataAttr('response-type', 'json')
+     * //^ one of: json, html, xml. Default: 'json'
+     * ->setHref('javascript: void(0)');
+     * )
      * - bulk actions with custom on-click handler
-        Tag::li(
-            Tag::button()
-                ->setContent(trans('path.to.translation'))
-                //^ you can use ':count' in label to insert selected items count or filtered items count
-                //^ depending on 'data-type' attribute
-                ->setClass('btn btn-success')
-                ->setDataAttr('type', 'bulk-selected')
-                //^ 'bulk-selected' or 'bulk-filtered'
-                ->setDataAttr('url', cmfRoute('route', [], false))
-                ->setDataAttr('id-field', 'id')
-                //^ id field name to use to get rows ids, default: 'id'
-                ->setOnClick('someFunction(this)')
-                //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
-        )
+     * Tag::li(
+     * Tag::button()
+     * ->setContent(trans('path.to.translation'))
+     * //^ you can use ':count' in label to insert selected items count or filtered items count
+     * //^ depending on 'data-type' attribute
+     * ->setClass('btn btn-success')
+     * ->setDataAttr('type', 'bulk-selected')
+     * //^ 'bulk-selected' or 'bulk-filtered'
+     * ->setDataAttr('url', $this->getCmfConfig()->route('route', [], false))
+     * ->setDataAttr('id-field', 'id')
+     * //^ id field name to use to get rows ids, default: 'id'
+     * ->setOnClick('someFunction(this)')
+     * //^ for 'bulk-selected': inside someFunction() you can get selected rows ids via $(this).data('data').ids
+     * )
      * Conditions will be received in the 'conditions' key of the request as JSON string
-     * @return $this
+     * @return static
      */
-    public function setBulkActionsToolbarItems(\Closure $callback) {
+    public function setBulkActionsToolbarItems(\Closure $callback)
+    {
         $this->bulkActionsToolbarItems = $callback;
         return $this;
     }
-
+    
     /**
      * @param array $records
      * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
      * @return array
      */
-    public function prepareRecords(array $records, array $virtualColumns = []) {
-        foreach ($records as $idx => &$record) {
+    public function prepareRecords(array $records, array $virtualColumns = []): array
+    {
+        foreach ($records as &$record) {
             $record = $this->prepareRecord($record, $virtualColumns);
             $resourceName = $this->getScaffoldConfig()->getResourceName();
-            if (array_get($record, '___details_allowed', false)) {
-                $record['___details_url'] = routeToCmfItemDetails($resourceName, $record['___pk_value']);
+            if (!empty($record['___details_allowed'])) {
+                $record['___details_url'] = $this->getScaffoldConfig()->getUrlToItemDetails($record['___pk_value']);
             }
-            if (array_get($record, '___edit_allowed', false)) {
-                $record['___edit_url'] = routeToCmfItemEditForm($resourceName, $record['___pk_value']);
+            if (!empty($record['___edit_allowed'])) {
+                $record['___edit_url'] = $this->getScaffoldConfig()->getUrlToItemEditForm($record['___pk_value']);
             }
-            if (array_get($record, '___delete_allowed', false)) {
-                $record['___delete_url'] = routeToCmfItemDelete($resourceName, $record['___pk_value']);
+            if (!empty($record['___delete_allowed'])) {
+                $record['___delete_url'] = $this->getScaffoldConfig()->getUrlToItemDelete($record['___pk_value']);
             }
-            if (array_get($record, '___cloning_allowed', false)) {
-                $record['___clone_url'] = routeToCmfItemCloneForm($resourceName, $record['___pk_value']);
+            if (!empty($record['___cloning_allowed'])) {
+                $record['___clone_url'] = $this->getScaffoldConfig()->getUrlToItemCloneForm($record['___pk_value']);
             }
             $record['___max_nesting_depth'] = $this->getNestedViewsDepthLimit();
         }
         return $records;
     }
-
-    public function createValueViewer(): DataGridColumn {
+    
+    public function createValueViewer(): DataGridColumn
+    {
         return DataGridColumn::create();
     }
-
+    
     /**
      * @return Tag[]|string[]
      */
-    public function getRowActions() {
+    public function getRowActions(): array
+    {
         return $this->rowActions ? (array)call_user_func($this->rowActions, $this) : [];
     }
-
+    
     /**
      * Note: common actions: 'details', 'edit', 'clone', 'delete' will be added automatically before custom menu items.
      * You can manipulate positioning of common items using actions names as keys (ex: 'details' => null).
@@ -610,112 +563,105 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * Examples:
      * 1. RowAction
      * a. Preferred usage:
-     * - CmfMenuItem::redirect(cmfRoute('route', [], false))
-            ->setTitle($this->translate('action.details'))
-            ->setIconClasses('fa fa-user text-primary')
-     * - CmfMenuItem::request(cmfRoute('route', [], false), 'delete')
-            ->setTitle($this->translate('action.delete'))
-            ->setIconClasses('fa fa-trash text-danger')
-            ->setConfirm($this->translate('message.delete_confirm'));
+     * - CmfMenuItem::redirect($this->getCmfConfig()->route('route', [], false))
+     * ->setTitle($this->translate('action.details'))
+     * ->setIconClasses('fa fa-user text-primary')
+     * - CmfMenuItem::request($this->getCmfConfig()->route('route', [], false), 'delete')
+     * ->setTitle($this->translate('action.delete'))
+     * ->setIconClasses('fa fa-trash text-danger')
+     * ->setConfirm($this->translate('message.delete_confirm'));
      * b. Alternative usage:
      * - call some url via ajax blocking data grid while waiting for response and then run "callback(json)"
-        * Tag::a()
-            ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
-            ->setClass('row-action text-success')
-            ->setTitle(cmfTransCustom('.path.to.translation'))
-            ->setDataAttr('toggle', 'tooltip')
-            ->setDataAttr('container', '#section-content .content') //< tooltip container
-            ->setDataAttr('block-datagrid', '1')
-            ->setDataAttr('action', 'request')
-            ->setDataAttr('method', 'put')
-            ->setDataAttr('url', cmfRoute('route', [], false))
-            ->setDataAttr('data', 'id={{= it.id }}')
-            //->setDataAttr('url', cmfRouteTpl('route', [], ['id'], false))
-            ->setDataAttr('on-success', 'callbackFuncitonName')
-            //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
-            //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
-            ->setHref('javascript: void(0)')
-            ->build()
+     * Tag::a()
+     * ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
+     * ->setClass('row-action text-success')
+     * ->setTitle(cmfTransCustom('.path.to.translation'))
+     * ->setDataAttr('toggle', 'tooltip')
+     * ->setDataAttr('container', '#section-content .content') //< tooltip container
+     * ->setDataAttr('block-datagrid', '1')
+     * ->setDataAttr('action', 'request')
+     * ->setDataAttr('method', 'put')
+     * ->setDataAttr('url', $this->getCmfConfig()->route('route', [], false))
+     * ->setDataAttr('data', 'id={{= it.id }}')
+     * //->setDataAttr('url', $this->getCmfConfig()->routeTpl('route', [], ['id'], false))
+     * ->setDataAttr('on-success', 'callbackFuncitonName')
+     * //^ callbackFuncitonName must be a function name: 'funcName' or 'Some.funcName' allowed
+     * //^ It will receive 3 args: data, $link, defaultOnSuccessCallback
+     * ->setHref('javascript: void(0)')
+     * ->build()
      * - redirect
-        * Tag::a()
-            ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
-            ->setClass('row-action text-primary')
-            ->setTitle(cmfTransCustom('.path.to.translation'))
-            ->setDataAttr('toggle', 'tooltip')
-            ->setDataAttr('container', '#section-content .content') //< tooltip container
-            ->setHref(cmfRoute('route', [], false))
-            ->setTarget('_blank')
-            ->build()
+     * Tag::a()
+     * ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
+     * ->setClass('row-action text-primary')
+     * ->setTitle(cmfTransCustom('.path.to.translation'))
+     * ->setDataAttr('toggle', 'tooltip')
+     * ->setDataAttr('container', '#section-content .content') //< tooltip container
+     * ->setHref($this->getCmfConfig()->route('route', [], false))
+     * ->setTarget('_blank')
+     * ->build()
      * 2. List of row actions:
      *      [
      *          RowAction1,
      *          RowAction2,
      *          'delete' => null
      *      ]
-     * @return $this
+     * @return static
      */
-    public function setRowActions(\Closure $rowActionsBuilder) {
+    public function setRowActions(\Closure $rowActionsBuilder)
+    {
         $this->rowActions = $rowActionsBuilder;
         return $this;
     }
-
+    
     /**
-     * @param bool $isEnabled
-     * @return $this
+     * @return static
      */
-    public function setIsRowActionsEnabled($isEnabled) {
-        $this->isRowActionsEnabled = (bool)$isEnabled;
+    public function setIsRowActionsEnabled(bool $isEnabled)
+    {
+        $this->isRowActionsEnabled = $isEnabled;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isRowActionsEnabled() {
+    
+    public function isRowActionsEnabled(): bool
+    {
         return $this->isRowActionsEnabled;
     }
-
-    /**
-     * @return bool
-     */
-    public function isRowActionsColumnFixed() {
-        return $this->isRowActionsColumnFixed;
-    }
-
+    
     /**
      * Pass 'true' to fix/stick actions column in data grid so it will not move during
      * horisontal scrolling of data grid
-     * @param bool $isFixed
-     * @return $this
+     * @return static
      */
-    public function setIsRowActionsColumnFixed(bool $isFixed) {
+    public function setIsRowActionsColumnFixed(bool $isFixed)
+    {
         $this->isRowActionsColumnFixed = $isFixed;
         return $this;
     }
-
+    
+    public function isRowActionsColumnFixed(): bool
+    {
+        return $this->isRowActionsColumnFixed;
+    }
+    
     /**
-     * @param bool $isEnabled
-     * @return $this
+     * @return static
      */
-    public function setIsContextMenuEnabled(bool $isEnabled) {
+    public function setIsContextMenuEnabled(bool $isEnabled)
+    {
         $this->isContextMenuEnabled = $isEnabled;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isContextMenuEnabled() {
+    
+    public function isContextMenuEnabled(): bool
+    {
         return $this->isContextMenuEnabled;
     }
-
-    /**
-     * @return array
-     */
-    public function getContextMenuItems() {
+    
+    public function getContextMenuItems(): array
+    {
         return $this->contextMenuItems ? (array)call_user_func($this->contextMenuItems, $this) : [];
     }
-
+    
     /**
      * Note: common actions: 'details', 'edit', 'clone', 'delete' will be added automatically before custom
      * menu items. You can manipulate positioning of common items using action name as key and null as value
@@ -723,87 +669,87 @@ class DataGridConfig extends ScaffoldSectionConfig {
      * @param \Closure $contextMenuItems - function (ScaffolSectionConfig $scaffoldSectionConfig) { return []; }
      * Format:
      * 1. MenuItem
-     * - CmfMenuItem::redirect(cmfRoute('route', [], false))
-            ->setTitle($this->translate('action.details'))
-            ->setIconClasses('fa fa-user text-primary')
-     * - CmfMenuItem::request(cmfRoute('route', [], false), 'delete')
-            ->setTitle($this->translate('action.delete'))
-            ->setIconClasses('fa fa-trash text-danger')
-            ->setConfirm($this->translate('message.delete_confirm'));
+     * - CmfMenuItem::redirect($this->getCmfConfig()->route('route', [], false))
+     * ->setTitle($this->translate('action.details'))
+     * ->setIconClasses('fa fa-user text-primary')
+     * - CmfMenuItem::request($this->getCmfConfig()->route('route', [], false), 'delete')
+     * ->setTitle($this->translate('action.delete'))
+     * ->setIconClasses('fa fa-trash text-danger')
+     * ->setConfirm($this->translate('message.delete_confirm'));
      * - Tag::li(Tag::a()) (For Tag::a() format see setRowActions() docs)
      * 2. List of menu items:
      * - No grouping:
-            [
-                MenuItem1,
-                MenuItem2,
-                'edit' => null
-                ...
-            ]
+     * [
+     * MenuItem1,
+     * MenuItem2,
+     * 'edit' => null
+     * ...
+     * ]
      * - With groups:
-            [
-                [
-                    MenuItem1,
-                    MenuItem2,
-                    ...
-                ],
-                [
-                    MenuItem3,
-                    'delete' => null
-                ]
-            ]
-     * @return $this
+     * [
+     * [
+     * MenuItem1,
+     * MenuItem2,
+     * ...
+     * ],
+     * [
+     * MenuItem3,
+     * 'delete' => null
+     * ]
+     * ]
+     * @return static
      */
-    public function setContextMenuItems(\Closure $contextMenuItems) {
+    public function setContextMenuItems(\Closure $contextMenuItems)
+    {
         $this->setIsContextMenuEnabled(true);
         $this->contextMenuItems = $contextMenuItems;
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getAdditionalDataTablesConfig() {
+    
+    public function getAdditionalDataTablesConfig(): array
+    {
         return $this->additionalDataTablesConfig;
     }
-
+    
     /**
-     * @param array $additionalDataTablesConfig
-     * @return $this
+     * @return static
      */
-    public function setAdditionalDataTablesConfig(array $additionalDataTablesConfig) {
+    public function setAdditionalDataTablesConfig(array $additionalDataTablesConfig)
+    {
         $this->additionalDataTablesConfig = $additionalDataTablesConfig;
         return $this;
     }
-
+    
     /**
      * @param string $name
      * @param null|DataGridColumn|AbstractValueViewer $tableCell
      * @param bool $autodetectIfLinkedToDbColumn
-     * @return ScaffoldSectionConfig
+     * @return static
      */
-    public function addValueViewer($name, AbstractValueViewer &$tableCell = null, bool $autodetectIfLinkedToDbColumn = false) {
+    public function addValueViewer(string $name, AbstractValueViewer &$tableCell = null, bool $autodetectIfLinkedToDbColumn = false)
+    {
         $tableCell = !$tableCell && $name === static::ROW_ACTIONS_COLUMN_NAME
             ? $this->getTableCellForForRowActions()
             : $tableCell;
         return parent::addValueViewer($name, $tableCell, $autodetectIfLinkedToDbColumn);
     }
-
+    
     /**
      * @return DataGridColumn|RenderableValueViewer
      */
-    protected function getTableCellForForRowActions() {
+    protected function getTableCellForForRowActions(): RenderableValueViewer
+    {
         return DataGridColumn::create()
             ->setIsLinkedToDbColumn(false)
             ->setName(static::ROW_ACTIONS_COLUMN_NAME)
             ->setLabel($this->translateGeneral('actions.column_label'))
             ->setType(DataGridColumn::TYPE_STRING);
     }
-
+    
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
      * @throws \UnexpectedValueException
-     * @throws NotFoundException
      */
     public function finish(): void
     {
@@ -820,7 +766,7 @@ class DataGridConfig extends ScaffoldSectionConfig {
             $allowedColumnTypes = [Column::TYPE_INT, Column::TYPE_FLOAT, Column::TYPE_UNIX_TIMESTAMP];
             foreach ($reorderingColumns as $columnName) {
                 if (!$this->hasValueViewer($columnName)) {
-                    throw new NotFoundException(
+                    throw new \UnexpectedValueException(
                         "Column '$columnName' provided for reordering was not found within declared data grid columns"
                     );
                 }
@@ -841,86 +787,70 @@ class DataGridConfig extends ScaffoldSectionConfig {
             }
         }
     }
-
-    protected function getSectionTranslationsPrefix(?string $subtype = null): string {
+    
+    protected function getSectionTranslationsPrefix(?string $subtype = null): string
+    {
         return $subtype === 'value_viewer' ? 'datagrid.column' : 'datagrid';
     }
-
+    
     /**
      * @param string $parentIdColumnName
      * @param int $limitNestingDepthTo - number of nested data grids. <= 0 - no limit; 1 = 1 subview only;
-     * @return $this
+     * @return static
      */
-    public function enableNestedView($parentIdColumnName = 'parent_id', $limitNestingDepthTo = -1) {
+    public function enableNestedView(string $parentIdColumnName = 'parent_id', int $limitNestingDepthTo = -1)
+    {
         $this->getTable()->getTableStructure()->getColumn($parentIdColumnName); //< validates column existence
         $this->enableNestedViewBasedOnColumn = $parentIdColumnName;
         $this->setNestedViewsDepthLimit($limitNestingDepthTo);
         $this->setIsRowActionsColumnFixed(false);
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isNestedViewEnabled() {
+    
+    public function isNestedViewEnabled(): bool
+    {
         return !empty($this->enableNestedViewBasedOnColumn);
     }
-
-    /**
-     * @return null|string
-     */
-    public function getColumnNameForNestedView() {
+    
+    public function getColumnNameForNestedView(): ?string
+    {
         return $this->enableNestedViewBasedOnColumn;
     }
-
+    
     /**
-     * @param int $maxDepth
-     * @return $this
+     * @return static
      */
-    public function setNestedViewsDepthLimit($maxDepth) {
+    public function setNestedViewsDepthLimit(int $maxDepth)
+    {
         $this->nestedViewsDepthLimit = (int)$maxDepth;
         return $this;
     }
-
-    /**
-     * @return int
-     */
-    public function getNestedViewsDepthLimit() {
+    
+    public function getNestedViewsDepthLimit(): int
+    {
         return $this->nestedViewsDepthLimit;
     }
-
+    
     /**
      * @param array $rowsPositioningColumns - column that is used to define rows order
-     * @return $this
+     * @return static
      */
-    public function enableRowsReorderingOn(...$rowsPositioningColumns) {
+    public function enableRowsReorderingOn(...$rowsPositioningColumns)
+    {
         $this->rowsPositioningColumns = $rowsPositioningColumns;
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getRowsPositioningColumns() {
+    
+    public function getRowsPositioningColumns(): array
+    {
         return $this->rowsPositioningColumns;
     }
-
-    /**
-     * @return bool
-     */
-    public function isRowsReorderingEnabled() {
+    
+    public function isRowsReorderingEnabled(): bool
+    {
         return !empty($this->rowsPositioningColumns);
     }
-
-    /**
-     * @return array
-     */
-    public function getAdditionalViewsForTemplate() {
-        return $this->additionalViewsForTemplate instanceof \Closure
-            ? call_user_func($this->additionalViewsForTemplate, $this)
-            : $this->additionalViewsForTemplate;
-    }
-
+    
     /**
      * Provide additional Laravel views to be inserted after data grid.
      * This will solve almost any problem with complex data grid cells that need to be rendered separately.
@@ -944,42 +874,45 @@ class DataGridConfig extends ScaffoldSectionConfig {
      *          ]
      *      - \Closure: function (DataGridConfig $dataGridConfig) { reurn [] } returned value must
      *          fit same format as array (see above)
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setAdditionalViewsForTemplate($views) {
+    public function setAdditionalViewsForTemplate($views)
+    {
         if (!is_array($views) && !($views instanceof \Closure)) {
             throw new \InvalidArgumentException('$views argument must be an array or \Closure');
         }
         $this->additionalViewsForTemplate = $views;
         return $this;
     }
-
-    /**
-     * @return DataGridRendererHelper
-     */
-    public function getRendererHelper() {
+    
+    public function getAdditionalViewsForTemplate(): array
+    {
+        return $this->additionalViewsForTemplate instanceof \Closure
+            ? call_user_func($this->additionalViewsForTemplate, $this)
+            : $this->additionalViewsForTemplate;
+    }
+    
+    public function getRendererHelper(): DataGridRendererHelper
+    {
         if (empty($this->rendererHelper)) {
             $this->rendererHelper = new DataGridRendererHelper($this);
         }
         return $this->rendererHelper;
     }
-
-    /**
-     * @param array $record
-     * @param array $virtualColumns
-     * @return array
-     */
-    public function prepareRecord(array $record, array $virtualColumns = []) {
+    
+    public function prepareRecord(array $record, array $virtualColumns = []): array
+    {
         $data = parent::prepareRecord($record, $virtualColumns);
         /** @var DataGridColumn $valueViewer */
         foreach ($this->getValueViewers() as $valueViewer) {
-            if ($valueViewer->hasRelation()) {
+            $relation = $valueViewer->getRelation();
+            if ($relation) {
                 // add special key for relation column that is not nested into sub object and datatables can find it
-                $path = $valueViewer->getRelation()->getName() . '.' . $valueViewer->getRelationColumn();
+                $path = $relation->getName() . '.' . $valueViewer->getRelationColumn();
                 $key = $valueViewer::convertNameForDataTables($valueViewer->getName());
                 if (!isset($data[$key])) {
-                    $data[$key] = array_get($data, $path);
+                    $data[$key] = Arr::get($data, $path);
                 }
             }
         }

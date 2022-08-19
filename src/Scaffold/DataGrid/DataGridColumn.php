@@ -1,92 +1,86 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\DataGrid;
 
+use Illuminate\Support\Arr;
 use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ValueRenderer;
 
-class DataGridColumn extends RenderableValueViewer {
-
-    /**
-     * @var bool
-     */
-    protected $isSortable = true;
-
-    /**
-     * @var bool
-     */
-    protected $isVisible = true;
-
-    /**
-     * @var null|int
-     */
-    protected $columnWidth;
-    /**
-     * @var array
-     */
-    protected $additionalOrderBy = [];
-
-    public static function convertNameForDataTables($name) {
+class DataGridColumn extends RenderableValueViewer
+{
+    
+    protected bool $isSortable = true;
+    protected bool $isVisible = true;
+    protected ?string $columnWidth = null;
+    protected array $additionalOrderBy = [];
+    
+    public static function convertNameForDataTables(string $name): string
+    {
         return str_replace('.', ':', $name);
     }
-
-    /**
-     * @return boolean
-     */
-    public function isSortable() {
+    
+    public function isSortable(): bool
+    {
         return $this->isSortable;
     }
-
+    
     /**
-     * @param boolean $isSortable
-     * @return $this
+     * @return static
      */
-    public function setIsSortable($isSortable) {
+    public function setIsSortable(bool $isSortable)
+    {
         $this->isSortable = $isSortable;
         return $this;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function enableSorting() {
+    public function enableSorting()
+    {
         $this->isSortable = true;
         return $this;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function disableSorting() {
+    public function disableSorting()
+    {
         $this->isSortable = false;
         return $this;
     }
-
-    /**
-     * @return boolean
-     */
-    public function isVisible() {
+    
+    public function isVisible(): bool
+    {
         return $this->isVisible;
     }
-
+    
     /**
-     * @param boolean $isVisible
-     * @return $this
+     * @return static
      */
-    public function setIsVisible($isVisible) {
+    public function setIsVisible(bool $isVisible)
+    {
         $this->isVisible = $isVisible;
         return $this;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function invisible() {
+    public function invisible()
+    {
         $this->isVisible = false;
         return $this;
     }
-
-    public function setType(string $type) {
+    
+    /**
+     * @return static
+     */
+    public function setType(string $type)
+    {
         switch ($type) {
             case static::TYPE_TEXT:
             case static::TYPE_MULTILINE:
@@ -99,34 +93,31 @@ class DataGridColumn extends RenderableValueViewer {
         }
         return parent::setType($type);
     }
-
+    
     /**
-     * @param string $width - 100, 100px, 25%. No units means that width is in pixels: 100 == 100px
-     * @return $this
+     * @param string|int $width - 100, 100px, 25%. No units means that width is in pixels: 100 == 100px
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setWidth($width) {
+    public function setWidth(string $width)
+    {
         if (!preg_match('%^\d+\s*(px|\%|)$%i', $width)) {
             throw new \InvalidArgumentException('$width argument must be in pixels (ex: 100px or 100) or percents (ex: 25%)');
         }
         $this->columnWidth = is_numeric($width) ? $width . 'px' : $width;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasCustomWidth() {
+    
+    public function hasCustomWidth(): bool
+    {
         return !empty($this->columnWidth);
     }
-
-    /**
-     * @return int|null
-     */
-    public function getWidth() {
+    
+    public function getWidth(): ?string
+    {
         return $this->columnWidth;
     }
-
+    
     public function getValueConverter(): ?\Closure
     {
         if (empty($this->valueConverter)) {
@@ -134,46 +125,48 @@ class DataGridColumn extends RenderableValueViewer {
                 case self::TYPE_BOOL:
                     $this->valueConverter = function ($value) {
                         if (!$this->isLinkedToDbColumn()) {
-                            if (!array_has($value, $this->getName())) {
+                            if (!Arr::has($value, $this->getName())) {
                                 return '-';
                             } else {
                                 $value = (bool)$value[$this->getName()];
                             }
                         }
-                        return cmfTransGeneral('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
+                        return $this->getCmfConfig()->transGeneral('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
                     };
                     break;
             }
         }
         return $this->valueConverter;
     }
-
-    public function setIsLinkedToDbColumn(bool $isDbColumn) {
+    
+    /**
+     * @return static
+     */
+    public function setIsLinkedToDbColumn(bool $isDbColumn)
+    {
         if (!$isDbColumn) {
             $this->setIsSortable(false);
         }
         return parent::setIsLinkedToDbColumn($isDbColumn);
     }
-
+    
     /**
      * Add additional sorting to ORDER BY when user sorts by this column
-     * @param $column
-     * @param $isAscending
-     * @return $this
+     * @return static
      */
-    public function addAdditionalOrderBy($column, $isAscending) {
+    public function addAdditionalOrderBy(string $column, bool $isAscending)
+    {
         $this->additionalOrderBy[$column] = $isAscending ? 'ASC' : 'DESC';
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getAdditionalOrderBy() {
+    
+    public function getAdditionalOrderBy(): array
+    {
         return $this->additionalOrderBy;
     }
-
-    public function getPosition(): int {
+    
+    public function getPosition(): int
+    {
         if (
             $this->getName() === DataGridConfig::ROW_ACTIONS_COLUMN_NAME
             && $this->getScaffoldSectionConfig()->isRowActionsEnabled()
@@ -190,8 +183,12 @@ class DataGridColumn extends RenderableValueViewer {
                 + ($this->getScaffoldSectionConfig()->isNestedViewEnabled() ? 1 : 0);
         }
     }
-
-    public function configureDefaultRenderer(ValueRenderer $renderer) {
+    
+    /**
+     * @return static
+     */
+    public function configureDefaultRenderer(ValueRenderer $renderer)
+    {
         parent::configureDefaultRenderer($renderer);
         if (!$renderer->hasTemplate()) {
             if ($this->getType() === static::TYPE_IMAGE) {
@@ -202,5 +199,5 @@ class DataGridColumn extends RenderableValueViewer {
         }
         return $this;
     }
-
+    
 }

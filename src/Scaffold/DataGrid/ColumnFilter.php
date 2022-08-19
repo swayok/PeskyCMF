@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold\DataGrid;
 
-use PeskyCMF\Scaffold\ScaffoldException;
+use Illuminate\Contracts\Validation\Factory as ValidationFactoryContract;
+use PeskyCMF\Config\CmfConfig;
 use PeskyORM\Core\DbExpr;
 use Swayok\Utils\NormalizeValue;
 
-class ColumnFilter {
-
+class ColumnFilter
+{
+    
     public const TYPE_STRING = 'string';
     public const TYPE_INTEGER = 'integer';
     public const TYPE_FLOAT = 'double';
@@ -16,8 +19,8 @@ class ColumnFilter {
     public const TYPE_TIME = 'time';
     public const TYPE_TIMESTAMP = 'datetime';
     public const TYPE_BOOL = 'boolean';
-
-    protected static $dataTypeDefaultOperatorsGroup = [
+    
+    protected static array $dataTypeDefaultOperatorsGroup = [
         self::TYPE_STRING => self::OPERATOR_GROUP_STRINGS,
         self::TYPE_INTEGER => self::OPERATOR_GROUP_NUMBERS,
         self::TYPE_FLOAT => self::OPERATOR_GROUP_NUMBERS,
@@ -26,8 +29,8 @@ class ColumnFilter {
         self::TYPE_TIMESTAMP => self::OPERATOR_GROUP_TIMESTAMP,
         self::TYPE_BOOL => self::OPERATOR_GROUP_BOOL,
     ];
-
-    protected static $dataTypeToDefaultInputType = [
+    
+    protected static array $dataTypeToDefaultInputType = [
         self::TYPE_STRING => self::INPUT_TYPE_STRING,
         self::TYPE_INTEGER => self::INPUT_TYPE_STRING,
         self::TYPE_FLOAT => self::INPUT_TYPE_STRING,
@@ -36,7 +39,7 @@ class ColumnFilter {
         self::TYPE_TIMESTAMP => self::INPUT_TYPE_STRING,
         self::TYPE_BOOL => self::INPUT_TYPE_RADIO,
     ];
-
+    
     public const OPERATOR_GROUP_NUMBERS = 'numbers';
     public const OPERATOR_GROUP_STRINGS = 'strings';
     public const OPERATOR_GROUP_NULLS = 'nulls';
@@ -45,7 +48,7 @@ class ColumnFilter {
     public const OPERATOR_GROUP_TIMESTAMP = 'timestamp';
     public const OPERATOR_GROUP_BOOL = 'boolean';
     public const OPERATOR_GROUP_ALL = 'all';
-
+    
     public const OPERATOR_EQUAL = 'equal';
     public const OPERATOR_NOT_EQUAL = 'not_equal';
     public const OPERATOR_IN_ARRAY = 'in';
@@ -66,8 +69,8 @@ class ColumnFilter {
     public const OPERATOR_IS_NOT_EMPTY = 'is_not_empty';
     public const OPERATOR_IS_NULL = 'is_null';
     public const OPERATOR_IS_NOT_NULL = 'is_not_null';
-
-    protected static $operatorGroups = [
+    
+    protected static array $operatorGroups = [
         self::OPERATOR_GROUP_NULLS => [
             self::OPERATOR_IS_NULL,
             self::OPERATOR_IS_NOT_NULL,
@@ -140,8 +143,8 @@ class ColumnFilter {
             self::OPERATOR_IS_NOT_NULL,
         ],
     ];
-
-    protected static $ruleOperatorToDbOperator = [
+    
+    protected static array $ruleOperatorToDbOperator = [
         self::OPERATOR_EQUAL => '=',
         self::OPERATOR_NOT_EQUAL => '!=',
         self::OPERATOR_IN_ARRAY => 'IN',
@@ -163,15 +166,15 @@ class ColumnFilter {
         self::OPERATOR_IS_NULL => 'IS',
         self::OPERATOR_IS_NOT_NULL => 'IS NOT',
     ];
-
+    
     public const INPUT_TYPE_STRING = 'text';
     public const INPUT_TYPE_TEXT = 'textarea';
     public const INPUT_TYPE_RADIO = 'radio';
     public const INPUT_TYPE_CHECKBOX = 'checkbox';
     public const INPUT_TYPE_SELECT = 'select';
     public const INPUT_TYPE_MULTISELECT = 'multselect';
-
-    protected static $inputTypes = [
+    
+    protected static array $inputTypes = [
         self::INPUT_TYPE_STRING,
         self::INPUT_TYPE_TEXT,
         self::INPUT_TYPE_SELECT,
@@ -179,34 +182,23 @@ class ColumnFilter {
         self::INPUT_TYPE_CHECKBOX,
         self::INPUT_TYPE_RADIO,
     ];
+    protected ?string $columnName = null;
+    protected ?string $columnNameForTranslation = null;
+    protected ?string $filterLabel = null;
+    protected ?string $dataType = null;
     /** @var string|null */
-    protected $columnName;
-    /** @var string|null */
-    protected $columnNameForTranslation;
-    /** @var string|null */
-    protected $filterLabel;
-    /** @var string|null */
-    protected $dataType;
-    /** @var string|null */
-    protected $inputType;
-    /** @var bool */
-    protected $multiselect = false;
-    /** @var null|array */
-    protected $operators;
-    /** @var array */
-    protected $allowedValues = [
+    protected ?string $inputType = null;
+    protected bool $multiselect = false;
+    protected ?array $operators = null;
+    protected array $allowedValues = [
         //'value' => 'label'
     ];
-    /** @var string|null */
-    protected $plugin = null;
-    /** @var array */
-    protected $pluginConfig = [];
+    protected ?string $plugin = null;
+    protected array $pluginConfig = [];
     // details: http://querybuilder.js.org/index.html#filters
-    /** @var array  */
-    protected $otherSettings = [];
+    protected array $otherSettings = [];
     // details: http://querybuilder.js.org/index.html#validation
-    /** @var array  */
-    protected $validators = [
+    protected array $validators = [
         //'min' => 0,       //< numbers - min value, strings - min length, timestamps - min date/time/datetime in correct 'format'
         //'max' => 0,       //< numbers - max value, strings - max length, timestamps - max date/time/datetime in correct 'format'
         //'step' => 1,      //< for numbers
@@ -215,112 +207,131 @@ class ColumnFilter {
     ];
     /** @var null|string|DbExpr */
     protected $columnNameReplacementForCondition;
-    /** @var bool */
-    protected $nullable = false;
-    /** @var null|FilterConfig */
-    protected $filterConfig;
-    /** @var null|\Closure */
-    protected $incomingValueModifier;
-
+    protected bool $nullable = false;
+    protected ?FilterConfig $filterConfig = null;
+    protected ?\Closure $incomingValueModifier = null;
+    
     /**
-     * @param string $dataType
-     * @param bool $canBeNull
-     * @param null|string $columnName
-     * @return ColumnFilter
+     * @return static
      */
-    public static function create($dataType = self::TYPE_STRING, $canBeNull = false, $columnName = null) {
+    public static function create(string $dataType = self::TYPE_STRING, bool $canBeNull = false, ?string $columnName = null)
+    {
         return new static($dataType, $canBeNull, $columnName);
     }
-
+    
     /**
      * Configure for ID column (primary or foreign keys)
-     * @param bool $excludeZero
-     * @param bool $canBeNull
-     * @param null|string $columnName
-     * @return ColumnFilter
+     * @return static
      */
-    public static function forPositiveInteger($excludeZero = false, $canBeNull = false, $columnName = null) {
+    public static function forPositiveInteger(bool $excludeZero = false, bool $canBeNull = false, ?string $columnName = null)
+    {
         return static::create(static::TYPE_INTEGER, $canBeNull, $columnName)->setMin($excludeZero ? 1 : 0);
     }
-
-    /**
-     * ColumnFilter constructor.
-     * @param string $dataType
-     * @param bool $canBeNull
-     * @param null $columnName
-     */
-    public function __construct($dataType = self::TYPE_STRING, $canBeNull = false, $columnName = null) {
+    
+    public function __construct(string $dataType = self::TYPE_STRING, bool $canBeNull = false, ?string $columnName = null)
+    {
         if (!empty($columnName)) {
             $this->setColumnName($columnName);
         }
         $this->setDataType($dataType, $canBeNull);
     }
-
-    public function setFilterConfig(FilterConfig $config) {
+    
+    /**
+     * @return static
+     */
+    public function setFilterConfig(FilterConfig $config)
+    {
         $this->filterConfig = $config;
         return $this;
     }
-
-    public function getFilterConfig(): FilterConfig {
+    
+    public function getFilterConfig(): FilterConfig
+    {
         if (!$this->filterConfig) {
             throw new \BadMethodCallException('FilterConfig not set');
         }
         return $this->filterConfig;
     }
-
-    public static function hasOperator(string $operator): bool {
+    
+    protected function getCmfConfig(): CmfConfig
+    {
+        return $this->getFilterConfig()->getCmfConfig();
+    }
+    
+    protected function getValidator(): ValidationFactoryContract
+    {
+        return $this->getCmfConfig()->getLaravelApp()->make('validator');
+    }
+    
+    public static function hasOperator(string $operator): bool
+    {
         return in_array($operator, static::$operatorGroups[static::OPERATOR_GROUP_ALL], true);
     }
-
-    public function hasColumnName(): bool {
+    
+    public function hasColumnName(): bool
+    {
         return !empty($this->columnName);
     }
-
-    public function setColumnName(string $columnName) {
+    
+    /**
+     * @return static
+     */
+    public function setColumnName(string $columnName)
+    {
         $this->columnName = $columnName;
         return $this;
     }
-
+    
     /**
-     * @return string
-     * @throws ScaffoldException
+     * @throws \UnexpectedValueException
      */
-    public function getColumnName(): string {
+    public function getColumnName(): string
+    {
         if (empty($this->columnName)) {
-            throw new ScaffoldException('Column name is empty for this filter');
+            throw new \UnexpectedValueException('Column name is empty for this filter');
         }
         return $this->columnName;
     }
-
-    public function setColumnNameForTranslation(string $name) {
+    
+    /**
+     * @return static
+     */
+    public function setColumnNameForTranslation(string $name)
+    {
         $this->columnNameForTranslation = $name;
         return $this;
     }
-
-    public function getColumnNameForTranslation(): string {
+    
+    public function getColumnNameForTranslation(): string
+    {
         if ($this->columnNameForTranslation === null) {
-            $this->columnNameForTranslation = strtolower(trim(preg_replace(
-                ['%([A-Z])%', '%[^a-zA-Z0-9.-]+%', '%\._%'],
-                ['_$1', '_', '.'],
-                $this->columnName
-            ), '_-.'));
+            $this->columnNameForTranslation = strtolower(
+                trim(
+                    preg_replace(
+                        ['%([A-Z])%', '%[^a-zA-Z0-9.-]+%', '%\._%'],
+                        ['_$1', '_', '.'],
+                        $this->columnName
+                    ),
+                    '_-.'
+                )
+            );
         }
         return $this->columnNameForTranslation;
     }
-
-    public function getDataType(): string {
+    
+    public function getDataType(): string
+    {
         return $this->dataType;
     }
-
+    
     /**
-     * @param string $type
-     * @param bool $canBeNull
-     * @return $this
-     * @throws ScaffoldException
+     * @return static
+     * @throws \InvalidArgumentException
      */
-    public function setDataType(string $type, bool $canBeNull = false) {
+    public function setDataType(string $type, bool $canBeNull = false)
+    {
         if (!array_key_exists($type, static::$dataTypeDefaultOperatorsGroup)) {
-            throw new ScaffoldException("Unknown filter type: $type");
+            throw new \InvalidArgumentException("Unknown filter type: $type");
         }
         $this->dataType = $type;
         if ($canBeNull) {
@@ -330,8 +341,8 @@ class ColumnFilter {
         switch ($type) {
             case static::TYPE_BOOL:
                 $this->setAllowedValues([
-                    't' => cmfTransGeneral('.datagrid.filter.bool.yes'),
-                    'f' => cmfTransGeneral('.datagrid.filter.bool.no'),
+                    't' => $this->getCmfConfig()->transGeneral('.datagrid.filter.bool.yes'),
+                    'f' => $this->getCmfConfig()->transGeneral('.datagrid.filter.bool.no'),
                 ]);
                 break;
             case static::TYPE_TIME:
@@ -363,17 +374,19 @@ class ColumnFilter {
         }
         return $this;
     }
-
+    
     /**
      * Add [is null] and [is not null] operators
-     * @return $this
+     * @return static
      */
-    public function canBeNull() {
+    public function canBeNull()
+    {
         $this->nullable = true;
         return $this;
     }
-
-    public function getOperators(): array {
+    
+    public function getOperators(): array
+    {
         if ($this->operators === null) {
             if ($this->getInputType() === static::INPUT_TYPE_SELECT) {
                 $this->operators = $this->multiselect
@@ -388,123 +401,129 @@ class ColumnFilter {
         }
         return $this->operators;
     }
-
+    
     /**
-     * @param array $operators
-     * @return $this
-     * @throws ScaffoldException
+     * @return static
+     * @throws \InvalidArgumentException
      */
-    public function setOperators(array $operators) {
+    public function setOperators(array $operators)
+    {
         foreach ($operators as $operator) {
             if (!in_array($operator, static::$operatorGroups[static::OPERATOR_GROUP_ALL], true)) {
-                throw new ScaffoldException("Unknown filter operator: $operator");
+                throw new \InvalidArgumentException("Unknown filter operator: $operator");
             }
         }
         $this->operators = $operators;
         return $this;
     }
-
+    
     /**
      * @param string $presetName - one of static::OPERATOR_GROUP_*
-     * @return $this
-     * @throws ScaffoldException
+     * @return static
+     * @throws \InvalidArgumentException
      */
-    public function setOperatorsFromPreset(string $presetName) {
+    public function setOperatorsFromPreset(string $presetName)
+    {
         if (!array_key_exists($presetName, static::$operatorGroups)) {
-            throw new ScaffoldException("Unknown filter operators preset: $presetName");
+            throw new \InvalidArgumentException("Unknown filter operators preset: $presetName");
         }
         $this->operators = static::$operatorGroups[$presetName];
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getFilterLabel(): string {
+    
+    public function getFilterLabel(): string
+    {
         if (empty($this->filterLabel)) {
             $this->filterLabel = $this->getFilterConfig()->translate($this);
         }
         return $this->filterLabel;
     }
-
-    public function setFilterLabel(string $filterLabel) {
+    
+    /**
+     * @return static
+     */
+    public function setFilterLabel(string $filterLabel)
+    {
         $this->filterLabel = $filterLabel;
         return $this;
     }
-
-    public function getInputType(): string {
+    
+    public function getInputType(): string
+    {
         return $this->inputType;
     }
-
+    
     /**
-     * @param string $inputType
-     * @return $this
-     * @throws ScaffoldException
+     * @return static
+     * @throws \InvalidArgumentException
      */
-    public function setInputType(string $inputType) {
+    public function setInputType(string $inputType)
+    {
         if (!in_array($inputType, static::$inputTypes, true)) {
-            throw new ScaffoldException("Unknown filter input type: $inputType");
+            throw new \InvalidArgumentException("Unknown filter input type: $inputType");
         }
-        switch ($inputType) {
-            case static::INPUT_TYPE_MULTISELECT:
-                $inputType = static::INPUT_TYPE_SELECT;
-                $this->multiselect = true;
-                break;
+        if ($inputType === static::INPUT_TYPE_MULTISELECT) {
+            $inputType = static::INPUT_TYPE_SELECT;
+            $this->multiselect = true;
         }
         $this->inputType = $inputType;
         return $this;
     }
-
-    public function getOtherSettings(): array {
+    
+    public function getOtherSettings(): array
+    {
         return $this->otherSettings;
     }
-
+    
     /**
      * Other filter rule settings
      * Details: http://querybuilder.js.org/index.html#filters
-     * @param array $otherSettings
-     * @return $this
+     * @return static
      */
-    public function setOtherSettings(array $otherSettings) {
+    public function setOtherSettings(array $otherSettings)
+    {
         $this->otherSettings = $otherSettings;
         return $this;
     }
-
+    
     /**
-     * @return array
-     * @throws ScaffoldException
+     * @throws \UnexpectedValueException
      */
-    public function getAllowedValues(): array {
+    public function getAllowedValues(): array
+    {
         if (empty($this->allowedValues) && $this->isItRequiresAllowedValues()) {
-            throw new ScaffoldException('List of allowed values is empty');
+            throw new \UnexpectedValueException('List of allowed values is empty');
         }
         return value($this->allowedValues);
     }
-
+    
     /**
      * This filter has one of selection types (select, radio, checkbox) and require $this->allowedValues to be set
      * @return bool
      */
-    protected function isItRequiresAllowedValues(): bool {
+    protected function isItRequiresAllowedValues(): bool
+    {
         return in_array(
             $this->inputType,
             [static::INPUT_TYPE_SELECT, static::INPUT_TYPE_RADIO, static::INPUT_TYPE_CHECKBOX],
             true
         );
     }
-
+    
     /**
      * @param array|\Closure $allowedValues
-     * @return $this
-     * @throws ScaffoldException
+     * @return static
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
      */
-    public function setAllowedValues($allowedValues) {
+    public function setAllowedValues($allowedValues)
+    {
         if (!$this->isItRequiresAllowedValues()) {
-            throw new ScaffoldException("Cannot set allowed values list to a filter input type: {$this->inputType}");
-        } else if (empty($allowedValues)) {
-            throw new ScaffoldException('List of allowed values is empty');
-        } else if (!is_array($allowedValues) && !($allowedValues instanceof \Closure)) {
-            throw new ScaffoldException('List of allowed values should be array or \Closure');
+            throw new \BadMethodCallException("Cannot set allowed values list to a filter input type: {$this->inputType}");
+        } elseif (empty($allowedValues)) {
+            throw new \InvalidArgumentException('List of allowed values is empty');
+        } elseif (!is_array($allowedValues) && !($allowedValues instanceof \Closure)) {
+            throw new \InvalidArgumentException('List of allowed values should be array or \Closure');
         }
         $this->allowedValues = $allowedValues;
         return $this;
@@ -513,132 +532,151 @@ class ColumnFilter {
     /**
      * Alias for setAllowedValues()
      * @param array|\Closure $allowedValues
-     * @return $this
-     * @throws ScaffoldException
+     * @return static
      */
-    public function setOptions($allowedValues) {
+    public function setOptions($allowedValues)
+    {
         return $this->setAllowedValues($allowedValues);
     }
-
-    public function getPlugin(): ?string {
+    
+    public function getPlugin(): ?string
+    {
         return $this->plugin;
     }
-
-    public function setPlugin(string $plugin) {
+    
+    /**
+     * @return static
+     */
+    public function setPlugin(string $plugin)
+    {
         $this->plugin = $plugin;
         return $this;
     }
-
-    public function getPluginConfig(): array {
+    
+    public function getPluginConfig(): array
+    {
         return $this->pluginConfig;
     }
-
-    public function setPluginConfig(array $pluginConfig) {
+    
+    /**
+     * @return static
+     */
+    public function setPluginConfig(array $pluginConfig)
+    {
         $this->pluginConfig = $pluginConfig;
         return $this;
     }
-
-    public function getValidators(): array {
+    
+    public function getValidators(): array
+    {
         return $this->validators;
     }
-
+    
     /**
-     * @param int|string $min -
+     * @param int|float|string $min -
      *      numbers: min value
      *      strings: min length
      *      timestamps: min date/time/datetime in correct 'format'
-     * @return $this
+     * @return static
      */
-    public function setMin($min) {
+    public function setMin($min)
+    {
         $this->validators['min'] = $min;
         return $this;
     }
-
+    
     /**
-     * @param int|string $max -
+     * @param int|float|string $max -
      *      numbers: max value
      *      strings: max length
      *      timestamps: max date/time/datetime in correct 'format'
-     * @return $this
+     * @return static
      */
-    public function setMax($max) {
+    public function setMax($max)
+    {
         $this->validators['max'] = $max;
         return $this;
     }
-
+    
     /**
      * @param int|float $step - for numbers only
-     * @return $this
+     * @return static
      */
-    public function setStep($step) {
+    public function setStep($step)
+    {
         $this->validators['step'] = $step;
         return $this;
     }
-
+    
     /**
      * @param string $format -
      *      strings: regexp
      *      timestamps: datetime format for timestamps in js (http://momentjs.com/docs/#/parsing/string-format/)
-     * @return $this
+     * @return static
      */
-    public function setFormat($format) {
+    public function setFormat(string $format)
+    {
         $this->validators['format'] = $format;
         return $this;
     }
-
-    /**
-     * @return null|string
-     */
-    public function getFormat() {
+    
+    public function getFormat(): ?string
+    {
         return empty($this->validators['format']) ? null : $this->validators['format'];
     }
-
+    
     /**
      * @return string|null|DbExpr
      */
-    public function getColumnNameReplacementForCondition() {
+    public function getColumnNameReplacementForCondition()
+    {
         return $this->columnNameReplacementForCondition;
     }
-
-    public function hasColumnNameReplacementForCondition(): bool {
+    
+    public function hasColumnNameReplacementForCondition(): bool
+    {
         return !empty($this->columnNameReplacementForCondition);
     }
-
+    
     /**
      * Replace column's name when building a condition for DB
      * @param string|DbExpr $columnNameReplacementForCondition
      * Example:
      *  without replacement: for column_name = 'count', operation = "equals", value = "1" conditon will be: "count" = '1'
      *  with replacement: expression = DbExpr('COALESCE(`count`, ``0``)') condition will be COALESCE("count", 0) = '1'
-     * @return $this
+     * @return static
      */
-    public function setColumnNameReplacementForCondition($columnNameReplacementForCondition) {
+    public function setColumnNameReplacementForCondition($columnNameReplacementForCondition)
+    {
         $this->columnNameReplacementForCondition = $columnNameReplacementForCondition;
         return $this;
     }
-
+    
     /**
      * @param \Closure $modifier - function ($value, $operator, ColumnFilter $columnFilter) { return $value; }
-     * @return $this
+     * @return static
      */
-    public function setIncomingValueModifier(\Closure $modifier) {
+    public function setIncomingValueModifier(\Closure $modifier)
+    {
         $this->incomingValueModifier = $modifier;
         return $this;
     }
-
+    
     /**
      * @param mixed $value
      * @param string $operator
      * @return mixed
      */
-    protected function modifyIncomingValue($value, string $operator) {
+    protected function modifyIncomingValue($value, string $operator)
+    {
         if ($this->incomingValueModifier) {
             return call_user_func($this->incomingValueModifier, $value, $operator, $this);
         }
         return $value;
     }
-
-    public function buildConfig(): array {
+    
+    public function buildConfig(): array
+    {
         return array_merge([
             'id' => static::buildFilterId($this->getColumnName()),
             'field' => $this->getColumnName(),
@@ -650,28 +688,30 @@ class ColumnFilter {
             'validation' => $this->getValidators(),
             'operators' => $this->getOperators(),
             'plugin' => $this->getPlugin(),
-            'plugin_config' => $this->getPluginConfig()
+            'plugin_config' => $this->getPluginConfig(),
         ], $this->otherSettings);
     }
-
-    public static function buildFilterId(string $columnName): string {
+    
+    public static function buildFilterId(string $columnName): string
+    {
         return 'filter-for-' . strtolower(preg_replace('%[^a-zA-Z0-9]+%i', '-', $columnName));
     }
-
+    
     /**
      * @param string $operator
      * @param mixed $value
      * @return array
-     * @throws ScaffoldException
+     * @throws \InvalidArgumentException
      */
-    public function buildConditionFromSearchRule(string $operator, $value): array {
+    public function buildConditionFromSearchRule(string $operator, $value): array
+    {
         if (!in_array($operator, $this->getOperators(), true)) {
-            throw new ScaffoldException("Operator [$operator] is forbidden for filter [{$this->getColumnName()}]");
+            throw new \InvalidArgumentException("Operator [$operator] is forbidden for filter [{$this->getColumnName()}]");
         }
         if (!is_array($value)) {
             $value = trim($value);
         }
-         // resolve multivalues
+        // resolve multivalues
         switch ($operator) {
             case static::OPERATOR_IN_ARRAY:
             case static::OPERATOR_NOT_IN_ARRAY:
@@ -714,13 +754,14 @@ class ColumnFilter {
         }
         return [trim($columnName . $dataTypeConverter . ' ' . $dbOperator) => $value];
     }
-
+    
     /**
      * @param mixed $value
      * @param string $operator
-     * @throws ScaffoldException
+     * @throws \InvalidArgumentException
      */
-    protected function validateValue($value, string $operator) {
+    protected function validateValue($value, string $operator)
+    {
         if (
             ($value === null || $value === '')
             && in_array(
@@ -741,10 +782,10 @@ class ColumnFilter {
             }
             unset($val);
             if (empty($value)) {
-                throw new ScaffoldException("Empty filter value is not allowed for [$operator] operator");
+                throw new \InvalidArgumentException("Empty filter value is not allowed for [$operator] operator");
             }
             if (count($value) !== 2 && in_array($operator, [static::OPERATOR_BETWEEN, static::OPERATOR_NOT_BETWEEN], true)) {
-                throw new ScaffoldException("There should be exactly 2 filter values for [$operator] operator");
+                throw new \InvalidArgumentException("There should be exactly 2 filter values for [$operator] operator");
             }
             return;
         }
@@ -777,18 +818,19 @@ class ColumnFilter {
                 }
                 break;
         }
-        $validator = \Validator::make(['value' => $value], ['value' => $validatorRule]);
+        $validator = $this->getValidator()->make(['value' => $value], ['value' => $validatorRule]);
         if ($validator->fails()) {
-            throw new ScaffoldException("Invalid value [$value] passed for filter column [{$this->getColumnName()}]");
+            throw new \InvalidArgumentException("Invalid value [$value] passed for filter column [{$this->getColumnName()}]");
         }
     }
-
+    
     /**
      * @param mixed $value
      * @param string $operator
      * @return mixed
      */
-    protected function convertRuleValueToConditionValue($value, string $operator) {
+    protected function convertRuleValueToConditionValue($value, string $operator)
+    {
         if (is_array($value)) {
             foreach ($value as &$val) {
                 $val = trim($this->convertRuleValueToConditionValue($val, $operator));
@@ -840,8 +882,9 @@ class ColumnFilter {
         }
         return $value;
     }
-
-    protected function convertRuleOperatorToDbOperator(string $operator): string {
+    
+    protected function convertRuleOperatorToDbOperator(string $operator): string
+    {
         switch ($operator) {
             case static::OPERATOR_EQUAL:
             case static::OPERATOR_IN_ARRAY:
@@ -858,12 +901,13 @@ class ColumnFilter {
         }
         return static::$ruleOperatorToDbOperator[$operator];
     }
-
+    
     /**
      * Get forced data type converter for column and value in DB. For example for dates it will return '::date'
      * @return string
      */
-    protected function getValueDataTypeConverterForDb(): string {
+    protected function getValueDataTypeConverterForDb(): string
+    {
         switch ($this->getDataType()) {
             case static::TYPE_TIME:
                 return '::time';
@@ -873,5 +917,5 @@ class ColumnFilter {
         }
         return '';
     }
-
+    
 }
