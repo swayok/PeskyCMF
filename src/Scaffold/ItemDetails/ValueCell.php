@@ -1,28 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\ItemDetails;
 
+use Illuminate\Support\Str;
 use PeskyCMF\Scaffold\RenderableValueViewer;
 use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\ORM\Column;
 
-class ValueCell extends RenderableValueViewer {
-
-    const TYPE_JSON_TREE = 'json_collapsed';
-    const TYPE_HTML = 'html';
-    /** @var array  */
-    protected $valueContainerAttributes = [];
-
+class ValueCell extends RenderableValueViewer
+{
+    
+    public const TYPE_JSON_TREE = 'json_collapsed';
+    public const TYPE_HTML = 'html';
+    
+    protected array $valueContainerAttributes = [];
+    
     /**
      * Returns list of additional relations to read
      * Designed to be used in custom ValueCells
-     * @return array
      */
-    public function getAdditionalRelationsToRead() {
+    public function getAdditionalRelationsToRead(): array
+    {
         return [];
     }
-
-    public function getValueConverter(): ?\Closure {
+    
+    public function getValueConverter(): ?\Closure
+    {
         if (empty(parent::getValueConverter())) {
             switch ($this->getType()) {
                 case static::TYPE_IMAGE:
@@ -32,12 +37,12 @@ class ValueCell extends RenderableValueViewer {
                                 unset($value['url']['source']);
                             }
                             $images = [];
-                            $translationPath = cmfTransCustom('.' . $columnConfig->getTableStructure()->getTableName())
+                            $baseTranslationPath = $columnConfig->getTableStructure()->getTableName()
                                 . '.item_details.field.' . $columnConfig->getName() . '_version.';
                             foreach ($value['url'] as $key => $url) {
                                 $images[] = [
-                                    'label' => trans($translationPath . $key),
-                                    'url' => $url
+                                    'label' => $this->getCmfConfig()->transCustom($baseTranslationPath . $key),
+                                    'url' => $url,
                                 ];
                             }
                             return $images;
@@ -50,11 +55,12 @@ class ValueCell extends RenderableValueViewer {
         }
         return parent::getValueConverter();
     }
-
-    public function doDefaultValueConversionByType($value, $type, array $record) {
+    
+    public function doDefaultValueConversionByType($value, string $type, array $record)
+    {
         switch ($type) {
             case static::TYPE_TEXT:
-                return '<div class="multiline-text">' . parent::doDefaultValueConversionByType($value, $type, $record) .  '</div>';
+                return '<div class="multiline-text">' . parent::doDefaultValueConversionByType($value, $type, $record) . '</div>';
             case static::TYPE_JSON_TREE:
                 if (!is_array($value) && $value !== null) {
                     if (is_string($value) || is_numeric($value) || is_bool($value)) {
@@ -71,8 +77,12 @@ class ValueCell extends RenderableValueViewer {
                 return parent::doDefaultValueConversionByType($value, $type, $record);
         }
     }
-
-    public function configureDefaultRenderer(ValueRenderer $renderer) {
+    
+    /**
+     * @return static
+     */
+    public function configureDefaultRenderer(ValueRenderer $renderer)
+    {
         parent::configureDefaultRenderer($renderer);
         if (!$renderer->hasTemplate()) {
             switch ($this->getType()) {
@@ -94,37 +104,34 @@ class ValueCell extends RenderableValueViewer {
         }
         return $this;
     }
-
+    
     /**
      * Add custom attributes to HTML element where record's value will be displayed
-     * @param array $attributes
-     * @return $this
+     * @return static
      */
-    public function addAttributesToValueContainer(array $attributes) {
+    public function addAttributesToValueContainer(array $attributes)
+    {
         $this->valueContainerAttributes = $attributes;
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getValueContainerAttributes() {
+    
+    public function getValueContainerAttributes(): array
+    {
         return $this->valueContainerAttributes;
-    }
-
-    /**
-     * Hide value's label with its container
-     * @return $this
-     */
-    public function hideLabel() {
-        return $this->setLabel('');
     }
     
     /**
-     * @return string
+     * Hide value's label with its container
+     * @return static
      */
-    public function getHtmlElementId() {
-        return str_slug($this->getScaffoldSectionConfig()->getScaffoldConfig()->getResourceName() . '-value-viewer-' . $this->getName());
+    public function hideLabel()
+    {
+        return $this->setLabel('');
     }
-
+    
+    public function getHtmlElementId(): string
+    {
+        return Str::slug($this->getScaffoldSectionConfig()->getScaffoldConfig()->getResourceName() . '-value-viewer-' . $this->getName());
+    }
+    
 }

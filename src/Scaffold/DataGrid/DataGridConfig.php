@@ -40,7 +40,7 @@ class DataGridConfig extends ScaffoldSectionConfig
     
     protected bool $allowComplexValueViewerNames = true;
     
-    protected ?string $template = 'cmf::scaffold.datagrid';
+    protected string $template = 'cmf::scaffold.datagrid';
     protected int $recordsPerPage = 25;
     protected int $offset = 0;
     protected int $maxLimit = 100;

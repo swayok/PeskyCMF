@@ -70,7 +70,7 @@ abstract class ScaffoldSectionConfig
      */
     protected $dataToSendToTemplate;
     
-    protected ?string $template = null;
+    protected string $template;
     protected ?string $jsInitiator = null;
     protected bool $isFinished = false;
     protected bool $allowRelationsInValueViewers = false;
@@ -184,7 +184,7 @@ abstract class ScaffoldSectionConfig
     }
     
     /**
-     * @param array $viewers
+     * @param AbstractValueViewer[] $viewers
      * @return static
      */
     protected function setValueViewers(array $viewers)

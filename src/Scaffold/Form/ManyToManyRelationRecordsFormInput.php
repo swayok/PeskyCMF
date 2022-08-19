@@ -78,7 +78,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         return parent::modifySubmitedValueBeforeValidation($value, $data);
     }
 
-    public function doDefaultValueConversionByType($value, $type, array $record) {
+    public function doDefaultValueConversionByType($value, string $type, array $record) {
         if (!is_array($value)) {
             throw new \InvalidArgumentException("Invalid data received for relation '{$this->getRelation()->getName()}'. Array expected.");
         }

@@ -140,14 +140,14 @@ class AsyncFilesFormInput extends FormInput {
     /**
      * @param mixed $value
      * @param string $type
-     * @param array $data
+     * @param array $record
      * @return array|mixed
      */
-    public function doDefaultValueConversionByType($value, $type, array $data) {
+    public function doDefaultValueConversionByType($value, string $type, array $record) {
         $ret = [];
         $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
         $record->enableTrustModeForDbData()->enableReadOnlyMode();
-        $record->fromData($data, true, false);
+        $record->fromData($record, true, false);
         $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
         /** @var FileInfo[] $fileInfoArray */
         foreach ($fileInfoArrays as $groupName => $fileInfoArray) {

@@ -212,7 +212,7 @@ class JsonArrayFormInput extends FormInput {
         );
     }
 
-    public function doDefaultValueConversionByType($value, $type, array $record) {
+    public function doDefaultValueConversionByType($value, string $type, array $record) {
         if (!is_array($value)) {
             if (!is_string($value)) {
                 throw new \InvalidArgumentException('$value argument must be a string or array');

@@ -1,28 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 
-class ItemDetailsConfig extends ScaffoldSectionConfig {
-
+class ItemDetailsConfig extends ScaffoldSectionConfig
+{
+    
     protected bool $allowRelationsInValueViewers = true;
-
+    
     protected bool $allowComplexValueViewerNames = true;
-
+    
     protected string $template = 'cmf::scaffold.item_details';
-
-    /** @var array */
-    protected $tabs = [];
-    /** @var null|int */
-    protected $currentTab;
-    /** @var array */
-    protected $rowsGroups = [];
-    /** @var null|int */
-    protected $currentRowsGroup;
-
-    public function getRelationsToRead() {
+    
+    protected array $tabs = [];
+    protected ?int $currentTab = null;
+    protected array $rowsGroups = [];
+    protected ?int $currentRowsGroup = null;
+    
+    public function getRelationsToRead(): array
+    {
         $relations = parent::getRelationsToRead();
         foreach ($this->getValueCells() as $valueCell) {
             $addRelations = $valueCell->getAdditionalRelationsToRead();
@@ -43,52 +43,51 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         }
         return $relations;
     }
-
-    public function createValueViewer(): ValueCell {
+    
+    public function createValueViewer(): ValueCell
+    {
         return ValueCell::create();
     }
-
-    protected function createValueRenderer(): ItemDetailsValueRenderer {
+    
+    protected function createValueRenderer(): ItemDetailsValueRenderer
+    {
         return ItemDetailsValueRenderer::create();
     }
-
+    
     /**
      * Alias for setValueViewers
-     * @param array $valueCells
-     * @return $this
+     * @param ValueCell[] $valueCells
+     * @return static
      */
-    public function setValueCells(array $valueCells) {
+    public function setValueCells(array $valueCells)
+    {
         return $this->setValueViewers($valueCells);
     }
-
+    
     /**
      * @return ValueCell[]|AbstractValueViewer[]
      */
-    public function getValueCells() {
+    public function getValueCells(): array
+    {
         return $this->getValueViewers();
     }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasValueCell($name) {
+    
+    public function hasValueCell(string $name): bool
+    {
         return $this->hasValueViewer($name);
     }
-
-    /**
-     * @param string $name
-     * @return ValueCell
-     */
-    public function getValueCell($name) {
+    
+    public function getValueCell(string $name): ValueCell
+    {
         return $this->getValueViewer($name);
     }
-
+    
     /**
-     * @param array $valueCells
-     * @return $this
+     * @param ValueCell[] $valueCells
+     * @return static
      */
-    public function setValueViewers(array $valueCells) {
+    public function setValueViewers(array $valueCells)
+    {
         /** @var AbstractValueViewer|null $config */
         foreach ($valueCells as $name => $config) {
             if (is_array($config)) {
@@ -108,14 +107,18 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         }
         return $this;
     }
-
+    
     /**
      * @param string $name
      * @param AbstractValueViewer|null $viewer
      * @param bool $autodetectIfLinkedToDbColumn
-     * @return $this
+     * @return static
      */
-    public function addValueViewer($name, AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false) {
+    public function addValueViewer(
+        string $name,
+        AbstractValueViewer &$viewer = null,
+        bool $autodetectIfLinkedToDbColumn = false
+    ) {
         parent::addValueViewer($name, $viewer, $autodetectIfLinkedToDbColumn);
         if ($this->currentRowsGroup === null) {
             $this->newRowsGroup('');
@@ -123,23 +126,20 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         $this->rowsGroups[$this->currentRowsGroup]['keys_for_values'][] = $name;
         return $this;
     }
-
+    
     /**
-     * @param string $tabLabel
-     * @param array $formInputs
-     * @return $this
+     * @return static
      */
-    public function addTab($tabLabel, array $formInputs) {
+    public function addTab(string $tabLabel, array $formInputs)
+    {
         $this->newTab($tabLabel);
         $this->setValueCells($formInputs);
         $this->currentTab = null;
         return $this;
     }
-
-    /**
-     * @param $label
-     */
-    protected function newRowsGroup($label) {
+    
+    protected function newRowsGroup(string $label): void
+    {
         if ($this->currentTab === null) {
             $this->newTab('');
         }
@@ -147,38 +147,33 @@ class ItemDetailsConfig extends ScaffoldSectionConfig {
         $this->tabs[$this->currentTab]['groups'][] = $this->currentRowsGroup;
         $this->rowsGroups[] = [
             'label' => $label,
-            'keys_for_values' => []
+            'keys_for_values' => [],
         ];
     }
-
-    /**
-     * @param $label
-     */
-    protected function newTab($label) {
+    
+    protected function newTab(string $label): void
+    {
         $this->currentTab = count($this->tabs);
         $this->tabs[] = [
             'label' => $label,
-            'groups' => []
+            'groups' => [],
         ];
         $this->currentRowsGroup = null;
     }
-
-    /**
-     * @return array
-     */
-    public function getTabs() {
+    
+    public function getTabs(): array
+    {
         return $this->tabs;
     }
-
-    /**
-     * @return array
-     */
-    public function getRowsGroups() {
+    
+    public function getRowsGroups(): array
+    {
         return $this->rowsGroups;
     }
-
-    protected function getSectionTranslationsPrefix(?string $subtype = null): string {
+    
+    protected function getSectionTranslationsPrefix(?string $subtype = null): string
+    {
         return $subtype === 'value_viewer' ? 'item_details.field' : 'item_details';
     }
-
+    
 }

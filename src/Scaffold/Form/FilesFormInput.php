@@ -146,7 +146,7 @@ class FilesFormInput extends FormInput {
     /**
      * @param mixed $value
      * @param string $type
-     * @param array $data
+     * @param array $record
      * @return array|mixed
      * @throws \PDOException
      * @throws \InvalidArgumentException
@@ -155,7 +155,7 @@ class FilesFormInput extends FormInput {
      * @throws \PeskyORM\Exception\InvalidDataException
      * @throws \PeskyORM\Exception\OrmException
      */
-    public function doDefaultValueConversionByType($value, $type, array $data) {
+    public function doDefaultValueConversionByType($value, string $type, array $record) {
         $ret = [
             'urls' => [],
             'preview_info' => [],
@@ -168,8 +168,8 @@ class FilesFormInput extends FormInput {
             return $ret;
         }
         $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-        $pkValue = array_get($data, $record::getPrimaryKeyColumnName());
-        $record->fromData($data, !empty($pkValue) || is_numeric($pkValue), false);
+        $pkValue = array_get($record, $record::getPrimaryKeyColumnName());
+        $record->fromData($record, !empty($pkValue) || is_numeric($pkValue), false);
 
         $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
         foreach ($fileInfoArrays as $fileName => $fileInfoArray) {

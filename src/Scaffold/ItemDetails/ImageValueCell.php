@@ -1,26 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\ItemDetails;
 
-use PeskyORMLaravel\Db\Column\FileColumn;
-use PeskyORMLaravel\Db\Column\ImageColumn;
-use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
+use PeskyORMColumns\Column\Files\MetadataImagesColumn;
+use PeskyORMColumns\Column\Files\Utils\DbImageFileInfo;
 
 /**
- * @method ImageColumn|FileColumn getTableColumn()
+ * @method MetadataImagesColumn getTableColumn()
  */
-class ImageValueCell extends ValueCell {
-
-    /** @var FilesGroupConfig[]|null */
-    protected $fileConfigsToShow;
-    /** @var string  */
+class ImageValueCell extends ValueCell
+{
+    
+    protected string $imageVersion = 'source';
+    
     protected ?string $templateForDefaultRenderer = 'cmf::item_details.image';
-
-    public function doDefaultValueConversionByType($value, $type, array $record) {
-        if (empty($value) || !is_array($value)) {
+    
+    public function doDefaultValueConversionByType($value, string $type, array $record): ?array
+    {
+        $column = $this->getTableColumn();
+        if (empty($value) || !is_array($value) || !$column->isItAnImage()) {
             return [];
         }
-        $column = $this->getTableColumn();
+        if (!array_key_exists($column->getMetadataColumnName(), $record)) {
+            throw new \UnexpectedValueException(
+                'You need to select ' . $column->getMetadataColumnName() . ' column to access images list'
+            );
+        }
         $object = $this
             ->getScaffoldSectionConfig()
             ->getTable()
@@ -28,13 +35,30 @@ class ImageValueCell extends ValueCell {
             ->enableTrustModeForDbData()
             ->enableReadOnlyMode()
             ->fromData($record, true, false);
-        $url = $object->getValue($column, 'url');
-        if ($url) {
+        
+        /** @var DbImageFileInfo $fileInfo */
+        $fileInfo = $object->getValue($column);
+        if ($fileInfo instanceof DbImageFileInfo && $fileInfo->isFileExists()) {
             return [
-                'url' => $url
+                'url' => $fileInfo->getAbsoluteFileUrl(),
             ];
         }
-        return null;
+        return [];
     }
-
+    
+    /**
+     * @return static
+     */
+    public function setImageVerstion(string $imageVersion)
+    {
+        if (!$this->getTableColumn()->hasImageVersionConfig($imageVersion)) {
+            throw new \InvalidArgumentException(
+                "There is no image version config called [$imageVersion] in DB column ["
+                . $this->getTableColumn()->getName() . ']'
+            );
+        }
+        $this->imageVersion = $imageVersion;
+        return $this;
+    }
+    
 }

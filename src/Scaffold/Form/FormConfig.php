@@ -108,7 +108,7 @@ class FormConfig extends ScaffoldSectionConfig {
     }
 
     /**
-     * @param array $formInputs
+     * @param FormInput[] $formInputs
      * @return $this
      */
     public function setValueViewers(array $formInputs) {

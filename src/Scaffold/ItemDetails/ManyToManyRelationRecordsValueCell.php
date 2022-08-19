@@ -1,32 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\ItemDetails;
 
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Relation;
 use Swayok\Html\Tag;
 
-class ManyToManyRelationRecordsValueCell extends ValueCell {
-
-    protected $columnForLinksLabels;
-     /** @var Relation|null */
-    private $dataSourceRelation;
-
+class ManyToManyRelationRecordsValueCell extends ValueCell
+{
+    
+    /** @var string|\Closure|null */
+    protected $columnForLinksLabels = null;
+    private ?Relation $dataSourceRelation = null;
+    
     /**
      * Name of the column in 'linker table' that contains primary key values of the foreign table
      * For example you have 3 tables: items (main table), categories (foreing table), item_categories (linker table);
      * Here you have many-to-many relation between items and categories that resolved via 'linker table'
      * item_categories that contains only 3 columns: id, item_id (link to items.id), category_id (link to categoris.id);
      * You need to pass 'category_id' via $columnName argument
-     * @param $columnName
-     * @return $this
+     * @return static
      */
-    public function setRelationsLinkingColumn($columnName) {
+    public function setRelationsLinkingColumn(string $columnName)
+    {
         $this->relationColumn = $columnName;
         return $this;
     }
-
-    public function setRelation(Relation $relation, string $columnName) {
+    
+    /**
+     * @return static
+     */
+    public function setRelation(Relation $relation, string $columnName)
+    {
         $this->relation = $relation;
         if ($columnName !== $relation->getForeignColumnName()) {
             $this->relationColumn = $columnName;
@@ -34,8 +41,9 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
         $this->dataSourceRelation = null;
         return $this;
     }
-
-    public function getRelationColumn(): ?string {
+    
+    public function getRelationColumn(): string
+    {
         if (empty($this->relationColumn)) {
             throw new \UnexpectedValueException(
                 "Relations linking column was not provided for '{$this->getName()}' input. "
@@ -44,12 +52,15 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
         }
         return parent::getRelationColumn();
     }
-
-    public function getAdditionalRelationsToRead() {
+    
+    public function getAdditionalRelationsToRead(): array
+    {
+        /** @noinspection NullPointerExceptionInspection */
         return [$this->getRelation()->getName() => ['*', $this->getDataSourceRelation()->getName() => ['*']]];
     }
-
-    public function doDefaultValueConversionByType($value, $type, array $record) {
+    
+    public function doDefaultValueConversionByType($value, string $type, array $record)
+    {
         if (is_array($value) && !empty($value)) {
             $links = [];
             $dataSourceRelation = $this->getDataSourceRelation();
@@ -57,13 +68,16 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
             $tableNameForRoute = $this->getTableNameForRouteToRelatedRecord() ?: $dataSourceRelation->getForeignTable()->getName();
             foreach ($value as $relatedRecord) {
                 $links[] = Tag::a()
-                    ->setHref(routeToCmfItemDetails(
-                        $tableNameForRoute,
-                        $relatedRecord[$this->getRelationColumn()]
-                    ))
-                    ->setContent($labelColumn instanceof \Closure
-                        ? $labelColumn($relatedRecord[$dataSourceRelation->getName()])
-                        : $relatedRecord[$dataSourceRelation->getName()][$labelColumn]
+                    ->setHref(
+                        $this->getScaffoldSectionConfig()->getScaffoldConfig()->getUrlToItemDetails(
+                            $tableNameForRoute,
+                            $relatedRecord[$this->getRelationColumn()]
+                        )
+                    )
+                    ->setContent(
+                        $labelColumn instanceof \Closure
+                            ? $labelColumn($relatedRecord[$dataSourceRelation->getName()])
+                            : $relatedRecord[$dataSourceRelation->getName()][$labelColumn]
                     )
                     ->build();
             }
@@ -71,48 +85,47 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
         }
         return '';
     }
-
+    
     /**
-     * @return Relation
-     * @throws \InvalidArgumentException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \BadMethodCallException
      * @throws \UnexpectedValueException
      */
-    protected function getDataSourceRelation() {
+    protected function getDataSourceRelation(): Relation
+    {
         if (!$this->dataSourceRelation) {
-            $relations = $this
-                ->getRelation()
+            /** @var Relation $relation */
+            $relation = $this->getRelation();
+            $relations = $relation
                 ->getForeignTable()
                 ->getTableStructure()
                 ->getColumn($this->getRelationColumn())
                 ->getRelations();
-            foreach ($relations as $relation) {
+            foreach ($relations as $dataSourceRelation) {
                 if ($relation->getType() === Relation::HAS_ONE) {
-                    $this->dataSourceRelation = $relation;
+                    $this->dataSourceRelation = $dataSourceRelation;
                     break;
                 }
             }
             if (!$this->dataSourceRelation) {
                 throw new \UnexpectedValueException(
                     "Failed to detect data source Relation for ManyToManyRelationRecordsFormInput '{$this->getName()}'. "
-                    . "Column '{$this->getRelation()->getForeignTable()->getName()}.{$this->getRelationColumn()}'"
+                    . "Column '{$relation->getForeignTable()->getName()}.{$this->getRelationColumn()}'"
                     . ' has no Relation with type HAS ONE'
                 );
             }
         }
         return $this->dataSourceRelation;
     }
-
+    
     /**
      * Set column name or closure that will be used as label for links
      * @param string|\Closure $columnNameOrClosure
      *      - string: column name
      *      - \Closure: function (RecordInterface $record) { return 'value' }
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setColumnForLinksLabels($columnNameOrClosure) {
+    public function setColumnForLinksLabels($columnNameOrClosure)
+    {
         if (!is_string($columnNameOrClosure) && !($columnNameOrClosure instanceof DbExpr)) {
             throw new \InvalidArgumentException(
                 '$columnNameOrClosure argument must be a string or a closure'
@@ -121,13 +134,14 @@ class ManyToManyRelationRecordsValueCell extends ValueCell {
         $this->columnForLinksLabels = $columnNameOrClosure;
         return $this;
     }
-
+    
     /**
      * @param mixed $default
      * @return string|DbExpr|null
      */
-    protected function getColumnForLinksLabels($default = null) {
+    protected function getColumnForLinksLabels($default = null)
+    {
         return $this->columnForLinksLabels ?: $default;
     }
-
+    
 }
