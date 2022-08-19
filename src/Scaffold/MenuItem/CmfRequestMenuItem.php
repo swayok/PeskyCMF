@@ -1,48 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\MenuItem;
 
 use Swayok\Html\Tag;
 
-class CmfRequestMenuItem extends CmfMenuItem {
-
-    /** @var string */
-    protected $httpMethod = 'get';
-    /** @var array */
-    protected $requestData = [];
-    /** @var string */
-    protected $responseDataType = 'json';
-    /** @var string|null */
-    protected $onSuccess;
-    /** @var bool */
-    protected $blockDataGrid = true;
-    /** @var string|null */
-    protected $confirm;
-
-    /**
-     * CmfRequestMenuItem constructor.
-     * @param $url
-     * @param $httpMethod
-     * @throws \InvalidArgumentException
-     */
-    protected function __construct(string $url, string $httpMethod) {
+class CmfRequestMenuItem extends CmfMenuItem
+{
+    
+    protected string $httpMethod = 'get';
+    protected array $requestData = [];
+    protected string $responseDataType = 'json';
+    protected ?string $onSuccess = null;
+    protected bool $blockDataGrid = true;
+    protected ?string $confirm = null;
+    
+    protected function __construct(string $url, string $httpMethod)
+    {
         parent::__construct($url);
         $this->setHttpMethod($httpMethod);
     }
-
-    /**
-     * @return string
-     */
-    public function getActionType() {
+    
+    public function getActionType(): string
+    {
         return 'request';
     }
-
+    
     /**
-     * @param string $httpMethod
-     * @return $this
+     * @param string $httpMethod - get|post|put|delete
+     * @return static
      * @throws \InvalidArgumentException
      */
-    protected function setHttpMethod(string $httpMethod) {
+    protected function setHttpMethod(string $httpMethod)
+    {
         $this->httpMethod = strtolower($httpMethod);
         if (!in_array($this->httpMethod, ['get', 'post', 'put', 'delete'], true)) {
             throw new \InvalidArgumentException(
@@ -51,72 +42,66 @@ class CmfRequestMenuItem extends CmfMenuItem {
         }
         return $this;
     }
-
-    public function getHttpMethod(): string {
+    
+    public function getHttpMethod(): string
+    {
         return $this->httpMethod;
     }
-
-    /**
-     * @return string|null
-     */
-    public function getOnSuccess() {
+    
+    public function getOnSuccess(): ?string
+    {
         return $this->onSuccess;
     }
-
+    
     /**
      * JS function name. This function will be called after successful response with 1 argument - response data.
      * Example: 'SomeVar.onSuccess' will be evalueated as SomeVar.onSuccess(responseData)
-     * @param string $onSuccess
-     * @return $this
+     * @return static
      */
-    public function setOnSuccess(string $onSuccess) {
+    public function setOnSuccess(string $onSuccess)
+    {
         $this->onSuccess = $onSuccess;
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getRequestData(): array {
+    
+    public function getRequestData(): array
+    {
         return $this->requestData;
     }
-
+    
     /**
      * Key-value array with data to send with response.
      * You can use Dot.js inserts as values using 'it' variable to access current item data.
      * Example: ['id' => '{{= it.id }}']
-     * @param array $requestData
-     * @return $this
+     * @return static
      */
-    public function setRequestData(array $requestData) {
+    public function setRequestData(array $requestData)
+    {
         $this->requestData = $requestData;
         return $this;
     }
-
-    /**
-     * @return null|string
-     */
-    public function makeRequestDataForHtmlAttribute() {
+    
+    public function makeRequestDataForHtmlAttribute(): ?string
+    {
         if (empty($this->requestData)) {
             return null;
         } else {
-            return http_build_query($this->requestData, null, '&', PHP_QUERY_RFC1738);
+            return http_build_query($this->requestData, '', '&', PHP_QUERY_RFC1738);
         }
     }
-
-    /**
-     * @return string
-     */
-    public function getResponseDataType(): string {
+    
+    public function getResponseDataType(): string
+    {
         return $this->responseDataType;
     }
-
+    
     /**
-     * @param string $responseDataType
-     * @return $this
+     * @param string $responseDataType - json|text|html
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setResponseDataType($responseDataType) {
+    public function setResponseDataType(string $responseDataType)
+    {
         $this->responseDataType = strtolower($responseDataType);
         if (!in_array($this->responseDataType, ['json', 'text', 'html'], true)) {
             throw new \InvalidArgumentException(
@@ -125,55 +110,48 @@ class CmfRequestMenuItem extends CmfMenuItem {
         }
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function isBlockDataGrid(): bool {
+    
+    public function isBlockDataGrid(): bool
+    {
         return $this->blockDataGrid;
     }
-
+    
     /**
      * Should current data grid be blocked until request's responce received or not?
-     * @param bool $blockDataGrid
-     * @return $this
+     * @return static
      */
-    public function setBlockDataGrid($blockDataGrid) {
+    public function setBlockDataGrid(bool $blockDataGrid)
+    {
         $this->blockDataGrid = $blockDataGrid;
         return $this;
     }
-
-    /**
-     * @return null|string
-     */
-    public function getConfirm() {
+    
+    public function getConfirm(): ?string
+    {
         return $this->confirm;
     }
-
+    
     /**
      * Request confirmation of action.
      * @param string $confirm - message (question) to display to user
-     * @return $this
+     * @return static
      */
-    public function setConfirm(string $confirm) {
+    public function setConfirm(string $confirm)
+    {
         $this->confirm = $confirm;
         return $this;
     }
-
-    /**
-     * @param Tag $tag
-     * @return Tag
-     */
-    protected function modifyTagBeforeRendering(Tag $tag) {
+    
+    protected function modifyTagBeforeRendering(Tag $tag): Tag
+    {
         return $tag;
     }
-
+    
     /**
      * Render menu item as <button>
-     * @param bool $withIcon
-     * @return string
      */
-    public function renderAsButton(bool $withIcon = true): string {
+    public function renderAsButton(bool $withIcon = true): string
+    {
         if ($this->isAccessible()) {
             $button = Tag::button(($withIcon ? $this->makeIcon() . ' ' : '') . $this->getTitle())
                 ->setClass($this->getButtonClasses())
@@ -195,14 +173,12 @@ class CmfRequestMenuItem extends CmfMenuItem {
             return '';
         }
     }
-
+    
     /**
      * Render menu item as <a> icon (title will be used as tooltip)
-     * @param string $additionalClasses
-     * @param bool $allowIconColorClass
-     * @return string
      */
-    public function renderAsIcon(string $additionalClasses = '', bool $allowIconColorClass = true): string {
+    public function renderAsIcon(string $additionalClasses = '', bool $allowIconColorClass = true): string
+    {
         if ($this->isAccessible()) {
             $button = Tag::a($this->makeIcon($allowIconColorClass))
                 ->addCustomRenderedAttributeWithValue($this->makeConditionalDisabledAttribute())
@@ -224,13 +200,12 @@ class CmfRequestMenuItem extends CmfMenuItem {
             return '';
         }
     }
-
+    
     /**
      * Render menu item as <li><a>...</a></li>
-     * @param bool $allowTooltip
-     * @return string
      */
-    public function renderAsBootstrapDropdownMenuItem(): string {
+    public function renderAsBootstrapDropdownMenuItem(): string
+    {
         if ($this->isAccessible()) {
             $button = Tag::a($this->makeIcon(true) . ' ' . $this->getTitle())
                 ->setHref('javascript: void(0)')
@@ -248,7 +223,7 @@ class CmfRequestMenuItem extends CmfMenuItem {
                 ->setDataAttr('block-datagrid', $this->isBlockDataGrid() ? '1' : null);
             return $this->wrapIntoShowCondition(
                 '<li ' . $this->makeConditionalDisabledAttribute() . '>'
-                    . $this->modifyTagBeforeRendering($button)->build()
+                . $this->modifyTagBeforeRendering($button)->build()
                 . '</li>'
             );
         } else {
