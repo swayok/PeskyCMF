@@ -32,7 +32,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
         <div class="box box-primary">
             <form role="form" method="post" action="{{ cmfRoute('cmf_profile', [], false, $cmfConfig) }}" id="cmf-user-profile-form">
                 <input type="hidden" name="_method" value="PUT">
-                <?php include $cmfConfig::cmf_views_dir() . '/input/password_inputs_autofill_disabler.php'; ?>
+                <?php include $cmfConfig->cmf_views_dir() . '/input/password_inputs_autofill_disabler.php'; ?>
                 <div class="box-body">
                     @php($loginColumn = $authModule->getUserLoginColumnName())
                     @if ($loginColumn !== 'email')
@@ -70,7 +70,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                             <label for="language-input">{{ $cmfConfig::transCustom('.page.profile.input.language') }}</label>
                             <select class="form-control" data-value="{{ $user->language }}" name="language" id="language-input"
                                     required="required" @if(!$canSubmit) disabled @endif>
-                                @foreach($cmfConfig::locales() as $lang)
+                                @foreach($cmfConfig->locales() as $lang)
                                     <option value="{{ $lang }}">{{ $cmfConfig::transCustom('.language.' . $lang) }}</option>
                                 @endforeach
                             </select>

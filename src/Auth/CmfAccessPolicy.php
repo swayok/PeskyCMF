@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeskyCMF\Auth;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Arr;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyORM\ORM\KeyValueTableHelpers\KeyValueTableInterface;
@@ -230,7 +231,7 @@ class CmfAccessPolicy
             )
         ) {
             $table = $this->getCmfConfig()->getTableByResourceName($resourceName);
-            $ownerColumn = array_get(static::$ownerColumnForTable, $resourceName, static::$defaultOwnerIdColumnName);
+            $ownerColumn = Arr::get(static::$ownerColumnForTable, $resourceName, static::$defaultOwnerIdColumnName);
             if (!$table->getTableStructure()->hasColumn($ownerColumn)) {
                 return true;
             }

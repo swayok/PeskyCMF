@@ -1,15 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Hash;
 use PeskyCMF\Config\CmfConfig;
 use PeskyORM\Core\DbConnectionsManager;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
 
-class CmfAddAdminCommand extends Command {
-
+class CmfAddAdminCommand extends Command
+{
+    
     protected $description = 'Create administrator in DB';
     protected $signature = 'cmf:add-admin 
         {email_or_login} 
@@ -17,13 +21,9 @@ class CmfAddAdminCommand extends Command {
         {table=admins} 
         {schema?} 
         {--login : use [login] field instead of [email]}';
-
-    public function fire() {
-        // compatibility with Laravel <= 5.4
-        $this->handle();
-    }
-
-    public function handle() {
+    
+    public function handle(): void
+    {
         $db = DbConnectionsManager::getConnection('default');
         $args = $this->input->getArguments();
         $emailOrLogin = strtolower(trim($args['email_or_login']));
@@ -40,18 +40,18 @@ class CmfAddAdminCommand extends Command {
         }
         try {
             $data = [
-                'password' => \Hash::make($password),
+                'password' => Hash::make($password),
                 'role' => $args['role'],
                 'is_superadmin' => true,
                 $authField => $emailOrLogin,
-                'language' => CmfConfig::getDefault()->default_locale()
+                'language' => CmfConfig::getDefault()->default_locale(),
             ];
             if ($exists > 0) {
                 $result = $db->update($table, $data, DbExpr::create("`{$authField}`=``{$emailOrLogin}``"));
             } else {
                 $result = $db->insert($table, $data);
             }
-
+            
             if ($result > 0) {
                 $this->line($exists > 0 ? 'Admin updated' : 'Admin created');
             } else {

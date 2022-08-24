@@ -48,7 +48,7 @@ class RecaptchaServiceProvider extends ServiceProvider
                 || $isValid['key'] !== $value
                 || $isValid['expires_at'] < time()
             ) {
-                $isValid = static::validate($cmfConfig::recaptcha_private_key(), $value, $this->getRequest()->getClientIp());
+                $isValid = static::validate($cmfConfig->recaptcha_private_key(), $value, $this->getRequest()->getClientIp());
             }
             if (is_array($isValid)) {
                 $isValid['key'] = $value;

@@ -378,7 +378,7 @@ class CmfAuthModule
     {
         $this->getAuthGuard()->logout();
         $this->getSessionStore()->flush();
-        $this->getCmfConfig()->resetLocale();
+        $this->getCmfConfig()->detectLocale();
     }
     
     /**

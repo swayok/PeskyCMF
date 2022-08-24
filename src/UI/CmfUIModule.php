@@ -281,8 +281,8 @@ class CmfUIModule {
             'uiUrl' => $cmfConfig::route('cmf_main_ui', [], false),
             'userDataUrl' => $cmfConfig::route('cmf_profile_data', [], false),
             'menuCountersDataUrl' => $cmfConfig::route('cmf_menu_counters_data', [], false),
-            'defaultPageTitle' => $cmfConfig::default_page_title(),
-            'pageTitleAddition' => $cmfConfig::page_title_addition(),
+            'defaultPageTitle' => $cmfConfig->default_page_title(),
+            'pageTitleAddition' => $cmfConfig->page_title_addition(),
             'localizationStrings' => $cmfConfig::transGeneral('ui.js_component'),
         ];
     }

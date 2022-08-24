@@ -10,8 +10,8 @@ use PeskyCMF\Http\Middleware\AjaxOnly;
  * @var CmfConfig $cmfConfig
  */
 $routeNamePrefix = $cmfConfig::routes_names_prefix();
-$apiControllerClass = $cmfConfig::cmf_scaffold_api_controller_class();
-$generalControllerClass = $cmfConfig::cmf_general_controller_class();
+$apiControllerClass = $cmfConfig->cmf_scaffold_api_controller_class();
+$generalControllerClass = $cmfConfig->cmf_general_controller_class();
 
 Route::group(
     [
@@ -158,7 +158,7 @@ Route::get('ui/templates.js', [
 
 Route::group(
     [
-        'middleware' => $cmfConfig::auth_middleware()
+        'middleware' => $cmfConfig->auth_middleware()
     ],
     function () use ($generalControllerClass, $routeNamePrefix) {
     
@@ -287,7 +287,7 @@ Route::pattern('resource', '[a-z]+([_a-z0-9]*[a-z0-9])?');
 Route::group(
     [
         'prefix' => 'resource',
-        'middleware' => $cmfConfig::auth_middleware()
+        'middleware' => $cmfConfig->auth_middleware()
     ],
     function () use ($apiControllerClass, $generalControllerClass, $routeNamePrefix) {
     
@@ -403,8 +403,8 @@ Route::group(
         'prefix' => 'api',
         'middleware' => array_unique(array_merge(
             [AjaxOnly::class],
-            $cmfConfig::auth_middleware(),
-            $cmfConfig::middleware_for_cmf_scaffold_api_controller()
+            $cmfConfig->auth_middleware(),
+            $cmfConfig->middleware_for_cmf_scaffold_api_controller()
         ))
     ],
     function () use ($apiControllerClass, $routeNamePrefix) {

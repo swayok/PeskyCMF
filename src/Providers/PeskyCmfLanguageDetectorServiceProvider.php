@@ -4,36 +4,38 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Providers;
 
+use Illuminate\Foundation\Events\LocaleUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use PeskyCMF\Config\CmfConfig;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
+// todo: get rid of extending LanguageDetectorServiceProvider and maybe from PeskyCmfLanguageDetectorServiceProvider itself
 class PeskyCmfLanguageDetectorServiceProvider extends LanguageDetectorServiceProvider
 {
     
     /** @var array */
-    protected $configsOverride = [];
+    protected array $configsOverride = [];
     /** @var null|string */
-    protected $defaultLanguage = null;
+    protected ?string $defaultLanguage = null;
     
-    public function register()
+    public function register(): void
     {
         parent::register();
         
-        $this->app['events']->listen('locale.changed', function ($locale) {
+        $this->app['events']->listen(LocaleUpdated::class, function ($locale) {
             $this->applyNewLanguage($locale);
         });
     }
     
     public function importConfigsFromPeskyCmf(CmfConfig $cmfConfig): void
     {
-        $this->defaultLanguage = $cmfConfig::default_locale();
-        $this->configsOverride = $cmfConfig::language_detector_configs();
+        $this->defaultLanguage = $cmfConfig->default_locale();
+        $this->configsOverride = $cmfConfig->language_detector_configs();
         $this->detectAndApplyLanguage();
     }
     
-    public function boot()
+    public function boot(): void
     {
         if ($this->defaultLanguage) {
             /** @var Request $request */

@@ -19,9 +19,9 @@ class CmfAuth
     public function handle(Request $request, \Closure $next)
     {
         $cmfConfig = CmfConfig::getPrimary();
-        $loginUrl = $cmfConfig::getAuthModule()->getLoginPageUrl();
-        if (!$cmfConfig::getAuthGuard()->check()) {
-            $cmfConfig::getAuthModule()->saveIntendedUrl($request->url());
+        $loginUrl = $cmfConfig->getAuthModule()->getLoginPageUrl();
+        if (!$cmfConfig->getAuthGuard()->check()) {
+            $cmfConfig->getAuthModule()->saveIntendedUrl($request->url());
             return $request->ajax()
                 ? CmfJsonResponse::create(HttpCode::UNAUTHORISED)->setForcedRedirect($loginUrl)
                 : new RedirectResponse($loginUrl);
@@ -37,7 +37,7 @@ class CmfAuth
                 $response = $request->ajax()
                     ? CmfJsonResponse::create(HttpCode::FORBIDDEN)->setMessage($message)->goBack($loginUrl)
                     : (new RedirectResponse($loginUrl))->with(
-                        $cmfConfig::session_message_key(),
+                        $cmfConfig->session_message_key(),
                         [
                             'message' => $message,
                             'type' => CmfJsonResponse::MESSAGE_TYPE_INFO,

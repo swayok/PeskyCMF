@@ -13,7 +13,7 @@
 <html lang="">
 <head>
     <meta charset="UTF-8">
-    <title>@section('page-title') {{ $cmfConfig::default_page_title() }} @show</title>
+    <title>@section('page-title') {{ $cmfConfig->default_page_title() }} @show</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 
@@ -43,7 +43,7 @@
 
 </head>
 
-<body class="{{ $skin }}" data-locale="{{ $cmfConfig::getShortLocale() }}">
+<body class="{{ $skin }}" data-locale="{{ $cmfConfig->getShortLocale() }}">
     <div class="wrapper has-preloader loading" id="page-wrapper">
 
     </div>
@@ -124,7 +124,7 @@
 
     @stack('jscode')
 
-    <?php $message = Session::pull($cmfConfig::session_message_key(), false); ?>
+    <?php $message = $cmfConfig->getLaravelApp()->make('session.store')->pull($cmfConfig->session_message_key(), false); ?>
     @if (!empty($message) && (is_string($message) || (is_array($message) && !empty($message['message']))))
         <script type="application/javascript">
             <?php $type = is_string($message) || empty($message['type']) || !in_array($message['type'], ['success', 'info', 'warning', 'error']) ? 'info' : $message['type'] ?>

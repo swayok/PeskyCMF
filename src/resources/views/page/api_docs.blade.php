@@ -21,7 +21,7 @@
     </ol>
 </div>
 <div class="content" id="api-docs">
-    @foreach($cmfConfig::getApiDocumentationModule()->getDocumentationClassesList() as $header => $methods)
+    @foreach($cmfConfig->getApiDocumentationModule()->getDocumentationClassesList() as $header => $methods)
         <div class="row"><div class="col-xs-12">
             <div class="box box-solid box-primary api-docs-section">
                 <div class="box-header">

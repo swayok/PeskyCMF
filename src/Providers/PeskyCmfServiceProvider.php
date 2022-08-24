@@ -263,10 +263,10 @@ class PeskyCmfServiceProvider extends ServiceProvider
     {
         foreach ($this->getAvailableCmfConfigs() as $sectionName => $cmfConfig) {
             if (!$this->app->routesAreCached()) {
-                $cmfConfig::getInstance()->declareRoutes($sectionName);
+                $cmfConfig::getInstance()->declareRoutes($this->app, $sectionName);
             }
             if (!$this->app->configurationIsCached()) {
-                $cmfConfig::getInstance()->updateAppConfigs($this->app);
+                $cmfConfig::getInstance()->extendLaravelAppConfigs($this->app);
             }
         }
     }
