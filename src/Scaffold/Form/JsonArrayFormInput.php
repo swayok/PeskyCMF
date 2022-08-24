@@ -1,31 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyCMF\Scaffold\AbstractValueViewer;
 use PeskyCMF\Scaffold\ScaffoldSectionConfig;
 
-class JsonArrayFormInput extends FormInput {
-
-    protected $minValuesCount = 0;
-    protected $maxValuesCount = 0; //< 0 = infinite
-
+class JsonArrayFormInput extends FormInput
+{
+    
+    protected int $minValuesCount = 0;
+    protected int $maxValuesCount = 0; //< 0 = infinite
+    
     /** @var FormInput[] */
-    protected $subInputs = [];
-    /** @var \Closure */
-    protected $validatorsForSubInputs;
-    /** @var string */
-    protected $addRowButtonLabel;
-    /** @var string */
-    protected $deleteRowButtonLabel;
-    /** @var \Closure */
-    protected $submittedRowsFilter;
+    protected array $subInputs = [];
+    protected string $addRowButtonLabel;
+    protected string $deleteRowButtonLabel;
+    
+    protected ?\Closure $validatorsForSubInputs = null;
+    protected ?\Closure $submittedRowsFilter = null;
     
     /**
      * @param FormInput[]|string[] $subInputs = ['name1', 'name2' => FormInput::create()]
-     * @return $this
+     * @return static
      */
-    public function setSubInputs(array $subInputs) {
+    public function setSubInputs(array $subInputs)
+    {
         /** @var FormInput|null $config */
         foreach ($subInputs as $name => $config) {
             if (is_int($name)) {
@@ -36,13 +37,14 @@ class JsonArrayFormInput extends FormInput {
         }
         return $this;
     }
-
+    
     /**
      * @param string $name
      * @param FormInput|AbstractValueViewer|null $subInputConfig
-     * @return $this
+     * @return static
      */
-    public function addSubInput(string $name, ?FormInput $subInputConfig) {
+    public function addSubInput(string $name, ?FormInput $subInputConfig)
+    {
         if (!$subInputConfig) {
             $subInputConfig = FormInput::create();
         }
@@ -50,55 +52,59 @@ class JsonArrayFormInput extends FormInput {
         if ($this->hasName()) {
             $subInputConfig->setName($this->makeFullSubInputName($name));
         }
-        $subInputConfig->setLabel(false);
+        $subInputConfig->setLabel('');
         $subInputConfig->setPosition(count($this->subInputs));
         $subInputConfig->setScaffoldSectionConfig($this->getScaffoldSectionConfig());
         $this->subInputs[$name] = $subInputConfig;
         return $this;
     }
-
+    
     /**
      * @return FormInput[]
      */
-    public function getSubInputs(): array {
+    public function getSubInputs(): array
+    {
         return $this->subInputs;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function setName(string $name) {
+    public function setName(string $name)
+    {
         parent::setName($name);
         foreach ($this->subInputs as $inputName => $input) {
             $input->setName($this->makeFullSubInputName($inputName));
         }
         return $this;
     }
-
+    
     /**
-     * @param ScaffoldSectionConfig|null $scaffoldSectionConfig
-     * @return $this
+     * @return static
      */
-    public function setScaffoldSectionConfig(?ScaffoldSectionConfig $scaffoldSectionConfig) {
+    public function setScaffoldSectionConfig(ScaffoldSectionConfig $scaffoldSectionConfig)
+    {
         parent::setScaffoldSectionConfig($scaffoldSectionConfig);
         foreach ($this->subInputs as $input) {
             $input->setScaffoldSectionConfig($scaffoldSectionConfig);
         }
         return $this;
     }
-
+    
     /**
      * @param \Closure $validators = function (bool $isCreation, array $defaultValidators) { return ['input_name.*.subinput_name' => 'required']; }
-     * @return $this
+     * @return static
      */
-    public function setValidatorsForSubInputs(\Closure $validators) {
+    public function setValidatorsForSubInputs(\Closure $validators)
+    {
         $this->validatorsForSubInputs = $validators;
         return $this;
     }
-
-    protected function getValidatorsForSubInputs(bool $isCreation): array {
+    
+    protected function getValidatorsForSubInputs(bool $isCreation): array
+    {
         $validators = [];
-        foreach ($this->subInputs as $name => $input) {
+        foreach ($this->subInputs as $input) {
             /** @noinspection SlowArrayOperationsInLoopInspection */
             $validators = array_merge($validators, $input->getValidators($isCreation));
         }
@@ -107,112 +113,91 @@ class JsonArrayFormInput extends FormInput {
         }
         return $validators;
     }
-
-    /**
-     * @return int
-     */
-    public function getMinValuesCount() {
+    
+    public function getMinValuesCount(): int
+    {
         return $this->minValuesCount;
     }
-
+    
     /**
-     * @param int $minValuesCount
-     * @return $this
+     * @return static
      */
-    public function setMinValuesCount($minValuesCount) {
-        $this->minValuesCount = max(0, (int)$minValuesCount);
+    public function setMinValuesCount(int $minValuesCount)
+    {
+        $this->minValuesCount = max(0, $minValuesCount);
         return $this;
     }
-
-    /**
-     * @return int
-     */
-    public function getMaxValuesCount() {
+    
+    public function getMaxValuesCount(): int
+    {
         return $this->maxValuesCount;
     }
-
+    
     /**
-     * @param int $maxValuesCount
-     * @return $this
+     * @return static
      */
-    public function setMaxValuesCount($maxValuesCount) {
-        $this->maxValuesCount = max(0, (int)$maxValuesCount);
+    public function setMaxValuesCount(int $maxValuesCount)
+    {
+        $this->maxValuesCount = max(0, $maxValuesCount);
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getAddRowButtonLabel() {
+    
+    public function getAddRowButtonLabel(): string
+    {
         return $this->addRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.add_row');
     }
-
+    
     /**
-     * @param string $addRowButtonLabel
-     * @return $this
+     * @return static
      */
-    public function setAddRowButtonLabel($addRowButtonLabel) {
+    public function setAddRowButtonLabel(string $addRowButtonLabel)
+    {
         $this->addRowButtonLabel = $addRowButtonLabel;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getDeleteRowButtonLabel() {
+    
+    public function getDeleteRowButtonLabel(): string
+    {
         return $this->deleteRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.delete_row');
     }
-
+    
     /**
-     * @param string $deleteRowButtonLabel
-     * @return $this
+     * @return static
      */
-    public function setDeleteRowButtonLabel($deleteRowButtonLabel) {
-        $this->deleteRowButtonLabel = (string)$deleteRowButtonLabel;
+    public function setDeleteRowButtonLabel(string $deleteRowButtonLabel)
+    {
+        $this->deleteRowButtonLabel = $deleteRowButtonLabel;
         return $this;
     }
-
-    /**
-     * @return string
-     */
+    
     public function getType(): string
     {
         return static::TYPE_HIDDEN;
     }
-
-    /**
-     * @return \Closure
-     */
-    public function getRenderer() {
-        if (empty($this->renderer)) {
-            return function () {
-                return $this->getDefaultRenderer();
-            };
-        } else {
-            return $this->renderer;
-        }
+    
+    protected function getDefaultRenderer(): \Closure
+    {
+        return function () {
+            $renderer = new InputRenderer();
+            $renderer->setTemplate('cmf::input.json_array');
+            return $renderer;
+        };
     }
-
-    /**
-     * @return InputRenderer
-     */
-    protected function getDefaultRenderer() {
-        $renderer = new InputRenderer();
-        $renderer->setTemplate('cmf::input.json_array');
-        return $renderer;
-    }
-
-    public function getValidators($isCreation) {
+    
+    public function getValidators(bool $isCreation): array
+    {
         return array_merge(
             [
-                $this->getName() => ($this->getMinValuesCount() > 0 ? 'required' : 'nullable') . '|array|min:' . $this->getMinValuesCount() . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
+                $this->getName() => ($this->getMinValuesCount() > 0 ? 'required' : 'nullable') . '|array|min:' . $this->getMinValuesCount(
+                    ) . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
                 $this->getName() . '.*' => 'required|array',
             ],
             $this->getValidatorsForSubInputs($isCreation)
         );
     }
-
-    public function doDefaultValueConversionByType($value, string $type, array $record) {
+    
+    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    {
         if (!is_array($value)) {
             if (!is_string($value)) {
                 throw new \InvalidArgumentException('$value argument must be a string or array');
@@ -227,17 +212,24 @@ class JsonArrayFormInput extends FormInput {
     
     /**
      * @param \Closure $filter = function($row): bool { return true; }
-     * @return $this
+     * @return static
      */
-    public function setSubmittedRowsFilter(\Closure $filter) {
+    public function setSubmittedRowsFilter(\Closure $filter)
+    {
         $this->submittedRowsFilter = $filter;
         return $this;
     }
     
-    public function modifySubmitedValueBeforeValidation($value, array $data) {
+    /**
+     * @param string|array $value
+     * @param array $data
+     * @return string|array
+     */
+    public function modifySubmitedValueBeforeValidation($value, array $data)
+    {
         if ($this->submittedRowsFilter && is_array($value)) {
             $filteredRows = [];
-            foreach ($value as $index => $row) {
+            foreach ($value as $row) {
                 if (call_user_func($this->submittedRowsFilter, $row)) {
                     $filteredRows[] = $row;
                 }
@@ -247,13 +239,14 @@ class JsonArrayFormInput extends FormInput {
         return parent::modifySubmitedValueBeforeValidation($value, $data);
     }
     
-    protected function hasName(): bool {
+    protected function hasName(): bool
+    {
         return !empty($this->name);
     }
-
-    protected function makeFullSubInputName(string $inputName): string {
+    
+    protected function makeFullSubInputName(string $inputName): string
+    {
         return $this->getName() . '..' . $inputName;
     }
-
-
+    
 }

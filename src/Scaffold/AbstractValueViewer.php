@@ -144,12 +144,12 @@ abstract class AbstractValueViewer
     }
     
     /**
-     * @throws ValueViewerConfigException
+     * @throws \UnexpectedValueException
      */
-    public function getName(): ?string
+    public function getName(): string
     {
         if (empty($this->name)) {
-            throw new ValueViewerConfigException($this, 'Value viewer name not provided');
+            throw new \UnexpectedValueException(static::class . '->name not provided');
         }
         return $this->name;
     }

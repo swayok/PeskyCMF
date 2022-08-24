@@ -49,7 +49,7 @@ class ApiMethodErrorResponseInfo
     }
     
     /**
-     * @return $this
+     * @return static
      */
     public function setHttpCode(int $httpCode)
     {
@@ -63,7 +63,7 @@ class ApiMethodErrorResponseInfo
     }
     
     /**
-     * @return $this
+     * @return static
      */
     public function setTitle(string $description)
     {
@@ -77,7 +77,7 @@ class ApiMethodErrorResponseInfo
     }
     
     /**
-     * @return $this
+     * @return static
      */
     public function setDescription(string $description)
     {
@@ -91,7 +91,7 @@ class ApiMethodErrorResponseInfo
     }
     
     /**
-     * @return $this
+     * @return static
      */
     public function setResponse(array $response)
     {
@@ -101,7 +101,7 @@ class ApiMethodErrorResponseInfo
     
     /**
      * Additional data to be added to response info
-     * @return $this
+     * @return static
      */
     public function setExtraData(array $data)
     {

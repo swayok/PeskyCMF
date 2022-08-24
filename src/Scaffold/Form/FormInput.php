@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\Form;
 
 use Illuminate\Validation\Rule;
@@ -8,13 +10,12 @@ use PeskyCMF\Scaffold\ValueRenderer;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\Relation;
 
-class FormInput extends RenderableValueViewer {
-
-    /** @var bool */
-    protected $showOnCreate = true;
-    /** @var bool */
-    protected $showOnEdit = true;
-
+class FormInput extends RenderableValueViewer
+{
+    
+    protected bool $showOnCreate = true;
+    protected bool $showOnEdit = true;
+    
     public const TYPE_READONLY_TEXT = 'readonly_text';
     public const TYPE_PASSWORD = Column::TYPE_PASSWORD;
     public const TYPE_EMAIL = Column::TYPE_EMAIL;
@@ -26,7 +27,7 @@ class FormInput extends RenderableValueViewer {
     public const TYPE_DATE_RANGE = 'daterange';
     public const TYPE_DATETIME_RANGE = 'datetimerange';
     public const TYPE_TIME_RANGE = 'timerange';
-
+    
     /**
      * value can be:
      * 1. <array> of pairs:
@@ -35,44 +36,38 @@ class FormInput extends RenderableValueViewer {
      * @var null|array|\Closure
      */
     protected $options;
-
-    /** @var \Closure|null */
-    protected $optionsLoader;
-
-    /** @var bool */
-    protected $enableOptionsFilteringByKeywords;
-    /** @var int */
-    protected $minCharsRequiredToInitOptionsFiltering = 1;
-
-    /** @var null|string */
-    protected $emptyOptionLabel;
-
+    
+    protected ?\Closure $optionsLoader = null;
+    
+    protected bool $enableOptionsFilteringByKeywords;
+    protected int $minCharsRequiredToInitOptionsFiltering = 1;
+    
+    protected ?string $emptyOptionLabel = null;
+    
     protected ?string $tooltip = null;
-    /** @var null|array */
-    protected $disablersConfigs = [];
-    /** @var null|\Closure */
-    protected $submittedValueModifier;
-    /** @var string */
-    protected $additionalHtml = '';
-
+    protected array $disablersConfigs = [];
+    protected ?\Closure $submittedValueModifier = null;
+    protected string $additionalHtml = '';
+    
     /**
      * Default input id
-     * @return string
      */
-    public function getDefaultId() {
+    public function getDefaultId(): string
+    {
         return static::makeDefaultId(
             $this->getName(),
             $this->getScaffoldSectionConfig()->getScaffoldConfig()->getResourceName()
         );
     }
-
+    
     /**
      * @param bool $forHtmlInput - convert name into a valid HTML input name('Relation.coln_name' to 'Relation[col_name]')
-     * @return null|string
+     * @return string
      */
-    public function getName($forHtmlInput = false) {
+    public function getName(bool $forHtmlInput = false): string
+    {
         if ($forHtmlInput) {
-            $name = $this->getName();
+            $name = $this->getName(false); //< correct
             if (static::isComplexViewerName($name)) {
                 $name = implode('.', static::splitComplexViewerName($name));
             }
@@ -86,22 +81,22 @@ class FormInput extends RenderableValueViewer {
             return parent::getName();
         }
     }
-
-    protected function getNameForDisablers() {
+    
+    protected function getNameForDisablers(): string
+    {
         return $this->getName(true);
     }
-
+    
     /**
      * Make default html id for input using $formInputName
-     * @param string $formInputName
-     * @param string $tableName
-     * @return string
      */
-    public static function makeDefaultId($formInputName, $tableName) {
-        return 't-' . $tableName . '-c-' . preg_replace('%[^a-zA-Z0-9-]+%', '_', $formInputName) . '-input';
+    public static function makeDefaultId(string $formInputName, string $resourceName): string
+    {
+        return 't-' . $resourceName . '-c-' . preg_replace('%[^a-zA-Z0-9-]+%', '_', $formInputName) . '-input';
     }
-
-    public function render(array $dataForTemplate = []) {
+    
+    public function render(array $dataForTemplate = []): string
+    {
         $renderedInput = parent::render($dataForTemplate);
         if ($this->isShownOnCreate() && $this->isShownOnEdit()) {
             return $renderedInput;
@@ -110,230 +105,219 @@ class FormInput extends RenderableValueViewer {
             return '{{? ' . ($this->isShownOnCreate() ? '' : '!') . "it._is_creation }}{$renderedInput}{{?}}";
         }
     }
-
+    
     /**
-     * @return null|array|\Closure
+     * @return array|\Closure
      */
-    public function getOptions() {
+    public function getOptions()
+    {
         return $this->hasOptionsLoader() ? [] : $this->options;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasOptionsOrOptionsLoader() {
+    
+    public function hasOptionsOrOptionsLoader(): bool
+    {
         return $this->hasOptionsLoader() || !empty($this->options);
     }
-
+    
     /**
      * @param null|array|\Closure $options
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setOptions($options) {
+    public function setOptions($options)
+    {
         if (!is_array($options) && !($options instanceof \Closure)) {
             throw new \InvalidArgumentException($this, '$options argument should be an array or \Closure');
         }
         $this->options = $options;
         return $this;
     }
-
+    
     /**
      * @param \Closure $loader = function ($pkValue, $keywords, FormInput $formInput, FormConfig $formConfig) { return [] }
-     * @return $this
+     * @return static
      */
-    public function setOptionsLoader(\Closure $loader) {
+    public function setOptionsLoader(\Closure $loader)
+    {
         $this->optionsLoader = $loader;
         return $this;
     }
-
+    
     /**
      * Allows autocomplete functionality (search by keywords) for <select> inputs using options loader
      * @param int $minCharsToInitFiltering - minimum characters required to initiate ajax request
-     * @return $this
+     * @return static
      */
-    public function enableOptionsFilteringByKeywords($minCharsToInitFiltering = 1) {
+    public function enableOptionsFilteringByKeywords(int $minCharsToInitFiltering = 1)
+    {
         $this->enableOptionsFilteringByKeywords = true;
-        $this->minCharsRequiredToInitOptionsFiltering = (int)$minCharsToInitFiltering;
+        $this->minCharsRequiredToInitOptionsFiltering = $minCharsToInitFiltering;
         return $this;
     }
-
-    /**
-     * @return \Closure|null
-     */
-    public function getOptionsLoader() {
+    
+    public function getOptionsLoader(): ?\Closure
+    {
         return $this->optionsLoader;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasOptionsLoader() {
+    
+    public function hasOptionsLoader(): bool
+    {
         return !empty($this->optionsLoader);
     }
-
-    /**
-     * @return bool
-     */
-    public function isOptionsFilteringEnabled() {
+    
+    public function isOptionsFilteringEnabled(): bool
+    {
         return $this->enableOptionsFilteringByKeywords;
     }
-
-    /**
-     * @return int
-     */
-    public function getMinCharsRequiredToInitOptionsFiltering() {
+    
+    public function getMinCharsRequiredToInitOptionsFiltering(): int
+    {
         return $this->minCharsRequiredToInitOptionsFiltering;
     }
-
+    
     /**
-     * @param $label
-     * @return $this
+     * @return static
      */
-    public function setEmptyOptionLabel($label) {
+    public function setEmptyOptionLabel(string $label)
+    {
         $this->emptyOptionLabel = $label;
         return $this;
     }
-
-    /**
-     * @return null|string
-     */
-    public function getEmptyOptionLabel() {
+    
+    public function getEmptyOptionLabel(): string
+    {
         return $this->emptyOptionLabel ?: '';
     }
-
-    /**
-     * @return bool
-     */
-    public function hasEmptyOptionLabel() {
+    
+    public function hasEmptyOptionLabel(): bool
+    {
         return $this->emptyOptionLabel !== null;
     }
-
-    /**
-     * @return boolean
-     */
-    public function isShownOnCreate() {
+    
+    public function isShownOnCreate(): bool
+    {
         return $this->showOnCreate;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function showOnCreate() {
+    public function showOnCreate()
+    {
         $this->showOnCreate = true;
         return $this;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function hideOnCreate() {
+    public function hideOnCreate()
+    {
         $this->showOnCreate = false;
         return $this;
     }
-
-    /**
-     * @return boolean
-     */
-    public function isShownOnEdit() {
+    
+    public function isShownOnEdit(): bool
+    {
         return $this->showOnEdit;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function showOnEdit() {
+    public function showOnEdit()
+    {
         $this->showOnEdit = true;
         return $this;
     }
-
+    
     /**
-     * @return $this
+     * @return static
      */
-    public function hideOnEdit() {
+    public function hideOnEdit()
+    {
         $this->showOnEdit = false;
         return $this;
     }
-
-    public function getLabel(?InputRenderer $renderer = null): string {
+    
+    public function getLabel(?InputRenderer $renderer = null): string
+    {
         $isRequired = '';
         if ($renderer === null) {
             $isRequired = $this->getTableColumn()->isValueRequiredToBeNotEmpty() ? '*' : '';
-        } else if ($renderer->isRequired()) {
+        } elseif ($renderer->isRequired()) {
             $isRequired = '*';
-        } else if ($renderer->isRequiredForCreate()) {
+        } elseif ($renderer->isRequiredForCreate()) {
             $isRequired = '{{? !!it.isCreation }}*{{?}}';
-        } else if ($renderer->isRequiredForEdit()) {
+        } elseif ($renderer->isRequiredForEdit()) {
             $isRequired = '{{? !it.isCreation }}*{{?}}';
         }
         return parent::getLabel() . $isRequired;
     }
-
+    
     /**
      * Add some html after input
-     * @param string $html
-     * @return $this
+     * @return static
      */
-    public function setAdditionalHtml($html) {
+    public function setAdditionalHtml(string $html)
+    {
         $this->additionalHtml = $html;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getAdditionalHtml() {
+    
+    public function getAdditionalHtml(): string
+    {
         return $this->additionalHtml;
     }
-
-    public function getTooltip(): ?string {
+    
+    public function getTooltip(): ?string
+    {
         return $this->tooltip;
     }
-
-    /**
-     * @return string
-     */
-    public function getFormattedTooltip() {
+    
+    public function getFormattedTooltip(): string
+    {
         if ($this->hasTooltip()) {
             return $this->buildTooltip($this->getTooltip());
         } else {
             return '';
         }
     }
-
+    
     /**
      * @param string|array $tooltip
      * @return string
      */
-    protected function buildTooltip($tooltip) {
+    protected function buildTooltip($tooltip): string
+    {
         return '<span class="help-block"><p class="mn">'
             . '<i class="glyphicon glyphicon-info-sign text-blue fs16 va-t mr5 lh20" style="top: 0;"></i>'
             . (is_array($tooltip) ? implode('</p><p class="mn pl20">', $tooltip) : (string)$tooltip)
             . '</p></span>';
     }
-
+    
     /**
      * @param string|array $tooltip - array: array of strings. If processed by getFormattedTooltip() - it will be
      *      converted to string where each element of array starts with new line (<br>)
-     * @return $this
+     * @return static
      */
-    public function setTooltip($tooltip) {
+    public function setTooltip($tooltip)
+    {
         $this->tooltip = $tooltip;
         return $this;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasTooltip() {
+    
+    public function hasTooltip(): bool
+    {
         return !empty($this->tooltip);
     }
-
+    
     /**
      * @param bool $isCreation - true: validators for record creation; false: validators for record update
      * @return array
      */
-    public function getValidators($isCreation) {
+    public function getValidators(bool $isCreation): array
+    {
         if (!$this->isLinkedToDbColumn() || $this->hasRelation()) {
             return [];
         }
@@ -359,27 +343,27 @@ class FormInput extends RenderableValueViewer {
                 $uniquenessValidator = preg_replace('%^unique%', 'unique_ceseinsensitive', (string)$uniquenessValidator);
             }
             $rule .= $uniquenessValidator;
-        } else if (in_array($column->getType(), [$column::TYPE_JSON, $column::TYPE_JSONB], true)) {
+        } elseif (in_array($column->getType(), [$column::TYPE_JSON, $column::TYPE_JSONB], true)) {
             $rule .= 'array';
-        } else if ($column->getType() === $column::TYPE_BOOL) {
+        } elseif ($column->getType() === $column::TYPE_BOOL) {
             $rule .= 'boolean';
-        } else if ($column->getType() === $column::TYPE_INT) {
+        } elseif ($column->getType() === $column::TYPE_INT) {
             $rule .= 'integer' . ($column->isItPrimaryKey() || $column->isItAForeignKey() ? '|min:1' : '');
-        } else if ($column->getType() === $column::TYPE_FLOAT) {
+        } elseif ($column->getType() === $column::TYPE_FLOAT) {
             $rule .= 'numeric';
-        } else if ($column->getType() === $column::TYPE_EMAIL) {
+        } elseif ($column->getType() === $column::TYPE_EMAIL) {
             $rule .= 'string|email';
-        } else if ($column->getType() === $column::TYPE_FILE) {
+        } elseif ($column->getType() === $column::TYPE_FILE) {
             $rule .= 'file';
-        } else if ($column->getType() === $column::TYPE_IMAGE) {
+        } elseif ($column->getType() === $column::TYPE_IMAGE) {
             $rule .= 'image';
-        } else if ($column->getType() === $column::TYPE_ENUM) {
+        } elseif ($column->getType() === $column::TYPE_ENUM) {
             $rule .= 'string|in:' . implode(',', $column->getAllowedValues());
-        } else if ($column->getType() === $column::TYPE_IPV4_ADDRESS) {
+        } elseif ($column->getType() === $column::TYPE_IPV4_ADDRESS) {
             $rule .= 'ipv4';
-        } else if ($column->getType() === $column::TYPE_UNIX_TIMESTAMP) {
+        } elseif ($column->getType() === $column::TYPE_UNIX_TIMESTAMP) {
             $rule .= 'integer|min:0';
-        } else if ($column->getType() === $column::TYPE_TIMEZONE_OFFSET) {
+        } elseif ($column->getType() === $column::TYPE_TIMEZONE_OFFSET) {
             $rule .= 'integer';
         } else {
             $rule .= 'string';
@@ -391,28 +375,29 @@ class FormInput extends RenderableValueViewer {
         }
         return [$columnName => $rule];
     }
-
+    
     /**
      * This indicates if value of this input should be saved normally (false) or it will be saved manually (true)
      * Manual saving is useful to create/update related records for HAS MANY relations
-     * @return bool
      */
-    public function hasOwnValueSavingMethod() {
+    public function hasOwnValueSavingMethod(): bool
+    {
         return false;
     }
-
+    
     /**
      * Provides special value saver used only when isValueWillBeSavedManually() returns true;
      * This is used in complex situations like saving relations of type HAS MANY
      * Closure must throw PeskyORM\Exception\InvalidDataException if something is wring with incoming data.
      * @return \Closure - funciton ($value, RecordInterface $record, $created) {  }
      */
-    public function getValueSaver() {
+    public function getValueSaver(): \Closure
+    {
         return function () {
             return true;
         };
     }
-
+    
     /**
      * Modify incoming value before validating it. May be useful for situations when you need to clean
      * incoming value from unnecessary data
@@ -420,44 +405,42 @@ class FormInput extends RenderableValueViewer {
      * @param array $data
      * @return mixed
      */
-    public function modifySubmitedValueBeforeValidation($value, array $data) {
+    public function modifySubmitedValueBeforeValidation($value, array $data)
+    {
         if ($this->hasSubmittedValueModifier()) {
             return call_user_func($this->getSubmittedValueModifier(), $value, $data);
         } else {
             return $value;
         }
     }
-
+    
     /**
      * Closure may modify incoming value before it is validated.
      * @param \Closure $modifier - function ($value, array $data) { return $value; }
-     * @return $this
+     * @return static
      */
-    public function setSubmittedValueModifier(\Closure $modifier) {
+    public function setSubmittedValueModifier(\Closure $modifier)
+    {
         $this->submittedValueModifier = $modifier;
         return $this;
     }
-
-    /**
-     * @return \Closure|null
-     */
-    protected function getSubmittedValueModifier() {
+    
+    protected function getSubmittedValueModifier(): ?\Closure
+    {
         return $this->submittedValueModifier;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasSubmittedValueModifier() {
+    
+    public function hasSubmittedValueModifier(): bool
+    {
         return !empty($this->submittedValueModifier);
     }
-
+    
     /**
      * This input should be disabled only when $otherInput has no provided value ($hasValue)
      * Note: can be called several times to add more conditions. Conditions will be preocessed "1 OR 2 OR 3..."
      * If any condition matches - input will be disabled
      * @param string $otherInput
-     * @param mixed $hasValue
+     * @param mixed $otherInputValue
      *      - bool: if $otherInput is checkbox/trigger |
      *      - string or array: if $otherInput is select or radios
      *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
@@ -466,18 +449,19 @@ class FormInput extends RenderableValueViewer {
      * @param bool $ignoreIfInputIsAbsent
      *      - true: if input is not present in form this condition will be ignored
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
-     * @return $this
+     * @return static
      */
-    public function setDisabledUntil($otherInput, $hasValue, bool $ignoreIfInputIsAbsent = false) {
-        return $this->addDisablerConfig($otherInput, false, $hasValue, $ignoreIfInputIsAbsent, false);
+    public function setDisabledUntil(string $otherInput, $otherInputValue, bool $ignoreIfInputIsAbsent = false)
+    {
+        return $this->addDisablerConfig($otherInput, false, $otherInputValue, $ignoreIfInputIsAbsent, false);
     }
-
+    
     /**
      * This input should be disabled only when $otherInput has provided value ($hasValue).
      * Note: can be called several times to add more conditions. Conditions will be processed as "1 OR 2 OR 3..."
      * If any condition matches - input will be disabled
      * @param string $otherInput
-     * @param mixed $hasValue
+     * @param mixed $otherInputValue
      *      - bool: if $otherInput is checkbox/trigger |
      *      - string or array: if $otherInput is select or radios
      *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
@@ -486,33 +470,35 @@ class FormInput extends RenderableValueViewer {
      * @param bool $ignoreIfInputIsAbsent
      *      - true: if input is not present in form this condition will be ignored
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
-     * @return $this
+     * @return static
      */
-    public function setDisabledWhen($otherInput, $hasValue, bool $ignoreIfInputIsAbsent = false) {
-        return $this->addDisablerConfig($otherInput, true, $hasValue, $ignoreIfInputIsAbsent, false);
+    public function setDisabledWhen(string $otherInput, $otherInputValue, bool $ignoreIfInputIsAbsent = false)
+    {
+        return $this->addDisablerConfig($otherInput, true, $otherInputValue, $ignoreIfInputIsAbsent, false);
     }
-
+    
     /**
      * Input will be always marked as 'readonly'
-     * @return FormInput
+     * @return static
      */
-    public function setDisabledAlways() {
+    public function setDisabledAlways()
+    {
         $this->disablersConfigs = [];
         $this->disablersConfigs[] = function () {
             return [
                 'force_state' => true,
-                'attribute' => 'disabled'
+                'attribute' => 'disabled',
             ];
         };
         return $this;
     }
-
+    
     /**
      * This input should be marked as 'readonly' only when $otherInput has no provided value ($hasValue)
      * Note: can be called several times to add more conditions. Conditions will be preocessed "1 OR 2 OR 3..."
      * If any condition matches - input will be readonly
      * @param string $otherInput
-     * @param mixed $hasValue
+     * @param mixed $otherInputValue
      *      - bool: if $otherInput is checkbox/trigger |
      *      - string or array: if $otherInput is select or radios
      *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
@@ -524,18 +510,19 @@ class FormInput extends RenderableValueViewer {
      * @param null $changeValue
      *      - null: leave as is
      *      - string or bool: change value of this input when it gets "readonly" attribute
-     * @return $this
+     * @return static
      */
-    public function setReadonlyUntil($otherInput, $hasValue, bool $ignoreIfInputIsAbsent = false, $changeValue = null) {
-        return $this->addDisablerConfig($otherInput, false, $hasValue, $ignoreIfInputIsAbsent, true, $changeValue);
+    public function setReadonlyUntil(string $otherInput, $otherInputValue, bool $ignoreIfInputIsAbsent = false, $changeValue = null)
+    {
+        return $this->addDisablerConfig($otherInput, false, $otherInputValue, $ignoreIfInputIsAbsent, true, $changeValue);
     }
-
+    
     /**
      * This input should be marked as 'readonly' only when $otherInput has provided value ($hasValue)
      * Note: can be called several times to add more conditions. Conditions will be preocessed "1 OR 2 OR 3..."
      * If any condition matches - input will be readonly
      * @param string $otherInput
-     * @param mixed $hasValue
+     * @param mixed $otherInputValue
      *      - bool: if $otherInput is checkbox/trigger |
      *      - string or array: if $otherInput is select or radios
      *      - regexp: custom regexp. MUST BE COMPATIBLE to javascript's regexp implementation
@@ -547,29 +534,34 @@ class FormInput extends RenderableValueViewer {
      * @param null $changeValue
      *      - null: leave as is
      *      - string or bool: change value of this input when it gets "readonly" attribute
-     * @return $this
+     * @return static
      */
-    public function setReadonlyWhen($otherInput, $hasValue, bool $ignoreIfInputIsAbsent = false, $changeValue = null) {
-        return $this->addDisablerConfig($otherInput, true, $hasValue, $ignoreIfInputIsAbsent, true, $changeValue);
+    public function setReadonlyWhen(string $otherInput, $otherInputValue, bool $ignoreIfInputIsAbsent = false, $changeValue = null)
+    {
+        return $this->addDisablerConfig($otherInput, true, $otherInputValue, $ignoreIfInputIsAbsent, true, $changeValue);
     }
-
+    
     /**
      * Input will be always marked as 'readonly'
-     * @return FormInput
+     * @return static
      */
-    public function setReadonlyAlways() {
+    public function setReadonlyAlways()
+    {
         $this->disablersConfigs = [];
         $this->disablersConfigs[] = function () {
             return [
                 'force_state' => true,
-                'attribute' => 'readonly'
+                'attribute' => 'readonly',
             ];
         };
         return $this;
     }
-
+    
+    /**
+     * @return static
+     */
     protected function addDisablerConfig(
-        $enablerInputName,
+        string $enablerInputName,
         bool $isEqualsTo,
         $value,
         bool $ignoreIfInputIsAbsent = true,
@@ -582,7 +574,7 @@ class FormInput extends RenderableValueViewer {
                     $value = preg_quote($value, '/');
                 });
                 $value = '/^(' . implode('|', $value) . ')$/';
-            } else if (!is_bool($value) && !preg_match('%^/.*/[a-z]*$%', $value)) {
+            } elseif (!is_bool($value) && !preg_match('%^/.*/[a-z]*$%', $value)) {
                 $value = '/^(' . preg_quote($value, '%') . ')$/';
             }
             return [
@@ -591,7 +583,7 @@ class FormInput extends RenderableValueViewer {
                 'value_is_equals' => $isEqualsTo,
                 'attribute' => $setReadOnly ? 'readonly' : 'disabled',
                 'set_readonly_value' => $setReadOnly ? $readonlyValue : null,
-                'ignore_if_disabler_input_is_absent' => $ignoreIfInputIsAbsent
+                'ignore_if_disabler_input_is_absent' => $ignoreIfInputIsAbsent,
             ];
         };
         if (array_key_exists('conditions', $this->disablersConfigs)) {
@@ -601,11 +593,9 @@ class FormInput extends RenderableValueViewer {
         }
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getDisablersConfigs() {
+    
+    public function getDisablersConfigs(): array
+    {
         if (!array_key_exists('input_name', $this->disablersConfigs)) {
             $ret = [
                 'input_name' => $this->getNameForDisablers(),
@@ -619,19 +609,18 @@ class FormInput extends RenderableValueViewer {
         }
         return $this->disablersConfigs;
     }
-
-    /**
-     * @return bool
-     */
-    public function hasDisablersConfigs() {
+    
+    public function hasDisablersConfigs(): bool
+    {
         return !empty($this->disablersConfigs);
     }
-
+    
     /**
      * @param ValueRenderer|InputRenderer $renderer
-     * @return $this
+     * @return static
      */
-    public function configureDefaultRenderer(ValueRenderer $renderer) {
+    public function configureDefaultRenderer(ValueRenderer $renderer)
+    {
         parent::configureDefaultRenderer($renderer);
         if (!$renderer->hasTemplate()) {
             switch ($this->getType()) {
@@ -715,6 +704,6 @@ class FormInput extends RenderableValueViewer {
         }
         return $this;
     }
-
-
+    
+    
 }

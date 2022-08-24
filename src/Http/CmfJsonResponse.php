@@ -100,7 +100,7 @@ class CmfJsonResponse extends JsonResponse
     /**
      * @param array $errors
      * @param string|null $message
-     * @return $this
+     * @return static
      */
     public function setErrors(array $errors, ?string $message = null): CmfJsonResponse
     {
@@ -118,7 +118,7 @@ class CmfJsonResponse extends JsonResponse
      * @param string|null $footer
      * @param string|null $url
      * @param string $modalSize
-     * @return $this
+     * @return static
      */
     public function setModalContent(
         string $title,

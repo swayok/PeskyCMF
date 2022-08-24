@@ -1,60 +1,69 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
 
-class ManyToManyRelationRecordsFormInput extends FormInput {
-
+class ManyToManyRelationRecordsFormInput extends FormInput
+{
+    
     /**
-     * @var array
+     * @var array|\Closure
      */
     protected $dbQueryConditionsForDefaultOptionsLoader = [];
     /**
      * @var null|string|DbExpr
      */
     protected $optionLabelColumnForDefaultOptionsLoader;
-
+    
     /**
      * Name of the column in 'linker table' that contains primary key values of the foreign table
      * For example you have 3 tables: items (main table), categories (foreing table), item_categories (linker table);
      * Here you have many-to-many relation between items and categories that resolved via 'linker table'
      * item_categories that contains only 3 columns: id, item_id (link to items.id), category_id (link to categoris.id);
      * You need to pass 'category_id' via $columnName argument
-     * @param $columnName
-     * @return $this
+     * @return static
      */
-    public function setRelationsLinkingColumn($columnName) {
+    public function setRelationsLinkingColumn(string $columnName)
+    {
         $this->relationColumn = $columnName;
         return $this;
     }
-
-    /**
-     * @return string
-     */
+    
     public function getType(): string
     {
         return static::TYPE_MULTISELECT;
     }
-
-    public function getValidators($isCreation) {
+    
+    public function getValidators(bool $isCreation): array
+    {
         return [
             $this->getName() => 'array|nullable',
-            $this->getName(). '.' . $this->getRelationColumn() => 'integer',
+            $this->getName() . '.' . $this->getRelationColumn() => 'integer',
         ];
     }
-
-    public function setRelation(Relation $relation, string $columnName) {
+    
+    /**
+     * @return static
+     */
+    public function setRelation(Relation $relation, string $columnName)
+    {
         $this->relation = $relation;
         if ($columnName !== $relation->getForeignColumnName()) {
             $this->relationColumn = $columnName;
         }
         return $this;
     }
-
-    public function getRelationColumn(): ?string {
+    
+    /**
+     * @throws \UnexpectedValueException
+     */
+    public function getRelationColumn(): ?string
+    {
         if (empty($this->relationColumn)) {
             throw new \UnexpectedValueException(
                 "Relations linking column was not provided for '{$this->getName()}' input. "
@@ -63,8 +72,9 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         }
         return parent::getRelationColumn();
     }
-
-    public function modifySubmitedValueBeforeValidation($value, array $data) {
+    
+    public function modifySubmitedValueBeforeValidation($value, array $data)
+    {
         if (empty($value)) {
             $value = [];
         }
@@ -77,60 +87,75 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         }
         return parent::modifySubmitedValueBeforeValidation($value, $data);
     }
-
-    public function doDefaultValueConversionByType($value, string $type, array $record) {
+    
+    /**
+     * @throws \InvalidArgumentException
+     */
+    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    {
+        $relation = $this->getRelation();
         if (!is_array($value)) {
-            throw new \InvalidArgumentException("Invalid data received for relation '{$this->getRelation()->getName()}'. Array expected.");
+            throw new \InvalidArgumentException("Invalid data received for relation '{$relation->getName()}'. Array expected.");
         }
         $ret = [];
         $column = $this->getRelationColumn();
-        /** @var array $value */
         foreach ($value as $foreignRecord) {
             if (!array_key_exists($column, $foreignRecord)) {
                 throw new \InvalidArgumentException(
-                    "Invalid data received for relation '{$this->getRelation()->getName()}'. Value for column {$column} not found."
+                    "Invalid data received for relation '{$relation->getName()}'. Value for column {$column} not found."
                 );
             }
             $ret[] = $foreignRecord[$column];
         }
         return $ret;
     }
-
-    public function hasOptionsLoader() {
-        return true;
-    }
-
-    public function setOptions($options) {
-        throw new \BadMethodCallException(
-            "Plain options is forbidden for ManyToManyRelationRecordsFormInput '{$this->getName()}'. Use options loader."
-        );
-    }
-
-    public function getOptionsLoader() {
-        if (!$this->hasRelation()) {
+    
+    public function getRelation(): Relation
+    {
+        if (!$this->relation) {
             throw new \BadMethodCallException(
                 "ManyToManyRelationRecordsFormInput '{$this->getName()}' must be linked to Relation in order to funciton properly"
             );
         }
+        return $this->relation;
+    }
+    
+    public function hasOptionsLoader(): bool
+    {
+        return true;
+    }
+    
+    /**
+     * @return static
+     */
+    public function setOptions($options)
+    {
+        throw new \BadMethodCallException(
+            "Plain options is forbidden for ManyToManyRelationRecordsFormInput '{$this->getName()}'. Use options loader."
+        );
+    }
+    
+    public function getOptionsLoader(): \Closure
+    {
+        $relation = $this->getRelation();
         if (!$this->optionsLoader) {
             /** @var Relation|null $dataSourceRelation */
             $dataSourceRelation = null;
-            $relations = $this
-                ->getRelation()
+            $relations = $relation
                 ->getForeignTable()
                 ->getTableStructure()
                 ->getColumn($this->getRelationColumn())
                 ->getRelations();
-            foreach ($relations as $relation) {
-                if ($relation->getType() === Relation::HAS_ONE) {
-                    $dataSourceRelation = $relation;
+            foreach ($relations as $otherRelation) {
+                if ($otherRelation->getType() === Relation::HAS_ONE) {
+                    $dataSourceRelation = $otherRelation;
                     break;
                 }
             }
             if (!$dataSourceRelation) {
                 throw new \UnexpectedValueException(
                     "Failed to detect data source Relation for ManyToManyRelationRecordsFormInput '{$this->getName()}'. "
-                    . "Column '{$this->getRelation()->getForeignTable()->getName()}.{$this->getRelationColumn()}'"
+                    . "Column '{$relation->getForeignTable()->getName()}.{$this->getRelationColumn()}'"
                     . ' has no Relation with type HAS ONE'
                 );
             }
@@ -138,7 +163,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
             $this->optionsLoader = function () use ($dataSourceRelation, $table) {
                 $labelColumn = $this->getOptionLabelColumnForDefaultOptionsLoader($dataSourceRelation->getDisplayColumnName());
                 if ($labelColumn instanceof \Closure) {
-                    $records = $table::select('*', value($this->getDbQueryConditionsForDefaultOptionsLoader()));
+                    $records = $table::select('*', $this->getDbQueryConditionsForDefaultOptionsLoader());
                     $records->optimizeIteration();
                     $options = [];
                     /** @var RecordInterface $record */
@@ -150,28 +175,29 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
                     return $table::selectAssoc(
                         $table::getPkColumnName(),
                         $labelColumn,
-                        value($this->getDbQueryConditionsForDefaultOptionsLoader())
+                        $this->getDbQueryConditionsForDefaultOptionsLoader()
                     );
                 }
             };
         }
         return $this->optionsLoader;
     }
-
-    /**
-     * @return array
-     */
-    protected function getDbQueryConditionsForDefaultOptionsLoader() {
-        return $this->dbQueryConditionsForDefaultOptionsLoader;
+    
+    protected function getDbQueryConditionsForDefaultOptionsLoader(): array
+    {
+        return is_array($this->dbQueryConditionsForDefaultOptionsLoader)
+            ? $this->dbQueryConditionsForDefaultOptionsLoader
+            : ($this->dbQueryConditionsForDefaultOptionsLoader)();
     }
-
+    
     /**
      * Set conditions for default options loader
      * @param array|\Closure $conditonsAndOptions
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setDbQueryConditionsForDefaultOptionsLoader($conditonsAndOptions) {
+    public function setDbQueryConditionsForDefaultOptionsLoader($conditonsAndOptions)
+    {
         if (
             !is_array($conditonsAndOptions)
             && !($conditonsAndOptions instanceof DbExpr)
@@ -184,16 +210,17 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         $this->dbQueryConditionsForDefaultOptionsLoader = $conditonsAndOptions;
         return $this;
     }
-
+    
     /**
      * Set source for options labels
      * @param string|\Closure $columnNameOrClosure
      *      - string: column name
      *      - \Closure: function (RecordInterface $record) { return 'value' }
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setOptionLabelColumnForDefaultOptionsLoader($columnNameOrClosure) {
+    public function setOptionLabelColumnForDefaultOptionsLoader($columnNameOrClosure)
+    {
         if (
             !is_string($columnNameOrClosure)
             && !($columnNameOrClosure instanceof DbExpr)
@@ -206,14 +233,15 @@ class ManyToManyRelationRecordsFormInput extends FormInput {
         $this->optionLabelColumnForDefaultOptionsLoader = $columnNameOrClosure;
         return $this;
     }
-
+    
     /**
      * @param mixed $default
      * @return string|DbExpr|null
      */
-    protected function getOptionLabelColumnForDefaultOptionsLoader($default = null) {
+    protected function getOptionLabelColumnForDefaultOptionsLoader($default = null)
+    {
         return $this->optionLabelColumnForDefaultOptionsLoader ?: $default;
     }
-
-
+    
+    
 }

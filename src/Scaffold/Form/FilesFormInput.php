@@ -1,47 +1,54 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyORMLaravel\Db\Column\FilesColumn;
-use PeskyORMLaravel\Db\Column\Utils\FileInfo;
-use PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig;
-use PeskyORMLaravel\Db\Column\Utils\ImagesGroupConfig;
+use Illuminate\Support\Arr;
+use PeskyORMColumns\Column\Files\MetadataFilesColumn;
+use PeskyORMColumns\Column\Files\Utils\DbFileInfo;
+use PeskyORMColumns\Column\Files\Utils\MimeTypesHelper;
 
 /**
- * @method FilesColumn getTableColumn()
+ * @method MetadataFilesColumn getTableColumn()
+ * todo: upgrade this to be able to use MetadataFileColumn
  */
-class FilesFormInput extends FormInput {
-
+class FilesFormInput extends FormInput
+{
+    
     /** @var string */
-    protected $view = 'cmf::input.files_uploaders';
-
+    protected string $view = 'cmf::input.files_uploaders';
+    
     /** @var null|array|\Closure */
     protected $fileConfigsToUse;
-
-    protected $jsPluginOptions = [];
-
+    
+    protected array $jsPluginOptions = [];
+    
     /**
      * Disable uploading preview for this input
-     * @return $this
+     * @return static
      */
-    public function disablePreview() {
+    public function disablePreview()
+    {
         $this->jsPluginOptions['showPreview'] = false;
         return $this;
     }
-
+    
     /**
      * @param array $options
-     * @return $this
+     * @return static
      */
-    public function setJsPluginOptions(array $options) {
+    public function setJsPluginOptions(array $options)
+    {
         $this->jsPluginOptions = $options;
         return $this;
     }
-
-    public function getJsPluginOptions(): array {
+    
+    public function getJsPluginOptions(): array
+    {
         return $this->jsPluginOptions;
     }
-
+    
     /**
      * @return string
      */
@@ -49,79 +56,62 @@ class FilesFormInput extends FormInput {
     {
         return static::TYPE_HIDDEN;
     }
-
+    
     /**
      * List of file names to accept.
      * Only provided files will be shown in form. Other files will be ignored (and won't be changed in any way)
      * @param array|\Closure $fileGroups - \Closure must return array
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setFilesGroupsToUse($fileGroups) {
+    public function setFilesGroupsToUse($fileGroups)
+    {
         if (empty($fileGroups)) {
             throw new \InvalidArgumentException('$fileGroups argument cannot be empty');
-        } else if (!is_array($fileGroups) && !($fileGroups instanceof \Closure)) {
+        } elseif (!is_array($fileGroups) && !($fileGroups instanceof \Closure)) {
             throw new \InvalidArgumentException('$fileGroups argument must be an array or \Closure');
         }
         $this->fileConfigsToUse = $fileGroups;
         return $this;
     }
-
+    
     /**
-     * @return \Closure
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function getRenderer() {
-        if (empty($this->renderer)) {
-            return function () {
-                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                return $this->getDefaultRenderer();
-            };
-        } else {
-            return $this->renderer;
-        }
+    protected function getDefaultRenderer(): \Closure
+    {
+        return function () {
+            $column = $this->getTableColumn();
+            if (!($column instanceof MetadataFilesColumn)) {
+                throw new \BadMethodCallException(
+                    "Linked column for form field '{$this->getName()}' must be an instance of " . MetadataFilesColumn::class
+                );
+            }
+            $configs = $this->getAcceptedFileConfigurations();
+            if (empty($configs)) {
+                throw new \BadMethodCallException(
+                    "There is no configurations for files in column '{$column->getName()}'"
+                );
+            }
+            $renderer = new InputRenderer();
+            $renderer
+                ->setTemplate($this->view)
+                ->addData('filesConfigs', $configs);
+            return $renderer;
+        };
     }
-
-    /**
-     * @return InputRenderer
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    protected function getDefaultRenderer() {
-        $column = $this->getTableColumn();
-        if (!($column instanceof FilesColumn)) {
-            throw new \BadMethodCallException(
-                "Linked column for form field '{$this->getName()}' must be an instance of " . FilesColumn::class
-            );
-        }
-        $configs = $this->getAcceptedFileConfigurations();
-        if (empty($configs)) {
-            throw new \BadMethodCallException(
-                "There is no configurations for files in column '{$column->getName()}'"
-            );
-        }
-        $renderer = new InputRenderer();
-        $renderer
-            ->setTemplate($this->view)
-            ->addData('filesConfigs', $configs);
-        return $renderer;
-    }
-
+    
     /**
      * @return FilesGroupConfig[]
      * @throws \UnexpectedValueException
      */
-    protected function getAcceptedFileConfigurations() {
+    protected function getAcceptedFileConfigurations(): array
+    {
         $column = $this->getTableColumn();
         $configsNames = value($this->fileConfigsToUse);
         if ($configsNames === null) {
             return $column->getFilesGroupsConfigurations();
-        } else if (!is_array($configsNames)) {
+        } elseif (!is_array($configsNames)) {
             throw new \UnexpectedValueException(
                 static::class . '->fileConfigsToUse property must be an array or \Closure that returns an array'
             );
@@ -133,33 +123,23 @@ class FilesFormInput extends FormInput {
             return $ret;
         }
     }
-
+    
     public function hasLabel(): bool
     {
         return true;
     }
-
-    public function getLabel(?InputRenderer $renderer = null): string {
+    
+    public function getLabel(?InputRenderer $renderer = null): string
+    {
         return '';
     }
-
-    /**
-     * @param mixed $value
-     * @param string $type
-     * @param array $record
-     * @return array|mixed
-     * @throws \PDOException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PeskyORM\Exception\OrmException
-     */
-    public function doDefaultValueConversionByType($value, string $type, array $record) {
+    
+    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    {
         $ret = [
             'urls' => [],
             'preview_info' => [],
-            'files' => []
+            'files' => [],
         ];
         if (!is_array($value)) {
             $value = json_decode($value, true);
@@ -167,11 +147,11 @@ class FilesFormInput extends FormInput {
         if (!is_array($value) || empty($value)) {
             return $ret;
         }
-        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-        $pkValue = array_get($record, $record::getPrimaryKeyColumnName());
-        $record->fromData($record, !empty($pkValue) || is_numeric($pkValue), false);
-
-        $fileInfoArrays = $record->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
+        $recordObject = $this->getScaffoldSectionConfig()->getTable()->newRecord();
+        $pkValue = Arr::get($record, $recordObject::getPrimaryKeyColumnName());
+        $recordObject->fromData($record, !empty($pkValue) || is_numeric($pkValue), false);
+        
+        $fileInfoArrays = $recordObject->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
         foreach ($fileInfoArrays as $fileName => $fileInfoArray) {
             if (empty($fileInfoArray)) {
                 continue;
@@ -179,50 +159,47 @@ class FilesFormInput extends FormInput {
             $ret['preview_info'][$fileName] = [];
             $ret['urls'][$fileName] = [];
             $ret['files'][$fileName] = [];
-            /** @var FileInfo $fileInfo */
+            /** @var DbFileInfo $fileInfo */
             foreach ($fileInfoArray as $fileInfo) {
-                if ($fileInfo->exists()) {
-                    $ret['urls'][$fileName][] = $fileInfo->getAbsoluteUrl();
+                if ($fileInfo->isFileExists()) {
+                    $ret['urls'][$fileName][] = $fileInfo->getAbsoluteFileUrl();
                     $ret['files'][$fileName][] = [
-                        'info' => $fileInfo->getCustomInfo(),
-                        'name' => $fileInfo->getOriginalFileName() ?: $fileInfo->getFileName(),
+                        'name' => $fileInfo->getOriginalFileNameWithExtension() ?: $fileInfo->getFileNameWithExtension(),
                         'extension' => $fileInfo->getFileExtension(),
                         'uuid' => $fileInfo->getUuid(),
                     ];
-
+                    
                     $ret['preview_info'][$fileName][] = [
                         'caption' => $fileInfo->getOriginalFileNameWithExtension(),
-                        'size' => $fileInfo->getSize(),
-                        'downloadUrl' => $fileInfo->getAbsoluteUrl(),
+                        'size' => $fileInfo->getFileSize(),
+                        'downloadUrl' => $fileInfo->getAbsoluteFileUrl(),
                         'filetype' => $fileInfo->getMimeType(),
                         'type' => static::getUploaderPreviewTypeFromFileInfo($fileInfo),
-                        'key' => 1
+                        'key' => 1,
                     ];
                 }
             }
         }
         return $ret;
     }
-
-    /**
-     * @param FileInfo $fileInfo
-     * @return string
-     */
-    protected static function getUploaderPreviewTypeFromFileInfo(FileInfo $fileInfo) {
-        $type = $fileInfo->getFileType();
+    
+    protected static function getUploaderPreviewTypeFromFileInfo(DbFileInfo $fileInfo): string
+    {
+        $type = $fileInfo->getMimeType();
         switch ($type) {
-            case FilesGroupConfig::TYPE_IMAGE:
-            case FilesGroupConfig::TYPE_AUDIO:
-            case FilesGroupConfig::TYPE_VIDEO:
-            case FilesGroupConfig::TYPE_TEXT:
-            case FilesGroupConfig::TYPE_OFFICE:
+            case MimeTypesHelper::TYPE_IMAGE:
+            case MimeTypesHelper::TYPE_AUDIO:
+            case MimeTypesHelper::TYPE_VIDEO:
+            case MimeTypesHelper::TYPE_TEXT:
+            case MimeTypesHelper::TYPE_OFFICE:
                 return $type;
             default:
                 return 'object';
         }
     }
-
-    public function getValidators($isCreation) {
+    
+    public function getValidators(bool $isCreation): array
+    {
         $validators = [];
         $configs = $this->getAcceptedFileConfigurations();
         foreach ($configs as $fileConfig) {
@@ -243,32 +220,30 @@ class FilesFormInput extends FormInput {
         }
         return $validators;
     }
-
-    public function hasTooltip() {
+    
+    public function hasTooltip(): bool
+    {
         return false; //< there can't be own tooltip for input. only image/file configs can have tooltips
     }
-
+    
     /**
-     * @return string|void
      * @throws \BadMethodCallException
      */
-    public function getFormattedTooltip() {
+    public function getFormattedTooltip(): string
+    {
         throw new \BadMethodCallException(
-            'Tooltip for ' . get_class($this) .  ' is not allowed. There can only be tooltips for file/image configs.'
+            'Tooltip for ' . get_class($this) . ' is not allowed. There can only be tooltips for file/image configs.'
         );
     }
-
-    /**
-     * @param string $configName
-     * @return string
-     */
-    public function getFormattedTooltipForFileConfig($configName) {
+    
+    public function getFormattedTooltipForFileConfig(string $configName): string
+    {
         $tooltips = $this->getTooltip();
         if (!is_array($tooltips) || empty($tooltips[$configName])) {
             return '';
         }
         return $this->buildTooltip($tooltips[$configName]);
     }
-
-
+    
+    
 }

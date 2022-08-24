@@ -179,14 +179,16 @@ abstract class RenderableValueViewer extends AbstractValueViewer
      */
     public function getRenderer(): ?\Closure
     {
-        if (empty($this->renderer)) {
-            $defaultRenderer = $this->getScaffoldSectionConfig()->getDefaultValueRenderer();
-            if (!empty($defaultRenderer)) {
-                return $defaultRenderer;
-            }
-            throw new ValueViewerConfigException($this, get_class($this) . '->renderer is not provided');
+        return $this->renderer ?: $this->getDefaultRenderer();
+    }
+    
+    protected function getDefaultRenderer(): \Closure
+    {
+        $defaultRenderer = $this->getScaffoldSectionConfig()->getDefaultValueRenderer();
+        if (!empty($defaultRenderer)) {
+            return $defaultRenderer;
         }
-        return $this->renderer;
+        throw new ValueViewerConfigException($this, get_class($this) . '->renderer is not provided');
     }
     
     /**

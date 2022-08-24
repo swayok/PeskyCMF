@@ -2,12 +2,11 @@
 
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyORMLaravel\Db\Column\AsyncImagesColumn;
-use PeskyORMLaravel\Db\Column\FilesColumn;
-use PeskyORMLaravel\Db\Column\ImagesColumn;
+use PeskyORMColumns\Column\Files\MetadataImagesColumn;
 
 /**
- * @method ImagesColumn|FilesColumn getTableColumn()
+ * @method MetadataImagesColumn getTableColumn()
+ * todo: upgrade this to be able to use MetadataFileColumn
  */
 class AsyncImagesFormInput extends AsyncFilesFormInput {
 
@@ -17,7 +16,7 @@ class AsyncImagesFormInput extends AsyncFilesFormInput {
      * List of image names to accept.
      * Only provided images will be shown in form. Other images will be ignored (and won't be changed in any way)
      * @param array|\Closure $imagesGroups - \Closure must return array
-     * @return $this
+     * @return static
      * @throws \InvalidArgumentException
      */
     public function setImagesGroupsToUse($imagesGroups) {
@@ -33,8 +32,7 @@ class AsyncImagesFormInput extends AsyncFilesFormInput {
     }
 
     /**
-     * @param int $previewWidth
-     * @return $this
+     * @return static
      */
     public function setPreviewWidth(int $previewWidth) {
         $this->previewWidth = $previewWidth;
@@ -53,10 +51,11 @@ class AsyncImagesFormInput extends AsyncFilesFormInput {
     /**
      * @throws \BadMethodCallException
      */
-    protected function validateLinkedColumnClass() {
-        if (!($this->getTableColumn() instanceof AsyncImagesColumn)) {
+    protected function validateLinkedColumnClass(): void
+    {
+        if (!($this->getTableColumn() instanceof MetadataImagesColumn)) {
             throw new \BadMethodCallException(
-                "Linked column for form field '{$this->getName()}' must be an instance of " . AsyncImagesColumn::class
+                "Linked column for form field '{$this->getName()}' must be an instance of " . MetadataImagesColumn::class
             );
         }
     }

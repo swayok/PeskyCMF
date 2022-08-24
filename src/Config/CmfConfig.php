@@ -88,7 +88,7 @@ abstract class CmfConfig extends ConfigsContainer
     /**
      * Returns instance of config class it was called from
      * Note: method excluded from toArray() results but key "config_instance" added instead of it
-     * @return $this
+     * @return static
      */
     final public static function getInstance()
     {

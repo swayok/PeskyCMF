@@ -1,109 +1,81 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\Form;
 
-use PeskyORMLaravel\Db\Column\FileColumn;
-use PeskyORMLaravel\Db\Column\ImageColumn;
-use PeskyORMLaravel\Db\Column\Utils\FileConfig;
-use PeskyORMLaravel\Db\Column\Utils\FileInfo;
-use PeskyORMLaravel\Db\Column\Utils\ImageConfig;
+use Illuminate\Support\Arr;
+use PeskyORMColumns\Column\Files\MetadataFilesColumn;
+use PeskyORMColumns\Column\Files\MetadataImagesColumn;
+use PeskyORMColumns\Column\Files\Utils\DbFileInfo;
+use PeskyORMColumns\Column\Files\Utils\MimeTypesHelper;
 
 /**
- * @method FileColumn|ImageColumn getTableColumn()
+ * @method MetadataFilesColumn getTableColumn()
  */
-class FileFormInput extends FormInput {
-
-    /** @var string */
-    protected $view = 'cmf::input.file_uploader';
-
-    protected $jsPluginOptions = [];
-
+class FileFormInput extends FormInput
+{
+    
+    protected string $view = 'cmf::input.file_uploader';
+    
+    protected array $jsPluginOptions = [];
+    
     /**
      * Disable uploading preview for this input
-     * @return $this
+     * @return static
      */
-    public function disablePreview() {
+    public function disablePreview()
+    {
         $this->jsPluginOptions['showPreview'] = false;
         return $this;
     }
-
+    
     /**
      * @param array $options
-     * @return $this
+     * @return static
      */
-    public function setJsPluginOptions(array $options) {
+    public function setJsPluginOptions(array $options)
+    {
         $this->jsPluginOptions = $options;
         return $this;
     }
-
-    public function getJsPluginOptions(): array {
+    
+    public function getJsPluginOptions(): array
+    {
         return $this->jsPluginOptions;
     }
-
-    /**
-     * @return string
-     */
+    
     public function getType(): string
     {
         return static::TYPE_HIDDEN;
     }
-
+    
     /**
-     * @return \Closure
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
-    public function getRenderer() {
-        if (empty($this->renderer)) {
-            return function () {
-                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                return $this->getDefaultRenderer();
-            };
-        } else {
-            return $this->renderer;
-        }
+    protected function getDefaultRenderer(): \Closure
+    {
+        return function () {
+            $column = $this->getTableColumn();
+            if (!($column instanceof MetadataFilesColumn)) {
+                throw new \BadMethodCallException(
+                    "Linked column for form field '{$this->getName()}' must be an instance of " . MetadataFilesColumn::class
+                );
+            }
+            $renderer = new InputRenderer();
+            $renderer
+                ->setTemplate($this->view)
+                ->addData('fileConfig', $column);
+            return $renderer;
+        };
     }
-
-    /**
-     * @return InputRenderer
-     * @throws \PeskyCMF\Scaffold\ScaffoldException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyCMF\Scaffold\ValueViewerConfigException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     */
-    protected function getDefaultRenderer() {
-        $column = $this->getTableColumn();
-        if (!($column instanceof FileColumn)) {
-            throw new \BadMethodCallException(
-                "Linked column for form field '{$this->getName()}' must be an instance of " . FileColumn::class
-            );
-        }
-        $renderer = new InputRenderer();
-        $renderer
-            ->setTemplate($this->view)
-            ->addData('fileConfig', $column->getConfiguration());
-        return $renderer;
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $type
-     * @param array $record
-     * @return array|mixed
-     * @throws \PDOException
-     * @throws \InvalidArgumentException
-     * @throws \BadMethodCallException
-     * @throws \UnexpectedValueException
-     * @throws \PeskyORM\Exception\InvalidDataException
-     * @throws \PeskyORM\Exception\OrmException
-     */
-    public function doDefaultValueConversionByType($value, string $type, array $record) {
+    
+    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    {
         $ret = [
             'urls' => [],
             'preview_info' => [],
-            'files' => []
+            'files' => [],
         ];
         if (!is_array($value)) {
             $value = json_decode($value, true);
@@ -111,67 +83,60 @@ class FileFormInput extends FormInput {
         if (!is_array($value) || empty($value)) {
             return $ret;
         }
-        $record = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-        $pkValue = array_get($record, $record::getPrimaryKeyColumnName());
-        $record->fromData($record, !empty($pkValue) || is_numeric($pkValue), false);
-
-        /** @var FileInfo $fileInfo */
-        $fileInfo = $record->getValue($this->getTableColumn()->getName(), 'file_info');
-        if (!empty($fileInfo) && $fileInfo->exists()) {
-            $ret['preview_info']['default'] = [];
-            $ret['urls']['default'] = [];
-            $ret['files']['default'] = [];
-            /** @var FileInfo $fileInfo */
-            $ret['urls']['default'] = [$fileInfo->getAbsoluteUrl()];
+        $recordObject = $this->getScaffoldSectionConfig()->getTable()->newRecord();
+        $pkValue = Arr::get($record, $recordObject::getPrimaryKeyColumnName());
+        $recordObject->fromData($record, !empty($pkValue) || is_numeric($pkValue), false);
+        
+        /** @var DbFileInfo $fileInfo */
+        $fileInfo = $recordObject->getValue($this->getTableColumn()->getName());
+        if ($fileInfo instanceof DbFileInfo && $fileInfo->isFileExists()) {
+            $ret['urls']['default'] = [$fileInfo->getAbsoluteFileUrl()];
             $ret['files']['default'] = [
                 [
-                    'info' => $fileInfo->getCustomInfo(),
-                    'name' => $fileInfo->getOriginalFileName() ?: $fileInfo->getFileName(),
+                    'name' => $fileInfo->getOriginalFileNameWithExtension() ?: $fileInfo->getFileNameWithExtension(),
                     'extension' => $fileInfo->getFileExtension(),
                     'uuid' => $fileInfo->getUuid(),
-                ]
+                ],
             ];
             $ret['preview_info']['default'] = [
                 [
                     'caption' => $fileInfo->getOriginalFileNameWithExtension(),
-                    'size' => $fileInfo->getSize(),
-                    'downloadUrl' => $fileInfo->getAbsoluteUrl(),
+                    'size' => $fileInfo->getFileSize(),
+                    'downloadUrl' => $fileInfo->getAbsoluteFileUrl(),
                     'filetype' => $fileInfo->getMimeType(),
                     'type' => static::getUploaderPreviewTypeFromFileInfo($fileInfo),
-                    'key' => 1
-                ]
+                    'key' => 1,
+                ],
             ];
         }
         return $ret;
     }
-
-    /**
-     * @param FileInfo $fileInfo
-     * @return string
-     */
-    protected static function getUploaderPreviewTypeFromFileInfo(FileInfo $fileInfo) {
-        $type = $fileInfo->getFileType();
+    
+    protected static function getUploaderPreviewTypeFromFileInfo(DbFileInfo $fileInfo): string
+    {
+        $type = $fileInfo->getMimeType();
         switch ($type) {
-            case FileConfig::TYPE_IMAGE:
-            case FileConfig::TYPE_AUDIO:
-            case FileConfig::TYPE_VIDEO:
-            case FileConfig::TYPE_TEXT:
-            case FileConfig::TYPE_OFFICE:
+            case MimeTypesHelper::TYPE_IMAGE:
+            case MimeTypesHelper::TYPE_AUDIO:
+            case MimeTypesHelper::TYPE_VIDEO:
+            case MimeTypesHelper::TYPE_TEXT:
+            case MimeTypesHelper::TYPE_OFFICE:
                 return $type;
             default:
                 return 'object';
         }
     }
-
-    public function getValidators($isCreation) {
+    
+    public function getValidators(bool $isCreation): array
+    {
         $validators = [];
-        $fileConfig = $this->getTableColumn()->getConfiguration();
+        $column = $this->getTableColumn();
         $baseName = $this->getName();
-        $isRequired = $fileConfig->getMinFilesCount() > 0 ? 'required|' : '';
+        $isRequired = $column->allowsNullValues() ? '' : 'required|';
         $validators[$baseName] = $isRequired . 'array';
-        $commonValidators = 'nullable|' . ($fileConfig instanceof ImageConfig ? 'image' : 'file') . '|max:' . $fileConfig->getMaxFileSize()
-            . '|mimetypes:' . implode(',', $fileConfig->getAllowedMimeTypes());
-        if ($fileConfig->getMinFilesCount() > 0) {
+        $commonValidators = 'nullable|' . ($column instanceof MetadataImagesColumn ? 'image' : 'file') . '|max:' . $column->getMaxFileSize()
+            . '|mimetypes:' . implode(',', $column->getAllowedMimeTypes());
+        if ($column->getMinFilesCount() > 0) {
             $validators["{$baseName}.file"] = "required_without:{$baseName}.uuid|required_if:{$baseName}.deleted,1|{$commonValidators}";
             $validators["{$baseName}.uuid"] = "required_without:{$baseName}.file|nullable|string";
         } else {
@@ -180,5 +145,5 @@ class FileFormInput extends FormInput {
         }
         return $validators;
     }
-
+    
 }

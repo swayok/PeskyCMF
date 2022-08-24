@@ -26,7 +26,7 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @param int $minValuesCount
-     * @return $this
+     * @return static
      */
     public function setMinValuesCount($minValuesCount) {
         $this->minValuesCount = max(0, (int)$minValuesCount);
@@ -42,7 +42,7 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @param int $maxValuesCount
-     * @return $this
+     * @return static
      */
     public function setMaxValuesCount($maxValuesCount) {
         $this->maxValuesCount = max(0, (int)$maxValuesCount);
@@ -58,7 +58,7 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @param string $keysLabel
-     * @return $this
+     * @return static
      */
     public function setKeysLabel($keysLabel) {
         $this->keysLabel = (string)$keysLabel;
@@ -67,7 +67,7 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @param \Closure $options
-     * @return $this
+     * @return static
      */
     public function setKeysOptions(\Closure $options) {
         $this->keysOptions = $options;
@@ -106,7 +106,7 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @param string $valuesLabel
-     * @return $this
+     * @return static
      */
     public function setValuesLabel($valuesLabel) {
         $this->valuesLabel = (string)$valuesLabel;
@@ -122,7 +122,7 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @param string $addRowButtonLabel
-     * @return $this
+     * @return static
      */
     public function setAddRowButtonLabel($addRowButtonLabel) {
         $this->addRowButtonLabel = $addRowButtonLabel;
@@ -138,7 +138,7 @@ class KeyValueSetFormInput extends FormInput {
 
     /**
      * @param string $deleteRowButtonLabel
-     * @return $this
+     * @return static
      */
     public function setDeleteRowButtonLabel($deleteRowButtonLabel) {
         $this->deleteRowButtonLabel = (string)$deleteRowButtonLabel;
@@ -153,29 +153,15 @@ class KeyValueSetFormInput extends FormInput {
         return static::TYPE_HIDDEN;
     }
 
-    /**
-     * @return \Closure
-     */
-    public function getRenderer() {
-        if (empty($this->renderer)) {
-            return function () {
-                return $this->getDefaultRenderer();
-            };
-        } else {
-            return $this->renderer;
-        }
+    protected function getDefaultRenderer(): \Closure {
+        return function () {
+            $renderer = new InputRenderer();
+            $renderer->setTemplate('cmf::input.key_value_set');
+            return $renderer;
+        };
     }
 
-    /**
-     * @return InputRenderer
-     */
-    protected function getDefaultRenderer() {
-        $renderer = new InputRenderer();
-        $renderer->setTemplate('cmf::input.key_value_set');
-        return $renderer;
-    }
-
-    public function getValidators($isCreation) {
+    public function getValidators(bool $isCreation): array {
         $allowedValues = $this->hasKeysOptions() ? '|in:' . implode(',', array_keys($this->getKeysOptions())) : '';
         return [
             $this->getName() => ($this->getMinValuesCount() > 0 ? 'required' : 'nullable') . '|array|min:' . $this->getMinValuesCount() . ($this->getMaxValuesCount() > 0 ? '|max:' . $this->getMaxValuesCount() : ''),
@@ -198,7 +184,7 @@ class KeyValueSetFormInput extends FormInput {
         return $value;
     }
 
-    public function doDefaultValueConversionByType($value, string $type, array $record) {
+    public function doDefaultValueConversionByType($value, string $type, array $record): array {
         if (!is_array($value)) {
             if (!is_string($value)) {
                 throw new \InvalidArgumentException('$value argument must be a string or array');
