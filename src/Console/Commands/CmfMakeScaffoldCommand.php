@@ -1,25 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Console\Commands;
 
-use Illuminate\Console\Command;
-use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\PeskyCmfManager;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableInterface;
-use PeskyORMLaravel\Db\OrmDbClassesUtils;
+use PeskyORMLaravel\Db\OrmClassesCreationUtils;
 use Swayok\Utils\File;
 use Swayok\Utils\StringUtils;
 
-class CmfMakeScaffoldCommand extends Command {
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
+class CmfMakeScaffoldCommand extends CmfCommand
+{
+    
     protected $signature = 'cmf:make-scaffold
         {table_name}
         {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}
@@ -27,116 +22,40 @@ class CmfMakeScaffoldCommand extends Command {
         {--cmf-config-class= : full class name to a class that extends CmfConfig}
         {--class-name= : short scaffold class name}
         {--keyvalue : table is key-value storage}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
+    
     protected $description = 'Create scaffold class for DB table.';
-
-    /**
-     * @var CmfConfig
-     */
-    protected $cmfConfig;
-
-    protected function getScaffoldConfigParentClass() {
-        if ($this->option('keyvalue')) {
-            return $this->getCmfConfig()->config('ui.scaffold_configs_base_class_for_key_value_tables') ?: KeyValueTableScaffoldConfig::class;
-        } else {
-            return $this->getCmfConfig()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
-        }
-    }
-
-    /**
-     * @return CmfConfig
-     * @throws \InvalidArgumentException
-     */
-    protected function getCmfConfig() {
-        if (!$this->cmfConfig) {
-            $class = $this->option('cmf-config-class');
-            if ($class) {
-                if (!class_exists($class)) {
-                    throw new \InvalidArgumentException(
-                        'Class ' . $class . ' provided through option --cmf-config-class does not exist'
-                    );
-                }
-                if (!is_subclass_of($class, CmfConfig::class)) {
-                    throw new \InvalidArgumentException(
-                        'Class ' . $class . ' provided through option --cmf-config-class must extend CmfConfig class'
-                    );
-                }
-                /** @var CmfConfig $class */
-                $this->cmfConfig = $class::getInstance();
-            } else {
-                $sectionName = $this->argument('cmf-section');
-                if (!empty($sectionName)) {
-                    /** @var PeskyCmfManager $peskyCmfManager */
-                    $peskyCmfManager = app(PeskyCmfManager::class);
-                    $this->cmfConfig = $peskyCmfManager->getCmfConfigForSection($sectionName);
-                } else {
-                    $this->cmfConfig = CmfConfig::getDefault();
-                    if (get_class($this->cmfConfig) === CmfConfig::class) {
-                        throw new \InvalidArgumentException(
-                            'Child class for CmfConfig was not found. You need to provide it through --cmf-config-class option '
-                        );
-                    }
-                }
-            }
-            $this->cmfConfig->initSection(app());
-        }
-        return $this->cmfConfig;
-    }
-
-    /**
-     * @param TableInterface $table
-     * @param string|null $resourceName
-     * @return string - short name of scaffold class to be created
-     */
-    protected function getScaffoldClassName(TableInterface $table, ?string $resourceName = null) {
-        $scaffoldClassName = $this->option('class-name');
-        if (empty($scaffoldClassName)) {
-            return StringUtils::classify($resourceName ?: $table::getName()) . 'ScaffoldConfig';
-        }
-        return $scaffoldClassName;
-    }
-
-    protected function getTableInstanceByTableName(string $tableName): TableInterface {
-        return OrmDbClassesUtils::getTableInstanceByTableNameInDb($tableName);
-    }
-
-    /**
-     * Execute the console command.
-     */
-    public function handle() {
+    
+    public function handle(): int
+    {
         $table = $this->getTableInstanceByTableName($this->argument('table_name'));
-
+        
         $namespace = $this->getScaffoldsNamespace();
         $className = $this->getScaffoldClassName($table, $this->option('resource'));
-
+        
         $filePath = $this->getFolder($namespace) . $className . '.php';
         if (File::exist($filePath)) {
             if ($this->confirm("Scaffold class file {$filePath} already exists. Overwrite?")) {
                 File::remove($filePath);
             } else {
                 $this->line('Terminated');
-                return;
+                return 0;
             }
         }
-
+        
         $this->createScaffoldClassFile($table, $namespace, $className, $filePath);
-
-
+        
+        
         $this->line($filePath . ' created');
-
+        
         $columnsTranslations = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             $columnsTranslations[] = "'{$column->getName()}' => ''";
         }
         $columnsTranslationsFilter = implode(",\n                    ", $columnsTranslations) . ",";
         $columnsTranslations = implode(",\n                ", $columnsTranslations) . ",";
-
-        $this->comment(<<<INFO
+        
+        $this->comment(
+            <<<INFO
 
 Translations:
     '{$table->getTableStructure()->getTableName()}' => [
@@ -168,42 +87,53 @@ Translations:
     ]
 
 INFO
-);
+        );
+        return 0;
     }
-
+    
+    protected function getScaffoldConfigParentClass(): string
+    {
+        if ($this->option('keyvalue')) {
+            return $this->getCmfConfig()->config('ui.scaffold_configs_base_class_for_key_value_tables') ?: KeyValueTableScaffoldConfig::class;
+        } else {
+            return $this->getCmfConfig()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
+        }
+    }
+    
     /**
-     * @return string
+     * @return string - short name of scaffold class to be created
      */
-    protected function getScaffoldsNamespace() {
+    protected function getScaffoldClassName(TableInterface $table, ?string $resourceName = null): string
+    {
+        $scaffoldClassName = $this->option('class-name');
+        if (empty($scaffoldClassName)) {
+            return StringUtils::classify($resourceName ?: $table::getName()) . 'ScaffoldConfig';
+        }
+        return $scaffoldClassName;
+    }
+    
+    protected function getTableInstanceByTableName(string $tableName): TableInterface
+    {
+        return OrmClassesCreationUtils::getTableInstanceByTableNameInDb($tableName);
+    }
+    
+    protected function getScaffoldsNamespace(): string
+    {
         $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->app_subfolder());
         $scaffoldsSubfolder = str_replace('/', '\\', $this->getScaffoldsFolderName());
         return 'App\\' . $appSubfolder . '\\' . $scaffoldsSubfolder;
     }
-
-    /**
-     * @param string $table
-     * @return string
-     * @throws \ReflectionException
-     */
-//    protected function getNamespaceByTable($table) {
-//        $namespace = (new \ReflectionClass($table))->getNamespaceName();
-//        return preg_replace('%^PeskyCM[FS]\\\Db\\\%', config('peskyorm.classes_namespace', '\\App\\Db') . '\\', $namespace);
-//    }
-
-    /**
-     * @return string
-     */
-    protected function getScaffoldsFolderName() {
+    
+    protected function getScaffoldsFolderName(): string
+    {
         return 'Scaffolds';
     }
-
-    /**
-     * @param string $namespace
-     * @return string
-     */
-    protected function getFolder($namespace) {
+    
+    protected function getFolder(string $namespace): string
+    {
         $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->app_subfolder());
-        return $this->getBasePathToApp() . DIRECTORY_SEPARATOR . $appSubfolder . DIRECTORY_SEPARATOR . $this->getScaffoldsFolderName() . DIRECTORY_SEPARATOR;
+        return $this->getBasePathToApp() . DIRECTORY_SEPARATOR . $appSubfolder . DIRECTORY_SEPARATOR . $this->getScaffoldsFolderName(
+            ) . DIRECTORY_SEPARATOR;
         /*$folder = preg_replace(
             ['%[\\/]%', '%^/?App%'],
             [DIRECTORY_SEPARATOR, $this->getBasePathToApp()],
@@ -211,26 +141,19 @@ INFO
         );
         return $folder . DIRECTORY_SEPARATOR;*/
     }
-
-    /**
-     * @return string
-     */
-    protected function getBasePathToApp() {
+    
+    protected function getBasePathToApp(): string
+    {
         return app_path();
     }
-
-    /**
-     * @param TableInterface $table
-     * @param string $namespace
-     * @param string $className
-     * @param string $filePath
-     */
-    protected function createScaffoldClassFile(TableInterface $table, $namespace, $className, $filePath) {
+    
+    protected function createScaffoldClassFile(TableInterface $table, string $namespace, string $className, string $filePath): void
+    {
         $parentClass = $this->getScaffoldConfigParentClass();
         $parentClassShort = class_basename($parentClass);
         $tableClass = get_class($table);
         $tableClassShort = class_basename($table);
-
+        
         $contents = <<<VIEW
 <?php
 
@@ -299,24 +222,27 @@ class {$className} extends {$parentClassShort} {
 VIEW;
         File::save($filePath, $contents, 0664, 0755);
     }
-
-    protected function makeContainsForDataGrid(TableInterface $table) {
+    
+    protected function makeContainsForDataGrid(TableInterface $table): string
+    {
         $contains = [];
         foreach ($this->getJoinableRelationNames($table) as $relationName) {
             $contains[] = "'{$relationName}' => ['*'],";
         }
         return implode("\n                ", $contains);
     }
-
-    protected function makeContainsForItemDetailsViewer(TableInterface $table) {
+    
+    protected function makeContainsForItemDetailsViewer(TableInterface $table): string
+    {
         $contains = [];
         foreach ($this->getJoinableRelationNames($table) as $relationName) {
             $contains[] = "'{$relationName}' => ['*'],";
         }
         return implode("\n                ", $contains);
     }
-
-    protected function getJoinableRelationNames(TableInterface $table) {
+    
+    protected function getJoinableRelationNames(TableInterface $table): array
+    {
         $ret = [];
         foreach ($table->getTableStructure()->getRelations() as $relation) {
             if ($relation->getType() !== $relation::HAS_MANY) {
@@ -325,8 +251,9 @@ VIEW;
         }
         return $ret;
     }
-
-    protected function makeFieldsListForDataGrid(TableInterface $table) {
+    
+    protected function makeFieldsListForDataGrid(TableInterface $table): string
+    {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
 //            if ($column->isItAForeignKey()) {
@@ -335,13 +262,14 @@ VIEW;
 //                    ->setType(DataGridColumn::TYPE_LINK),
 //VIEW;
 //            } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
-                $valueViewers[] = "'{$column->getName()}',";
+            $valueViewers[] = "'{$column->getName()}',";
 //            }
         }
         return implode("\n                ", $valueViewers);
     }
-
-    protected function makeFiltersList(TableInterface $table) {
+    
+    protected function makeFiltersList(TableInterface $table): string
+    {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)) {
@@ -350,8 +278,9 @@ VIEW;
         }
         return implode("\n                ", $valueViewers);
     }
-
-    protected function makeFieldsListForItemDetailsViewer(TableInterface $table) {
+    
+    protected function makeFieldsListForItemDetailsViewer(TableInterface $table): string
+    {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
 //            if ($column->isItAForeignKey()) {
@@ -360,13 +289,14 @@ VIEW;
 //                    ->setType(ValueCell::TYPE_LINK),
 //VIEW;
 //            } else {
-                $valueViewers[] = "'{$column->getName()}',";
+            $valueViewers[] = "'{$column->getName()}',";
 //            }
         }
         return implode("\n                ", $valueViewers);
     }
-
-    protected function makeFieldsListForItemForms(TableInterface $table) {
+    
+    protected function makeFieldsListForItemForms(TableInterface $table): string
+    {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if ($column->isValueCanBeSetOrChanged() && !$column->isAutoUpdatingValue() && !$column->isItPrimaryKey()) {
@@ -378,7 +308,6 @@ VIEW;
                         return static::getUser()->id;
                     }),
 VIEW;
-
                 } else {
                     $valueViewers[] = "'{$column->getName()}',";
                 }
@@ -386,5 +315,5 @@ VIEW;
         }
         return implode("\n                ", $valueViewers);
     }
-
+    
 }

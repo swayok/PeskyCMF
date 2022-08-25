@@ -1,18 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
 use PeskyORMLaravel\Db\LaravelUploadedTempFileInfo;
 use Swayok\Utils\Folder;
 
-class CmfCleanUploadedTempFilesCommand extends Command {
-
+class CmfCleanUploadedTempFilesCommand extends Command
+{
+    
     protected $description = 'Clean old uploaded temp files';
-
+    
     protected $signature = 'cmf:clean-uploaded-temp-files';
-
-    public function handle() {
+    
+    public function handle(): int
+    {
         $this->line('> Deleting old uploaded temp files');
         $dir = Folder::load(LaravelUploadedTempFileInfo::getUploadsTempFolder());
         if ($dir->exists()) {
@@ -26,5 +30,6 @@ class CmfCleanUploadedTempFilesCommand extends Command {
                 }
             }
         }
+        return 0;
     }
 }

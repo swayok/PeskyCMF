@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Swayok\Utils\File;
 
-class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
-
+class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand
+{
+    
     protected $description = 'Create class that extends CmfApiMethodDocumentation class';
-
+    
     protected $signature = 'cmf:make-api-method-doc
         {class_name}
         {docs_group}
@@ -16,14 +20,15 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
         {--folder= : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}
         {--cmf-config-class= : full class name to a class that extends CmfConfig}
         {--auto : automatically set url, http method, translation paths, etc..}';
-
-    protected function makeClass($className, $namespace, $filePath) {
-        $this->line('Writing class ' .  $namespace . '\\' . $className . ' to file ' . $filePath);
+    
+    protected function makeClass(string $className, string $namespace, string $filePath): void
+    {
+        $this->line('Writing class ' . $namespace . '\\' . $className . ' to file ' . $filePath);
         $namespace = ltrim($namespace, '\\');
         $baseClass = $this->getCmfConfig()->getApiDocumentationModule()->getMethodBaseClass();
         $baseClassName = class_basename($baseClass);
         $classSuffix = $this->getCmfConfig()->getApiDocumentationModule()->getClassNameSuffix();
-        $translationSubGroup = snake_case(
+        $translationSubGroup = Str::snake(
             preg_replace(
                 '%(ApiDocs?|(Method)?(Doc(umentation)?)?|' . preg_quote($classSuffix, '%') . '$)%',
                 '',
@@ -31,7 +36,7 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
             )
         );
         $docsGroup = $this->argument('docs_group');
-        $translationGroup = empty($docsGroup) ? 'method' : snake_case($docsGroup);
+        $translationGroup = empty($docsGroup) ? 'method' : Str::snake($docsGroup);
         $url = $this->guessUrl($translationGroup === 'method' ? null : $translationGroup, $translationSubGroup);
         $translationGroup .= '.' . $translationSubGroup;
         $httpMethod = 'GET';
@@ -47,7 +52,7 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
             $urlQueryParams = "    public \$urlQueryParameters = [\n        //'_method' => 'PUT',\n    ];\n";
             $validationErrors = "    public \$validationErrors = [\n        //'key' => 'required|string',\n    ];\n";
         }
-
+        
         $fileContents = <<<CLASS
 <?php
 
@@ -108,44 +113,31 @@ CLASS;
         Arr::set($translations, $translationGroup . '.error', []);
         $this->line($this->arrayToString($translations));
     }
-
-    protected function guessUrl($group, $method) {
+    
+    protected function guessUrl(string $group, string $method): string
+    {
         $url = '/api/';
         if ($group) {
             $url .= $group . '/';
         }
         return $url . $method;
     }
-
-    protected function askQuestions($url, $translationGroup) {
+    
+    protected function askQuestions(string $url, string $translationGroup): array
+    {
         $url = $this->ask('API method url (use "{param}" to mark variable part of URL):', $url);
         $httpMethod = $this->choice('HTTP method:', ['GET', 'POST', 'PUT', 'DELETE'], 0);
         $translationGroup = $this->ask('Translation path:', $translationGroup);
         return [$url, $httpMethod, $translationGroup];
     }
-
-    protected function arrayToString(array $array, $depth = 0) {
-        $ret = "[\n";
-        foreach ($array as $key => $value) {
-            $ret .= str_pad('', $depth * 4 + 4, ' ');
-            if (!is_int($key)) {
-                $ret .= "'$key' => ";
-            }
-            if (is_array($value)) {
-                $ret .= $this->arrayToString($value, $depth + 1);
-            } else {
-                $ret .= "'$value',\n";
-            }
-        }
-        return $ret . str_pad('', $depth * 4, ' ') . "],\n";
-    }
-
-    protected function askParams($url, $httpMethod) {
+    
+    protected function askParams(string $url, string $httpMethod): array
+    {
         $urlParams = [];
         $urlQueryParams = [];
         $postParams = '';
         // url params
-        if (preg_match_all('%\{([^}]+)\}%', $url, $matches)) {
+        if (preg_match_all('%\{([^}]+)}%', $url, $matches)) {
             foreach ($matches[1] as $paramName) {
                 $urlParams[$paramName] = 'string';
             }
@@ -165,8 +157,9 @@ CLASS;
         $validationErrors = '    protected $validationErrors = ' . rtrim($this->arrayToString($validationErrors, 1), " ,\n") . ";\n";
         return [$urlParams, $urlQueryParams, $postParams, $validationErrors];
     }
-
-    protected function askParamsFor($type, array $predefinedParams = []) {
+    
+    protected function askParamsFor(string $type, array $predefinedParams = []): array
+    {
         $validationErrors = [];
         $params = $predefinedParams;
         if ($this->confirm("Do you want to provide $type parameters?", true)) {
@@ -187,7 +180,7 @@ CLASS;
                 Arr::set($params, $parts[0], $parts[1]);
                 Arr::set($validationErrors, $parts[0], ['required', 'string']);
                 $this->line('Parameters: ' . $this->arrayToString($params));
-            } while (trim($param) !== '');
+            } while (true);
         }
         return [$params, $validationErrors];
     }

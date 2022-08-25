@@ -15,6 +15,7 @@ class CmfAddAdminCommand extends Command
 {
     
     protected $description = 'Create administrator in DB';
+    
     protected $signature = 'cmf:add-admin 
         {email_or_login} 
         {role=admin} 
@@ -22,7 +23,7 @@ class CmfAddAdminCommand extends Command
         {schema?} 
         {--login : use [login] field instead of [email]}';
     
-    public function handle(): void
+    public function handle(): int
     {
         $db = DbConnectionsManager::getConnection('default');
         $args = $this->input->getArguments();
@@ -36,7 +37,7 @@ class CmfAddAdminCommand extends Command
         $password = $this->secret('Enter password for admin');
         if (empty($password)) {
             $this->line('Cannot continue: password is empty');
-            exit;
+            return 1;
         }
         try {
             $data = [
@@ -61,7 +62,8 @@ class CmfAddAdminCommand extends Command
             $this->line('Fail. DB Exception:');
             $this->line($exc->getMessage());
             $this->line($exc->getTraceAsString());
-            exit;
+            return 1;
         }
+        return 0;
     }
 }
