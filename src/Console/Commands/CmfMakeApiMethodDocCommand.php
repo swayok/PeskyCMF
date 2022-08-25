@@ -2,6 +2,7 @@
 
 namespace PeskyCMF\Console\Commands;
 
+use Illuminate\Support\Arr;
 use Swayok\Utils\File;
 
 class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand {
@@ -97,14 +98,14 @@ CLASS;
         $this->line("File $filePath created");
         $this->line('Add next translations to you dictionaries:');
         $translations = [];
-        array_set($translations, $translationGroup . '.title', '');
-        array_set($translations, $translationGroup . '.title_for_postman', '');
-        array_set($translations, $translationGroup . '.description', '');
-        array_set($translations, $translationGroup . '.params.url', []);
-        array_set($translations, $translationGroup . '.params.url_query', []);
-        array_set($translations, $translationGroup . '.params.post', []);
-        array_set($translations, $translationGroup . '.header', []);
-        array_set($translations, $translationGroup . '.error', []);
+        Arr::set($translations, $translationGroup . '.title', '');
+        Arr::set($translations, $translationGroup . '.title_for_postman', '');
+        Arr::set($translations, $translationGroup . '.description', '');
+        Arr::set($translations, $translationGroup . '.params.url', []);
+        Arr::set($translations, $translationGroup . '.params.url_query', []);
+        Arr::set($translations, $translationGroup . '.params.post', []);
+        Arr::set($translations, $translationGroup . '.header', []);
+        Arr::set($translations, $translationGroup . '.error', []);
         $this->line($this->arrayToString($translations));
     }
 
@@ -183,8 +184,8 @@ CLASS;
                     $this->error('Invalid parameter format. "param_name:comment" expected');
                     continue;
                 }
-                array_set($params, $parts[0], $parts[1]);
-                array_set($validationErrors, $parts[0], ['required', 'string']);
+                Arr::set($params, $parts[0], $parts[1]);
+                Arr::set($validationErrors, $parts[0], ['required', 'string']);
                 $this->line('Parameters: ' . $this->arrayToString($params));
             } while (trim($param) !== '');
         }

@@ -177,8 +177,8 @@ class PeskyCmfAppSettings
     
     public static function __callStatic($name, $arguments)
     {
-        $default = array_get($arguments, 0, static::getDefaultValue($name));
-        $ignoreEmptyValue = (bool)array_get($arguments, 1, true);
+        $default = Arr::get($arguments, 0, static::getDefaultValue($name));
+        $ignoreEmptyValue = (bool)Arr::get($arguments, 1, true);
         return static::getTable()->getValue($name, null, $default, $ignoreEmptyValue);
     }
     

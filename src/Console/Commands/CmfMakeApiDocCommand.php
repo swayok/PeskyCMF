@@ -3,6 +3,7 @@
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use PeskyCMF\ApiDocs\CmfApiDocumentation;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\PeskyCmfManager;
@@ -125,8 +126,8 @@ CLASS;
         $this->line("File $filePath created");
         $this->line('Add next translations to you dictionaries:');
         $translations = [];
-        array_set($translations, $translationGroup . '.title', '');
-        array_set($translations, $translationGroup . '.description', '');
+        Arr::set($translations, $translationGroup . '.title', '');
+        Arr::set($translations, $translationGroup . '.description', '');
         $this->line($this->arrayToString($translations));
     }
 

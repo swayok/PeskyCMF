@@ -142,12 +142,12 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
             if ($error instanceof ApiMethodErrorResponseInfo) {
                 $error = $error->toArray();
             }
-            $error['title'] = $this->translateInserts(array_get($error, 'title', ''));
-            $error['description'] = $this->translateInserts(array_get($error, 'description', ''));
+            $error['title'] = $this->translateInserts(Arr::get($error, 'title', ''));
+            $error['description'] = $this->translateInserts(Arr::get($error, 'description', ''));
         }
         unset($error);
         usort($errors, function ($err1, $err2) {
-            return (int)array_get($err1, 'code', 0) <=> (int)array_get($err2, 'code', 0);
+            return (int)Arr::get($err1, 'code', 0) <=> (int)Arr::get($err2, 'code', 0);
         });
         return $errors;
     }
@@ -308,8 +308,8 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
             $ret[$key] = [
                 'name' => $key,
                 'type' => $value,
-                'description' => array_get($descriptions, $key, ''),
-                'value' => array_get($defaultValues, $key, ''),
+                'description' => Arr::get($descriptions, $key, ''),
+                'value' => Arr::get($defaultValues, $key, ''),
             ];
         }
         return $ret;
@@ -327,7 +327,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
             if ($name === '_method') {
                 $queryParams[] = urlencode($name) . '=' . $info['type'];
             } else {
-                $queryParams[] = urlencode($name) . '=' . array_get($info, 'value', '');
+                $queryParams[] = urlencode($name) . '=' . Arr::get($info, 'value', '');
             }
         }
         $queryParams = empty($queryParams) ? '' : '?' . implode('&', $queryParams);
@@ -359,7 +359,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         foreach ($this->getPostParameters() as $key => $info) {
             $item['request']['body']['formdata'][] = [
                 'key' => $key,
-                'value' => ($key === '_method') ? $info['type'] : array_get($info, 'value', ''),
+                'value' => ($key === '_method') ? $info['type'] : Arr::get($info, 'value', ''),
                 'description' => $this->cleanTextForPostman($info['description']),
                 'type' => 'text',
                 'enabled' => true,

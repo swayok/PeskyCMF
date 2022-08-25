@@ -36,7 +36,7 @@
                                 @if (!empty($subItem['class'])) class="{{ $subItem['class'] }}" @endif
                             >
                                 @if (!empty($subItem['icon']))<i class="{{ $subItem['icon'] }}"></i>@endif
-                                <span>{!! trans($subItem['label']) !!}</span>{!! array_get($subItem, 'addition', '') !!}
+                                <span>{!! trans($subItem['label']) !!}</span>{!! \Illuminate\Support\Arr::get($subItem, 'addition', '') !!}
                                 @if (!empty($subItem['counter']))
                                     <span class="pull-right-container" data-counter-name="{{ $subItem['counter'] }}"></span>
                                 @endif
@@ -55,7 +55,7 @@
                         @if (!empty($info['icon']))
                             <i class="{{ $info['icon'] }}"></i>
                         @endif
-                        <span>{!! trans($info['label']) !!}</span>{!! array_get($info, 'addition', '') !!}
+                        <span>{!! trans($info['label']) !!}</span>{!! \Illuminate\Support\Arr::get($info, 'addition', '') !!}
                         @if (!empty($info['counter']))
                             <span class="pull-right-container" data-counter-name="{{ $info['counter'] }}"></span>
                         @endif
