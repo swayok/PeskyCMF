@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Config\CmfConfig $cmfConfig
  */
@@ -8,7 +9,7 @@
 
     </div>
     <div class="actions">
-        <?php if (\Gate::allows('resource.details', ['cmf_profile', $cmfConfig->getUser()])): ?>
+        <?php if ($cmfConfig->getAuthModule()->getAuthGate()->allows('resource.details', ['cmf_profile', $cmfConfig->getUser()])): ?>
             <a href="{{ cmfRoute('cmf_profile', [], false) }}">
                 <i class="fa fa-fw fa-user"></i>{{ cmfTransCustom('.user.profile_label') }}
             </a>

@@ -1,4 +1,8 @@
-<?php echo "<?php\n"; ?>
+<?php
+declare(strict_types=1);
+
+echo "<?php\n";
+?>
 
 class CreateTimestampRenewTriggerFunction extends PeskyCMF\Db\MigrationByQuery {
 

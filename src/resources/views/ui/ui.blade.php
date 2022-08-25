@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Config\CmfConfig $cmfConfig
  * @var \PeskyCMF\UI\CmfUIModule $uiModule

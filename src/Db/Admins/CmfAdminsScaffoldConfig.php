@@ -65,7 +65,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
             ])
             ->setRowActions(function () {
                 $actions = [];
-                if (\Gate::allows('cmf_page', ['login_as'])) {
+                if ($this->authGate->allows('cmf_page', ['login_as'])) {
                     $actions[] = Tag::a()
                         ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
                         ->setClass('row-action text-muted')
@@ -144,7 +144,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
             ->setWidth(60)
             ->setToolbarItems(function () {
                 $actions = [];
-                if (\Gate::allows('cmf_page', ['login_as'])) {
+                if ($this->authGate->allows('cmf_page', ['login_as'])) {
                     $actions[] = Tag::button()
                         ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
                         ->setClass('btn btn-default')

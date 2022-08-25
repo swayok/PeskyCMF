@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyORM\ORM\TableInterface $table
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
@@ -53,11 +54,11 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                     <div class="modal-body">
                     <?php
                         $enablerTooltip = $formConfig->translateGeneral('bulk_edit.enabler.tooltip');
-                        $baseEnablerId = str_random() . '-enabler-for-';
+                        $baseEnablerId = \Illuminate\Support\Str::random() . '-enabler-for-';
                         foreach ($formConfig->getBulkEditableColumns() as $inputConfig) {
                             try {
                                 $renderedInput = $inputConfig->render();
-                                $enablerSwitchId = $baseEnablerId . str_slug($inputConfig->getName());
+                                $enablerSwitchId = $baseEnablerId . \Illuminate\Support\Str::slug($inputConfig->getName());
                                 $enablerSwitch = <<<INPUT
                                     <div class="bulk-edit-form-input-enabler pull-left va-t mr15">
                                         <input class="bulk-edit-form-input-enabler-input" type="checkbox"

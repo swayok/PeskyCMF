@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var string|null $defaultBackUrl
  * @var bool|null $addBackUrl

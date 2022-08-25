@@ -1,9 +1,9 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Auth\CmfAuthModule $authModule
  * @var \PeskyCMF\Config\CmfConfig $cmfConfig
  */
-
 ?>
 <script type="application/javascript">
     Utils.requireFiles(['{{ $cmfConfig->recaptcha_script() }}']);

@@ -1,4 +1,7 @@
-<?php $hidingStyles = 'display: block; width: 0; height: 0; margin: 0; padding: 0; border: 0;" value="test@test.com'; ?>
+<?php
+declare(strict_types=1);
+$hidingStyles = 'display: block; width: 0; height: 0; margin: 0; padding: 0; border: 0;" value="test@test.com';
+?>
 <!-- disable chrome email & password autofill -->
 <input type="text" name="__email" formnovalidate value="test@test.com" disabled style="<?php echo $hidingStyles ?>" >
 <input type="text" name="__name" formnovalidate value="test" disabled style="<?php echo $hidingStyles ?>" >

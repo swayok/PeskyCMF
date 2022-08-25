@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
  * @var \PeskyCMF\Scaffold\Form\FormInput $valueViewer
@@ -13,5 +14,7 @@ $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAtt
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 ?>
 
-<input value="<?php echo $valueViewer->getDotJsInsertForValue(); ?>"
-    {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}>
+<input
+    value="<?php echo $valueViewer->getDotJsInsertForValue(); ?>"
+    {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
+>

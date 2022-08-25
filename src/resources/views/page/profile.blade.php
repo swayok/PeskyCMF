@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Db\Admins\CmfAdmin|\PeskyORM\ORM\RecordInterface|\Illuminate\Contracts\Auth\Authenticatable $user
  * @var bool|null $canSubmit

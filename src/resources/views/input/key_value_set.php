@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
  * @var \PeskyCMF\Scaffold\Form\KeyValueSetFormInput $valueViewer

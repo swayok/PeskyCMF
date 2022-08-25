@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Auth\CmfAuthModule $authModule
  * @var \PeskyCMF\Config\CmfConfig $cmfConfig

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyORM\ORM\TableInterface $table
  * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
@@ -7,7 +8,7 @@
  */
 
 $formId = "scaffold-form-{$idSuffix}";
-$pkColName = $table->getPkColumnName();
+$pkColName = $table::getPkColumnName();
 
 $ifEdit = '{{? !it._is_creation }}';
 $ifCreate = '{{? it._is_creation }}';

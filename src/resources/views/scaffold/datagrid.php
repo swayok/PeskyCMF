@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyORM\ORM\TableInterface $table
  * @var string $tableNameForRoutes

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridCellRenderer $rendererConfig
  * @var \PeskyCMF\Scaffold\DataGrid\DataGridConfig $sectionConfig

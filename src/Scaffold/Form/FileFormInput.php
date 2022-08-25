@@ -16,9 +16,47 @@ use PeskyORMColumns\Column\Files\Utils\MimeTypesHelper;
 class FileFormInput extends FormInput
 {
     
-    protected string $view = 'cmf::input.file_uploader';
+    protected string $view = 'cmf::input.files_uploader';
     
     protected array $jsPluginOptions = [];
+    
+    protected ?FilesUploaderConfig $filesUploaderConfig = null;
+    
+    protected bool $isRequired = false;
+    
+    public function __construct()
+    {
+        $this->filesUploaderConfig = new FilesUploaderConfig();
+    }
+    
+    public function getFilesUploaderConfig(): FilesUploaderConfig
+    {
+        if (!$this->filesUploaderConfig) {
+            $this->filesUploaderConfig = new FilesUploaderConfig();
+            $column = $this->getTableColumn();
+            $this->filesUploaderConfig->minFilesCount = $column->isValueCanBeNull() ? 0 : 1;
+            $this->filesUploaderConfig->setAllowedFilesExtensions($column->getAllowedFileExtensions());
+        } else {
+            $this->filesUploaderConfig->maxFilesCount = 1;
+            $this->filesUploaderConfig->minFilesCount = min(1, $this->filesUploaderConfig->minFilesCount);
+        }
+        return $this->filesUploaderConfig;
+    }
+    
+    public function setFilesUploaderConfig(FilesUploaderConfig $config)
+    {
+        $this->filesUploaderConfig = $config;
+        return $this;
+    }
+    
+    /**
+     * @return static
+     */
+    public function setIsRequired(bool $required)
+    {
+        $this->isRequired = $required;
+        return $this;
+    }
     
     /**
      * Disable uploading preview for this input
@@ -65,7 +103,7 @@ class FileFormInput extends FormInput
             $renderer = new InputRenderer();
             $renderer
                 ->setTemplate($this->view)
-                ->addData('fileConfig', $column);
+                ->addData('fileConfig', $this->getFilesUploaderConfig());
             return $renderer;
         };
     }

@@ -17,10 +17,7 @@ class FilesFormInput extends FormInput
 {
     
     /** @var string */
-    protected string $view = 'cmf::input.files_uploaders';
-    
-    /** @var null|array|\Closure */
-    protected $fileConfigsToUse;
+    protected string $view = 'cmf::input.files_uploader';
     
     protected array $jsPluginOptions = [];
     

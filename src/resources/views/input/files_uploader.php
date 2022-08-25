@@ -1,26 +1,29 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig
  * @var \PeskyCMF\Scaffold\Form\FileFormInput $valueViewer
  * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
  * @var \PeskyORM\ORM\TableInterface $table
- * @var \PeskyORMLaravel\Db\Column\FileColumn $column
- * @var \PeskyORMLaravel\Db\Column\Utils\FileConfig $fileConfig
+ * @var \PeskyORMColumns\Column\Files\MetadataFilesColumn $column
+ * @var \PeskyCMF\Scaffold\Form\FilesUploaderConfig $fileConfig
  */
 $column = $valueViewer->getTableColumn();
 $inputId = $valueViewer->getDefaultId();
 $configName = 'default';
-$configNameToInputId = [$configName => array_merge(['id' => $inputId], $fileConfig->getConfigsArrayForJs())];
+$configNameToInputId = [
+    $configName => $fileConfig->toArray($inputId)
+];
 $inputName = $valueViewer->getName(true);
 $isImages = $column->isItAnImage();
 ?>
 
 <div id="<?php echo $inputId; ?>-top-container">
     <div class="section-divider">
-        <span><?php echo $valueViewer->getLabel() . ($fileConfig->getMinFilesCount() > 0 ? '*' : ''); ?></span>
+        <span><?php echo $valueViewer->getLabel() . ($fileConfig->minFilesCount > 0 ? '*' : ''); ?></span>
     </div>
     <script type="text/html" id="<?php echo $inputId ?>-tpl">
-        <div class="file-upload-input-container <?php echo $isImages ? 'image-upload' : ''; ?> form-group mb15 col-xs-12 col-md-<?php echo $fileConfig->getMaxFilesCount() > 1 ? '6' : '12' ?>"
+        <div class="file-upload-input-container <?php echo $isImages ? 'image-upload' : ''; ?> form-group mb15 col-xs-12 col-md-<?php echo $fileConfig->maxFilesCount > 1 ? '6' : '12' ?>"
             data-id="<?php echo $inputId; ?>">
             <input type="file" class="file-loading" data-old-file-uuid="{{= it.uuid }}"
                    id="<?php echo $inputId; ?>" name="<?php echo $inputName; ?>[file]">

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @var \PeskyCMF\Scaffold\ScaffoldConfig $scaffoldConfig
  * @var \PeskyORM\ORM\TableInterface $table
@@ -11,7 +12,7 @@
 $data = compact([
     'table', 'tableNameForRoutes', 'dataGridConfig', 'dataGridFilterConfig', 'formConfig', 'itemDetailsConfig'
 ]);
-$data['idSuffix'] = str_slug(strtolower($tableNameForRoutes));
+$data['idSuffix'] = \Illuminate\Support\Str::slug(strtolower($tableNameForRoutes));
 ?>
 
 <!-- datagrid start -->

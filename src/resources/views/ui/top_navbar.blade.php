@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /*
 <nav class="navbar navbar-static-top">
     <div class="navbar-custom-menu">
