@@ -20,7 +20,7 @@ abstract class CmfApiDocumentation
      * Used only by CmfConfig::loadApiMethodsDocumentationClassesFromFileSystem().
      * @var int|null
      */
-    protected static $position;
+    protected static ?int $position = null;
     
     /**
      * Base path to translations for current api method documentation
@@ -28,7 +28,7 @@ abstract class CmfApiDocumentation
      * Format: 'group', 'group.method', 'user.details'
      * @var string
      */
-    protected $translationsBasePath = '';
+    protected string $translationsBasePath = '';
     
     /**
      * You can use simple string or translation path in format: '{method.some_name.title}'
@@ -38,7 +38,7 @@ abstract class CmfApiDocumentation
      * When null: $this->translationsBasePath . '.title' will be used
      * @var string|null
      */
-    protected $title;
+    protected ?string $title = null;
     
     /**
      * You can use simple string or translation path in format: '{method.some_name.description}'
@@ -48,23 +48,29 @@ abstract class CmfApiDocumentation
      * When null: $this->translationsBasePath . '.description' will be used
      * @var string|null
      */
-    protected $description;
+    protected ?string $description = null;
+    
+    protected string $uuid;
+    
+    protected CmfConfig $cmfConfig;
+    
+    /**
+     * @return static
+     */
+    public static function create(CmfConfig $cmfConfig)
+    {
+        return new static($cmfConfig);
+    }
+    
+    public function __construct(CmfConfig $cmfConfig)
+    {
+        $this->cmfConfig = $cmfConfig;
+        $this->uuid = 'doc-' . Str::snake(str_replace('\\', '', get_class($this)), '-');
+    }
     
     public function getErrors(): array
     {
         return [];
-    }
-    
-    public static function create()
-    {
-        return new static();
-    }
-    
-    protected $uuid;
-    
-    public function __construct()
-    {
-        $this->uuid = 'doc-' . Str::snake(str_replace('\\', '', get_class($this)), '-');
     }
     
     public static function getPosition(): ?int
@@ -152,7 +158,7 @@ abstract class CmfApiDocumentation
     
     protected function translatePath(string $path)
     {
-        return CmfConfig::transApiDoc($path);
+        return $this->cmfConfig->transApiDoc($path);
     }
     
     public function isMethodDocumentation(): bool

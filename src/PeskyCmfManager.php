@@ -11,18 +11,13 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 class PeskyCmfManager
 {
     
-    protected $currentCmfSectionName;
-    /** @var CmfConfig */
-    protected $currentCmfConfig;
-    /** @var Application */
-    protected $app;
+    protected ?string $currentCmfSectionName = null;
+    protected ?CmfConfig $currentCmfConfig = null;
+    protected Application $app;
     /** @var \Closure[] */
-    protected $callbacks = [];
+    protected array $callbacks = [];
     
-    /**
-     * @param Application $app
-     */
-    public function __construct($app)
+    public function __construct(Application $app)
     {
         $this->app = $app;
     }

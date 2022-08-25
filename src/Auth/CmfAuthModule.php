@@ -20,7 +20,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Mail\Message;
-use Illuminate\Session\Store;
+use Illuminate\Session\Store as SessionStore;
 use Illuminate\Support\Arr;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
@@ -41,63 +41,77 @@ use Swayok\Utils\Set;
 class CmfAuthModule
 {
     
-    use DataValidationHelper,
-        AuthorizesRequests;
+    use DataValidationHelper;
+    use AuthorizesRequests;
     
-    protected $cmfConfig;
-    protected $authPolicyName = 'CmfAccessPolicy';
-    protected $emailColumnName;
-    protected $authGuard;
-    protected $originalUserFromLoginAsActionSessionKey = '__original_user';
+    protected CmfConfig $cmfConfig;
+    protected ?string $emailColumnName = null;
+    
+    protected string $originalUserFromLoginAsActionSessionKey = '__original_user';
     // page views
-    protected $userLoginPageViewPath = 'cmf::ui.login';
-    protected $forgotPasswordPageViewPath = 'cmf::ui.forgot_password';
-    protected $replacePasswordPageViewPath = 'cmf::ui.replace_password';
-    protected $userProfilePageViewPath = 'cmf::page.profile';
-    protected $registrationPageViewPath = 'cmf::ui.registration';
+    protected string $userLoginPageViewPath = 'cmf::ui.login';
+    protected string $forgotPasswordPageViewPath = 'cmf::ui.forgot_password';
+    protected string $replacePasswordPageViewPath = 'cmf::ui.replace_password';
+    protected string $userProfilePageViewPath = 'cmf::page.profile';
+    protected string $registrationPageViewPath = 'cmf::ui.registration';
     // emails views
-    protected $passwordRevoceryEmailViewPath = 'cmf::emails.password_restore_instructions';
+    protected string $passwordRevoceryEmailViewPath = 'cmf::emails.password_restore_instructions';
     // html elements
-    protected $defaultLoginPageLogo = '<img src="/packages/cmf/raw/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
+    protected string $defaultLoginPageLogo = '<img src="/packages/cmf/raw/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
+    
+    protected ?Guard $authGuard = null;
+    protected Application $app;
+    protected SessionStore $sessionStore;
+    protected AuthManager $authManager;
+    protected Mailer $mailer;
+    protected GateContract $authGate;
+    protected Dispatcher $eventsDispatcher;
     
     public function __construct(CmfConfig $cmfConfig)
     {
         $this->cmfConfig = $cmfConfig;
+        $this->app = $cmfConfig->getLaravelApp();
+        $this->sessionStore = $this->app->make('session.store');
+        $this->authManager = $this->app->make('auth');
+        $this->mailer = $this->app->make('mailer');
+        $this->authGate = $this->app->make(GateContract::class);
+        $this->eventsDispatcher = $this->app->make('events');
+        $this->validator = $this->app->make('validator');
     }
     
     protected function getLaravelApp(): Application
     {
-        return $this->cmfConfig->getLaravelApp();
+        return $this->app;
     }
     
-    protected function getSessionStore(): Store
+    protected function getSessionStore(): SessionStore
     {
-        return $this->getLaravelApp()->make('session.store');
+        return $this->sessionStore;
     }
     
     protected function getAuthManager(): AuthManager
     {
-        return $this->getLaravelApp()->make('auth');
+        return $this->authManager;
     }
     
     protected function getMailer(): Mailer
     {
-        return $this->getLaravelApp()->make('mailer');
+        return $this->mailer;
     }
     
     public function getAuthGate(): GateContract
     {
-        return $this->getLaravelApp()->make(GateContract::class);
+        return $this->authGate;
     }
     
     protected function getEventsDispatcher(): Dispatcher
     {
-        return $this->getLaravelApp()->make('events');
+        return $this->eventsDispatcher;
     }
     
     protected function getValidator(): ValidationFactoryContract
     {
-        return $this->getLaravelApp()->make('validator');
+        return $this->validator;
     }
     
     public function init(): void
@@ -247,14 +261,11 @@ class CmfAuthModule
             }
             $columnsToSave[] = $columnName;
         }
-        $validator = $this->getValidator()->make(
-            $request->all(),
+        $this->validate(
+            $request,
             $validationRules,
             Set::flatten((array)$this->getCmfConfig()->transCustom('.registration_form.errors'))
         );
-        if ($validator->fails()) {
-            abort($this->makeValidationErrorsJsonResponse($validator->getMessageBag()->toArray()));
-        }
         return $request->only($columnsToSave);
     }
     
@@ -312,18 +323,11 @@ class CmfAuthModule
             ->reloadPage();
     }
     
-    /**
-     * @return string
-     */
     public function getAccessPolicyClassName(): string
     {
         return $this->getCmfConfig()->config('auth.acceess_policy_class') ?: CmfAccessPolicy::class;
     }
     
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function processUserLoginRequest(Request $request): JsonResponse
     {
         $userLoginColumn = $this->getUserLoginColumnName();
@@ -383,7 +387,6 @@ class CmfAuthModule
     
     /**
      * @param int|string $otherUserId
-     * @return JsonResponse
      */
     public function processLoginAsOtherUserRequest($otherUserId): JsonResponse
     {
@@ -559,7 +562,7 @@ class CmfAuthModule
             [
                 'url' => cmfRoute('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()], true, $this->getCmfConfig()),
                 'user' => $user->toArrayWithoutFiles(),
-                'cmfConfigClass' => get_class($this->getCmfConfig()),
+                'cmfConfig' => $this->getCmfConfig(),
             ],
             function (Message $message) use ($from, $to, $subject) {
                 $message
@@ -571,7 +574,6 @@ class CmfAuthModule
     }
     
     /**
-     * @param string $accessKey
      * @return RecordInterface|ResetsPasswordsViaAccessKey
      */
     protected function getUserFromPasswordRecoveryAccessKey(string $accessKey): ?RecordInterface
@@ -650,8 +652,8 @@ class CmfAuthModule
      */
     public function configureAuthorizationGatesAndPolicies(): void
     {
-        app()->singleton($this->authPolicyName, $this->getAccessPolicyClassName());
-        $this->getAuthGate()->resource('resource', $this->authPolicyName, [
+        $this->getLaravelApp()->singleton(CmfAccessPolicy::class, $this->getAccessPolicyClassName());
+        $this->getAuthGate()->resource('resource', CmfAccessPolicy::class, [
             'view' => 'view',
             'details' => 'details',
             'create' => 'create',
@@ -667,7 +669,7 @@ class CmfAuthModule
             'custom_page_for_item' => 'custom_page_for_item',
             'custom_action_for_item' => 'custom_action_for_item',
         ]);
-        $this->getAuthGate()->define('cmf_page', $this->authPolicyName . '@cmf_page');
+        $this->getAuthGate()->define('cmf_page', CmfAccessPolicy::class . '@cmf_page');
     }
     
     public function listenForUserAuthenticationEvents(): void
@@ -765,30 +767,25 @@ class CmfAuthModule
             }
             $columnsToUpdate[] = $columnName;
         }
-        $validator = $this->getValidator()->make(
-            $request->all(),
+        $this->validate(
+            $request,
             $validationRules,
             Set::flatten((array)$this->getCmfConfig()->transCustom('.page.profile.errors'))
         );
         $errors = [];
-        if ($validator->fails()) {
-            $errors = $validator->getMessageBag()->toArray();
-        } else {
-            /** @noinspection NestedPositiveIfStatementsInspection */
-            /** @noinspection MissingOrEmptyGroupStatementInspection */
-            /** @noinspection PhpStatementHasEmptyBodyInspection */
-            if (!$requirePassword && empty($request->input('new_password'))) {
-                // do nothing
-            } elseif (method_exists($admin, 'checkPassword')) {
-                if (!$admin->checkPassword($request->input('old_password'))) {
-                    $errors['old_password'] = $this->getCmfConfig()->transCustom('.page.profile.errors.old_password.match');
-                }
-            } elseif (!$this->getLaravelApp()->make('hash')->check($request->input('old_password'), $admin->getAuthPassword())) {
+        /** @noinspection MissingOrEmptyGroupStatementInspection */
+        /** @noinspection PhpStatementHasEmptyBodyInspection */
+        if (!$requirePassword && empty($request->input('new_password'))) {
+            // do nothing
+        } elseif (method_exists($admin, 'checkPassword')) {
+            if (!$admin->checkPassword($request->input('old_password'))) {
                 $errors['old_password'] = $this->getCmfConfig()->transCustom('.page.profile.errors.old_password.match');
             }
+        } elseif (!$this->getLaravelApp()->make('hash')->check($request->input('old_password'), $admin->getAuthPassword())) {
+            $errors['old_password'] = $this->getCmfConfig()->transCustom('.page.profile.errors.old_password.match');
         }
         if (count($errors) > 0) {
-            abort($this->makeValidationErrorsJsonResponse($errors));
+            $this->throwValidationErrorsResponse($errors);
         }
         
         return $request->only($columnsToUpdate);

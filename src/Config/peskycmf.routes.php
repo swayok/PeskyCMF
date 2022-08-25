@@ -9,7 +9,7 @@ use PeskyCMF\Http\Middleware\AjaxOnly;
 /**
  * @var CmfConfig $cmfConfig
  */
-$routeNamePrefix = $cmfConfig::routes_names_prefix();
+$routeNamePrefix = $cmfConfig->routes_names_prefix();
 $apiControllerClass = $cmfConfig->cmf_scaffold_api_controller_class();
 $generalControllerClass = $cmfConfig->cmf_general_controller_class();
 

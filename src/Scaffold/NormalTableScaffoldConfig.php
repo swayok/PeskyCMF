@@ -503,7 +503,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig
             ->setMessage(
                 $formConfig->translateGeneral($isCreated ? 'message.create.success' : 'message.edit.success')
             )
-            ->setRedirect($this->getRedirectUrlAfterDataSaved($isCreated, $record) ?: 'back', static::getUrlToItemsTable());
+            ->setRedirect($this->getRedirectUrlAfterDataSaved($isCreated, $record) ?: 'back', $this->getUrlToItemsTable());
     }
     
     /**
@@ -514,7 +514,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig
     protected function getRedirectUrlAfterDataSaved(bool $created, RecordInterface $object): ?string
     {
         if ($created && empty($this->getRequest()->input('create_another'))) {
-            $url = $this->goBackAfterCreation ? 'back' : static::getUrlToItemEditForm($object->getPrimaryKeyValue());
+            $url = $this->goBackAfterCreation ? 'back' : $this->getUrlToItemEditForm($object->getPrimaryKeyValue());
         } else {
             $url = (!$created && $this->goBackAfterEditing) ? 'back' : 'reload';
         }
@@ -558,7 +558,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig
         if ($conditions === null) {
             $message = $formConfig->translateGeneral('bulk_edit.message.nothing_updated');
         } else {
-            if (static::getAuthGate()->denies('resource.update_bulk', [static::getResourceName(), $conditions])) {
+            if ($this->authGate->denies('resource.update_bulk', [static::getResourceName(), $conditions])) {
                 return $this->makeAccessDeniedReponse($formConfig->translateGeneral('bulk_edit.message.forbidden'));
             }
             $table::beginTransaction();
@@ -571,7 +571,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig
         }
         return CmfJsonResponse::create()
             ->setMessage($message)
-            ->goBack(static::getUrlToItemsTable());
+            ->goBack($this->getUrlToItemsTable());
     }
     
     public function deleteRecord(string $id): JsonResponse
@@ -602,7 +602,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig
         
         return CmfJsonResponse::create()
             ->setMessage($this->translateGeneral('message.delete.success'))
-            ->goBack(static::getUrlToItemsTable());
+            ->goBack($this->getUrlToItemsTable());
     }
     
     /**
@@ -623,7 +623,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig
         if ($conditions === null) {
             $message = $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.nothing_deleted');
         } else {
-            if (static::getAuthGate()->denies('resource.delete_bulk', [static::getResourceName(), $conditions])) {
+            if ($this->authGate->denies('resource.delete_bulk', [static::getResourceName(), $conditions])) {
                 return $this->makeAccessDeniedReponse(
                     $this->getDataGridConfig()->translateGeneral('bulk_actions.message.delete_bulk.forbidden')
                 );
@@ -635,7 +635,7 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig
         }
         return CmfJsonResponse::create()
             ->setMessage($message)
-            ->goBack(static::getUrlToItemsTable());
+            ->goBack($this->getUrlToItemsTable());
     }
     
     /**

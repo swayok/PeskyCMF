@@ -3,7 +3,6 @@
 namespace PeskyCMF\Db\Settings;
 
 use Illuminate\Http\JsonResponse;
-use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyORM\ORM\TableInterface;
@@ -31,16 +30,16 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         return static::$table;
     }
 
-    public static function getMainMenuItem(): ?array
+    public function getMainMenuItem(): ?array
     {
         $resoureName = static::getResourceName();
-        $url = routeToCmfItemEditForm(static::getResourceName(), 'all');
+        $url = $this->getUrlToItemEditForm(static::getResourceName(), 'all');
         if ($url === null) {
             // access to this menu item was denied
             return null;
         }
         return [
-            'label' => cmfTransCustom($resoureName . '.menu_title'),
+            'label' => $this->cmfConfig->transCustom($resoureName . '.menu_title'),
             'icon' => static::getIconForMenuItem(),
             'url' => $url
         ];
@@ -56,8 +55,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
         $formConfig = parent::createFormConfig()
             ->setWidth(50)
             ->setModalConfig(false);
-        /** @var PeskyCmfAppSettings $appSettings */
-        $appSettings = static::getCmfConfig()->getAppSettings();
+        $appSettings = $this->cmfConfig->getAppSettings();
         $appSettings::configureScaffoldFormConfig($formConfig);
         $formConfig
             ->setValidators(function () use ($appSettings) {
@@ -91,7 +89,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig {
 
     public function getRecordValues(?string $id = null): JsonResponse
     {
-        $settings = static::getCmfConfig()->getAppSettings()->getAllValues(true);
+        $settings = $this->cmfConfig->getAppSettings()->getAllValues(true);
         $settings[static::getTable()->getPkColumnName()] = 0;
         return cmfJsonResponse()->setData($this->getFormConfig()->prepareRecord($settings));
     }

@@ -38,7 +38,7 @@ use PeskyORM\ORM\TableInterface;
 use Vluzrmos\LanguageDetector\Contracts\LanguageDetectorInterface;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
-abstract class CmfConfig extends ConfigsContainer
+abstract class CmfConfig
 {
     
     protected Application $app;
@@ -48,6 +48,22 @@ abstract class CmfConfig extends ConfigsContainer
     protected ?ScaffoldLoggerInterface $httpRequestsLogger = null;
     
     private static array $instances = [];
+    
+    protected static array $localeSuffixMap = [
+        'en' => 'US',
+        'ko' => 'KR',
+        'ja' => 'JP',
+        'cs' => 'CZ',
+        'da' => 'DK',
+        'et' => 'EE',
+        'fa' => 'IR',
+        'kh' => 'KM',
+        'nb' => 'NO',
+        'pt' => 'BR',
+        'sv' => 'SE',
+        'vi' => 'VN',
+        'zh' => 'CN',
+    ];
     
     final private function __construct()
     {
@@ -75,9 +91,12 @@ abstract class CmfConfig extends ConfigsContainer
      * Use this object as primary config
      * Note: this object will be returned when you call CmfConfig::getInstance() instead of CustomConfig::getInstance()
      */
-    final public function useAsPrimary(): void
+    final public function useAsPrimary(Application $app): void
     {
         self::$instances[__CLASS__] = $this;
+        $this->setLaravelApp($app);
+        /** @noinspection SelfClassReferencingInspection */
+        $app->singleton(CmfConfig::class, $this);
     }
     
     final public static function getPrimary(): CmfConfig
@@ -88,6 +107,14 @@ abstract class CmfConfig extends ConfigsContainer
         return self::$instances[__CLASS__];
     }
     
+    final public static function getPrimaryOrDefault(): CmfConfig {
+        $ret = self::$instances[__CLASS__] ?? self::$instances['default'] ?? null;
+        if (!$ret) {
+            throw new \BadMethodCallException('Both Primary and Default CMF Configs are not specified');
+        }
+        return $ret;
+    }
+    
     /**
      * Returns instance of config class it was called from
      * Note: method excluded from toArray() results but key "config_instance" added instead of it
@@ -95,7 +122,7 @@ abstract class CmfConfig extends ConfigsContainer
      */
     final public static function getInstance()
     {
-        if (!array_key_exists(static::class, self::$instances)) {
+        if (!isset(self::$instances[static::class])) {
             self::$instances[static::class] = new static();
         }
         return self::$instances[static::class];
@@ -135,15 +162,14 @@ abstract class CmfConfig extends ConfigsContainer
      * @param mixed $default
      * @return mixed
      */
-    public static function config(string $key, $default = null)
+    public function config(string $key, $default = null)
     {
-        $cmfConfig = static::getInstance();
-        return $cmfConfig->getLaravelConfigs()->get($cmfConfig->configsFileName() . '.' . $key, $default);
+        return $this->getLaravelConfigs()->get($this->configsFileName() . '.' . $key, $default);
     }
     
     public function routes_files(): array
     {
-        return (array)static::config('routes_files', []);
+        return (array)$this->config('routes_files', []);
     }
     
     final public function cmf_views_dir(): string
@@ -157,18 +183,15 @@ abstract class CmfConfig extends ConfigsContainer
             'autodetect' => true,
             'driver' => 'browser',
             'cookie' => true,
-            'cookie_name' => static::makeUtilityKey('locale'),
+            'cookie_name' => $this->makeUtilityKey('locale'),
             'cookie_encrypt' => true,
             'languages' => $this->locales_for_language_detector(),
         ];
     }
     
-    /**
-     * @return PeskyCmfAppSettings
-     */
     public function getAppSettings(): PeskyCmfAppSettings
     {
-        return static::getInstance()->getLaravelApp()->make(PeskyCmfAppSettings::class);
+        return $this->getLaravelApp()->make(PeskyCmfAppSettings::class);
     }
     
     /**
@@ -182,9 +205,9 @@ abstract class CmfConfig extends ConfigsContainer
     /**
      * @return CmfAdmin|Authenticatable|ResetsPasswordsViaAccessKey|RecordInterface|null
      */
-    public static function getUser(): ?RecordInterface
+    public function getUser(): ?RecordInterface
     {
-        return static::getInstance()->getAuthModule()->getUser();
+        return $this->getAuthModule()->getUser();
     }
     
     public function getAuthModule(): CmfAuthModule
@@ -194,7 +217,7 @@ abstract class CmfConfig extends ConfigsContainer
     
     public function getUiModule(): CmfUIModule
     {
-        return static::getInstance()->getLaravelApp()->make(CmfUIModule::class);
+        return $this->getLaravelApp()->make(CmfUIModule::class);
     }
     
     /**
@@ -212,9 +235,9 @@ abstract class CmfConfig extends ConfigsContainer
     /**
      * Url prefix for routes
      */
-    public static function url_prefix(): string
+    public function url_prefix(): string
     {
-        return static::config('url_prefix', 'admin');
+        return $this->config('url_prefix', 'admin');
     }
     
     /**
@@ -222,7 +245,7 @@ abstract class CmfConfig extends ConfigsContainer
      */
     public function app_subfolder(): string
     {
-        return static::config('app_subfolder', 'Admin');
+        return $this->config('app_subfolder', 'Admin');
     }
     
     public function recaptcha_private_key(): ?string
@@ -243,7 +266,7 @@ abstract class CmfConfig extends ConfigsContainer
     public function default_page_title(): string
     {
         return $this->getAppSettings()->default_browser_title(function () {
-            return static::transCustom('.default_page_title');
+            return $this->transCustom('.default_page_title');
         }, true);
     }
     
@@ -276,7 +299,7 @@ abstract class CmfConfig extends ConfigsContainer
      */
     public function routes_names_prefix(): string
     {
-        return static::url_prefix() . '/';
+        return $this->url_prefix() . '/';
     }
     
     public function getRouteName(string $routeAlias): string
@@ -284,9 +307,9 @@ abstract class CmfConfig extends ConfigsContainer
         return $this->routes_names_prefix() . $routeAlias;
     }
     
-    public static function route(string $routeName, array $parameters = [], bool $absolute = false): string
+    public function route(string $routeName, array $parameters = [], bool $absolute = false): string
     {
-        return route(static::getInstance()->getRouteName($routeName), $parameters, $absolute);
+        return route($this->getRouteName($routeName), $parameters, $absolute);
     }
     
     /**
@@ -294,7 +317,7 @@ abstract class CmfConfig extends ConfigsContainer
      */
     public function auth_middleware(): array
     {
-        return (array)static::config('auth.middleware', [CmfAuth::class]);
+        return (array)$this->config('auth.middleware', [CmfAuth::class]);
     }
     
     /**
@@ -308,7 +331,7 @@ abstract class CmfConfig extends ConfigsContainer
     /**
      * The menu structure of the site.
      * @return array
-     * You may use static::getMenuItem($resourceName) or static::getMenuItems() to get
+     * You may use $this->getMenuItem($resourceName) or $this->getMenuItems() to get
      * menu items from registered scaffold configs.
      * Todo: add CmfSidebarMenuItem class to help designing menu items
      * Menu item format:
@@ -348,21 +371,21 @@ abstract class CmfConfig extends ConfigsContainer
         return array_merge(
             [
                 [
-                    'label' => static::transCustom('.page.dashboard.menu_title'),
+                    'label' => $this->transCustom('.page.dashboard.menu_title'),
                     'url' => routeToCmfPage('dashboard'),
                     'icon' => 'glyphicon glyphicon-dashboard',
                 ],
                 /*[
-                    'label' => static::transCustom('.users.menu_title'),
+                    'label' => $this->transCustom('.users.menu_title'),
                     'url' => '/resource/users',
                     'icon' => 'fa fa-group'
                 ],*/
                 /*[
-                    'label' => static::transCustom('.menu.section_utils'),
+                    'label' => $this->transCustom('.menu.section_utils'),
                     'icon' => 'glyphicon glyphicon-align-justify',
                     'submenu' => [
                         [
-                            'label' => static::transCustom('.admins.menu_title'),
+                            'label' => $this->transCustom('.admins.menu_title'),
                             'url' => '/resource/admins',
                             'icon' => 'glyphicon glyphicon-user'
                         ],
@@ -414,6 +437,7 @@ abstract class CmfConfig extends ConfigsContainer
     /**
      * @param array $excludeItemsWithKeys - list of keys to exclude from resulting menu items array
      * @return array
+     * @noinspection PhpUnused
      */
     protected function getMenuItemsExcept(...$excludeItemsWithKeys): array
     {
@@ -426,6 +450,7 @@ abstract class CmfConfig extends ConfigsContainer
     
     /**
      * Get menu item config or null if there is no such menu item
+     * @noinspection PhpUnused
      */
     protected function getMenuItem(string $resourceName): ?array
     {
@@ -437,7 +462,7 @@ abstract class CmfConfig extends ConfigsContainer
      */
     public function custom_dictionary_name(): string
     {
-        return static::config('dictionary', 'cmf::custom');
+        return $this->config('dictionary', 'cmf::custom');
     }
     
     /**
@@ -449,9 +474,9 @@ abstract class CmfConfig extends ConfigsContainer
      * @param string|null $locale
      * @return string|array
      */
-    public static function transCustom(string $path, array $parameters = [], ?string $locale = null)
+    public function transCustom(string $path, array $parameters = [], ?string $locale = null)
     {
-        $dict = static::getInstance()->custom_dictionary_name();
+        $dict = $this->custom_dictionary_name();
         $path = '.' . ltrim($path, '.');
         $primaryPath = $dict . $path;
         $trans = trans($primaryPath, $parameters, $locale);
@@ -482,9 +507,9 @@ abstract class CmfConfig extends ConfigsContainer
      * @param string|null $locale
      * @return string|array
      */
-    public static function transGeneral(string $path, array $parameters = [], ?string $locale = null)
+    public function transGeneral(string $path, array $parameters = [], ?string $locale = null)
     {
-        $dict = static::getInstance()->cmf_general_dictionary_name();
+        $dict = $this->cmf_general_dictionary_name();
         $path = '.' . ltrim($path, '.');
         $primaryPath = $dict . $path;
         $trans = trans($primaryPath, $parameters, $locale);
@@ -505,15 +530,10 @@ abstract class CmfConfig extends ConfigsContainer
      * @param null $locale
      * @return string|array
      */
-    public static function transApiDoc(string $translationPath, array $parameters = [], $locale = null)
+    public function transApiDoc(string $translationPath, array $parameters = [], $locale = null)
     {
-        if (static::class === self::class) {
-            // redirect CmfConfig::transApiDoc() calls to primary config class
-            return self::getPrimary()->transApiDoc($translationPath, $parameters, $locale);
-        } else {
-            $translationPath = 'api_docs.' . ltrim($translationPath, '.');
-            return static::transCustom($translationPath, $parameters, $locale);
-        }
+        $translationPath = 'api_docs.' . ltrim($translationPath, '.');
+        return $this->transCustom($translationPath, $parameters, $locale);
     }
     
     /**
@@ -521,7 +541,7 @@ abstract class CmfConfig extends ConfigsContainer
      */
     public function default_locale(): string
     {
-        return static::config('locale', 'en');
+        return $this->config('locale', 'en');
     }
     
     /**
@@ -530,7 +550,7 @@ abstract class CmfConfig extends ConfigsContainer
      */
     public function locales(): array
     {
-        return array_unique(array_values(static::config('locales', ['en'])));
+        return array_unique(array_values($this->config('locales', ['en'])));
     }
     
     /**
@@ -540,7 +560,7 @@ abstract class CmfConfig extends ConfigsContainer
      */
     public function locales_for_language_detector(): array
     {
-        return (array)static::config('locales', ['en']);
+        return (array)$this->config('locales', ['en']);
     }
     
     /**
@@ -556,29 +576,14 @@ abstract class CmfConfig extends ConfigsContainer
      */
     public function getShortLocale(): string
     {
-        return strtolower(substr(static::getInstance()->getLaravelApp()->getLocale(), 0, 2));
+        return strtolower(substr($this->getLaravelApp()->getLocale(), 0, 2));
     }
     
+    /** @noinspection PhpUnusedParameterInspection */
     public function onLocaleChanged(string $newLocale): void
     {
-        Column::setValidationErrorsMessages((array)self::transGeneral('form.message.column_validation_errors') ?: []);
+        Column::setValidationErrorsMessages((array)$this->transGeneral('form.message.column_validation_errors') ?: []);
     }
-    
-    protected static array $localeSuffixMap = [
-        'en' => 'US',
-        'ko' => 'KR',
-        'ja' => 'JP',
-        'cs' => 'CZ',
-        'da' => 'DK',
-        'et' => 'EE',
-        'fa' => 'IR',
-        'kh' => 'KM',
-        'nb' => 'NO',
-        'pt' => 'BR',
-        'sv' => 'SE',
-        'vi' => 'VN',
-        'zh' => 'CN',
-    ];
     
     /**
      * Get locale in format "en_US" or "ru-RU" or "it-it"
@@ -607,15 +612,15 @@ abstract class CmfConfig extends ConfigsContainer
     
     public function session_message_key(): string
     {
-        return static::makeUtilityKey('message');
+        return $this->makeUtilityKey('message');
     }
     
     /**
      * Start page URL of CMS section
      */
-    public static function home_page_url(bool $absolute = false): string
+    public function home_page_url(bool $absolute = false): string
     {
-        return static::route('cmf_start_page', [], $absolute);
+        return $this->route('cmf_start_page', [], $absolute);
     }
     
     /**
@@ -688,8 +693,8 @@ abstract class CmfConfig extends ConfigsContainer
             'contentsCss' => $this->css_files_for_wysiwyg_editor(),
             // _token won't be working this way =(
             // moved to WysiwygFormInput->getWysiwygConfig()
-            //'uploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
-            //'filebrowserImageUploadUrl' => static::route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
+            //'uploadUrl' => $this->route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
+            //'filebrowserImageUploadUrl' => $this->route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
         ];
     }
     
@@ -706,6 +711,7 @@ abstract class CmfConfig extends ConfigsContainer
      * Data inserts for CmsPage-related scaffold configs to be added to ckeditor's plugin
      * Use WysiwygFormInput::createDataInsertConfig() and WysiwygFormInput::createDataInsertConfigWithArguments()
      * to create valid config
+     * @noinspection PhpUnusedParameterInspection
      */
     public function getAdditionalWysywygDataInsertsForCmsPages(ScaffoldConfig $scaffold): array
     {
@@ -715,6 +721,7 @@ abstract class CmfConfig extends ConfigsContainer
     /**
      * Html inserts for CmsPage-related scaffold configs to be added to ckeditor's plugin
      * Use WysiwygFormInput::createHtmlInsertConfig('<html>', 'menu title') to create valid config
+     * @noinspection PhpUnusedParameterInspection
      */
     public function getWysywygHtmlInsertsForCmsPages(ScaffoldConfig $scaffold): array
     {
@@ -732,6 +739,7 @@ abstract class CmfConfig extends ConfigsContainer
     
     /**
      * Get ScaffoldConfig class name
+     * @return string|ScaffoldConfig
      */
     public function getScaffoldConfigClass(string $resourceName): string
     {
@@ -777,19 +785,19 @@ abstract class CmfConfig extends ConfigsContainer
     {
         return Cache::remember(
             $this->getCacheKeyForOptimizedUiTemplates('pages'),
-            (int)static::config('ui.optimize_ui_templates.timeout', 0),
+            (int)$this->config('ui.optimize_ui_templates.timeout', 0),
             function () {
                 $generalControllerClass = $this->cmf_general_controller_class();
                 /** @var CmfGeneralController $controller */
                 $controller = new $generalControllerClass();
-                if (static::getUser()) {
+                if ($this->getUser()) {
                     return [
-                        static::route('cmf_main_ui', [], false) => $controller->getBasicUiView(),
+                        $this->route('cmf_main_ui', [], false) => $controller->getBasicUiView(),
                     ];
                 } else {
                     return [
-                        static::route('cmf_login', [], false) . '.html' => $controller->getLoginTpl(),
-                        static::route('cmf_forgot_password', [], false) . '.html' => $controller->getForgotPasswordTpl(),
+                        $this->route('cmf_login', [], false) . '.html' => $controller->getLoginTpl(),
+                        $this->route('cmf_forgot_password', [], false) . '.html' => $controller->getForgotPasswordTpl(),
                     ];
                 }
             }
@@ -798,13 +806,13 @@ abstract class CmfConfig extends ConfigsContainer
     
     public function getCachedResourcesTemplates(): array
     {
-        if (!static::getUser()) {
+        if (!$this->getUser()) {
             return [];
         }
         return $this->getLaravelApp()->make('cache.store')
             ->remember(
                 $this->getCacheKeyForOptimizedUiTemplates('resources'),
-                (int)static::config('ui.optimize_ui_templates.timeout', 0),
+                (int)$this->config('ui.optimize_ui_templates.timeout', 0),
                 function () {
                     return $this->collectResourcesTemplatesToBeCached();
                 }
@@ -816,7 +824,7 @@ abstract class CmfConfig extends ConfigsContainer
         $resourceTemplates = [];
         /** @var ScaffoldConfig $scaffoldConfigClass */
         foreach ($this->getUiModule()->getResources() as $resourceName => $scaffoldConfigClass) {
-            $scaffoldConfig = new $scaffoldConfigClass();
+            $scaffoldConfig = new $scaffoldConfigClass($this);
             $splitted = $scaffoldConfig->renderTemplatesAndSplit();
             if (!empty($splitted)) {
                 $resourceTemplates[$resourceName] = $splitted;
@@ -841,14 +849,15 @@ abstract class CmfConfig extends ConfigsContainer
         if ($this->getAuthModule()->getAccessPolicyClassName() === CmfAccessPolicy::class) {
             $userId = 'any';
         } else {
-            $user = static::getUser();
+            $user = $this->getUser();
             $userId = $user ? $user->getAuthIdentifier() : 'not_authenticated';
         }
-        return static::url_prefix() . '_templates_' . static::getInstance()->getShortLocale() . '_' . $group . '_user_' . $userId;
+        return $this->url_prefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
     }
     
     /**
      * Role-based cache key
+     * @noinspection PhpUnused
      */
     protected function getCacheKeyForOptimizedUiTemplatesBasedOnUserRole(string $group): string
     {
@@ -856,7 +865,7 @@ abstract class CmfConfig extends ConfigsContainer
             $userId = 'any';
         } else {
             $userId = 'not_authenticated';
-            $user = static::getUser();
+            $user = $this->getUser();
             if ($user && $user->existsInDb()) {
                 if ($user::hasColumn('is_superadmin')) {
                     $userId = '__superadmin__';
@@ -867,12 +876,12 @@ abstract class CmfConfig extends ConfigsContainer
                 }
             }
         }
-        return static::url_prefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
+        return $this->url_prefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
     }
     
-    public static function makeUtilityKey(string $keySuffix): string
+    public function makeUtilityKey(string $keySuffix): string
     {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', static::url_prefix()) . '_' . $keySuffix;
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', $this->url_prefix()) . '_' . $keySuffix;
     }
     
     /** @noinspection OnlyWritesOnParameterInspection */
@@ -880,12 +889,12 @@ abstract class CmfConfig extends ConfigsContainer
     {
         $cmfConfig = $this;
         $groupConfig = [
-            'prefix' => static::url_prefix(),
-            'middleware' => (array)static::config('routes_middleware', ['web']),
+            'prefix' => $this->url_prefix(),
+            'middleware' => (array)$this->config('routes_middleware', ['web']),
         ];
         $cmfSectionSelectorMiddleware = $this->getUseCmfSectionMiddleware($sectionName);
         array_unshift($groupConfig['middleware'], $cmfSectionSelectorMiddleware);
-        $namespace = static::config('controllers_namespace');
+        $namespace = $this->config('controllers_namespace');
         if (!empty($namespace)) {
             $groupConfig['namespace'] = ltrim($namespace, '\\');
         }
@@ -945,7 +954,7 @@ abstract class CmfConfig extends ConfigsContainer
     protected function addAuthGuardConfigToAppConfigs(ConfigRepository $appConfigs): void
     {
         // merge cmf guard and provider with configs in config/auth.php
-        $cmfAuthConfig = static::config('auth.guard');
+        $cmfAuthConfig = $this->config('auth.guard');
         if (!is_array($cmfAuthConfig)) {
             // custom auth guard name provided
             return;
@@ -956,7 +965,7 @@ abstract class CmfConfig extends ConfigsContainer
             'providers' => [],
         ]);
         
-        $guardName = Arr::get($cmfAuthConfig, 'name') ?: static::url_prefix();
+        $guardName = Arr::get($cmfAuthConfig, 'name') ?: $this->url_prefix();
         if (array_key_exists($guardName, $config['guards'])) {
             return; //< it is provided manually or cached
         }
@@ -964,7 +973,7 @@ abstract class CmfConfig extends ConfigsContainer
         if (is_array($provider)) {
             $providerName = Arr::get($provider, 'name', $guardName);
             if (empty($provider['model'])) {
-                $provider['model'] = static::config('auth.user_record_class', function () {
+                $provider['model'] = $this->config('auth.user_record_class', function () {
                     throw new \UnexpectedValueException('You need to provide a DB Record class for users');
                 });
             }
@@ -988,8 +997,7 @@ abstract class CmfConfig extends ConfigsContainer
     
     public function initSection(Application $app): void
     {
-        $this->setLaravelApp($app);
-        $this->useAsPrimary();
+        $this->useAsPrimary($app);
         
         // configurators
         $this->configureSession();
@@ -1000,7 +1008,7 @@ abstract class CmfConfig extends ConfigsContainer
         
         // init auth module
         /** @var CmfAuthModule $cmfAuthModuleClass */
-        $cmfAuthModuleClass = static::config('auth.module') ?: CmfAuthModule::class;
+        $cmfAuthModuleClass = $this->config('auth.module') ?: CmfAuthModule::class;
         /** @var CmfAuthModule $authModule */
         $authModule = new $cmfAuthModuleClass($this);
         $app->singleton(CmfAuthModule::class, function () use ($authModule) {
@@ -1010,7 +1018,7 @@ abstract class CmfConfig extends ConfigsContainer
         
         // init UI module
         /** @var CmfAuthModule $cmfAuthModuleClass */
-        $cmfUIModuleClass = static::config('ui.module') ?: CmfUIModule::class;
+        $cmfUIModuleClass = $this->config('ui.module') ?: CmfUIModule::class;
         /** @var CmfAuthModule $authModule */
         $uiModule = new $cmfUIModuleClass($this);
         $app->singleton(CmfUIModule::class, function () use ($uiModule) {
@@ -1019,7 +1027,7 @@ abstract class CmfConfig extends ConfigsContainer
         
         // init API Documentation module
         $app->singleton(CmfApiDocumentationModule::class, function () {
-            $cmfApiDocsModuleClass = static::config('api_documentation.module') ?: CmfApiDocumentationModule::class;
+            $cmfApiDocsModuleClass = $this->config('api_documentation.module') ?: CmfApiDocumentationModule::class;
             return new $cmfApiDocsModuleClass($this);
         });
         
@@ -1035,8 +1043,8 @@ abstract class CmfConfig extends ConfigsContainer
         $app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
         $langDetectorProvider->importConfigsFromPeskyCmf($this);
         
-        if (static::config('file_access_mask') !== null) {
-            umask(static::config('file_access_mask'));
+        if ($this->config('file_access_mask') !== null) {
+            umask($this->config('file_access_mask'));
         }
         
         // Register resource name to ScaffoldConfig class mappings
@@ -1060,8 +1068,8 @@ abstract class CmfConfig extends ConfigsContainer
         $appConfigs = $this->getLaravelConfigs();
         $config = array_merge(
             $appConfigs->get('session'),
-            ['path' => '/' . trim(static::url_prefix(), '/')],
-            (array)static::config('session', [])
+            ['path' => '/' . trim($this->url_prefix(), '/')],
+            (array)$this->config('session', [])
         );
         $appConfigs->set('session', $config);
     }

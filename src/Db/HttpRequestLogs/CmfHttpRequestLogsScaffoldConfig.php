@@ -131,7 +131,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
         if (!empty($record['table'])) {
             if ($record['http_method'] !== 'DELETE') {
                 try {
-                    static::getCmfConfig()->getScaffoldConfigClass($record['table']);
+                    $this->cmfConfig->getScaffoldConfigClass($record['table']);
                     if (!empty($record['item_id'])) {
                         $url = routeToCmfItemDetails($record['table'], $record['item_id']);
                     } else {
@@ -158,7 +158,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
                 $label .= " ({$record['requester_info']})";
             }
             try {
-                static::getCmfConfig()->getScaffoldConfigClass($record['requester_table']);
+                $this->cmfConfig->getScaffoldConfigClass($record['requester_table']);
                 if (!empty($record['requester_id'])) {
                     $url = routeToCmfItemDetails($record['requester_table'], $record['requester_id']);
                 } else {

@@ -39,7 +39,7 @@ class CmfAccessPolicy
      * To allow access for all roles use 'true' intead of roles array.
      * @var array
      */
-    protected static $resources = [
+    protected static array $resources = [
         'buildings' => [
             'others' => true,
         ],
@@ -61,7 +61,7 @@ class CmfAccessPolicy
      * Note that if resource does not have "owner id column name" - access to its items will be allowed to any role.
      * @var array
      */
-    protected static $resourcesWithOwnershipValidation = [
+    protected static array $resourcesWithOwnershipValidation = [
     
     ];
     
@@ -74,7 +74,7 @@ class CmfAccessPolicy
      * ]
      * @var array
      */
-    protected static $ownerColumnForTable = [
+    protected static array $ownerColumnForTable = [
     
     ];
     
@@ -82,7 +82,7 @@ class CmfAccessPolicy
      * Default "owner id column name"
      * @var string
      */
-    protected static $defaultOwnerIdColumnName = 'admin_id';
+    protected static string $defaultOwnerIdColumnName = 'admin_id';
     
     /**
      * Access to CMF pages: routeToCmfPage('page_name')
@@ -94,7 +94,7 @@ class CmfAccessPolicy
      * To allow access for all roles use 'true' intead of roles array.
      * @var array
      */
-    protected static $cmfPages = [
+    protected static array $cmfPages = [
         'login_as' => false,
     ];
     
@@ -108,14 +108,17 @@ class CmfAccessPolicy
      * To allow access for all roles use 'true' intead of roles array.
      * @var array
      */
-    protected static $defaults = [
+    protected static array $defaults = [
         'others' => true,
     ];
     
-    /**
-     * @param RecordInterface $user
-     * @return bool
-     */
+    protected CmfConfig $cmfConfig;
+    
+    public function __construct(CmfConfig $cmfConfig)
+    {
+        $this->cmfConfig = $cmfConfig;
+    }
+    
     protected function isSuperadmin(RecordInterface $user): bool
     {
         if ($user::hasColumn('is_superadmin')) {
@@ -124,28 +127,16 @@ class CmfAccessPolicy
         return false;
     }
     
-    /**
-     * @param RecordInterface $user
-     * @return null|string
-     */
     protected function getUserRole(RecordInterface $user): ?string
     {
         return $user::hasColumn('role') ? $user->getValue('role') : 'admin';
     }
     
-    /**
-     * @return CmfConfig
-     */
     protected function getCmfConfig(): CmfConfig
     {
-        return CmfConfig::getPrimary();
+        return $this->cmfConfig;
     }
     
-    /**
-     * @param RecordInterface|CmfAdmin $user
-     * @param string $pageName
-     * @return bool
-     */
     public function cmf_page(RecordInterface $user, string $pageName): bool
     {
         if ($this->isSuperadmin($user)) {
@@ -181,12 +172,6 @@ class CmfAccessPolicy
         );
     }
     
-    /**
-     * @param string $role
-     * @param string $resourceName
-     * @param string $ability
-     * @return bool
-     */
     protected function roleHasAccessToResource(string $role, string $resourceName, string $ability): bool
     {
         if (array_key_exists($resourceName, static::$resources)) {
@@ -257,11 +242,6 @@ class CmfAccessPolicy
         return true;
     }
     
-    /**
-     * @param string $role
-     * @param string $ability
-     * @return bool
-     */
     protected function getAccessFromDefaults(string $role, string $ability): bool
     {
         if (array_key_exists($ability, static::$defaults)) {

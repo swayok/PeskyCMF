@@ -29,7 +29,7 @@ interface ScaffoldConfigInterface
      * Main menu item info. Return null if you do not want to add item to menu
      * Details in CmfConfig::menu()
      */
-    public static function getMainMenuItem(): ?array;
+    public function getMainMenuItem(): ?array;
     
     public static function getMenuItemCounterName(): ?string;
     

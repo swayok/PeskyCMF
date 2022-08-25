@@ -262,8 +262,8 @@ class AsyncFilesFormInput extends FormInput
     {
         $scaffoldConfig = $this->getScaffoldSectionConfig()->getScaffoldConfig();
         return [
-            'upload_url' => $scaffoldConfig::getUrlForTempFileUpload($this->getName(false)),
-            'delete_url' => $scaffoldConfig::getUrlForTempFileUpload($this->getName(false)),
+            'upload_url' => $scaffoldConfig->getUrlForTempFileUpload($this->getName(false)),
+            'delete_url' => $scaffoldConfig->getUrlForTempFileDelete($this->getName(false)),
         ];
     }
     

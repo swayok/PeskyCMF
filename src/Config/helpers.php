@@ -36,7 +36,7 @@ if (!defined('DOTJS_INSERT_REGEXP_FOR_ROUTES')) {
 if (!function_exists('cmfConfig')) {
     function cmfConfig(): CmfConfig
     {
-        return CmfConfig::getPrimary();
+        return app(CmfConfig::class);
     }
 }
 
@@ -286,7 +286,7 @@ if (!function_exists('cmfTransGeneral')) {
      */
     function cmfTransGeneral(string $path, array $parameters = [], ?string $locale = null)
     {
-        return CmfConfig::transGeneral($path, $parameters, $locale);
+        return cmfConfig()->transGeneral($path, $parameters, $locale);
     }
 }
 
@@ -299,7 +299,7 @@ if (!function_exists('cmfTransCustom')) {
      */
     function cmfTransCustom(string $path, array $parameters = [], ?string $locale = null)
     {
-        return CmfConfig::transCustom($path, $parameters, $locale);
+        return cmfConfig()->transCustom($path, $parameters, $locale);
     }
 }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold;
 
-use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Contracts\Auth\Access\Gate as AuthGate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,6 +32,9 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
 {
     
     use DataValidationHelper;
+    
+    protected CmfConfig $cmfConfig;
+    protected AuthGate $authGate;
     
     protected ?DataGridConfig $dataGridConfig = null;
     protected ?FilterConfig $dataGridFilterConfig = null;
@@ -77,58 +80,54 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     protected $loggableRecordRelations = false;
     
     /**
-     * @var RecordInterface|Record|CmfDbRecord
+     * @var RecordInterface|Record|CmfDbRecord|null
      */
     private ?RecordInterface $optimizedTableRecord = null;
     
-    /**
-     * ScaffoldConfig constructor.
-     */
-    public function __construct()
+    public function __construct(CmfConfig $cmfConfig)
     {
+        $this->cmfConfig = $cmfConfig;
+        $this->authGate = $this->cmfConfig->getAuthModule()->getAuthGate();
         if ($this->viewsBaseTranslationKey === null) {
             $this->viewsBaseTranslationKey = static::getResourceName();
         }
-        $this->setLogger(static::getCmfConfig()->getHttpRequestsLogger());
+        $this->setLogger($this->cmfConfig->getHttpRequestsLogger());
     }
     
-    public static function getCmfConfig(): CmfConfig
+    final public function getCmfConfig(): CmfConfig
     {
-        return CmfConfig::getPrimary();
+        return $this->cmfConfig;
     }
     
-    public static function getAuthGate(): Gate
+    final public function getAuthGate(): AuthGate
     {
-        return static::getCmfConfig()->getAuthModule()->getAuthGate();
+        return $this->authGate;
     }
     
     /**
      * @return Authenticatable|CmfAdmin|ResetsPasswordsViaAccessKey|RecordInterface
      */
-    public static function getUser(): RecordInterface
+    final public function getUser(): RecordInterface
     {
-        return static::getCmfConfig()->getUser();
+        return $this->cmfConfig->getUser();
     }
     
-    /**
-     * @return string
-     */
     public static function getResourceName(): string
     {
         return static::getTable()->getName();
     }
     
-    public static function getMainMenuItem(): ?array
+    public function getMainMenuItem(): ?array
     {
         $resourceName = static::getResourceName();
-        if (static::getAuthGate()->denies('resource.view', [$resourceName])) {
+        if ($this->authGate->denies('resource.view', [$resourceName])) {
             // access to this menu item was denied
             return null;
         }
         return [
-            'label' => static::getCmfConfig()->transCustom($resourceName . '.menu_title'),
+            'label' => $this->cmfConfig->transCustom($resourceName . '.menu_title'),
             'icon' => static::getIconForMenuItem(),
-            'url' => static::getUrlToItemsTable(),
+            'url' => $this->getUrlToItemsTable(),
             'counter' => static::getMenuItemCounterName(),
         ];
     }
@@ -148,7 +147,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return null;
     }
     
-    public static function getUrlToItemsTable(
+    public function getUrlToItemsTable(
         array $filters = [],
         bool $absolute = false,
         bool $ignoreAccessPolicy = false
@@ -157,12 +156,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             static::getResourceName(),
             $filters,
             $absolute,
-            static::getCmfConfig(),
+            $this->cmfConfig,
             $ignoreAccessPolicy
         );
     }
     
-    public static function getUrlCustomAction(
+    public function getUrlCustomAction(
         string $actionId,
         array $queryArgs = [],
         bool $absolute = false
@@ -172,11 +171,11 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             $actionId,
             $queryArgs,
             $absolute,
-            static::getCmfConfig()
+            $this->cmfConfig
         );
     }
     
-    public static function getUrlCustomPage(
+    public function getUrlCustomPage(
         string $pageId,
         array $queryArgs = [],
         bool $absolute = false
@@ -186,11 +185,11 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             $pageId,
             $queryArgs,
             $absolute,
-            static::getCmfConfig()
+            $this->cmfConfig
         );
     }
     
-    public static function getUrlToItemDetails(
+    public function getUrlToItemDetails(
         string $itemId,
         bool $absolute = false,
         bool $ignoreAccessPolicy = false
@@ -199,12 +198,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             static::getResourceName(),
             $itemId,
             $absolute,
-            static::getCmfConfig(),
+            $this->cmfConfig,
             $ignoreAccessPolicy
         );
     }
     
-    public static function getUrlToItemAddForm(
+    public function getUrlToItemAddForm(
         array $data = [],
         bool $absolute = false,
         bool $ignoreAccessPolicy = false
@@ -213,12 +212,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             static::getResourceName(),
             $data,
             $absolute,
-            static::getCmfConfig(),
+            $this->cmfConfig,
             $ignoreAccessPolicy
         );
     }
     
-    public static function getUrlToItemEditForm(
+    public function getUrlToItemEditForm(
         string $itemId,
         bool $absolute = false,
         bool $ignoreAccessPolicy = false
@@ -227,12 +226,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             static::getResourceName(),
             $itemId,
             $absolute,
-            static::getCmfConfig(),
+            $this->cmfConfig,
             $ignoreAccessPolicy
         );
     }
     
-    public static function getUrlToItemCloneForm(
+    public function getUrlToItemCloneForm(
         string $itemId,
         bool $absolute = false,
         bool $ignoreAccessPolicy = false
@@ -241,12 +240,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             static::getResourceName(),
             $itemId,
             $absolute,
-            static::getCmfConfig(),
+            $this->cmfConfig,
             $ignoreAccessPolicy
         );
     }
     
-    public static function getUrlToItemDelete(
+    public function getUrlToItemDelete(
         string $itemId,
         bool $absolute = false,
         bool $ignoreAccessPolicy = false
@@ -255,12 +254,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             static::getResourceName(),
             $itemId,
             $absolute,
-            static::getCmfConfig(),
+            $this->cmfConfig,
             $ignoreAccessPolicy
         );
     }
     
-    public static function getUrlForTempFileUpload(
+    public function getUrlForTempFileUpload(
         string $inputName,
         bool $absolute = false,
         bool $ignoreAccessPolicy = false
@@ -269,12 +268,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             static::getResourceName(),
             $inputName,
             $absolute,
-            static::getCmfConfig(),
+            $this->cmfConfig,
             $ignoreAccessPolicy
         );
     }
     
-    public static function getUrlForTempFileDelete(
+    public function getUrlForTempFileDelete(
         string $inputName,
         bool $absolute = false,
         bool $ignoreAccessPolicy = false
@@ -283,12 +282,12 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             static::getResourceName(),
             $inputName,
             $absolute,
-            static::getCmfConfig(),
+            $this->cmfConfig,
             $ignoreAccessPolicy
         );
     }
     
-    public static function getUrlToItemCustomAction(
+    public function getUrlToItemCustomAction(
         string $itemId,
         string $actionId,
         array $queryArgs = [],
@@ -300,11 +299,11 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             $actionId,
             $queryArgs,
             $absolute,
-            static::getCmfConfig()
+            $this->cmfConfig
         );
     }
     
-    public static function getUrlToItemCustomPage(
+    public function getUrlToItemCustomPage(
         string $itemId,
         string $pageId,
         array $queryArgs = [],
@@ -316,13 +315,13 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             $pageId,
             $queryArgs,
             $absolute,
-            static::getCmfConfig()
+            $this->cmfConfig
         );
     }
     
     public function getRequest(): Request
     {
-        return static::getCmfConfig()->getLaravelApp()->make('request');
+        return $this->cmfConfig->getLaravelApp()->make(Request::class);
     }
     
     public function getOptimizedTableRecord(?array $dbDataForRecord = null): RecordInterface
@@ -415,7 +414,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     
     public function isSectionAllowed(): bool
     {
-        return static::getAuthGate()->allows('resource.view', [static::getResourceName()]);
+        return $this->authGate->allows('resource.view', [static::getResourceName()]);
     }
     
     public function isCreateAllowed(): bool
@@ -423,7 +422,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return (
             $this->isCreateAllowed
             && $this->isSectionAllowed()
-            && static::getAuthGate()->allows('resource.create', [static::getResourceName()])
+            && $this->authGate->allows('resource.create', [static::getResourceName()])
         );
     }
     
@@ -453,7 +452,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
      */
     public function isRecordDeleteAllowed(array $record): bool
     {
-        return $this->isDeleteAllowed() && static::getAuthGate()->allows('resource.delete', [static::getResourceName(), $record]);
+        return $this->isDeleteAllowed() && $this->authGate->allows('resource.delete', [static::getResourceName(), $record]);
     }
     
     /**
@@ -462,7 +461,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
      */
     public function isRecordEditAllowed(array $record): bool
     {
-        return $this->isEditAllowed() && static::getAuthGate()->allows('resource.update', [static::getResourceName(), $record]);
+        return $this->isEditAllowed() && $this->authGate->allows('resource.update', [static::getResourceName(), $record]);
     }
     
     /**
@@ -473,7 +472,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     {
         return (
             $this->isDetailsViewerAllowed()
-            && static::getAuthGate()->allows('resource.details', [static::getResourceName(), $record])
+            && $this->authGate->allows('resource.details', [static::getResourceName(), $record])
         );
     }
     
@@ -497,7 +496,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
      */
     public function translate(string $section, string $suffix = '', array $parameters = [])
     {
-        return static::getCmfConfig()->transCustom(
+        return $this->cmfConfig->transCustom(
             rtrim(".{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'),
             $parameters
         );
@@ -511,7 +510,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     {
         $text = $this->translate($path, '', $parameters);
         if (preg_match('%\.' . preg_quote($path, '%') . '$%', $text)) {
-            $text = static::getCmfConfig()->transGeneral($path, $parameters);
+            $text = $this->cmfConfig->transGeneral($path, $parameters);
         }
         return $text;
     }
@@ -521,7 +520,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         if (!$this->isSectionAllowed()) {
             abort($this->makeAccessDeniedReponse($this->translateGeneral('message.access_denied_to_scaffold')));
         }
-        return static::getCmfConfig()->getUiModule()->renderScaffoldTemplates($this);
+        return $this->cmfConfig->getUiModule()->renderScaffoldTemplates($this);
     }
     
     public function renderTemplatesAndSplit(): array
@@ -630,14 +629,14 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         }
         return CmfJsonResponse::create(HttpCode::NOT_FOUND)
             ->setMessage($message)
-            ->goBack(static::getUrlToItemsTable());
+            ->goBack($this->getUrlToItemsTable());
     }
     
     protected function makeAccessDeniedReponse(string $message): JsonResponse
     {
         return CmfJsonResponse::create(HttpCode::FORBIDDEN)
             ->setMessage($message)
-            ->goBack(static::getUrlToItemsTable());
+            ->goBack($this->getUrlToItemsTable());
     }
     
     /**
@@ -738,7 +737,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     {
         return CmfJsonResponse::create(HttpCode::NOT_FOUND)
             ->setMessage('Handler [' . static::class . '->getCustomData($dataId)] not defined')
-            ->goBack(static::getUrlToItemsTable());
+            ->goBack($this->getUrlToItemsTable());
     }
     
     public function getCustomPage(string $pageName)
@@ -827,7 +826,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             if ($this->getRequest()->ajax()) {
                 return CmfJsonResponse::create(HttpCode::NOT_FOUND)
                     ->setMessage($message)
-                    ->goBack(static::getUrlToItemsTable());
+                    ->goBack($this->getUrlToItemsTable());
             } else {
                 return view('cmf::ui.default_page_header', [
                     'header' => $message,

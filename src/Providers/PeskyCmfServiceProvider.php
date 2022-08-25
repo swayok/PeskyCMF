@@ -32,6 +32,10 @@ class PeskyCmfServiceProvider extends ServiceProvider
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
         
         $this->setDefaultCmfConfig();
+    
+        $this->app->singleton(CmfConfig::class, function () {
+            return CmfConfig::getPrimaryOrDefault();
+        });
         
         $this->app->singleton(PeskyCmfManager::class, function ($app) {
             return new PeskyCmfManager($app);
@@ -263,10 +267,10 @@ class PeskyCmfServiceProvider extends ServiceProvider
     {
         foreach ($this->getAvailableCmfConfigs() as $sectionName => $cmfConfig) {
             if (!$this->app->routesAreCached()) {
-                $cmfConfig::getInstance()->declareRoutes($this->app, $sectionName);
+                $cmfConfig->declareRoutes($this->app, $sectionName);
             }
             if (!$this->app->configurationIsCached()) {
-                $cmfConfig::getInstance()->extendLaravelAppConfigs($this->app);
+                $cmfConfig->extendLaravelAppConfigs($this->app);
             }
         }
     }
@@ -281,9 +285,6 @@ class PeskyCmfServiceProvider extends ServiceProvider
                 $className::getInstance()->useAsDefault();
             }
         }
-        $this->app->singleton(CmfConfig::class, function () {
-            return CmfConfig::getDefault();
-        });
     }
     
 }

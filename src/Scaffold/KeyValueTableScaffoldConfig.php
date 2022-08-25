@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeskyCMF\Scaffold;
 
 use Illuminate\Http\JsonResponse;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
@@ -19,16 +20,16 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
     
     protected bool $isCreateAllowed = false;
     
-    public function __construct()
+    public function __construct(CmfConfig $cmfConfig)
     {
+        parent::__construct($cmfConfig);
         $table = static::getTable();
         if (!($table instanceof KeyValueTableInterface)) {
             throw new \UnexpectedValueException(
                 'Class ' . get_class($table) . ' returned by '
-                . static::class . '->getTable() must implement ' . KeyValueTableInterface::class
+                . static::class . '::getTable() must implement ' . KeyValueTableInterface::class
             );
         }
-        parent::__construct();
     }
     
     protected function createFormConfig(): FormConfig
@@ -90,7 +91,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
             );
         }
         $fkValue = empty($fkColumn) ? null : $request->input($fkColumn);
-        if (static::getAuthGate()->denies('resource.update', [static::getResourceName(), $fkValue])) {
+        if ($this->authGate->denies('resource.update', [static::getResourceName(), $fkValue])) {
             return $this->makeAccessDeniedReponse($formConfig->translateGeneral('message.edit.forbidden'));
         }
         $inputConfigs = $formConfig->getValueViewers();

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PeskyCMF\Scaffold\Form;
 
 use Illuminate\Support\Arr;
-use PeskyCMF\Config\CmfConfig;
 
 class WysiwygFormInput extends FormInput
 {
@@ -306,7 +305,7 @@ class WysiwygFormInput extends FormInput
                 $config['contentsCss'] = $this->customCssFiles;
             }
         }
-        $config['uploadUrl'] = CmfConfig::getInstance()->route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]);
+        $config['uploadUrl'] = $this->getCmfConfig()->route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]);
         $config['filebrowserImageUploadUrl'] = $config['uploadUrl'];
         return $config;
     }

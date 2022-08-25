@@ -13,7 +13,7 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
 <div class="register-box">
     <div class="register-logo">
         {!! $authModule->getLoginPageLogo() !!}
-        <div><b>{!! $cmfConfig::transCustom('.registration_form.header') !!}</b></div>
+        <div><b>{!! $cmfConfig->transCustom('.registration_form.header') !!}</b></div>
     </div>
     <div
         class="register-box-body"
@@ -30,7 +30,7 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
                         class="control-label"
                         for="{{ $loginInputName }}"
                     >
-                        {{ $cmfConfig::transCustom(".registration_form.{$loginInputName}_label") }}*
+                        {{ $cmfConfig->transCustom(".registration_form.{$loginInputName}_label") }}*
                     </label>
                     <input
                         type="text"
@@ -47,7 +47,7 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
                         class="control-label"
                         for="name-input"
                     >
-                        {{ $cmfConfig::transCustom(".registration_form.name_label") }}
+                        {{ $cmfConfig->transCustom(".registration_form.name_label") }}
                     </label>
                     <input
                         type="text"
@@ -62,7 +62,7 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
                     class="control-label"
                     for="email-input"
                 >
-                    {{ $cmfConfig::transCustom(".registration_form.email_label") }}@if ($loginInputName === 'email')
+                    {{ $cmfConfig->transCustom(".registration_form.email_label") }}@if ($loginInputName === 'email')
                         *
                     @endif
                 </label>
@@ -82,7 +82,7 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
                     class="control-label"
                     for="password-input"
                 >
-                    {{ $cmfConfig::transCustom('.registration_form.password_label') }}*
+                    {{ $cmfConfig->transCustom('.registration_form.password_label') }}*
                 </label>
                 <div class="has-feedback">
                     <input
@@ -100,7 +100,7 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
                     class="control-label"
                     for="password-confirmation-input"
                 >
-                    {{ $cmfConfig::transCustom('.registration_form.password_confirmation_label') }}*
+                    {{ $cmfConfig->transCustom('.registration_form.password_confirmation_label') }}*
                 </label>
                 <div class="has-feedback">
                     <input
@@ -131,12 +131,12 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
                     type="submit"
                     class="btn btn-primary btn-block btn-flat"
                 >
-                    {{ $cmfConfig::transCustom('.registration_form.button_label') }}
+                    {{ $cmfConfig->transCustom('.registration_form.button_label') }}
                 </button>
             </div>
         </form>
     </div>
     <div class="text-center mt20 register">
-        <a href="{{ cmfRoute('cmf_login', [], false, $cmfConfig) }}">{{ $cmfConfig::transCustom('.registration_form.login_to_account_label') }}</a>
+        <a href="{{ cmfRoute('cmf_login', [], false, $cmfConfig) }}">{{ $cmfConfig->transCustom('.registration_form.login_to_account_label') }}</a>
     </div>
 </div>

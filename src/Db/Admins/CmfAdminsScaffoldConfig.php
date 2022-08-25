@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Db\Admins;
 
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
@@ -33,7 +34,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
      */
     public static function getTable(): TableInterface
     {
-        return static::getCmfConfig()->getAuthModule()->getUsersTable();
+        return CmfConfig::getPrimary()->getAuthModule()->getUsersTable();
     }
     
     protected static function getIconForMenuItem(): ?string
@@ -91,7 +92,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                 ->setInputType(ColumnFilter::INPUT_TYPE_SELECT)
                 ->setAllowedValues(function () {
                     $options = [];
-                    foreach (static::getCmfConfig()->getAuthModule()->getUserRolesList() as $roleId) {
+                    foreach ($this->cmfConfig->getAuthModule()->getUserRolesList() as $roleId) {
                         $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
                     }
                     return $options;
@@ -172,7 +173,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
             'language' => FormInput::create()
                 ->setOptions(function () {
                     $options = [];
-                    foreach (static::getCmfConfig()->locales() as $lang) {
+                    foreach ($this->cmfConfig->locales() as $lang) {
                         $options[$lang] = cmfTransCustom(".language.$lang");
                     }
                     return $options;
@@ -184,11 +185,11 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                 }),
             'is_active',
             'is_superadmin' => FormInput::create()
-                ->setType(static::getCmfConfig()->getUser()->is_superadmin ? FormInput::TYPE_BOOL : FormInput::TYPE_HIDDEN),
+                ->setType($this->getUser()->is_superadmin ? FormInput::TYPE_BOOL : FormInput::TYPE_HIDDEN),
             'role' => FormInput::create()
                 ->setOptions(function () {
                     $options = [];
-                    foreach (static::getCmfConfig()->getAuthModule()->getUserRolesList() as $roleId) {
+                    foreach ($this->cmfConfig->getAuthModule()->getUserRolesList() as $roleId) {
                         $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
                     }
                     return $options;
@@ -203,7 +204,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                     return InputRenderer::create('cmf::input/hidden');
                 })->setValueConverter(function ($value, Column $columnConfig, array $record) {
                     if (empty($value) && empty($record['id'])) {
-                        return static::getUser()->id;
+                        return $this->getUser()->id;
                     } else {
                         return $value;
                     }
@@ -216,7 +217,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
             ->setWidth(50)
             ->setFormInputs($formInputs)
             ->setIncomingDataModifier(function (array $data, $isCreation) {
-                if (!static::getCmfConfig()->getUser()->is_superadmin) {
+                if (!$this->getUser()->is_superadmin) {
                     if ($isCreation) {
                         $data['is_superadmin'] = false;
                     } else {
@@ -239,8 +240,8 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
     protected function getBaseValidators(): array
     {
         return [
-            'role' => 'required|in:' . implode(',', static::getCmfConfig()->getAuthModule()->getUserRolesList()),
-            'language' => 'required|in:' . implode(',', static::getCmfConfig()->locales()),
+            'role' => 'required|in:' . implode(',', $this->cmfConfig->getAuthModule()->getUserRolesList()),
+            'language' => 'required|in:' . implode(',', $this->cmfConfig->locales()),
             'is_active' => 'boolean',
             'is_superadmin' => 'boolean',
         ];
@@ -279,7 +280,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
     
     protected function getUserLoginColumnName(): string
     {
-        return static::getCmfConfig()->getAuthModule()->getUserLoginColumnName();
+        return $this->cmfConfig->getAuthModule()->getUserLoginColumnName();
     }
     
 }

@@ -17,7 +17,7 @@ use Swayok\Utils\Set;
 trait DataValidationHelper
 {
     
-    protected $validator;
+    protected ?ValidationFactoryContract $validator = null;
     
     protected function getValidator(): ValidationFactoryContract
     {
@@ -100,13 +100,9 @@ trait DataValidationHelper
         return response()->json($this->prepareDataForValidationErrorsResponse($errors), HttpCode::CANNOT_PROCESS);
     }
     
-    /**
-     * @param array $errors
-     * @throws ValidationException
-     */
     public function throwValidationErrorsResponse(array $errors): void
     {
-        throw new ValidationException($this->getValidator()->make([], []), $this->makeValidationErrorsJsonResponse($errors));
+        abort($this->makeValidationErrorsJsonResponse($errors));
     }
     
     public function prepareDataForValidationErrorsResponse(array $errors): array
