@@ -148,7 +148,7 @@ abstract class CmfApiDocumentation
     protected function translateInserts(string $text): string
     {
         return preg_replace_callback(
-            '%\{([^{}]*)\}%',
+            '%\{([^{}]*)}%',
             function ($matches) {
                 return $this->translatePath($matches[1]);
             },

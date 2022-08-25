@@ -12,27 +12,17 @@ use Symfony\Component\HttpFoundation\Response;
 class CmfHttpRequestLogsTable extends CmfDbTable
 {
     
-    /** @var CmfHttpRequestLog */
-    protected $currentLog;
-    /** @var RecordInterface|null */
-    protected $currentLogRecord;
-    /** @var null|array */
-    protected $columnsToLog;
-    /** @var null|array */
-    protected $relationsToLog;
+    protected ?CmfHttpRequestLog $currentLog = null;
+    protected ?RecordInterface $recordToTrack = null;
+    protected ?array $columnsToLog = null;
+    protected ?array $relationsToLog = null;
     
-    /**
-     * @return CmfHttpRequestLogsTableStructure
-     */
-    public function getTableStructure()
+    public function getTableStructure(): CmfHttpRequestLogsTableStructure
     {
         return CmfHttpRequestLogsTableStructure::getInstance();
     }
     
-    /**
-     * @return CmfHttpRequestLog
-     */
-    public function newRecord()
+    public function newRecord(): CmfHttpRequestLog
     {
         return new CmfHttpRequestLog();
     }
@@ -42,10 +32,7 @@ class CmfHttpRequestLogsTable extends CmfDbTable
         return 'HttpRequestLogs';
     }
     
-    /**
-     * @return CmfHttpRequestLog
-     */
-    public static function getCurrentLog()
+    public static function getCurrentLog(): CmfHttpRequestLog
     {
         $instance = static::getInstance();
         if (!$instance->currentLog) {
@@ -58,7 +45,7 @@ class CmfHttpRequestLogsTable extends CmfDbTable
     {
         $instance = static::getInstance();
         $instance->currentLog = null;
-        $instance->currentLogRecord = null;
+        $instance->recordToTrack = null;
         $instance->columnsToLog = null;
         $instance->relationsToLog = null;
     }
@@ -67,9 +54,8 @@ class CmfHttpRequestLogsTable extends CmfDbTable
      * Minify response content.
      * Useful for heavy responses that contain lots of data or heavy data like files.
      * @param \Closure $minifier - function (Request $request) { return $content; }
-     * @return CmfHttpRequestLog
      */
-    public static function setResponseContentMinifier(\Closure $minifier)
+    public static function setResponseContentMinifier(\Closure $minifier): CmfHttpRequestLog
     {
         return static::getCurrentLog()->setResponseContentMinifier($minifier);
     }
@@ -78,9 +64,8 @@ class CmfHttpRequestLogsTable extends CmfDbTable
      * Minify request data.
      * Useful for heavy requests that contain lots of data or heavy data like files.
      * @param \Closure $minifier - function (array $data) { return $data; }
-     * @return CmfHttpRequestLog
      */
-    public static function setRequestDataMinifier(\Closure $minifier)
+    public static function setRequestDataMinifier(\Closure $minifier): CmfHttpRequestLog
     {
         return static::getCurrentLog()->setRequestDataMinifier($minifier);
     }
@@ -88,8 +73,6 @@ class CmfHttpRequestLogsTable extends CmfDbTable
     /**
      * Register request data minifier that may be used by during request logging via
      * route's 'log_data_minifier' action.
-     * @param string $name
-     * @param \Closure $minifier
      */
     public static function registerRequestDataMinifier(string $name, \Closure $minifier): void
     {
@@ -101,93 +84,70 @@ class CmfHttpRequestLogsTable extends CmfDbTable
      * @param bool $force - log request even if route has no 'log' action in its config
      * @return CmfHttpRequestLog|null
      */
-    public static function logRequest(Request $request, bool $force = false)
+    public static function logRequest(Request $request, bool $force = false): ?CmfHttpRequestLog
     {
         return static::getCurrentLog()->fromRequest($request, $force);
     }
     
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param RecordInterface|null $user
-     * @return CmfHttpRequestLog
-     */
-    public static function logResponse(Request $request, Response $response, ?RecordInterface $user = null)
+    public static function logResponse(Request $request, Response $response, ?RecordInterface $user = null): CmfHttpRequestLog
     {
-        $currentLog = static::getCurrentLog();
-        if (isset(static::getInstance()->currentLogRecord) && !isset($currentLog->data_after)) {
-            static::logDbRecordAfterChange();
-        }
-        return $currentLog->logResponse($request, $response, $user);
+        static::logDbRecordAfterChange();
+        return static::getCurrentLog()->logResponse($request, $response, $user);
     }
     
     /**
      * Response will not be logged
-     * @return CmfHttpRequestLog
      */
-    public static function ignoreResponseLogging()
+    public static function ignoreResponseLogging(): CmfHttpRequestLog
     {
         return static::getCurrentLog()->ignoreResponseLogging();
     }
     
-    /**
-     * @param RecordInterface|null $user
-     * @return CmfHttpRequestLog
-     */
-    public static function logRequester(?RecordInterface $user = null)
+    public static function logRequester(?RecordInterface $user = null): CmfHttpRequestLog
     {
         return static::getCurrentLog()->logRequester($user);
     }
     
-    /**
-     * @param RecordInterface $record
-     * @param array|null $columnsToLog
-     * @param array|null $relationsToLog
-     * @return CmfHttpRequestLog
-     */
-    public static function logDbRecordBeforeChange(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null)
-    {
+    public static function logDbRecordBeforeChange(
+        RecordInterface $record,
+        ?array $columnsToLog = null,
+        ?array $relationsToLog = null
+    ): CmfHttpRequestLog {
         $instance = static::getInstance();
-        $instance->currentLogRecord = $record;
+        $instance->recordToTrack = $record;
         $instance->columnsToLog = $columnsToLog;
         $instance->relationsToLog = $relationsToLog;
         return static::getCurrentLog()->logDbRecordBeforeChange($record, null, $columnsToLog, $relationsToLog);
     }
     
-    /**
-     * @return CmfHttpRequestLog
-     */
-    public static function logDbRecordAfterChange()
+    public static function logDbRecordAfterChange(): CmfHttpRequestLog
     {
         $instance = static::getInstance();
-        return static::getCurrentLog()->logDbRecordAfterChange(
-            $instance->currentLogRecord,
-            $instance->columnsToLog,
-            $instance->relationsToLog
-        );
+        $currentLog = static::getCurrentLog();
+        if (!isset($currentLog->data_after) && $instance->recordToTrack) {
+            return $currentLog->logDbRecordAfterChange(
+                $instance->recordToTrack,
+                $instance->columnsToLog,
+                $instance->relationsToLog
+            );
+        }
+        return $currentLog;
     }
     
-    /**
-     * @param RecordInterface $record
-     * @param array|null $columnsToLog
-     * @param array|null $relationsToLog
-     * @return CmfHttpRequestLog
-     */
-    public static function logDbRecordCreation(RecordInterface $record, array $columnsToLog = null, array $relationsToLog = null)
-    {
+    public static function logDbRecordCreation(
+        RecordInterface $record,
+        ?array $columnsToLog = null,
+        ?array $relationsToLog = null
+    ): CmfHttpRequestLog {
         $instance = static::getInstance();
-        $instance->currentLogRecord = $record;
+        $instance->recordToTrack = $record;
         $instance->columnsToLog = $columnsToLog;
         $instance->relationsToLog = $relationsToLog;
         static::getCurrentLog()->logDbRecordUsage($record, null);
         return static::getCurrentLog()->logDbRecordAfterChange($record, $columnsToLog, $relationsToLog);
     }
     
-    /**
-     * @param RecordInterface $record
-     * @return CmfHttpRequestLog
-     */
-    public static function logDbRecordUsage(RecordInterface $record)
+    public static function logDbRecordUsage(RecordInterface $record): CmfHttpRequestLog
     {
         return static::getCurrentLog()->logDbRecordUsage($record);
     }
@@ -197,16 +157,12 @@ class CmfHttpRequestLogsTable extends CmfDbTable
      * @param mixed $value - no objects supported!!
      * @return CmfHttpRequestLog
      */
-    public static function addDebugData(string $key, $value)
+    public static function addDebugData(string $key, $value): CmfHttpRequestLog
     {
         return static::getCurrentLog()->addDebugData($key, $value);
     }
     
-    /**
-     * @param array $data
-     * @return CmfHttpRequestLog
-     */
-    public static function addDebugDataFromArray(array $data)
+    public static function addDebugDataFromArray(array $data): CmfHttpRequestLog
     {
         return static::getCurrentLog()->addDebugDataFromArray($data);
     }

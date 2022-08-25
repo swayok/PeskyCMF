@@ -48,10 +48,12 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
         }
     }
     echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());
-}
+};
+
+$viewFactory = $formConfig->getCmfConfig()->getViewsFactory();
 ?>
 
-<?php View::startSection('scaffold-form-footer'); ?>
+<?php $viewFactory->startSection('scaffold-form-footer'); ?>
     <div class="box-footer">
         <div class="row toolbar">
             <div class="<?php echo $ifCreate; ?>col-xs-3<?php echo $else; ?>col-xs-5<?php echo $endIf; ?> toolbar-left">
@@ -99,9 +101,9 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             </div>
         <?php endif; ?>
     </div>
-<?php View::stopSection(); ?>
+<?php $viewFactory->stopSection(); ?>
 
-<?php View::startSection('scaffold-form-enablers-script'); ?>
+<?php $viewFactory->startSection('scaffold-form-enablers-script'); ?>
     <?php
         $enablers = [];
         foreach ($formConfig->getFormInputs() as $inputConfig) {
@@ -117,9 +119,9 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             });
         </script>
     <?php endif ?>
-<?php View::stopSection(); ?>
+<?php $viewFactory->stopSection(); ?>
 
-<?php View::startSection('scaffold-form'); ?>
+<?php $viewFactory->startSection('scaffold-form'); ?>
     <?php
         $formAttributes = [
             'id' => $formId,
@@ -155,7 +157,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
                 <ul class="nav nav-tabs">
                     <?php foreach ($tabs as $idx => $tabInfo): ?>
                         <li class="<?php echo $idx === 0 ? 'active' : '' ?>">
-                            <a href="#<?php echo $formId . '-' . (string)($idx + 1) ?>" data-toggle="tab" role="tab">
+                            <a href="#<?php echo $formId . '-' . ($idx + 1) ?>" data-toggle="tab" role="tab">
                                 <?php echo empty($tabInfo['label']) ? '*' : $tabInfo['label']; ?>
                             </a>
                         </li>
@@ -166,7 +168,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             <div class="<?php echo $hasTabs ? 'tab-content' : 'box {{? it.__modal }} mbn br-t-n {{??}} ' . $ifCreate . 'box-primary' . $else . 'box-success' . $endIf . ' {{?}}' ?>">
                 <?php foreach ($tabs as $idx => $tabInfo): ?>
                     <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body'; ?>
-                    <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $formId . '-' . (string)($idx + 1) ?>">
+                    <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $formId . '-' . ($idx + 1) ?>">
                         <?php $buildInputs($tabInfo); ?>
                     </div>
                 <?php endforeach; ?>
@@ -179,16 +181,16 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             <?php endif ?>
         </div>
     </form>
-    <?php echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates(View::yieldContent('scaffold-form-enablers-script')); ?>
-<?php View::stopSection(); ?>
+    <?php echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($viewFactory->yieldContent('scaffold-form-enablers-script')); ?>
+<?php $viewFactory->stopSection(); ?>
 
 <script type="text/html" id="item-form-tpl">
     {{##def.footer = function () {
-        return Base64.decode('<?php echo base64_encode(View::yieldContent('scaffold-form-footer')); ?>');
+        return Base64.decode('<?php echo base64_encode($viewFactory->yieldContent('scaffold-form-footer')); ?>');
     }
     #}}
     {{##def.form = function () {
-        return Base64.decode('<?php echo base64_encode(View::yieldContent('scaffold-form')); ?>');
+        return Base64.decode('<?php echo base64_encode($viewFactory->yieldContent('scaffold-form')); ?>');
     }
     #}}
     {{##def.title:

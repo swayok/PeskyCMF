@@ -12,12 +12,11 @@ use PeskyORM\ORM\Record;
 class CmfUserAuthenticatedEventListener
 {
     
-    public function handle(CmfUserAuthenticated $event)
+    public function handle(CmfUserAuthenticated $event): void
     {
         /** @var Record $user */
         $user = $event->user;
         if ($user::hasColumn('language') && $user->hasValue('language')) {
-            /** @noinspection StaticInvocationViaThisInspection */
             $event->cmfConfig->setLocale($user->getValue('language'));
         }
         if ($user::hasColumn('timezone') && $user->hasValue('timezone')) {

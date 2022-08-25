@@ -41,12 +41,12 @@ abstract class CmfMenuItem
     
     public static function bulkActionRedirectOnSelectedRows(string $url): CmfBulkActionRedirectMenuItem
     {
-        return new CmfBulkActionRedirectMenuItem($url, true);
+        return new CmfBulkActionRedirectMenuItem($url, CmfBulkActionMenuItem::ACTION_TYPE_BULK_SELECTED);
     }
     
     public static function bulkActionRedirectOnFilteredRows(string $url): CmfBulkActionRedirectMenuItem
     {
-        return new CmfBulkActionRedirectMenuItem($url, false);
+        return new CmfBulkActionRedirectMenuItem($url, CmfBulkActionMenuItem::ACTION_TYPE_BULK_FILTERED);
     }
     
     /**
@@ -223,7 +223,7 @@ abstract class CmfMenuItem
     
     public function isAccessible(): bool
     {
-        return $this->accessProvider ? (bool)call_user_func($this->accessProvider) : true;
+        return !$this->accessProvider || call_user_func($this->accessProvider);
     }
     
     public function getTooltip(): ?string

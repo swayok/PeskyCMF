@@ -7,26 +7,11 @@ namespace PeskyCMF\ApiDocs;
 class ApiMethodErrorResponseInfo
 {
     
-    /**
-     * @var int
-     */
-    protected $httpCode = 500;
-    /**
-     * @var string
-     */
-    protected $title = 'No title provided';
-    /**
-     * @var string
-     */
-    protected $description = '';
-    /**
-     * @var array
-     */
-    protected $response = [];
-    /**
-     * @var array
-     */
-    protected $extraData = [];
+    protected int $httpCode = 500;
+    protected string $title = 'No title provided';
+    protected string $description = '';
+    protected array $response = [];
+    protected array $extraData = [];
     
     /**
      * @return static

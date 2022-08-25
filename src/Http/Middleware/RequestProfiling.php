@@ -14,10 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 class RequestProfiling
 {
     
-    /**
-     * @var ExceptionHandler
-     */
-    protected $exceptionHandler;
+    protected ExceptionHandler $exceptionHandler;
     
     public function __construct(ExceptionHandler $exceptionHandler)
     {

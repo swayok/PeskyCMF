@@ -28,8 +28,8 @@ $subInputs = $valueViewer->getSubInputs();
                                 '%<label for="' . preg_quote($subInputIdForHtml, '%') . '">.*?</label>%is',
                                 '%name="' . preg_quote($subInputNameForHtml, '%') . '%is',
                                 '%id="' . preg_quote($subInputIdForHtml, '%') . '"%is',
-                                '%((?:data-)?value=")[^"]*?(")%is',
-                                '%class="form-control"%is'
+                                '%((?:data-)?value=")[^"]*?(")%i',
+                                '%class="form-control"%i'
                             ],
                             [
                                 '$1$2',

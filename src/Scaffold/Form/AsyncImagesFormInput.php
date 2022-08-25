@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Scaffold\Form;
 
 use PeskyORMColumns\Column\Files\MetadataImagesColumn;
@@ -8,10 +10,11 @@ use PeskyORMColumns\Column\Files\MetadataImagesColumn;
  * @method MetadataImagesColumn getTableColumn()
  * todo: upgrade this to be able to use MetadataFileColumn
  */
-class AsyncImagesFormInput extends AsyncFilesFormInput {
-
-    protected $previewWidth = 200;
-
+class AsyncImagesFormInput extends AsyncFilesFormInput
+{
+    
+    protected int $previewWidth = 200;
+    
     /**
      * List of image names to accept.
      * Only provided images will be shown in form. Other images will be ignored (and won't be changed in any way)
@@ -19,35 +22,39 @@ class AsyncImagesFormInput extends AsyncFilesFormInput {
      * @return static
      * @throws \InvalidArgumentException
      */
-    public function setImagesGroupsToUse($imagesGroups) {
+    public function setImagesGroupsToUse($imagesGroups)
+    {
         $this->setFilesGroupsToUse($imagesGroups);
         return $this;
     }
-
+    
     /**
      * @return int
      */
-    public function getPreviewWidth(): int {
+    public function getPreviewWidth(): int
+    {
         return $this->previewWidth;
     }
-
+    
     /**
      * @return static
      */
-    public function setPreviewWidth(int $previewWidth) {
+    public function setPreviewWidth(int $previewWidth)
+    {
         $this->previewWidth = $previewWidth;
         return $this;
     }
-
-    public function getConfigsArrayForJs(string $filesGroupName): array {
+    
+    public function getConfigsArrayForJs(string $filesGroupName): array
+    {
         return array_merge(
             parent::getConfigsArrayForJs($filesGroupName),
             [
-                'preview_width' => $this->getPreviewWidth()
+                'preview_width' => $this->getPreviewWidth(),
             ]
         );
     }
-
+    
     /**
      * @throws \BadMethodCallException
      */
@@ -59,5 +66,5 @@ class AsyncImagesFormInput extends AsyncFilesFormInput {
             );
         }
     }
-
+    
 }

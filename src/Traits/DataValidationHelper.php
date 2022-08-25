@@ -123,6 +123,7 @@ trait DataValidationHelper
     {
         foreach ($errors as $key => $messages) {
             if (strpos($key, '.') !== false) {
+                /** @noinspection RegExpRedundantEscape */
                 $newKey = preg_replace(
                     ['%^([^\]]+)\]%', '%\[\]\]%'],
                     ['$1', '][]'],

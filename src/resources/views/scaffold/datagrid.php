@@ -9,10 +9,10 @@ declare(strict_types=1);
 $helper = $dataGridConfig->getRendererHelper();
 $dataGridId = $helper->getId();
 $gridColumnsConfigs = $helper->getSortedColumnConfigs();
-
+$viewFactory = $dataGridConfig->getCmfConfig()->getViewsFactory();
 ?>
 
-<?php View::startSection('scaffold-datagrid-table'); ?>
+<?php $viewFactory->startSection('scaffold-datagrid-table'); ?>
     <table id="<?php echo $dataGridId ?>" class="table table-bordered table-hover table-striped fluid-width">
         <thead>
             <tr>
@@ -23,9 +23,9 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
 
     <?php echo $helper->getAdditionalViews(); ?>
 
-<?php View::stopSection(); ?>
+<?php $viewFactory->stopSection(); ?>
 
-<?php View::startSection('scaffold-datagrid-js'); ?>
+<?php $viewFactory->startSection('scaffold-datagrid-js'); ?>
     <script type="application/javascript">
         (function() {
             var dataTablesConfig = <?php echo json_encode($helper->getDataTablesConfig(), JSON_UNESCAPED_UNICODE); ?>;
@@ -121,8 +121,8 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
             <?php foreach ($gridColumnsConfigs as $columnConfig) : ?>
                 <?php if ($columnConfig->hasCustomWidth()) : ?>
                     dataTablesConfig.columnDefs.push({
-                        targets: <?php echo (int)$columnConfig->getPosition(); ?>,
-                        width: <?php echo (int)$columnConfig->getWidth(); ?>
+                        targets: <?php echo $columnConfig->getPosition(); ?>,
+                        width: <?php echo $columnConfig->getWidth(); ?>
                     });
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -183,7 +183,7 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
 
         })();
     </script>
-<?php View::stopSection(); ?>
+<?php $viewFactory->stopSection(); ?>
 
 <div id="data-grid-tpl">
     <?php echo view('cmf::ui.default_page_header', [
@@ -193,13 +193,13 @@ $gridColumnsConfigs = $helper->getSortedColumnConfigs();
     <div class="content">
         <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">
             <div class="box"><div class="box-body scaffold-data-grid-container">
-                <?php echo View::yieldContent('scaffold-datagrid-table'); ?>
+                <?php echo $viewFactory->yieldContent('scaffold-datagrid-table'); ?>
             </div></div>
         </div></div>
 
     </div>
 
-    <?php echo View::yieldContent('scaffold-datagrid-js'); ?>
+    <?php echo $viewFactory->yieldContent('scaffold-datagrid-js'); ?>
 
 </div>
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold\Form;
 
-use Illuminate\Support\Arr;
 use PeskyORMColumns\Column\Files\MetadataFilesColumn;
 use PeskyORMColumns\Column\Files\Utils\DbFileInfo;
 use PeskyORMColumns\Column\Files\Utils\MimeTypesHelper;
@@ -63,12 +62,12 @@ class FilesFormInput extends FormInput
      */
     public function setFilesGroupsToUse($fileGroups)
     {
-        if (empty($fileGroups)) {
-            throw new \InvalidArgumentException('$fileGroups argument cannot be empty');
-        } elseif (!is_array($fileGroups) && !($fileGroups instanceof \Closure)) {
-            throw new \InvalidArgumentException('$fileGroups argument must be an array or \Closure');
-        }
-        $this->fileConfigsToUse = $fileGroups;
+//        if (empty($fileGroups)) {
+//            throw new \InvalidArgumentException('$fileGroups argument cannot be empty');
+//        } elseif (!is_array($fileGroups) && !($fileGroups instanceof \Closure)) {
+//            throw new \InvalidArgumentException('$fileGroups argument must be an array or \Closure');
+//        }
+//        $this->fileConfigsToUse = $fileGroups;
         return $this;
     }
     
@@ -99,26 +98,27 @@ class FilesFormInput extends FormInput
     }
     
     /**
-     * @return FilesGroupConfig[]
      * @throws \UnexpectedValueException
      */
     protected function getAcceptedFileConfigurations(): array
     {
-        $column = $this->getTableColumn();
-        $configsNames = value($this->fileConfigsToUse);
-        if ($configsNames === null) {
-            return $column->getFilesGroupsConfigurations();
-        } elseif (!is_array($configsNames)) {
-            throw new \UnexpectedValueException(
-                static::class . '->fileConfigsToUse property must be an array or \Closure that returns an array'
-            );
-        } else {
-            $ret = [];
-            foreach ($configsNames as $name) {
-                $ret[$name] = $column->getFilesGroupConfiguration($name);
-            }
-            return $ret;
-        }
+//        $column = $this->getTableColumn();
+//        $configsNames = value($this->fileConfigsToUse);
+//        if ($configsNames === null) {
+//            return $column->getFilesGroupsConfigurations();
+//        } elseif (!is_array($configsNames)) {
+//            throw new \UnexpectedValueException(
+//                static::class . '->fileConfigsToUse property must be an array or \Closure that returns an array'
+//            );
+//        } else {
+//            $ret = [];
+//            foreach ($configsNames as $name) {
+//                $ret[$name] = $column->getFilesGroupConfiguration($name);
+//            }
+//            return $ret;
+//        }
+        // todo: upgrade this
+        return [];
     }
     
     public function hasLabel(): bool
@@ -144,9 +144,7 @@ class FilesFormInput extends FormInput
         if (!is_array($value) || empty($value)) {
             return $ret;
         }
-        $recordObject = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-        $pkValue = Arr::get($record, $recordObject::getPrimaryKeyColumnName());
-        $recordObject->fromData($record, !empty($pkValue) || is_numeric($pkValue), false);
+        $recordObject = $this->makeRecordObjectFromArray($record);
         
         $fileInfoArrays = $recordObject->getValue($this->getTableColumn()->getName(), 'file_info_arrays');
         foreach ($fileInfoArrays as $fileName => $fileInfoArray) {
@@ -203,7 +201,7 @@ class FilesFormInput extends FormInput
             $baseName = $this->getName() . '.' . $fileConfig->getName();
             $isRequired = $fileConfig->getMinFilesCount() > 0 ? 'required|' : '';
             $validators[$baseName] = $isRequired . 'array|max:' . $fileConfig->getMaxFilesCount();
-            $commonValidators = 'nullable|' . ($fileConfig instanceof ImagesGroupConfig ? 'image' : 'file') . '|max:' . $fileConfig->getMaxFileSize()
+            $commonValidators = 'nullable|' . ($this->getTableColumn()->isItAnImage() ? 'image' : 'file') . '|max:' . $fileConfig->getMaxFileSize()
                 . '|mimetypes:' . implode(',', $fileConfig->getAllowedMimeTypes());
             for ($i = 0; $i < $fileConfig->getMaxFilesCount(); $i++) {
                 if ($fileConfig->getMinFilesCount() > $i) {

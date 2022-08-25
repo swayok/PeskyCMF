@@ -39,7 +39,7 @@ class RecaptchaServiceProvider extends ServiceProvider
         // validator usage: ['g-recaptcha-response' => 'recaptcha']
         // Note that 'required|string' may be omitted.
         // Error translation is: 'validation.recaptcha'
-        $this->validator->extend('recaptcha', function ($attribute, $value, $parameters) {
+        $this->validator->extend('recaptcha', function ($attribute, $value) {
             if (empty($value)) {
                 return false;
             }

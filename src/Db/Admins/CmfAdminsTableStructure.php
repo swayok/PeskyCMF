@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnusedPrivateMethodInspection */
 
 declare(strict_types=1);
 
@@ -13,22 +14,6 @@ use PeskyORMColumns\TableStructureTraits\IsActiveColumn;
 use PeskyORMColumns\TableStructureTraits\TimestampColumns;
 use PeskyORMColumns\TableStructureTraits\UserAuthColumns;
 
-/**
- * @property-read Column $id
- * @property-read Column $parent_id
- * @property-read Column $name
- * @property-read Column $email
- * @property-read Column $password
- * @property-read Column $ip
- * @property-read Column $is_superadmin
- * @property-read Column $is_active
- * @property-read Column $role
- * @property-read Column $language
- * @property-read Column $created_at
- * @property-read Column $updated_at
- * @property-read Column $timezone
- * @property-read Column $remember_token
- */
 class CmfAdminsTableStructure extends CmfDbTableStructure
 {
     
@@ -37,9 +22,6 @@ class CmfAdminsTableStructure extends CmfDbTableStructure
     use IsActiveColumn;
     use UserAuthColumns;
     
-    /**
-     * @return string
-     */
     public static function getTableName(): string
     {
         return 'admins';

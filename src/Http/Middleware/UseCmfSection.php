@@ -11,10 +11,7 @@ use PeskyCMF\PeskyCmfManager;
 class UseCmfSection
 {
     
-    /**
-     * @var Application
-     */
-    protected $app;
+    protected Application $app;
     
     public function __construct(Application $app) {
         $this->app = $app;

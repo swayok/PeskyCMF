@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeskyCMF\Db\HttpRequestStats;
 
 use PeskyCMF\Db\CmfDbTable;

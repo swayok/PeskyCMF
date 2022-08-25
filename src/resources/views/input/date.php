@@ -33,9 +33,9 @@ if (empty($config)) {
     $config = [];
 }
 $config = array_merge([
-    'useCurrent' => $rendererConfig->isRequired() ? true : false,
+    'useCurrent' => $rendererConfig->isRequired(),
     'format' => 'YYYY-MM-DD',
-    'locale' => app()->getLocale(),
+    'locale' => $sectionConfig->getCmfConfig()->getLaravelApp()->getLocale(),
     'sideBySide' => false
 ], $config);
 ?>

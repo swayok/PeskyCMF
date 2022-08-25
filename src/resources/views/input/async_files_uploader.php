@@ -5,8 +5,8 @@ declare(strict_types=1);
  * @var \PeskyCMF\Scaffold\Form\AsyncFilesFormInput $valueViewer
  * @var \PeskyCMF\Scaffold\Form\FormConfig $sectionConfig
  * @var \PeskyORM\ORM\TableInterface $table
- * @var \PeskyORMLaravel\Db\Column\FilesColumn $column
- * @var \PeskyORMLaravel\Db\Column\Utils\FilesGroupConfig[] $filesConfigs
+ * @var \PeskyORMColumns\Column\Files\MetadataFilesColumn $column
+ * @var \PeskyCMF\Scaffold\Form\FilesUploaderConfig[] $filesConfigs
  */
 $column = $valueViewer->getTableColumn();
 $defaultId = $valueViewer->getDefaultId();
@@ -21,9 +21,8 @@ $isImages = $column->isItAnImage();
             $inputName = $valueViewer->getName(true) . '[' . $configName . ']';
             $configNameToInputId[$configName] = array_merge(
                 $valueViewer->getConfigsArrayForJs($configName),
-                $fileConfig->getConfigsArrayForJs(),
+                $fileConfig->toArray($inputId),
                 [
-                    'id' => $inputId,
                     'name' => $inputName . '[]'
                 ]
             );
@@ -49,7 +48,7 @@ $isImages = $column->isItAnImage();
             <input
                 type="file"
                 style="display: none !important;"
-                <?php echo $fileConfig->getMaxFilesCount() !== 1 ? 'multiple' : '' ?>
+                <?php echo $fileConfig->maxFilesCount !== 1 ? 'multiple' : '' ?>
                 id="<?php echo $inputId; ?>"
             >
             <button type="button" class="btn btn-default btn-sm" id="<?php echo $inputId; ?>-attach-button">

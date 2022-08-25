@@ -20,14 +20,8 @@ abstract class CmfController extends Controller
     use DataValidationHelper;
     use AuthorizesRequests;
     
-    /**
-     * @var CmfConfig
-     */
-    protected $cmfConfig;
-    /**
-     * @var Application
-     */
-    protected $app;
+    protected CmfConfig $cmfConfig;
+    protected Application $app;
     
     public function __construct(CmfConfig $cmfConfig, Application $app)
     {

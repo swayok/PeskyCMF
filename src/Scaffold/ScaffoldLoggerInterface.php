@@ -27,14 +27,14 @@ interface ScaffoldLoggerInterface
     
     /**
      * @param RecordInterface $record
-     * @param array $columnsToLog - list of columns to store within Log (default: all columns)
+     * @param array|null $columnsToLog - list of columns to store within Log (default: all columns)
      * @param array|null $relationsToLog - list of relations to store within Log (default: all loaded relations)
      * @return static
      */
     public function logDbRecordAfterChange(
         RecordInterface $record,
-        array $columnsToLog = null,
-        array $relationsToLog = null
+        ?array $columnsToLog = null,
+        ?array $relationsToLog = null
     );
     
     /**

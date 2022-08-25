@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'test' => 'ok', //< used in PeskyCmfServiceProvider to load cmf dictionaries
     'ui' => [

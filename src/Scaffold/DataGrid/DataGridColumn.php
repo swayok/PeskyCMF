@@ -120,21 +120,17 @@ class DataGridColumn extends RenderableValueViewer
     
     public function getValueConverter(): ?\Closure
     {
-        if (empty($this->valueConverter)) {
-            switch ($this->getType()) {
-                case self::TYPE_BOOL:
-                    $this->valueConverter = function ($value) {
-                        if (!$this->isLinkedToDbColumn()) {
-                            if (!Arr::has($value, $this->getName())) {
-                                return '-';
-                            } else {
-                                $value = (bool)$value[$this->getName()];
-                            }
-                        }
-                        return $this->getCmfConfig()->transGeneral('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
-                    };
-                    break;
-            }
+        if (empty($this->valueConverter) && $this->getType() === self::TYPE_BOOL) {
+            $this->valueConverter = function ($value) {
+                if (!$this->isLinkedToDbColumn()) {
+                    if (!Arr::has($value, $this->getName())) {
+                        return '-';
+                    } else {
+                        $value = (bool)$value[$this->getName()];
+                    }
+                }
+                return $this->getCmfConfig()->transGeneral('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
+            };
         }
         return $this->valueConverter;
     }

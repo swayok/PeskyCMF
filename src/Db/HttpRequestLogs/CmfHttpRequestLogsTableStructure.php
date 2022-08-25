@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnusedPrivateMethodInspection */
 
 declare(strict_types=1);
 
@@ -8,28 +9,6 @@ use PeskyORM\ORM\Column;
 use PeskyORM\ORM\TableStructure;
 use PeskyORMColumns\TableStructureTraits\IdColumn;
 
-/**
- * @property-read Column $id
- * @property-read Column $requester_table
- * @property-read Column $requester_id
- * @property-read Column $requester_info
- * @property-read Column $url
- * @property-read Column $http_method
- * @property-read Column $ip
- * @property-read Column $filter
- * @property-read Column $section
- * @property-read Column $response_code
- * @property-read Column $response_type
- * @property-read Column $request
- * @property-read Column $response
- * @property-read Column $debug
- * @property-read Column $table
- * @property-read Column $item_id
- * @property-read Column $data_before
- * @property-read Column $data_after
- * @property-read Column $created_at
- * @property-read Column $responded_at
- */
 class CmfHttpRequestLogsTableStructure extends TableStructure
 {
     

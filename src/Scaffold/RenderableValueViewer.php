@@ -42,6 +42,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer
     public function getVarNameForDotJs(bool $addIt = true, array $additionalVarNameParts = []): string
     {
         if ($this->varNameForDotJs === null) {
+            /** @noinspection NotOptimalRegularExpressionsInspection */
             $this->varNameForDotJs = preg_replace('%[^a-zA-Z0-9_]+%', '.', $this->getName());
         }
         return ($addIt ? 'it.' : '') . rtrim($this->varNameForDotJs . implode('.', $additionalVarNameParts), '.');

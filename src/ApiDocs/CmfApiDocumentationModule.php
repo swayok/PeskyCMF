@@ -11,7 +11,7 @@ use Swayok\Utils\Folder;
 class CmfApiDocumentationModule
 {
     
-    protected $cmfConfig;
+    protected CmfConfig $cmfConfig;
     
     public function __construct(CmfConfig $cmfConfig)
     {

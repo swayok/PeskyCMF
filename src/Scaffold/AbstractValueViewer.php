@@ -11,6 +11,7 @@ use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\ORM\Column;
+use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
 use Swayok\Html\Tag;
 
@@ -124,7 +125,7 @@ abstract class AbstractValueViewer
         return $this;
     }
     
-    public function getTableNameForRouteToRelatedRecord(): ?string
+    public function getResourceNameForRouteToRelatedRecord(): ?string
     {
         return $this->tableNameForRouteToRelatedRecord;
     }
@@ -364,6 +365,14 @@ abstract class AbstractValueViewer
         return $value;
     }
     
+    protected function makeRecordObjectFromArray(array $record): RecordInterface
+    {
+        $recordObject = $this->getScaffoldSectionConfig()->getTable()->newRecord();
+        $pkValue = Arr::get($record, $recordObject::getPrimaryKeyColumnName());
+        $recordObject->fromData($record, !empty($pkValue) || is_numeric($pkValue), false);
+        return $recordObject;
+    }
+    
     public function buildLinkToExternalRecord(
         Column $columnConfig,
         array $record,
@@ -421,7 +430,7 @@ abstract class AbstractValueViewer
             return Tag::a($linkLabel)
                 ->setHref(
                     CmfUrl::toItemDetails(
-                        $this->getTableNameForRouteToRelatedRecord() ?: $relationConfig->getForeignTable()->getName(),
+                        $this->getResourceNameForRouteToRelatedRecord() ?: $relationConfig->getForeignTable()->getName(),
                         $relationData[$relationPkColumn],
                         false,
                         $this->getCmfConfig()

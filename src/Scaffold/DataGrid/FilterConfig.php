@@ -80,7 +80,7 @@ class FilterConfig
      */
     public function addFilter(string $columnName, ?ColumnFilter $config = null)
     {
-        if (empty($config)) {
+        if (!$config) {
             $this->findTableColumn($columnName); //< needed to validate column existense
             $config = $this->createColumnFilterConfig($columnName);
         } elseif (!$config->hasColumnNameReplacementForCondition()) {
@@ -160,9 +160,6 @@ class FilterConfig
         return $table::getStructure()->getColumn($columnName);
     }
     
-    /**
-     * @return static
-     */
     protected function findRelatedTable(
         TableInterface $table,
         string $relationAlias,

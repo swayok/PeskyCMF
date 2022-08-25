@@ -393,7 +393,6 @@ class DataGridConfig extends ScaffoldSectionConfig
             throw new \UnexpectedValueException(get_class($this) . '->bulkActionsToolbarItems closure must return an array');
         }
         /** @var Tag|string $item */
-        /** @var array $bulkActionsToolbarItems */
         foreach ($bulkActionsToolbarItems as &$item) {
             if (is_object($item)) {
                 /** @noinspection MissingOrEmptyGroupStatementInspection */
@@ -525,7 +524,6 @@ class DataGridConfig extends ScaffoldSectionConfig
     {
         foreach ($records as &$record) {
             $record = $this->prepareRecord($record, $virtualColumns);
-            $resourceName = $this->getScaffoldConfig()->getResourceName();
             if (!empty($record['___details_allowed'])) {
                 $record['___details_url'] = $this->getScaffoldConfig()->getUrlToItemDetails($record['___pk_value']);
             }
@@ -822,7 +820,7 @@ class DataGridConfig extends ScaffoldSectionConfig
      */
     public function setNestedViewsDepthLimit(int $maxDepth)
     {
-        $this->nestedViewsDepthLimit = (int)$maxDepth;
+        $this->nestedViewsDepthLimit = $maxDepth;
         return $this;
     }
     

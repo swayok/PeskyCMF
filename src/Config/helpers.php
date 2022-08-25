@@ -407,6 +407,7 @@ if (!function_exists('formatDate')) {
      *      - 'current': drop year only when it is same as current
      *      - integer: drop year only when it is same as passed integer
      *      - other values: year will be added
+     * @param string|null $default
      * @return string
      */
     function formatDate(
@@ -432,8 +433,8 @@ if (!function_exists('formatDate')) {
             $month = mb_strtolower(cmfTransGeneral('.month.when.' . $date->format('m')));
             if (
                 $ignoreYear === true //< ignore any year
-                || ($ignoreYear === 'current' && $date->isCurrentYear()) //< ignore current year
                 || (is_numeric($ignoreYear) && (int)$ignoreYear === $date->year) //< ignore certain year ($ignoreYear)
+                || ($ignoreYear === 'current' && $date->isCurrentYear()) //< ignore current year
             ) {
                 $year = '';
             } else {
@@ -461,6 +462,7 @@ if (!function_exists('formatDate')) {
 if (!function_exists('formatMoney')) {
     /**
      * @param float $number
+     * @param int $decimals
      * @param string $thousandsSeparator
      * @return string
      */
@@ -525,7 +527,7 @@ if (!function_exists('pickLocalization')) {
      *      - false: $translations values = arrays with 2 keys: 'key' and 'value';
      * @return string|null
      */
-    function pickLocalization(array $translations, $default = null, bool $isAssociativeArray = true): ?string
+    function pickLocalization(array $translations, ?string $default = null, bool $isAssociativeArray = true): ?string
     {
         $langCodes = [app()->getLocale(), cmfConfig()->default_locale()];
         foreach ($langCodes as $langCode) {
@@ -566,7 +568,7 @@ if (!function_exists('pickLocalizationFromJson')) {
      * @return string|null
      * @see pickLocalization()
      */
-    function pickLocalizationFromJson($translationsJson, $default = null, bool $isAssociativeArray = true): ?string
+    function pickLocalizationFromJson($translationsJson, ?string $default = null, bool $isAssociativeArray = true): ?string
     {
         $translations = is_array($translationsJson) ? $translationsJson : json_decode($translationsJson, true);
         return is_array($translations) ? $default : pickLocalization($translations, $default, $isAssociativeArray);

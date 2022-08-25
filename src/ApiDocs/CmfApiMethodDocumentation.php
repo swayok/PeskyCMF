@@ -27,9 +27,8 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
      * to translation path - it will be added automatically using CmfConfig::getPrimary()->custom_dictionary_name().
      * Resulting path will be: 'admin.api_docs.method.some_name.title' if dictionary name is 'admin'
      * When null: $this->translationsBasePath . '.title_for_postman' or $this->getUrl() will be used
-     * @var string|null
      */
-    protected $titleForPostman;
+    protected ?string $titleForPostman = null;
     //protected $titleForPostman = '{group.method.title_for_postman}';
     
     /**
@@ -38,10 +37,10 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
      * enough unlike '{url_parameter}' variant)
      * @var string
      */
-    protected $url = '/api/example/{url_parameter}/list';
-    protected $httpMethod = 'GET';
+    protected string $url = '/api/example/{url_parameter}/list';
+    protected string $httpMethod = 'GET';
     
-    protected $headers = [
+    protected array $headers = [
         'Accept' => 'application/json',
         'Accept-Language' => '{{language}}',
         'Authorization' => 'Bearer {{auth_token}}',
@@ -51,28 +50,25 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
      * For url: '/api/items/{id}/list' 'id' is url parameter (brackets needed only to highlight url parameter)
      * @var array
      */
-    protected $urlParameters = [
+    protected array $urlParameters = [
 //        'url_parameter' => 'int'
     ];
-    protected $urlQueryParameters = [
+    protected array $urlQueryParameters = [
 //        '_method' => 'PUT',
 //        'token' => 'string',
     ];
-    protected $postParameters = [
+    protected array $postParameters = [
 //        'id' => 'int',
     ];
-    protected $validationErrors = [
+    protected array $validationErrors = [
 //        'token' => ['required', 'string'],
 //        'id' => ['required', 'integer', 'min:1']
     ];
     
-    protected $onSuccess = [
+    protected array $onSuccess = [
 //        'name' => 'string',
     ];
     
-    /**
-     * @return array
-     */
     protected function getPossibleErrors(): array
     {
         /* Example:
@@ -152,7 +148,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         return $errors;
     }
     
-    protected static $authFailError = [
+    protected static array $authFailError = [
         'code' => HttpCode::UNAUTHORISED,
         'title' => '{error.auth_failure.title}',
         'description' => '{error.auth_failure.description}',
@@ -161,7 +157,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    protected static $accessDeniedError = [
+    protected static array $accessDeniedError = [
         'code' => HttpCode::FORBIDDEN,
         'title' => '{error.access_denied.title}',
         'description' => '{error.auth_failure.description}',
@@ -170,7 +166,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    protected static $dataValidationError = [
+    protected static array $dataValidationError = [
         'code' => HttpCode::CANNOT_PROCESS,
         'title' => '{error.validation_errors.title}',
         'description' => '{error.auth_failure.description}',
@@ -180,7 +176,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    protected static $serverError = [
+    protected static array $serverError = [
         'code' => HttpCode::SERVER_ERROR,
         'title' => '{error.server_error.title}',
         'description' => '{error.auth_failure.description}',
@@ -189,7 +185,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    protected static $itemNotFound = [
+    protected static array $itemNotFound = [
         'code' => HttpCode::NOT_FOUND,
         'title' => '{error.item_not_found.title}',
         'description' => '{error.item_not_found.description}',
@@ -272,6 +268,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
     /**
      * @param string $group - one of: 'url', 'url_query', 'post'
      * @return array
+     * @noinspection PhpUnusedParameterInspection
      */
     public function getDefaultParamsValuesForPostman(string $group): array
     {
@@ -335,7 +332,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
             'name' => $this->getTitleForPostman(),
             'request' => [
                 'url' => url(
-                    preg_replace('%\{([^/]+?)\}%', ':$1', $this->getUrl()) . $queryParams
+                    preg_replace('%\{([^/]+?)}%', ':$1', $this->getUrl()) . $queryParams
                 ),
                 'method' => $this->getHttpMethodForPostman(),
                 'description' => $this->cleanTextForPostman($this->getTitle() . "\n" . $this->getDescription()),
@@ -371,7 +368,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
     protected function cleanTextForPostman(string $text): string
     {
         return preg_replace(
-            ['% +%', "%\n\s+%s"],
+            ['% +%', "%\n\s+%"],
             [' ', "\n"],
             trim(
                 strip_tags(

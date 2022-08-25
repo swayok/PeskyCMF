@@ -11,12 +11,10 @@ use PeskyORM\ORM\Table;
 abstract class CmfDbTable extends Table
 {
     
-    /** @var array */
-    private static $timeZonesList;
-    /** @var array */
-    private static $timeZonesOptions;
+    private static ?array $timeZonesList = null;
+    private static ?array $timeZonesOptions = null;
     
-    public static function getTimezonesList($asOptions = false)
+    public static function getTimezonesList($asOptions = false): array
     {
         if (self::$timeZonesList === null) {
             self::$timeZonesList = \DateTimeZone::listIdentifiers();
@@ -34,7 +32,7 @@ abstract class CmfDbTable extends Table
         }
     }
     
-    public function getCurrentTime()
+    public function getCurrentTime(): int
     {
         $result = static::selectValue(static::getCurrentTimeDbExpr());
         return $result ? strtotime($result) : time();
@@ -45,7 +43,7 @@ abstract class CmfDbTable extends Table
         return DbExpr::create('NOW()');
     }
     
-    public static function _getCurrentTime()
+    public static function _getCurrentTime(): int
     {
         $ds = self::getConnection(false);
         $query = 'SELECT ' . $ds->quoteDbExpr(static::getCurrentTimeDbExpr());

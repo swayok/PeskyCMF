@@ -28,30 +28,26 @@ class ValueCell extends RenderableValueViewer
     
     public function getValueConverter(): ?\Closure
     {
-        if (empty(parent::getValueConverter())) {
-            switch ($this->getType()) {
-                case static::TYPE_IMAGE:
-                    $this->setValueConverter(function ($value, Column $columnConfig, array $record) {
-                        if (!empty($value) && is_array($value) && !empty($value['url']) && is_array($value['url'])) {
-                            if (count($value['url']) > 0) {
-                                unset($value['url']['source']);
-                            }
-                            $images = [];
-                            $baseTranslationPath = $columnConfig->getTableStructure()->getTableName()
-                                . '.item_details.field.' . $columnConfig->getName() . '_version.';
-                            foreach ($value['url'] as $key => $url) {
-                                $images[] = [
-                                    'label' => $this->getCmfConfig()->transCustom($baseTranslationPath . $key),
-                                    'url' => $url,
-                                ];
-                            }
-                            return $images;
-                        } else {
-                            return [];
-                        }
-                    });
-                    break;
-            }
+        if (empty(parent::getValueConverter()) && $this->getType() === static::TYPE_IMAGE) {
+            $this->setValueConverter(function ($value, Column $columnConfig) {
+                if (!empty($value) && is_array($value) && !empty($value['url']) && is_array($value['url'])) {
+                    if (count($value['url']) > 0) {
+                        unset($value['url']['source']);
+                    }
+                    $images = [];
+                    $baseTranslationPath = $columnConfig->getTableStructure()->getTableName()
+                        . '.item_details.field.' . $columnConfig->getName() . '_version.';
+                    foreach ($value['url'] as $key => $url) {
+                        $images[] = [
+                            'label' => $this->getCmfConfig()->transCustom($baseTranslationPath . $key),
+                            'url' => $url,
+                        ];
+                    }
+                    return $images;
+                } else {
+                    return [];
+                }
+            });
         }
         return parent::getValueConverter();
     }

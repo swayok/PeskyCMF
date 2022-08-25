@@ -22,8 +22,7 @@ class ImagesFormInput extends FilesFormInput
      */
     public function setImagesGroupsToUse($imageGroups)
     {
-        $this->setFilesGroupsToUse($imageGroups);
-        return $this;
+        return $this->setFilesGroupsToUse($imageGroups);
     }
     
 }

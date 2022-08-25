@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $dictionary = [
     'default_page_title' => 'PeskyCMF',
     'language' => [

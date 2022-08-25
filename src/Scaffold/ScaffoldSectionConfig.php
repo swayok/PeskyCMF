@@ -501,7 +501,6 @@ abstract class ScaffoldSectionConfig
             }
         }
         $record = $this->modifyRawRecordData($record);
-        $customData = $this->getCustomDataForRecord($record);
         $valueViewers = $this->getValueViewers();
         // backup values
         $recordWithBackup = [];
@@ -587,7 +586,8 @@ abstract class ScaffoldSectionConfig
                 Arr::set($recordWithBackup, $safeKey, $convertedValue);
             }
         }
-        if (!empty($customData) && is_array($customData)) {
+        $customData = $this->getCustomDataForRecord($record);
+        if (!empty($customData)) {
             $recordWithBackup = array_merge($recordWithBackup, $customData);
         }
         return array_merge($recordWithBackup, $permissionsAndServiceData);
@@ -606,7 +606,6 @@ abstract class ScaffoldSectionConfig
         $valueViewers = $this->getViewersForRelations();
         foreach ($recordData[$relationName] as $columnName => $value) {
             $viewerName = $relationName . '.' . ($index === null ? '' : $index . '.') . $columnName;
-            /** @noinspection NullPointerExceptionInspection */
             if (
                 array_key_exists($viewerName, $valueViewers)
                 && $valueViewers[$viewerName]->getRelation()->getName() === $relationName

@@ -228,7 +228,7 @@ $errors = $method->getErrors()
                                         <td class="api-documentation-param-type-cell">
                                             @if(is_array($paramInfo['type']))
                                                 {!! json_encode($paramInfo['type'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) !!}
-                                            @else
+                                            @elseif(is_string($paramInfo['type']))
                                                 {!! $paramInfo['type'] !!}
                                             @endif
                                         </td>

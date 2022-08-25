@@ -65,14 +65,13 @@ class ManyToManyRelationRecordsValueCell extends ValueCell
             $links = [];
             $dataSourceRelation = $this->getDataSourceRelation();
             $labelColumn = $this->getColumnForLinksLabels($dataSourceRelation->getDisplayColumnName());
-            $tableNameForRoute = $this->getTableNameForRouteToRelatedRecord() ?: $dataSourceRelation->getForeignTable()->getName();
+            $resourceName = $this->getResourceNameForRouteToRelatedRecord() ?: $dataSourceRelation->getForeignTable()->getName();
             foreach ($value as $relatedRecord) {
                 $links[] = Tag::a()
                     ->setHref(
-                        $this->getScaffoldSectionConfig()->getScaffoldConfig()->getUrlToItemDetails(
-                            $tableNameForRoute,
-                            $relatedRecord[$this->getRelationColumn()]
-                        )
+                        $this->getCmfConfig()
+                            ->getScaffoldConfig($resourceName)
+                            ->getUrlToItemDetails($relatedRecord[$this->getRelationColumn()])
                     )
                     ->setContent(
                         $labelColumn instanceof \Closure

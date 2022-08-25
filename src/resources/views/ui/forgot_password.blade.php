@@ -45,7 +45,7 @@ declare(strict_types=1);
                     class="btn btn-default btn-flat pull-left"
                     href="{{ $authModule->getLoginPageUrl() }}"
                 >
-                    {{ $cmfConfig::transGeneral('.action.back') }}
+                    {{ $cmfConfig->transGeneral('.action.back') }}
                 </a>
                 <button
                     type="submit"

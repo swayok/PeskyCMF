@@ -255,9 +255,7 @@ class FormConfig extends ScaffoldSectionConfig
      */
     public function setTooltipsForInputs(array $tooltips)
     {
-        if (is_array($tooltips)) {
-            $this->tooltips = $tooltips;
-        }
+        $this->tooltips = $tooltips;
         return $this;
     }
     

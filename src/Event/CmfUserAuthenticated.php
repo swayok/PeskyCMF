@@ -12,9 +12,8 @@ class CmfUserAuthenticated
 {
     
     /** @var RecordInterface|Authenticatable */
-    public $user;
-    /** @var CmfConfig */
-    public $cmfConfig;
+    public RecordInterface $user;
+    public CmfConfig $cmfConfig;
     
     public function __construct(RecordInterface $user, CmfConfig $cmfConfig)
     {

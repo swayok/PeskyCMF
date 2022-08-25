@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnusedPrivateMethodInspection */
 
 declare(strict_types=1);
 
@@ -9,24 +10,6 @@ use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 use PeskyORMColumns\TableStructureTraits\IdColumn;
 
-/**
- * @property-read Column $id
- * @property-read Column $http_method
- * @property-read Column $url
- * @property-read Column $route
- * @property-read Column $created_at
- * @property-read Column $duration
- * @property-read Column $duration_sql
- * @property-read Column $duration_error
- * @property-read Column $memory_usage_mb
- * @property-read Column $is_cache
- * @property-read Column $url_params
- * @property-read Column $sql
- * @property-read Column $http_code
- * @property-read Column $request_data
- * @property-read Column $checkpoints
- * @property-read Column $counters
- */
 class CmfHttpRequestStatsTableStructure extends CmfDbTableStructure
 {
     

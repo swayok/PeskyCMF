@@ -14,10 +14,7 @@ class ValidateData
     
     use DataValidationHelper;
     
-    /**
-     * @var Application
-     */
-    protected $app;
+    protected Application $app;
     
     public function __construct(Application $app)
     {
@@ -32,10 +29,6 @@ class ValidateData
     */
     
     /**
-     * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param \Closure $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)

@@ -10,7 +10,11 @@ declare(strict_types=1);
 if (empty($options)) {
     $options = [];
 }
-$yes = empty($options['yes']) ? cmfTransGeneral('.item_details.field.bool.yes') : $options['yes'];
-$no = empty($options['no']) ? cmfTransGeneral('.item_details.field.bool.no') : $options['no'];
+$yes = \Illuminate\Support\Arr::get($options, 'yes', function () {
+    return cmfTransGeneral('.item_details.field.bool.yes');
+});
+$no = \Illuminate\Support\Arr::get($options, 'no', function () {
+    return cmfTransGeneral('.item_details.field.bool.no');
+});
 echo $valueViewer->getConditionalDotJsInsertForValue($yes, $no);
 

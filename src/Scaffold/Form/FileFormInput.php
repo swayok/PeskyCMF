@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold\Form;
 
-use Illuminate\Support\Arr;
 use PeskyORMColumns\Column\Files\MetadataFilesColumn;
 use PeskyORMColumns\Column\Files\MetadataImagesColumn;
 use PeskyORMColumns\Column\Files\Utils\DbFileInfo;
@@ -121,9 +120,7 @@ class FileFormInput extends FormInput
         if (!is_array($value) || empty($value)) {
             return $ret;
         }
-        $recordObject = $this->getScaffoldSectionConfig()->getTable()->newRecord();
-        $pkValue = Arr::get($record, $recordObject::getPrimaryKeyColumnName());
-        $recordObject->fromData($record, !empty($pkValue) || is_numeric($pkValue), false);
+        $recordObject = $this->makeRecordObjectFromArray($record);
         
         /** @var DbFileInfo $fileInfo */
         $fileInfo = $recordObject->getValue($this->getTableColumn()->getName());

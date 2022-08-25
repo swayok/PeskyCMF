@@ -24,24 +24,12 @@ class LogHttpRequest
      * list of logs with urls
      * @var CmfHttpRequestLog[]
      */
-    private static $logs = [];
+    private static array $logs = [];
     
-    /**
-     * @var Application
-     */
-    protected $app;
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-    /**
-     * @var AuthFactory
-     */
-    protected $auth;
-    /**
-     * @var ExceptionHandler
-     */
-    protected $exceptionHandler;
+    protected Application $app;
+    protected LoggerInterface $logger;
+    protected AuthFactory $auth;
+    protected ExceptionHandler $exceptionHandler;
     
     public function __construct(
         Application $app,

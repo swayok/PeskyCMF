@@ -10,9 +10,10 @@ $pageUrl = routeToCmfItemDetails($tableNameForRoutes, '{{= it.___pk_value }}');
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 $tabs = $itemDetailsConfig->getTabs();
 $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
+$viewFactory = $itemDetailsConfig->getCmfConfig()->getViewsFactory();
 ?>
 
-<?php View::startSection('item-detials-tabsheet') ;?>
+<?php $viewFactory->startSection('item-detials-tabsheet') ;?>
     <?php
         $groups = $itemDetailsConfig->getRowsGroups();
         $jsInitiator = '';
@@ -27,7 +28,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
                 <ul class="nav nav-tabs">
                     <?php foreach ($tabs as $idx => $tabInfo): ?>
                         <li class="<?php echo $idx === 0 ? 'active' : '' ?>">
-                            <a href="#<?php echo $containerId . '-' . (string)($idx + 1) ?>" data-toggle="tab" role="tab">
+                            <a href="#<?php echo $containerId . '-' . ($idx + 1) ?>" data-toggle="tab" role="tab">
                                 <?php echo empty($tabInfo['label']) ? '*' : $tabInfo['label']; ?>
                             </a>
                         </li>
@@ -39,7 +40,7 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
         <div class="<?php echo $hasTabs ? 'tab-content' : 'box {{? it.__modal }} br-t-n {{??}} box-primary {{?}} mn pn' ?>">
             <?php foreach ($tabs as $idx => $tabInfo) : ?>
                 <?php $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body mn pn'; ?>
-                <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $containerId . '-' . (string)($idx + 1) ?>">
+                <div role="tabpanel" class=" <?php echo $class ?>" id="<?php echo $containerId . '-' . ($idx + 1) ?>">
                     <table class="table table-striped table-bordered mn item-details-table br-l-n br-r-n">
                         <?php
                             $class = $hasTabs ? 'tab-pane' . ($idx === 0 ? ' active' : '') : 'box-body';
@@ -101,9 +102,9 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
             <?php endforeach; ?>
         </div>
     </div>
-<?php View::stopSection(); ?>
+<?php $viewFactory->stopSection(); ?>
 
-<?php View::startSection('item-detials-footer') ;?>
+<?php $viewFactory->startSection('item-detials-footer') ;?>
     <div class="row toolbar">
         <div class="{{? it.__modal }} col-xs-3 {{??}} col-xs-2 {{?}} text-left toolbar-left">
             {{? it.__modal }}
@@ -140,16 +141,16 @@ $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
             ?>
         </div>
     </div>
-<?php View::stopSection(); ?>
+<?php $viewFactory->stopSection(); ?>
 
 <script type="text/html" id="item-details-tpl">
     {{##def.tabsheet = function () {
-        return Base64.decode('<?php echo base64_encode(View::yieldContent('item-detials-tabsheet')); ?>');
+        return Base64.decode('<?php echo base64_encode($viewFactory->yieldContent('item-detials-tabsheet')); ?>');
     }
     #}}
 
     {{##def.footer = function () {
-        return Base64.decode('<?php echo base64_encode(View::yieldContent('item-detials-footer')); ?>');
+        return Base64.decode('<?php echo base64_encode($viewFactory->yieldContent('item-detials-footer')); ?>');
     }
     #}}
     {{? it.__modal }}

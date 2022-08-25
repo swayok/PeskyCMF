@@ -337,6 +337,9 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
             : $responseContent;
     }
     
+    /**
+     * @return static
+     */
     public function ignoreResponseLogging()
     {
         $this->ignoreResponseLogging = true;
@@ -430,7 +433,9 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
                 ($user::hasColumn('name') && !empty($user->name))
                 || ($user::hasColumn('first_name') && !empty($user->first_name))
             ) {
-                $name = $user::hasColumn('name') && !empty($user->name) ? $user->name : $user->first_name;
+                $name = $user::hasColumn('name') && !empty($user->name)
+                    ? $user->getValue('name')
+                    : $user->getValue('first_name');
                 if ($user::hasColumn('surname') && !empty($user->surname)) {
                     $name .= ' ' . $user->surname;
                 } elseif ($user::hasColumn('last_name') && !empty($user->last_name)) {

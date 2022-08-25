@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @var string $idSuffix
  */
 $formId = "scaffold-bulk-edit-form-{$idSuffix}";
-$pkColName = $table->getPkColumnName();
+$pkColName = $table::getPkColumnName();
 $backUrl = routeToCmfItemsTable($tableNameForRoutes);
 ?>
 

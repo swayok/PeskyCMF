@@ -23,7 +23,7 @@ use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface
 class PeskyCmfAppSettings
 {
     
-    /** @var $this */
+    /** @var static */
     protected static $instance;
     
     public const DEFAULT_BROWSER_TITLE = 'default_browser_title';
@@ -32,9 +32,9 @@ class PeskyCmfAppSettings
     public const DEFAULT_LANGUAGE = 'default_language';
     public const FALLBACK_LANGUAGES = 'fallback_languages';
     
-    protected static $settingsForWysiwygDataIsnserts = [
+    protected static array $settingsForWysiwygDataIsnserts = [];
     
-    ];
+    private ?array $defaultValues = null;
     
     /**
      * @return static
@@ -121,15 +121,13 @@ class PeskyCmfAppSettings
         return $data;
     }
     
-    private $defaultValues;
-    
     /**
      * Get default value for setting $name
      * @return mixed
      */
     public static function getDefaultValue(string $name)
     {
-        if (!static::getInstance()->defaultValues) {
+        if (static::getInstance()->defaultValues === null) {
             static::getInstance()->defaultValues = static::getAllDefaultValues();
         }
         if (Arr::has(static::getInstance()->defaultValues, $name)) {
