@@ -60,7 +60,7 @@ class PeskyCmfLanguageDetectorServiceProvider extends LanguageDetectorServicePro
      * Detect and apply language for the application.
      * Failsafe
      */
-    protected function detectAndApplyLanguage()
+    protected function detectAndApplyLanguage(): void
     {
         if ($this->config('autodetect', true)) {
             $detector = $this->getLanguageDetector();

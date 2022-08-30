@@ -760,7 +760,7 @@ class ColumnFilter
      * @param string $operator
      * @throws \InvalidArgumentException
      */
-    protected function validateValue($value, string $operator)
+    protected function validateValue($value, string $operator): void
     {
         if (
             ($value === null || $value === '')

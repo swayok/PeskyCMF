@@ -16,6 +16,7 @@ $rendererConfig
     ->addAttribute('type', 'text', false);
 $rendererConfig->addAttribute('id', $rendererConfig->getAttribute('id') . '-{{= it.index }}', true);
 $inputName = $rendererConfig->getAttribute('name');
+/** @noinspection DuplicatedCode */
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText();

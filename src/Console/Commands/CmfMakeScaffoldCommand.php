@@ -129,17 +129,12 @@ INFO
         return 'Scaffolds';
     }
     
-    protected function getFolder(string $namespace): string
+    protected function getFolder(): string
     {
         $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->app_subfolder());
-        return $this->getBasePathToApp() . DIRECTORY_SEPARATOR . $appSubfolder . DIRECTORY_SEPARATOR . $this->getScaffoldsFolderName(
-            ) . DIRECTORY_SEPARATOR;
-        /*$folder = preg_replace(
-            ['%[\\/]%', '%^/?App%'],
-            [DIRECTORY_SEPARATOR, $this->getBasePathToApp()],
-            rtrim($namespace, '\\')
-        );
-        return $folder . DIRECTORY_SEPARATOR;*/
+        return $this->getBasePathToApp() . DIRECTORY_SEPARATOR
+            . $appSubfolder . DIRECTORY_SEPARATOR
+            . $this->getScaffoldsFolderName() . DIRECTORY_SEPARATOR;
     }
     
     protected function getBasePathToApp(): string

@@ -1,4 +1,6 @@
 <?php
+
+/** @noinspection DuplicatedCode */
 declare(strict_types=1);
 /**
  * @var \PeskyCMF\Scaffold\Form\InputRenderer $rendererConfig

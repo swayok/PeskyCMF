@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Schema;
 class CmfHttpRequestStatsMigration extends Migration
 {
     
-    public function up()
+    public function up(): void
     {
         if (!Schema::hasTable(CmfHttpRequestStatsTableStructure::getTableName())) {
             Schema::create(CmfHttpRequestStatsTableStructure::getTableName(), function (Blueprint $table) {
@@ -49,7 +49,7 @@ class CmfHttpRequestStatsMigration extends Migration
         }
     }
     
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists(CmfHttpRequestStatsTableStructure::getTableName());
     }

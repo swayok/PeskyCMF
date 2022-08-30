@@ -13,22 +13,6 @@ use PeskyCMF\HttpCode;
 use PeskyCMF\PeskyCmfAppSettings;
 use Swayok\Utils\StringUtils;
 
-if (!defined('t')) {
-    define('t', true);
-}
-
-if (!defined('f')) {
-    define('f', false);
-}
-
-if (!defined('y')) {
-    define('y', true);
-}
-
-if (!defined('n')) {
-    define('n', false);
-}
-
 if (!defined('DOTJS_INSERT_REGEXP_FOR_ROUTES')) {
     define('DOTJS_INSERT_REGEXP_FOR_ROUTES', '(\{\{\s*=.*?\}\}|\{\s*=.*?\})');
 }

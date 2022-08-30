@@ -42,6 +42,9 @@ class FileFormInput extends FormInput
         return $this->filesUploaderConfig;
     }
     
+    /**
+     * @return static
+     */
     public function setFilesUploaderConfig(FilesUploaderConfig $config)
     {
         $this->filesUploaderConfig = $config;

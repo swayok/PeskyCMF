@@ -382,6 +382,7 @@ class FormConfig extends ScaffoldSectionConfig
         return $this->bulkEditableColumns;
     }
     
+    /** @noinspection PhpUnusedParameterInspection */
     protected function getNextBulkEditableColumnPosition(FormInput $formInput): int
     {
         return count($this->bulkEditableColumns);

@@ -27,7 +27,7 @@ use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 class PeskyCmfServiceProvider extends ServiceProvider
 {
     
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
         
@@ -69,7 +69,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         });
     }
     
-    public function provides()
+    public function provides(): array
     {
         return [
             CmfConfig::class,

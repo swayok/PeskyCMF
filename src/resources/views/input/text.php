@@ -11,6 +11,7 @@ $rendererConfig
     ->addAttribute('id', $valueViewer->getDefaultId(), false)
     ->addAttribute('class', 'form-control', false)
     ->addAttribute('type', 'text', false);
+/** @noinspection DuplicatedCode */
 $attributesForCreate = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForCreate());
 $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttributesForEdit());
 $hasAddons = $rendererConfig->hasPrefixText() || $rendererConfig->hasSuffixText();

@@ -50,6 +50,7 @@ class CmfMakeApiDocCommand extends CmfCommand
         $this->line('Writing class ' . $namespace . '\\' . $className . ' to file ' . $filePath);
         $namespace = ltrim($namespace, '\\');
         $baseClass = CmfApiDocumentation::class;
+        /** @noinspection DuplicatedCode */
         $baseClassName = class_basename($baseClass);
         $classSuffix = $this->getCmfConfig()->getApiDocumentationModule()->getClassNameSuffix();
         $translationSubGroup = Str::snake(
