@@ -24,12 +24,6 @@
             "PeskyCMF": "/src"
         }
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
-        }
-    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
@@ -52,8 +46,5 @@
     "suggest": {
         "swayok/laravel-antihack-tool": "master@dev - active hack protection tool",
         "npm or yarn": "Install node.js and yarn"
-    },
-    "todo": {
-        "bower-asset/cropperjs": "1.*"
     }
 }
