@@ -37,9 +37,9 @@
         "laravel/framework": ">=5.3|>=6.0",
         "swayok/utils": "^1.3",
         "swayok/peskyorm": "v2.x-dev",
-        "swayok/peskyorm-laravel": "master@dev",
+        "swayok/peskyorm-laravel": "dev-orm_v2",
         "swayok/html-tag-helper": "^1.0",
-        "swayok/laravel-language-detector": "master-dev"
+        "swayok/laravel-language-detector": "dev-master"
     },
     "scripts": {
         "post-install-cmd": [
