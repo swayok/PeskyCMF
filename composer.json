@@ -1,14 +1,15 @@
 {
     "name": "swayok/peskycmf",
     "type": "library",
-    "description": "PeskyCMF - CMF based on Laravel Framework 5, PeskyORM and AdminLTE UI template",
+    "description": "PeskyCMF - CMF based on Laravel Framework 5+, PeskyORM and AdminLTE 2 UI template",
     "keywords": [
         "php",
         "cmf",
         "laravel",
-        "admin",
+        "admin-ui",
         "database",
-        "web"
+        "web",
+        "scaffolding"
     ],
     "authors": [
         {
@@ -20,38 +21,27 @@
         "issues": "https://github.com/swayok/PeskyCMF/issues"
     },
     "autoload": {
-        "psr-0": {
-            "PeskyCMF": "/src"
+        "psr-4": {
+            "PeskyCMF\\": "src"
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/swayok/peskyorm.git"
-        }
-    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
-        "php": ">=5.6",
-        "laravel/framework": ">=5.2",
-        "swayok/utils": "~1.0",
-        "swayok/peskyorm": "dev-v1_stable",
-        "swayok/html-tag-helper": "~1.0",
-        "swayok/laravel-site-loader": "master@dev",
-        "almasaeed2010/adminlte": "2.3.*",
-        "fortawesome/font-awesome": "^4.7",
-        "nostalgiaz/bootstrap-switch": "*",
-        "eonasdan/bootstrap-datetimepicker": "*",
-        "datatables/datatables": "*",
-        "ckeditor/ckeditor": "4.*",
-        "twbs/bootstrap": "3.*",
-        "components/jquery": "2.*",
-        "snapappointments/bootstrap-select": "^1.13",
-        "mistic100/jquery-querybuilder": "*",
-        "grimmlink/toastr": "2.*",
-        "moment/moment": "2.*",
-        "jquery-form/form": "3.*",
-        "afarkas/html5shiv": "*",
-        "select2/select2": "*",
-        "robinherbots/jquery.inputmask": "^3.3"
+        "php": ">=7.4.0",
+        "ext-json": "*",
+        "ext-imagick": "*",
+        "ext-pdo": "*",
+        "laravel/framework": ">=5.4",
+        "swayok/utils": "^1.7",
+        "swayok/peskyorm-laravel": "dev-orm_v2_1",
+        "swayok/html-tag-helper": "^1.0",
+        "swayok/laravel-language-detector": "dev-master"
+    },
+    "suggest": {
+        "swayok/laravel-antihack-tool": "active hack protection tool (dev-master branch)",
+        "swayok/alternative-laravel-cache": "alternative tagged and hierarchial cache drivers for Laravel",
+        "swayok/laravel-extended-errors": "faster and more informative replacement for Laravel's Whoops",
+        "npm or yarn": "Install node.js and yarn"
     }
 }

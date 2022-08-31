@@ -1,0 +1,8 @@
+/src/PeskyCMF/public/compiled
+/npm/node_modules
+/npm/package-lock.json
+/npm/yarn.lock
+/npm/mix.js.map
+composer.lock
+/vendor
+/.idea

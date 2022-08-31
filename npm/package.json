@@ -1,0 +1,54 @@
+{
+    "name": "peskycmf-dependencies",
+    "version": "2.0.0",
+    "description": "Libs and plugins required for PeskyCMF.",
+    "keywords": [
+        "PeskyCMF"
+    ],
+    "homepage": "https://github.com/swayok/PeskyCMF",
+    "bugs": "https://github.com/swayok/PeskyCMF/issues",
+    "private": true,
+    "license": "MIT",
+    "author": {
+        "name": "Filippov Alexander"
+    },
+    "scripts": {
+        "dev": "npm run development",
+        "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "watch": "npm run development -- --watch",
+        "watch-poll": "npm run watch -- --watch-poll",
+        "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "prod": "npm run production",
+        "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
+    },
+    "dependencies": {
+        "admin-lte": "^2.4.18",
+        "ajax-bootstrap-select": "^1.4.5",
+        "bootstrap": "^3.4.1",
+        "bootstrap-fileinput": "^4.5.3",
+        "bootstrap-select": "^1.13.12",
+        "bootstrap-switch": "3.3.4",
+        "datatables": "^1.10.18",
+        "eonasdan-bootstrap-datetimepicker": "^4.17.47",
+        "inputmask": "^4.0.9",
+        "jQuery-QueryBuilder": "^2.5.2",
+        "jquery": "^3.4.1",
+        "jquery-form": "^4.2.2",
+        "moment": "^2.24.0",
+        "page-on-promises": "^2.0.0",
+        "select2": "^4.0.11",
+        "simple-scrollbar": "^0.4.0",
+        "sortablejs": "^1.10.1",
+        "toastr": "^2.1.4",
+        "typeahead.js": "^0.11.1"
+    },
+    "devDependencies": {
+        "axios": "^0.18.1",
+        "cross-env": "^5.2.1",
+        "laravel-mix": "^2.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/swayok/PeskyCMF"
+    }
+}
