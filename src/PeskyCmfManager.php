@@ -74,9 +74,8 @@ class PeskyCmfManager
     
     /**
      * Key from config('peskycmf.cmf_configs') array
-     * @return static
      */
-    public function setCurrentCmfSection(string $cmfSectionName)
+    public function setCurrentCmfSection(string $cmfSectionName): static
     {
         if ($cmfSectionName !== $this->currentCmfSectionName) {
             $this->currentCmfConfig = $this->getCmfConfigForSection($cmfSectionName);
@@ -94,9 +93,8 @@ class PeskyCmfManager
     /**
      * Add Closure to be evaluated after setCurrentCmfSection() call.
      * CmfConfig instance will be passed to closure.
-     * @return static
      */
-    public function onSectionSet(\Closure $callback)
+    public function onSectionSet(\Closure $callback): static
     {
         $this->callbacks[] = $callback;
         return $this;

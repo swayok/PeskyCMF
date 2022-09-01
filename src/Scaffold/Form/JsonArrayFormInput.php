@@ -23,9 +23,8 @@ class JsonArrayFormInput extends FormInput
     
     /**
      * @param FormInput[]|string[] $subInputs = ['name1', 'name2' => FormInput::create()]
-     * @return static
      */
-    public function setSubInputs(array $subInputs)
+    public function setSubInputs(array $subInputs): static
     {
         /** @var FormInput|null $config */
         foreach ($subInputs as $name => $config) {
@@ -42,8 +41,9 @@ class JsonArrayFormInput extends FormInput
      * @param string $name
      * @param FormInput|AbstractValueViewer|null $subInputConfig
      * @return static
+     * @noinspection PhpDocSignatureInspection
      */
-    public function addSubInput(string $name, ?FormInput $subInputConfig)
+    public function addSubInput(string $name, ?FormInput $subInputConfig): static
     {
         if (!$subInputConfig) {
             $subInputConfig = FormInput::create();
@@ -67,10 +67,7 @@ class JsonArrayFormInput extends FormInput
         return $this->subInputs;
     }
     
-    /**
-     * @return static
-     */
-    public function setName(string $name)
+    public function setName(string $name): static
     {
         parent::setName($name);
         foreach ($this->subInputs as $inputName => $input) {
@@ -79,10 +76,7 @@ class JsonArrayFormInput extends FormInput
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function setScaffoldSectionConfig(ScaffoldSectionConfig $scaffoldSectionConfig)
+    public function setScaffoldSectionConfig(ScaffoldSectionConfig $scaffoldSectionConfig): static
     {
         parent::setScaffoldSectionConfig($scaffoldSectionConfig);
         foreach ($this->subInputs as $input) {
@@ -92,10 +86,10 @@ class JsonArrayFormInput extends FormInput
     }
     
     /**
-     * @param \Closure $validators = function (bool $isCreation, array $defaultValidators) { return ['input_name.*.subinput_name' => 'required']; }
-     * @return static
+     * Signature:
+     * function (bool $isCreation, array $defaultValidators): array { return ['input_name.*.subinput_name' => 'required']; }
      */
-    public function setValidatorsForSubInputs(\Closure $validators)
+    public function setValidatorsForSubInputs(\Closure $validators): static
     {
         $this->validatorsForSubInputs = $validators;
         return $this;
@@ -119,10 +113,7 @@ class JsonArrayFormInput extends FormInput
         return $this->minValuesCount;
     }
     
-    /**
-     * @return static
-     */
-    public function setMinValuesCount(int $minValuesCount)
+    public function setMinValuesCount(int $minValuesCount): static
     {
         $this->minValuesCount = max(0, $minValuesCount);
         return $this;
@@ -133,10 +124,7 @@ class JsonArrayFormInput extends FormInput
         return $this->maxValuesCount;
     }
     
-    /**
-     * @return static
-     */
-    public function setMaxValuesCount(int $maxValuesCount)
+    public function setMaxValuesCount(int $maxValuesCount): static
     {
         $this->maxValuesCount = max(0, $maxValuesCount);
         return $this;
@@ -147,10 +135,7 @@ class JsonArrayFormInput extends FormInput
         return $this->addRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.add_row');
     }
     
-    /**
-     * @return static
-     */
-    public function setAddRowButtonLabel(string $addRowButtonLabel)
+    public function setAddRowButtonLabel(string $addRowButtonLabel): static
     {
         $this->addRowButtonLabel = $addRowButtonLabel;
         return $this;
@@ -161,10 +146,7 @@ class JsonArrayFormInput extends FormInput
         return $this->deleteRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.delete_row');
     }
     
-    /**
-     * @return static
-     */
-    public function setDeleteRowButtonLabel(string $deleteRowButtonLabel)
+    public function setDeleteRowButtonLabel(string $deleteRowButtonLabel): static
     {
         $this->deleteRowButtonLabel = $deleteRowButtonLabel;
         return $this;
@@ -196,7 +178,7 @@ class JsonArrayFormInput extends FormInput
         );
     }
     
-    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): array
     {
         if (!is_array($value)) {
             if (!is_string($value)) {
@@ -211,21 +193,21 @@ class JsonArrayFormInput extends FormInput
     }
     
     /**
-     * @param \Closure $filter = function($row): bool { return true; }
-     * @return static
+     * Signature:
+     * function(mixed $row): bool { return true; }
      */
-    public function setSubmittedRowsFilter(\Closure $filter)
+    public function setSubmittedRowsFilter(\Closure $filter): static
     {
         $this->submittedRowsFilter = $filter;
         return $this;
     }
     
     /**
-     * @param string|array $value
+     * @param mixed $value
      * @param array $data
      * @return string|array
      */
-    public function modifySubmitedValueBeforeValidation($value, array $data)
+    public function modifySubmitedValueBeforeValidation(mixed $value, array $data): array|string
     {
         if ($this->submittedRowsFilter && is_array($value)) {
             $filteredRows = [];

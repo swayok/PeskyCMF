@@ -31,10 +31,7 @@ class FormConfig extends ScaffoldSectionConfig
      * @var FormInput[]
      */
     protected array $bulkEditableColumns = [];
-    /**
-     * @var int|string|null
-     */
-    protected $itemId;
+    protected string|int|float|null $itemId = null;
     
     protected ?bool $hasFiles = null;
     protected ?bool $hasOptionsLoader = null;
@@ -68,10 +65,7 @@ class FormConfig extends ScaffoldSectionConfig
         return $this->getCmfConfig()->getLaravelApp()->make('validator');
     }
     
-    /**
-     * @return static
-     */
-    public function setBulkEditingTemplate(string $laravelViewPath)
+    public function setBulkEditingTemplate(string $laravelViewPath): static
     {
         $this->bulkEditingTemplate = $laravelViewPath;
         return $this;
@@ -92,9 +86,8 @@ class FormConfig extends ScaffoldSectionConfig
     
     /**
      * @param FormInput[] $formInputs
-     * @return static
      */
-    public function setValueViewers(array $formInputs)
+    public function setValueViewers(array $formInputs): static
     {
         /** @var AbstractValueViewer|null $config */
         foreach ($formInputs as $name => $config) {
@@ -122,21 +115,17 @@ class FormConfig extends ScaffoldSectionConfig
     
     /**
      * Alias for setValueViewers
-     * @param array $formInputs - formats:
+     * $formInputs accepts:
      * - ['name1', 'name2' => FormInput::create(), ...]
      * - ['group lablel' => ['name1', 'name2' => FormInput::create(), ...]
      * Also you may use '/' as value to separate inputs with <hr>
-     * @return static
      */
-    public function setFormInputs(array $formInputs)
+    public function setFormInputs(array $formInputs): static
     {
         return $this->setValueViewers($formInputs);
     }
     
-    /**
-     * @return static
-     */
-    public function addTab(string $tabLabel, array $formInputs)
+    public function addTab(string $tabLabel, array $formInputs): static
     {
         $this->newTab($tabLabel);
         $this->setFormInputs($formInputs);
@@ -146,9 +135,8 @@ class FormConfig extends ScaffoldSectionConfig
     
     /**
      * Add inputs to existing tab. If tab not exists - new one will be created
-     * @return static
      */
-    public function updateTab(string $tabLabel, array $formInputs)
+    public function updateTab(string $tabLabel, array $formInputs): static
     {
         $tabExists = false;
         foreach ($this->getTabs() as $tabIndex => $tabInfo) {
@@ -222,10 +210,7 @@ class FormConfig extends ScaffoldSectionConfig
         return $this->inputGroups;
     }
     
-    /**
-     * @return static
-     */
-    public function addValueViewer(string $name, ?AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false)
+    public function addValueViewer(string $name, ?AbstractValueViewer &$viewer = null, bool $autodetectIfLinkedToDbColumn = false): static
     {
         parent::addValueViewer($name, $viewer, $autodetectIfLinkedToDbColumn);
         if ($this->currentInputsGroup === null) {
@@ -251,9 +236,8 @@ class FormConfig extends ScaffoldSectionConfig
     /**
      * @param array $tooltips - anything except array will be ignored so it won't crash when there is no
      *      translations for tooltips in dictionaries (ex: trans('cmf.admins.form.tooltip') may be array or string)
-     * @return static
      */
-    public function setTooltipsForInputs(array $tooltips)
+    public function setTooltipsForInputs(array $tooltips): static
     {
         $this->tooltips = $tooltips;
         return $this;
@@ -331,7 +315,7 @@ class FormConfig extends ScaffoldSectionConfig
      * @return static
      * @throws \BadMethodCallException
      */
-    public function setBulkEditableColumns(array $columns)
+    public function setBulkEditableColumns(array $columns): static
     {
         if (empty($this->valueViewers)) {
             throw new \BadMethodCallException('setValueViewers() method must be called before');
@@ -352,7 +336,7 @@ class FormConfig extends ScaffoldSectionConfig
      * @return static
      * @throws \InvalidArgumentException
      */
-    public function addBulkEditableColumn(string $name, FormInput $formInput = null)
+    public function addBulkEditableColumn(string $name, FormInput $formInput = null): static
     {
         $tableStructure = $this->getTable()->getTableStructure();
         if ((!$formInput || $formInput->isLinkedToDbColumn()) && !$tableStructure::hasColumn($name)) {
@@ -388,19 +372,12 @@ class FormConfig extends ScaffoldSectionConfig
         return count($this->bulkEditableColumns);
     }
     
-    /**
-     * @return int|string|null
-     */
-    public function getItemId()
+    public function getItemId(): int|float|string|null
     {
         return $this->itemId;
     }
     
-    /**
-     * @param int|string $itemId
-     * @return static
-     */
-    public function setItemId($itemId)
+    public function setItemId(int|float|string $itemId): static
     {
         $this->itemId = $itemId;
         return $this;
@@ -526,9 +503,8 @@ class FormConfig extends ScaffoldSectionConfig
     /**
      * @param \Closure $validatorsForEdit - function (array $updates, ?RecordInterface $record) { return []; }
      * Note: You can insert fields from $updates using '{{field_name}}'
-     * @return static
      */
-    public function addValidatorsForEdit(\Closure $validatorsForEdit)
+    public function addValidatorsForEdit(\Closure $validatorsForEdit): static
     {
         $this->validatorsForEdit = $validatorsForEdit;
         return $this;
@@ -546,9 +522,8 @@ class FormConfig extends ScaffoldSectionConfig
     /**
      * @param \Closure $validatorsForCreate = function (array $data) { return []; }
      * Note: You can insert fields from received data via '{{field_name}}'
-     * @return static
      */
-    public function addValidatorsForCreate(\Closure $validatorsForCreate)
+    public function addValidatorsForCreate(\Closure $validatorsForCreate): static
     {
         $this->validatorsForCreate = $validatorsForCreate;
         return $this;
@@ -557,9 +532,8 @@ class FormConfig extends ScaffoldSectionConfig
     /**
      * @param \Closure $validators = function (array $data) { return []; }
      * Note: You can insert fields from received data via '{{field_name}}'
-     * @return static
      */
-    public function setValidators(\Closure $validators)
+    public function setValidators(\Closure $validators): static
     {
         $this->validators = $validators;
         return $this;
@@ -597,9 +571,8 @@ class FormConfig extends ScaffoldSectionConfig
     /**
      * @param \Closure $callback - function (array $data, $isRevalidation): ?array { return null; }
      * Note: callback MUST return empty value if everything is ok or array with errors
-     * @return static
      */
-    public function setBeforeValidateCallback(\Closure $callback)
+    public function setBeforeValidateCallback(\Closure $callback): static
     {
         $this->beforeValidateCallback = $callback;
         return $this;
@@ -663,9 +636,8 @@ class FormConfig extends ScaffoldSectionConfig
     
     /**
      * @param \Closure $modifier - function (array $data, $isCreation, FormConfig $formConfig) { return $data; }
-     * @return static
      */
-    public function setIncomingDataModifier(\Closure $modifier)
+    public function setIncomingDataModifier(\Closure $modifier): static
     {
         $this->incomingDataModifier = $modifier;
         return $this;
@@ -673,9 +645,8 @@ class FormConfig extends ScaffoldSectionConfig
     
     /**
      * @param \Closure $modifier - function (array $data, FormConfig $formConfig) { return $data; }
-     * @return static
      */
-    public function setIncomingDataModifierForBulkEdit(\Closure $modifier)
+    public function setIncomingDataModifierForBulkEdit(\Closure $modifier): static
     {
         $this->incomingDataModifierForBulkEdit = $modifier;
         return $this;
@@ -770,9 +741,8 @@ class FormConfig extends ScaffoldSectionConfig
      * Note: if you need to revalidate data after callback - use setRevalidateDataAfterBeforeSaveCallback() method
      * Note: is not applied to bulk edit!
      * @param \Closure $callback = function ($isCreation, array $validatedData, FormConfig $formConfig) { return $validatedData; }
-     * @return static
      */
-    public function setBeforeSaveCallback(\Closure $callback)
+    public function setBeforeSaveCallback(\Closure $callback): static
     {
         $this->beforeSaveCallback = $callback;
         return $this;
@@ -793,9 +763,8 @@ class FormConfig extends ScaffoldSectionConfig
      * Note: if you need to revalidate data after callback - use setRevalidateDataAfterBeforeSaveCallback() method
      * Note: is not applied to bulk edit!
      * @param \Closure $callback = function (array $validatedData, FormConfig $formConfig) { return $validatedData; }
-     * @return static
      */
-    public function setBeforeBulkEditDataSaveCallback(\Closure $callback)
+    public function setBeforeBulkEditDataSaveCallback(\Closure $callback): static
     {
         $this->beforeBulkEditDataSaveCallback = $callback;
         return $this;
@@ -811,10 +780,7 @@ class FormConfig extends ScaffoldSectionConfig
         return $this->beforeBulkEditDataSaveCallback;
     }
     
-    /**
-     * @return static
-     */
-    public function setRevalidateDataAfterBeforeSaveCallback(bool $forCreation, bool $forUpdate)
+    public function setRevalidateDataAfterBeforeSaveCallback(bool $forCreation, bool $forUpdate): static
     {
         $this->revalidateDataAfterBeforeSaveCallbackForCreation = $forCreation;
         $this->revalidateDataAfterBeforeSaveCallbackForUpdate = $forUpdate;
@@ -829,16 +795,15 @@ class FormConfig extends ScaffoldSectionConfig
     }
     
     /**
-     * @param \Closure $calback = function (array $data, $isRevalidation, $isBulkEdit) { return true }
+     * \Closure -> function (array $data, bool $isRevalidation, bool $isBulkEdit): true|string|array { return true; }
      * Note: callback MUST return true if everything is ok, otherwise - returned values treated as error
      * Values allowed to be returned:
      *      - true: no errors
      *      - string: custom "validation failed" message (without errors for certain fields)
      *      - array: validation errors for certain fields, may contain "_mesasge" key to be displayed instead of
      *               default "validation failed" message
-     * @return static
      */
-    public function setValidationSuccessCallback(\Closure $calback)
+    public function setValidationSuccessCallback(\Closure $calback): static
     {
         $this->validationSuccessCallback = $calback;
         return $this;
@@ -865,13 +830,13 @@ class FormConfig extends ScaffoldSectionConfig
     }
     
     /**
-     * Callback is called after successfully saving data but before model's commit()
-     * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
+     * Callback is called after successfully saving data but before model's commit().
+     * Signature:
+     * function (bool $isCreation, array $validatedData, RecordInterface $record, FormConfig $formConfig): bool|JsonResponse { return true; }
+     * Closure must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
      * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
-     * @param \Closure $callback - function (bool $isCreation, array $validatedData, RecordInterface $record, FormConfig $formConfig) { return true; }
-     * @return static
      */
-    public function setAfterSaveCallback(\Closure $callback)
+    public function setAfterSaveCallback(\Closure $callback): static
     {
         $this->afterSaveCallback = $callback;
         return $this;
@@ -888,13 +853,13 @@ class FormConfig extends ScaffoldSectionConfig
     }
     
     /**
-     * Callback is called after successfully saving data but before model's commit()
+     * Callback is called after successfully saving data but before model's commit().
+     * Signature:
+     * function (array $validatedData, FormConfig $formConfig): bool|JsonResponse { return []; }
      * It must return true if everything is ok or instance of \Symfony\Component\HttpFoundation\JsonResponse
      * Response success detected by HTTP code of \Illuminate\Http\JsonResponse: code < 400 - success; code >= 400 - error
-     * @param \Closure $callback - function (array $validatedData, FormConfig $formConfig) { return []; }
-     * @return static
      */
-    public function setBulkEditAfterSaveCallback(\Closure $callback)
+    public function setBulkEditAfterSaveCallback(\Closure $callback): static
     {
         $this->bulkEditAfterSaveCallback = $callback;
         return $this;
@@ -911,14 +876,11 @@ class FormConfig extends ScaffoldSectionConfig
     }
     
     /**
-     * @param array|\Closure $arrayOrClosure
-     *      - \Closure: funciton (array $defaults, FormConfig $formConfig): array { return $defaults; }
-     * @return static
-     * @throws \InvalidArgumentException
+     * Signature: funciton (array $defaults, FormConfig $formConfig): array { return $defaults; }
      */
-    public function setDefaultValuesModifier(\Closure $arrayOrClosure)
+    public function setDefaultValuesModifier(\Closure $modifier): static
     {
-        $this->defaultValuesModifier = $arrayOrClosure;
+        $this->defaultValuesModifier = $modifier;
         return $this;
     }
     
@@ -937,12 +899,11 @@ class FormConfig extends ScaffoldSectionConfig
     }
     
     /**
-     * @param \Closure $stringOfClosure - function (FormConfig $formConfig): string { return '<div>'; }
-     * @return static
+     * Signature: function (FormConfig $formConfig): string { return '<div>'; }
      */
-    public function setAdditionalHtmlForForm(\Closure $stringOfClosure)
+    public function setAdditionalHtmlForForm(\Closure $htmlGenerator): static
     {
-        $this->additionalHtmlForForm = $stringOfClosure;
+        $this->additionalHtmlForForm = $htmlGenerator;
         return $this;
     }
     

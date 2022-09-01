@@ -25,10 +25,9 @@ class WysiwygFormInput extends FormInput
     }
     
     /**
-     * @param $folder - relative path to folder inside public_path()
-     * @return static
+     * Set relative path to folder inside public_path()
      */
-    public function setRelativeImageUploadsFolder($folder)
+    public function setRelativeImageUploadsFolder(string $folder): static
     {
         $this->relativeImageUploadsFolder = trim($folder, ' /\\');
         return $this;
@@ -54,10 +53,7 @@ class WysiwygFormInput extends FormInput
         return $this->maxImageWidth;
     }
     
-    /**
-     * @return static
-     */
-    public function setMaxImageWidth(int $maxImageWidth)
+    public function setMaxImageWidth(int $maxImageWidth): static
     {
         $this->maxImageWidth = $maxImageWidth;
         return $this;
@@ -68,17 +64,16 @@ class WysiwygFormInput extends FormInput
         return $this->maxImageHeight;
     }
     
-    /**
-     * @return static
-     */
-    public function setMaxImageHeight(int $maxImageHeight)
+    public function setMaxImageHeight(int $maxImageHeight): static
     {
         $this->maxImageHeight = $maxImageHeight;
         return $this;
     }
     
     /**
-     * @param \Closure $provider - must return array of associative arrays with keys:
+     * Signature:
+     * function (): array { return [$dataInsert1, $dataInsert2, ...]; }
+     * Where $dataInsert is associative array with keys:
      *  - 'code' - php code that returns some text content. Code is inserted using Blade's command '{!! your_code_here !!}'
      *  - 'title' - insert's label to display inside wysiwyg editor
      *  - 'is_block' (optional)
@@ -89,9 +84,8 @@ class WysiwygFormInput extends FormInput
      *      'title' => 'Test insert',
      *      'is_block' => false
      *  ]
-     * @return static
      */
-    public function setDataInserts(\Closure $provider)
+    public function setDataInserts(\Closure $provider): static
     {
         $this->dataInserts = $provider;
         return $this;
@@ -229,10 +223,7 @@ class WysiwygFormInput extends FormInput
         ];
     }
     
-    /**
-     * @return static
-     */
-    public function setHtmlInserts(\Closure $provider)
+    public function setHtmlInserts(\Closure $provider): static
     {
         $this->htmlInserts = $provider;
         return $this;
@@ -266,19 +257,18 @@ class WysiwygFormInput extends FormInput
     /**
      * This file will be added into wysiwyg editor to allow custom styling inside editor
      * It also allows to display HtmlInserts the same way as on frontend
-     * @return static
      */
-    public function addCssFilesToWysiwygEditor(...$cssFiles)
+    public function addCssFilesToWysiwygEditor(...$cssFiles): static
     {
         $this->customCssFiles = $cssFiles;
         return $this;
     }
     
     /**
-     * @param \Closure $configMaker - must return array
-     * @return static
+     * Signature:
+     * function(): array { return []; }
      */
-    public function setWysiwygConfig(\Closure $configMaker)
+    public function setWysiwygConfig(\Closure $configMaker): static
     {
         $this->wysiwygConfig = $configMaker;
         return $this;
@@ -312,9 +302,8 @@ class WysiwygFormInput extends FormInput
     
     /**
      * @param string $jsCode - valid javascript code. Don't forget to add ';' at the end
-     * @return static
      */
-    public function setCustomJsCode(string $jsCode)
+    public function setCustomJsCode(string $jsCode): static
     {
         $this->customJsCode = $jsCode;
         return $this;
@@ -325,10 +314,7 @@ class WysiwygFormInput extends FormInput
         return $this->customJsCode;
     }
     
-    /**
-     * @return static
-     */
-    public function setWysiwygInitializerFunctionName(string $functionName)
+    public function setWysiwygInitializerFunctionName(string $functionName): static
     {
         $this->wysiwygInitializerFunctionName = $functionName;
         return $this;

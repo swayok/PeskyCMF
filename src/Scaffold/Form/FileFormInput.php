@@ -42,19 +42,13 @@ class FileFormInput extends FormInput
         return $this->filesUploaderConfig;
     }
     
-    /**
-     * @return static
-     */
-    public function setFilesUploaderConfig(FilesUploaderConfig $config)
+    public function setFilesUploaderConfig(FilesUploaderConfig $config): static
     {
         $this->filesUploaderConfig = $config;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function setIsRequired(bool $required)
+    public function setIsRequired(bool $required): static
     {
         $this->isRequired = $required;
         return $this;
@@ -62,19 +56,14 @@ class FileFormInput extends FormInput
     
     /**
      * Disable uploading preview for this input
-     * @return static
      */
-    public function disablePreview()
+    public function disablePreview(): static
     {
         $this->jsPluginOptions['showPreview'] = false;
         return $this;
     }
     
-    /**
-     * @param array $options
-     * @return static
-     */
-    public function setJsPluginOptions(array $options)
+    public function setJsPluginOptions(array $options): static
     {
         $this->jsPluginOptions = $options;
         return $this;
@@ -110,7 +99,7 @@ class FileFormInput extends FormInput
         };
     }
     
-    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): array
     {
         $ret = [
             'urls' => [],
@@ -153,16 +142,15 @@ class FileFormInput extends FormInput
     protected static function getUploaderPreviewTypeFromFileInfo(DbFileInfo $fileInfo): string
     {
         $type = $fileInfo->getMimeType();
-        switch ($type) {
-            case MimeTypesHelper::TYPE_IMAGE:
-            case MimeTypesHelper::TYPE_AUDIO:
-            case MimeTypesHelper::TYPE_VIDEO:
-            case MimeTypesHelper::TYPE_TEXT:
-            case MimeTypesHelper::TYPE_OFFICE:
-                return $type;
-            default:
-                return 'object';
-        }
+        return match ($type) {
+            MimeTypesHelper::TYPE_IMAGE,
+            MimeTypesHelper::TYPE_AUDIO,
+            MimeTypesHelper::TYPE_VIDEO,
+            MimeTypesHelper::TYPE_TEXT,
+            MimeTypesHelper::TYPE_OFFICE => $type,
+            
+            default => 'object',
+        };
     }
     
     public function getValidators(bool $isCreation): array

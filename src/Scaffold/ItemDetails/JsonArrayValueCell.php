@@ -16,9 +16,8 @@ class JsonArrayValueCell extends ValueCell
     
     /**
      * @param array $jsonKeys - ordering matters!
-     * @return static
      */
-    public function setJsonKeys(array $jsonKeys)
+    public function setJsonKeys(array $jsonKeys): static
     {
         $this->jsonKeys = $jsonKeys;
         return $this;
@@ -38,7 +37,7 @@ class JsonArrayValueCell extends ValueCell
         return $headers;
     }
     
-    public function doDefaultValueConversionByType($value, string $type, array $record)
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record)
     {
         return is_array($value) ? $value : json_decode($value);
     }

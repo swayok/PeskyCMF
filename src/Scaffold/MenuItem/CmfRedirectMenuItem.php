@@ -12,19 +12,13 @@ class CmfRedirectMenuItem extends CmfMenuItem
     protected bool $openOnNewTab = false;
     protected ?bool $openInModal = null;
     
-    /**
-     * @return static
-     */
-    public function openOnNewTab()
+    public function openOnNewTab(): static
     {
         $this->openOnNewTab = true;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function setOpenInModal(bool $openInModal = true)
+    public function setOpenInModal(bool $openInModal = true): static
     {
         $this->openInModal = $openInModal;
         return $this;

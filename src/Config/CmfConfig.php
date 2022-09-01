@@ -118,9 +118,8 @@ abstract class CmfConfig
     /**
      * Returns instance of config class it was called from
      * Note: method excluded from toArray() results but key "config_instance" added instead of it
-     * @return static
      */
-    final public static function getInstance()
+    final public static function getInstance(): static
     {
         if (!isset(self::$instances[static::class])) {
             self::$instances[static::class] = new static();
@@ -159,10 +158,10 @@ abstract class CmfConfig
     
     /**
      * @param string $key
-     * @param mixed $default
+     * @param mixed|null $default
      * @return mixed
      */
-    public function config(string $key, $default = null)
+    public function config(string $key, mixed $default = null): mixed
     {
         return $this->getLaravelConfigs()->get($this->configsFileName() . '.' . $key, $default);
     }
@@ -196,6 +195,7 @@ abstract class CmfConfig
     
     /**
      * @return Guard|StatefulGuard|SessionGuard
+     * @noinspection PhpDocSignatureInspection
      */
     public function getAuthGuard(): Guard
     {
@@ -204,6 +204,7 @@ abstract class CmfConfig
     
     /**
      * @return CmfAdmin|Authenticatable|ResetsPasswordsViaAccessKey|RecordInterface|null
+     * @noinspection PhpDocSignatureInspection
      */
     public function getUser(): ?RecordInterface
     {
@@ -412,10 +413,9 @@ abstract class CmfConfig
     }
     
     /**
-     * @param string $itemKey
-     * @param array|\Closure $menuItem - format: see menu()
+     * For $menuItem format see docs for menu()
      */
-    public function addMenuItem(string $itemKey, $menuItem): void
+    public function addMenuItem(string $itemKey, array|\Closure $menuItem): void
     {
         $this->getUiModule()->addCustomMenuItem($itemKey, $menuItem);
     }
@@ -474,7 +474,7 @@ abstract class CmfConfig
      * @param string|null $locale
      * @return string|array
      */
-    public function transCustom(string $path, array $parameters = [], ?string $locale = null)
+    public function transCustom(string $path, array $parameters = [], ?string $locale = null): array|string
     {
         $dict = $this->custom_dictionary_name();
         $path = '.' . ltrim($path, '.');
@@ -507,7 +507,7 @@ abstract class CmfConfig
      * @param string|null $locale
      * @return string|array
      */
-    public function transGeneral(string $path, array $parameters = [], ?string $locale = null)
+    public function transGeneral(string $path, array $parameters = [], ?string $locale = null): array|string
     {
         $dict = $this->cmf_general_dictionary_name();
         $path = '.' . ltrim($path, '.');
@@ -525,12 +525,8 @@ abstract class CmfConfig
     
     /**
      * Translations for Api Docs
-     * @param string $translationPath
-     * @param array $parameters
-     * @param null $locale
-     * @return string|array
      */
-    public function transApiDoc(string $translationPath, array $parameters = [], $locale = null)
+    public function transApiDoc(string $translationPath, array $parameters = [], ?string $locale = null): array|string
     {
         $translationPath = 'api_docs.' . ltrim($translationPath, '.');
         return $this->transCustom($translationPath, $parameters, $locale);
@@ -591,7 +587,7 @@ abstract class CmfConfig
      * @param bool $lowercased - true: will return "it-it" instead of "it-IT"
      * @return string
      */
-    public function getLocaleWithSuffix(string $separator = '_', bool $lowercased = false): ?string
+    public function getLocaleWithSuffix(string $separator = '_', bool $lowercased = false): string
     {
         $locale = preg_split('%[-_]%', strtolower(app()->getLocale()));
         if (count($locale) === 2) {
@@ -729,8 +725,7 @@ abstract class CmfConfig
     }
     
     /**
-     * Get ScaffoldConfig instance
-     * @return ScaffoldConfig|ScaffoldConfigInterface
+     * Get ScaffoldConfig instance by resource name
      */
     public function getScaffoldConfig(string $resourceName): ScaffoldConfigInterface
     {
@@ -738,8 +733,7 @@ abstract class CmfConfig
     }
     
     /**
-     * Get ScaffoldConfig class name
-     * @return string|ScaffoldConfig
+     * Get ScaffoldConfig class name by resource name
      */
     public function getScaffoldConfigClass(string $resourceName): string
     {
@@ -747,7 +741,7 @@ abstract class CmfConfig
     }
     
     /**
-     * Get TableInterface instance for $tableName
+     * Get TableInterface instance by resource name
      * Note: can be ovewritted to allow usage of fake tables in resources routes
      * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
      */

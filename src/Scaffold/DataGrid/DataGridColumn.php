@@ -26,28 +26,19 @@ class DataGridColumn extends RenderableValueViewer
         return $this->isSortable;
     }
     
-    /**
-     * @return static
-     */
-    public function setIsSortable(bool $isSortable)
+    public function setIsSortable(bool $isSortable): static
     {
         $this->isSortable = $isSortable;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function enableSorting()
+    public function enableSorting(): static
     {
         $this->isSortable = true;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function disableSorting()
+    public function disableSorting(): static
     {
         $this->isSortable = false;
         return $this;
@@ -58,28 +49,19 @@ class DataGridColumn extends RenderableValueViewer
         return $this->isVisible;
     }
     
-    /**
-     * @return static
-     */
-    public function setIsVisible(bool $isVisible)
+    public function setIsVisible(bool $isVisible): static
     {
         $this->isVisible = $isVisible;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function invisible()
+    public function invisible(): static
     {
         $this->isVisible = false;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function setType(string $type)
+    public function setType(string $type): static
     {
         switch ($type) {
             case static::TYPE_TEXT:
@@ -96,15 +78,14 @@ class DataGridColumn extends RenderableValueViewer
     
     /**
      * @param string|int $width - 100, 100px, 25%. No units means that width is in pixels: 100 == 100px
-     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setWidth(string $width)
+    public function setWidth(string|int $width): static
     {
-        if (!preg_match('%^\d+\s*(px|\%|)$%i', $width)) {
+        if (!is_int($width) && !preg_match('%^\d+\s*(px|\%|)$%i', $width)) {
             throw new \InvalidArgumentException('$width argument must be in pixels (ex: 100px or 100) or percents (ex: 25%)');
         }
-        $this->columnWidth = is_numeric($width) ? $width . 'px' : $width;
+        $this->columnWidth = is_int($width) || preg_match('%^\d+$%', $width) ? $width . 'px' : $width;
         return $this;
     }
     
@@ -135,10 +116,7 @@ class DataGridColumn extends RenderableValueViewer
         return $this->valueConverter;
     }
     
-    /**
-     * @return static
-     */
-    public function setIsLinkedToDbColumn(bool $isDbColumn)
+    public function setIsLinkedToDbColumn(bool $isDbColumn): static
     {
         if (!$isDbColumn) {
             $this->setIsSortable(false);
@@ -148,9 +126,8 @@ class DataGridColumn extends RenderableValueViewer
     
     /**
      * Add additional sorting to ORDER BY when user sorts by this column
-     * @return static
      */
-    public function addAdditionalOrderBy(string $column, bool $isAscending)
+    public function addAdditionalOrderBy(string $column, bool $isAscending): static
     {
         $this->additionalOrderBy[$column] = $isAscending ? 'ASC' : 'DESC';
         return $this;
@@ -180,10 +157,7 @@ class DataGridColumn extends RenderableValueViewer
         }
     }
     
-    /**
-     * @return static
-     */
-    public function configureDefaultRenderer(ValueRenderer $renderer)
+    public function configureDefaultRenderer(ValueRenderer $renderer): static
     {
         parent::configureDefaultRenderer($renderer);
         if (!$renderer->hasTemplate()) {

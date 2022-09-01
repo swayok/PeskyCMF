@@ -52,7 +52,7 @@ class ValueCell extends RenderableValueViewer
         return parent::getValueConverter();
     }
     
-    public function doDefaultValueConversionByType($value, string $type, array $record)
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record)
     {
         switch ($type) {
             case static::TYPE_TEXT:
@@ -74,10 +74,7 @@ class ValueCell extends RenderableValueViewer
         }
     }
     
-    /**
-     * @return static
-     */
-    public function configureDefaultRenderer(ValueRenderer $renderer)
+    public function configureDefaultRenderer(ValueRenderer $renderer): static
     {
         parent::configureDefaultRenderer($renderer);
         if (!$renderer->hasTemplate()) {
@@ -103,9 +100,8 @@ class ValueCell extends RenderableValueViewer
     
     /**
      * Add custom attributes to HTML element where record's value will be displayed
-     * @return static
      */
-    public function addAttributesToValueContainer(array $attributes)
+    public function addAttributesToValueContainer(array $attributes): static
     {
         $this->valueContainerAttributes = $attributes;
         return $this;
@@ -118,9 +114,8 @@ class ValueCell extends RenderableValueViewer
     
     /**
      * Hide value's label with its container
-     * @return static
      */
-    public function hideLabel()
+    public function hideLabel(): static
     {
         return $this->setLabel('');
     }

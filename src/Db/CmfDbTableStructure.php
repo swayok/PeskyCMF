@@ -12,10 +12,7 @@ abstract class CmfDbTableStructure extends TableStructure
     protected string $writableConnection = 'default';
     protected string $readonlyConnection = 'default';
     
-    /**
-     * @return static
-     */
-    public function setConnectionsNames(string $writable = 'default', string $readonly = 'default')
+    public function setConnectionsNames(string $writable = 'default', string $readonly = 'default'): static
     {
         $this->writableConnection = $writable;
         $this->readonlyConnection = $readonly;

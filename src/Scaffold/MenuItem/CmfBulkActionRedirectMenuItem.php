@@ -39,9 +39,8 @@ class CmfBulkActionRedirectMenuItem extends CmfRedirectMenuItem
     
     /**
      * Used by 'bulk-selected' action to get primary key values from selected data grid rows
-     * @return static
      */
-    public function setPrimaryKeyColumnName(string $primaryKeyColumnName)
+    public function setPrimaryKeyColumnName(string $primaryKeyColumnName): static
     {
         $this->primaryKeyColumnName = $primaryKeyColumnName;
         return $this;

@@ -21,10 +21,7 @@ class JsonListFormInput extends FormInput
         return $forHtmlInput ? $name . '[]' : $name;
     }
     
-    /**
-     * @return static
-     */
-    public function setMinValuesCount(int $minValuesCount)
+    public function setMinValuesCount(int $minValuesCount): static
     {
         $this->minValuesCount = max(0, $minValuesCount);
         return $this;
@@ -35,10 +32,7 @@ class JsonListFormInput extends FormInput
         return $this->minValuesCount;
     }
     
-    /**
-     * @return static
-     */
-    public function setMaxValuesCount(int $maxValuesCount)
+    public function setMaxValuesCount(int $maxValuesCount): static
     {
         $this->maxValuesCount = max(0, $maxValuesCount);
         return $this;
@@ -49,10 +43,7 @@ class JsonListFormInput extends FormInput
         return $this->maxValuesCount;
     }
     
-    /**
-     * @return static
-     */
-    public function setInitialRowsCount(int $initialRowsCount)
+    public function setInitialRowsCount(int $initialRowsCount): static
     {
         $this->initalRowsCount = max(0, $initialRowsCount);
         return $this;
@@ -63,10 +54,7 @@ class JsonListFormInput extends FormInput
         return $this->initalRowsCount;
     }
     
-    /**
-     * @return static
-     */
-    public function setAddRowButtonLabel(string $addRowButtonLabel)
+    public function setAddRowButtonLabel(string $addRowButtonLabel): static
     {
         $this->addRowButtonLabel = $addRowButtonLabel;
         return $this;
@@ -77,10 +65,7 @@ class JsonListFormInput extends FormInput
         return $this->addRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.add_row');
     }
     
-    /**
-     * @return static
-     */
-    public function setDeleteRowButtonLabel(string $deleteRowButtonLabel)
+    public function setDeleteRowButtonLabel(string $deleteRowButtonLabel): static
     {
         $this->deleteRowButtonLabel = $deleteRowButtonLabel;
         return $this;
@@ -91,10 +76,7 @@ class JsonListFormInput extends FormInput
         return $this->deleteRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.delete_row');
     }
     
-    /**
-     * @return static
-     */
-    public function setTableHeaderForValue(string $tableHeaderForValue)
+    public function setTableHeaderForValue(string $tableHeaderForValue): static
     {
         $this->tableHeaderForValue = $tableHeaderForValue;
         return $this;
@@ -131,7 +113,7 @@ class JsonListFormInput extends FormInput
         ];
     }
     
-    public function doDefaultValueConversionByType($value, string $type, array $record)
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): array
     {
         if (!is_array($value)) {
             if (!is_string($value)) {
@@ -145,16 +127,16 @@ class JsonListFormInput extends FormInput
         return $value;
     }
     
-    public function modifySubmitedValueBeforeValidation($values, array $data)
+    public function modifySubmitedValueBeforeValidation(mixed $value, array $data): array
     {
         if ($this->hasSubmittedValueModifier()) {
-            return call_user_func($this->getSubmittedValueModifier(), $values, $data);
-        } elseif (is_array($values)) {
-            return array_filter($values, function ($value) {
+            return call_user_func($this->getSubmittedValueModifier(), $value, $data);
+        } elseif (is_array($value)) {
+            return array_filter($value, function ($value) {
                 return !empty($value);
             });
         } else {
-            return $values;
+            return $value;
         }
     }
 }

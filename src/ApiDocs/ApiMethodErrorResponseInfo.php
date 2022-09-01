@@ -13,10 +13,7 @@ class ApiMethodErrorResponseInfo
     protected array $response = [];
     protected array $extraData = [];
     
-    /**
-     * @return static
-     */
-    public static function create(?int $httpCode = null)
+    public static function create(?int $httpCode = null): static
     {
         return new static($httpCode);
     }
@@ -33,10 +30,7 @@ class ApiMethodErrorResponseInfo
         return $this->httpCode;
     }
     
-    /**
-     * @return static
-     */
-    public function setHttpCode(int $httpCode)
+    public function setHttpCode(int $httpCode): static
     {
         $this->httpCode = $httpCode;
         return $this;
@@ -47,10 +41,7 @@ class ApiMethodErrorResponseInfo
         return $this->title;
     }
     
-    /**
-     * @return static
-     */
-    public function setTitle(string $description)
+    public function setTitle(string $description): static
     {
         $this->title = $description;
         return $this;
@@ -61,10 +52,7 @@ class ApiMethodErrorResponseInfo
         return $this->description;
     }
     
-    /**
-     * @return static
-     */
-    public function setDescription(string $description)
+    public function setDescription(string $description): static
     {
         $this->description = $description;
         return $this;
@@ -75,10 +63,7 @@ class ApiMethodErrorResponseInfo
         return $this->response;
     }
     
-    /**
-     * @return static
-     */
-    public function setResponse(array $response)
+    public function setResponse(array $response): static
     {
         $this->response = $response;
         return $this;
@@ -86,9 +71,8 @@ class ApiMethodErrorResponseInfo
     
     /**
      * Additional data to be added to response info
-     * @return static
      */
-    public function setExtraData(array $data)
+    public function setExtraData(array $data): static
     {
         $this->extraData = $data;
         return $this;

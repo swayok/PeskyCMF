@@ -50,26 +50,17 @@ abstract class AbstractValueViewer
     protected ?string $relationColumn = null;
     protected ?string $tableNameForRouteToRelatedRecord = null;
     
-    /**
-     * @return static
-     */
-    public static function create()
+    public static function create(): static
     {
         return new static();
     }
     
-    /**
-     * @return ScaffoldSectionConfig|DataGridConfig|ItemDetailsConfig|FormConfig
-     */
-    public function getScaffoldSectionConfig(): ScaffoldSectionConfig
+    public function getScaffoldSectionConfig(): ScaffoldSectionConfig|DataGridConfig|ItemDetailsConfig|FormConfig
     {
         return $this->scaffoldSectionConfig;
     }
     
-    /**
-     * @return static
-     */
-    public function setScaffoldSectionConfig(ScaffoldSectionConfig $scaffoldSectionConfig)
+    public function setScaffoldSectionConfig(ScaffoldSectionConfig $scaffoldSectionConfig): static
     {
         $this->scaffoldSectionConfig = $scaffoldSectionConfig;
         return $this;
@@ -90,10 +81,7 @@ abstract class AbstractValueViewer
         }
     }
     
-    /**
-     * @return static
-     */
-    public function setRelation(Relation $relation, string $columnName)
+    public function setRelation(Relation $relation, string $columnName): static
     {
         $this->relation = $relation;
         $this->relationColumn = $columnName;
@@ -117,9 +105,8 @@ abstract class AbstractValueViewer
     
     /**
      * Used only for value cells that make <a> tags to generate valid urls to related records
-     * @return static
      */
-    public function setTableNameForRouteToRelatedRecord(string $tableName)
+    public function setTableNameForRouteToRelatedRecord(string $tableName): static
     {
         $this->tableNameForRouteToRelatedRecord = $tableName;
         return $this;
@@ -130,10 +117,7 @@ abstract class AbstractValueViewer
         return $this->tableNameForRouteToRelatedRecord;
     }
     
-    /**
-     * @return static
-     */
-    public function setIsLinkedToDbColumn(bool $isDbColumn)
+    public function setIsLinkedToDbColumn(bool $isDbColumn): static
     {
         $this->isLinkedToDbColumn = $isDbColumn;
         return $this;
@@ -176,10 +160,7 @@ abstract class AbstractValueViewer
         return $parts;
     }
     
-    /**
-     * @return static
-     */
-    public function setName(string $name)
+    public function setName(string $name): static
     {
         $this->name = $name;
         if ($this->nameForTranslation === null) {
@@ -193,10 +174,7 @@ abstract class AbstractValueViewer
         return $this->nameForTranslation;
     }
     
-    /**
-     * @return static
-     */
-    public function setNameForTranslation(string $name)
+    public function setNameForTranslation(string $name): static
     {
         $this->nameForTranslation = $name;
         return $this;
@@ -214,10 +192,7 @@ abstract class AbstractValueViewer
         return $this->type;
     }
     
-    /**
-     * @return static
-     */
-    public function setType(string $type)
+    public function setType(string $type): static
     {
         $this->type = $type;
         return $this;
@@ -239,10 +214,7 @@ abstract class AbstractValueViewer
         return $this->label;
     }
     
-    /**
-     * @return static
-     */
-    public function setLabel(string $label)
+    public function setLabel(string $label): static
     {
         $this->label = $label;
         return $this;
@@ -253,10 +225,7 @@ abstract class AbstractValueViewer
         return $this->position;
     }
     
-    /**
-     * @return static
-     */
-    public function setPosition(int $position)
+    public function setPosition(int $position): static
     {
         $this->position = $position;
         return $this;
@@ -276,27 +245,19 @@ abstract class AbstractValueViewer
      * @param \Closure $valueConverter
      *      - when $this->isDbField() === true: function ($value, Column $columnConfig, array $record, AbstractValueViewer $valueViewer) { return 'value' }
      *      - when $this->isDbField() === false: function (array $record, AbstractValueViewer $valueViewer, ScaffoldSectionConfig $scaffoldSectionConfig) { return 'value' }
-     * @return static
      */
-    public function setValueConverter(\Closure $valueConverter)
+    public function setValueConverter(\Closure $valueConverter): static
     {
         $this->valueConverter = $valueConverter;
         return $this;
     }
     
-    /**
-     * @param mixed $value
-     * @param array $record
-     * @param bool $ignoreValueConverter
-     * @param string|null $relationKey
-     * @return mixed
-     */
     public function convertValue(
-        $value,
+        mixed $value,
         array $record,
         bool $ignoreValueConverter = false,
         ?string $relationKey = null
-    ) {
+    ): mixed {
         $valueConverter = !$ignoreValueConverter ? $this->getValueConverter() : null;
         if (!empty($valueConverter)) {
             if ($this->isLinkedToDbColumn()) {
@@ -327,13 +288,9 @@ abstract class AbstractValueViewer
     }
     
     /**
-     * Default value converter by value type
-     * @param mixed $value
-     * @param string $type - one of static::TYPE_*
-     * @param array $record
-     * @return mixed
+     * Default $value converter by value $type (one of static::TYPE_*)
      */
-    public function doDefaultValueConversionByType($value, string $type, array $record)
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): mixed
     {
         switch ($type) {
             case static::TYPE_DATETIME:

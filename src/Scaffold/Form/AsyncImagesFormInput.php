@@ -18,28 +18,20 @@ class AsyncImagesFormInput extends AsyncFilesFormInput
     /**
      * List of image names to accept.
      * Only provided images will be shown in form. Other images will be ignored (and won't be changed in any way)
-     * @param array|\Closure $imagesGroups - \Closure must return array
-     * @return static
-     * @throws \InvalidArgumentException
+     * $imagesGroups as \Closure must return array.
      */
-    public function setImagesGroupsToUse($imagesGroups)
+    public function setImagesGroupsToUse(array|\Closure $imagesGroups): static
     {
         $this->setFilesGroupsToUse($imagesGroups);
         return $this;
     }
     
-    /**
-     * @return int
-     */
     public function getPreviewWidth(): int
     {
         return $this->previewWidth;
     }
     
-    /**
-     * @return static
-     */
-    public function setPreviewWidth(int $previewWidth)
+    public function setPreviewWidth(int $previewWidth): static
     {
         $this->previewWidth = $previewWidth;
         return $this;

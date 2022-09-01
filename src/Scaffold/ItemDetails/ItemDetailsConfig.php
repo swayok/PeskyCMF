@@ -57,9 +57,8 @@ class ItemDetailsConfig extends ScaffoldSectionConfig
     /**
      * Alias for setValueViewers
      * @param ValueCell[] $valueCells
-     * @return static
      */
-    public function setValueCells(array $valueCells)
+    public function setValueCells(array $valueCells): static
     {
         return $this->setValueViewers($valueCells);
     }
@@ -84,9 +83,8 @@ class ItemDetailsConfig extends ScaffoldSectionConfig
     
     /**
      * @param ValueCell[] $valueCells
-     * @return static
      */
-    public function setValueViewers(array $valueCells)
+    public function setValueViewers(array $valueCells): static
     {
         /** @var AbstractValueViewer|null $config */
         foreach ($valueCells as $name => $config) {
@@ -108,17 +106,11 @@ class ItemDetailsConfig extends ScaffoldSectionConfig
         return $this;
     }
     
-    /**
-     * @param string $name
-     * @param AbstractValueViewer|null $viewer
-     * @param bool $autodetectIfLinkedToDbColumn
-     * @return static
-     */
     public function addValueViewer(
         string $name,
         AbstractValueViewer &$viewer = null,
         bool $autodetectIfLinkedToDbColumn = false
-    ) {
+    ): static {
         parent::addValueViewer($name, $viewer, $autodetectIfLinkedToDbColumn);
         if ($this->currentRowsGroup === null) {
             $this->newRowsGroup('');
@@ -127,10 +119,7 @@ class ItemDetailsConfig extends ScaffoldSectionConfig
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function addTab(string $tabLabel, array $formInputs)
+    public function addTab(string $tabLabel, array $formInputs): static
     {
         $this->newTab($tabLabel);
         $this->setValueCells($formInputs);

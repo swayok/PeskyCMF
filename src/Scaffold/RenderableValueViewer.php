@@ -26,9 +26,8 @@ abstract class RenderableValueViewer extends AbstractValueViewer
     
     /**
      * @param string $name - something like 'RelationName.column_name' (Do not add 'it.' in the beginning!!!)
-     * @return static
      */
-    public function setVarNameForDotJs(string $name)
+    public function setVarNameForDotJs(string $name): static
     {
         $this->varNameForDotJs = $name;
         return $this;
@@ -60,7 +59,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer
      */
     public function getFailsafeValueForDotJs(
         array $additionalVarNameParts = [],
-        string $type = 'string',
+        ?string $type = 'string',
         ?string $default = null
     ): string {
         $fullName = $this->getVarNameForDotJs();
@@ -193,11 +192,10 @@ abstract class RenderableValueViewer extends AbstractValueViewer
     }
     
     /**
-     * @param \Closure $renderer - function (RenderableValueViewer $valueViewer, ScaffoldSectionConfig $sectionConfig, array $dataForTemplate) {}
-     *      function may return either string or instance of ValueRenderer
-     * @return static
+     * Signature:
+     * function (RenderableValueViewer $valueViewer, ScaffoldSectionConfig $sectionConfig, array $dataForTemplate): string|ValueRenderer {}
      */
-    public function setRenderer(\Closure $renderer)
+    public function setRenderer(\Closure $renderer): static
     {
         $this->renderer = $renderer;
         return $this;
@@ -229,10 +227,10 @@ abstract class RenderableValueViewer extends AbstractValueViewer
     }
     
     /**
-     * @param \Closure $configurator = function (ValueRenderer $renderer, RenderableValueViewer $valueViewer) {}
-     * @return static
+     * Signature:
+     * function (ValueRenderer $renderer, RenderableValueViewer $valueViewer): void {}
      */
-    public function setDefaultRendererConfigurator(\Closure $configurator)
+    public function setDefaultRendererConfigurator(\Closure $configurator): static
     {
         $this->defaultRendererConfigurator = $configurator;
         return $this;
@@ -250,10 +248,10 @@ abstract class RenderableValueViewer extends AbstractValueViewer
     
     /**
      * Note: input jQuery object is tored in $input variable
-     * @param string|\Closure $jsBlockContents - \Closure: function (RenderableValueViewer $valueViewer) { return 'js code'; }
-     * @return static
+     * \Closure Signature:
+     * function (RenderableValueViewer $valueViewer): string { return 'js code'; }
      */
-    public function addJavaScriptBlock($jsBlockContents)
+    public function addJavaScriptBlock(\Closure|string $jsBlockContents): static
     {
         $this->jsBlocks[] = $jsBlockContents;
         return $this;
@@ -280,10 +278,7 @@ abstract class RenderableValueViewer extends AbstractValueViewer
         }
     }
     
-    /**
-     * @return static
-     */
-    public function configureDefaultRenderer(ValueRenderer $renderer)
+    public function configureDefaultRenderer(ValueRenderer $renderer): static
     {
         if ($this->templateForDefaultRenderer) {
             $renderer->setTemplate($this->templateForDefaultRenderer);
@@ -296,19 +291,14 @@ abstract class RenderableValueViewer extends AbstractValueViewer
     
     /**
      * @param string $template - path to template (in Laravel templates stored in /resources/views by default)
-     * @return static
      */
-    public function setTemplateForDefaultRenderer(string $template)
+    public function setTemplateForDefaultRenderer(string $template): static
     {
         $this->templateForDefaultRenderer = $template;
         return $this;
     }
     
-    /**
-     * @param array $data
-     * @return static
-     */
-    public function setAdditionalTemplateDataForDefaultRenderer(array $data)
+    public function setAdditionalTemplateDataForDefaultRenderer(array $data): static
     {
         $this->templateDataForDefaultRenderer = $data;
         return $this;

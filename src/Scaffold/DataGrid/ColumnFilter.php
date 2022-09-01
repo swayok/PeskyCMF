@@ -186,7 +186,6 @@ class ColumnFilter
     protected ?string $columnNameForTranslation = null;
     protected ?string $filterLabel = null;
     protected ?string $dataType = null;
-    /** @var string|null */
     protected ?string $inputType = null;
     protected bool $multiselect = false;
     protected ?array $operators = null;
@@ -205,25 +204,20 @@ class ColumnFilter
         //'format' => '',   //< regexp for strings or datetime format for timestamps (http://momentjs.com/docs/#/parsing/string-format/)
         //'allow_empty_value' => true,
     ];
-    /** @var null|string|DbExpr */
-    protected $columnNameReplacementForCondition;
+    protected string|null|DbExpr $columnNameReplacementForCondition = null;
     protected bool $nullable = false;
     protected ?FilterConfig $filterConfig = null;
     protected ?\Closure $incomingValueModifier = null;
     
-    /**
-     * @return static
-     */
-    public static function create(string $dataType = self::TYPE_STRING, bool $canBeNull = false, ?string $columnName = null)
+    public static function create(string $dataType = self::TYPE_STRING, bool $canBeNull = false, ?string $columnName = null): static
     {
         return new static($dataType, $canBeNull, $columnName);
     }
     
     /**
      * Configure for ID column (primary or foreign keys)
-     * @return static
      */
-    public static function forPositiveInteger(bool $excludeZero = false, bool $canBeNull = false, ?string $columnName = null)
+    public static function forPositiveInteger(bool $excludeZero = false, bool $canBeNull = false, ?string $columnName = null): static
     {
         return static::create(static::TYPE_INTEGER, $canBeNull, $columnName)->setMin($excludeZero ? 1 : 0);
     }
@@ -236,10 +230,7 @@ class ColumnFilter
         $this->setDataType($dataType, $canBeNull);
     }
     
-    /**
-     * @return static
-     */
-    public function setFilterConfig(FilterConfig $config)
+    public function setFilterConfig(FilterConfig $config): static
     {
         $this->filterConfig = $config;
         return $this;
@@ -273,10 +264,7 @@ class ColumnFilter
         return !empty($this->columnName);
     }
     
-    /**
-     * @return static
-     */
-    public function setColumnName(string $columnName)
+    public function setColumnName(string $columnName): static
     {
         $this->columnName = $columnName;
         return $this;
@@ -293,10 +281,7 @@ class ColumnFilter
         return $this->columnName;
     }
     
-    /**
-     * @return static
-     */
-    public function setColumnNameForTranslation(string $name)
+    public function setColumnNameForTranslation(string $name): static
     {
         $this->columnNameForTranslation = $name;
         return $this;
@@ -325,10 +310,9 @@ class ColumnFilter
     }
     
     /**
-     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setDataType(string $type, bool $canBeNull = false)
+    public function setDataType(string $type, bool $canBeNull = false): static
     {
         if (!array_key_exists($type, static::$dataTypeDefaultOperatorsGroup)) {
             throw new \InvalidArgumentException("Unknown filter type: $type");
@@ -377,9 +361,8 @@ class ColumnFilter
     
     /**
      * Add [is null] and [is not null] operators
-     * @return static
      */
-    public function canBeNull()
+    public function canBeNull(): static
     {
         $this->nullable = true;
         return $this;
@@ -403,10 +386,9 @@ class ColumnFilter
     }
     
     /**
-     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setOperators(array $operators)
+    public function setOperators(array $operators): static
     {
         foreach ($operators as $operator) {
             if (!in_array($operator, static::$operatorGroups[static::OPERATOR_GROUP_ALL], true)) {
@@ -422,7 +404,7 @@ class ColumnFilter
      * @return static
      * @throws \InvalidArgumentException
      */
-    public function setOperatorsFromPreset(string $presetName)
+    public function setOperatorsFromPreset(string $presetName): static
     {
         if (!array_key_exists($presetName, static::$operatorGroups)) {
             throw new \InvalidArgumentException("Unknown filter operators preset: $presetName");
@@ -439,10 +421,7 @@ class ColumnFilter
         return $this->filterLabel;
     }
     
-    /**
-     * @return static
-     */
-    public function setFilterLabel(string $filterLabel)
+    public function setFilterLabel(string $filterLabel): static
     {
         $this->filterLabel = $filterLabel;
         return $this;
@@ -454,10 +433,9 @@ class ColumnFilter
     }
     
     /**
-     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setInputType(string $inputType)
+    public function setInputType(string $inputType): static
     {
         if (!in_array($inputType, static::$inputTypes, true)) {
             throw new \InvalidArgumentException("Unknown filter input type: $inputType");
@@ -478,9 +456,8 @@ class ColumnFilter
     /**
      * Other filter rule settings
      * Details: http://querybuilder.js.org/index.html#filters
-     * @return static
      */
-    public function setOtherSettings(array $otherSettings)
+    public function setOtherSettings(array $otherSettings): static
     {
         $this->otherSettings = $otherSettings;
         return $this;
@@ -499,7 +476,6 @@ class ColumnFilter
     
     /**
      * This filter has one of selection types (select, radio, checkbox) and require $this->allowedValues to be set
-     * @return bool
      */
     protected function isItRequiresAllowedValues(): bool
     {
@@ -511,19 +487,15 @@ class ColumnFilter
     }
     
     /**
-     * @param array|\Closure $allowedValues
-     * @return static
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
-    public function setAllowedValues($allowedValues)
+    public function setAllowedValues(array|\Closure $allowedValues): static
     {
         if (!$this->isItRequiresAllowedValues()) {
             throw new \BadMethodCallException("Cannot set allowed values list to a filter input type: {$this->inputType}");
         } elseif (empty($allowedValues)) {
             throw new \InvalidArgumentException('List of allowed values is empty');
-        } elseif (!is_array($allowedValues) && !($allowedValues instanceof \Closure)) {
-            throw new \InvalidArgumentException('List of allowed values should be array or \Closure');
         }
         $this->allowedValues = $allowedValues;
         return $this;
@@ -531,10 +503,8 @@ class ColumnFilter
     
     /**
      * Alias for setAllowedValues()
-     * @param array|\Closure $allowedValues
-     * @return static
      */
-    public function setOptions($allowedValues)
+    public function setOptions(array|\Closure $allowedValues): static
     {
         return $this->setAllowedValues($allowedValues);
     }
@@ -544,10 +514,7 @@ class ColumnFilter
         return $this->plugin;
     }
     
-    /**
-     * @return static
-     */
-    public function setPlugin(string $plugin)
+    public function setPlugin(string $plugin): static
     {
         $this->plugin = $plugin;
         return $this;
@@ -558,10 +525,7 @@ class ColumnFilter
         return $this->pluginConfig;
     }
     
-    /**
-     * @return static
-     */
-    public function setPluginConfig(array $pluginConfig)
+    public function setPluginConfig(array $pluginConfig): static
     {
         $this->pluginConfig = $pluginConfig;
         return $this;
@@ -573,36 +537,36 @@ class ColumnFilter
     }
     
     /**
-     * @param int|float|string $min -
+     * @param float|int|string $min -
      *      numbers: min value
      *      strings: min length
      *      timestamps: min date/time/datetime in correct 'format'
      * @return static
      */
-    public function setMin($min)
+    public function setMin(float|int|string $min): static
     {
         $this->validators['min'] = $min;
         return $this;
     }
     
     /**
-     * @param int|float|string $max -
+     * @param float|int|string $max -
      *      numbers: max value
      *      strings: max length
      *      timestamps: max date/time/datetime in correct 'format'
      * @return static
      */
-    public function setMax($max)
+    public function setMax(float|int|string $max): static
     {
         $this->validators['max'] = $max;
         return $this;
     }
     
     /**
-     * @param int|float $step - for numbers only
+     * @param float|int $step - for numbers only
      * @return static
      */
-    public function setStep($step)
+    public function setStep(float|int $step): static
     {
         $this->validators['step'] = $step;
         return $this;
@@ -614,7 +578,7 @@ class ColumnFilter
      *      timestamps: datetime format for timestamps in js (http://momentjs.com/docs/#/parsing/string-format/)
      * @return static
      */
-    public function setFormat(string $format)
+    public function setFormat(string $format): static
     {
         $this->validators['format'] = $format;
         return $this;
@@ -628,7 +592,7 @@ class ColumnFilter
     /**
      * @return string|null|DbExpr
      */
-    public function getColumnNameReplacementForCondition()
+    public function getColumnNameReplacementForCondition(): DbExpr|string|null
     {
         return $this->columnNameReplacementForCondition;
     }
@@ -640,13 +604,11 @@ class ColumnFilter
     
     /**
      * Replace column's name when building a condition for DB
-     * @param string|DbExpr $columnNameReplacementForCondition
      * Example:
      *  without replacement: for column_name = 'count', operation = "equals", value = "1" conditon will be: "count" = '1'
      *  with replacement: expression = DbExpr('COALESCE(`count`, ``0``)') condition will be COALESCE("count", 0) = '1'
-     * @return static
      */
-    public function setColumnNameReplacementForCondition($columnNameReplacementForCondition)
+    public function setColumnNameReplacementForCondition(DbExpr|string $columnNameReplacementForCondition): static
     {
         $this->columnNameReplacementForCondition = $columnNameReplacementForCondition;
         return $this;
@@ -656,18 +618,13 @@ class ColumnFilter
      * @param \Closure $modifier - function ($value, $operator, ColumnFilter $columnFilter) { return $value; }
      * @return static
      */
-    public function setIncomingValueModifier(\Closure $modifier)
+    public function setIncomingValueModifier(\Closure $modifier): static
     {
         $this->incomingValueModifier = $modifier;
         return $this;
     }
     
-    /**
-     * @param mixed $value
-     * @param string $operator
-     * @return mixed
-     */
-    protected function modifyIncomingValue($value, string $operator)
+    protected function modifyIncomingValue(mixed $value, string $operator): mixed
     {
         if ($this->incomingValueModifier) {
             return call_user_func($this->incomingValueModifier, $value, $operator, $this);
@@ -698,12 +655,9 @@ class ColumnFilter
     }
     
     /**
-     * @param string $operator
-     * @param mixed $value
-     * @return array
      * @throws \InvalidArgumentException
      */
-    public function buildConditionFromSearchRule(string $operator, $value): array
+    public function buildConditionFromSearchRule(string $operator, mixed $value): array
     {
         if (!in_array($operator, $this->getOperators(), true)) {
             throw new \InvalidArgumentException("Operator [$operator] is forbidden for filter [{$this->getColumnName()}]");
@@ -729,22 +683,18 @@ class ColumnFilter
         if ($this->hasColumnNameReplacementForCondition()) {
             $colReplacement = $this->getColumnNameReplacementForCondition();
             if ($colReplacement instanceof DbExpr) {
-                switch ($operator) {
-                    case static::OPERATOR_IN_ARRAY:
-                    case static::OPERATOR_NOT_IN_ARRAY:
-                        $value = '(``' . implode('``,``', $value) . '``)';
-                        break;
-                    case static::OPERATOR_BETWEEN:
-                    case static::OPERATOR_NOT_BETWEEN:
-                        $value = "``{$value[0]}`` AND ``{$value[1]}``";
-                        break;
-                    case static::OPERATOR_IS_NULL:
-                    case static::OPERATOR_IS_NOT_NULL:
-                        $value = 'NULL';
-                        break;
-                    default:
-                        $value = "``{$value}``";
-                }
+                $value = match ($operator) {
+                    static::OPERATOR_IN_ARRAY,
+                    static::OPERATOR_NOT_IN_ARRAY => '(``' . implode('``,``', $value) . '``)',
+                    
+                    static::OPERATOR_BETWEEN,
+                    static::OPERATOR_NOT_BETWEEN => "``{$value[0]}`` AND ``{$value[1]}``",
+                    
+                    static::OPERATOR_IS_NULL,
+                    static::OPERATOR_IS_NOT_NULL => 'NULL',
+                    
+                    default => "``{$value}``",
+                };
                 return [DbExpr::create($colReplacement->get() . " {$dbOperator} {$value}")];
             } else {
                 $columnName = $colReplacement;
@@ -756,11 +706,9 @@ class ColumnFilter
     }
     
     /**
-     * @param mixed $value
-     * @param string $operator
      * @throws \InvalidArgumentException
      */
-    protected function validateValue($value, string $operator): void
+    protected function validateValue(mixed $value, string $operator): void
     {
         if (
             ($value === null || $value === '')
@@ -824,12 +772,7 @@ class ColumnFilter
         }
     }
     
-    /**
-     * @param mixed $value
-     * @param string $operator
-     * @return mixed
-     */
-    protected function convertRuleValueToConditionValue($value, string $operator)
+    protected function convertRuleValueToConditionValue(mixed $value, string $operator): mixed
     {
         if (is_array($value)) {
             foreach ($value as &$val) {
@@ -908,14 +851,14 @@ class ColumnFilter
      */
     protected function getValueDataTypeConverterForDb(): string
     {
-        switch ($this->getDataType()) {
-            case static::TYPE_TIME:
-                return '::time';
-            case static::TYPE_DATE:
-            case static::TYPE_TIMESTAMP:
-                return '::date';
-        }
-        return '';
+        return match ($this->getDataType()) {
+            static::TYPE_TIME => '::time',
+            
+            static::TYPE_DATE,
+            static::TYPE_TIMESTAMP => '::date',
+            
+            default => '',
+        };
     }
     
 }

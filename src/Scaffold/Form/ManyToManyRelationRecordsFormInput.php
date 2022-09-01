@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold\Form;
 
+use Closure;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\Relation;
@@ -11,14 +12,8 @@ use PeskyORM\ORM\Relation;
 class ManyToManyRelationRecordsFormInput extends FormInput
 {
     
-    /**
-     * @var array|\Closure
-     */
-    protected $dbQueryConditionsForDefaultOptionsLoader = [];
-    /**
-     * @var null|string|DbExpr
-     */
-    protected $optionLabelColumnForDefaultOptionsLoader;
+    protected Closure|array $dbQueryConditionsForDefaultOptionsLoader = [];
+    protected string|null|DbExpr $optionLabelColumnForDefaultOptionsLoader = null;
     
     /**
      * Name of the column in 'linker table' that contains primary key values of the foreign table
@@ -26,9 +21,8 @@ class ManyToManyRelationRecordsFormInput extends FormInput
      * Here you have many-to-many relation between items and categories that resolved via 'linker table'
      * item_categories that contains only 3 columns: id, item_id (link to items.id), category_id (link to categoris.id);
      * You need to pass 'category_id' via $columnName argument
-     * @return static
      */
-    public function setRelationsLinkingColumn(string $columnName)
+    public function setRelationsLinkingColumn(string $columnName): static
     {
         $this->relationColumn = $columnName;
         return $this;
@@ -47,10 +41,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput
         ];
     }
     
-    /**
-     * @return static
-     */
-    public function setRelation(Relation $relation, string $columnName)
+    public function setRelation(Relation $relation, string $columnName): static
     {
         $this->relation = $relation;
         if ($columnName !== $relation->getForeignColumnName()) {
@@ -73,7 +64,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput
         return parent::getRelationColumn();
     }
     
-    public function modifySubmitedValueBeforeValidation($value, array $data)
+    public function modifySubmitedValueBeforeValidation(mixed $value, array $data): array
     {
         if (empty($value)) {
             $value = [];
@@ -91,7 +82,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput
     /**
      * @throws \InvalidArgumentException
      */
-    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): array
     {
         $relation = $this->getRelation();
         if (!is_array($value)) {
@@ -125,10 +116,7 @@ class ManyToManyRelationRecordsFormInput extends FormInput
         return true;
     }
     
-    /**
-     * @return static
-     */
-    public function setOptions($options)
+    public function setOptions(array|Closure $options): static
     {
         throw new \BadMethodCallException(
             "Plain options is forbidden for ManyToManyRelationRecordsFormInput '{$this->getName()}'. Use options loader."
@@ -192,53 +180,28 @@ class ManyToManyRelationRecordsFormInput extends FormInput
     
     /**
      * Set conditions for default options loader
-     * @param array|\Closure $conditonsAndOptions
-     * @return static
-     * @throws \InvalidArgumentException
+     * \Closure -> function(): array { return []; }
      */
-    public function setDbQueryConditionsForDefaultOptionsLoader($conditonsAndOptions)
+    public function setDbQueryConditionsForDefaultOptionsLoader(array|Closure $conditonsAndOptions): static
     {
-        if (
-            !is_array($conditonsAndOptions)
-            && !($conditonsAndOptions instanceof DbExpr)
-            && !($conditonsAndOptions instanceof \Closure)
-        ) {
-            throw new \InvalidArgumentException(
-                '$conditonsAndOptions argument must be a string, DbExpr or a Closure'
-            );
-        }
         $this->dbQueryConditionsForDefaultOptionsLoader = $conditonsAndOptions;
         return $this;
     }
     
     /**
-     * Set source for options labels
-     * @param string|\Closure $columnNameOrClosure
-     *      - string: column name
-     *      - \Closure: function (RecordInterface $record) { return 'value' }
-     * @return static
-     * @throws \InvalidArgumentException
+     * Set source for options labels.
+     * $columnNameOrClosure:
+     * - string: column name
+     * - DbExpr: some complex column name
+     * - \Closure: function (RecordInterface $record): string|DbExpr { return 'value'; }
      */
-    public function setOptionLabelColumnForDefaultOptionsLoader($columnNameOrClosure)
+    public function setOptionLabelColumnForDefaultOptionsLoader(Closure|DbExpr|string $columnNameOrClosure): static
     {
-        if (
-            !is_string($columnNameOrClosure)
-            && !($columnNameOrClosure instanceof DbExpr)
-            && !($columnNameOrClosure instanceof \Closure)
-        ) {
-            throw new \InvalidArgumentException(
-                '$columnNameOrClosure argument must be a string, DbExpr or a Closure'
-            );
-        }
         $this->optionLabelColumnForDefaultOptionsLoader = $columnNameOrClosure;
         return $this;
     }
     
-    /**
-     * @param mixed $default
-     * @return string|DbExpr|null
-     */
-    protected function getOptionLabelColumnForDefaultOptionsLoader($default = null)
+    protected function getOptionLabelColumnForDefaultOptionsLoader(mixed $default = null): mixed
     {
         return $this->optionLabelColumnForDefaultOptionsLoader ?: $default;
     }

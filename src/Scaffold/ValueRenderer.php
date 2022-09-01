@@ -25,44 +25,34 @@ abstract class ValueRenderer
     }
     
     /**
-     * @param string|null $key - string: get value for a key or default one | null: get all data
-     * @param mixed $default
-     * @return array|mixed
+     * @param float|int|string|null $key - string: get value for a key or default one | null: get all data
+     * @param mixed|null $default
+     * @return mixed
      */
-    public function getData(string $key = null, $default = null)
+    public function getData(float|int|string $key = null, mixed $default = null): mixed
     {
         return $key === null ? $this->data : Arr::get($this->data, $key, $default);
     }
     
-    /**
-     * @param array $data
-     * @return static
-     */
-    public function setData(array $data)
+    public function setData(array $data): static
     {
         $this->data = $data;
         return $this;
     }
     
     /**
-     * @param string|int|float $key
-     * @param mixed $value
-     * @return static
-     * @throws ScaffoldException
+     * @throws \InvalidArgumentException
      */
-    public function addData($key, $value)
+    public function addData(float|int|string $key, mixed $value): static
     {
         if (empty($key)) {
-            throw new ScaffoldException('$key cannot be empty');
+            throw new \InvalidArgumentException('$key argument value cannot be empty');
         }
         $this->data[$key] = $value;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function mergeData(array $data)
+    public function mergeData(array $data): static
     {
         $this->data = array_merge($this->data, $data);
         return $this;
@@ -73,10 +63,7 @@ abstract class ValueRenderer
         return $this->template;
     }
     
-    /**
-     * @return static
-     */
-    public function setTemplate(string $template)
+    public function setTemplate(string $template): static
     {
         $this->template = $template;
         return $this;

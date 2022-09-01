@@ -32,10 +32,9 @@ class FormInput extends RenderableValueViewer
      * value can be:
      * 1. <array> of pairs:
      *      'option_value' => 'option_label'
-     * 3. \Closure
-     * @var null|array|\Closure
+     * 2. \Closure that returns key-value array like described above
      */
-    protected $options;
+    protected \Closure|array|null $options = null;
     
     protected ?\Closure $optionsLoader = null;
     
@@ -106,10 +105,7 @@ class FormInput extends RenderableValueViewer
         }
     }
     
-    /**
-     * @return array|\Closure
-     */
-    public function getOptions()
+    public function getOptions(): array|\Closure
     {
         return $this->hasOptionsLoader() ? [] : $this->options;
     }
@@ -120,24 +116,19 @@ class FormInput extends RenderableValueViewer
     }
     
     /**
-     * @param null|array|\Closure $options
-     * @return static
-     * @throws \InvalidArgumentException
+     * $options as \Closure must return array
      */
-    public function setOptions($options)
+    public function setOptions(array|\Closure $options): static
     {
-        if (!is_array($options) && !($options instanceof \Closure)) {
-            throw new \InvalidArgumentException($this, '$options argument should be an array or \Closure');
-        }
         $this->options = $options;
         return $this;
     }
     
     /**
-     * @param \Closure $loader = function ($pkValue, $keywords, FormInput $formInput, FormConfig $formConfig) { return [] }
-     * @return static
+     * Signature:
+     * function (int|string|float $pkValue, string $keywords, FormInput $formInput, FormConfig $formConfig): array { return [] }
      */
-    public function setOptionsLoader(\Closure $loader)
+    public function setOptionsLoader(\Closure $loader): static
     {
         $this->optionsLoader = $loader;
         return $this;
@@ -146,9 +137,8 @@ class FormInput extends RenderableValueViewer
     /**
      * Allows autocomplete functionality (search by keywords) for <select> inputs using options loader
      * @param int $minCharsToInitFiltering - minimum characters required to initiate ajax request
-     * @return static
      */
-    public function enableOptionsFilteringByKeywords(int $minCharsToInitFiltering = 1)
+    public function enableOptionsFilteringByKeywords(int $minCharsToInitFiltering = 1): static
     {
         $this->enableOptionsFilteringByKeywords = true;
         $this->minCharsRequiredToInitOptionsFiltering = $minCharsToInitFiltering;
@@ -175,10 +165,7 @@ class FormInput extends RenderableValueViewer
         return $this->minCharsRequiredToInitOptionsFiltering;
     }
     
-    /**
-     * @return static
-     */
-    public function setEmptyOptionLabel(string $label)
+    public function setEmptyOptionLabel(string $label): static
     {
         $this->emptyOptionLabel = $label;
         return $this;
@@ -199,19 +186,13 @@ class FormInput extends RenderableValueViewer
         return $this->showOnCreate;
     }
     
-    /**
-     * @return static
-     */
-    public function showOnCreate()
+    public function showOnCreate(): static
     {
         $this->showOnCreate = true;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function hideOnCreate()
+    public function hideOnCreate(): static
     {
         $this->showOnCreate = false;
         return $this;
@@ -222,19 +203,13 @@ class FormInput extends RenderableValueViewer
         return $this->showOnEdit;
     }
     
-    /**
-     * @return static
-     */
-    public function showOnEdit()
+    public function showOnEdit(): static
     {
         $this->showOnEdit = true;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function hideOnEdit()
+    public function hideOnEdit(): static
     {
         $this->showOnEdit = false;
         return $this;
@@ -257,9 +232,8 @@ class FormInput extends RenderableValueViewer
     
     /**
      * Add some html after input
-     * @return static
      */
-    public function setAdditionalHtml(string $html)
+    public function setAdditionalHtml(string $html): static
     {
         $this->additionalHtml = $html;
         return $this;
@@ -284,24 +258,19 @@ class FormInput extends RenderableValueViewer
         }
     }
     
-    /**
-     * @param string|array $tooltip
-     * @return string
-     */
-    protected function buildTooltip($tooltip): string
+    protected function buildTooltip(array|string $tooltip): string
     {
         return '<span class="help-block"><p class="mn">'
             . '<i class="glyphicon glyphicon-info-sign text-blue fs16 va-t mr5 lh20" style="top: 0;"></i>'
-            . (is_array($tooltip) ? implode('</p><p class="mn pl20">', $tooltip) : (string)$tooltip)
+            . (is_array($tooltip) ? implode('</p><p class="mn pl20">', $tooltip) : $tooltip)
             . '</p></span>';
     }
     
     /**
-     * @param string|array $tooltip - array: array of strings. If processed by getFormattedTooltip() - it will be
+     * @param array|string $tooltip - array: array of strings. If processed by getFormattedTooltip() - it will be
      *      converted to string where each element of array starts with new line (<br>)
-     * @return static
      */
-    public function setTooltip($tooltip)
+    public function setTooltip(array|string $tooltip): static
     {
         $this->tooltip = $tooltip;
         return $this;
@@ -389,7 +358,8 @@ class FormInput extends RenderableValueViewer
      * Provides special value saver used only when isValueWillBeSavedManually() returns true;
      * This is used in complex situations like saving relations of type HAS MANY
      * Closure must throw PeskyORM\Exception\InvalidDataException if something is wring with incoming data.
-     * @return \Closure - funciton ($value, RecordInterface $record, $created) {  }
+     * @return \Closure
+     * Signature: funciton (mixed $value, RecordInterface $record, bool $created) {  }
      */
     public function getValueSaver(): \Closure
     {
@@ -401,11 +371,8 @@ class FormInput extends RenderableValueViewer
     /**
      * Modify incoming value before validating it. May be useful for situations when you need to clean
      * incoming value from unnecessary data
-     * @param mixed $value
-     * @param array $data
-     * @return mixed
      */
-    public function modifySubmitedValueBeforeValidation($value, array $data)
+    public function modifySubmitedValueBeforeValidation(mixed $value, array $data): mixed
     {
         if ($this->hasSubmittedValueModifier()) {
             return call_user_func($this->getSubmittedValueModifier(), $value, $data);
@@ -416,10 +383,9 @@ class FormInput extends RenderableValueViewer
     
     /**
      * Closure may modify incoming value before it is validated.
-     * @param \Closure $modifier - function ($value, array $data) { return $value; }
-     * @return static
+     * Signature: function (mixed $value, array $data): mixed { return $value; }
      */
-    public function setSubmittedValueModifier(\Closure $modifier)
+    public function setSubmittedValueModifier(\Closure $modifier): static
     {
         $this->submittedValueModifier = $modifier;
         return $this;
@@ -451,8 +417,11 @@ class FormInput extends RenderableValueViewer
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @return static
      */
-    public function setDisabledUntil(string $otherInput, $otherInputValue, bool $ignoreIfInputIsAbsent = false)
-    {
+    public function setDisabledUntil(
+        string $otherInput,
+        mixed $otherInputValue,
+        bool $ignoreIfInputIsAbsent = false
+    ): static {
         return $this->addDisablerConfig($otherInput, false, $otherInputValue, $ignoreIfInputIsAbsent, false);
     }
     
@@ -472,16 +441,18 @@ class FormInput extends RenderableValueViewer
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
      * @return static
      */
-    public function setDisabledWhen(string $otherInput, $otherInputValue, bool $ignoreIfInputIsAbsent = false)
-    {
+    public function setDisabledWhen(
+        string $otherInput,
+        mixed $otherInputValue,
+        bool $ignoreIfInputIsAbsent = false
+    ): static {
         return $this->addDisablerConfig($otherInput, true, $otherInputValue, $ignoreIfInputIsAbsent, false);
     }
     
     /**
      * Input will be always marked as 'readonly'
-     * @return static
      */
-    public function setDisabledAlways()
+    public function setDisabledAlways(): static
     {
         $this->disablersConfigs = [];
         $this->disablersConfigs[] = function () {
@@ -507,13 +478,17 @@ class FormInput extends RenderableValueViewer
      * @param bool $ignoreIfInputIsAbsent
      *      - true: if input is not present in form this condition will be ignored
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
-     * @param null $changeValue
+     * @param string|bool|null $changeValue
      *      - null: leave as is
      *      - string or bool: change value of this input when it gets "readonly" attribute
      * @return static
      */
-    public function setReadonlyUntil(string $otherInput, $otherInputValue, bool $ignoreIfInputIsAbsent = false, $changeValue = null)
-    {
+    public function setReadonlyUntil(
+        string $otherInput,
+        mixed $otherInputValue,
+        bool $ignoreIfInputIsAbsent = false,
+        string|bool $changeValue = null
+    ): static {
         return $this->addDisablerConfig($otherInput, false, $otherInputValue, $ignoreIfInputIsAbsent, true, $changeValue);
     }
     
@@ -531,21 +506,24 @@ class FormInput extends RenderableValueViewer
      * @param bool $ignoreIfInputIsAbsent
      *      - true: if input is not present in form this condition will be ignored
      *      - false: if input is not present in form this condition will write about this situation in browser's console and will not be used
-     * @param null $changeValue
+     * @param string|bool|null $changeValue
      *      - null: leave as is
      *      - string or bool: change value of this input when it gets "readonly" attribute
      * @return static
      */
-    public function setReadonlyWhen(string $otherInput, $otherInputValue, bool $ignoreIfInputIsAbsent = false, $changeValue = null)
-    {
+    public function setReadonlyWhen(
+        string $otherInput,
+        mixed $otherInputValue,
+        bool $ignoreIfInputIsAbsent = false,
+        string|bool $changeValue = null
+    ): static {
         return $this->addDisablerConfig($otherInput, true, $otherInputValue, $ignoreIfInputIsAbsent, true, $changeValue);
     }
     
     /**
      * Input will be always marked as 'readonly'
-     * @return static
      */
-    public function setReadonlyAlways()
+    public function setReadonlyAlways(): static
     {
         $this->disablersConfigs = [];
         $this->disablersConfigs[] = function () {
@@ -557,17 +535,14 @@ class FormInput extends RenderableValueViewer
         return $this;
     }
     
-    /**
-     * @return static
-     */
     protected function addDisablerConfig(
         string $enablerInputName,
         bool $isEqualsTo,
-        $value,
+        mixed $value,
         bool $ignoreIfInputIsAbsent = true,
         bool $setReadOnly = false,
-        $readonlyValue = null
-    ) {
+        mixed $readonlyValue = null
+    ): static {
         $closure = function () use ($enablerInputName, $isEqualsTo, $value, $ignoreIfInputIsAbsent, $setReadOnly, $readonlyValue) {
             if (is_array($value)) {
                 array_walk($value, function (&$value) {
@@ -617,9 +592,9 @@ class FormInput extends RenderableValueViewer
     
     /**
      * @param ValueRenderer|InputRenderer $renderer
-     * @return static
+     * @noinspection PhpDocSignatureInspection
      */
-    public function configureDefaultRenderer(ValueRenderer $renderer)
+    public function configureDefaultRenderer(ValueRenderer $renderer): static
     {
         parent::configureDefaultRenderer($renderer);
         if (!$renderer->hasTemplate()) {

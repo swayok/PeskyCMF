@@ -32,7 +32,7 @@ class CmfMakeScaffoldCommand extends CmfCommand
         $namespace = $this->getScaffoldsNamespace();
         $className = $this->getScaffoldClassName($table, $this->option('resource'));
         
-        $filePath = $this->getFolder($namespace) . $className . '.php';
+        $filePath = $this->getFolder() . $className . '.php';
         if (File::exist($filePath)) {
             if ($this->confirm("Scaffold class file {$filePath} already exists. Overwrite?")) {
                 File::remove($filePath);

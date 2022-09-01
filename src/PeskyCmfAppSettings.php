@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use PeskyCMF\Db\Settings\CmfSettingsTable;
@@ -23,9 +24,6 @@ use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface
 class PeskyCmfAppSettings
 {
     
-    /** @var static */
-    protected static $instance;
-    
     public const DEFAULT_BROWSER_TITLE = 'default_browser_title';
     public const BROWSER_TITLE_ADDITION = 'browser_title_addition';
     public const LANGUAGES = 'languages';
@@ -35,19 +33,14 @@ class PeskyCmfAppSettings
     protected static array $settingsForWysiwygDataIsnserts = [];
     
     private ?array $defaultValues = null;
+    protected Application $app;
     
-    /**
-     * @return static
-     */
-    public static function getInstance()
+    public static function getInstance(): static
     {
-        if (!static::$instance) {
-            static::$instance = new static();
-        }
-        return static::$instance;
+        return app(__CLASS__);
     }
     
-    protected function __construct()
+    public function __construct()
     {
     }
     
@@ -123,18 +116,18 @@ class PeskyCmfAppSettings
     
     /**
      * Get default value for setting $name
-     * @return mixed
      */
-    public static function getDefaultValue(string $name)
+    public static function getDefaultValue(string $name): mixed
     {
-        if (static::getInstance()->defaultValues === null) {
-            static::getInstance()->defaultValues = static::getAllDefaultValues();
+        $instance = static::getInstance();
+        if ($instance->defaultValues === null) {
+            $instance->defaultValues = static::getAllDefaultValues();
         }
-        if (Arr::has(static::getInstance()->defaultValues, $name)) {
-            if (static::getInstance()->defaultValues[$name] instanceof \Closure) {
-                static::getInstance()->defaultValues[$name] = static::getInstance()->defaultValues[$name]();
+        if (Arr::has($instance->defaultValues, $name)) {
+            if ($instance->defaultValues[$name] instanceof \Closure) {
+                $instance->defaultValues[$name] = $instance->defaultValues[$name]();
             }
-            return static::getInstance()->defaultValues[$name];
+            return $instance->defaultValues[$name];
         }
         return null;
     }
@@ -150,6 +143,7 @@ class PeskyCmfAppSettings
     
     /**
      * @return CmfSettingsTable|LaravelKeyValueTableInterface
+     * @noinspection PhpDocSignatureInspection
      */
     protected static function getTable(): LaravelKeyValueTableInterface
     {
@@ -186,12 +180,9 @@ class PeskyCmfAppSettings
     }
     
     /**
-     * @param string $key
-     * @param mixed $value
-     * @param bool $validate
      * @throws \InvalidArgumentException
      */
-    public static function update(string $key, $value, bool $validate = true): void
+    public static function update(string $key, mixed $value, bool $validate = true): void
     {
         $data = [$key => $value];
         if ($validate && !($value instanceof DbExpr)) {

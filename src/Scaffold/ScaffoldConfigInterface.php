@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold;
 
+use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -20,6 +21,7 @@ interface ScaffoldConfigInterface
     
     /**
      * @return TableInterface|KeyValueTableInterface|LaravelKeyValueTableInterface
+     * @noinspection PhpDocSignatureInspection
      */
     public static function getTable(): TableInterface;
     
@@ -39,9 +41,8 @@ interface ScaffoldConfigInterface
      * You may return an HTML string or \Closure that returns that string.
      * Note that self::getMenuItemCounterName() uses this method to decide if it should return null or counter name.
      * If you want to return HTML string consider overwriting of self::getMenuItemCounterName()
-     * @return null|\Closure|string
      */
-    public static function getMenuItemCounterValue();
+    public static function getMenuItemCounterValue(): null|Closure|string;
     
     public function getDataGridConfig(): DataGridConfig;
     
@@ -97,40 +98,19 @@ interface ScaffoldConfigInterface
     
     public function deleteBulkOfRecords(): JsonResponse;
     
-    /**
-     * @return Response|string|View
-     */
-    public function getCustomData(string $dataId);
+    public function getCustomData(string $dataId): Response|string|View;
     
-    /**
-     * @return Response|string|View
-     */
-    public function getCustomPage(string $pageName);
+    public function getCustomPage(string $pageName): Response|string|View;
     
-    /**
-     * @return Response|string|View
-     */
-    public function performCustomAjaxAction(string $actionName);
+    public function performCustomAjaxAction(string $actionName): Response|string|View;
     
-    /**
-     * @return Response|string|View
-     */
-    public function performCustomDirectAction(string $actionName);
+    public function performCustomDirectAction(string $actionName): Response|string|View;
     
-    /**
-     * @return Response|string|View
-     */
-    public function getCustomPageForRecord(string $itemId, string $pageName);
+    public function getCustomPageForRecord(string $itemId, string $pageName): Response|string|View;
     
-    /**
-     * @return Response|string|View
-     */
-    public function performCustomAjaxActionForRecord(string $itemId, string $actionName);
+    public function performCustomAjaxActionForRecord(string $itemId, string $actionName): Response|string|View;
     
-    /**
-     * @return Response|string|View
-     */
-    public function performCustomDirectActionForRecord(string $itemId, string $actionName);
+    public function performCustomDirectActionForRecord(string $itemId, string $actionName): Response|string|View;
     
     /**
      * Get selects options as html for each select-like input in form

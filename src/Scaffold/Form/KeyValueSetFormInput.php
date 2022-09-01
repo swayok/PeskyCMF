@@ -20,10 +20,7 @@ class KeyValueSetFormInput extends FormInput
         return $this->minValuesCount;
     }
     
-    /**
-     * @return static
-     */
-    public function setMinValuesCount(int $minValuesCount)
+    public function setMinValuesCount(int $minValuesCount): static
     {
         $this->minValuesCount = max(0, $minValuesCount);
         return $this;
@@ -34,10 +31,7 @@ class KeyValueSetFormInput extends FormInput
         return $this->maxValuesCount;
     }
     
-    /**
-     * @return static
-     */
-    public function setMaxValuesCount(int $maxValuesCount)
+    public function setMaxValuesCount(int $maxValuesCount): static
     {
         $this->maxValuesCount = max(0, $maxValuesCount);
         return $this;
@@ -48,20 +42,17 @@ class KeyValueSetFormInput extends FormInput
         return $this->keysLabel ?: $this->getScaffoldSectionConfig()->translate(null, 'input.' . $this->getNameForTranslation() . '_key');
     }
     
-    /**
-     * @return static
-     */
-    public function setKeysLabel(string $keysLabel)
+    public function setKeysLabel(string $keysLabel): static
     {
         $this->keysLabel = $keysLabel;
         return $this;
     }
     
     /**
-     * @param \Closure $options
-     * @return static
+     * Signature:
+     * function(): array { return ['value' => 'label', ...] }
      */
-    public function setKeysOptions(\Closure $options)
+    public function setKeysOptions(\Closure $options): static
     {
         $this->keysOptions = $options;
         return $this;
@@ -93,10 +84,7 @@ class KeyValueSetFormInput extends FormInput
         return $this->valuesLabel ?: $this->getScaffoldSectionConfig()->translate(null, 'input.' . $this->getNameForTranslation() . '_value');
     }
     
-    /**
-     * @return static
-     */
-    public function setValuesLabel(string $valuesLabel)
+    public function setValuesLabel(string $valuesLabel): static
     {
         $this->valuesLabel = $valuesLabel;
         return $this;
@@ -107,10 +95,7 @@ class KeyValueSetFormInput extends FormInput
         return $this->addRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.add_row');
     }
     
-    /**
-     * @return static
-     */
-    public function setAddRowButtonLabel(string $addRowButtonLabel)
+    public function setAddRowButtonLabel(string $addRowButtonLabel): static
     {
         $this->addRowButtonLabel = $addRowButtonLabel;
         return $this;
@@ -121,10 +106,7 @@ class KeyValueSetFormInput extends FormInput
         return $this->deleteRowButtonLabel ?: $this->getScaffoldSectionConfig()->translateGeneral('input.key_value_set.delete_row');
     }
     
-    /**
-     * @return static
-     */
-    public function setDeleteRowButtonLabel(string $deleteRowButtonLabel)
+    public function setDeleteRowButtonLabel(string $deleteRowButtonLabel): static
     {
         $this->deleteRowButtonLabel = $deleteRowButtonLabel;
         return $this;
@@ -156,21 +138,22 @@ class KeyValueSetFormInput extends FormInput
         ];
     }
     
-    public function modifySubmitedValueBeforeValidation($value, array $data)
+    public function modifySubmitedValueBeforeValidation(mixed $value, array $data): array
     {
         $value = parent::modifySubmitedValueBeforeValidation($value, $data);
-        if (is_array($value)) {
-            foreach ($value as $index => $keyValuePair) {
-                if (empty($keyValuePair['key']) || trim($keyValuePair['key']) === '') {
-                    // remove record with empty key
-                    unset($value[$index]);
-                }
+        if (!is_array($value)) {
+            throw new \InvalidArgumentException('$value argument must be array');
+        }
+        foreach ($value as $index => $keyValuePair) {
+            if (empty($keyValuePair['key']) || trim($keyValuePair['key']) === '') {
+                // remove record with empty key
+                unset($value[$index]);
             }
         }
         return $value;
     }
     
-    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): array
     {
         if (!is_array($value)) {
             if (!is_string($value)) {

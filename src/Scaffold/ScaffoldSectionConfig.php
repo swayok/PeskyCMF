@@ -54,21 +54,12 @@ abstract class ScaffoldSectionConfig
     
     protected ?\Closure $toolbarItems = null;
     
-    /**
-     * @var array|\Closure
-     */
-    protected $specialConditions = [];
+    protected \Closure|array $specialConditions = [];
     
     protected array $additionalColumnsToSelect = [];
     
-    /**
-     * @var array|\Closure
-     */
-    protected $dataToAddToRecord;
-    /**
-     * @var array|\Closure
-     */
-    protected $dataToSendToTemplate;
+    protected \Closure|array|null $dataToAddToRecord = null;
+    protected \Closure|array|null $dataToSendToTemplate = null;
     
     protected string $template;
     protected ?string $jsInitiator = null;
@@ -79,13 +70,9 @@ abstract class ScaffoldSectionConfig
      */
     protected bool $allowComplexValueViewerNames = false;
     
-    /**
-     * @return static
-     */
-    public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig)
+    public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig): ScaffoldSectionConfig|static
     {
-        $class = static::class;
-        return new $class($table, $scaffoldConfig);
+        return new static($table, $scaffoldConfig);
     }
     
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig)
@@ -104,10 +91,7 @@ abstract class ScaffoldSectionConfig
         return $this->getScaffoldConfig()->getCmfConfig();
     }
     
-    /**
-     * @return static
-     */
-    public function setTemplate(string $template)
+    public function setTemplate(string $template): static
     {
         $this->template = $template;
         return $this;
@@ -126,9 +110,8 @@ abstract class ScaffoldSectionConfig
     
     /**
      * Translate resource-related items (column names, input labels, etc.)
-     * @return string|array
      */
-    public function translate(?AbstractValueViewer $viewer = null, string $suffix = '', array $parameters = [])
+    public function translate(?AbstractValueViewer $viewer = null, string $suffix = '', array $parameters = []): array|string
     {
         if ($viewer) {
             return $this
@@ -143,9 +126,8 @@ abstract class ScaffoldSectionConfig
     
     /**
      * Translate general UI elements (button labels, tooltips, messages, etc..)
-     * @return array|string
      */
-    public function translateGeneral(string $path, array $parameters = [])
+    public function translateGeneral(string $path, array $parameters = []): array|string
     {
         $prefix = $this->getSectionTranslationsPrefix();
         $text = $this->getScaffoldConfig()->translate($prefix, $path, $parameters);
@@ -175,9 +157,8 @@ abstract class ScaffoldSectionConfig
     
     /**
      * Disables any usage of TableStructure (validation, automatic field type guessing, etc)
-     * @return static
      */
-    public function thereIsNoDbColumns()
+    public function thereIsNoDbColumns(): static
     {
         $this->thereIsNoDbColumns = true;
         return $this;
@@ -185,9 +166,8 @@ abstract class ScaffoldSectionConfig
     
     /**
      * @param AbstractValueViewer[] $viewers
-     * @return static
      */
-    protected function setValueViewers(array $viewers)
+    protected function setValueViewers(array $viewers): static
     {
         /** @var AbstractValueViewer|null $config */
         foreach ($viewers as $name => $config) {
@@ -196,12 +176,7 @@ abstract class ScaffoldSectionConfig
         return $this;
     }
     
-    /**
-     * @param string|int $name
-     * @param \Closure|string|AbstractValueViewer|null $config
-     * @return static
-     */
-    protected function normalizeAndAddValueViewer($name, $config)
+    protected function normalizeAndAddValueViewer(int|string $name, \Closure|string|AbstractValueViewer|null $config): static
     {
         $valueConverter = null;
         if (is_int($name)) {
@@ -298,9 +273,9 @@ abstract class ScaffoldSectionConfig
     abstract public function createValueViewer(): AbstractValueViewer;
     
     /**
-     * @param string $name
      * @return DataGridColumn|ValueCell|FormInput|AbstractValueViewer
      * @throws \InvalidArgumentException
+     * @noinspection PhpDocSignatureInspection
      */
     public function getValueViewer(string $name): AbstractValueViewer
     {
@@ -316,14 +291,13 @@ abstract class ScaffoldSectionConfig
     }
     
     /**
-     * @return static
      * @throws \InvalidArgumentException
      */
     public function addValueViewer(
         string $name,
         ?AbstractValueViewer &$viewer = null,
         bool $autodetectIfLinkedToDbColumn = false
-    ) {
+    ): static {
         $usesRelation = false;
         $hasColumnWithViewerName = $this->getTable()->getTableStructure()->hasColumn($name);
         $isAutocreated = !$viewer;
@@ -431,10 +405,7 @@ abstract class ScaffoldSectionConfig
         return empty($this->title) ? $default : $this->title;
     }
     
-    /**
-     * @return static
-     */
-    public function setTitle(string $title)
+    public function setTitle(string $title): static
     {
         $this->title = $title;
         return $this;
@@ -455,12 +426,11 @@ abstract class ScaffoldSectionConfig
     }
     
     /**
-     * Modify record's data before it is processed by ScaffoldSectionConfig->prepareRecord()
-     * Must return array
-     * @param \Closure $modifier - function (array $record, ScaffoldSectionConfig $sectionConfig) { return $record }
-     * @return static
+     * Modify record's data before it is processed by ScaffoldSectionConfig->prepareRecord().
+     * Signature:
+     * function (array $record, ScaffoldSectionConfig $sectionConfig): array { return $record }
      */
-    public function setRawRecordDataModifier(\Closure $modifier)
+    public function setRawRecordDataModifier(\Closure $modifier): static
     {
         $this->rawRecordDataModifier = $modifier;
         return $this;
@@ -638,16 +608,11 @@ abstract class ScaffoldSectionConfig
     }
     
     /**
-     * @param array|\Closure $arrayOrClosure
-     *      - \Closure: funciton (array $record, ScaffoldSectionConfig $scaffoldSectionConfig) { return []; }
-     * @return static
-     * @throws \InvalidArgumentException
+     * Signature:
+     * funciton (array $record, ScaffoldSectionConfig $scaffoldSectionConfig): array { return []; }
      */
-    public function setDataToAddToRecord($arrayOrClosure)
+    public function setDataToAddToRecord(array|\Closure $arrayOrClosure): static
     {
-        if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
-            throw new \InvalidArgumentException('$arrayOrClosure argument must be an array or \Closure');
-        }
         $this->dataToAddToRecord = $arrayOrClosure;
         return $this;
     }
@@ -664,15 +629,11 @@ abstract class ScaffoldSectionConfig
     }
     
     /**
-     * @param array|\Closure $arrayOrClosure - function (ScaffoldSectionConfig $sectionConfig) { return [] }
-     * @return static
-     * @throws \InvalidArgumentException
+     * Signature:
+     * function (ScaffoldSectionConfig $sectionConfig): array { return [] }
      */
-    public function sendDataToTemplate($arrayOrClosure)
+    public function sendDataToTemplate(array|\Closure $arrayOrClosure): static
     {
-        if (!is_array($arrayOrClosure) && !($arrayOrClosure instanceof \Closure)) {
-            throw new \InvalidArgumentException('$arrayOrClosure argument must be an array or \Closure');
-        }
         $this->dataToSendToTemplate = $arrayOrClosure;
         return $this;
     }
@@ -702,14 +663,12 @@ abstract class ScaffoldSectionConfig
      * Set relations to join.
      * Notes:
      * - For data grid you need to provide key-value pairs in same format as for columns selection:
-     *   ['Relation' => ['col1', 'col2', ...]]. More info: @param array $relationNames
-     * @return static
-     * @see AbstractSelect::columns()
+     *   ['Relation' => ['col1', 'col2', ...]]. More info: AbstractSelect::columns().
      *   HAS MANY relations are forbidden.
      * - For item edit form and item details view you need to provide only names of the relations you need to read
      *   with the item. All types of relations allowed but there is no automatic possibility to get deeper relations
      */
-    public function readRelations(array $relationNames)
+    public function readRelations(array $relationNames): static
     {
         $this->relationsToRead = $relationNames;
         return $this;
@@ -736,10 +695,7 @@ abstract class ScaffoldSectionConfig
         $valueViewer->configureDefaultRenderer($renderer);
     }
     
-    /**
-     * @return static
-     */
-    public function setDefaultValueRenderer(\Closure $defaultFieldRenderer)
+    public function setDefaultValueRenderer(\Closure $defaultFieldRenderer): static
     {
         $this->defaultFieldRenderer = $defaultFieldRenderer;
         return $this;
@@ -890,9 +846,8 @@ abstract class ScaffoldSectionConfig
      *          ToolbarItem2,
      *          'delete' => null
      *      ]
-     * @return static
      */
-    public function setToolbarItems(\Closure $callback)
+    public function setToolbarItems(\Closure $callback): static
     {
         $this->toolbarItems = $callback;
         return $this;
@@ -936,15 +891,11 @@ abstract class ScaffoldSectionConfig
     }
     
     /**
-     * @param array|\Closure $specialConditions - array or function (ScaffoldSectionConfig $scaffoldSectionConfig) {}
-     * @return static
-     * @throws \InvalidArgumentException
+     * Signature:
+     * function (ScaffoldSectionConfig $scaffoldSectionConfig): array { return []; }
      */
-    public function setSpecialConditions($specialConditions)
+    public function setSpecialConditions(array|\Closure $specialConditions): static
     {
-        if (!is_array($specialConditions) && !($specialConditions instanceof \Closure)) {
-            throw new \InvalidArgumentException('$specialConditions argument must be an array or \Closure');
-        }
         $this->specialConditions = $specialConditions;
         return $this;
     }
@@ -954,10 +905,7 @@ abstract class ScaffoldSectionConfig
         return min($this->width, 100);
     }
     
-    /**
-     * @return static
-     */
-    public function setWidth(int $percents)
+    public function setWidth(int $percents): static
     {
         $this->width = $percents;
         return $this;
@@ -981,7 +929,7 @@ abstract class ScaffoldSectionConfig
      * @param string|null $size - 'sm', 'md', 'lg', 'xl' | null - autodetect depending on $this->width
      * @return static
      */
-    public function setModalConfig(bool $isEnabled = true, ?string $size = null)
+    public function setModalConfig(bool $isEnabled = true, ?string $size = null): static
     {
         $this->openInModal = $isEnabled;
         $this->modalSize = in_array($size, ['sm', 'md', 'lg', 'xl']) ? $size : null;
@@ -1027,12 +975,11 @@ abstract class ScaffoldSectionConfig
      * - JS function will be called after data was loaded and content rendered
      * - JS function will receive 1 argument depending on situation: $content or $modal
      * @param string $jsFunctionName - name of existing JS function without braces, for example: 'initSomething' or 'SomeVar.init'
-     * @return static
      * @throws \InvalidArgumentException
      */
-    public function setJsInitiator(string $jsFunctionName)
+    public function setJsInitiator(string $jsFunctionName): static
     {
-        if (!is_string($jsFunctionName) && !preg_match('%^[$_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%', $jsFunctionName)) {
+        if (!preg_match('%^[$_a-zA-Z][a-zA-Z0-9_.\[\]\'"]+$%', $jsFunctionName)) {
             throw new \InvalidArgumentException("Invalid JavaScript funciton name: [$jsFunctionName]");
         }
         $this->jsInitiator = $jsFunctionName;
@@ -1060,11 +1007,7 @@ abstract class ScaffoldSectionConfig
         }
     }
     
-    /**
-     * @param array $columnNames
-     * @return static
-     */
-    public function setAdditionalColumnsToSelect(...$columnNames)
+    public function setAdditionalColumnsToSelect(...$columnNames): static
     {
         if (count($columnNames) && is_array($columnNames[0])) {
             $columnNames = $columnNames[0];

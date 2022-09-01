@@ -23,16 +23,14 @@ class AsyncFilesFormInput extends FormInput
     protected string $view = 'cmf::input.async_files_uploader';
     
     protected array $jsPluginOptions = [];
-    /**
-     * @var array|\Closure
-     */
-    protected $fileConfigsToUse = [];
+    
+    protected \Closure|array $fileConfigsToUse = [];
     
     /**
      * @param array $options
      * @return static
      */
-    public function setJsPluginOptions(array $options)
+    public function setJsPluginOptions(array $options): static
     {
         $this->jsPluginOptions = $options;
         return $this;
@@ -50,17 +48,15 @@ class AsyncFilesFormInput extends FormInput
     
     /**
      * List of file names to accept.
-     * Only provided files will be shown in form. Other files will be ignored (and won't be changed in any way)
-     * @param array|\Closure $fileGroups - \Closure must return array
-     * @return static
+     * Only provided files will be shown in form.
+     * Other files will be ignored (and won't be changed in any way).
+     * $fileGroups as \Closure must return array.
      * @throws \InvalidArgumentException
      */
-    public function setFilesGroupsToUse($fileGroups)
+    public function setFilesGroupsToUse(array|\Closure $fileGroups): static
     {
         if (empty($fileGroups)) {
             throw new \InvalidArgumentException('$fileGroups argument cannot be empty');
-        } elseif (!is_array($fileGroups) && !($fileGroups instanceof \Closure)) {
-            throw new \InvalidArgumentException('$fileGroups argument must be an array or \Closure');
         }
         $this->fileConfigsToUse = $fileGroups;
         return $this;
@@ -133,13 +129,7 @@ class AsyncFilesFormInput extends FormInput
         return '';
     }
     
-    /**
-     * @param mixed $value
-     * @param string $type
-     * @param array $record
-     * @return array|mixed
-     */
-    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): array
     {
         $ret = [];
         $recordObject = $this->getScaffoldSectionConfig()->getTable()->newRecord();
@@ -233,11 +223,7 @@ class AsyncFilesFormInput extends FormInput
         return response($tempFile->encode());
     }
     
-    /**
-     * @param Request $request
-     * @return Response|CmfJsonResponse
-     */
-    public function deleteTempFile(Request $request)
+    public function deleteTempFile(Request $request): Response|CmfJsonResponse
     {
         $scaffoldConfig = $this->getScaffoldSectionConfig()->getScaffoldConfig();
         $scaffoldConfig->validate($request, [

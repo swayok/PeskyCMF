@@ -122,7 +122,7 @@ trait DataValidationHelper
     public static function fixValidationErrorsKeys(array $errors): array
     {
         foreach ($errors as $key => $messages) {
-            if (strpos($key, '.') !== false) {
+            if (str_contains($key, '.')) {
                 /** @noinspection RegExpRedundantEscape */
                 $newKey = preg_replace(
                     ['%^([^\]]+)\]%', '%\[\]\]%'],

@@ -22,19 +22,14 @@ class FilesFormInput extends FormInput
     
     /**
      * Disable uploading preview for this input
-     * @return static
      */
-    public function disablePreview()
+    public function disablePreview(): static
     {
         $this->jsPluginOptions['showPreview'] = false;
         return $this;
     }
     
-    /**
-     * @param array $options
-     * @return static
-     */
-    public function setJsPluginOptions(array $options)
+    public function setJsPluginOptions(array $options): static
     {
         $this->jsPluginOptions = $options;
         return $this;
@@ -45,9 +40,6 @@ class FilesFormInput extends FormInput
         return $this->jsPluginOptions;
     }
     
-    /**
-     * @return string
-     */
     public function getType(): string
     {
         return static::TYPE_HIDDEN;
@@ -55,18 +47,16 @@ class FilesFormInput extends FormInput
     
     /**
      * List of file names to accept.
-     * Only provided files will be shown in form. Other files will be ignored (and won't be changed in any way)
-     * @param array|\Closure $fileGroups - \Closure must return array
-     * @return static
+     * Only provided files will be shown in form.
+     * Other files will be ignored (and won't be changed in any way).
+     * $fileGroups as \Closure must return array.
      * @throws \InvalidArgumentException
      */
-    public function setFilesGroupsToUse($fileGroups)
+    public function setFilesGroupsToUse(array|\Closure $fileGroups): static
     {
-//        if (empty($fileGroups)) {
-//            throw new \InvalidArgumentException('$fileGroups argument cannot be empty');
-//        } elseif (!is_array($fileGroups) && !($fileGroups instanceof \Closure)) {
-//            throw new \InvalidArgumentException('$fileGroups argument must be an array or \Closure');
-//        }
+        if (empty($fileGroups)) {
+            throw new \InvalidArgumentException('$fileGroups argument cannot be empty');
+        }
 //        $this->fileConfigsToUse = $fileGroups;
         return $this;
     }
@@ -131,7 +121,7 @@ class FilesFormInput extends FormInput
         return '';
     }
     
-    public function doDefaultValueConversionByType($value, string $type, array $record): array
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): array
     {
         $ret = [
             'urls' => [],
@@ -181,16 +171,15 @@ class FilesFormInput extends FormInput
     protected static function getUploaderPreviewTypeFromFileInfo(DbFileInfo $fileInfo): string
     {
         $type = $fileInfo->getMimeType();
-        switch ($type) {
-            case MimeTypesHelper::TYPE_IMAGE:
-            case MimeTypesHelper::TYPE_AUDIO:
-            case MimeTypesHelper::TYPE_VIDEO:
-            case MimeTypesHelper::TYPE_TEXT:
-            case MimeTypesHelper::TYPE_OFFICE:
-                return $type;
-            default:
-                return 'object';
-        }
+        return match ($type) {
+            MimeTypesHelper::TYPE_IMAGE,
+            MimeTypesHelper::TYPE_AUDIO,
+            MimeTypesHelper::TYPE_VIDEO,
+            MimeTypesHelper::TYPE_TEXT,
+            MimeTypesHelper::TYPE_OFFICE => $type,
+            
+            default => 'object',
+        };
     }
     
     public function getValidators(bool $isCreation): array

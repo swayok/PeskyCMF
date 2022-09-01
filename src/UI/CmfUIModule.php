@@ -240,15 +240,13 @@ class CmfUIModule
     }
     
     /**
-     * @param string $resourceName
-     * @return string|ScaffoldConfig
      * @throws \InvalidArgumentException
      */
     public function getScaffoldConfigClass(string $resourceName): string
     {
         return Arr::get($this->getResources(), $resourceName, function () use ($resourceName) {
             throw new \InvalidArgumentException(
-                'There is no known ScaffoldConfig class for resource "' . $resourceName . '"'
+                'Cannot find ScaffoldConfig class for resource "' . $resourceName . '"'
             );
         });
     }
@@ -316,11 +314,9 @@ class CmfUIModule
     }
     
     /**
-     * @param string $itemKey
-     * @param array|\Closure $menuItem - format: see menu()
-     * @return static
+     * $menuItem format described in CmfConfig->menu()
      */
-    public function addCustomMenuItem(string $itemKey, $menuItem)
+    public function addCustomMenuItem(string $itemKey, array|\Closure $menuItem): static
     {
         $this->customMenuItems[$itemKey] = $menuItem;
         if ($this->allMenuItems) {

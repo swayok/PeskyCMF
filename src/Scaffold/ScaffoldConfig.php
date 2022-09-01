@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold;
 
+use Closure;
 use Illuminate\Contracts\Auth\Access\Gate as AuthGate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +15,6 @@ use Illuminate\View\View;
 use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
-use PeskyCMF\Db\CmfDbRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Http\Middleware\AjaxOnly;
@@ -24,7 +24,6 @@ use PeskyCMF\Scaffold\DataGrid\FilterConfig;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Traits\DataValidationHelper;
-use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORM\ORM\TempRecord;
 
@@ -73,15 +72,13 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     /**
      * List of record's relations and their columns to log together with record's data
      * Note: relation's data will be logged only when it is already loaded (no additional DB queries wil be done)
-     * Format: ['Relation1', 'Relation2' => ['column1', 'column2']]; Default: ['*']
-     * Use FALSE to disable logging of relations' data
-     * @var null|array|false
+     * Format:
+     * - array: ['Relation1', 'Relation2' => ['column1', 'column2']];
+     * - true: log all known relations in Record.
+     * - false: disable logging of relations' data.
      */
-    protected $loggableRecordRelations = false;
+    protected array|bool $loggableRecordRelations = false;
     
-    /**
-     * @var RecordInterface|Record|CmfDbRecord|null
-     */
     private ?RecordInterface $optimizedTableRecord = null;
     
     public function __construct(CmfConfig $cmfConfig)
@@ -106,6 +103,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     
     /**
      * @return Authenticatable|CmfAdmin|ResetsPasswordsViaAccessKey|RecordInterface
+     * @noinspection PhpDocSignatureInspection
      */
     final public function getUser(): RecordInterface
     {
@@ -142,7 +140,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return static::getMenuItemCounterValue() ? static::getResourceName() . '_count' : null;
     }
     
-    public static function getMenuItemCounterValue()
+    public static function getMenuItemCounterValue(): null|Closure|string
     {
         return null;
     }
@@ -483,7 +481,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
      * @param array $parameters
      * @return string|array
      */
-    public function translateForViewer(string $section, AbstractValueViewer $viewer, string $suffix = '', array $parameters = [])
+    public function translateForViewer(string $section, AbstractValueViewer $viewer, string $suffix = '', array $parameters = []): array|string
     {
         return $this->translate($section, rtrim("{$viewer->getNameForTranslation()}_{$suffix}", '_'), $parameters);
     }
@@ -494,7 +492,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
      * @param array $parameters
      * @return string|array
      */
-    public function translate(string $section, string $suffix = '', array $parameters = [])
+    public function translate(string $section, string $suffix = '', array $parameters = []): array|string
     {
         return $this->cmfConfig->transCustom(
             rtrim(".{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'),
@@ -504,9 +502,8 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     
     /**
      * Translate general UI elements (button labels, tooltips, messages, etc..)
-     * @return string|array
      */
-    public function translateGeneral(string $path, array $parameters = [])
+    public function translateGeneral(string $path, array $parameters = []): array|string
     {
         $text = $this->translate($path, '', $parameters);
         if (preg_match('%\.' . preg_quote($path, '%') . '$%', $text)) {
@@ -599,7 +596,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
      * @param bool|string $addEmptyOption - false: do not add default empty option | true: add | string: empty option label
      * @return string
      */
-    protected function renderOptionsForSelectInput(array $options, $addEmptyOption = false): string
+    protected function renderOptionsForSelectInput(array $options, bool|string $addEmptyOption = false): string
     {
         $ret = '';
         $hasEmptyOption = array_key_exists('', $options);
@@ -639,10 +636,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             ->goBack($this->getUrlToItemsTable());
     }
     
-    /**
-     * @return static
-     */
-    public function setLogger(ScaffoldLoggerInterface $logger)
+    public function setLogger(ScaffoldLoggerInterface $logger): static
     {
         $this->logger = $logger;
         return $this;
@@ -658,10 +652,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return $this->logger;
     }
     
-    /**
-     * @return static
-     */
-    public function logDbRecordBeforeChange(RecordInterface $record, ?string $tableName = null)
+    public function logDbRecordBeforeChange(RecordInterface $record, ?string $tableName = null): static
     {
         if ($this->hasLogger()) {
             /** @noinspection NullPointerExceptionInspection */
@@ -675,10 +666,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function logDbRecordAfterChange(RecordInterface $record)
+    public function logDbRecordAfterChange(RecordInterface $record): static
     {
         if ($this->hasLogger()) {
             /** @noinspection NullPointerExceptionInspection */
@@ -691,10 +679,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function logDbRecordLoad(RecordInterface $record, ?string $tableName = null)
+    public function logDbRecordLoad(RecordInterface $record, ?string $tableName = null): static
     {
         if ($this->hasLogger()) {
             /** @noinspection NullPointerExceptionInspection */
@@ -733,24 +718,24 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         }
     }
     
-    public function getCustomData(string $dataId)
+    public function getCustomData(string $dataId): Response|string|View
     {
         return CmfJsonResponse::create(HttpCode::NOT_FOUND)
             ->setMessage('Handler [' . static::class . '->getCustomData($dataId)] not defined')
             ->goBack($this->getUrlToItemsTable());
     }
     
-    public function getCustomPage(string $pageName)
+    public function getCustomPage(string $pageName): Response|string|View
     {
         return $this->callMethodByCustomActionOrPageName($pageName, null);
     }
     
-    public function performCustomAjaxAction(string $actionName)
+    public function performCustomAjaxAction(string $actionName): Response|string|View
     {
         return $this->callMethodByCustomActionOrPageName($actionName, null);
     }
     
-    public function performCustomDirectAction(string $actionName)
+    public function performCustomDirectAction(string $actionName): Response|string|View
     {
         $response = $this->callMethodByCustomActionOrPageName($actionName, null);
         if ($response instanceof JsonResponse) {
@@ -760,17 +745,17 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return $response;
     }
     
-    public function getCustomPageForRecord(string $itemId, string $pageName)
+    public function getCustomPageForRecord(string $itemId, string $pageName): Response|string|View
     {
         return $this->callMethodByCustomActionOrPageName($pageName, $this->getRequestedRecord($itemId));
     }
     
-    public function performCustomAjaxActionForRecord(string $itemId, string $actionName)
+    public function performCustomAjaxActionForRecord(string $itemId, string $actionName): Response|string|View
     {
         return $this->callMethodByCustomActionOrPageName($actionName, $this->getRequestedRecord($itemId));
     }
     
-    public function performCustomDirectActionForRecord(string $itemId, string $actionName)
+    public function performCustomDirectActionForRecord(string $itemId, string $actionName): Response|string|View
     {
         $response = $this->callMethodByCustomActionOrPageName($actionName, $this->getRequestedRecord($itemId));
         if ($response instanceof JsonResponse) {
@@ -808,10 +793,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return $record;
     }
     
-    /**
-     * @return Response|string|View
-     */
-    protected function callMethodByCustomActionOrPageName(string $methodName, ?RecordInterface $record = null)
+    protected function callMethodByCustomActionOrPageName(string $methodName, ?RecordInterface $record = null): Response|string|View|JsonResponse
     {
         $methodName = str_replace('-', '_', $methodName);
         if (method_exists($this, $methodName)) {

@@ -65,7 +65,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         $this->app->singleton(PeskyCmfAppSettings::class, function () {
             /** @var PeskyCmfAppSettings $appSettingsClass */
             $appSettingsClass = $this->getAppConfigs()->get('peskycmf.app_settings_class') ?: PeskyCmfAppSettings::class;
-            return $appSettingsClass::getInstance();
+            return new $appSettingsClass($this->app);
         });
     }
     

@@ -33,7 +33,7 @@
         "ext-imagick": "*",
         "ext-pdo": "*",
         "laravel/framework": ">=5.4",
-        "swayok/utils": "^1.7",
+        "swayok/utils": "^1.7.3",
         "swayok/peskyorm-laravel": "dev-orm_v2_2",
         "swayok/html-tag-helper": "^1.0",
         "swayok/laravel-language-detector": "dev-master"

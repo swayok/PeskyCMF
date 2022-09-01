@@ -17,7 +17,7 @@ class ImageValueCell extends ValueCell
     
     protected ?string $templateForDefaultRenderer = 'cmf::item_details.image';
     
-    public function doDefaultValueConversionByType($value, string $type, array $record): ?array
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): ?array
     {
         $column = $this->getTableColumn();
         if (empty($value) || !is_array($value) || !$column->isItAnImage()) {
@@ -46,10 +46,7 @@ class ImageValueCell extends ValueCell
         return [];
     }
     
-    /**
-     * @return static
-     */
-    public function setImageVerstion(string $imageVersion)
+    public function setImageVerstion(string $imageVersion): static
     {
         if (!$this->getTableColumn()->hasImageVersionConfig($imageVersion)) {
             throw new \InvalidArgumentException(

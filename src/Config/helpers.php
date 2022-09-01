@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
@@ -226,14 +225,14 @@ if (!function_exists('routeToCmfResourceCustomAction')) {
 
 if (!function_exists('transChoiceRu')) {
     /**
-     * @param string|array $idOrTranslations - array: translations rray with 3 values:
+     * @param array|string $idOrTranslations - array: translations rray with 3 values:
      *      array(0 => 'variant for 1', 1 => 'variant for 4', 2 => 'variant for 5')
      * @param int $itemsCount
      * @param array $parameters
-     * @param string|null $locale
+     * @param string $locale
      * @return string
      */
-    function transChoiceRu($idOrTranslations, int $itemsCount, array $parameters = [], string $locale = 'ru'): string
+    function transChoiceRu(array|string $idOrTranslations, int $itemsCount, array $parameters = [], string $locale = 'ru'): string
     {
         return transChoiceAlt($idOrTranslations, $itemsCount, $parameters, $locale);
     }
@@ -241,14 +240,14 @@ if (!function_exists('transChoiceRu')) {
 
 if (!function_exists('transChoiceAlt')) {
     /**
-     * @param string|array $idOrTranslations - array: translations array with 3 values:
+     * @param array|string $idOrTranslations - array: translations array with 3 values:
      *      array(0 => 'variant for 1', 1 => 'variant for 4', 2 => 'variant for 5')
      * @param int $itemsCount
      * @param array $parameters
      * @param string|null $locale
      * @return string
      */
-    function transChoiceAlt($idOrTranslations, int $itemsCount, array $parameters = [], ?string $locale = null): string
+    function transChoiceAlt(array|string $idOrTranslations, int $itemsCount, array $parameters = [], ?string $locale = null): string
     {
         $trans = StringUtils::pluralizeRu(
             $itemsCount,
@@ -268,7 +267,7 @@ if (!function_exists('cmfTransGeneral')) {
      * @param null|string $locale
      * @return string|array
      */
-    function cmfTransGeneral(string $path, array $parameters = [], ?string $locale = null)
+    function cmfTransGeneral(string $path, array $parameters = [], ?string $locale = null): array|string
     {
         return cmfConfig()->transGeneral($path, $parameters, $locale);
     }
@@ -281,7 +280,7 @@ if (!function_exists('cmfTransCustom')) {
      * @param null|string $locale
      * @return string|array
      */
-    function cmfTransCustom(string $path, array $parameters = [], ?string $locale = null)
+    function cmfTransCustom(string $path, array $parameters = [], ?string $locale = null): array|string
     {
         return cmfConfig()->transCustom($path, $parameters, $locale);
     }
@@ -331,16 +330,13 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
 }
 
 if (!function_exists('cmfRedirectResponseWithMessage')) {
-    /**
-     * @return RedirectResponse|CmfJsonResponse
-     */
     function cmfRedirectResponseWithMessage(
         bool $isAjax,
         string $url,
         string $message,
         string $type = 'info',
         ?CmfConfig $cmfConfig = null
-    ): Response {
+    ): RedirectResponse|CmfJsonResponse {
         if ($isAjax) {
             return cmfJsonResponse()
                 ->setMessage($message)
@@ -382,23 +378,23 @@ if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
 
 if (!function_exists('formatDate')) {
     /**
-     * @param string|int|CarbonInterface|null $date
+     * @param int|string|CarbonInterface|null $date
      * @param bool $addTime
      * @param string $yearSuffix - 'none', 'full', 'short' or custom value
-     * @param bool|string|int $ignoreYear
+     * @param bool|int|string $ignoreYear
      *      - false: year will be added
      *      - true: year will not be added;
      *      - 'current': drop year only when it is same as current
      *      - integer: drop year only when it is same as passed integer
      *      - other values: year will be added
      * @param string|null $default
-     * @return string
+     * @return string|null
      */
     function formatDate(
-        $date,
+        int|string|CarbonInterface|null $date,
         bool $addTime = false,
         string $yearSuffix = 'full',
-        $ignoreYear = false,
+        bool|int|string $ignoreYear = false,
         ?string $default = ''
     ): ?string {
         if (!$date) {
@@ -543,7 +539,7 @@ if (!function_exists('pickLocalization')) {
 if (!function_exists('pickLocalizationFromJson')) {
     /**
      * Pick correct localization strings from specially formatted array. Useful for localizations stored in DB
-     * @param string|array $translationsJson - format: '{"lang1_code": "translation1", "lang2_code": "translation2", ...}'
+     * @param array|string $translationsJson - format: '{"lang1_code": "translation1", "lang2_code": "translation2", ...}'
      * @param null|string $default - default value to return when there is no translation for app()->getLocale()
      *      language and for CmfConfig::getPrimary()->default_locale()
      * @param bool $isAssociativeArray
@@ -552,7 +548,7 @@ if (!function_exists('pickLocalizationFromJson')) {
      * @return string|null
      * @see pickLocalization()
      */
-    function pickLocalizationFromJson($translationsJson, ?string $default = null, bool $isAssociativeArray = true): ?string
+    function pickLocalizationFromJson(array|string $translationsJson, ?string $default = null, bool $isAssociativeArray = true): ?string
     {
         $translations = is_array($translationsJson) ? $translationsJson : json_decode($translationsJson, true);
         return is_array($translations) ? $default : pickLocalization($translations, $default, $isAssociativeArray);
@@ -563,10 +559,10 @@ if (!function_exists('setting')) {
     /**
      * Get value for CmfSetting called $name (CmfSetting->key === $name)
      * @param string|null $name - setting name
-     * @param mixed $default - default value
+     * @param mixed|null $default - default value
      * @return mixed|PeskyCmfAppSettings
      */
-    function setting(?string $name = null, $default = null)
+    function setting(?string $name = null, mixed $default = null): mixed
     {
         $appSettings = cmfConfig()->getAppSettings();
         if ($name === null) {

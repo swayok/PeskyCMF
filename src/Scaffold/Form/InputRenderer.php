@@ -32,10 +32,7 @@ class InputRenderer extends ValueRenderer
         $this->attributes = $attributes;
     }
     
-    /**
-     * @return static
-     */
-    public function setAttributes(array $attributes)
+    public function setAttributes(array $attributes): static
     {
         if (array_key_exists('options', $attributes)) {
             $this->setOptions($attributes['options']);
@@ -59,13 +56,13 @@ class InputRenderer extends ValueRenderer
     
     /**
      * @param string $name
-     * @param string|bool $value
+     * @param bool|string|int $value
      * @param bool $owerwrite
      *  - true: overwrites existing attribute value
      *  - false: do nothing if attribute value already set
      * @return static
      */
-    public function addAttribute(string $name, $value, bool $owerwrite = true)
+    public function addAttribute(string $name, bool|string|int $value, bool $owerwrite = true): static
     {
         if ($owerwrite || !array_key_exists($name, $this->attributes)) {
             $this->attributes[$name] = $value;
@@ -73,20 +70,12 @@ class InputRenderer extends ValueRenderer
         return $this;
     }
     
-    /**
-     * @param string $name
-     * @param string|null|bool $default
-     * @return mixed
-     */
-    public function getAttribute(string $name, $default = null)
+    public function getAttribute(string $name, bool|string|int|null $default = null): bool|string|int|null
     {
         return array_key_exists($name, $this->attributes) ? $this->attributes[$name] : $default;
     }
     
-    /**
-     * @return static
-     */
-    public function setAttributesForCreate(array $attributesForCreate)
+    public function setAttributesForCreate(array $attributesForCreate): static
     {
         $this->attributesForCreate = $attributesForCreate;
         return $this;
@@ -107,10 +96,7 @@ class InputRenderer extends ValueRenderer
         return $ret;
     }
     
-    /**
-     * @return static
-     */
-    public function setAttributesForEdit(array $attributesForEdit)
+    public function setAttributesForEdit(array $attributesForEdit): static
     {
         $this->attributesForEdit = $attributesForEdit;
         return $this;
@@ -132,28 +118,19 @@ class InputRenderer extends ValueRenderer
     }
     
     
-    /**
-     * @return static
-     */
-    public function setOptions(\Closure $options)
+    public function setOptions(\Closure $options): static
     {
         $this->options = $options;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function setOptionsForCreate(\Closure $options)
+    public function setOptionsForCreate(\Closure $options): static
     {
         $this->optionsForCreate = $options;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function setOptionsForEdit(\Closure $options)
+    public function setOptionsForEdit(\Closure $options): static
     {
         $this->optionsForEdit = $options;
         return $this;
@@ -208,13 +185,9 @@ class InputRenderer extends ValueRenderer
         );
     }
     
-    /**
-     * @param $bool
-     * @return static
-     */
-    public function setIsRequired($bool)
+    public function setIsRequired(bool $bool): static
     {
-        $this->isRequired = (bool)$bool;
+        $this->isRequired = $bool;
         if ($this->isRequired) {
             $this->isRequiredForCreate = $this->isRequiredForEdit = true;
         } elseif ($this->isRequiredForCreate && $this->isRequiredForEdit) {
@@ -223,41 +196,27 @@ class InputRenderer extends ValueRenderer
         return $this;
     }
     
-    /**
-     * @param $bool
-     * @return static
-     */
-    public function setIsRequiredForCreate($bool)
+    public function setIsRequiredForCreate(bool $bool): static
     {
-        $this->isRequiredForCreate = (bool)$bool;
+        $this->isRequiredForCreate = $bool;
         $this->isRequired = $this->isRequiredForCreate && $this->isRequiredForEdit;
         return $this;
     }
     
-    /**
-     * @param $bool
-     * @return static
-     */
-    public function setIsRequiredForEdit($bool)
+    public function setIsRequiredForEdit(bool $bool): static
     {
-        $this->isRequiredForEdit = (bool)$bool;
+        $this->isRequiredForEdit = $bool;
         $this->isRequired = $this->isRequiredForCreate && $this->isRequiredForEdit;
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function required()
+    public function required(): static
     {
         $this->setIsRequired(true);
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function notRequired()
+    public function notRequired(): static
     {
         $this->setIsRequired(false);
         return $this;
@@ -268,19 +227,13 @@ class InputRenderer extends ValueRenderer
         return $this->isRequired;
     }
     
-    /**
-     * @return static
-     */
-    public function requiredForCreate()
+    public function requiredForCreate(): static
     {
         $this->setIsRequiredForCreate(true);
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function notRequiredForCreate()
+    public function notRequiredForCreate(): static
     {
         $this->setIsRequiredForCreate(false);
         return $this;
@@ -291,19 +244,13 @@ class InputRenderer extends ValueRenderer
         return $this->isRequiredForCreate ?? $this->isRequired;
     }
     
-    /**
-     * @return static
-     */
-    public function requiredForEdit()
+    public function requiredForEdit(): static
     {
         $this->setIsRequiredForEdit(true);
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function notRequiredForEdit()
+    public function notRequiredForEdit(): static
     {
         $this->setIsRequiredForEdit(false);
         return $this;
@@ -317,9 +264,8 @@ class InputRenderer extends ValueRenderer
     /**
      * Add prefix text to input (text for left side addon in terms of bootstrap css)
      * Note: not all templates support this feature
-     * @return static
      */
-    public function setPrefixText(string $string)
+    public function setPrefixText(string $string): static
     {
         $this->prefix = trim($string);
         return $this;
@@ -338,9 +284,8 @@ class InputRenderer extends ValueRenderer
     /**
      * Add suffix text to input (text for right side addon in terms of bootstrap css)
      * Note: not all templates support this feature
-     * @return static
      */
-    public function setSuffixText(string $string)
+    public function setSuffixText(string $string): static
     {
         $this->suffix = trim($string);
         return $this;

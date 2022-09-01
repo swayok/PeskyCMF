@@ -85,10 +85,7 @@ abstract class CmfMenuItem
         return $this->title;
     }
     
-    /**
-     * @return static
-     */
-    public function setTitle(string $title)
+    public function setTitle(string $title): static
     {
         $this->title = $title;
         return $this;
@@ -104,10 +101,7 @@ abstract class CmfMenuItem
         return $this->iconClasses;
     }
     
-    /**
-     * @return static
-     */
-    public function setIconClasses(string $iconClasses)
+    public function setIconClasses(string $iconClasses): static
     {
         $this->iconClasses = $iconClasses;
         return $this;
@@ -123,7 +117,7 @@ abstract class CmfMenuItem
      * @param string $iconColorClass - example: 'text-primary'
      * @return static
      */
-    public function setIconColorClass(string $iconColorClass)
+    public function setIconColorClass(string $iconColorClass): static
     {
         $this->iconColorClass = $iconColorClass;
         return $this;
@@ -147,7 +141,7 @@ abstract class CmfMenuItem
      * @param string $buttonClasses - example 'btn btn-primary'
      * @return static
      */
-    public function setButtonClasses(string $buttonClasses)
+    public function setButtonClasses(string $buttonClasses): static
     {
         $this->buttonClasses = $buttonClasses;
         return $this;
@@ -164,9 +158,8 @@ abstract class CmfMenuItem
      * Resulting html will look like: '<button ... {{? it.is_active || it.id }}disabled{{?}} ...>...</button>'
      * or '<a ... class="... {{? it.is_active || it.id }}disabled{{?}}" ...>...</a>'
      * or '<li class="... {{? it.is_active || it.id }}disabled{{?}}">menu item code</li>' for bootstrap dropdown menu.
-     * @return static
      */
-    public function setConditionToDisable(string $conditionToDisable)
+    public function setConditionToDisable(string $conditionToDisable): static
     {
         $this->conditionToDisable = $conditionToDisable;
         return $this;
@@ -188,9 +181,8 @@ abstract class CmfMenuItem
      * Dot.js condition (actually any valid js code) to decide if menu item should be displayed for current item.
      * Use 'it' variable to access current item data. For example: 'it.is_active || it.id'.
      * Resulting html will look like: '{{? it.is_active || it.id }}menu item code{{?}}'.
-     * @return static
      */
-    public function setConditionToShow(string $conditionToShow)
+    public function setConditionToShow(string $conditionToShow): static
     {
         $this->conditionToShow = $conditionToShow;
         return $this;
@@ -213,9 +205,8 @@ abstract class CmfMenuItem
      * Note: \Closure receive no arguments and must return boolean value
      * Note: this will avoid usage of condition to show and condition to enable removing item
      * from final template at all.
-     * @return static
      */
-    public function setAccessProvider(\Closure $accessProvider)
+    public function setAccessProvider(\Closure $accessProvider): static
     {
         $this->accessProvider = $accessProvider;
         return $this;
@@ -246,10 +237,7 @@ abstract class CmfMenuItem
         return $this->hasTooltip() || $this->hasTitle();
     }
     
-    /**
-     * @return static
-     */
-    public function setTooltip(string $tooltip)
+    public function setTooltip(string $tooltip): static
     {
         $this->tooltip = $tooltip;
         return $this;
@@ -264,7 +252,7 @@ abstract class CmfMenuItem
      * @param string $tooltipPosition - top|left|bottom|right
      * @return static
      */
-    public function setTooltipPosition(string $tooltipPosition)
+    public function setTooltipPosition(string $tooltipPosition): static
     {
         $this->tooltipPosition = $tooltipPosition;
         return $this;

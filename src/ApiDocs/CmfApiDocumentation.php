@@ -54,10 +54,7 @@ abstract class CmfApiDocumentation
     
     protected CmfConfig $cmfConfig;
     
-    /**
-     * @return static
-     */
-    public static function create(CmfConfig $cmfConfig)
+    public static function create(CmfConfig $cmfConfig): static
     {
         return new static($cmfConfig);
     }
@@ -156,7 +153,7 @@ abstract class CmfApiDocumentation
         );
     }
     
-    protected function translatePath(string $path)
+    protected function translatePath(string $path): array|string
     {
         return $this->cmfConfig->transApiDoc($path);
     }

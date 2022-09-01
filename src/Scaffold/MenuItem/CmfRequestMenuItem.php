@@ -32,7 +32,7 @@ class CmfRequestMenuItem extends CmfMenuItem
      * @return static
      * @throws \InvalidArgumentException
      */
-    protected function setHttpMethod(string $httpMethod)
+    protected function setHttpMethod(string $httpMethod): static
     {
         $this->httpMethod = strtolower($httpMethod);
         if (!in_array($this->httpMethod, ['get', 'post', 'put', 'delete'], true)) {
@@ -56,9 +56,8 @@ class CmfRequestMenuItem extends CmfMenuItem
     /**
      * JS function name. This function will be called after successful response with 1 argument - response data.
      * Example: 'SomeVar.onSuccess' will be evalueated as SomeVar.onSuccess(responseData)
-     * @return static
      */
-    public function setOnSuccess(string $onSuccess)
+    public function setOnSuccess(string $onSuccess): static
     {
         $this->onSuccess = $onSuccess;
         return $this;
@@ -73,9 +72,8 @@ class CmfRequestMenuItem extends CmfMenuItem
      * Key-value array with data to send with response.
      * You can use Dot.js inserts as values using 'it' variable to access current item data.
      * Example: ['id' => '{{= it.id }}']
-     * @return static
      */
-    public function setRequestData(array $requestData)
+    public function setRequestData(array $requestData): static
     {
         $this->requestData = $requestData;
         return $this;
@@ -100,7 +98,7 @@ class CmfRequestMenuItem extends CmfMenuItem
      * @return static
      * @throws \InvalidArgumentException
      */
-    public function setResponseDataType(string $responseDataType)
+    public function setResponseDataType(string $responseDataType): static
     {
         $this->responseDataType = strtolower($responseDataType);
         if (!in_array($this->responseDataType, ['json', 'text', 'html'], true)) {
@@ -118,9 +116,8 @@ class CmfRequestMenuItem extends CmfMenuItem
     
     /**
      * Should current data grid be blocked until request's responce received or not?
-     * @return static
      */
-    public function setBlockDataGrid(bool $blockDataGrid)
+    public function setBlockDataGrid(bool $blockDataGrid): static
     {
         $this->blockDataGrid = $blockDataGrid;
         return $this;
@@ -136,7 +133,7 @@ class CmfRequestMenuItem extends CmfMenuItem
      * @param string $confirm - message (question) to display to user
      * @return static
      */
-    public function setConfirm(string $confirm)
+    public function setConfirm(string $confirm): static
     {
         $this->confirm = $confirm;
         return $this;

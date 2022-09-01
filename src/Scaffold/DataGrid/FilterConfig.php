@@ -31,10 +31,7 @@ class FilterConfig
     ];
     protected string $defaultDataGridColumnFilterConfigClass = ColumnFilter::class;
     
-    /**
-     * @return static
-     */
-    public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig)
+    public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig): static
     {
         return new static($table, $scaffoldConfig);
     }
@@ -57,9 +54,8 @@ class FilterConfig
     
     /**
      * @param ColumnFilter[]|string[] $filters
-     * @return static
      */
-    public function setFilters(array $filters)
+    public function setFilters(array $filters): static
     {
         $this->filters = [];
         /** @var ColumnFilter $config */
@@ -78,7 +74,7 @@ class FilterConfig
      * @param null|ColumnFilter $config
      * @return static
      */
-    public function addFilter(string $columnName, ?ColumnFilter $config = null)
+    public function addFilter(string $columnName, ?ColumnFilter $config = null): static
     {
         if (!$config) {
             $this->findTableColumn($columnName); //< needed to validate column existense
@@ -192,7 +188,7 @@ class FilterConfig
     
     public function getColumnNameWithAlias(string $columnName): string
     {
-        if (strpos($columnName, '.') === false) {
+        if (!str_contains($columnName, '.')) {
             return $this->getTable()->getAlias() . '.' . $columnName;
         }
         return $columnName;
@@ -219,23 +215,16 @@ class FilterConfig
         return $this->defaultConditions;
     }
     
-    /**
-     * @return static
-     */
-    public function setDefaultConditions(array $defaultConditions)
+    public function setDefaultConditions(array $defaultConditions): static
     {
         $this->defaultConditions = $defaultConditions;
         return $this;
     }
     
     /**
-     * @param string $columnName
-     * @param string $operator
-     * @param mixed $value
-     * @return static
      * @throws \InvalidArgumentException
      */
-    public function addDefaultCondition(string $columnName, string $operator, $value)
+    public function addDefaultCondition(string $columnName, string $operator, mixed $value): static
     {
         /** @var ColumnFilter $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
@@ -252,10 +241,7 @@ class FilterConfig
         return $this;
     }
     
-    /**
-     * @return static
-     */
-    public function addDefaultConditionForPk()
+    public function addDefaultConditionForPk(): static
     {
         /** @var ColumnFilter $configClass */
         $configClass = $this->defaultDataGridColumnFilterConfigClass;
@@ -316,9 +302,8 @@ class FilterConfig
     
     /**
      * Replace default ColumnFilter class
-     * @return static
      */
-    public function setDefaultDataGridColumnFilterConfigClass(string $className)
+    public function setDefaultDataGridColumnFilterConfigClass(string $className): static
     {
         $this->defaultDataGridColumnFilterConfigClass = $className;
         return $this;

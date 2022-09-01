@@ -15,12 +15,11 @@ class ImagesFormInput extends FilesFormInput
     
     /**
      * List of image names to accept.
-     * Only provided images will be shown in form. Other images will be ignored (and won't be changed in any way)
-     * @param array|\Closure $imageGroups - \Closure must return array
-     * @return static
-     * @throws \InvalidArgumentException
+     * Only provided images will be shown in form.
+     * Other images will be ignored (and won't be changed in any way).
+     * $imageGroups as \Closure must return array
      */
-    public function setImagesGroupsToUse($imageGroups)
+    public function setImagesGroupsToUse(array|\Closure $imageGroups): static
     {
         return $this->setFilesGroupsToUse($imageGroups);
     }
