@@ -104,7 +104,7 @@ declare(strict_types=1);
                             class="btn btn-box-tool fs13 va-t ptn mt5 reload-url-button hidden"
                             href=""
                             data-toggle="tooltip"
-                            title="{{ cmfTransGeneral('ui.modal.reload') }}"
+                            title="{{ $cmfConfig->transGeneral('ui.modal.reload') }}"
                         >
                             <i class="glyphicon glyphicon-refresh"></i>
                         </a>
@@ -113,7 +113,7 @@ declare(strict_types=1);
                             data-dismiss="modal"
                             class="btn btn-box-tool va-t pbn ptn mt5"
                             data-toggle="tooltip"
-                            title="{{ cmfTransGeneral('ui.modal.close') }}"
+                            title="{{ $cmfConfig->transGeneral('ui.modal.close') }}"
                         >
                             <span class="fs24 lh15">&times;</span>
                         </button>
@@ -156,7 +156,7 @@ declare(strict_types=1);
 
 @if ($cmfConfig->config('ui.optimize_ui_templates.enabled', false))
     <script
-        src="{{ cmfRoute('cmf_cached_templates_js', ['_' => time()]) }}"
+        src="{{ $cmfConfig->route('cmf_cached_templates_js', ['_' => time()]) }}"
         type="text/javascript"
     ></script>
 @endif

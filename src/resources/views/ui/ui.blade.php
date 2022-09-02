@@ -3,11 +3,6 @@ declare(strict_types=1);
 /**
  * @var \PeskyCMF\Config\CmfConfig $cmfConfig
  * @var \PeskyCMF\UI\CmfUIModule $uiModule
- * @var string $footerView
- * @var string $menuView
- * @var string $userPanelView
- * @var string $sidebarLogo
- * @var string $topNavbarView
  */
 ?>
 
@@ -22,7 +17,7 @@ declare(strict_types=1);
     <a href="javascript:void(0)" class="sidebar-toggle visible-xs" data-toggle="push-menu" role="button"></a>
     <a href="{{ $cmfConfig->home_page_url() }}" class="logo">
         <span class="logo-lg">
-            {!! $sidebarLogo !!}
+            {!! $uiModule->getSidebarLogo() !!}
         </span>
     </a>
     @include($uiModule->getUIView('top_navbar'))

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeskyCMF\ApiDocs;
 
 use Illuminate\Support\Str;
+use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use Swayok\Utils\Folder;
 
@@ -29,14 +30,13 @@ class CmfApiDocumentationModule
     /**
      * Menu item for api logs page.
      * Note: it is not added automatically to menu items - you need to add it manually to static::menu()
-     * @return array
      */
     public function getMenuItem(): array
     {
         return [
-            'label' => cmfTransCustom('api_docs.menu_title'),
+            'label' => $this->getCmfConfig()->transCustom('api_docs.menu_title'),
             'icon' => 'glyphicon glyphicon-book',
-            'url' => routeToCmfPage('api_docs'),
+            'url' => CmfUrl::toPage('api_docs'),
         ];
     }
     

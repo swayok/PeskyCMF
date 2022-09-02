@@ -6,8 +6,8 @@ namespace PeskyCMF\Db\Settings;
 
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
-use PeskyORM\ORM\TableInterface;
 use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueRecordHelpers;
+use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface;
 
 /**
  * @property-read int $id
@@ -24,20 +24,12 @@ class CmfSetting extends CmfDbRecord
     
     use LaravelKeyValueRecordHelpers;
     
-    /** @var CmfSettingsTable */
-    private static TableInterface $table;
-    
     /**
      * @return CmfSettingsTable
      */
-    public static function getTable(): TableInterface
+    public static function getTable(): LaravelKeyValueTableInterface
     {
-        if (static::$table === null) {
-            static::$table = app()->bound(CmfSettingsTable::class)
-                ? app(CmfSettingsTable::class)
-                : CmfSettingsTable::getInstance();
-        }
-        return static::$table;
+        return app(CmfSettingsTable::class);
     }
     
 }

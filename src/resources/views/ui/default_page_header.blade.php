@@ -5,6 +5,7 @@ declare(strict_types=1);
  * @var bool|null $addBackUrl
  * @var string|null $defaultBackUrl
  * @var bool|null $stickToTop
+ * @var \PeskyCMF\Config\CmfConfig $cmfConfig
  */
 $stickToTop = !empty($stickToTop);
 ?>

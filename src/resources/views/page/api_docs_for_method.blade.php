@@ -55,7 +55,7 @@ $errors = $method->getErrors()
                             <div class="box box-default">
                                 <div class="box-header br-r br-l br-b">
                                     <div class="box-title">
-                                        {{ cmfTransCustom('.api_docs.description') }}
+                                        {{ $method->getCmfConfig()->transCustom('api_docs.description') }}
                                     </div>
                                 </div>
                                 <div class="box-body">
@@ -70,7 +70,7 @@ $errors = $method->getErrors()
                     <div class="box box-default">
                         <div class="box-header br-r br-l br-b">
                             <div class="box-title">
-                                {{ cmfTransCustom('.api_docs.headers') }}
+                                {{ $method->getCmfConfig()->transCustom('api_docs.headers') }}
                             </div>
                         </div>
                         <div class="box-body pn">
@@ -78,13 +78,13 @@ $errors = $method->getErrors()
                                 <thead>
                                 <tr>
                                     <th width="150" class="api-documentation-header-name-cell">
-                                        {{ cmfTransCustom('.api_docs.header_name') }}
+                                        {{ $method->getCmfConfig()->transCustom('api_docs.header_name') }}
                                     </th>
                                     <th width="200" class="api-documentation-header-value-cell">
-                                        {{ cmfTransCustom('.api_docs.header_value') }}
+                                        {{ $method->getCmfConfig()->transCustom('api_docs.header_value') }}
                                     </th>
                                     <th class="api-documentation-header-description-cell">
-                                        {{ cmfTransCustom('.api_docs.header_description') }}
+                                        {{ $method->getCmfConfig()->transCustom('api_docs.header_description') }}
                                     </th>
                                 </tr>
                                 </thead>
@@ -115,7 +115,7 @@ $errors = $method->getErrors()
                         <div class="box box-solid box-warning">
                             <div class="box-header br-b bg-none">
                                 <div class="box-title text-orange">
-                                    {{ cmfTransCustom('.api_docs.url_params') }}
+                                    {{ $method->getCmfConfig()->transCustom('.api_docs.url_params') }}
                                 </div>
                             </div>
                             <div class="box-body pn">
@@ -123,13 +123,13 @@ $errors = $method->getErrors()
                                 <thead>
                                     <tr>
                                         <th width="150" class="api-documentation-param-name-cell">
-                                            {{ cmfTransCustom('.api_docs.param_name') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_name') }}
                                         </th>
                                         <th width="200" class="api-documentation-param-type-cell">
-                                            {{ cmfTransCustom('.api_docs.param_type') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_type') }}
                                         </th>
                                         <th class="api-documentation-param-description-cell">
-                                            {{ cmfTransCustom('.api_docs.param_description') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_description') }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -158,7 +158,7 @@ $errors = $method->getErrors()
                     <div class="box box-solid box-primary">
                         <div class="box-header bg-none br-b">
                             <div class="box-title text-primary">
-                                {{ cmfTransCustom('.api_docs.url_query_params') }}
+                                {{ $method->getCmfConfig()->transCustom('.api_docs.url_query_params') }}
                             </div>
                         </div>
                         <div class="box-body pn">
@@ -166,13 +166,13 @@ $errors = $method->getErrors()
                                 <thead>
                                     <tr>
                                         <th width="150" class="api-documentation-param-name-cell">
-                                            {{ cmfTransCustom('.api_docs.param_name') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_name') }}
                                         </th>
                                         <th width="200" class="api-documentation-param-type-cell">
-                                            {{ cmfTransCustom('.api_docs.param_type') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_type') }}
                                         </th>
                                         <th class="api-documentation-param-description-cell">
-                                            {{ cmfTransCustom('.api_docs.param_description') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_description') }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -201,7 +201,7 @@ $errors = $method->getErrors()
                     <div class="box box-solid box-info">
                         <div class="box-header bg-none br-b">
                             <div class="box-title text-aqua">
-                                {{ cmfTransCustom('.api_docs.post_params') }}
+                                {{ $method->getCmfConfig()->transCustom('.api_docs.post_params') }}
                             </div>
                         </div>
                         <div class="box-body pn">
@@ -209,13 +209,13 @@ $errors = $method->getErrors()
                                 <thead>
                                     <tr>
                                         <th width="150" class="api-documentation-param-name-cell">
-                                            {{ cmfTransCustom('.api_docs.param_name') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_name') }}
                                         </th>
                                         <th width="200" class="api-documentation-param-type-cell">
-                                            {{ cmfTransCustom('.api_docs.param_type') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_type') }}
                                         </th>
                                         <th class="api-documentation-param-description-cell">
-                                            {{ cmfTransCustom('.api_docs.param_description') }}
+                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_description') }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -250,7 +250,7 @@ $errors = $method->getErrors()
                         <div class="box box-solid box-success">
                             <div class="box-header">
                                 <div class="box-title">
-                                    {{ cmfTransCustom('.api_docs.response') }}
+                                    {{ $method->getCmfConfig()->transCustom('api_docs.response') }}
                                 </div>
                             </div>
                             <div class="box-body">
@@ -265,7 +265,7 @@ $errors = $method->getErrors()
                         <div class="box box-solid box-danger">
                             <div class="box-header">
                                 <div class="box-title">
-                                    {{ cmfTransCustom('.api_docs.errors') }}
+                                    {{ $method->getCmfConfig()->transCustom('api_docs.errors') }}
                                 </div>
                             </div>
                             <div class="box-body pn">
@@ -273,16 +273,16 @@ $errors = $method->getErrors()
                                     <thead>
                                         <tr>
                                             <th width="90" class="api-documentation-error-code-cell">
-                                                {{ cmfTransCustom('.api_docs.error_http_code') }}
+                                                {{ $method->getCmfConfig()->transCustom('api_docs.error_http_code') }}
                                             </th>
                                             <th width="200" class="api-documentation-error-title-cell">
-                                                {{ cmfTransCustom('.api_docs.error_title') }}
+                                                {{ $method->getCmfConfig()->transCustom('api_docs.error_title') }}
                                             </th>
                                             <th width="320" class="api-documentation-error-response-cell">
-                                                {{ cmfTransCustom('.api_docs.error_response') }}
+                                                {{ $method->getCmfConfig()->transCustom('api_docs.error_response') }}
                                             </th>
                                             <th class="api-documentation-error-description-cell">
-                                                {{ cmfTransCustom('.api_docs.error_description') }}
+                                                {{ $method->getCmfConfig()->transCustom('api_docs.error_description') }}
                                             </th>
                                         </tr>
                                     </thead>

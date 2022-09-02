@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 $formId = "scaffold-bulk-edit-form-{$idSuffix}";
 $pkColName = $table::getPkColumnName();
-$backUrl = routeToCmfItemsTable($tableNameForRoutes);
+$backUrl = \PeskyCMF\CmfUrl::toItemsTable($tableNameForRoutes, [], false, $formConfig->getCmfConfig());
 ?>
 
 <script type="text/html" id="bulk-edit-form-tpl">
@@ -36,7 +36,7 @@ $backUrl = routeToCmfItemsTable($tableNameForRoutes);
                     if ($formConfig->hasOptionsLoader()) {
                         $formAttributes['data-load-options'] = '1';
                     }
-                    $formAction = cmfRoute('cmf_api_edit_bulk', ['resource' => $tableNameForRoutes], false);
+                    $formAction = $formConfig->getCmfConfig()->route('cmf_api_edit_bulk', ['resource' => $tableNameForRoutes], false);
                 ?>
                 <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
                 data-uuid="{{= it.formUUID }}">

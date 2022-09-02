@@ -102,7 +102,7 @@ abstract class CmfUrl
      */
     public static function redirectToPage(string $pageId, array $queryArgs = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): RedirectResponse
     {
-        $url = routeToCmfPage($pageId, $queryArgs, $absolute, $cmfConfig);
+        $url = static::toPage($pageId, $queryArgs, $absolute, $cmfConfig);
         if (!$url) {
             abort(HttpCode::FORBIDDEN);
         }

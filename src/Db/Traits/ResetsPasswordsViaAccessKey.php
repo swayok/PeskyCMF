@@ -6,7 +6,6 @@ namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
-use PeskyCMF\Db\CmfDbRecord;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\ORM\Column;
 use PeskyORM\ORM\RecordInterface;
@@ -15,13 +14,11 @@ trait ResetsPasswordsViaAccessKey
 {
     
     /**
-     * @param int|null $expiresIn - minutes until expiration. Default: config('auth.passwords.' . app('auth')->getDefaultDriver() . '.expire', 60)
-     * @param array|null $additionalColumns - additional columns to encode. Default: $this->getAdditionalColumnsForPasswordRecoveryAccessKey()
-     * @return string
+     * @{@inheritDoc}
+     * If $additionalColumns is null then $this->getAdditionalColumnsForPasswordRecoveryAccessKey() will be used
      */
     public function getPasswordRecoveryAccessKey(?int $expiresIn = null, ?array $additionalColumns = null): string
     {
-        /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
         $expiresInMinutes = $expiresIn > 0 ? $expiresIn : (int)config('auth.passwords.' . app('auth')->getDefaultDriver() . '.expire', 60);
         $data = [
             'account_id' => $this->getPrimaryKeyValue(),
@@ -40,7 +37,6 @@ trait ResetsPasswordsViaAccessKey
     
     public function getAdditionalColumnsForPasswordRecoveryAccessKey(): array
     {
-        /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $this */
         $columns = [];
         if ($this::hasColumn('updated_at')) {
             $columns[] = 'updated_at';
@@ -50,14 +46,10 @@ trait ResetsPasswordsViaAccessKey
         return $columns;
     }
     
-    /**
-     * Validate access key and find user
-     * @param string $accessKey
-     * @param null|array $requiredAdditionalColumns - list of $additionalColumns (see getPasswordRecoveryAccessKey) which must be present in $accessKey
-     * @return RecordInterface|null - null = failed to parse access key, validate data or load user
-     */
-    public static function loadFromPasswordRecoveryAccessKey(string $accessKey, ?array $requiredAdditionalColumns = null): ?RecordInterface
-    {
+    public static function loadFromPasswordRecoveryAccessKey(
+        string $accessKey,
+        ?array $requiredAdditionalColumns = null
+    ): ?static {
         try {
             $data = Crypt::decrypt($accessKey);
         } catch (DecryptException) {
@@ -79,8 +71,8 @@ trait ResetsPasswordsViaAccessKey
         ) {
             return null;
         }
-        /** @var ResetsPasswordsViaAccessKey|CmfDbRecord $user */
-        $user = static::newEmptyRecord();
+        /** @var static|RecordInterface $user */
+        $user = new static();
         $conditions = [
             $user::getPrimaryKeyColumnName() => $data['account_id'],
         ];

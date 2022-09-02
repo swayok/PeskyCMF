@@ -220,7 +220,7 @@ class AsyncFilesFormInput extends FormInput
         ]);
         $tempFile = new LaravelUploadedTempFileInfo($request->file('file'), true);
         
-        return response($tempFile->encode());
+        return new Response($tempFile->encode());
     }
     
     public function deleteTempFile(Request $request): Response|CmfJsonResponse
@@ -232,15 +232,15 @@ class AsyncFilesFormInput extends FormInput
         $pkValue = $request->input('id');
         if ($pkValue) {
             // todo: delete real file and save record
-            return cmfJsonResponse(HttpCode::SERVER_ERROR);
+            return CmfJsonResponse::create(HttpCode::SERVER_ERROR);
         } else {
             $tempFile = new LaravelUploadedTempFileInfo($request->input('info'));
             if (!$tempFile->isValid()) {
-                return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
+                return CmfJsonResponse::create(HttpCode::CANNOT_PROCESS)
                     ->setMessage($scaffoldConfig->translateGeneral('input.async_files_uploads.invalid_encoded_info'));
             }
             $tempFile->delete();
-            return response('ok');
+            return new Response('ok');
         }
     }
     

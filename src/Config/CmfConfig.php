@@ -21,8 +21,9 @@ use PeskyCMF\ApiDocs\CmfApiDocumentationModule;
 use PeskyCMF\Auth\CmfAccessPolicy;
 use PeskyCMF\Auth\CmfAuthModule;
 use PeskyCMF\Auth\Middleware\CmfAuth;
+use PeskyCMF\CmfUrl;
 use PeskyCMF\Db\Admins\CmfAdmin;
-use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
+use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyCMF\Http\Controllers\CmfScaffoldApiController;
 use PeskyCMF\Http\Middleware\UseCmfSection;
@@ -313,7 +314,7 @@ abstract class CmfConfig
             [
                 [
                     'label' => $this->transCustom('.page.dashboard.menu_title'),
-                    'url' => routeToCmfPage('dashboard'),
+                    'url' => CmfUrl::toPage('dashboard', [], false, $this),
                     'icon' => 'glyphicon glyphicon-dashboard',
                 ],
                 /*[
@@ -529,7 +530,7 @@ abstract class CmfConfig
      */
     public function getLocaleWithSuffix(string $separator = '_', bool $lowercased = false): string
     {
-        $locale = preg_split('%[-_]%', strtolower(app()->getLocale()));
+        $locale = preg_split('%[-_]%', strtolower($this->getLaravelApp()->getLocale()));
         if (count($locale) === 2) {
             return $locale[0] . $separator . ($lowercased ? $locale[1] : strtoupper($locale[1]));
         } else {
@@ -726,12 +727,12 @@ abstract class CmfConfig
                 $controller = new $generalControllerClass();
                 if ($this->getUser()) {
                     return [
-                        $this->route('cmf_main_ui', [], false) => $controller->getBasicUiView(),
+                        $this->getUiModule()->getUiUrl(false) => $controller->getBasicUiView(),
                     ];
                 } else {
                     return [
-                        $this->route('cmf_login', [], false) . '.html' => $controller->getLoginTpl(),
-                        $this->route('cmf_forgot_password', [], false) . '.html' => $controller->getForgotPasswordTpl(),
+                        $this->getAuthModule()->getLoginPageUrl(false) . '.html' => $controller->getLoginTpl(),
+                        $this->getAuthModule()->getPasswordRecoveryStartPageUrl(false) . '.html' => $controller->getForgotPasswordTpl(),
                     ];
                 }
             }

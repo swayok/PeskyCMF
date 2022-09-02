@@ -6,8 +6,8 @@ declare(strict_types=1);
  * @var string $tableNameForRoutes
  * @var string $idSuffix
  */
-$pageUrl = routeToCmfItemDetails($tableNameForRoutes, '{{= it.___pk_value }}');
-$backUrl = routeToCmfItemsTable($tableNameForRoutes);
+$pageUrl = \PeskyCMF\CmfUrl::toItemDetails($tableNameForRoutes, '{{= it.___pk_value }}', false, $itemDetailsConfig->getCmfConfig());
+$backUrl = \PeskyCMF\CmfUrl::toItemsTable($tableNameForRoutes, [], false, $itemDetailsConfig->getCmfConfig());
 $tabs = $itemDetailsConfig->getTabs();
 $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
 $viewFactory = $itemDetailsConfig->getCmfConfig()->getViewsFactory();
@@ -207,6 +207,7 @@ $viewFactory = $itemDetailsConfig->getCmfConfig()->getViewsFactory();
         <?php echo view('cmf::ui.default_page_header', [
             'header' => $itemDetailsConfig->translate(null, 'header'),
             'defaultBackUrl' => $backUrl,
+            'cmfConfig' => $itemDetailsConfig->getCmfConfig()
         ])->render(); ?>
         <div class="content">
             <div class="row">

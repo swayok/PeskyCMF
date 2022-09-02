@@ -21,11 +21,11 @@ use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
 use Illuminate\Session\Store as SessionStore;
 use Illuminate\Support\Arr;
+use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\Admins\CmfAdminsTable;
-use PeskyCMF\Db\CmfDbRecord;
-use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
+use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Event\CmfUserAuthenticated;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\HttpCode;
@@ -435,12 +435,13 @@ class CmfAuthModule
         $data = $this->validate($request, $validators);
         $email = strtolower(trim($data['email']));
         if ($this->loginOnceUsingEmail($email)) {
-            /** @var CmfDbRecord|ResetsPasswordsViaAccessKey $user */
+            /** @var RecordInterface|ResetsPasswordsViaAccessKey $user */
             $user = $this->getAuthGuard()->getLastAttempted();
-            if (!method_exists($user, 'getPasswordRecoveryAccessKey')) {
+            if (!($user instanceof ResetsPasswordsViaAccessKey)) {
                 throw new \BadMethodCallException(
-                    'Class ' . get_class($user) . ' does not support password recovery. You should add ' .
-                    ResetsPasswordsViaAccessKey::class . ' trait to specified class to enable this functionality'
+                    'Class ' . get_class($user) . ' does not support password recovery. You should implement ' .
+                    ResetsPasswordsViaAccessKey::class . ' interface or use '
+                    . \PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey::class . ' trait.'
                 );
             }
             $this->sendPasswordRecoveryInstructionsEmail($user);
@@ -464,7 +465,6 @@ class CmfAuthModule
         $this->logoutCurrentUser(); //< to prevent usage of remembered user's session
         $user = $this->getUserFromPasswordRecoveryAccessKey($accessKey);
         if ($user && $user->getPrimaryKeyValue() !== $data['id']) {
-            /** @var CmfDbRecord $user */
             $user
                 ->begin()
                 ->updateValue('password', $data['password'], false)
@@ -508,12 +508,39 @@ class CmfAuthModule
     
     public function getLoginPageUrl(bool $absolute = false): string
     {
-        return route($this->getCmfConfig()->getRouteName('cmf_login'), [], $absolute);
+        return $this->getCmfConfig()->route('cmf_login', [], $absolute);
     }
     
     public function getLogoutPageUrl(bool $absolute = false): string
     {
-        return route($this->getCmfConfig()->getRouteName('cmf_logout'), [], $absolute);
+        return $this->getCmfConfig()->route('cmf_logout', [], $absolute);
+    }
+    
+    public function getRegistrationPageUrl(bool $absolute = false): string
+    {
+        return $this->getCmfConfig()->route('cmf_register', [], $absolute);
+    }
+    
+    public function getPasswordRecoveryStartPageUrl(bool $absolute = false): string
+    {
+        return $this->getCmfConfig()->route('cmf_forgot_password', [], $absolute);
+    }
+    
+    public function getPasswordRecoveryFinishPageUrl(ResetsPasswordsViaAccessKey|string $userOrAccessKey, bool $absolute = true): string
+    {
+        if (!is_string($userOrAccessKey)) {
+            $userOrAccessKey = $userOrAccessKey->getPasswordRecoveryAccessKey();
+        }
+        return $this->getCmfConfig()->route(
+            'cmf_replace_password',
+            ['access_key' => $userOrAccessKey],
+            $absolute
+        );
+    }
+    
+    public function getProfilePageUrl(bool $absolute = false): string
+    {
+        return $this->getCmfConfig()->route('cmf_profile', [], $absolute);
     }
     
     /**
@@ -557,7 +584,7 @@ class CmfAuthModule
         $this->getMailer()->send(
             $this->getPasswordRecoveryEmailViewPath(),
             [
-                'url' => cmfRoute('cmf_replace_password', [$user->getPasswordRecoveryAccessKey()], true, $this->getCmfConfig()),
+                'url' => $this->getPasswordRecoveryFinishPageUrl($user),
                 'user' => $user->toArrayWithoutFiles(),
                 'cmfConfig' => $this->getCmfConfig(),
             ],
@@ -575,7 +602,7 @@ class CmfAuthModule
      */
     protected function getUserFromPasswordRecoveryAccessKey(string $accessKey): ?RecordInterface
     {
-        /** @var ResetsPasswordsViaAccessKey $userClass */
+        /** @var RecordInterface|ResetsPasswordsViaAccessKey $userClass */
         $userClass = $this->getUserRecordClass();
         return $userClass::loadFromPasswordRecoveryAccessKey($accessKey);
     }
@@ -690,23 +717,24 @@ class CmfAuthModule
     
     public function getIntendedUrl(): string
     {
-        $intendedUrl = $this->getSessionStore()->pull($this->getCmfConfig()->makeUtilityKey('intended_url'));
+        $cmfConfig = $this->getCmfConfig();
+        $intendedUrl = $this->getSessionStore()->pull($cmfConfig->makeUtilityKey('intended_url'));
         if (empty($intendedUrl)) {
-            return $this->getCmfConfig()->home_page_url();
+            return $cmfConfig->home_page_url();
         } elseif (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
-            return routeToCmfItemsTable($matches[1], [], false, $this->getCmfConfig());
+            return CmfUrl::toItemsTable($matches[1], [], false, $cmfConfig);
         } elseif (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
-            return routeToCmfItemsTable($matches[1], [], false, $this->getCmfConfig());
+            return CmfUrl::toItemsTable($matches[1], [], false, $cmfConfig);
         } elseif (preg_match('%/api/([^/]+?)/([^/?]+?)/?(?:\?details=(\d)|$)%i', $intendedUrl, $matches)) {
             if (!empty($matches[3]) && $matches[3] === '1') {
-                return routeToCmfItemDetails($matches[1], $matches[2], false, $this->getCmfConfig());
+                return CmfUrl::toItemDetails($matches[1], $matches[2], false, $cmfConfig);
             } else {
-                return routeToCmfItemEditForm($matches[1], $matches[2], false, $this->getCmfConfig());
+                return CmfUrl::toItemEditForm($matches[1], $matches[2], false, $cmfConfig);
             }
         } elseif (preg_match('%/api/([^/]+?)%i', $intendedUrl, $matches)) {
-            return routeToCmfItemsTable($matches[1], [], false, $this->getCmfConfig());
+            return CmfUrl::toItemsTable($matches[1], [], false, $cmfConfig);
         } elseif (preg_match('%/page/([^/]+)\.html$%i', $intendedUrl, $matches)) {
-            return routeToCmfPage($matches[1], [], false, $this->getCmfConfig());
+            return CmfUrl::toPage($matches[1], [], false, $cmfConfig);
         } else {
             return $intendedUrl;
         }

@@ -65,6 +65,11 @@ abstract class CmfApiDocumentation
         $this->uuid = 'doc-' . Str::snake(str_replace('\\', '', get_class($this)), '-');
     }
     
+    public function getCmfConfig(): CmfConfig
+    {
+        return $this->cmfConfig;
+    }
+    
     public function getErrors(): array
     {
         return [];

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @var \PeskyCMF\Auth\CmfAuthModule $authModule
@@ -18,7 +19,7 @@ declare(strict_types=1);
         id="forgot-password-form-container"
     >
         <form
-            action="{{ cmfRoute('cmf_forgot_password', [], false, $cmfConfig) }}"
+            action="{{ $authModule->getPasswordRecoveryStartPageUrl(false) }}"
             method="post"
             id="forgot-password-form"
         >

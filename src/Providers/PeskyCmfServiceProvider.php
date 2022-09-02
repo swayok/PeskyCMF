@@ -17,6 +17,8 @@ use PeskyCMF\Console\Commands\CmfInstallHttpRequestsProfilingCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
+use PeskyCMF\Db\Settings\CmfSettingsTable;
+use PeskyCMF\Db\Settings\CmfSettingsTableStructure;
 use PeskyCMF\PeskyCmfAppSettings;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
@@ -74,6 +76,14 @@ class PeskyCmfServiceProvider extends ServiceProvider
             /** @var PeskyCmfAppSettings $appSettingsClass */
             $appSettingsClass = $this->getAppConfigs()->get('peskycmf.app_settings_class') ?: PeskyCmfAppSettings::class;
             return new $appSettingsClass($this->app);
+        });
+    
+        $this->app->singleton(CmfSettingsTable::class, function () {
+            return CmfSettingsTable::getInstance();
+        });
+    
+        $this->app->singleton(CmfSettingsTableStructure::class, function () {
+            return CmfSettingsTableStructure::getInstance();
         });
     }
     

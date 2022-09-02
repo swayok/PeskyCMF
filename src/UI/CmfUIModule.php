@@ -25,7 +25,7 @@ class CmfUIModule
     
     protected string $defaultSidebarLogo = '<img src="/packages/cmf/raw/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
     
-    protected array $UIViews = [
+    protected array $uiViews = [
         'layout' => 'cmf::layout',
         'ui' => 'cmf::ui.ui',
         'footer' => 'cmf::ui.footer',
@@ -161,9 +161,7 @@ class CmfUIModule
     
     protected function getDataForBasicUiView(): array
     {
-        return [
-            'sidebarLogo' => $this->getSidebarLogo(),
-        ];
+        return [];
     }
     
     public function getSidebarLogo(): string
@@ -188,8 +186,8 @@ class CmfUIModule
     protected function loadUIViewsFromConfig(): void
     {
         if (!$this->isUIViewsLoadedFromConfigs) {
-            $this->UIViews = array_replace(
-                $this->UIViews,
+            $this->uiViews = array_replace(
+                $this->uiViews,
                 (array)$this->cmfConfig->config('ui.views', [])
             );
         }
@@ -198,14 +196,16 @@ class CmfUIModule
     public function getUIView(string $viewName): string
     {
         $this->loadUIViewsFromConfig();
-        if (!isset($this->UIViews[$viewName])) {
+        if (!isset($this->uiViews[$viewName])) {
             abort(HttpCode::NOT_FOUND, "There is no UI view with name [$viewName]");
         }
-        return $this->UIViews[$viewName];
+        return $this->uiViews[$viewName];
     }
     
     public function renderUIView(string $viewName, array $data = []): string
     {
+        $data['cmfConfig'] = $this->cmfConfig;
+        $data['uiModule'] = $this;
         return $this->viewsFactory->make($this->getUIView($viewName), $data)->render();
     }
     
@@ -285,6 +285,11 @@ class CmfUIModule
         return $this->tables[$resourceName];
     }
     
+    public function getUiUrl(bool $absolute = false): string
+    {
+        return $this->cmfConfig->route('cmf_main_ui', [], $absolute);
+    }
+    
     /**
      * JS application settings (accessed via CmfSettings global variable)
      */
@@ -295,7 +300,7 @@ class CmfUIModule
             'rootUrl' => '/' . trim($this->cmfConfig->url_prefix(), '/'),
             'enablePing' => (int)$this->cmfConfig->config('ping_interval') > 0,
             'pingInterval' => (int)$this->cmfConfig->config('ping_interval') * 1000,
-            'uiUrl' => $this->cmfConfig->route('cmf_main_ui', [], false),
+            'uiUrl' => $this->getUiUrl(false),
             'userDataUrl' => $this->cmfConfig->route('cmf_profile_data', [], false),
             'menuCountersDataUrl' => $this->cmfConfig->route('cmf_menu_counters_data', [], false),
             'defaultPageTitle' => $this->cmfConfig->default_page_title(),
@@ -352,6 +357,20 @@ class CmfUIModule
             }
         }
         return $this->menuItemsFromScaffoldConfigs;
+    }
+    
+    public static function modifyDotJsTemplateToAllowInnerScriptsAndTemplates(string $dotJsTemplate): string
+    {
+        return preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
+            if (preg_match('%type="text/html"%i', $matches[1])) {
+                // inner dotjs template - needs to be encoded and decoded later
+                $encoded = base64_encode($matches[2]);
+                return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
+            } else {
+                $script = preg_replace('%(^|\s)//.*$%m', '$1', $matches[2]); //< remove "//" comments from a script
+                return "{{= '<' + 'script{$matches[1]}>' }}$script{{= '</' + 'script>'}}";
+            }
+        }, $dotJsTemplate);
     }
     
 }

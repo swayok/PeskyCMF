@@ -17,10 +17,17 @@ if (!defined('DOTJS_INSERT_REGEXP_FOR_ROUTES')) {
     define('DOTJS_INSERT_REGEXP_FOR_ROUTES', '(\{\{\s*=.*?\}\}|\{\s*=.*?\})');
 }
 
+if (!function_exists('cmfManager')) {
+    function cmfManager(): CmfManager
+    {
+        return app(CmfManager::class);
+    }
+}
+
 if (!function_exists('cmfConfig')) {
     function cmfConfig(): CmfConfig
     {
-        return app(CmfManager::class)->getCurrentCmfConfig();
+        return cmfManager()->getCurrentCmfConfig();
     }
 }
 
@@ -287,13 +294,6 @@ if (!function_exists('cmfTransCustom')) {
     }
 }
 
-if (!function_exists('cmfJsonResponse')) {
-    function cmfJsonResponse(int $httpCode = HttpCode::OK, array $headers = [], int $jsonOptions = 0): CmfJsonResponse
-    {
-        return new CmfJsonResponse([], $httpCode, $headers, $jsonOptions);
-    }
-}
-
 if (!function_exists('cmfJsonResponseForValidationErrors')) {
     /**
      * @param array $errors
@@ -305,7 +305,7 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
         if (empty($message)) {
             $message = (string)cmfTransGeneral('.form.message.validation_errors');
         }
-        return cmfJsonResponse(HttpCode::CANNOT_PROCESS)
+        return CmfJsonResponse::create(HttpCode::CANNOT_PROCESS)
             ->setErrors($errors, $message);
     }
 }
@@ -324,7 +324,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
         if (empty($fallbackUrl)) {
             $fallbackUrl = cmfConfig()->home_page_url();
         }
-        return cmfJsonResponse(HttpCode::NOT_FOUND)
+        return CmfJsonResponse::create(HttpCode::NOT_FOUND)
             ->setMessage($message)
             ->goBack($fallbackUrl);
     }
@@ -339,7 +339,7 @@ if (!function_exists('cmfRedirectResponseWithMessage')) {
         ?CmfConfig $cmfConfig = null
     ): RedirectResponse|CmfJsonResponse {
         if ($isAjax) {
-            return cmfJsonResponse()
+            return CmfJsonResponse::create()
                 ->setMessage($message)
                 ->setRedirect($url);
         } else {
@@ -354,26 +354,6 @@ if (!function_exists('cmfRedirectResponseWithMessage')) {
                 ]
             );
         }
-    }
-}
-
-if (!function_exists('modifyDotJsTemplateToAllowInnerScriptsAndTemplates')) {
-    /**
-     * @param string $dotJsTemplate
-     * @return string
-     */
-    function modifyDotJsTemplateToAllowInnerScriptsAndTemplates(string $dotJsTemplate): string
-    {
-        return preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
-            if (preg_match('%type="text/html"%i', $matches[1])) {
-                // inner dotjs template - needs to be encoded and decoded later
-                $encoded = base64_encode($matches[2]);
-                return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
-            } else {
-                $script = preg_replace('%(^|\s)//.*$%m', '$1', $matches[2]); //< remove "//" comments from a script
-                return "{{= '<' + 'script{$matches[1]}>' }}$script{{= '</' + 'script>'}}";
-            }
-        }, $dotJsTemplate);
     }
 }
 
@@ -582,7 +562,7 @@ if (!function_exists('hidePasswords')) {
     function hidePasswords(array $data): array
     {
         foreach ($data as $key => &$value) {
-            if (!empty($value) && preg_match('(pass(word|phrase|wd)?|pwd)', $key)) {
+            if (!empty($value) && preg_match('(pass(word|phrase|wd)?|pwd|secret)', $key)) {
                 $value = '******';
             }
         }

@@ -73,7 +73,7 @@ class CmfGeneralController extends CmfController
     
     public function redirectToUserProfile(): RedirectResponse
     {
-        return new RedirectResponse($this->getCmfConfig()->route('cmf_profile'));
+        return new RedirectResponse($this->getCmfConfig()->getAuthModule()->getProfilePageUrl());
     }
     
     public function renderUserProfileView(): string

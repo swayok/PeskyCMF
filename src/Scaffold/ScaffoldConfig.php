@@ -15,7 +15,7 @@ use Illuminate\View\View;
 use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
-use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
+use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Http\Middleware\AjaxOnly;
 use PeskyCMF\HttpCode;
@@ -812,6 +812,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
             } else {
                 return view('cmf::ui.default_page_header', [
                     'header' => $message,
+                    'cmfConfig' => $this->getCmfConfig()
                 ]);
             }
         }

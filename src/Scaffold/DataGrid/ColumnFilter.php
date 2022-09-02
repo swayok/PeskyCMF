@@ -335,7 +335,7 @@ class ColumnFilter
             case static::TYPE_DATE:
             case static::TYPE_TIMESTAMP:
                 $pluginConfig = [
-                    'locale' => app()->getLocale(),
+                    'locale' => $this->getCmfConfig()->getLaravelApp()->getLocale(),
                     'sideBySide' => false,
                     'useCurrent' => false,
                     'toolbarPlacement' => 'bottom',

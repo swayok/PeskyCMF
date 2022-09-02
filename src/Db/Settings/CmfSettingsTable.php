@@ -15,11 +15,6 @@ class CmfSettingsTable extends CmfDbTable implements LaravelKeyValueTableInterfa
     
     use LaravelKeyValueTableHelpers;
     
-    /** @var CmfSettingsTableStructure */
-    private static TableStructureInterface $tableStructure;
-    /** @var CmfSetting */
-    private static RecordInterface $recordClass;
-    
     public function getMainForeignKeyColumnName(): ?string
     {
         return null;
@@ -40,12 +35,7 @@ class CmfSettingsTable extends CmfDbTable implements LaravelKeyValueTableInterfa
      */
     public function getTableStructure(): TableStructureInterface
     {
-        if (static::$tableStructure === null) {
-            static::$tableStructure = app()->bound(CmfSettingsTableStructure::class)
-                ? app(CmfSettingsTableStructure::class)
-                : CmfSettingsTableStructure::getInstance();
-        }
-        return static::$tableStructure;
+        return app(CmfSettingsTableStructure::class);
     }
     
     /**
@@ -53,12 +43,7 @@ class CmfSettingsTable extends CmfDbTable implements LaravelKeyValueTableInterfa
      */
     public function newRecord(): RecordInterface
     {
-        if (static::$recordClass === null) {
-            static::$recordClass = app()->bound(CmfSetting::class)
-                ? app(CmfSetting::class)
-                : CmfSetting::class;
-        }
-        return static::$recordClass::newEmptyRecord();
+        return app(CmfSetting::class);
     }
     
 }

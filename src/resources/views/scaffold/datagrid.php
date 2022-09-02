@@ -188,7 +188,8 @@ $viewFactory = $dataGridConfig->getCmfConfig()->getViewsFactory();
 <div id="data-grid-tpl">
     <?php echo view('cmf::ui.default_page_header', [
         'header' => $dataGridConfig->translate(null, 'header'),
-        'defaultBackUrl' => $dataGridConfig->getScaffoldConfig()->getCmfConfig()->home_page_url(),
+        'defaultBackUrl' => $dataGridConfig->getCmfConfig()->home_page_url(),
+        'cmfConfig' => $dataGridConfig->getCmfConfig()
     ])->render(); ?>
     <div class="content">
         <div class="row"><div class="<?php echo $dataGridConfig->getCssClassesForContainer() ?>">

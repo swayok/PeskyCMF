@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @var \PeskyCMF\Auth\CmfAuthModule $authModule
@@ -18,7 +19,7 @@ $cmfConfig = $authModule->getCmfConfig();
         id="replace-password-form-container"
     >
         <form
-            action="{{ cmfRoute('cmf_replace_password', [$accessKey], false, $cmfConfig) }}"
+            action="{{ $authModule->getPasswordRecoveryFinishPageUrl($accessKey, false) }}"
             method="post"
             id="replace-password-form"
         >

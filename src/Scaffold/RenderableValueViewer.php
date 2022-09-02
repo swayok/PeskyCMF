@@ -223,7 +223,9 @@ abstract class RenderableValueViewer extends AbstractValueViewer
             throw new ValueViewerConfigException($this, 'Renderer function returned unsopported result. String or ValueRenderer object expected');
         }
         // replace <script> tags to be able to render that template
-        return modifyDotJsTemplateToAllowInnerScriptsAndTemplates($rendered . $this->getJavaScriptBlocks());
+        return $this->getCmfConfig()
+            ->getUiModule()
+            ::modifyDotJsTemplateToAllowInnerScriptsAndTemplates($rendered . $this->getJavaScriptBlocks());
     }
     
     /**

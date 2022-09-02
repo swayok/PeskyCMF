@@ -24,7 +24,7 @@ include __DIR__ . '/textarea.php';
         Utils.requireFiles(['/packages/cmf/raw/ckeditor/ckeditor.js'])
             .done(function () {
                 Utils.requireFiles([
-                        '<?php echo cmfRoute('cmf_ckeditor_config_js', ['_' => csrf_token()]) ?>',
+                        '<?php echo $sectionConfig->getCmfConfig()->route('cmf_ckeditor_config_js', ['_' => csrf_token()]) ?>',
                         '/packages/cmf/raw/ckeditor/adapters/jquery.js'
                     ])
                     .done(function () {

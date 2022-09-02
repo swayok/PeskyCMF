@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Routing\Controller;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
-use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
+use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\ORM\RecordInterface;
 

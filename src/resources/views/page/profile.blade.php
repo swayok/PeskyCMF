@@ -42,7 +42,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                 <form
                     role="form"
                     method="post"
-                    action="{{ cmfRoute('cmf_profile', [], false, $cmfConfig) }}"
+                    action="{{ $authModule->getProfilePageUrl(false) }}"
                     id="cmf-user-profile-form"
                 >
                     <input

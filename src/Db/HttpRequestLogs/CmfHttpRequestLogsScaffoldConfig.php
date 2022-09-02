@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Db\HttpRequestLogs;
 
+use PeskyCMF\CmfUrl;
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
@@ -133,9 +134,9 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
                 try {
                     $this->cmfConfig->getScaffoldConfigClass($record['table']);
                     if (!empty($record['item_id'])) {
-                        $url = routeToCmfItemDetails($record['table'], $record['item_id']);
+                        $url = CmfUrl::toItemDetails($record['table'], $record['item_id'], false, $this->cmfConfig);
                     } else {
-                        $url = routeToCmfItemsTable($record['table']);
+                        $url = CmfUrl::toItemsTable($record['table'], [], false, $this->cmfConfig);
                     }
                     
                     return Tag::a(rtrim($record['table'] . ' -> ' . $record['item_id'], '-> '))
@@ -160,9 +161,9 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
             try {
                 $this->cmfConfig->getScaffoldConfigClass($record['requester_table']);
                 if (!empty($record['requester_id'])) {
-                    $url = routeToCmfItemDetails($record['requester_table'], $record['requester_id']);
+                    $url = CmfUrl::toItemDetails($record['requester_table'], $record['requester_id'], false, $this->cmfConfig);
                 } else {
-                    $url = routeToCmfItemsTable($record['requester_table']);
+                    $url = CmfUrl::toItemsTable($record['requester_table'], [], false, $this->cmfConfig);
                 }
                 
                 return Tag::a($label)

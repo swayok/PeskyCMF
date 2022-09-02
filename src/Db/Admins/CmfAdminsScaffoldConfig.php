@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeskyCMF\Db\Admins;
 
 use PeskyCMF\CmfManager;
+use PeskyCMF\CmfUrl;
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
@@ -58,7 +59,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                 'role' => DataGridColumn::create()
                     ->setIsSortable(true)
                     ->setValueConverter(function ($value) {
-                        return cmfTransCustom(".admins.role.$value");
+                        return $this->getCmfConfig()->transCustom("admins.role.$value");
                     }),
                 'parent_id' => DataGridColumn::create()
                     ->setType(ValueCell::TYPE_LINK),
@@ -70,11 +71,11 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                     $actions[] = Tag::a()
                         ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
                         ->setClass('row-action text-muted')
-                        ->setTitle(cmfTransCustom('.admins.datagrid.action.login_as'))
+                        ->setTitle($this->getCmfConfig()->transCustom('admins.datagrid.action.login_as'))
                         ->setDataAttr('toggle', 'tooltip')
                         ->setDataAttr('block-datagrid', '1')
                         ->setDataAttr('action', 'request')
-                        ->setDataAttr('url', cmfRouteTpl('cmf_login_as_other_admin', [], ['id'], false))
+                        ->setDataAttr('url', CmfUrl::routeTpl('cmf_login_as_other_admin', [], ['id'], false, $this->getCmfConfig()))
                         ->setHref('javascript: void(0)')
                         ->build();
                 }
@@ -94,7 +95,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                 ->setAllowedValues(function () {
                     $options = [];
                     foreach ($this->cmfConfig->getAuthModule()->getUserRolesList() as $roleId) {
-                        $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
+                        $options[$roleId] = $this->getCmfConfig()->transCustom("admins.role.$roleId");
                     }
                     return $options;
                 }),
@@ -123,12 +124,12 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
             'name',
             'language' => ValueCell::create()
                 ->setValueConverter(function ($value) {
-                    return cmfTransCustom(".language.$value");
+                    return $this->getCmfConfig()->transCustom("language.$value");
                 }),
             'is_active',
             'role' => ValueCell::create()
                 ->setValueConverter(function ($value) {
-                    return cmfTransCustom(".admins.role.$value");
+                    return $this->getCmfConfig()->transCustom("admins.role.$value");
                 }),
             'is_superadmin',
             'parent_id' => ValueCell::create()
@@ -149,10 +150,10 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                     $actions[] = Tag::button()
                         ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
                         ->setClass('btn btn-default')
-                        ->setTitle(cmfTransCustom('.admins.item_details.action.login_as'))
+                        ->setTitle($this->getCmfConfig()->transCustom('admins.item_details.action.login_as'))
                         ->setDataAttr('toggle', 'tooltip')
                         ->setDataAttr('action', 'request')
-                        ->setDataAttr('url', cmfRouteTpl('cmf_login_as_other_admin', [], ['id'], false));
+                        ->setDataAttr('url', CmfUrl::routeTpl('cmf_login_as_other_admin', [], ['id'], false, $this->getCmfConfig()));
                 }
                 return $actions;
             });
@@ -175,7 +176,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                 ->setOptions(function () {
                     $options = [];
                     foreach ($this->cmfConfig->locales() as $lang) {
-                        $options[$lang] = cmfTransCustom(".language.$lang");
+                        $options[$lang] = $this->getCmfConfig()->transCustom("language.$lang");
                     }
                     return $options;
                 })
@@ -191,7 +192,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
                 ->setOptions(function () {
                     $options = [];
                     foreach ($this->cmfConfig->getAuthModule()->getUserRolesList() as $roleId) {
-                        $options[$roleId] = cmfTransCustom(".admins.role.$roleId");
+                        $options[$roleId] = $this->getCmfConfig()->transCustom("admins.role.$roleId");
                     }
                     return $options;
                 })

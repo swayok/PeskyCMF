@@ -5,18 +5,18 @@ declare(strict_types=1);
  */
 ?>
 <div class="content-header">
-    <h1>{{ cmfTransCustom('.api_docs.header') }}</h1>
+    <h1>{{ $cmfConfig->transCustom('api_docs.header') }}</h1>
     <ol class="breadcrumb">
         <li>
-            <a href="{{ cmfRoute('cmf_api_docs_download_postman_collection') }}" download>
+            <a href="{{ $cmfConfig->route('cmf_api_docs_download_postman_collection') }}" download>
                 <i class="glyphicon glyphicon-download-alt"></i>
-                {{ cmfTransCustom('.api_docs.download_postman_collection') }}
+                {{ $cmfConfig->transCustom('api_docs.download_postman_collection') }}
             </a>
         </li>
         <li>
             <a href="#" data-nav="reload">
                 <i class="glyphicon glyphicon-refresh"></i>
-               {{ cmfTransGeneral('.action.reload_page') }}
+               {{ $cmfConfig->transGeneral('action.reload_page') }}
             </a>
         </li>
     </ol>

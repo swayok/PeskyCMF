@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace PeskyCMF\Db\Settings;
 
 use Illuminate\Http\JsonResponse;
+use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
-use PeskyORM\ORM\TableInterface;
+use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface;
 
 class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig
 {
@@ -17,16 +18,9 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig
     protected bool $isEditAllowed = true;
     protected bool $isDeleteAllowed = false;
     
-    private static ?CmfSettingsTable $table = null;
-    
-    public static function getTable(): TableInterface
+    public static function getTable(): LaravelKeyValueTableInterface
     {
-        if (static::$table === null) {
-            static::$table = app()->bound(CmfSettingsTable::class)
-                ? app(CmfSettingsTable::class)
-                : CmfSettingsTable::getInstance();
-        }
-        return static::$table;
+        return app(CmfSettingsTable::class);
     }
     
     public function getMainMenuItem(): ?array
@@ -91,7 +85,7 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig
     {
         $settings = $this->cmfConfig->getAppSettings()->getAllValues(true);
         $settings[static::getTable()->getPkColumnName()] = 0;
-        return cmfJsonResponse()->setData($this->getFormConfig()->prepareRecord($settings));
+        return new CmfJsonResponse($this->getFormConfig()->prepareRecord($settings));
     }
     
     public function updateBulkOfRecords(): JsonResponse

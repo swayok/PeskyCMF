@@ -1,8 +1,15 @@
 <?php
 declare(strict_types=1);
+
+use PeskyCMF\CmfUrl;
+use PeskyCMF\Scaffold\Form\FormConfig;
+use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
+use PeskyORM\ORM\TableInterface;
+use Swayok\Html\Tag;
+
 /**
- * @var \PeskyORM\ORM\TableInterface $table
- * @var \PeskyCMF\Scaffold\Form\FormConfig $formConfig
+ * @var TableInterface $table
+ * @var FormConfig $formConfig
  * @var string $tableNameForRoutes
  * @var string $idSuffix
  */
@@ -17,15 +24,15 @@ $endIf = '{{?}}';
 $ifClone = '{{? !!it._is_cloning }}';
 
 $pageUrl = $ifEdit
-        . routeToCmfItemEditForm($tableNameForRoutes, '{{= it.___pk_value}}')
+        . CmfUrl::toItemEditForm($tableNameForRoutes, '{{= it.___pk_value}}', false, $formConfig->getCmfConfig())
     . $else
         . $ifClone
-            . routeToCmfItemCloneForm($tableNameForRoutes, '{{= it.___pk_value}}')
+            . CmfUrl::toItemCloneForm($tableNameForRoutes, '{{= it.___pk_value}}', false, $formConfig->getCmfConfig())
         . $else
-            . routeToCmfItemAddForm($tableNameForRoutes)
+            . CmfUrl::toItemAddForm($tableNameForRoutes, [], false, $formConfig->getCmfConfig())
         .$endIf
     . $endIf;
-$backUrl = routeToCmfItemsTable($tableNameForRoutes);
+$backUrl = CmfUrl::toItemsTable($tableNameForRoutes, [], false, $formConfig->getCmfConfig());
 $tabs = $formConfig->getTabs();
 $groups = $formConfig->getInputsGroups();
 $hasTabs = count($tabs) > 1 || !empty($tabs[0]['label']);
@@ -47,7 +54,7 @@ $buildInputs = function ($tabInfo) use ($groups, $formConfig) {
             echo $inputConfig->render() . $inputConfig->getAdditionalHtml();
         }
     }
-    echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());
+    echo $formConfig->getCmfConfig()->getUiModule()::modifyDotJsTemplateToAllowInnerScriptsAndTemplates($formConfig->getAdditionalHtmlForForm());
 };
 
 $viewFactory = $formConfig->getCmfConfig()->getViewsFactory();
@@ -73,7 +80,7 @@ $viewFactory = $formConfig->getCmfConfig()->getViewsFactory();
                     <button type="submit" class="btn <?php echo $ifCreate; ?>btn-primary<?php echo $else; ?>btn-success<?php echo $endIf; ?>">
                         <?php echo $formConfig->translateGeneral('toolbar.submit'); ?>
                     </button>
-                    <?php if (!$formConfig->getScaffoldConfig() instanceof \PeskyCMF\Scaffold\KeyValueTableScaffoldConfig): ?>
+                    <?php if (!$formConfig->getScaffoldConfig() instanceof KeyValueTableScaffoldConfig): ?>
                         <?php echo $ifCreate; ?>
                             <input type="submit" class="btn btn-primary" name="create_another" value="+1" data-toggle="tooltip"
                                    title="<?php echo $formConfig->translateGeneral('toolbar.submit_and_add_another'); ?>">
@@ -89,7 +96,7 @@ $viewFactory = $formConfig->getCmfConfig()->getViewsFactory();
             <div class="mt10 text-center">
                 <?php
                     foreach ($toolbarItems as $item) {
-                        if ($item instanceof \Swayok\Html\Tag) {
+                        if ($item instanceof Tag) {
                             echo $item->build();
                         } else if ($item instanceof PeskyCMF\Scaffold\MenuItem\CmfMenuItem) {
                             echo $item->renderAsButton();
@@ -137,11 +144,11 @@ $viewFactory = $formConfig->getCmfConfig()->getViewsFactory();
         if ($formConfig->hasJsInitiator()) {
             $formAttributes['data-initiator'] = addslashes($formConfig->getJsInitiator());
         }
-        $editUrl = cmfRouteTpl('cmf_api_update_item', ['resource' => $tableNameForRoutes], ['id' => 'it.___pk_value'], false);
-        $createUrl = cmfRoute('cmf_api_create_item', ['resource' => $tableNameForRoutes], false);
+        $editUrl = CmfUrl::routeTpl('cmf_api_update_item', ['resource' => $tableNameForRoutes], ['id' => 'it.___pk_value'], false, $formConfig->getCmfConfig());
+        $createUrl = CmfUrl::route('cmf_api_create_item', ['resource' => $tableNameForRoutes], false, $formConfig->getCmfConfig());
         $formAction = $ifEdit . $editUrl . $else . $createUrl . $endIf;
     ?>
-    <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo \Swayok\Html\Tag::buildAttributes($formAttributes); ?>
+    <form role="form" method="post" action="<?php echo $formAction; ?>" <?php echo Tag::buildAttributes($formAttributes); ?>
     data-uuid="{{= it.formUUID }}">
         <?php echo $ifEdit; ?>
             <input type="hidden" name="_method" value="PUT">
@@ -181,7 +188,7 @@ $viewFactory = $formConfig->getCmfConfig()->getViewsFactory();
             <?php endif ?>
         </div>
     </form>
-    <?php echo modifyDotJsTemplateToAllowInnerScriptsAndTemplates($viewFactory->yieldContent('scaffold-form-enablers-script')); ?>
+    <?php echo $formConfig->getCmfConfig()->getUiModule()::modifyDotJsTemplateToAllowInnerScriptsAndTemplates($viewFactory->yieldContent('scaffold-form-enablers-script')); ?>
 <?php $viewFactory->stopSection(); ?>
 
 <script type="text/html" id="item-form-tpl">
@@ -237,6 +244,7 @@ $viewFactory = $formConfig->getCmfConfig()->getViewsFactory();
         <?php echo view('cmf::ui.default_page_header', [
             'header' => '{{# def.title }}',
             'defaultBackUrl' => $backUrl,
+            'cmfConfig' => $formConfig->getCmfConfig()
         ])->render(); ?>
         <div class="content">
             <div class="row">

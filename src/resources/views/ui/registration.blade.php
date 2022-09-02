@@ -20,7 +20,7 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
         id="login-form-container"
     >
         <form
-            action="{{ cmfRoute('cmf_register') }}"
+            action="{{ $authModule->getRegistrationPageUrl(false) }}"
             method="post"
             id="registration-form"
         >
@@ -137,6 +137,6 @@ $usersTableStructure = $authModule->getUsersTable()->getTableStructure();
         </form>
     </div>
     <div class="text-center mt20 register">
-        <a href="{{ cmfRoute('cmf_login', [], false, $cmfConfig) }}">{{ $cmfConfig->transCustom('.registration_form.login_to_account_label') }}</a>
+        <a href="{{ $authModule->getLoginPageUrl(false) }}">{{ $cmfConfig->transCustom('.registration_form.login_to_account_label') }}</a>
     </div>
 </div>

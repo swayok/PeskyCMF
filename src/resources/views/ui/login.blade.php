@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @var \PeskyCMF\Auth\CmfAuthModule $authModule
@@ -43,7 +44,7 @@ $loginInputName = $authModule->getUserLoginColumnName();
             <div class="row login-submit">
                 @if ($authModule->isPasswordRestoreAllowed())
                     <div class="col-xs-8 forgot-password">
-                        <a href="{{ cmfRoute('cmf_forgot_password', [], false, $cmfConfig) }}">{{ $cmfConfig->transCustom('.login_form.forgot_password_label') }}</a>
+                        <a href="{{ $authModule->getPasswordRecoveryStartPageUrl(false) }}">{{ $cmfConfig->transCustom('.login_form.forgot_password_label') }}</a>
                     </div>
                 @endif
                 <div class="col-xs-4">
@@ -59,7 +60,7 @@ $loginInputName = $authModule->getUserLoginColumnName();
     </div>
     @if ($authModule->isRegistrationAllowed())
         <div class="text-center mt20 register">
-            <a href="{{ cmfRoute('cmf_register', [], false, $cmfConfig) }}">{{ $cmfConfig->transCustom('.login_form.registration_label') }}</a>
+            <a href="{{ $authModule->getRegistrationPageUrl(false) }}">{{ $cmfConfig->transCustom('.login_form.registration_label') }}</a>
         </div>
     @endif
 </div>
