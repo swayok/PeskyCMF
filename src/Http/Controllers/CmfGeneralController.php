@@ -245,7 +245,8 @@ class CmfGeneralController extends CmfController
         } elseif (preg_match('%^t-(.+?)-c-(.+?)-input$%', $matches)) {
             [, $resourceName, $columnName] = $matches;
         } else {
-            return $this->getCmfConfig()->transGeneral('.ckeditor.fileupload.cannot_detect_resource_and_field', ['editor_name' => $editorId]);
+            return $this->getCmfConfig()
+                ->transGeneral('ckeditor.fileupload.cannot_detect_resource_and_field', ['editor_name' => $editorId]);
         }
         $scaffoldConfig = $this->getCmfConfig()->getScaffoldConfig($resourceName);
         $columns = $scaffoldConfig->getFormConfig()->getValueViewers();
@@ -262,7 +263,7 @@ class CmfGeneralController extends CmfController
         }
         if (!$column) {
             return $this->getCmfConfig()->transGeneral(
-                '.ckeditor.fileupload.cannot_find_field_in_scaffold',
+                'ckeditor.fileupload.cannot_find_field_in_scaffold',
                 [
                     'editor_name' => $editorId,
                     'field_name' => $columnName,
@@ -273,7 +274,7 @@ class CmfGeneralController extends CmfController
         if ($column instanceof WysiwygFormInput) {
             if (!$column->hasImageUploadsFolder()) {
                 return $this->getCmfConfig()->transGeneral(
-                    '.ckeditor.fileupload.image_uploading_folder_not_set',
+                    'ckeditor.fileupload.image_uploading_folder_not_set',
                     [
                         'field_name' => $columnName,
                         'scaffold_class' => get_class($scaffoldConfig),
@@ -283,7 +284,7 @@ class CmfGeneralController extends CmfController
             return $column;
         } else {
             return $this->getCmfConfig()->transGeneral(
-                '.ckeditor.fileupload.is_not_wysiwyg_field_config',
+                'ckeditor.fileupload.is_not_wysiwyg_field_config',
                 [
                     'wysywig_class' => WysiwygFormInput::class,
                     'field_name' => $columnName,
@@ -313,7 +314,7 @@ class CmfGeneralController extends CmfController
                 && ValidateValue::isCorruptedJpeg($file->getRealPath())
             )
         ) {
-            return ['', $this->getCmfConfig()->transGeneral('.ckeditor.fileupload.invalid_or_corrupted_image')];
+            return ['', $this->getCmfConfig()->transGeneral('ckeditor.fileupload.invalid_or_corrupted_image')];
         }
         if (
             ($formInput->getMaxImageWidth() > 0 && $imageProcessor->getImageWidth() > $formInput->getMaxImageWidth())
@@ -327,11 +328,11 @@ class CmfGeneralController extends CmfController
                 true
             );
             if (!$success) {
-                return ['', $this->getCmfConfig()->transGeneral('.ckeditor.fileupload.failed_to_resize_image')];
+                return ['', $this->getCmfConfig()->transGeneral('ckeditor.fileupload.failed_to_resize_image')];
             }
         }
         if (!$imageProcessor->writeImage($file->getRealPath())) {
-            return ['', $this->getCmfConfig()->transGeneral('.ckeditor.fileupload.failed_to_save_image_to_fs')];
+            return ['', $this->getCmfConfig()->transGeneral('ckeditor.fileupload.failed_to_save_image_to_fs')];
         }
         $url = $formInput->getRelativeImageUploadsUrl() . $newFileName;
         
@@ -341,7 +342,7 @@ class CmfGeneralController extends CmfController
     public function downloadApiRequestsCollectionForPostman(Request $request): Response
     {
         $host = $request->getHttpHost();
-        $fileName = $this->getCmfConfig()->transCustom('.api_docs.postman_collection_file_name', [
+        $fileName = $this->getCmfConfig()->transCustom('api_docs.postman_collection_file_name', [
             'http_host' => $host,
         ]);
         $data = [

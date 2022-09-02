@@ -528,7 +528,7 @@ class DataGridConfig extends ScaffoldSectionConfig
      * Tag::a()
      * ->setContent('<i class="glyphicon glyphicon-screenshot"></i>')
      * ->setClass('row-action text-success')
-     * ->setTitle(cmfTransCustom('.path.to.translation'))
+     * ->setTitle(cmfTransCustom('path.to.translation'))
      * ->setDataAttr('toggle', 'tooltip')
      * ->setDataAttr('container', '#section-content .content') //< tooltip container
      * ->setDataAttr('block-datagrid', '1')
@@ -546,7 +546,7 @@ class DataGridConfig extends ScaffoldSectionConfig
      * Tag::a()
      * ->setContent('<i class="glyphicon glyphicon-log-in"></i>')
      * ->setClass('row-action text-primary')
-     * ->setTitle(cmfTransCustom('.path.to.translation'))
+     * ->setTitle(cmfTransCustom('path.to.translation'))
      * ->setDataAttr('toggle', 'tooltip')
      * ->setDataAttr('container', '#section-content .content') //< tooltip container
      * ->setHref($this->getCmfConfig()->route('route', [], false))

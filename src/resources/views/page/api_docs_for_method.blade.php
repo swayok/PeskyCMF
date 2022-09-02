@@ -115,7 +115,7 @@ $errors = $method->getErrors()
                         <div class="box box-solid box-warning">
                             <div class="box-header br-b bg-none">
                                 <div class="box-title text-orange">
-                                    {{ $method->getCmfConfig()->transCustom('.api_docs.url_params') }}
+                                    {{ $method->getCmfConfig()->transCustom('api_docs.url_params') }}
                                 </div>
                             </div>
                             <div class="box-body pn">
@@ -123,13 +123,13 @@ $errors = $method->getErrors()
                                 <thead>
                                     <tr>
                                         <th width="150" class="api-documentation-param-name-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_name') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_name') }}
                                         </th>
                                         <th width="200" class="api-documentation-param-type-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_type') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_type') }}
                                         </th>
                                         <th class="api-documentation-param-description-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_description') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_description') }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -158,7 +158,7 @@ $errors = $method->getErrors()
                     <div class="box box-solid box-primary">
                         <div class="box-header bg-none br-b">
                             <div class="box-title text-primary">
-                                {{ $method->getCmfConfig()->transCustom('.api_docs.url_query_params') }}
+                                {{ $method->getCmfConfig()->transCustom('api_docs.url_query_params') }}
                             </div>
                         </div>
                         <div class="box-body pn">
@@ -166,13 +166,13 @@ $errors = $method->getErrors()
                                 <thead>
                                     <tr>
                                         <th width="150" class="api-documentation-param-name-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_name') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_name') }}
                                         </th>
                                         <th width="200" class="api-documentation-param-type-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_type') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_type') }}
                                         </th>
                                         <th class="api-documentation-param-description-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_description') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_description') }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -201,7 +201,7 @@ $errors = $method->getErrors()
                     <div class="box box-solid box-info">
                         <div class="box-header bg-none br-b">
                             <div class="box-title text-aqua">
-                                {{ $method->getCmfConfig()->transCustom('.api_docs.post_params') }}
+                                {{ $method->getCmfConfig()->transCustom('api_docs.post_params') }}
                             </div>
                         </div>
                         <div class="box-body pn">
@@ -209,13 +209,13 @@ $errors = $method->getErrors()
                                 <thead>
                                     <tr>
                                         <th width="150" class="api-documentation-param-name-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_name') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_name') }}
                                         </th>
                                         <th width="200" class="api-documentation-param-type-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_type') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_type') }}
                                         </th>
                                         <th class="api-documentation-param-description-cell">
-                                            {{ $method->getCmfConfig()->transCustom('.api_docs.param_description') }}
+                                            {{ $method->getCmfConfig()->transCustom('api_docs.param_description') }}
                                         </th>
                                     </tr>
                                 </thead>

@@ -14,14 +14,14 @@ if (!isset($addBackUrl)) {
     <li>
         <a href="#" data-nav="back" @if(!empty($defaultBackUrl))data-default-url="{!! $defaultBackUrl !!}"@endif>
             <i class="glyphicon fa fa-reply"></i>
-            {{ $cmfConfig->transGeneral('.action.back') }}
+            {{ $cmfConfig->transGeneral('action.back') }}
         </a>
     </li>
     @endif
     <li>
         <a href="#" data-nav="reload">
             <i class="glyphicon glyphicon-refresh"></i>
-            {{ $cmfConfig->transGeneral('.action.reload_page') }}
+            {{ $cmfConfig->transGeneral('action.reload_page') }}
         </a>
     </li>
 </ol>

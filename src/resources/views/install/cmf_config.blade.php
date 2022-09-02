@@ -11,6 +11,7 @@ echo "<?php\n";
 namespace App\{{ $sectionName }};
 
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\CmfUrl;
 
 class {{ $cmfConfigClassName }} extends CmfConfig {
 
@@ -43,22 +44,22 @@ class {{ $cmfConfigClassName }} extends CmfConfig {
         return array_merge(
             [
                 [
-                    'label' => self::transCustom('.page.dashboard.menu_title'),
-                    'url' => routeToCmfPage('dashboard'),
+                    'label' => self::transCustom('page.dashboard.menu_title'),
+                    'url' => CmfUrl::toPage('dashboard'),
                     'icon' => 'glyphicon glyphicon-dashboard',
                 ],
                 /*[
-                    'label' => self::transCustom('.users.menu_title'),
-                    'url' => routeToCmfItemsTable('users'),
+                    'label' => self::transCustom('users.menu_title'),
+                    'url' => CmfUrl::toItemsTable('users'),
                     'icon' => 'fa fa-group'
                 ],*/
                 /*[
-                    'label' => self::transCustom('.menu.section_utils'),
+                    'label' => self::transCustom('menu.section_utils'),
                     'icon' => 'glyphicon glyphicon-align-justify',
                     'submenu' => [
                         [
-                            'label' => self::transCustom('.admins.menu_title'),
-                            'url' => routeToCmfItemsTable('admins'),
+                            'label' => self::transCustom('admins.menu_title'),
+                            'url' => CmfUrl::toItemsTable('admins'),
                             'icon' => 'glyphicon glyphicon-user'
                         ],
                     ]

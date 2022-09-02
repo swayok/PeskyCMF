@@ -303,7 +303,7 @@ if (!function_exists('cmfJsonResponseForValidationErrors')) {
     function cmfJsonResponseForValidationErrors(array $errors = [], ?string $message = null): CmfJsonResponse
     {
         if (empty($message)) {
-            $message = (string)cmfTransGeneral('.form.message.validation_errors');
+            $message = (string)cmfTransGeneral('form.message.validation_errors');
         }
         return CmfJsonResponse::create(HttpCode::CANNOT_PROCESS)
             ->setErrors($errors, $message);
@@ -319,7 +319,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
     function cmfJsonResponseForHttp404(?string $fallbackUrl = null, ?string $message = null): CmfJsonResponse
     {
         if (empty($message)) {
-            $message = (string)cmfTransGeneral('.message.http404');
+            $message = (string)cmfTransGeneral('message.http404');
         }
         if (empty($fallbackUrl)) {
             $fallbackUrl = cmfConfig()->home_page_url();
@@ -391,7 +391,7 @@ if (!function_exists('formatDate')) {
             }
         }
         if (in_array(app()->getLocale(), ['ru', 'ru_RU'], true)) {
-            $month = mb_strtolower(cmfTransGeneral('.month.when.' . $date->format('m')));
+            $month = mb_strtolower(cmfTransGeneral('month.when.' . $date->format('m')));
             if (
                 $ignoreYear === true //< ignore any year
                 || (is_numeric($ignoreYear) && (int)$ignoreYear === $date->year) //< ignore certain year ($ignoreYear)
@@ -401,10 +401,10 @@ if (!function_exists('formatDate')) {
             } else {
                 switch ($yearSuffix) {
                     case 'short':
-                        $yearSuffix = (string)cmfTransGeneral('.year_suffix.short');
+                        $yearSuffix = (string)cmfTransGeneral('year_suffix.short');
                         break;
                     case 'full':
-                        $yearSuffix = (string)cmfTransGeneral('.year_suffix.full');
+                        $yearSuffix = (string)cmfTransGeneral('year_suffix.full');
                         break;
                     case 'none':
                         $yearSuffix = '';
@@ -412,7 +412,7 @@ if (!function_exists('formatDate')) {
                 $year = $date->year . $yearSuffix;
             }
             $dateStr = rtrim("{$date->day} {$month} {$year}");
-            $timeStr = ($addTime ? ' ' . ltrim(cmfTransGeneral('.time.at') . $date->format(' H:i')) : '');
+            $timeStr = ($addTime ? ' ' . ltrim(cmfTransGeneral('time.at') . $date->format(' H:i')) : '');
             return $dateStr . $timeStr;
         } else {
             return date('H:i d F Y') . (in_array($yearSuffix, ['short', 'full', 'none'], true) ? '' : $yearSuffix);
@@ -447,29 +447,29 @@ if (!function_exists('formatSeconds')) {
             $days = floor($seconds / 86400);
             $seconds -= 86400 * $days;
             $ret .= $shortLabels
-                ? cmfTransGeneral('.format_seconds.days_short', ['days' => $days])
-                : transChoiceAlt(cmfTransGeneral('.format_seconds.days'), (int)$days, ['days' => $days]);
+                ? cmfTransGeneral('format_seconds.days_short', ['days' => $days])
+                : transChoiceAlt(cmfTransGeneral('format_seconds.days'), (int)$days, ['days' => $days]);
         }
         if ($seconds >= 3600 || !empty($days)) {
             $hours = floor($seconds / 3600);
             $seconds -= 3600 * $hours;
             $ret .= $shortLabels
-                ? cmfTransGeneral('.format_seconds.hours_short', ['hours' => $hours])
-                : transChoiceAlt(cmfTransGeneral('.format_seconds.hours'), (int)$hours, ['hours' => $hours]);
+                ? cmfTransGeneral('format_seconds.hours_short', ['hours' => $hours])
+                : transChoiceAlt(cmfTransGeneral('format_seconds.hours'), (int)$hours, ['hours' => $hours]);
         }
         if ($seconds >= 60 || !empty($days) || !empty($hours)) {
             $minutes = floor($seconds / 60);
             $seconds -= 60 * $minutes;
             $ret .= $shortLabels
-                ? cmfTransGeneral('.format_seconds.minutes_short', ['minutes' => $minutes])
-                : transChoiceAlt(cmfTransGeneral('.format_seconds.minutes'), (int)$minutes, ['minutes' => $minutes]);
+                ? cmfTransGeneral('format_seconds.minutes_short', ['minutes' => $minutes])
+                : transChoiceAlt(cmfTransGeneral('format_seconds.minutes'), (int)$minutes, ['minutes' => $minutes]);
         }
         if ($displaySeconds) {
             $ret .= $shortLabels
-                ? cmfTransGeneral('.format_seconds.seconds_short', ['seconds' => $seconds])
-                : transChoiceAlt(cmfTransGeneral('.format_seconds.seconds'), $seconds, ['seconds' => $seconds]);
+                ? cmfTransGeneral('format_seconds.seconds_short', ['seconds' => $seconds])
+                : transChoiceAlt(cmfTransGeneral('format_seconds.seconds'), $seconds, ['seconds' => $seconds]);
         } elseif (empty($days) && empty($hours) && empty($minutes)) {
-            $ret = cmfTransGeneral('.format_seconds.less_then_a_minute');
+            $ret = cmfTransGeneral('format_seconds.less_then_a_minute');
         }
         return $ret;
     }

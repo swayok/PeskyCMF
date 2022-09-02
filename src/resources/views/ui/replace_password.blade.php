@@ -12,7 +12,7 @@ $cmfConfig = $authModule->getCmfConfig();
 <div class="login-box">
     <div class="login-logo">
         {!! $authModule->getLoginPageLogo() !!}
-        <div><b>{!! $cmfConfig->transCustom('.replace_password.header') !!}</b></div>
+        <div><b>{!! $cmfConfig->transCustom('replace_password.header') !!}</b></div>
     </div>
     <div
         class="login-box-body"
@@ -42,7 +42,7 @@ $cmfConfig = $authModule->getCmfConfig();
                     name="password"
                     required
                     class="form-control"
-                    placeholder="{{ $cmfConfig->transCustom('.replace_password.password_label') }}"
+                    placeholder="{{ $cmfConfig->transCustom('replace_password.password_label') }}"
                 >
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
@@ -52,7 +52,7 @@ $cmfConfig = $authModule->getCmfConfig();
                     name="password_confirm"
                     required
                     class="form-control"
-                    placeholder="{{ $cmfConfig->transCustom('.replace_password.password_confirm_label') }}"
+                    placeholder="{{ $cmfConfig->transCustom('replace_password.password_confirm_label') }}"
                 >
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
@@ -61,7 +61,7 @@ $cmfConfig = $authModule->getCmfConfig();
                     type="submit"
                     class="btn btn-primary btn-flat"
                 >
-                    {{ $cmfConfig->transCustom('.replace_password.button_label') }}
+                    {{ $cmfConfig->transCustom('replace_password.button_label') }}
                 </button>
             </div>
         </form>

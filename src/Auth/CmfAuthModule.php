@@ -266,7 +266,7 @@ class CmfAuthModule
         $this->validate(
             $request,
             $validationRules,
-            Set::flatten((array)$this->getCmfConfig()->transCustom('.registration_form.errors'))
+            Set::flatten((array)$this->getCmfConfig()->transCustom('registration_form.errors'))
         );
         return $request->only($columnsToSave);
     }
@@ -283,7 +283,7 @@ class CmfAuthModule
             if ($admin::hasColumn('is_superadmin') && $admin->is_superadmin) {
                 $role = 'superadmin';
             }
-            $adminData['role'] = $this->getCmfConfig()->transCustom('.admins.role.' . $role);
+            $adminData['role'] = $this->getCmfConfig()->transCustom('admins.role.' . $role);
         }
         return $adminData;
     }
@@ -343,7 +343,7 @@ class CmfAuthModule
         ];
         if (!$this->getAuthGuard()->attempt($credentials)) {
             return CmfJsonResponse::create(HttpCode::INVALID)
-                ->setMessage($this->getCmfConfig()->transCustom('.login_form.login_failed'));
+                ->setMessage($this->getCmfConfig()->transCustom('login_form.login_failed'));
         } else {
             return CmfJsonResponse::create()->setRedirect($this->getIntendedUrl());
         }
@@ -448,7 +448,7 @@ class CmfAuthModule
         }
         
         return CmfJsonResponse::create()
-            ->setMessage($this->getCmfConfig()->transCustom('.forgot_password.instructions_sent'))
+            ->setMessage($this->getCmfConfig()->transCustom('forgot_password.instructions_sent'))
             ->setRedirect($this->getLoginPageUrl());
     }
     
@@ -470,11 +470,11 @@ class CmfAuthModule
                 ->updateValue('password', $data['password'], false)
                 ->commit();
             return CmfJsonResponse::create()
-                ->setMessage($this->getCmfConfig()->transCustom('.replace_password.password_replaced'))
+                ->setMessage($this->getCmfConfig()->transCustom('replace_password.password_replaced'))
                 ->setForcedRedirect($this->getLoginPageUrl());
         } else {
             return CmfJsonResponse::create(HttpCode::FORBIDDEN)
-                ->setMessage($this->getCmfConfig()->transCustom('.replace_password.invalid_access_key'))
+                ->setMessage($this->getCmfConfig()->transCustom('replace_password.invalid_access_key'))
                 ->setForcedRedirect($this->getLoginPageUrl());
         }
     }
@@ -500,7 +500,7 @@ class CmfAuthModule
         } else {
             abort(
                 CmfJsonResponse::create(HttpCode::FORBIDDEN)
-                    ->setMessage($this->getCmfConfig()->transCustom('.replace_password.invalid_access_key'))
+                    ->setMessage($this->getCmfConfig()->transCustom('replace_password.invalid_access_key'))
                     ->setRedirect($this->getLoginPageUrl())
             );
         }
@@ -578,7 +578,7 @@ class CmfAuthModule
      */
     protected function sendPasswordRecoveryInstructionsEmail(RecordInterface $user): void
     {
-        $subject = $this->getCmfConfig()->transCustom('.forgot_password.email_subject');
+        $subject = $this->getCmfConfig()->transCustom('forgot_password.email_subject');
         $from = $this->getCmfConfig()->system_email_address();
         $to = $user->getValue($this->getUserEmailColumnName());
         $this->getMailer()->send(
@@ -796,7 +796,7 @@ class CmfAuthModule
         $this->validate(
             $request,
             $validationRules,
-            Set::flatten((array)$this->getCmfConfig()->transCustom('.page.profile.errors'))
+            Set::flatten((array)$this->getCmfConfig()->transCustom('page.profile.errors'))
         );
         $errors = [];
         /** @noinspection MissingOrEmptyGroupStatementInspection */
@@ -805,10 +805,10 @@ class CmfAuthModule
             // do nothing
         } elseif (method_exists($admin, 'checkPassword')) {
             if (!$admin->checkPassword($request->input('old_password'))) {
-                $errors['old_password'] = $this->getCmfConfig()->transCustom('.page.profile.errors.old_password.match');
+                $errors['old_password'] = $this->getCmfConfig()->transCustom('page.profile.errors.old_password.match');
             }
         } elseif (!$this->getLaravelApp()->make('hash')->check($request->input('old_password'), $admin->getAuthPassword())) {
-            $errors['old_password'] = $this->getCmfConfig()->transCustom('.page.profile.errors.old_password.match');
+            $errors['old_password'] = $this->getCmfConfig()->transCustom('page.profile.errors.old_password.match');
         }
         if (count($errors) > 0) {
             $this->throwValidationErrorsResponse($errors);

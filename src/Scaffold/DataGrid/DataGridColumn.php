@@ -110,7 +110,7 @@ class DataGridColumn extends RenderableValueViewer
                         $value = (bool)$value[$this->getName()];
                     }
                 }
-                return $this->getCmfConfig()->transGeneral('.datagrid.field.bool.' . ($value ? 'yes' : 'no'));
+                return $this->getCmfConfig()->transGeneral('datagrid.field.bool.' . ($value ? 'yes' : 'no'));
             };
         }
         return $this->valueConverter;

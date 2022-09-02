@@ -10,7 +10,7 @@ $loginInputName = $authModule->getUserLoginColumnName();
 <div class="login-box">
     <div class="login-logo">
         {!! $authModule->getLoginPageLogo() !!}
-        <div><b>{!! $cmfConfig->transCustom('.login_form.header') !!}</b></div>
+        <div><b>{!! $cmfConfig->transCustom('login_form.header') !!}</b></div>
     </div>
     <div
         class="login-box-body"
@@ -27,7 +27,7 @@ $loginInputName = $authModule->getUserLoginColumnName();
                     name="{{ $loginInputName }}"
                     required
                     class="form-control"
-                    placeholder="{{ $cmfConfig->transCustom(".login_form.{$loginInputName}_label") }}"
+                    placeholder="{{ $cmfConfig->transCustom("login_form.{$loginInputName}_label") }}"
                 >
                 <span class="glyphicon glyphicon-{{ $loginInputName === 'email' ? 'envelope' : 'user' }} form-control-feedback"></span>
             </div>
@@ -37,14 +37,14 @@ $loginInputName = $authModule->getUserLoginColumnName();
                     name="password"
                     required
                     class="form-control"
-                    placeholder="{{ $cmfConfig->transCustom('.login_form.password_label') }}"
+                    placeholder="{{ $cmfConfig->transCustom('login_form.password_label') }}"
                 >
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
             <div class="row login-submit">
                 @if ($authModule->isPasswordRestoreAllowed())
                     <div class="col-xs-8 forgot-password">
-                        <a href="{{ $authModule->getPasswordRecoveryStartPageUrl(false) }}">{{ $cmfConfig->transCustom('.login_form.forgot_password_label') }}</a>
+                        <a href="{{ $authModule->getPasswordRecoveryStartPageUrl(false) }}">{{ $cmfConfig->transCustom('login_form.forgot_password_label') }}</a>
                     </div>
                 @endif
                 <div class="col-xs-4">
@@ -52,7 +52,7 @@ $loginInputName = $authModule->getUserLoginColumnName();
                         type="submit"
                         class="btn btn-primary btn-block btn-flat"
                     >
-                        {{ $cmfConfig->transCustom('.login_form.button_label') }}
+                        {{ $cmfConfig->transCustom('login_form.button_label') }}
                     </button>
                 </div>
             </div>
@@ -60,7 +60,7 @@ $loginInputName = $authModule->getUserLoginColumnName();
     </div>
     @if ($authModule->isRegistrationAllowed())
         <div class="text-center mt20 register">
-            <a href="{{ $authModule->getRegistrationPageUrl(false) }}">{{ $cmfConfig->transCustom('.login_form.registration_label') }}</a>
+            <a href="{{ $authModule->getRegistrationPageUrl(false) }}">{{ $cmfConfig->transCustom('login_form.registration_label') }}</a>
         </div>
     @endif
 </div>

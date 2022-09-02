@@ -10,7 +10,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
 ?>
 <div class="content-header">
     <h1>
-        {{ $cmfConfig->transCustom('.page.profile.header') }}
+        {{ $cmfConfig->transCustom('page.profile.header') }}
     </h1>
     <ol class="breadcrumb">
         <li>
@@ -20,7 +20,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                 data-default-url="{{ $cmfConfig->home_page_url() }}"
             >
                 <i class="glyphicon fa fa-reply"></i>
-                {{ $cmfConfig->transGeneral('.action.back') }}
+                {{ $cmfConfig->transGeneral('action.back') }}
             </a>
         </li>
         <li>
@@ -29,7 +29,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                 data-nav="reload"
             >
                 <i class="glyphicon glyphicon-refresh"></i>
-                {{ $cmfConfig->transGeneral('.action.reload_page') }}
+                {{ $cmfConfig->transGeneral('action.reload_page') }}
             </a>
         </li>
     </ol>
@@ -56,7 +56,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                         @php($loginColumn = $authModule->getUserLoginColumnName())
                         @if ($loginColumn !== 'email')
                             <div class="form-group">
-                                <label for="{{ $loginColumn }}-input">{{ $cmfConfig->transCustom('.page.profile.input.' . $loginColumn) }}*</label>
+                                <label for="{{ $loginColumn }}-input">{{ $cmfConfig->transCustom('page.profile.input.' . $loginColumn) }}*</label>
                                 <input
                                     class="form-control"
                                     value="{{ $user->$loginColumn }}"
@@ -70,7 +70,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                         @if ($user::hasColumn('email'))
                             @php($emailRequired = !$user::getColumn('email')->isValueCanBeNull())
                             <div class="form-group">
-                                <label for="email-input">{{ $cmfConfig->transCustom('.page.profile.input.email') . ($emailRequired ? '*' : '') }}</label>
+                                <label for="email-input">{{ $cmfConfig->transCustom('page.profile.input.email') . ($emailRequired ? '*' : '') }}</label>
                                 <input
                                     class="form-control"
                                     value="{{ $user->email }}"
@@ -91,7 +91,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                 disabled
                             >
                             <!-- end of autofill disabler -->
-                            <label for="new-password-input">{{ $cmfConfig->transCustom('.page.profile.input.new_password') }}</label>
+                            <label for="new-password-input">{{ $cmfConfig->transCustom('page.profile.input.new_password') }}</label>
                             <input
                                 class="form-control"
                                 value=""
@@ -103,7 +103,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                         </div>
                         @if ($user::hasColumn('name'))
                             <div class="form-group">
-                                <label for="name-input">{{ $cmfConfig->transCustom('.page.profile.input.name') }}</label>
+                                <label for="name-input">{{ $cmfConfig->transCustom('page.profile.input.name') }}</label>
                                 <input
                                     class="form-control"
                                     value="{{ $user->name }}"
@@ -115,7 +115,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                         @endif
                         @if ($user::hasColumn('language'))
                             <div class="form-group">
-                                <label for="language-input">{{ $cmfConfig->transCustom('.page.profile.input.language') }}</label>
+                                <label for="language-input">{{ $cmfConfig->transCustom('page.profile.input.language') }}</label>
                                 <select
                                     class="form-control"
                                     data-value="{{ $user->language }}"
@@ -124,14 +124,14 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                     required="required"
                                     @if(!$canSubmit) disabled @endif>
                                     @foreach($cmfConfig->locales() as $lang)
-                                        <option value="{{ $lang }}">{{ $cmfConfig->transCustom('.language.' . $lang) }}</option>
+                                        <option value="{{ $lang }}">{{ $cmfConfig->transCustom('language.' . $lang) }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         @endif
                         @if ($user::hasColumn('timezone'))
                             <div class="form-group">
-                                <label for="timezone-input">{{ $cmfConfig->transCustom('.page.profile.input.timezone') }}</label>
+                                <label for="timezone-input">{{ $cmfConfig->transCustom('page.profile.input.timezone') }}</label>
                                 @php($isRequired = !$user::getColumn('timezone')->allowsNullValues())
                                 <select
                                     class="form-control selectpicker"
@@ -142,10 +142,10 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                     @endif
                                     @if(!$canSubmit) disabled
                                     @endif
-                                    data-live-search-placeholder="{{ $cmfConfig->transCustom('.page.profile.input.timezone_search') }}"
+                                    data-live-search-placeholder="{{ $cmfConfig->transCustom('page.profile.input.timezone_search') }}"
                                 >
                                     @if (!$isRequired)
-                                        <option value="">{{ $cmfConfig->transCustom('.page.profile.input.no_timezone') }}</option>
+                                        <option value="">{{ $cmfConfig->transCustom('page.profile.input.no_timezone') }}</option>
                                     @endif
                                     @foreach($authModule->getUsersTable()->getTimezonesList(true) as $value => $label)
                                         <option value="{{ $value }}">{{ $label }}</option>
@@ -163,7 +163,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                 disabled
                             >
                             <!-- end of autofill disabler -->
-                            <label for="old-password-input">{{ $cmfConfig->transCustom('.page.profile.input.old_password') }}*</label>
+                            <label for="old-password-input">{{ $cmfConfig->transCustom('page.profile.input.old_password') }}*</label>
                             <input
                                 class="form-control"
                                 value=""
@@ -184,7 +184,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                     data-nav="back"
                                     data-default-url="{{ $cmfConfig->home_page_url() }}"
                                 >
-                                    {{ $cmfConfig->transGeneral('.form.toolbar.cancel') }}
+                                    {{ $cmfConfig->transGeneral('form.toolbar.cancel') }}
                                 </a>
                             </div>
                             <div class="col-xs-6">
@@ -192,7 +192,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                     type="submit"
                                     class="btn btn-success pull-right"
                                     @if(!$canSubmit) disabled @endif>
-                                    {{ $cmfConfig->transGeneral('.form.toolbar.submit') }}
+                                    {{ $cmfConfig->transGeneral('form.toolbar.submit') }}
                                 </button>
                             </div>
                         </div>

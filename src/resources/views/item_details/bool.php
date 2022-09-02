@@ -11,10 +11,10 @@ if (empty($options)) {
     $options = [];
 }
 $yes = \Illuminate\Support\Arr::get($options, 'yes', function () use ($sectionConfig) {
-    return $sectionConfig->getCmfConfig()->transGeneral('.item_details.field.bool.yes');
+    return $sectionConfig->getCmfConfig()->transGeneral('item_details.field.bool.yes');
 });
 $no = \Illuminate\Support\Arr::get($options, 'no', function () use ($sectionConfig) {
-    return $sectionConfig->getCmfConfig()->transGeneral('.item_details.field.bool.no');
+    return $sectionConfig->getCmfConfig()->transGeneral('item_details.field.bool.no');
 });
 echo $valueViewer->getConditionalDotJsInsertForValue($yes, $no);
 

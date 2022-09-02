@@ -208,7 +208,7 @@ abstract class CmfConfig
     public function default_page_title(): string
     {
         return $this->getAppSettings()->default_browser_title(function () {
-            return $this->transCustom('.default_page_title');
+            return $this->transCustom('default_page_title');
         }, true);
     }
     
@@ -313,21 +313,21 @@ abstract class CmfConfig
         return array_merge(
             [
                 [
-                    'label' => $this->transCustom('.page.dashboard.menu_title'),
+                    'label' => $this->transCustom('page.dashboard.menu_title'),
                     'url' => CmfUrl::toPage('dashboard', [], false, $this),
                     'icon' => 'glyphicon glyphicon-dashboard',
                 ],
                 /*[
-                    'label' => $this->transCustom('.users.menu_title'),
+                    'label' => $this->transCustom('users.menu_title'),
                     'url' => '/resource/users',
                     'icon' => 'fa fa-group'
                 ],*/
                 /*[
-                    'label' => $this->transCustom('.menu.section_utils'),
+                    'label' => $this->transCustom('menu.section_utils'),
                     'icon' => 'glyphicon glyphicon-align-justify',
                     'submenu' => [
                         [
-                            'label' => $this->transCustom('.admins.menu_title'),
+                            'label' => $this->transCustom('admins.menu_title'),
                             'url' => '/resource/admins',
                             'icon' => 'glyphicon glyphicon-user'
                         ],
@@ -410,7 +410,8 @@ abstract class CmfConfig
      * Translate from custom dictionary. You can use it via CmfConfig::transCustom() insetad of
      * CmfConfig::getPrimary()->transCustom() if you need to get translation for primary config.
      * Note: if there is no translation in your dictionary - it will be imported from 'cmf::custom' dictionary
-     * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
+     * @param string $path - without dictionary name.
+     * Example: 'admins.test' will be converted to '{$this->custom_dictionary_name()}.admins.test'
      * @param array $parameters
      * @param string|null $locale
      * @return string|array
@@ -418,11 +419,10 @@ abstract class CmfConfig
     public function transCustom(string $path, array $parameters = [], ?string $locale = null): array|string
     {
         $dict = $this->custom_dictionary_name();
-        $path = '.' . ltrim($path, '.');
-        $primaryPath = $dict . $path;
+        $primaryPath = $dict . '.' . $path;
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::custom') {
-            $fallbackPath = 'cmf::custom' . $path;
+            $fallbackPath = 'cmf::custom.' . $path;
             $trans = trans($fallbackPath, $parameters, $locale);
             if ($trans === $fallbackPath) {
                 return $primaryPath;
@@ -440,10 +440,11 @@ abstract class CmfConfig
     }
     
     /**
-     * Translate from custom dictionary. You can use it via CmfConfig::transGeneral() insetad of
-     * CmfConfig::getPrimary()->transGeneral() if you need to get translation for primary config
+     * Translate from custom dictionary.
+     * You can use it via CmfConfig->transGeneral() if you need to get translation for primary config
      * Note: if there is no translation in your dictionary - it will be imported from 'cmf::cmf' dictionary
-     * @param string $path - without dictionary name. Example: 'admins.test' will be converted to '{dictionary}.admins.test'
+     * @param string $path - without dictionary name.
+     * Example: 'admins.test' will be converted to '{$this->cmf_general_dictionary_name()}.admins.test'
      * @param array $parameters
      * @param string|null $locale
      * @return string|array
@@ -451,11 +452,10 @@ abstract class CmfConfig
     public function transGeneral(string $path, array $parameters = [], ?string $locale = null): array|string
     {
         $dict = $this->cmf_general_dictionary_name();
-        $path = '.' . ltrim($path, '.');
-        $primaryPath = $dict . $path;
+        $primaryPath = $dict . '.' . $path;
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::cmf') {
-            $fallbackPath = 'cmf::cmf' . $path;
+            $fallbackPath = 'cmf::cmf.' . $path;
             $trans = trans($fallbackPath, $parameters, $locale);
             if ($trans === $fallbackPath) {
                 return $primaryPath;

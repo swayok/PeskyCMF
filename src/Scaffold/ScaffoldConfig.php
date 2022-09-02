@@ -495,7 +495,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     public function translate(string $section, string $suffix = '', array $parameters = []): array|string
     {
         return $this->cmfConfig->transCustom(
-            rtrim(".{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'),
+            rtrim("{$this->viewsBaseTranslationKey}.{$section}.{$suffix}", '.'),
             $parameters
         );
     }
@@ -507,6 +507,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
     {
         $text = $this->translate($path, '', $parameters);
         if (preg_match('%\.' . preg_quote($path, '%') . '$%', $text)) {
+            // there is no custom translation so we try to get general translation
             $text = $this->cmfConfig->transGeneral($path, $parameters);
         }
         return $text;

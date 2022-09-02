@@ -106,7 +106,7 @@ $keysOptions = $hasKeysOptions ? $valueViewer->getKeysOptions() : [];
             $(this).tooltip('hide');
             if (rowsCount <= minRows) {
                 // required number of rows is less or equal to currently added rows
-                toastr.error('<?php echo $sectionConfig->getCmfConfig()->transGeneral('.form.input.key_value_set.row_delete_action_forbidden') ?>');
+                toastr.error('<?php echo $sectionConfig->getCmfConfig()->transGeneral('form.input.key_value_set.row_delete_action_forbidden') ?>');
                 return false;
             }
             $(this).tooltip('destroy');

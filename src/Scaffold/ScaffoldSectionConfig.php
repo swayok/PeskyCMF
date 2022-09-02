@@ -153,7 +153,7 @@ abstract class ScaffoldSectionConfig
      *          Path will be like 'resource.{section}.value_viewers.translation'
      *      - 'general' - translations for general UI elements ($this->translateGeneral()). Used only when there is
      *          no custom translation (example path: 'resource.{section}.translation') and system needs to get
-     *          translation from $this->getCmfConfig()->transGeneral(). By default it should be same as for $subtype = null
+     *          translation from cmfConfig()->transGeneral(). By default it should be same as for $subtype = null
      * @return string
      */
     abstract protected function getSectionTranslationsPrefix(?string $subtype = null): string;

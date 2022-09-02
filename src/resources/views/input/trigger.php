@@ -26,8 +26,8 @@ $attributesForEdit = \Swayok\Html\Tag::buildAttributes($rendererConfig->getAttri
     <div class="ib">
         <input {{? !!it.isCreation }}<?php echo $attributesForCreate; ?>{{??}}<?php echo $attributesForEdit; ?>{{?}}
             <?php echo $valueViewer->getConditionalDotJsInsertForValue('checked', '') ?>
-            data-on-text="<?php echo $rendererConfig->getData('label_yes', $sectionConfig->getCmfConfig()->transGeneral('.form.input.bool.yes')) ?>"
-            data-off-text="<?php echo $rendererConfig->getData('label_no', $sectionConfig->getCmfConfig()->transGeneral('.form.input.bool.no')) ?>">
+            data-on-text="<?php echo $rendererConfig->getData('label_yes', $sectionConfig->getCmfConfig()->transGeneral('form.input.bool.yes')) ?>"
+            data-off-text="<?php echo $rendererConfig->getData('label_no', $sectionConfig->getCmfConfig()->transGeneral('form.input.bool.no')) ?>">
     </div>
     <?php echo $valueViewer->getFormattedTooltip(); ?>
 </div>

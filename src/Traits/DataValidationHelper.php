@@ -92,7 +92,7 @@ trait DataValidationHelper
     
     protected function getValidationErrorsResponseMessage(): string
     {
-        return $this->getCmfConfig()->transGeneral('.message.invalid_data_received');
+        return $this->getCmfConfig()->transGeneral('message.invalid_data_received');
     }
     
     public function makeValidationErrorsJsonResponse(array $errors): JsonResponse

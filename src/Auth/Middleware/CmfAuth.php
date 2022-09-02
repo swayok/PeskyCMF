@@ -39,7 +39,7 @@ class CmfAuth
             
             $response = $next($request);
             if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
-                $message = $this->cmfConfig->transGeneral('.message.access_denied');
+                $message = $this->cmfConfig->transGeneral('message.access_denied');
                 $response = $request->ajax()
                     ? CmfJsonResponse::create(HttpCode::FORBIDDEN)->setMessage($message)->goBack($loginUrl)
                     : (new RedirectResponse($loginUrl))->with(
