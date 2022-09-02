@@ -44,18 +44,18 @@ class CmfManager
         return $this->currentCmfConfig ?? $this->getCmfConfigForSection(null);
     }
     
-    public function getCurrentCmfSection(): string
+    public function getCurrentCmfSectionName(): string
     {
-        return $this->currentCmfSectionName ?? $this->getDefaultSectionName();
+        return $this->currentCmfSectionName ?? $this->getDefaultCmfSectionName();
     }
     
     public function getCmfConfigForSection(?string $cmfSectionName = null): CmfConfig
     {
         if ($cmfSectionName === null) {
-            $cmfSectionName = $this->getDefaultSectionName();
+            $cmfSectionName = $this->getDefaultCmfSectionName();
         }
         if (!isset($this->loadedCmfConfigs[$cmfSectionName])) {
-            $knownConfigs = $this->getAllSectionsNames();
+            $knownConfigs = $this->getAllCmfSectionsNames();
             if (!isset($knownConfigs[$cmfSectionName])) {
                 throw new \InvalidArgumentException("There is no key '$cmfSectionName' in config('peskycmf.cmf_configs') array");
             }
@@ -72,7 +72,7 @@ class CmfManager
         return $this->loadedCmfConfigs[$cmfSectionName];
     }
     
-    public function getDefaultSectionName(): string
+    public function getDefaultCmfSectionName(): string
     {
         if (!$this->defaultSectionName) {
             $cmfSectionName = $this->config('default_cmf_config');
@@ -86,7 +86,7 @@ class CmfManager
         return $this->defaultSectionName;
     }
     
-    public function getAllSectionsNames(): array
+    public function getAllCmfSectionsNames(): array
     {
         if ($this->sectionsNames === null) {
             $this->sectionsNames = (array)$this->config('cmf_configs');
@@ -97,7 +97,7 @@ class CmfManager
     /**
      * Key from config('peskycmf.cmf_configs') array
      */
-    public function setCurrentCmfSection(string $cmfSectionName): static
+    public function setCurrentCmfSection(string $cmfSectionName): void
     {
         if ($cmfSectionName !== $this->currentCmfSectionName) {
             $this->currentCmfConfig = $this->getCmfConfigForSection($cmfSectionName);
@@ -109,17 +109,15 @@ class CmfManager
                 $closure($this->currentCmfConfig);
             }
         }
-        return $this;
     }
     
     /**
      * Add Closure to be evaluated after setCurrentCmfSection() call.
      * CmfConfig instance will be passed to closure.
      */
-    public function onSectionSet(\Closure $callback): static
+    public function onSectionSet(\Closure $callback): void
     {
         $this->callbacks[] = $callback;
-        return $this;
     }
     
     public function registerRoutesForAllCmfSections(): void
@@ -146,7 +144,7 @@ class CmfManager
     public function getAvailableCmfConfigs(): array
     {
         $ret = [];
-        foreach ($this->getAllSectionsNames() as $sectionName) {
+        foreach ($this->getAllCmfSectionsNames() as $sectionName) {
             $ret[$sectionName] = $this->getCmfConfigForSection($sectionName);
         }
         return $ret;
