@@ -312,7 +312,6 @@ class FormConfig extends ScaffoldSectionConfig
     }
     
     /**
-     * @return static
      * @throws \BadMethodCallException
      */
     public function setBulkEditableColumns(array $columns): static
@@ -410,11 +409,7 @@ class FormConfig extends ScaffoldSectionConfig
         return $this->hasOptionsLoader;
     }
     
-    /**
-     * @param int|string|null $pkValue - primary key value
-     * @return array[]
-     */
-    public function loadOptions($pkValue): array
+    public function loadOptions(int|float|string|null $pkValue): array
     {
         // todo: maybe use $this->itemId ???
         $options = [];
@@ -433,13 +428,7 @@ class FormConfig extends ScaffoldSectionConfig
         return $options;
     }
     
-    /**
-     * @param string $inputName
-     * @param int|string|null $pkValue - primary key value
-     * @param string|null $keywords - keywords for filtering
-     * @return array
-     */
-    public function loadOptionsForInput(string $inputName, $pkValue, ?string $keywords): array
+    public function loadOptionsForInput(string $inputName, int|float|string|null $pkValue, ?string $keywords): array
     {
         // todo: maybe use $this->itemId ???
         $viewer = $this->getValueViewer($inputName);
