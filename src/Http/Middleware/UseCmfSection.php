@@ -6,7 +6,7 @@ namespace PeskyCMF\Http\Middleware;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
-use PeskyCMF\PeskyCmfManager;
+use PeskyCMF\CmfManager;
 
 class UseCmfSection
 {
@@ -25,8 +25,8 @@ class UseCmfSection
      */
     public function handle(Request $request, \Closure $next, string $cmfSectionName): mixed
     {
-        /** @var PeskyCmfManager $cmfManager */
-        $cmfManager = $this->app->make(PeskyCmfManager::class);
+        /** @var CmfManager $cmfManager */
+        $cmfManager = $this->app->make(CmfManager::class);
         $cmfManager->setCurrentCmfSection($cmfSectionName);
         return $next($request);
     }

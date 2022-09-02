@@ -17,7 +17,7 @@ class CmfMakeScaffoldCommand extends CmfCommand
     
     protected $signature = 'cmf:make-scaffold
         {table_name}
-        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}
+        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by CmfManager}
         {--resource= : name of resource if it differs from table_name}
         {--cmf-config-class= : full class name to a class that extends CmfConfig}
         {--class-name= : short scaffold class name}

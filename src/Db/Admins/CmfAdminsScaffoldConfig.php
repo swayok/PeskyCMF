@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Db\Admins;
 
-use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\CmfManager;
 use PeskyCMF\Scaffold\DataGrid\ColumnFilter;
 use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
 use PeskyCMF\Scaffold\DataGrid\DataGridConfig;
@@ -35,7 +35,7 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
      */
     public static function getTable(): TableInterface
     {
-        return CmfConfig::getPrimary()->getAuthModule()->getUsersTable();
+        return app()->make(CmfManager::class)->getCurrentCmfConfig()->getAuthModule()->getUsersTable();
     }
     
     protected static function getIconForMenuItem(): ?string

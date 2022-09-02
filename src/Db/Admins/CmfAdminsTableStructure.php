@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Db\Admins;
 
+use PeskyCMF\CmfManager;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\CmfDbTableStructure;
 use PeskyORM\ORM\Column;
@@ -110,12 +111,14 @@ class CmfAdminsTableStructure extends CmfDbTableStructure
             $this->getCmfConfig()->getAuthModule()->getUsersTable(),
             'id'
         )
-            ->setDisplayColumnName($this->getCmfConfig()->getAuthModule()->getUserLoginColumnName());
+            ->setDisplayColumnName(function () {
+                return $this->getCmfConfig()->getAuthModule()->getUserLoginColumnName();
+            });
     }
     
     public function getCmfConfig(): CmfConfig
     {
-        return CmfConfig::getDefault();
+        return app(CmfManager::class)->getCurrentCmfConfig();
     }
     
 }

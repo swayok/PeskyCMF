@@ -6,7 +6,7 @@ namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
-use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\CmfManager;
 use PeskyORM\Core\DbConnectionsManager;
 use PeskyORM\Core\DbExpr;
 use PeskyORM\Core\Utils;
@@ -45,7 +45,7 @@ class CmfAddAdminCommand extends Command
                 'role' => $args['role'],
                 'is_superadmin' => true,
                 $authField => $emailOrLogin,
-                'language' => CmfConfig::getDefault()->default_locale(),
+                'language' => app(CmfManager::class)->getCurrentCmfConfig(),
             ];
             if ($exists > 0) {
                 $result = $db->update($table, $data, DbExpr::create("`{$authField}`=``{$emailOrLogin}``"));

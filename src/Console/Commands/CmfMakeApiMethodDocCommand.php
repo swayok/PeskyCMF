@@ -16,7 +16,7 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand
     protected $signature = 'cmf:make-api-method-doc
         {class_name}
         {docs_group}
-        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by PeskyCmfManager}
+        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by CmfManager}
         {--folder= : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}
         {--cmf-config-class= : full class name to a class that extends CmfConfig}
         {--auto : automatically set url, http method, translation paths, etc..}';

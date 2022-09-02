@@ -13,7 +13,7 @@ abstract class CmfUrl
     
     protected static function getCmfConfig(?CmfConfig $cmfConfig = null): CmfConfig
     {
-        return $cmfConfig ?: app(CmfConfig::class);
+        return $cmfConfig ?: app(CmfManager::class)->getCurrentCmfConfig();
     }
     
     protected static function getAuthGate(?CmfConfig $cmfConfig): GateContract

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
+use PeskyCMF\CmfManager;
 use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\CmfJsonResponse;
@@ -19,7 +20,7 @@ if (!defined('DOTJS_INSERT_REGEXP_FOR_ROUTES')) {
 if (!function_exists('cmfConfig')) {
     function cmfConfig(): CmfConfig
     {
-        return app(CmfConfig::class);
+        return app(CmfManager::class)->getCurrentCmfConfig();
     }
 }
 

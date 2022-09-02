@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace PeskyCMF\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use PeskyCMF\PeskyCmfManager;
+use PeskyCMF\CmfManager as RealCmfManager;
 
-class PeskyCmf extends Facade
+/**
+ * todo: add methods docs
+ */
+class CmfManager extends Facade
 {
     
     protected static function getFacadeAccessor(): string
     {
-        return PeskyCmfManager::class;
+        return RealCmfManager::class;
     }
 }

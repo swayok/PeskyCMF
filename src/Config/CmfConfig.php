@@ -47,8 +47,6 @@ abstract class CmfConfig
     protected ViewsFactory $viewsFactory;
     protected ?ScaffoldLoggerInterface $httpRequestsLogger = null;
     
-    private static array $instances = [];
-    
     protected static array $localeSuffixMap = [
         'en' => 'US',
         'ko' => 'KR',
@@ -65,66 +63,8 @@ abstract class CmfConfig
         'zh' => 'CN',
     ];
     
-    final private function __construct()
+    public function __construct()
     {
-    }
-    
-    /**
-     * Use this object as default config
-     * Note: this is used in *Record, *Table, and *TableStructure DB classes of CMS
-     */
-    final public function useAsDefault(): void
-    {
-        self::$instances['default'] = $this;
-    }
-    
-    /**
-     * Get CmfConfig marked as default one (or primary config if default one not provided)
-     * @return CmfConfig
-     */
-    final public static function getDefault(): CmfConfig
-    {
-        return self::$instances['default'] ?? self::getPrimary();
-    }
-    
-    /**
-     * Use this object as primary config
-     * Note: this object will be returned when you call CmfConfig::getInstance() instead of CustomConfig::getInstance()
-     */
-    final public function useAsPrimary(Application $app): void
-    {
-        self::$instances[__CLASS__] = $this;
-        $this->setLaravelApp($app);
-        /** @noinspection SelfClassReferencingInspection */
-        $app->singleton(CmfConfig::class, $this);
-    }
-    
-    final public static function getPrimary(): CmfConfig
-    {
-        if (!isset(self::$instances[__CLASS__])) {
-            throw new \BadMethodCallException('Primary CMF Config is not specified');
-        }
-        return self::$instances[__CLASS__];
-    }
-    
-    final public static function getPrimaryOrDefault(): CmfConfig {
-        $ret = self::$instances[__CLASS__] ?? self::$instances['default'] ?? null;
-        if (!$ret) {
-            throw new \BadMethodCallException('Both Primary and Default CMF Configs are not specified');
-        }
-        return $ret;
-    }
-    
-    /**
-     * Returns instance of config class it was called from
-     * Note: method excluded from toArray() results but key "config_instance" added instead of it
-     */
-    final public static function getInstance(): static
-    {
-        if (!isset(self::$instances[static::class])) {
-            self::$instances[static::class] = new static();
-        }
-        return self::$instances[static::class];
     }
     
     public function getLaravelApp(): Application
@@ -991,7 +931,7 @@ abstract class CmfConfig
     
     public function initSection(Application $app): void
     {
-        $this->useAsPrimary($app);
+        $this->setLaravelApp($app);
         
         // configurators
         $this->configureSession();

@@ -7,7 +7,7 @@ namespace PeskyCMF\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
-use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\CmfManager;
 use PeskyCMF\Console\Commands\CmfAddAdminCommand;
 use PeskyCMF\Console\Commands\CmfAddSectionCommand;
 use PeskyCMF\Console\Commands\CmfCleanUploadedTempFilesCommand;
@@ -17,9 +17,7 @@ use PeskyCMF\Console\Commands\CmfInstallHttpRequestsProfilingCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
-use PeskyCMF\Facades\PeskyCmf;
 use PeskyCMF\PeskyCmfAppSettings;
-use PeskyCMF\PeskyCmfManager;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
@@ -31,48 +29,22 @@ class PeskyCmfServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
         
-        $this->setDefaultCmfConfig();
-    
-        $this->app->singleton(CmfConfig::class, function () {
-            return CmfConfig::getPrimaryOrDefault();
-        });
+        $this->registerCmfInjections();
         
-        $this->app->singleton(PeskyCmfManager::class, function ($app) {
-            return new PeskyCmfManager($app);
-        });
+        $this->registerRelatedServiceProviders();
+        $this->registerServiceProvidersForConsole();
+        $this->registerServiceProvidersForLocalDevelopment();
         
-        $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
-        $this->app->register(RecaptchaServiceProvider::class);
-        AliasLoader::getInstance()->alias('LanguageDetector', LanguageDetector::class);
-        AliasLoader::getInstance()->alias('PeskyCmf', PeskyCmf::class);
-        
-        if ($this->runningInConsole()) {
-            $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
-            $this->app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
-        }
-        
-        if ($this->app->environment() === 'local') {
-            if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
-                $this->app->register('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider');
-            }
-            if (class_exists('\Barryvdh\Debugbar\ServiceProvider')) {
-                $this->app->register('\Barryvdh\Debugbar\ServiceProvider');
-            }
-        }
+        $this->registerFacades();
         
         $this->registerCommands();
-        
-        $this->app->singleton(PeskyCmfAppSettings::class, function () {
-            /** @var PeskyCmfAppSettings $appSettingsClass */
-            $appSettingsClass = $this->getAppConfigs()->get('peskycmf.app_settings_class') ?: PeskyCmfAppSettings::class;
-            return new $appSettingsClass($this->app);
-        });
     }
     
     public function provides(): array
     {
         return [
-            CmfConfig::class,
+            CmfManager::class,
+            'cmf.manager',
             PeskyCmfAppSettings::class,
         ];
     }
@@ -91,11 +63,52 @@ class PeskyCmfServiceProvider extends ServiceProvider
         $this->scheduleCommands();
     }
     
-    /**
-     * Overwrite this method in your custom service provider if you do want or do not want to run
-     * console-specific methods in register() and boot() methods
-     * @return bool
-     */
+    protected function registerCmfInjections(): void
+    {
+        $this->app->singleton(CmfManager::class, function ($app) {
+            return new CmfManager($app);
+        });
+        $this->app->alias(CmfManager::class, 'cmf.manager');
+    
+        $this->app->singleton(PeskyCmfAppSettings::class, function () {
+            /** @var PeskyCmfAppSettings $appSettingsClass */
+            $appSettingsClass = $this->getAppConfigs()->get('peskycmf.app_settings_class') ?: PeskyCmfAppSettings::class;
+            return new $appSettingsClass($this->app);
+        });
+    }
+    
+    protected function registerRelatedServiceProviders(): void
+    {
+        $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
+        $this->app->register(RecaptchaServiceProvider::class);
+    }
+    
+    protected function registerServiceProvidersForConsole(): void
+    {
+        if ($this->runningInConsole()) {
+            $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
+            $this->app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
+        }
+    }
+    
+    protected function registerServiceProvidersForLocalDevelopment(): void
+    {
+        if ($this->app->environment('local')) {
+            if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
+                $this->app->register('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider');
+            }
+            if (class_exists('\Barryvdh\Debugbar\ServiceProvider')) {
+                $this->app->register('\Barryvdh\Debugbar\ServiceProvider');
+            }
+        }
+    }
+    
+    protected function registerFacades(): void
+    {
+        AliasLoader::getInstance()->alias('LanguageDetector', LanguageDetector::class);
+        AliasLoader::getInstance()->alias('CmfManager', \PeskyCMF\Facades\CmfManager::class);
+    }
+    
     protected function runningInConsole(): bool
     {
         return $this->app->runningInConsole();
@@ -247,44 +260,12 @@ class PeskyCmfServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'cmf');
     }
     
-    /**
-     * @return CmfConfig[]
-     */
-    protected function getAvailableCmfConfigs(): array
-    {
-        $cmfConfigsClasses = $this->getAppConfigs()->get('peskycmf.cmf_configs');
-        $configs = [];
-        /** @var CmfConfig|string $className */
-        foreach ($cmfConfigsClasses as $sectionName => $className) {
-            if (class_exists($className) && is_subclass_of($className, CmfConfig::class)) {
-                $configs[$sectionName] = $className::getInstance();
-            }
-        }
-        return $configs;
-    }
-    
     protected function declareRoutesAndConfigsForAllCmfSections(): void
     {
-        foreach ($this->getAvailableCmfConfigs() as $sectionName => $cmfConfig) {
-            if (!$this->app->routesAreCached()) {
-                $cmfConfig->declareRoutes($this->app, $sectionName);
-            }
-            if (!$this->app->configurationIsCached()) {
-                $cmfConfig->extendLaravelAppConfigs($this->app);
-            }
-        }
-    }
-    
-    protected function setDefaultCmfConfig(): void
-    {
-        $defaultConfig = $this->getAppConfigs()->get('peskycmf.default_cmf_config');
-        if ($defaultConfig) {
-            /** @var CmfConfig|string $className */
-            $className = $this->getAppConfigs()->get('peskycmf.cmf_configs.' . $defaultConfig);
-            if (!empty($className) && class_exists($className)) {
-                $className::getInstance()->useAsDefault();
-            }
-        }
+        /** @var CmfManager $manager */
+        $manager = $this->app->make(CmfManager::class);
+        $manager->registerRoutesForAllCmfSections();
+        $manager->extendLaravelAppConfigsForAllCmfSections();
     }
     
 }

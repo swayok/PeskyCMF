@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace PeskyCMF\Console\Commands;
 
 use Illuminate\Console\Command;
+use PeskyCMF\CmfManager;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\PeskyCmfManager;
 use Swayok\Utils\File;
 use Swayok\Utils\StringUtils;
 
@@ -31,21 +31,11 @@ abstract class CmfCommand extends Command
                     );
                 }
                 /** @var CmfConfig $class */
-                $this->cmfConfig = $class::getInstance();
+                $this->cmfConfig = new $class();
             } else {
-                $sectionName = $this->argument('cmf-section');
-                if (!empty($sectionName)) {
-                    /** @var PeskyCmfManager $peskyCmfManager */
-                    $peskyCmfManager = app(PeskyCmfManager::class);
-                    $this->cmfConfig = $peskyCmfManager->getCmfConfigForSection($sectionName);
-                } else {
-                    $this->cmfConfig = CmfConfig::getDefault();
-                    if (get_class($this->cmfConfig) === CmfConfig::class) {
-                        throw new \InvalidArgumentException(
-                            'Child class for CmfConfig was not found. You need to provide it through --cmf-config-class option '
-                        );
-                    }
-                }
+                /** @var CmfManager $peskyCmfManager */
+                $peskyCmfManager = app(CmfManager::class);
+                $this->cmfConfig = $peskyCmfManager->getCmfConfigForSection($this->argument('cmf-section') ?: null);
             }
             $this->cmfConfig->initSection(app());
         }
