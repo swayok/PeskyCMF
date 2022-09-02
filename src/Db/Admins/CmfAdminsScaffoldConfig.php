@@ -30,7 +30,8 @@ class CmfAdminsScaffoldConfig extends NormalTableScaffoldConfig
     protected ?array $notLoggableRecordColumns = ['password'];
     
     /**
-     * @return TableInterface|CmfAdminsTable
+     * @return CmfAdminsTable|TableInterface
+     * @noinspection PhpDocSignatureInspection
      */
     public static function getTable(): TableInterface
     {

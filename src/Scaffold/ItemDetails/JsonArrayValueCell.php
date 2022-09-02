@@ -37,7 +37,7 @@ class JsonArrayValueCell extends ValueCell
         return $headers;
     }
     
-    public function doDefaultValueConversionByType(mixed $value, string $type, array $record)
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): array
     {
         return is_array($value) ? $value : json_decode($value);
     }

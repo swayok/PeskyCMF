@@ -153,11 +153,9 @@ class CmfHttpRequestLogsTable extends CmfDbTable
     }
     
     /**
-     * @param string $key
-     * @param mixed $value - no objects supported!!
-     * @return CmfHttpRequestLog
+     * Do not pass complex objects to $value - json_encode might fail
      */
-    public static function addDebugData(string $key, $value): CmfHttpRequestLog
+    public static function addDebugData(string $key, mixed $value): CmfHttpRequestLog
     {
         return static::getCurrentLog()->addDebugData($key, $value);
     }

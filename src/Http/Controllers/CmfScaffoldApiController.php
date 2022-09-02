@@ -7,6 +7,8 @@ namespace PeskyCMF\Http\Controllers;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyORM\ORM\TableInterface;
@@ -14,14 +16,8 @@ use PeskyORM\ORM\TableInterface;
 class CmfScaffoldApiController extends CmfController
 {
     
-    /**
-     * @var string
-     */
-    private $requestedResourceName;
-    /**
-     * @var ScaffoldConfigInterface
-     */
-    private $scaffoldConfig;
+    private string $requestedResourceName;
+    private ScaffoldConfigInterface $scaffoldConfig;
     
     public function __construct(CmfConfig $cmfConfig, Application $app, Request $request)
     {
@@ -127,25 +123,25 @@ class CmfScaffoldApiController extends CmfController
         return $this->getScaffoldConfig()->deleteBulkOfRecords();
     }
     
-    public function getCustomData(string $resourceName, string $dataId)
+    public function getCustomData(string $resourceName, string $dataId): View|string|Response
     {
         $this->authorize('resource.view', [$resourceName]);
         return $this->getScaffoldConfig()->getCustomData($dataId);
     }
     
-    public function getCustomPage(string $resourceName, string $pageName)
+    public function getCustomPage(string $resourceName, string $pageName): View|string|Response
     {
         $this->authorize('resource.custom_page', [$resourceName, $pageName]);
         return $this->getScaffoldConfig()->getCustomPage($pageName);
     }
     
-    public function getCustomPageForItem(string $resourceName, string $itemId, string $pageName)
+    public function getCustomPageForItem(string $resourceName, string $itemId, string $pageName): View|string|Response
     {
         $this->authorize('resource.custom_page_for_item', [$resourceName, $pageName, $itemId]);
         return $this->getScaffoldConfig()->getCustomPageForRecord($itemId, $pageName);
     }
     
-    public function performCustomAction(Request $request, string $resourceName, string $actionName)
+    public function performCustomAction(Request $request, string $resourceName, string $actionName): View|string|Response
     {
         $this->authorize('resource.custom_action', [$resourceName, $actionName]);
         if ($request->ajax()) {
@@ -155,7 +151,7 @@ class CmfScaffoldApiController extends CmfController
         }
     }
     
-    public function performCustomActionForItem(Request $request, string $resourceName, string $itemId, string $actionName)
+    public function performCustomActionForItem(Request $request, string $resourceName, string $itemId, string $actionName): View|string|Response
     {
         $this->authorize('resource.custom_action_for_item', [$resourceName, $actionName, $itemId]);
         if ($request->ajax()) {

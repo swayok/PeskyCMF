@@ -17,7 +17,6 @@ abstract class CmfMenuItem
     protected ?\Closure $accessProvider = null;
     protected ?string $tooltip = null;
     protected string $tooltipPosition = 'top';
-    protected ?bool $openInModal = null;
     
     public static function redirect(string $url): CmfRedirectMenuItem
     {

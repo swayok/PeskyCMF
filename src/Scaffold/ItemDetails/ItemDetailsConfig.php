@@ -11,7 +11,6 @@ class ItemDetailsConfig extends ScaffoldSectionConfig
 {
     
     protected bool $allowRelationsInValueViewers = true;
-    
     protected bool $allowComplexValueViewerNames = true;
     
     protected string $template = 'cmf::scaffold.item_details';

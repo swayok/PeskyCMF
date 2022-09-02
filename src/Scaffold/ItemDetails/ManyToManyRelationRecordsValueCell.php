@@ -53,7 +53,7 @@ class ManyToManyRelationRecordsValueCell extends ValueCell
         return [$this->getRelation()->getName() => ['*', $this->getDataSourceRelation()->getName() => ['*']]];
     }
     
-    public function doDefaultValueConversionByType(mixed $value, string $type, array $record)
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): string
     {
         if (is_array($value) && !empty($value)) {
             $links = [];

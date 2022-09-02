@@ -18,7 +18,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Mail\Message;
 use Illuminate\Session\Store as SessionStore;
 use Illuminate\Support\Arr;
@@ -138,6 +137,7 @@ class CmfAuthModule
     
     /**
      * @return CmfAdmin|RecordInterface|Authenticatable
+     * @noinspection PhpDocSignatureInspection
      */
     public function getUser(): RecordInterface
     {
@@ -151,6 +151,7 @@ class CmfAuthModule
     
     /**
      * @return Guard|StatefulGuard|SessionGuard
+     * @noinspection PhpDocSignatureInspection
      */
     public function getAuthGuard(): Guard
     {
@@ -169,6 +170,7 @@ class CmfAuthModule
     
     /**
      * @return TableInterface|CmfAdminsTable
+     * @noinspection PhpDocSignatureInspection
      */
     public function getUsersTable(): TableInterface
     {
@@ -347,10 +349,7 @@ class CmfAuthModule
         }
     }
     
-    /**
-     * @return RedirectResponse|JsonResponse
-     */
-    public function processUserLogoutRequest(Request $request): Response
+    public function processUserLogoutRequest(Request $request): RedirectResponse|JsonResponse
     {
         $loginPageUrl = $this->getLoginPageUrl(true);
         if ($this->getSessionStore()->has($this->originalUserFromLoginAsActionSessionKey)) {
@@ -385,15 +384,12 @@ class CmfAuthModule
         $this->getCmfConfig()->detectLocale();
     }
     
-    /**
-     * @param int|string $otherUserId
-     */
-    public function processLoginAsOtherUserRequest($otherUserId): JsonResponse
+    public function processLoginAsOtherUserRequest(int|float|string $otherUserId): JsonResponse
     {
         $this->authorize('cmf_page', ['login_as']);
         $currentUser = $this->getUser();
         $currentUserId = $currentUser->getAuthIdentifier();
-        if ($currentUserId === $otherUserId || $currentUserId === (int)$otherUserId) {
+        if ($currentUserId === $otherUserId || (float)$currentUserId === (float)$otherUserId) {
             return CmfJsonResponse::create(HttpCode::CANNOT_PROCESS)
                 ->setMessage($this->getCmfConfig()->transCustom('admins.login_as.same_user'));
         }
@@ -551,6 +547,7 @@ class CmfAuthModule
     
     /**
      * @param ResetsPasswordsViaAccessKey|RecordInterface $user
+     * @noinspection PhpDocSignatureInspection
      */
     protected function sendPasswordRecoveryInstructionsEmail(RecordInterface $user): void
     {
@@ -719,6 +716,7 @@ class CmfAuthModule
      * @param Request $request
      * @param RecordInterface|Authenticatable $admin
      * @return array
+     * @noinspection PhpDocSignatureInspection
      */
     protected function validateAndGetUserProfileUpdates(Request $request, RecordInterface $admin): array
     {
@@ -818,6 +816,7 @@ class CmfAuthModule
      * Additional non-editable data to save into user record.
      * For example: role, language
      * @param RecordInterface|Authenticatable $user - user record with submitted data already set
+     * @noinspection PhpDocSignatureInspection
      */
     protected function addCustomRegistrationData(RecordInterface $user): void
     {
@@ -827,6 +826,7 @@ class CmfAuthModule
      * Additional actions after user's account created.
      * For example: send confirmation email
      * @param RecordInterface|Authenticatable $user
+     * @noinspection PhpDocSignatureInspection
      */
     protected function afterRegistration(RecordInterface $user): void
     {
@@ -837,6 +837,7 @@ class CmfAuthModule
      * Here you can modify email confirmation status and send confirmation email
      * @param RecordInterface|Authenticatable $user
      * @param string|null $oldEmail
+     * @noinspection PhpDocSignatureInspection
      */
     protected function onUserEmailAddressChange(RecordInterface $user, ?string $oldEmail): void
     {

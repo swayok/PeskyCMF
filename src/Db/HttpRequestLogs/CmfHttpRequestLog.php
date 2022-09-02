@@ -124,7 +124,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         static::$responseContentMinifiers[$name] = $minifier;
     }
     
-    public function fromRequest(Request $request, bool $enabledByDefault = false, bool $force = false): ?ScaffoldLoggerInterface
+    public function fromRequest(Request $request, bool $enabledByDefault = false, bool $force = false): ?static
     {
         if ($this->hasValue('request')) {
             throw new \BadMethodCallException('You should not call this method twice');
@@ -352,7 +352,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         return $this;
     }
     
-    public function logResponse(Request $request, Response $response, ?RecordInterface $user = null): ScaffoldLoggerInterface
+    public function logResponse(Request $request, Response $response, ?RecordInterface $user = null): static
     {
         if ($this->ignoreResponseLogging) {
             return $this;
@@ -446,19 +446,12 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         return null;
     }
     
-    /**
-     * @param RecordInterface $record
-     * @param null|string $tableName - for cases when table name differs from record's table name (so-called table name for routes)
-     * @param array|null $columnsToLog - list of columns to store within Log
-     * @param array|null $relationsToLog - list of loaded relations to store within Log (default: all loaded relations)
-     * @return static
-     */
     public function logDbRecordBeforeChange(
         RecordInterface $record,
         ?string $tableName = null,
         ?array $columnsToLog = null,
         ?array $relationsToLog = null
-    ): ScaffoldLoggerInterface {
+    ): static {
         if ($this->isAllowed()) {
             try {
                 if ($columnsToLog !== null) {
@@ -489,17 +482,11 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         return $data;
     }
     
-    /**
-     * @param RecordInterface $record
-     * @param array|null $columnsToLog - list of columns to store within Log
-     * @param array|null $relationsToLog - list of loaded relations to store within Log (default: all loaded relations)
-     * @return static
-     */
     public function logDbRecordAfterChange(
         RecordInterface $record,
         ?array $columnsToLog = null,
         ?array $relationsToLog = null
-    ): ScaffoldLoggerInterface {
+    ): static {
         if ($this->isAllowed()) {
             try {
                 if ($columnsToLog !== null) {
@@ -519,12 +506,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         return $this;
     }
     
-    /**
-     * @param RecordInterface $record
-     * @param null|string $tableName - for cases when table name differs from record's table name (so-called table name for routes)
-     * @return static
-     */
-    public function logDbRecordUsage(RecordInterface $record, ?string $tableName = null): ScaffoldLoggerInterface
+    public function logDbRecordUsage(RecordInterface $record, ?string $tableName = null): static
     {
         if ($this->isAllowed()) {
             try {

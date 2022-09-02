@@ -64,6 +64,9 @@ abstract class ScaffoldSectionConfig
     protected string $template;
     protected ?string $jsInitiator = null;
     protected bool $isFinished = false;
+    /**
+     * Allow viewer names like "Relation.column_name"
+     */
     protected bool $allowRelationsInValueViewers = false;
     /**
      * Allow viewer names like "column_name:key_name" for json/jsonb DB columns

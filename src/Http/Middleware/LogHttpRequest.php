@@ -74,7 +74,7 @@ class LogHttpRequest
      * @param array $methods - list of HTTP methods to log. If empty - log all methods
      * @return mixed
      */
-    public function handle(Request $request, \Closure $next, ?string $authGuard = null, bool $enableByDefault = true, ...$methods)
+    public function handle(Request $request, \Closure $next, ?string $authGuard = null, bool $enableByDefault = true, ...$methods): mixed
     {
         $route = $request->route();
         $isAllowed = (
@@ -131,6 +131,7 @@ class LogHttpRequest
     
     /**
      * @param CmfHttpRequestLog|ScaffoldLoggerInterface $log
+     * @noinspection PhpDocSignatureInspection
      */
     protected function logRequest(ScaffoldLoggerInterface $log, $request, bool $enableByDefault): void
     {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PeskyCMF\Http\Controllers;
 
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Routing\Controller;
@@ -29,15 +30,16 @@ abstract class CmfController extends Controller
         $this->app = $app;
     }
     
-    public function getAuthGuard()
+    public function getAuthGuard(): Guard
     {
         return $this->getCmfConfig()->getAuthGuard();
     }
     
     /**
      * @return Authenticatable|CmfAdmin|ResetsPasswordsViaAccessKey|RecordInterface
+     * @noinspection PhpDocSignatureInspection
      */
-    public function getUser()
+    public function getUser(): RecordInterface
     {
         $user = $this->getCmfConfig()->getUser();
         if (!$user) {

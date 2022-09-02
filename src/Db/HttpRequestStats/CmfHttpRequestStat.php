@@ -156,10 +156,7 @@ class CmfHttpRequestStat extends CmfDbRecord
         }
     }
     
-    /**
-     * @return mixed
-     */
-    public static function profileClosure(string $checkpointKey, \Closure $closure)
+    public static function profileClosure(string $checkpointKey, \Closure $closure): mixed
     {
         static::startCheckpoint($checkpointKey);
         $ret = value($closure);

@@ -142,7 +142,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
                         ->setHref($url)
                         ->setTarget('_blank')
                         ->build();
-                } catch (\Throwable $exc) {
+                } catch (\Throwable) {
                 }
             }
             return rtrim($record['table'] . ' -> ' . $record['item_id'], '-> ');
@@ -169,7 +169,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
                     ->setHref($url)
                     ->setTarget('_blank')
                     ->build();
-            } catch (\Throwable $exc) {
+            } catch (\Throwable) {
             }
             return $label;
         }

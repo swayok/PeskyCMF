@@ -7,7 +7,6 @@ namespace PeskyCMF\Auth;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Arr;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyORM\ORM\KeyValueTableHelpers\KeyValueTableInterface;
 use PeskyORM\ORM\RecordInterface;
 
@@ -149,18 +148,13 @@ class CmfAccessPolicy
     }
     
     /**
-     * @param RecordInterface|CmfAdmin $user
-     * @param string $ability
-     * @param string $resourceName
-     * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue
-     * @param array $conditions
-     * @return bool
+     * $conditions used only for bulk actions when $recordOrItemIdOrFkValue === null
      */
     protected function resource(
         RecordInterface $user,
         string $ability,
         string $resourceName,
-        $recordOrItemIdOrFkValue = null,
+        RecordInterface|array|float|int|string $recordOrItemIdOrFkValue = null,
         array $conditions = []
     ): bool {
         if ($this->isSuperadmin($user)) {
@@ -193,18 +187,13 @@ class CmfAccessPolicy
     }
     
     /**
-     * @param RecordInterface|CmfAdmin $user
-     * @param string $resourceName
-     * @param string $ability
-     * @param mixed|RecordInterface|null $recordOrItemIdOrFkValue
-     * @param array $conditions
-     * @return bool
+     * $conditions used only for bulk actions when $recordOrItemIdOrFkValue === null
      */
     protected function userHasAccessToRecord(
         RecordInterface $user,
         string $resourceName,
         string $ability,
-        $recordOrItemIdOrFkValue = null,
+        RecordInterface|array|float|int|string $recordOrItemIdOrFkValue = null,
         array $conditions = []
     ): bool {
         if (
@@ -222,9 +211,10 @@ class CmfAccessPolicy
             }
             if ($recordOrItemIdOrFkValue === null) {
                 // bulk action
-                return $table::count($conditions) === $table::count(array_merge($conditions, [$ownerColumn => $user->id]));
+                $countConditions = array_merge($conditions, [$ownerColumn => $user->getPrimaryKeyValue()]);
+                return $table::count($conditions) === $table::count($countConditions);
             } elseif ($recordOrItemIdOrFkValue instanceof RecordInterface || is_array($recordOrItemIdOrFkValue)) {
-                return $recordOrItemIdOrFkValue[$ownerColumn] === $user->id;
+                return $recordOrItemIdOrFkValue[$ownerColumn] === $user->getPrimaryKeyValue();
             } elseif ($table instanceof KeyValueTableInterface) {
                 $fkColName = $table->getMainForeignKeyColumnName();
                 if ($fkColName === null) {
@@ -232,11 +222,18 @@ class CmfAccessPolicy
                 } elseif (empty($recordOrItemIdOrFkValue)) {
                     return false;
                 } else {
-                    return $table::count([$fkColName => $recordOrItemIdOrFkValue]) ===
-                        $table::count([$fkColName => $recordOrItemIdOrFkValue, $ownerColumn => $user->id]);
+                    $countConditions = [
+                        $fkColName => $recordOrItemIdOrFkValue,
+                        $ownerColumn => $user->getPrimaryKeyValue()
+                    ];
+                    return $table::count([$fkColName => $recordOrItemIdOrFkValue]) === $table::count($countConditions);
                 }
             } else {
-                return $table::count([$table::getPkColumnName() => $recordOrItemIdOrFkValue, $ownerColumn => $user->id]) === 1;
+                $countConditions = [
+                    $table::getPkColumnName() => $recordOrItemIdOrFkValue,
+                    $ownerColumn => $user->getPrimaryKeyValue()
+                ];
+                return $table::count($countConditions) === 1;
             }
         }
         return true;

@@ -56,10 +56,10 @@ class CmfGeneralController extends CmfController
         } elseif ($views->exists('cmf::page.' . $name)) {
             return $views->make('cmf::page.' . $name, $dataForView)->render();
         }
-        abort($this->getViewNotFoundResponse($request, $name, $primaryView));
+        abort($this->getViewNotFoundResponse($name, $primaryView));
     }
     
-    protected function getViewNotFoundResponse(Request $request, string $pageName, $primaryView): JsonResponse
+    protected function getViewNotFoundResponse(string $pageName, $primaryView): JsonResponse
     {
         return CmfJsonResponse::create(HttpCode::NOT_FOUND)
             ->setMessage("View file for page {$pageName} not found at {$primaryView}")
@@ -122,7 +122,7 @@ class CmfGeneralController extends CmfController
                     break;
                 }
             }
-        } catch (NotFoundHttpException $exc) {
+        } catch (NotFoundHttpException) {
         }
         return new JsonResponse([]);
     }
@@ -172,7 +172,7 @@ class CmfGeneralController extends CmfController
         return $this->getCmfConfig()->getAuthModule()->processLoginAsOtherUserRequest($otherUserId);
     }
     
-    public function logout(Request $request): Response
+    public function logout(Request $request): RedirectResponse|JsonResponse
     {
         return $this->getCmfConfig()->getAuthModule()->processUserLogoutRequest($request);
     }
@@ -222,11 +222,7 @@ class CmfGeneralController extends CmfController
             ->build();
     }
     
-    /**
-     * @param Request $request
-     * @return WysiwygFormInput|string
-     */
-    protected function validateImageUpload(Request $request)
+    protected function validateImageUpload(Request $request): WysiwygFormInput|string
     {
         $errors = $this->validateAndReturnErrors($request->all(), [
             'CKEditorFuncNum' => 'required|int',

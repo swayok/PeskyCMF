@@ -317,7 +317,7 @@ class DataGridRendererHelper
      * @param bool $render - render row action if it is an object or not
      * @return CmfRedirectMenuItem|CmfRequestMenuItem|Tag|string
      */
-    public function getRowActionDotJsTemplate(string $actionKey, bool $render = true)
+    public function getRowActionDotJsTemplate(string $actionKey, bool $render = true): CmfRequestMenuItem|CmfRedirectMenuItem|Tag|string
     {
         switch ($actionKey) {
             case 'details':

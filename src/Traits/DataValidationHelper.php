@@ -37,7 +37,7 @@ trait DataValidationHelper
      * @return array - data from request filtered by rules keys
      * @throws ValidationException
      */
-    public function validate($dataOrRequest, array $rules, array $messages = [], array $customAttributes = []): array
+    public function validate(array|Request $dataOrRequest, array $rules, array $messages = [], array $customAttributes = []): array
     {
         $errors = $this->validateAndReturnErrors($dataOrRequest, $rules, $messages, $customAttributes);
         if (!empty($errors)) {
@@ -55,8 +55,12 @@ trait DataValidationHelper
      * @param array $customAttributes
      * @return array - errors
      */
-    public function validateAndReturnErrors($dataOrRequest, array $rules, array $messages = [], array $customAttributes = []): array
-    {
+    public function validateAndReturnErrors(
+        array|Request $dataOrRequest,
+        array $rules,
+        array $messages = [],
+        array $customAttributes = []
+    ): array {
         $messages = Set::flatten($messages);
         if ($dataOrRequest instanceof Request) {
             $dataOrRequest = $dataOrRequest->all();
@@ -71,12 +75,8 @@ trait DataValidationHelper
     
     /**
      * Get the request input based on the given validation rules.
-     *
-     * @param array|Request|Collection $data
-     * @param array $rules
-     * @return array
      */
-    protected function extractInputFromRules($data, array $rules): array
+    protected function extractInputFromRules(array|Collection|Request $data, array $rules): array
     {
         $keys = (new Collection($rules))->keys()
             ->map(function ($rule) {

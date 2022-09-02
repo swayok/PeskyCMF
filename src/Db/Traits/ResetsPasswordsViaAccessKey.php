@@ -60,7 +60,7 @@ trait ResetsPasswordsViaAccessKey
     {
         try {
             $data = Crypt::decrypt($accessKey);
-        } catch (DecryptException $exc) {
+        } catch (DecryptException) {
             return null;
         }
         if (empty($data)) {

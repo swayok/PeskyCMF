@@ -38,12 +38,8 @@ class AjaxOnly
      * If 'params' === true - all params retrieved from original URL will be passed to fallback route
      * If 'params' === false - params retrieved from original URL will not be passed to fallback route
      *
-     * @param Request $request
-     * @param \Closure $next
-     * @return mixed
-     * @throws \InvalidArgumentException
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         if (!$request->ajax()) {
             $route = $request->route();

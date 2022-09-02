@@ -25,7 +25,7 @@ abstract class CmfUrl
      * @param string $routeName
      * @param array $parameters
      * @param bool $absolute
-     * @param null|CmfConfig|string $cmfConfig
+     * @param null|CmfConfig $cmfConfig
      * @return string
      */
     public static function route(string $routeName, array $parameters = [], bool $absolute = false, ?CmfConfig $cmfConfig = null): string
@@ -217,7 +217,7 @@ abstract class CmfUrl
     
     /**
      * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
+     * @param string|int|float $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|CmfConfig $cmfConfig
      * @param bool $ignoreAccessPolicy - true: will not run static::getAuthGate($cmfConfig)->denies('resource.*') test
@@ -225,7 +225,7 @@ abstract class CmfUrl
      */
     public static function toItemEditForm(
         string $resourceName,
-        string $itemId,
+        string|int|float $itemId,
         bool $absolute = false,
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
@@ -307,7 +307,7 @@ abstract class CmfUrl
     
     /**
      * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
+     * @param string|int|float $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|CmfConfig $cmfConfig
      * @param bool $ignoreAccessPolicy - true: will not run static::getAuthGate($cmfConfig)->denies('resource.*') test
@@ -315,7 +315,7 @@ abstract class CmfUrl
      */
     public static function toItemCloneForm(
         string $resourceName,
-        string $itemId,
+        string|int|float $itemId,
         bool $absolute = false,
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
@@ -337,7 +337,7 @@ abstract class CmfUrl
     
     /**
      * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
+     * @param string|int|float $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|CmfConfig $cmfConfig
      * @param bool $ignoreAccessPolicy - true: will not run static::getAuthGate($cmfConfig)->denies('resource.*') test
@@ -345,7 +345,7 @@ abstract class CmfUrl
      */
     public static function toItemDetails(
         string $resourceName,
-        string $itemId,
+        string|int|float $itemId,
         bool $absolute = false,
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
@@ -368,7 +368,7 @@ abstract class CmfUrl
     
     /**
      * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
+     * @param string|int|float $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
      * @param null|CmfConfig $cmfConfig
      * @param bool $ignoreAccessPolicy - true: will not run static::getAuthGate($cmfConfig)->denies('resource.*') test
@@ -376,7 +376,7 @@ abstract class CmfUrl
      */
     public static function toItemDelete(
         string $resourceName,
-        string $itemId,
+        string|int|float $itemId,
         bool $absolute = false,
         ?CmfConfig $cmfConfig = null,
         bool $ignoreAccessPolicy = false
@@ -426,7 +426,7 @@ abstract class CmfUrl
     
     /**
      * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
+     * @param string|int|float $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param string $pageId
      * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
@@ -435,7 +435,7 @@ abstract class CmfUrl
      */
     public static function toItemCustomPage(
         string $resourceName,
-        string $itemId,
+        string|int|float $itemId,
         string $pageId,
         array $queryArgs = [],
         bool $absolute = false,
@@ -462,7 +462,7 @@ abstract class CmfUrl
     
     /**
      * @param string $resourceName
-     * @param int|string $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
+     * @param string|int|float $itemId - it may be a dotjs insert in format: '{{= it.id }}' or '{= it.id }'
      * @param string $actionId
      * @param array $queryArgs - may contain dotjs inserts in format: '{{= it.id }}' or '{= it.id }'
      * @param bool $absolute
@@ -471,7 +471,7 @@ abstract class CmfUrl
      */
     public static function toItemCustomAction(
         string $resourceName,
-        string $itemId,
+        string|int|float $itemId,
         string $actionId,
         array $queryArgs = [],
         bool $absolute = false,
@@ -524,17 +524,9 @@ abstract class CmfUrl
         return static::replaceUrlSafeInsertsInUrlByDotJsInsterts($url, $replaces['replaces']);
     }
     
-    /**
-     * @param string $route
-     * @param string|int|float $itemId
-     * @param array $parameters
-     * @param bool $absolute
-     * @param CmfConfig|null|string $cmfConfig
-     * @return string
-     */
     protected static function routeWithPossibleItemIdDotJsInsert(
         string $route,
-        string $itemId,
+        string|int|float $itemId,
         array $parameters,
         bool $absolute = false,
         ?CmfConfig $cmfConfig = null

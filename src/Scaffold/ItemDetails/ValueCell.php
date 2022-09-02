@@ -52,7 +52,7 @@ class ValueCell extends RenderableValueViewer
         return parent::getValueConverter();
     }
     
-    public function doDefaultValueConversionByType(mixed $value, string $type, array $record)
+    public function doDefaultValueConversionByType(mixed $value, string $type, array $record): mixed
     {
         switch ($type) {
             case static::TYPE_TEXT:

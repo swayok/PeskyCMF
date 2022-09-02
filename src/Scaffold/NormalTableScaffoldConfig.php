@@ -641,7 +641,6 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig
     /**
      * @param string $inputNamePrefix - input name prefix
      *      For example if you use '_ids' instead of 'ids' - use prefix '_'
-     * @return array
      */
     protected function getSelectConditionsForBulkActions(string $inputNamePrefix = ''): ?array
     {

@@ -53,7 +53,7 @@ class RequestProfiling
      * @param int $minDbQueries - do not record profiling if min amount of queries is lee then specified
      * @return mixed
      */
-    public function handle(Request $request, \Closure $next, bool $enabledByDefault = true, float $minDuration = 0, int $minDbQueries = 0)
+    public function handle(Request $request, \Closure $next, bool $enabledByDefault = true, float $minDuration = 0, int $minDbQueries = 0): mixed
     {
         $route = $request->route();
         $config = Arr::get($route->getAction(), 'profiler');

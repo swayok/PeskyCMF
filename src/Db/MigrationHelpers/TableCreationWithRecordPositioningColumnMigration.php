@@ -98,7 +98,7 @@ abstract class TableCreationWithRecordPositioningColumnMigration extends Migrati
             DB::statement(
                     $this->quoteDbExpr(DbExpr::create("DROP FUNCTION IF EXISTS `{$schema}`.`{$triggerFunctionName}`() RESTRICT"))
             );
-        } catch (\PDOException $exc) {
+        } catch (\PDOException) {
             // ignore
         }
     }

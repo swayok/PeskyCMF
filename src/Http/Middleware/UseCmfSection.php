@@ -23,7 +23,7 @@ class UseCmfSection
      * @param string $cmfSectionName - name of a key from config('peskycmf.cmf_configs')
      * @return mixed
      */
-    public function handle(Request $request, \Closure $next, string $cmfSectionName)
+    public function handle(Request $request, \Closure $next, string $cmfSectionName): mixed
     {
         /** @var PeskyCmfManager $cmfManager */
         $cmfManager = $this->app->make(PeskyCmfManager::class);

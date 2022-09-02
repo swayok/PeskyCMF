@@ -28,10 +28,7 @@ class ValidateData
     }
     */
     
-    /**
-     * @return mixed
-     */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         $route = $request->route();
         $actionInfo = $route->getAction();

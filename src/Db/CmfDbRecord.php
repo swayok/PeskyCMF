@@ -16,8 +16,12 @@ abstract class CmfDbRecord extends Record
      * @param bool $asValueLabelPair
      * @return array
      */
-    public static function toOptions(array $values, bool $withLabels = false, $translationsPath = '', bool $asValueLabelPair = false): array
-    {
+    public static function toOptions(
+        array $values,
+        bool $withLabels = false,
+        string|\Closure $translationsPath = '',
+        bool $asValueLabelPair = false
+    ): array {
         if (!$withLabels) {
             return $values;
         }

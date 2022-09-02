@@ -194,7 +194,7 @@ abstract class CmfApiMethodDocumentation extends CmfApiDocumentation
         ],
     ];
     
-    public function getTitleForPostman()
+    public function getTitleForPostman(): string
     {
         $title = $this->titleForPostman
             ? $this->translateInserts($this->titleForPostman)
