@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Scaffold;
 
-use Closure;
 use Illuminate\Contracts\Auth\Access\Gate as AuthGate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +14,7 @@ use Illuminate\View\View;
 use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
+use PeskyCMF\Db\TempRecord;
 use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Http\Middleware\AjaxOnly;
@@ -25,7 +25,6 @@ use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\ORM\RecordInterface;
-use PeskyORM\ORM\TempRecord;
 
 abstract class ScaffoldConfig implements ScaffoldConfigInterface
 {
@@ -140,7 +139,7 @@ abstract class ScaffoldConfig implements ScaffoldConfigInterface
         return static::getMenuItemCounterValue() ? static::getResourceName() . '_count' : null;
     }
     
-    public static function getMenuItemCounterValue(): null|Closure|string
+    public static function getMenuItemCounterValue(): null|\Closure|string
     {
         return null;
     }
