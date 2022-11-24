@@ -15,6 +15,7 @@ use PeskyCMF\CmfUrl;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\CmfDbRecord;
+use PeskyCMF\Db\TempRecord;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Http\Middleware\AjaxOnly;
@@ -26,7 +27,6 @@ use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyCMF\Traits\DataValidationHelper;
 use PeskyORM\ORM\Record;
 use PeskyORM\ORM\RecordInterface;
-use PeskyORM\ORM\TempRecord;
 
 abstract class ScaffoldConfig implements ScaffoldConfigInterface
 {

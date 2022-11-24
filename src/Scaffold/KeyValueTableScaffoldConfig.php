@@ -6,6 +6,7 @@ namespace PeskyCMF\Scaffold;
 
 use Illuminate\Http\JsonResponse;
 use PeskyCMF\Config\CmfConfig;
+use PeskyCMF\Db\TempRecord;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
@@ -13,7 +14,6 @@ use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\Exception\InvalidDataException;
 use PeskyORM\ORM\KeyValueTableHelpers\KeyValueDataSaver;
 use PeskyORM\ORM\KeyValueTableHelpers\KeyValueTableInterface;
-use PeskyORM\ORM\TempRecord;
 
 abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
 {
