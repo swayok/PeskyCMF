@@ -716,7 +716,8 @@ if (!function_exists('formatDate')) {
 
 if (!function_exists('formatMoney')) {
     /**
-     * @param float $number
+     * @param float  $number
+     * @param int    $decimals
      * @param string $thousandsSeparator
      * @return string
      */
