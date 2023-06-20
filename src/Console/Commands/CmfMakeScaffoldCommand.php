@@ -14,7 +14,7 @@ use Swayok\Utils\StringUtils;
 
 class CmfMakeScaffoldCommand extends CmfCommand
 {
-    
+
     protected $signature = 'cmf:make-scaffold
         {table_name}
         {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by CmfManager}
@@ -22,16 +22,16 @@ class CmfMakeScaffoldCommand extends CmfCommand
         {--cmf-config-class= : full class name to a class that extends CmfConfig}
         {--class-name= : short scaffold class name}
         {--keyvalue : table is key-value storage}';
-    
+
     protected $description = 'Create scaffold class for DB table.';
-    
+
     public function handle(): int
     {
         $table = $this->getTableInstanceByTableName($this->argument('table_name'));
-        
+
         $namespace = $this->getScaffoldsNamespace();
         $className = $this->getScaffoldClassName($table, $this->option('resource'));
-        
+
         $filePath = $this->getFolder() . $className . '.php';
         if (File::exist($filePath)) {
             if ($this->confirm("Scaffold class file {$filePath} already exists. Overwrite?")) {
@@ -41,19 +41,19 @@ class CmfMakeScaffoldCommand extends CmfCommand
                 return 0;
             }
         }
-        
+
         $this->createScaffoldClassFile($table, $namespace, $className, $filePath);
-        
-        
+
+
         $this->line($filePath . ' created');
-        
+
         $columnsTranslations = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             $columnsTranslations[] = "'{$column->getName()}' => ''";
         }
         $columnsTranslationsFilter = implode(",\n                    ", $columnsTranslations) . ",";
         $columnsTranslations = implode(",\n                ", $columnsTranslations) . ",";
-        
+
         $this->comment(
             <<<INFO
 
@@ -90,7 +90,7 @@ INFO
         );
         return 0;
     }
-    
+
     protected function getScaffoldConfigParentClass(): string
     {
         if ($this->option('keyvalue')) {
@@ -99,7 +99,7 @@ INFO
             return $this->getCmfConfig()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
         }
     }
-    
+
     /**
      * @return string - short name of scaffold class to be created
      */
@@ -111,44 +111,44 @@ INFO
         }
         return $scaffoldClassName;
     }
-    
+
     protected function getTableInstanceByTableName(string $tableName): TableInterface
     {
         return OrmClassesCreationUtils::getTableInstanceByTableNameInDb($tableName);
     }
-    
+
     protected function getScaffoldsNamespace(): string
     {
-        $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->app_subfolder());
+        $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->appSubfolder());
         $scaffoldsSubfolder = str_replace('/', '\\', $this->getScaffoldsFolderName());
         return 'App\\' . $appSubfolder . '\\' . $scaffoldsSubfolder;
     }
-    
+
     protected function getScaffoldsFolderName(): string
     {
         return 'Scaffolds';
     }
-    
+
     protected function getFolder(): string
     {
-        $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->app_subfolder());
+        $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->appSubfolder());
         return $this->getBasePathToApp() . DIRECTORY_SEPARATOR
             . $appSubfolder . DIRECTORY_SEPARATOR
             . $this->getScaffoldsFolderName() . DIRECTORY_SEPARATOR;
     }
-    
+
     protected function getBasePathToApp(): string
     {
         return app_path();
     }
-    
+
     protected function createScaffoldClassFile(TableInterface $table, string $namespace, string $className, string $filePath): void
     {
         $parentClass = $this->getScaffoldConfigParentClass();
         $parentClassShort = class_basename($parentClass);
         $tableClass = get_class($table);
         $tableClassShort = class_basename($table);
-        
+
         $contents = <<<VIEW
 <?php
 
@@ -168,16 +168,16 @@ class {$className} extends {$parentClassShort} {
     protected \$isEditAllowed = true;
     protected \$isCloningAllowed = false;
     protected \$isDeleteAllowed = true;
-    
+
     public static function getTable() {
         return {$tableClassShort}::getInstance();
     }
-    
+
     protected static function getIconForMenuItem() {
         // icon classes like: 'fa fa-cog' or just delete if you do not want an icon
         return '';
     }
-    
+
     protected function createDataGridConfig() {
         return parent::createDataGridConfig()
             ->readRelations([
@@ -188,7 +188,7 @@ class {$className} extends {$parentClassShort} {
                 {$this->makeFieldsListForDataGrid($table)}
             ]);
     }
-    
+
     protected function createDataGridFilterConfig() {
         return parent::createDataGridFilterConfig()
             ->setFilters([
@@ -205,7 +205,7 @@ class {$className} extends {$parentClassShort} {
                 {$this->makeFieldsListForItemDetailsViewer($table)}
             ]);
     }
-    
+
     protected function createFormConfig() {
         return parent::createFormConfig()
             ->setWidth(50)
@@ -217,7 +217,7 @@ class {$className} extends {$parentClassShort} {
 VIEW;
         File::save($filePath, $contents, 0664, 0755);
     }
-    
+
     protected function makeContainsForDataGrid(TableInterface $table): string
     {
         $contains = [];
@@ -226,7 +226,7 @@ VIEW;
         }
         return implode("\n                ", $contains);
     }
-    
+
     protected function makeContainsForItemDetailsViewer(TableInterface $table): string
     {
         $contains = [];
@@ -235,7 +235,7 @@ VIEW;
         }
         return implode("\n                ", $contains);
     }
-    
+
     protected function getJoinableRelationNames(TableInterface $table): array
     {
         $ret = [];
@@ -246,7 +246,7 @@ VIEW;
         }
         return $ret;
     }
-    
+
     protected function makeFieldsListForDataGrid(TableInterface $table): string
     {
         $valueViewers = [];
@@ -262,7 +262,7 @@ VIEW;
         }
         return implode("\n                ", $valueViewers);
     }
-    
+
     protected function makeFiltersList(TableInterface $table): string
     {
         $valueViewers = [];
@@ -273,7 +273,7 @@ VIEW;
         }
         return implode("\n                ", $valueViewers);
     }
-    
+
     protected function makeFieldsListForItemDetailsViewer(TableInterface $table): string
     {
         $valueViewers = [];
@@ -289,7 +289,7 @@ VIEW;
         }
         return implode("\n                ", $valueViewers);
     }
-    
+
     protected function makeFieldsListForItemForms(TableInterface $table): string
     {
         $valueViewers = [];
@@ -310,5 +310,5 @@ VIEW;
         }
         return implode("\n                ", $valueViewers);
     }
-    
+
 }

@@ -157,7 +157,8 @@ return [
 
         /**
          * CSS files to add to app
-         * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.css' is created by "php artisan cmf:install"
+         * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.css'
+         * is created by "php artisan cmf:install"
          */
         'css_files' => [
             //'/packages/admin/css/admin.custom.css'
@@ -165,7 +166,8 @@ return [
 
         /**
          * JS files to add to app
-         * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.js' is created by "php artisan cmf:install"
+         * Note: file '/packages/{underscored_url_prefix}/css/{underscored_url_prefix}.custom.js'
+         * is created by "php artisan cmf:install"
          */
         'js_files' => [
             //'/packages/admin/js/admin.custom.js'
@@ -274,9 +276,10 @@ return [
         'module' => \PeskyCMF\ApiDocs\CmfApiDocumentationModule::class,
 
         /**
-         * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation or \PeskyCMF\ApiDocs\CmfApiDocumentation class
-         * Note: there is a possibility to load classes automatically using 'api_documentation_classes_folder'. More details
-         * in CmfApiDocumentationModule->loadApiMethodsDocumentationClassesFromFileSystem()
+         * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation
+         * or \PeskyCMF\ApiDocs\CmfApiDocumentation class.
+         * Note: there is a possibility to load classes automatically using 'api_documentation_classes_folder'.
+         * More details in CmfApiDocumentationModule->loadApiMethodsDocumentationClassesFromFileSystem().
          */
         'classes' => [
 

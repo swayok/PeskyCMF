@@ -6,6 +6,10 @@ declare(strict_types=1);
  */
 echo "<?php\n";
 ?>
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Http\Middleware\AjaxOnly;
 
@@ -15,12 +19,12 @@ use PeskyCMF\Http\Middleware\AjaxOnly;
 
 Route::group(
     [
-        'middleware' => $cmfConfig::auth_middleware()
+        'middleware' => $cmfConfig->authMiddleware()
     ],
     function () use ($cmfConfig) {
 
         Route::get('/', [
-            'as' => $cmfConfig::getRouteName('cmf_start_page'),
+            'as' => $cmfConfig->getRouteName('cmf_start_page'),
             'uses' => 'PagesController@redirectFromStartPage',
         ]);
 
@@ -30,13 +34,11 @@ Route::group(
                     AjaxOnly::class
                 ]
             ],
-            function () {
-
+            static function () {
                 Route::get('/page/dashboard.html', [
                     'uses' => 'PagesController@dashboard'
                 ]);
             }
-
         );
     }
 );

@@ -10,33 +10,29 @@ use Illuminate\Support\Arr;
 use PeskyCMF\Config\CmfConfig;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
-// todo: get rid of extending LanguageDetectorServiceProvider and maybe from PeskyCmfLanguageDetectorServiceProvider itself
+// todo: get rid of extending LanguageDetectorServiceProvider and maybe from
+//  PeskyCmfLanguageDetectorServiceProvider itself
 class PeskyCmfLanguageDetectorServiceProvider extends LanguageDetectorServiceProvider
 {
-    
     /** @var array */
     protected array $configsOverride = [];
     /** @var null|string */
     protected ?string $defaultLanguage = null;
-    
-    public function register(): void
-    {
-        parent::register();
-        
-        $this->app['events']->listen(LocaleUpdated::class, function ($locale) {
-            $this->applyNewLanguage($locale);
-        });
-    }
-    
+
     public function importConfigsFromPeskyCmf(CmfConfig $cmfConfig): void
     {
-        $this->defaultLanguage = $cmfConfig->default_locale();
-        $this->configsOverride = $cmfConfig->language_detector_configs();
+        $this->defaultLanguage = $cmfConfig->defaultLocale();
+        $this->configsOverride = $cmfConfig->languageDetectorConfigs();
         $this->detectAndApplyLanguage();
     }
-    
+
     public function boot(): void
     {
+        $this->app['events']->listen(LocaleUpdated::class, function (LocaleUpdated $event) {
+            if ($event->locale !== $this->app->getLocale()) {
+                $this->applyNewLanguage($event->locale);
+            }
+        });
         if ($this->defaultLanguage) {
             /** @var Request $request */
             $request = $this->app['request'];
@@ -47,15 +43,14 @@ class PeskyCmfLanguageDetectorServiceProvider extends LanguageDetectorServicePro
         }
         parent::boot();
     }
-    
-    
+
     protected function config($key, $default = null)
     {
         return Arr::get($this->configsOverride, $key, function () use ($key, $default) {
             return parent::config($key, $default);
         });
     }
-    
+
     /**
      * Detect and apply language for the application.
      * Failsafe
@@ -77,7 +72,7 @@ class PeskyCmfLanguageDetectorServiceProvider extends LanguageDetectorServicePro
             $this->applyNewLanguage($language, true);
         }
     }
-    
+
     protected function applyNewLanguage(string $language, bool $force = false): void
     {
         $langsMapping = $this->config('languages', []);
@@ -94,6 +89,4 @@ class PeskyCmfLanguageDetectorServiceProvider extends LanguageDetectorServicePro
         $detector->addCookieToQueue($language);
         $detector->apply($language);
     }
-    
-    
 }

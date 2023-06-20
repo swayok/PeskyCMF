@@ -3,11 +3,11 @@
 declare(strict_types=1);
 /**
  * @var \PeskyCMF\Auth\CmfAuthModule $authModule
- * @var \PeskyCMF\Config\CmfConfig $cmfConfig
+ * @var \PeskyCMF\Config\CmfConfig   $cmfConfig
  */
 ?>
 <script type="application/javascript">
-    Utils.requireFiles(['{{ $cmfConfig->recaptcha_script() }}']);
+    Utils.requireFiles(['{{ $cmfConfig->recaptchaScript() }}']);
 </script>
 <div class="login-box">
     <div class="login-logo">
@@ -37,7 +37,7 @@ declare(strict_types=1);
                 <div class="form-group text-center">
                     <div
                         class="g-recaptcha ib"
-                        data-sitekey="{{ $cmfConfig->recaptcha_public_key() }}"
+                        data-sitekey="{{ $cmfConfig->recaptchaPublicKey() }}"
                     ></div>
                 </div>
             @endif

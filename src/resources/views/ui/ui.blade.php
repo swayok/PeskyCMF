@@ -1,8 +1,9 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @var \PeskyCMF\Config\CmfConfig $cmfConfig
- * @var \PeskyCMF\UI\CmfUIModule $uiModule
+ * @var \PeskyCMF\UI\CmfUIModule   $uiModule
  */
 ?>
 
@@ -15,7 +16,7 @@ declare(strict_types=1);
 
 <header class="main-header">
     <a href="javascript:void(0)" class="sidebar-toggle visible-xs" data-toggle="push-menu" role="button"></a>
-    <a href="{{ $cmfConfig->home_page_url() }}" class="logo">
+    <a href="{{ $cmfConfig->homePageUrl() }}" class="logo">
         <span class="logo-lg">
             {!! $uiModule->getSidebarLogo() !!}
         </span>

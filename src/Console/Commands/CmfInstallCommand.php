@@ -13,14 +13,13 @@ use Swayok\Utils\Folder;
 
 class CmfInstallCommand extends CmfCommand
 {
-    
     protected $description = 'Install PeskyCMF';
-    
-    protected $signature = 'cmf:install 
-        {app_subfolder=Admin} 
-        {url_prefix=admin} 
+
+    protected $signature = 'cmf:install
+        {app_subfolder=Admin}
+        {url_prefix=admin}
         {database_classes_app_subfolder=Db}';
-    
+
     public function handle(): int
     {
         $appSubfolder = ucfirst(trim(trim($this->input->getArgument('app_subfolder')), '/\\'));
@@ -37,13 +36,16 @@ class CmfInstallCommand extends CmfCommand
             'cmfConfigClassName' => $appSubfolder . 'Config',
         ];
         $this->createPagesController($baseFolderPath, $viewsPath, $dataForViews);
-        $this->copyBaseDbClasses($viewsPath, $dataForViews);
         $publicFiles = $this->createJsCssLessFiles($dataForViews);
         $this->cleanLaravelOrmClassesAndMigrations();
         $this->createAppSettingsClass();
         $peskyOrmConfigFilePath = $this->createPeskyOrmConfigFile();
         $this->createPeskyCmfConfigFile($appSubfolder, $dataForViews);
-        $cmfSectionConfigFileNameWithoutExtension = $this->createCmfSectionConfigFile($appSubfolder, $dataForViews, $publicFiles);
+        $cmfSectionConfigFileNameWithoutExtension = $this->createCmfSectionConfigFile(
+            $appSubfolder,
+            $dataForViews,
+            $publicFiles
+        );
         $this->createCmfConfigClassForCmfSection(
             $appSubfolder,
             $viewsPath,
@@ -53,81 +55,59 @@ class CmfInstallCommand extends CmfCommand
         );
         $this->createMigrations();
         $this->extender();
-        
+
         $this->line('Done');
-        
+
         $this->suggestions($peskyOrmConfigFilePath);
         $this->outro();
         return 0;
     }
-    
+
     /**
      * To be used in subclasses
      */
     protected function extender(): void
     {
     }
-    
+
     protected function outro(): void
     {
         $this->line('You will need to perform next steps to activate CMF:');
-        $this->line('1. Add ' . PeskyCmfServiceProvider::class . ' to you app.providers config (not needed if you use PeskyCMS)');
+        $this->line(
+            '1. Add ' . PeskyCmfServiceProvider::class
+            . ' to you app.providers config (not needed if you use PeskyCMS)'
+        );
         $this->line('2. Remove ' . PeskyOrmServiceProvider::class . ' from you app.providers config');
         $this->line('3. Run "php artisan vendor:publish --tag=public --force" to publish vendor public files');
         $this->line(
-            '4. Add "php artisan vendor:publish --tag=public --force" to you composer.json into "scripts"."post-autoload-dump" array to make all public vendor files be up to date'
+            '4. Add "php artisan vendor:publish --tag=public --force" to your composer.json'
+            . ' into "scripts"."post-autoload-dump" array to make all public vendor files be up to date'
         );
         $this->line('5. Run "php artisan migrate" to create tables in database');
         $this->line('6. Run "php artisan cmf:add-admin your-email@address.com" to create superadmin for CMS');
     }
-    
+
     protected function suggestions(string $peskyOrmConfigFilePath): void
     {
         $this->line("You may need to change configs in {$peskyOrmConfigFilePath} file");
     }
-    
+
     protected function getAppSettignsClassContents(): string
     {
-        return <<<FILE
-<?php
-
-namespace App;
-
-use PeskyCMF\PeskyCmfAppSettings;
-
-class AppSettings extends PeskyCmfAppSettings {
-
-}
-
-FILE;
+        return File::contents(
+            __DIR__ . '/../../resources/views/install/cmf_app_settings.stub'
+        );
     }
-    
+
     protected function createPagesController(string $baseFolderPath, string $viewsPath, array $dataForViews): void
     {
         File::load($baseFolderPath . '/Http/Controllers/PagesController.php', true, 0755, 0644)
             ->write(View::file($viewsPath . 'pages_controller.blade.php', $dataForViews)->render());
     }
-    
-    protected function copyBaseDbClasses(string $viewsPath, array $dataForViews): void
-    {
-        /*$dbFolder = Folder::load(app_path('/' . $dataForViews['dbClassesAppSubfolder']), true, 0755);
-        $abstractModelFilePath = $dbFolder->pwd() . '/AbstractTable.php';
-        $writeAbstractModelFile = !File::exist($abstractModelFilePath) || $this->confirm('AbstractTable file ' . $abstractModelFilePath . ' already exist. Overwrite?');
-        if ($writeAbstractModelFile) {
-            File::load($abstractModelFilePath, true, 0755, 0644)
-                ->write(\View::file($viewsPath . 'db/base_db_model.php', $dataForViews)->render());
-        }
-        $abstractRecordFilePath = $dbFolder->pwd() . '/AbstractRecord.php';
-        $writeAbstractRecordFile = !File::exist($abstractRecordFilePath) || $this->confirm('AbstractRecord file ' . $abstractRecordFilePath . ' already exist. Overwrite?');
-        if ($writeAbstractRecordFile) {
-            File::load($abstractRecordFilePath, true, 0755, 0644)
-                ->write(\View::file($viewsPath . 'db/base_db_record.php', $dataForViews)->render());
-        }*/
-    }
-    
+
     protected function createJsCssLessFiles(array $dataForViews): array
     {
-        $relativePathToPublicFiles = '/packages/' . $dataForViews['urlPrefix'] . '/';
+        $relativePathToPublicFiles = '/' . $dataForViews['urlPrefix'] . '/';
         $publicFilesContents = [
             'js' => $this->getCustomJsFileContents(),
             'css' => '',
@@ -141,52 +121,32 @@ FILE;
         }
         return $createdFilesByType;
     }
-    
+
     /** @noinspection JSUnusedLocalSymbols */
     protected function getCustomJsFileContents(): string
     {
-        return <<<JS
-var CmfApp = {};
-
-/* Declare custom routes using page.route()
-CmfApp.addRoutes = function () {
-    
-};
-*/
-
-/* Do something before application is started by page.start()
-CmfApp.beforeStart = function () {
-    
-};
-*/
-
-/* Do something after application is started by page.start()
-CmfApp.afterStart = function () {
-    
-};
-*/
-
-/* Extend functionality of the router
-CmfApp.extendRouter = function () {
-    
-};
-*/
-JS;
+        return File::contents(
+            __DIR__ . '/../../resources/views/install/cmf_admin_custom_js.stub'
+        );
     }
-    
+
     protected function createMigrations(): void
     {
         $migrationsPath = $this->getMigrationsPath();
         foreach (['settings', 'admins'] as $index => $tableName) {
-            $this->addMigrationForTable($tableName, $migrationsPath, strtotime("2014-01-01 0{$index}:00:00"));
+            $this->addMigrationForTable(
+                $tableName,
+                $migrationsPath,
+                strtotime("2014-01-01 0{$index}:00:00")
+            );
         }
     }
-    
+
     protected function getMigrationsPath(): string
     {
         return database_path('migrations') . DIRECTORY_SEPARATOR;
     }
-    
+
     protected function cleanLaravelOrmClassesAndMigrations(): void
     {
         $migrationsPath = $this->getMigrationsPath();
@@ -195,7 +155,7 @@ JS;
         File::remove($migrationsPath . '2014_10_12_100000_create_password_resets_table.php');
         File::remove(app_path('User.php'));
     }
-    
+
     protected function createAppSettingsClass(): void
     {
         $appSettingsPath = app_path('AppSettings.php');
@@ -206,7 +166,7 @@ JS;
             $this->line('- ' . $appSettingsPath . ' already exist. skipped');
         }
     }
-    
+
     protected function createPeskyOrmConfigFile(): string
     {
         $peskyOrmConfigFilePath = config_path('peskyorm.php');
@@ -220,7 +180,7 @@ JS;
         }
         return $peskyOrmConfigFilePath;
     }
-    
+
     protected function createPeskyCmfConfigFile(string $appSubfolder, array $dataForViews): void
     {
         $generalCmfConfigFilePath = config_path('peskycmf.php');
@@ -228,28 +188,39 @@ JS;
             $configContents = File::contents(__DIR__ . '/../../Config/peskycmf.config.php');
             $replacements = [
                 // rename 'cmf_configs.default' to 'cmf_configs.{urlPrefix}'
-                "%('default')\s*=>\s*.*%im" => '\'' . $dataForViews['urlPrefix'] . '\' => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,',
+                "%('default')\s*=>\s*.*%im" => '\'' . $dataForViews['urlPrefix']
+                    . '\' => \\App\\' . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . '::class,',
                 // replace 'default_cmf_config' value by '{urlPrefix}'
                 "%('default_cmf_config')\s*=>\s*.*%im" => "$1 => '{$dataForViews['urlPrefix']}',",
                 // replace 'app_settings_class' value by '\App\AppSettings::class'
                 "%('app_settings_class')\s*=>\s*.*%im" => "$1 => '\\App\\AppSettings::class',",
             ];
-            $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
+            $configContents = preg_replace(
+                array_keys($replacements),
+                array_values($replacements),
+                $configContents
+            );
             File::save($generalCmfConfigFilePath, $configContents, 0664, 0755);
             $this->line($generalCmfConfigFilePath . ' created');
             unset($configContents);
         } else {
             $this->line("Update next keys in 'configs/peskycmf.php' file to activate CMF:");
             $this->line(' ');
-            
+
             $this->line("'default_cmf_config' => 'cmf',");
-            $this->line("'cmf_configs' => ['cmf' => \\App\\" . $appSubfolder . '\\' . $dataForViews['cmfConfigClassName'] . "::class,\n]");
+            $this->line(
+                "'cmf_configs' => ['cmf' => \\App\\" . $appSubfolder
+                . '\\' . $dataForViews['cmfConfigClassName'] . "::class,\n]"
+            );
             $this->line("'app_settings_class' => \\App\\AppSettings::class,");
         }
     }
-    
-    protected function createCmfSectionConfigFile(string $appSubfolder, array $dataForViews, array $publicFiles): string
-    {
+
+    protected function createCmfSectionConfigFile(
+        string $appSubfolder,
+        array $dataForViews,
+        array $publicFiles
+    ): string {
         $cmfSectionConfigFileNameWithoutExtension = Str::snake($appSubfolder);
         $cmfSectionConfigFilePath = config_path($cmfSectionConfigFileNameWithoutExtension . '.php');
         $writeCmfSectionConfigFile = (
@@ -269,11 +240,14 @@ JS;
         }
         $updateKeysInConfigs = null;
         if ($writeCmfSectionConfigFile) {
-            File::load(__DIR__ . '/../../Config/cmf_section.config.php')->copy($cmfSectionConfigFilePath, true, 0664);
+            File::load(__DIR__ . '/../../Config/cmf_section.config.php')
+                ->copy($cmfSectionConfigFilePath, true, 0664);
             $updateKeysInConfigs = true;
         }
         if ($updateKeysInConfigs === null) {
-            $updateKeysInConfigs = $this->confirm('Do you wish to update some keys in ' . $cmfSectionConfigFilePath . ' by actual values?');
+            $updateKeysInConfigs = $this->confirm(
+                'Do you wish to update some keys in ' . $cmfSectionConfigFilePath . ' by actual values?'
+            );
         }
         $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
         $controllersNamespace = 'App\\' . $appSubfolder . '\\Http\\Controllers';
@@ -296,7 +270,7 @@ JS;
         } else {
             $this->line("Update next keys in '$cmfSectionConfigFilePath' file to activate CMF:");
             $this->line(' ');
-            
+
             $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
             $this->line("'app_subfolder' => '$appSubfolder',");
             $this->line("'routes_files' => ['{$routesFileRelativePath}'],");
@@ -308,12 +282,12 @@ JS;
         }
         return $cmfSectionConfigFileNameWithoutExtension;
     }
-    
+
     protected function getRoutesFileRelativePath($appSubfolder): string
     {
         return 'routes/' . Str::snake($appSubfolder) . '.php';
     }
-    
+
     protected function createCmfConfigClassForCmfSection(
         string $appSubfolder,
         string $viewsPath,
@@ -345,8 +319,4 @@ JS;
             $this->line($routesFilePath . ' created');
         }
     }
-    
-    
-    
-    
 }

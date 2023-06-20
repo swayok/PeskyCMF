@@ -39,13 +39,13 @@ use Swayok\Utils\Set;
 
 class CmfAuthModule
 {
-    
+
     use DataValidationHelper;
     use AuthorizesRequests;
-    
+
     protected CmfConfig $cmfConfig;
     protected ?string $emailColumnName = null;
-    
+
     protected string $originalUserFromLoginAsActionSessionKey = '__original_user';
     // page views
     protected string $userLoginPageViewPath = 'cmf::ui.login';
@@ -56,8 +56,8 @@ class CmfAuthModule
     // emails views
     protected string $passwordRevoceryEmailViewPath = 'cmf::emails.password_restore_instructions';
     // html elements
-    protected string $defaultLoginPageLogo = '<img src="/packages/cmf/raw/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
-    
+    protected string $defaultLoginPageLogo = '<img src="/vendor/peskycmf/raw/img/peskycmf-logo-black.svg" width="340" alt=" " class="mb15">';
+
     protected ?Guard $authGuard = null;
     protected Application $app;
     protected SessionStore $sessionStore;
@@ -65,7 +65,7 @@ class CmfAuthModule
     protected Mailer $mailer;
     protected GateContract $authGate;
     protected Dispatcher $eventsDispatcher;
-    
+
     public function __construct(CmfConfig $cmfConfig)
     {
         $this->cmfConfig = $cmfConfig;
@@ -77,42 +77,42 @@ class CmfAuthModule
         $this->eventsDispatcher = $this->app->make('events');
         $this->validator = $this->app->make('validator');
     }
-    
+
     protected function getLaravelApp(): Application
     {
         return $this->app;
     }
-    
+
     protected function getSessionStore(): SessionStore
     {
         return $this->sessionStore;
     }
-    
+
     protected function getAuthManager(): AuthManager
     {
         return $this->authManager;
     }
-    
+
     protected function getMailer(): Mailer
     {
         return $this->mailer;
     }
-    
+
     public function getAuthGate(): GateContract
     {
         return $this->authGate;
     }
-    
+
     protected function getEventsDispatcher(): Dispatcher
     {
         return $this->eventsDispatcher;
     }
-    
+
     protected function getValidator(): ValidationFactoryContract
     {
         return $this->validator;
     }
-    
+
     public function init(): void
     {
         $this->configureAuthorizationGatesAndPolicies();
@@ -121,12 +121,12 @@ class CmfAuthModule
         $this->authGuard = $this->getAuthManager()->guard($authGuardName);
         $this->listenForUserAuthenticationEvents();
     }
-    
+
     public function getCmfConfig(): CmfConfig
     {
         return $this->cmfConfig;
     }
-    
+
     protected function getAuthGuardName(): string
     {
         return $this->getCmfConfig()->config('auth.guard.name', function () {
@@ -134,7 +134,7 @@ class CmfAuthModule
             return is_string($config) ? $config : 'admin';
         });
     }
-    
+
     /**
      * @return CmfAdmin|RecordInterface|Authenticatable
      * @noinspection PhpDocSignatureInspection
@@ -143,12 +143,12 @@ class CmfAuthModule
     {
         return $this->getAuthGuard()->user();
     }
-    
+
     public function hasUser(): bool
     {
         return (bool)$this->getAuthGuard()->user();
     }
-    
+
     /**
      * @return Guard|StatefulGuard|SessionGuard
      * @noinspection PhpDocSignatureInspection
@@ -157,7 +157,7 @@ class CmfAuthModule
     {
         return $this->authGuard ?: $this->getAuthManager()->guard($this->getAuthGuardName());
     }
-    
+
     /**
      * @return string|RecordInterface
      */
@@ -167,7 +167,7 @@ class CmfAuthModule
             throw new \UnexpectedValueException('You need to provide a DB Record class for users');
         });
     }
-    
+
     /**
      * @return TableInterface|CmfAdminsTable
      * @noinspection PhpDocSignatureInspection
@@ -177,17 +177,17 @@ class CmfAuthModule
         $recordClass = $this->getUserRecordClass(); //< do not merge with next line!!!
         return $recordClass::getTable();
     }
-    
+
     public function loginOnceUsingEmail(string $email): bool
     {
         return $this->getAuthGuard()->once([$this->getUserEmailColumnName() => $email]);
     }
-    
+
     public function getLoginPageLogo(): string
     {
         return $this->getCmfConfig()->config('auth.login_logo') ?: $this->defaultLoginPageLogo;
     }
-    
+
     public function renderUserLoginPageView(): string
     {
         if ($this->hasUser()) {
@@ -195,7 +195,7 @@ class CmfAuthModule
         }
         return view($this->userLoginPageViewPath, ['authModule' => $this])->render();
     }
-    
+
     /**
      * Enable/disable password restore link in login form
      */
@@ -203,7 +203,7 @@ class CmfAuthModule
     {
         return $this->getCmfConfig()->config('auth.is_registration_allowed', true);
     }
-    
+
     public function renderUserRegistrationPageView(): string
     {
         if (!$this->isRegistrationAllowed()) {
@@ -213,7 +213,7 @@ class CmfAuthModule
             'authModule' => $this,
         ])->render();
     }
-    
+
     public function processUserRegistrationRequest(Request $request): JsonResponse
     {
         if (!$this->isRegistrationAllowed()) {
@@ -227,9 +227,9 @@ class CmfAuthModule
         $this->afterRegistration($user);
         $this->getAuthGuard()->login($user, true);
         return CmfJsonResponse::create()
-            ->setForcedRedirect($this->getCmfConfig()->home_page_url());
+            ->setForcedRedirect($this->getCmfConfig()->homePageUrl());
     }
-    
+
     protected function validateAndGetDataForRegistration(Request $request): array
     {
         $validationRules = [
@@ -270,7 +270,7 @@ class CmfAuthModule
         );
         return $request->only($columnsToSave);
     }
-    
+
     public function getDataForUserProfileForm(): array
     {
         $admin = $this->getUser();
@@ -287,7 +287,7 @@ class CmfAuthModule
         }
         return $adminData;
     }
-    
+
     public function renderUserProfilePageView(): string
     {
         $user = $this->getUser();
@@ -298,7 +298,7 @@ class CmfAuthModule
             'canSubmit' => $this->getAuthGate()->allows('resource.update', ['cmf_profile', $user]),
         ])->render();
     }
-    
+
     public function processUserProfileUpdateRequest(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -324,12 +324,12 @@ class CmfAuthModule
             ->setMessage($this->getCmfConfig()->transCustom('page.profile.saved'))
             ->reloadPage();
     }
-    
+
     public function getAccessPolicyClassName(): string
     {
         return $this->getCmfConfig()->config('auth.acceess_policy_class') ?: CmfAccessPolicy::class;
     }
-    
+
     public function processUserLoginRequest(Request $request): JsonResponse
     {
         $userLoginColumn = $this->getUserLoginColumnName();
@@ -348,7 +348,7 @@ class CmfAuthModule
             return CmfJsonResponse::create()->setRedirect($this->getIntendedUrl());
         }
     }
-    
+
     public function processUserLogoutRequest(Request $request): RedirectResponse|JsonResponse
     {
         $loginPageUrl = $this->getLoginPageUrl(true);
@@ -373,7 +373,7 @@ class CmfAuthModule
             ? CmfJsonResponse::create()->setForcedRedirect($loginPageUrl)
             : new RedirectResponse($loginPageUrl);
     }
-    
+
     /**
      * Logout current user, invalidate session and reset locale
      */
@@ -383,7 +383,7 @@ class CmfAuthModule
         $this->getSessionStore()->flush();
         $this->getCmfConfig()->detectLocale();
     }
-    
+
     public function processLoginAsOtherUserRequest(int|float|string $otherUserId): JsonResponse
     {
         $this->authorize('cmf_page', ['login_as']);
@@ -410,17 +410,17 @@ class CmfAuthModule
             $this->originalUserFromLoginAsActionSessionKey => [
                 'id' => $currentUserId,
                 'token' => $token,
-                'url' => $this->getLaravelApp()->make('url')->previous($this->getCmfConfig()->home_page_url(true)),
+                'url' => $this->getLaravelApp()->make('url')->previous($this->getCmfConfig()->homePageUrl(true)),
             ],
-            $this->getCmfConfig()->session_message_key() => $this->getCmfConfig()->transCustom(
+            $this->getCmfConfig()->sessionMessageKey() => $this->getCmfConfig()->transCustom(
                 'admins.login_as.success',
                 ['user' => $otherUser->getValue($this->getUserLoginColumnName())]
             ),
         ]);
         return CmfJsonResponse::create()
-            ->setRedirect($this->getCmfConfig()->home_page_url());
+            ->setRedirect($this->getCmfConfig()->homePageUrl());
     }
-    
+
     public function startPasswordRecoveryProcess(Request $request): JsonResponse
     {
         if (!$this->isPasswordRestoreAllowed()) {
@@ -446,12 +446,12 @@ class CmfAuthModule
             }
             $this->sendPasswordRecoveryInstructionsEmail($user);
         }
-        
+
         return CmfJsonResponse::create()
             ->setMessage($this->getCmfConfig()->transCustom('forgot_password.instructions_sent'))
             ->setRedirect($this->getLoginPageUrl());
     }
-    
+
     public function finishPasswordRecoveryProcess(Request $request, string $accessKey): JsonResponse
     {
         if (!$this->isPasswordRestoreAllowed()) {
@@ -478,12 +478,12 @@ class CmfAuthModule
                 ->setForcedRedirect($this->getLoginPageUrl());
         }
     }
-    
+
     public function renderForgotPasswordPageView(): string
     {
         return view($this->forgotPasswordPageViewPath, ['authModule' => $this])->render();
     }
-    
+
     public function renderReplaceUserPasswordPageView(string $accessKey): string
     {
         if (!$this->isPasswordRestoreAllowed()) {
@@ -505,27 +505,27 @@ class CmfAuthModule
             );
         }
     }
-    
+
     public function getLoginPageUrl(bool $absolute = false): string
     {
         return $this->getCmfConfig()->route('cmf_login', [], $absolute);
     }
-    
+
     public function getLogoutPageUrl(bool $absolute = false): string
     {
         return $this->getCmfConfig()->route('cmf_logout', [], $absolute);
     }
-    
+
     public function getRegistrationPageUrl(bool $absolute = false): string
     {
         return $this->getCmfConfig()->route('cmf_register', [], $absolute);
     }
-    
+
     public function getPasswordRecoveryStartPageUrl(bool $absolute = false): string
     {
         return $this->getCmfConfig()->route('cmf_forgot_password', [], $absolute);
     }
-    
+
     public function getPasswordRecoveryFinishPageUrl(ResetsPasswordsViaAccessKey|string $userOrAccessKey, bool $absolute = true): string
     {
         if (!is_string($userOrAccessKey)) {
@@ -537,12 +537,12 @@ class CmfAuthModule
             $absolute
         );
     }
-    
+
     public function getProfilePageUrl(bool $absolute = false): string
     {
         return $this->getCmfConfig()->route('cmf_profile', [], $absolute);
     }
-    
+
     /**
      * Enable/disable password restore link in login form
      */
@@ -550,12 +550,12 @@ class CmfAuthModule
     {
         return $this->getCmfConfig()->config('auth.is_password_restore_allowed', true);
     }
-    
+
     public function getUserLoginColumnName(): string
     {
         return $this->getCmfConfig()->config('auth.user_login_column') ?: 'email';
     }
-    
+
     /**
      * List of roles for CMF section's user
      */
@@ -563,7 +563,7 @@ class CmfAuthModule
     {
         return $this->getCmfConfig()->config('auth.roles', ['user']);
     }
-    
+
     public function getDefaultUserRole(): string
     {
         return $this->getCmfConfig()->config('auth.default_role', function () {
@@ -571,7 +571,7 @@ class CmfAuthModule
             return count($roles) ? array_values($roles)[0] : 'user';
         });
     }
-    
+
     /**
      * @param ResetsPasswordsViaAccessKey|RecordInterface $user
      * @noinspection PhpDocSignatureInspection
@@ -579,7 +579,7 @@ class CmfAuthModule
     protected function sendPasswordRecoveryInstructionsEmail(RecordInterface $user): void
     {
         $subject = $this->getCmfConfig()->transCustom('forgot_password.email_subject');
-        $from = $this->getCmfConfig()->system_email_address();
+        $from = $this->getCmfConfig()->systemEmailAddress();
         $to = $user->getValue($this->getUserEmailColumnName());
         $this->getMailer()->send(
             $this->getPasswordRecoveryEmailViewPath(),
@@ -596,7 +596,7 @@ class CmfAuthModule
             }
         );
     }
-    
+
     /**
      * @return RecordInterface|ResetsPasswordsViaAccessKey
      */
@@ -606,7 +606,7 @@ class CmfAuthModule
         $userClass = $this->getUserRecordClass();
         return $userClass::loadFromPasswordRecoveryAccessKey($accessKey);
     }
-    
+
     /**
      * @throws \BadMethodCallException
      */
@@ -627,7 +627,7 @@ class CmfAuthModule
         }
         return $this->emailColumnName;
     }
-    
+
     /**
      * In this method you should place authorisation gates and policies according to Laravel's docs:
      * https://laravel.com/docs/5.4/authorization
@@ -695,7 +695,7 @@ class CmfAuthModule
         ]);
         $this->getAuthGate()->define('cmf_page', CmfAccessPolicy::class . '@cmf_page');
     }
-    
+
     public function listenForUserAuthenticationEvents(): void
     {
         $this->getEventsDispatcher()->listen(
@@ -703,24 +703,24 @@ class CmfAuthModule
             CmfUserAuthenticatedEventListener::class
         );
     }
-    
+
     protected function getPasswordRecoveryEmailViewPath(): string
     {
         return $this->passwordRevoceryEmailViewPath;
     }
-    
+
     public function saveIntendedUrl(string $url): void
     {
         $this->getSessionStore()
             ->put($this->getCmfConfig()->makeUtilityKey('intended_url'), $url);
     }
-    
+
     public function getIntendedUrl(): string
     {
         $cmfConfig = $this->getCmfConfig();
         $intendedUrl = $this->getSessionStore()->pull($cmfConfig->makeUtilityKey('intended_url'));
         if (empty($intendedUrl)) {
-            return $cmfConfig->home_page_url();
+            return $cmfConfig->homePageUrl();
         } elseif (preg_match('%/api/([^/]+?)/list/?$%i', $intendedUrl, $matches)) {
             return CmfUrl::toItemsTable($matches[1], [], false, $cmfConfig);
         } elseif (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
@@ -739,7 +739,7 @@ class CmfAuthModule
             return $intendedUrl;
         }
     }
-    
+
     /**
      * @param Request $request
      * @param RecordInterface|Authenticatable $admin
@@ -813,15 +813,15 @@ class CmfAuthModule
         if (count($errors) > 0) {
             $this->throwValidationErrorsResponse($errors);
         }
-        
+
         return $request->only($columnsToUpdate);
     }
-    
+
     public function isRecaptchaAvailable(): bool
     {
-        return !empty($this->getCmfConfig()->recaptcha_public_key());
+        return !empty($this->getCmfConfig()->recaptchaPublicKey());
     }
-    
+
     /**
      * Additional user profile fields and validators
      * Format: ['filed1' => 'validation rules', 'field2', ...]
@@ -830,7 +830,7 @@ class CmfAuthModule
     {
         return [];
     }
-    
+
     /**
      * Additional user profile fields and validators
      * Format: ['filed1' => 'validation rules', 'field2', ...]
@@ -839,7 +839,7 @@ class CmfAuthModule
     {
         return [];
     }
-    
+
     /**
      * Additional non-editable data to save into user record.
      * For example: role, language
@@ -849,7 +849,7 @@ class CmfAuthModule
     protected function addCustomRegistrationData(RecordInterface $user): void
     {
     }
-    
+
     /**
      * Additional actions after user's account created.
      * For example: send confirmation email
@@ -859,7 +859,7 @@ class CmfAuthModule
     protected function afterRegistration(RecordInterface $user): void
     {
     }
-    
+
     /**
      * Called when user have changed his emails address.
      * Here you can modify email confirmation status and send confirmation email
@@ -870,5 +870,5 @@ class CmfAuthModule
     protected function onUserEmailAddressChange(RecordInterface $user, ?string $oldEmail): void
     {
     }
-    
+
 }

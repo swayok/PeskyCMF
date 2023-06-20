@@ -11,20 +11,19 @@ use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
-use PeskyORM\ORM\TableInterface;
+use PeskyORM\ORM\Table\TableInterface;
 use Swayok\Utils\File;
 
 class CmfUIModule
 {
-    
     protected CmfConfig $cmfConfig;
     protected ViewsFactory $viewsFactory;
-    
+
     protected string $scaffoldTemplatesForNormalTableViewPath = 'cmf::scaffold.templates';
     protected string $scaffoldTemplatesForKeyValueTableViewPath = 'cmf::scaffold.templates';
-    
-    protected string $defaultSidebarLogo = '<img src="/packages/cmf/raw/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
-    
+
+    protected string $defaultSidebarLogo = '<img src="/vendor/peskycmf/raw/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
+
     protected array $uiViews = [
         'layout' => 'cmf::layout',
         'ui' => 'cmf::ui.ui',
@@ -34,26 +33,26 @@ class CmfUIModule
         'top_navbar' => 'cmf::ui.top_navbar',
     ];
     protected bool $isUIViewsLoadedFromConfigs = false;
-    
+
     protected ?array $resources = null;
     protected array $tables = [];
     protected array $scaffoldConfigs = [];
-    
+
     protected ?array $menuItemsFromScaffoldConfigs = null;
     protected array $customMenuItems = [];
     protected ?array $allMenuItems = null;
-    
+
     public function __construct(CmfConfig $cmfConfig)
     {
         $this->cmfConfig = $cmfConfig;
         $this->viewsFactory = $cmfConfig->getLaravelApp()->make('view');
     }
-    
+
     public function renderLayoutView(): string
     {
         return $this->renderUIView('layout', $this->getDataForLayout());
     }
-    
+
     protected function getDataForLayout(): array
     {
         $uiSkin = $this->getSkinName();
@@ -66,12 +65,12 @@ class CmfUIModule
             'jsAppData' => $this->getJsAppData(),
         ];
     }
-    
+
     public function getSkinName(): string
     {
         return $this->cmfConfig->config('ui.skin', 'skin-blue');
     }
-    
+
     public function getCoreAssetsForLayout(string $skin): array
     {
         $assetsMode = config('peskycmf.assets');
@@ -85,26 +84,26 @@ class CmfUIModule
         $locale = $this->cmfConfig->getLocaleWithSuffix('_');
         $ret = [
             'js-head' => [
-                "/packages/cmf/raw/js/jquery{$minSuffix}.js",
+                "/vendor/peskycmf/raw/js/jquery{$minSuffix}.js",
             ],
             'js' => [
-                'cmf-libs' => "/packages/cmf/{$subFolder}/js/cmf-libs.js",
-                'cmf-jquery-and-bootstrap-plugins' => "/packages/cmf/{$subFolder}/js/cmf-jquery-and-bootstrap-plugins.js",
-                'cmf-core' => "/packages/cmf/{$subFolder}/js/cmf-core.js",
-                'localization' => "/packages/cmf/{$subFolder}/js/locale/{$locale}.js",
-                'app' => '/packages/cmf/raw/js/cmf-app.js',
+                'cmf-libs' => "/vendor/peskycmf/{$subFolder}/js/cmf-libs.js",
+                'cmf-jquery-and-bootstrap-plugins' => "/vendor/peskycmf/{$subFolder}/js/cmf-jquery-and-bootstrap-plugins.js",
+                'cmf-core' => "/vendor/peskycmf/{$subFolder}/js/cmf-core.js",
+                'localization' => "/vendor/peskycmf/{$subFolder}/js/locale/{$locale}.js",
+                'app' => '/vendor/peskycmf/raw/js/cmf-app.js',
             ],
             'css' => [
-                '/packages/cmf/raw/css/fonts/Roboto/roboto.css',
-                '/packages/cmf/raw/css/bootstrap/bootstrap.css',
-                '/packages/cmf/raw/css/adminlte/AdminLTE.css',
-                "/packages/cmf/raw/css/adminlte/skins/{$skin}.css",
-                'cmf-libs' => "/packages/cmf/{$subFolder}/css/cmf-libs.css",
-                'cmf-core' => "/packages/cmf/{$subFolder}/css/cmf.css",
-                "/packages/cmf/raw/font-awesome/css/font-awesome{$minSuffix}.css",
+                '/vendor/peskycmf/raw/css/fonts/Roboto/roboto.css',
+                '/vendor/peskycmf/raw/css/bootstrap/bootstrap.css',
+                '/vendor/peskycmf/raw/css/adminlte/AdminLTE.css',
+                "/vendor/peskycmf/raw/css/adminlte/skins/{$skin}.css",
+                'cmf-libs' => "/vendor/peskycmf/{$subFolder}/css/cmf-libs.css",
+                'cmf-core' => "/vendor/peskycmf/{$subFolder}/css/cmf.css",
+                "/vendor/peskycmf/raw/font-awesome/css/font-awesome{$minSuffix}.css",
             ],
         ];
-        
+
         if ($isSrcMode) {
             $files = File::readJson(__DIR__ . '/../../../npm/config/cmf-assets.json');
             $isCore = $assetsMode === 'src-core';
@@ -113,27 +112,27 @@ class CmfUIModule
                 if (isset($ret['js'][$packName])) {
                     $ret['js'][$packName] = [];
                     foreach ($files['scripts'][$packName]['files'] as $path) {
-                        $ret['js'][$packName][] = '/packages/cmf/src/' . $path;
+                        $ret['js'][$packName][] = '/vendor/peskycmf/src/' . $path;
                     }
                 }
                 if (isset($ret['css'][$packName])) {
                     $ret['css'][$packName] = [];
                     foreach ($files['stylesheets'][$packName]['files'] as $path) {
-                        $ret['css'][$packName][] = '/packages/cmf/src/' . $path;
+                        $ret['css'][$packName][] = '/vendor/peskycmf/src/' . $path;
                     }
                 }
             }
-            $ret['js']['app'] = '/packages/cmf/src/src/js/cmf.app.js';
+            $ret['js']['app'] = '/vendor/peskycmf/src/src/js/cmf.app.js';
             if (!$isCore && isset($files['localizations'][$locale])) {
                 $ret['js']['localization'] = [];
                 foreach ($files['localizations'][$locale]['files'] as $path) {
-                    $ret['js']['localization'][] = '/packages/cmf/src/' . $path;
+                    $ret['js']['localization'][] = '/vendor/peskycmf/src/' . $path;
                 }
             }
         }
         return $ret;
     }
-    
+
     public function getCustomAssetsForLayout(): array
     {
         return [
@@ -142,7 +141,7 @@ class CmfUIModule
             'js_code_blocks' => (array)$this->cmfConfig->config('ui.js_code_blocks', []),
         ];
     }
-    
+
     /**
      * Prefix to load custom views from.
      * For example
@@ -153,22 +152,22 @@ class CmfUIModule
     {
         return $this->cmfConfig->config('ui.views_subfolder', 'admin') . '.';
     }
-    
+
     public function renderBasicUIView(): string
     {
         return $this->renderUIView('ui', $this->getDataForBasicUiView());
     }
-    
+
     protected function getDataForBasicUiView(): array
     {
         return [];
     }
-    
+
     public function getSidebarLogo(): string
     {
         return (string)($this->cmfConfig->config('ui.sidebar_logo') ?: $this->defaultSidebarLogo);
     }
-    
+
     public function renderScaffoldTemplates(ScaffoldConfigInterface $scaffoldConfig): string
     {
         $view = $scaffoldConfig instanceof KeyValueTableScaffoldConfig
@@ -182,7 +181,7 @@ class CmfUIModule
             )
         )->render();
     }
-    
+
     protected function loadUIViewsFromConfig(): void
     {
         if (!$this->isUIViewsLoadedFromConfigs) {
@@ -192,7 +191,7 @@ class CmfUIModule
             );
         }
     }
-    
+
     public function getUIView(string $viewName): string
     {
         $this->loadUIViewsFromConfig();
@@ -201,14 +200,14 @@ class CmfUIModule
         }
         return $this->uiViews[$viewName];
     }
-    
+
     public function renderUIView(string $viewName, array $data = []): string
     {
         $data['cmfConfig'] = $this->cmfConfig;
         $data['uiModule'] = $this;
         return $this->viewsFactory->make($this->getUIView($viewName), $data)->render();
     }
-    
+
     public function getResources(): array
     {
         if ($this->resources === null) {
@@ -220,7 +219,7 @@ class CmfUIModule
         }
         return $this->resources;
     }
-    
+
     /**
      * Get ScaffoldConfig instance
      * @param string $resourceName - table name passed via route parameter, may differ from $table->getTableName()
@@ -238,7 +237,7 @@ class CmfUIModule
         }
         return $this->scaffoldConfigs[$resourceName];
     }
-    
+
     /**
      * @throws \InvalidArgumentException
      */
@@ -250,7 +249,7 @@ class CmfUIModule
             );
         });
     }
-    
+
     /**
      * Get values for menu items counters (details in CmfConfig::menu())
      * @return array like ['pending_orders' => '<span class="label label-primary pull-right">2</span>']
@@ -267,10 +266,10 @@ class CmfUIModule
         }
         return $counters;
     }
-    
+
     /**
      * Get TableInterface instance for $tableName
-     * Note: can be ovewritted to allow usage of fake tables in resources routes
+     * Note: can be overwritten to allow usage of fake tables in resources routes
      * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
      * @param string $resourceName
      * @return TableInterface
@@ -284,12 +283,12 @@ class CmfUIModule
         }
         return $this->tables[$resourceName];
     }
-    
+
     public function getUiUrl(bool $absolute = false): string
     {
         return $this->cmfConfig->route('cmf_main_ui', [], $absolute);
     }
-    
+
     /**
      * JS application settings (accessed via CmfSettings global variable)
      */
@@ -297,18 +296,18 @@ class CmfUIModule
     {
         return [
             'isDebug' => $this->cmfConfig->getLaravelConfigs()->get('app.debug'),
-            'rootUrl' => '/' . trim($this->cmfConfig->url_prefix(), '/'),
+            'rootUrl' => '/' . trim($this->cmfConfig->urlPrefix(), '/'),
             'enablePing' => (int)$this->cmfConfig->config('ping_interval') > 0,
             'pingInterval' => (int)$this->cmfConfig->config('ping_interval') * 1000,
             'uiUrl' => $this->getUiUrl(false),
             'userDataUrl' => $this->cmfConfig->route('cmf_profile_data', [], false),
             'menuCountersDataUrl' => $this->cmfConfig->route('cmf_menu_counters_data', [], false),
-            'defaultPageTitle' => $this->cmfConfig->default_page_title(),
-            'pageTitleAddition' => $this->cmfConfig->page_title_addition(),
+            'defaultPageTitle' => $this->cmfConfig->defaultPageTitle(),
+            'pageTitleAddition' => $this->cmfConfig->pageTitleAddition(),
             'localizationStrings' => $this->cmfConfig->transGeneral('ui.js_component'),
         ];
     }
-    
+
     /**
      * Variables that will be sent to js and stored into AppData
      * To access data from js code use AppData.key_name
@@ -317,7 +316,7 @@ class CmfUIModule
     {
         return [];
     }
-    
+
     /**
      * $menuItem format described in CmfConfig->menu()
      */
@@ -332,7 +331,7 @@ class CmfUIModule
         }
         return $this;
     }
-    
+
     public function getMenuItems(): array
     {
         if ($this->allMenuItems === null) {
@@ -346,7 +345,7 @@ class CmfUIModule
         }
         return $this->allMenuItems;
     }
-    
+
     protected function getMenuItemsFromScaffoldConfigs(): array
     {
         if ($this->menuItemsFromScaffoldConfigs === null) {
@@ -358,7 +357,7 @@ class CmfUIModule
         }
         return $this->menuItemsFromScaffoldConfigs;
     }
-    
+
     public static function modifyDotJsTemplateToAllowInnerScriptsAndTemplates(string $dotJsTemplate): string
     {
         return preg_replace_callback('%<script([^>]*)>(.*?)</script>%is', function ($matches) {
@@ -372,5 +371,5 @@ class CmfUIModule
             }
         }, $dotJsTemplate);
     }
-    
+
 }

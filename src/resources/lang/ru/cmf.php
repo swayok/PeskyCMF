@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use PeskyORM\ORM\TableStructure\TableColumn\ColumnValueValidationMessages\ColumnValueValidationMessagesInterface;
+
 return [
     'test' => 'ok', //< used in PeskyCmfServiceProvider to load cmf dictionaries
     'ui' => [
@@ -284,30 +286,50 @@ return [
             'failed_to_save_resource_data' => 'Не удалось сохранить данные',
             'validation_errors' => 'Обнаружены недопустимые данные',
             'column_validation_errors' => [
-                'value_cannot_be_null' => 'Получено запрещенное значение: NULL.',
-                'value_must_be_boolean' => 'Ожидается логическое значение (да/нет).',
-                'value_must_be_integer' => 'Ожидается целое число.',
-                'value_must_be_float' => 'Ожидается целое или дробное число.',
-                'value_must_be_image' => 'Ожидается картинка.',
-                'value_must_be_file' => 'Ожидается файл.',
-                'value_must_be_json' => 'Ожидается JSON-строка',
-                'value_must_be_ipv4_address' => 'Неправильный IP адрас. Пример: 127.0.0.1',
-                'value_must_be_email' => 'Ожидается email-адрес.',
-                'value_must_be_timezone_offset' => 'Ожидается смещение по времени (часовому поясу).',
-                'value_must_be_timestamp' => 'Ожидается дата и время.',
-                'value_must_be_timestamp_with_tz' => 'Ожидается дата и время с указанием временной зоны.',
-                'value_must_be_time' => 'Ожидается время.',
-                'value_must_be_date' => 'Ожидается дата.',
-                'value_is_not_allowed' => 'Получено запрещенное значение: :value.',
-                'one_of_values_is_not_allowed' => 'Одно из полученных значение запрещено.',
-                'value_must_be_string' => 'Ожидается строка.',
-                'value_must_be_string_or_numeric' => 'Ожидается строка или число (целое или дробное).',
-                'value_must_be_array' => 'Ожидается массив.',
-                'invalid_image_type' => "Формат загруженной картинки ('%s') не разрешен для '%s'. Разрешенные форматы: %s.",
-                'invalid_file_type' => "Формат загруженного файла ('%s') не разрешен для '%s'. Разрешенные форматы: %s.",
-                'file_size_is_too_large' => "Размер загруженного файла превышает максимальный размер файла %s килобайт большой для '%s'.",
-                'file_is_not_a_valid_image' => "Загруженный файл для '%s' поврежден или не является картинкой.",
-                'file_is_not_a_valid_upload' => "Данные, полученные для '%s' не содержат данные о загруженном файле.",
+                ColumnValueValidationMessagesInterface::EXCEPTION_MESSAGE => 'Ошибки валидации данных: %s.',
+                ColumnValueValidationMessagesInterface::VALUE_CANNOT_BE_NULL => 'Получено запрещенное значение: NULL.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_BOOLEAN =>
+                    'Ожидается логическое значение (да/нет).',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_INTEGER => 'Ожидается целое число.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_POSITIVE_INTEGER =>
+                    'Ожидается целое число больше нуля.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_FLOAT => 'Ожидается целое или дробное число.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_IMAGE => 'Ожидается картинка.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_FILE => 'Ожидается файл.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_JSON_OR_JSONABLE =>
+                    'Значение должно быть JSON строкой или быть объектом, который можно конвертировать в JSON.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_JSON_ARRAY_OR_OBJECT =>
+                    'Значение должно быть массивом или объектом закодированным в JSON или PHP массивом.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_JSON_ARRAY =>
+                    'Значение должно быть индексированным массивом закодированным в JSON или индексированным PHP массивом.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_JSON_OBJECT =>
+                    'Значение должно быть объектом закодированным в JSON или ассоциативным PHP массивом.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_IPV4_ADDRESS =>
+                    'Значение должно быть IPv4 адресом.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_EMAIL =>
+                    'Значение должно быть корректным E-mail адресом.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_TIMEZONE =>
+                    'Значение должно быть названием временной зоны или смещением временной зоны по UTC от -12:00 до +14:00.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_TIMESTAMP =>
+                    'Значение должно содержать дату и время.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_TIMESTAMP_OR_INTEGER =>
+                    'Значение должно содержать дату и время или положительным целым числом (UNIX timestamp).',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_TIME => 'Значение должно содержать время.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_DATE => 'Значение должно содержать дату.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_STRING => 'Значение должно быть строкой.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_PASSWORD_HASH =>
+                    'Значение должно содержать хеш пароля.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_PLAIN_PASSWORD =>
+                    'Значение должно быть незахешированным паролем (получен хеш).',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_ARRAY => 'Значение должно быть массивом.',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_RESOURCE =>
+                    'Значение должно быть ресурсом (resource).',
+                ColumnValueValidationMessagesInterface::VALUE_MUST_BE_STRING_OR_RESOURCE =>
+                    'Значение должно быть строкой или ресурсом (resource).',
+                ColumnValueValidationMessagesInterface::VALUE_FROM_DB_CANNOT_BE_DB_EXPRESSION =>
+                    'Значение полученное из БД не можеть быть экземпляром класса DbExpr.',
+                ColumnValueValidationMessagesInterface::VALUE_FROM_DB_CANNOT_BE_QUERY_BUILDER =>
+                    'Значение полученное из БД не можеть быть экземпляром класса SelectQueryBuilderInterface.',
             ]
         ],
         'input' => [
@@ -322,13 +344,15 @@ return [
             'key_value_set' => [
                 'add_row' => 'Добавить строку',
                 'delete_row' => 'Удалить строку',
-                'row_delete_action_forbidden' => 'Нельзя удалить эту строку т.к. достигнуто минимальное количество строк',
+                'row_delete_action_forbidden' =>
+                    'Нельзя удалить эту строку т.к. достигнуто минимальное количество строк',
                 'table_header_for_abstract_value' => 'Значение',
             ],
             'has_many_related_records' => [
                 'add_row' => 'Добавить',
                 'delete_row' => 'Удалить',
-                'row_delete_action_forbidden' => 'Нельзя удалить этот объект т.к. достигнуто минимальное количество объектов'
+                'row_delete_action_forbidden' =>
+                    'Нельзя удалить этот объект т.к. достигнуто минимальное количество объектов'
             ],
             'async_files_uploads' => [
                 'file_name' => 'Имя',

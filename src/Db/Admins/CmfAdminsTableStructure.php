@@ -17,23 +17,23 @@ use PeskyORMColumns\TableStructureTraits\UserAuthColumns;
 
 class CmfAdminsTableStructure extends CmfDbTableStructure
 {
-    
+
     use IdColumn;
     use TimestampColumns;
     use IsActiveColumn;
     use UserAuthColumns;
-    
+
     public static function getTableName(): string
     {
         return 'admins';
     }
-    
+
     private function parent_id(): Column
     {
         return Column::create(Column::TYPE_INT)
             ->convertsEmptyStringToNull();
     }
-    
+
     private function email(): Column
     {
         $column = Column::create(Column::TYPE_EMAIL)
@@ -46,7 +46,7 @@ class CmfAdminsTableStructure extends CmfDbTableStructure
         }
         return $column;
     }
-    
+
     private function login(): Column
     {
         $column = Column::create(Column::TYPE_STRING)
@@ -59,20 +59,20 @@ class CmfAdminsTableStructure extends CmfDbTableStructure
         }
         return $column;
     }
-    
+
     private function name(): Column
     {
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
             ->setDefaultValue('');
     }
-    
+
     private function ip(): Column
     {
         return Column::create(Column::TYPE_IPV4_ADDRESS)
             ->convertsEmptyStringToNull();
     }
-    
+
     private function is_superadmin(): Column
     {
         return Column::create(Column::TYPE_BOOL)
@@ -80,7 +80,7 @@ class CmfAdminsTableStructure extends CmfDbTableStructure
             ->convertsEmptyStringToNull()
             ->setDefaultValue(false);
     }
-    
+
     private function role(): Column
     {
         return Column::create(Column::TYPE_STRING)
@@ -88,21 +88,21 @@ class CmfAdminsTableStructure extends CmfDbTableStructure
             ->convertsEmptyStringToNull()
             ->setDefaultValue($this->getCmfConfig()->getAuthModule()->getDefaultUserRole());
     }
-    
+
     private function language(): Column
     {
         return Column::create(Column::TYPE_STRING)
             ->disallowsNullValues()
             ->convertsEmptyStringToNull()
-            ->setDefaultValue($this->getCmfConfig()->default_locale());
+            ->setDefaultValue($this->getCmfConfig()->defaultLocale());
     }
-    
+
     private function timezone(): Column
     {
         return Column::create(Column::TYPE_STRING)
             ->convertsEmptyStringToNull();
     }
-    
+
     private function ParentAdmin(): Relation
     {
         return Relation::create(
@@ -115,10 +115,10 @@ class CmfAdminsTableStructure extends CmfDbTableStructure
                 return $this->getCmfConfig()->getAuthModule()->getUserLoginColumnName();
             });
     }
-    
+
     public function getCmfConfig(): CmfConfig
     {
         return app(CmfManager::class)->getCurrentCmfConfig();
     }
-    
+
 }

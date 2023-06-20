@@ -4,51 +4,50 @@ declare(strict_types=1);
 
 namespace PeskyCMF;
 
+use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Foundation\Application;
 use PeskyCMF\Config\CmfConfig;
-use Symfony\Component\HttpFoundation\ParameterBag;
 
 class CmfManager
 {
-    
     protected Application $app;
-    
+
     protected ?array $sectionsNames = null;
     protected ?string $defaultSectionName = null;
     protected ?string $currentCmfSectionName = null;
-    
+
     /** @var CmfConfig[] */
     protected array $loadedCmfConfigs = [];
     protected ?CmfConfig $currentCmfConfig = null;
-    
+
     /** @var \Closure[] */
     protected array $callbacks = [];
-    
+
     public function __construct(Application $app)
     {
         $this->app = $app;
     }
-    
+
     protected function config($key)
     {
         return $this->appConfigs()->get('peskycmf.' . $key);
     }
-    
-    protected function appConfigs(): ParameterBag
+
+    protected function appConfigs(): ConfigRepository
     {
         return $this->app['config'];
     }
-    
+
     public function getCurrentCmfConfig(): CmfConfig
     {
         return $this->currentCmfConfig ?? $this->getCmfConfigForSection(null);
     }
-    
+
     public function getCurrentCmfSectionName(): string
     {
         return $this->currentCmfSectionName ?? $this->getDefaultCmfSectionName();
     }
-    
+
     public function getCmfConfigForSection(?string $cmfSectionName = null): CmfConfig
     {
         if ($cmfSectionName === null) {
@@ -57,21 +56,29 @@ class CmfManager
         if (!isset($this->loadedCmfConfigs[$cmfSectionName])) {
             $knownConfigs = $this->getAllCmfSectionsNames();
             if (!isset($knownConfigs[$cmfSectionName])) {
-                throw new \InvalidArgumentException("There is no key '$cmfSectionName' in config('peskycmf.cmf_configs') array");
+                throw new \InvalidArgumentException(
+                    "There is no key '$cmfSectionName' in config('peskycmf.cmf_configs') array"
+                );
             }
             $className = $knownConfigs[$cmfSectionName];
             if (!class_exists($className)) {
                 throw new \InvalidArgumentException("Class {$className} does not exists");
             }
-            if (!is_subclass_of($className, CmfConfig::class)) {
-                throw new \InvalidArgumentException("Class {$className} must extend " . CmfConfig::class . ' class');
+            if (
+                $className !== CmfConfig::class
+                && !is_subclass_of($className, CmfConfig::class)
+            ) {
+                throw new \InvalidArgumentException(
+                    "Class {$className} must extend " . CmfConfig::class . ' class'
+                );
             }
             /** @var CmfConfig $className */
             $this->loadedCmfConfigs[$cmfSectionName] = new $className();
+            $this->loadedCmfConfigs[$cmfSectionName]->setLaravelApp($this->app);
         }
         return $this->loadedCmfConfigs[$cmfSectionName];
     }
-    
+
     public function getDefaultCmfSectionName(): string
     {
         if (!$this->defaultSectionName) {
@@ -85,7 +92,7 @@ class CmfManager
         }
         return $this->defaultSectionName;
     }
-    
+
     public function getAllCmfSectionsNames(): array
     {
         if ($this->sectionsNames === null) {
@@ -93,7 +100,7 @@ class CmfManager
         }
         return $this->sectionsNames;
     }
-    
+
     /**
      * Key from config('peskycmf.cmf_configs') array
      */
@@ -102,15 +109,15 @@ class CmfManager
         if ($cmfSectionName !== $this->currentCmfSectionName) {
             $this->currentCmfConfig = $this->getCmfConfigForSection($cmfSectionName);
             $this->currentCmfSectionName = $cmfSectionName;
-            
+
             $this->currentCmfConfig->initSection($this->app);
-            
+
             foreach ($this->callbacks as $closure) {
                 $closure($this->currentCmfConfig);
             }
         }
     }
-    
+
     /**
      * Add Closure to be evaluated after setCurrentCmfSection() call.
      * CmfConfig instance will be passed to closure.
@@ -119,7 +126,7 @@ class CmfManager
     {
         $this->callbacks[] = $callback;
     }
-    
+
     public function registerRoutesForAllCmfSections(): void
     {
         if (!$this->app->routesAreCached()) {
@@ -128,7 +135,7 @@ class CmfManager
             }
         }
     }
-    
+
     public function extendLaravelAppConfigsForAllCmfSections(): void
     {
         if (!$this->app->configurationIsCached()) {
@@ -137,14 +144,14 @@ class CmfManager
             }
         }
     }
-    
+
     /**
      * @return CmfConfig[]
      */
     public function getAvailableCmfConfigs(): array
     {
         $ret = [];
-        foreach ($this->getAllCmfSectionsNames() as $sectionName) {
+        foreach ($this->getAllCmfSectionsNames() as $sectionName => $configClass) {
             $ret[$sectionName] = $this->getCmfConfigForSection($sectionName);
         }
         return $ret;

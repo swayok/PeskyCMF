@@ -26,104 +26,84 @@ use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 class PeskyCmfServiceProvider extends ServiceProvider
 {
-    
     public function register(): void
     {
-        $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
-        
-        $this->registerCmfInjections();
-        
+        $this->registerCmfBindings();
+
         $this->registerRelatedServiceProviders();
         $this->registerServiceProvidersForConsole();
-        $this->registerServiceProvidersForLocalDevelopment();
-        
+
         $this->registerFacades();
-        
         $this->registerCommands();
     }
-    
-    public function provides(): array
-    {
-        return [
-            CmfManager::class,
-            'cmf.manager',
-            PeskyCmfAppSettings::class,
-        ];
-    }
-    
+
     public function boot(): void
     {
         require_once __DIR__ . '/../Config/helpers.php';
-        
+
+        $this->mergeConfigFrom($this->getConfigFilePath(), 'peskycmf');
+
         $this->configurePublishes();
-        
+
         $this->configureTranslations();
         $this->configureViews();
-        
+
         $this->declareRoutesAndConfigsForAllCmfSections();
-        
+
         $this->scheduleCommands();
     }
-    
-    protected function registerCmfInjections(): void
+
+    protected function registerCmfBindings(): void
     {
         $this->app->singleton(CmfManager::class, function ($app) {
             return new CmfManager($app);
         });
         $this->app->alias(CmfManager::class, 'cmf.manager');
-    
+
         $this->app->singleton(PeskyCmfAppSettings::class, function () {
             /** @var PeskyCmfAppSettings $appSettingsClass */
-            $appSettingsClass = $this->getAppConfigs()->get('peskycmf.app_settings_class') ?: PeskyCmfAppSettings::class;
+            $appSettingsClass = $this->getAppConfigs()->get('peskycmf.app_settings_class')
+                ?: PeskyCmfAppSettings::class;
             return new $appSettingsClass($this->app);
         });
-    
-        $this->app->singleton(CmfSettingsTable::class, function () {
-            return CmfSettingsTable::getInstance();
-        });
-    
-        $this->app->singleton(CmfSettingsTableStructure::class, function () {
-            return CmfSettingsTableStructure::getInstance();
-        });
+
+        // $this->app->singleton(CmfSettingsTable::class, function () {
+        //     return CmfSettingsTable::getInstance();
+        // });
+        //
+        // $this->app->singleton(CmfSettingsTableStructure::class, function () {
+        //     return CmfSettingsTableStructure::getInstance();
+        // });
     }
-    
+
     protected function registerRelatedServiceProviders(): void
     {
         $this->app->register(PeskyCmfPeskyOrmServiceProvider::class);
         $this->app->register(RecaptchaServiceProvider::class);
     }
-    
+
     protected function registerServiceProvidersForConsole(): void
     {
         if ($this->runningInConsole()) {
             $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
-            $this->app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
+            $this->app->alias(
+                LanguageDetectorServiceProvider::class,
+                PeskyCmfLanguageDetectorServiceProvider::class
+            );
         }
     }
-    
-    protected function registerServiceProvidersForLocalDevelopment(): void
-    {
-        if ($this->app->environment('local')) {
-            if (class_exists('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider')) {
-                $this->app->register('\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider');
-            }
-            if (class_exists('\Barryvdh\Debugbar\ServiceProvider')) {
-                $this->app->register('\Barryvdh\Debugbar\ServiceProvider');
-            }
-        }
-    }
-    
+
     protected function registerFacades(): void
     {
         AliasLoader::getInstance()->alias('LanguageDetector', LanguageDetector::class);
         AliasLoader::getInstance()->alias('CmfManager', \PeskyCMF\Facades\CmfManager::class);
     }
-    
+
     protected function runningInConsole(): bool
     {
         return $this->app->runningInConsole();
     }
-    
+
     /**
      * @return ParameterBag
      */
@@ -131,7 +111,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
     {
         return $this->app['config'];
     }
-    
+
     protected function configurePublishes(): void
     {
         if (!$this->runningInConsole()) {
@@ -139,34 +119,34 @@ class PeskyCmfServiceProvider extends ServiceProvider
         }
         $cmfLibDir = __DIR__ . '/..';
         // publish cmf assets (minified)
-        $cmfNpmDistDir = $cmfLibDir . '/../../npm/dist';
+        $cmfNpmDistDir = $cmfLibDir . '/../npm/dist';
         $cmfAssets = [
-            $cmfNpmDistDir . '/min' => public_path('packages/cmf/min'),
-            $cmfNpmDistDir . '/packed' => public_path('packages/cmf/packed'),
-            $cmfNpmDistDir . '/raw' => public_path('packages/cmf/raw'),
+            $cmfNpmDistDir . '/min' => public_path('vendor/peskycmf/min'),
+            $cmfNpmDistDir . '/packed' => public_path('vendor/peskycmf/packed'),
+            $cmfNpmDistDir . '/raw' => public_path('vendor/peskycmf/raw'),
         ];
         if (stripos(config('peskycmf.assets'), 'src') === 0) {
-            $cmfAssets[$cmfNpmDistDir . '/src'] = public_path('packages/cmf/src');
+            $cmfAssets[$cmfNpmDistDir . '/src'] = public_path('vendor/peskycmf/src');
         }
         $this->publishes($cmfAssets, 'public');
-        
+
         $this->publishes([
             $this->getConfigFilePath() => config_path('peskycmf.php'),
             $this->getOrmConfigFilePath() => config_path('peskyorm.php'),
             $cmfLibDir . '/Config/ru_validation_translations.php' => resource_path('lang/ru/validation.php'),
         ], 'config');
     }
-    
+
     protected function getConfigFilePath(): string
     {
         return __DIR__ . '/../Config/peskycmf.config.php';
     }
-    
+
     protected function getOrmConfigFilePath(): string
     {
         return __DIR__ . '/../Config/peskyorm.config.php';
     }
-    
+
     protected function registerCommands(): void
     {
         $this->registerInstallCommand();
@@ -178,7 +158,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         $this->registerMakeApiDocsCommands();
         $this->registerCleanUploadedTempFilesCommand();
     }
-    
+
     protected function registerInstallCommand(): void
     {
         $this->app->singleton('command.cmf.install', function () {
@@ -186,7 +166,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         });
         $this->commands('command.cmf.install');
     }
-    
+
     protected function registerAddSectionCommand(): void
     {
         $this->app->singleton('command.cmf.add-section', function () {
@@ -194,7 +174,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         });
         $this->commands('command.cmf.add-section');
     }
-    
+
     protected function registerAddAdminCommand(): void
     {
         $this->app->singleton('command.cmf.add-admin', function () {
@@ -202,7 +182,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         });
         $this->commands('command.cmf.add-admin');
     }
-    
+
     protected function registerMakeScaffoldCommand(): void
     {
         $this->app->singleton('command.cmf.make-scaffold', function () {
@@ -210,7 +190,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         });
         $this->commands('command.cmf.make-scaffold');
     }
-    
+
     protected function registerInstallHttpRequestsLoggingCommand(): void
     {
         $this->app->singleton('command.cmf.install-http-requests-logging', function () {
@@ -218,7 +198,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         });
         $this->commands('command.cmf.install-http-requests-logging');
     }
-    
+
     protected function registerInstallHttpRequestsProfilingCommand(): void
     {
         $this->app->singleton('command.cmf.install-http-requests-profiling', function () {
@@ -226,20 +206,20 @@ class PeskyCmfServiceProvider extends ServiceProvider
         });
         $this->commands('command.cmf.install-http-requests-profiling');
     }
-    
+
     protected function registerMakeApiDocsCommands(): void
     {
         $this->app->singleton('command.cmf.make-api-docs', function () {
             return new CmfMakeApiDocCommand();
         });
         $this->commands('command.cmf.make-api-docs');
-        
+
         $this->app->singleton('command.cmf.make-api-method-docs', function () {
             return new CmfMakeApiMethodDocCommand();
         });
         $this->commands('command.cmf.make-api-method-docs');
     }
-    
+
     protected function registerCleanUploadedTempFilesCommand(): void
     {
         $this->app->singleton('command.cmf.clean-uploaded-temp-files', function () {
@@ -247,7 +227,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         });
         $this->commands('command.cmf.clean-uploaded-temp-files');
     }
-    
+
     protected function scheduleCommands(): void
     {
         if ($this->runningInConsole()) {
@@ -257,19 +237,17 @@ class PeskyCmfServiceProvider extends ServiceProvider
                 ->dailyAt('06:00');
         }
     }
-    
+
     protected function configureTranslations(): void
     {
-//        if (!\Lang::has('cmf::test', 'en')) {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'cmf');
-//        }
     }
-    
+
     protected function configureViews(): void
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'cmf');
     }
-    
+
     protected function declareRoutesAndConfigsForAllCmfSections(): void
     {
         /** @var CmfManager $manager */
@@ -277,5 +255,4 @@ class PeskyCmfServiceProvider extends ServiceProvider
         $manager->registerRoutesForAllCmfSections();
         $manager->extendLaravelAppConfigsForAllCmfSections();
     }
-    
 }

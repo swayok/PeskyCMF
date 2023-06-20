@@ -9,50 +9,49 @@ use PeskyCMF\Http\Middleware\AjaxOnly;
 /**
  * @var CmfConfig $cmfConfig
  */
-$routeNamePrefix = $cmfConfig->routes_names_prefix();
-$apiControllerClass = $cmfConfig->cmf_scaffold_api_controller_class();
-$generalControllerClass = $cmfConfig->cmf_general_controller_class();
+$routeNamePrefix = $cmfConfig->routesNamesPrefix();
+$apiControllerClass = $cmfConfig->cmfScaffoldApiControllerClass();
+$generalControllerClass = $cmfConfig->cmfGeneralControllerClass();
 
 Route::group(
     [
         'middleware' => AjaxOnly::class,
     ],
     function () use ($routeNamePrefix, $generalControllerClass) {
-    
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::getLoginTpl()
          */
         Route::get('login.html', [
             'uses' => $generalControllerClass . '@getLoginTpl',
             'log' => 'cmf.login',
-            'fallback' => ['route' => $routeNamePrefix . 'cmf_login']
+            'fallback' => ['route' => $routeNamePrefix . 'cmf_login'],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::doLogin()
          */
         Route::post('login', [
             'uses' => $generalControllerClass . '@doLogin',
             'log' => 'cmf.login',
-            'fallback' => ['route' => $routeNamePrefix . 'cmf_login']
+            'fallback' => ['route' => $routeNamePrefix . 'cmf_login'],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::getRegistrationTpl()
          */
         Route::get('register.html', [
             'uses' => $generalControllerClass . '@getRegistrationTpl',
             'log' => 'cmf.registration',
-            'fallback' => ['route' => $routeNamePrefix . 'cmf_register']
+            'fallback' => ['route' => $routeNamePrefix . 'cmf_register'],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::doRegister()
          */
         Route::post('register', [
             'uses' => $generalControllerClass . '@doRegister',
             'log' => 'cmf.registration',
-            'fallback' => ['route' => $routeNamePrefix . 'cmf_register']
+            'fallback' => ['route' => $routeNamePrefix . 'cmf_register'],
         ]);
     }
 );
@@ -62,7 +61,7 @@ Route::group(
  */
 Route::get('login', [
     'as' => $routeNamePrefix . 'cmf_login',
-    'uses' => $generalControllerClass . '@loadJsApp'
+    'uses' => $generalControllerClass . '@loadJsApp',
 ]);
 
 /**
@@ -70,7 +69,7 @@ Route::get('login', [
  */
 Route::get('register', [
     'as' => $routeNamePrefix . 'cmf_register',
-    'uses' => $generalControllerClass . '@loadJsApp'
+    'uses' => $generalControllerClass . '@loadJsApp',
 ]);
 
 /**
@@ -79,7 +78,7 @@ Route::get('register', [
 Route::get('logout', [
     'as' => $routeNamePrefix . 'cmf_logout',
     'uses' => $generalControllerClass . '@logout',
-    'log' => 'cmf.logout'
+    'log' => 'cmf.logout',
 ]);
 
 /**
@@ -88,46 +87,45 @@ Route::get('logout', [
 Route::post('/ping', [
     'as' => $routeNamePrefix . 'ping',
     'uses' => $generalControllerClass . '@ping',
-    'log' => false
+    'log' => false,
 ]);
 
 Route::group(
     [
         'middleware' => AjaxOnly::class,
-        'fallback' => ['route' => $routeNamePrefix . 'cmf_forgot_password']
+        'fallback' => ['route' => $routeNamePrefix . 'cmf_forgot_password'],
     ],
     function () use ($generalControllerClass) {
-    
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::getForgotPasswordTpl()
          */
         Route::get('forgot_password.html', [
             'uses' => $generalControllerClass . '@getForgotPasswordTpl',
-            'log' => 'cmf.forgot_password'
+            'log' => 'cmf.forgot_password',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::sendPasswordReplacingInstructions()
          */
         Route::post('forgot_password', [
             'uses' => $generalControllerClass . '@sendPasswordReplacingInstructions',
-            'log' => 'cmf.forgot_password'
+            'log' => 'cmf.forgot_password',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::getReplacePasswordTpl()
          */
         Route::get('replace_password/{access_key}.html', [
             'uses' => $generalControllerClass . '@getReplacePasswordTpl',
-            'log' => 'cmf.replace_password'
+            'log' => 'cmf.replace_password',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::replacePassword()
          */
         Route::put('replace_password/{access_key}', [
             'uses' => $generalControllerClass . '@replacePassword',
-            'log' => 'cmf.replace_password'
+            'log' => 'cmf.replace_password',
         ]);
     }
 );
@@ -137,7 +135,7 @@ Route::group(
  */
 Route::get('forgot_password', [
     'as' => $routeNamePrefix . 'cmf_forgot_password',
-    'uses' => $generalControllerClass . '@loadJsApp'
+    'uses' => $generalControllerClass . '@loadJsApp',
 ]);
 
 /**
@@ -145,7 +143,7 @@ Route::get('forgot_password', [
  */
 Route::get('replace_password/{access_key}', [
     'as' => $routeNamePrefix . 'cmf_replace_password',
-    'uses' => $generalControllerClass . '@loadJsApp'
+    'uses' => $generalControllerClass . '@loadJsApp',
 ]);
 
 /**
@@ -158,16 +156,15 @@ Route::get('ui/templates.js', [
 
 Route::group(
     [
-        'middleware' => $cmfConfig->auth_middleware()
+        'middleware' => $cmfConfig->authMiddleware(),
     ],
     function () use ($generalControllerClass, $routeNamePrefix) {
-    
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::ckeditorUploadImage()
          */
         Route::post('ckeditor/upload/image', [
             'as' => $routeNamePrefix . 'cmf_ckeditor_upload_image',
-            'uses' => $generalControllerClass . '@ckeditorUploadImage'
+            'uses' => $generalControllerClass . '@ckeditorUploadImage',
         ]);
 
         Route::group(
@@ -175,18 +172,17 @@ Route::group(
                 'middleware' => AjaxOnly::class,
                 'fallback' => [
                     'route' => $routeNamePrefix . 'cmf_start_page',
-                    'use_params' => false
-                ]
+                    'use_params' => false,
+                ],
             ],
             function () use ($generalControllerClass, $routeNamePrefix) {
-    
                 /**
                  * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loginAsOtherUser()
                  */
                 Route::get('service/login/as/{id}', [
                     'as' => $routeNamePrefix . 'cmf_login_as_other_admin',
                     'uses' => $generalControllerClass . '@loginAsOtherUser',
-                    'log' => 'cmf.service_login_as'
+                    'log' => 'cmf.service_login_as',
                 ]);
 
                 // UI views
@@ -195,24 +191,24 @@ Route::group(
                  */
                 Route::get('ui/ui.html', [
                     'as' => $routeNamePrefix . 'cmf_main_ui',
-                    'uses' => $generalControllerClass . '@getBasicUiView'
+                    'uses' => $generalControllerClass . '@getBasicUiView',
                 ]);
-    
+
                 /**
                  * @see \PeskyCMF\Http\Controllers\CmfGeneralController::getCustomUiView()
                  */
                 Route::get('ui/{view}.html', [
                     'as' => $routeNamePrefix . 'cmf_custom_ui_view',
-                    'uses' => $generalControllerClass . '@getCustomUiView'
+                    'uses' => $generalControllerClass . '@getCustomUiView',
                 ]);
-    
+
                 /**
                  * @see \PeskyCMF\Http\Controllers\CmfGeneralController::getMenuCounters()
                  */
                 Route::get('page/menu/counters', [
                     'as' => $routeNamePrefix . 'cmf_menu_counters_data',
                     'uses' => $generalControllerClass . '@getMenuCounters',
-                    'log' => false
+                    'log' => false,
                 ]);
 
                 // Admin profile
@@ -221,24 +217,24 @@ Route::group(
                  */
                 Route::get('page/profile/data', [
                     'as' => $routeNamePrefix . 'cmf_profile_data',
-                    'uses' => $generalControllerClass . '@getUserProfileData'
+                    'uses' => $generalControllerClass . '@getUserProfileData',
                 ]);
-    
+
                 /**
                  * @see \PeskyCMF\Http\Controllers\CmfGeneralController::renderUserProfileView()
                  */
                 Route::get('page/profile.html', [
                     'uses' => $generalControllerClass . '@renderUserProfileView',
-                    'log' => 'cmf.profile'
+                    'log' => 'cmf.profile',
                 ]);
-    
+
                 /**
                  * @see \PeskyCMF\Http\Controllers\CmfGeneralController::updateUserProfile()
                  */
                 Route::put('page/profile', [
                     'as' => $routeNamePrefix . 'cmf_profile',
                     'uses' => $generalControllerClass . '@updateUserProfile',
-                    'log' => 'cmf.profile'
+                    'log' => 'cmf.profile',
                 ]);
 
                 // Custom Pages
@@ -246,7 +242,6 @@ Route::group(
                  * @see \PeskyCMF\Http\Controllers\CmfGeneralController::getPage()
                  */
                 Route::get('page/{page}.html', $generalControllerClass . '@getPage');
-
             }
         );
 
@@ -254,7 +249,7 @@ Route::group(
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loadJsApp()
          */
-        Route::get('page/{page}',  $generalControllerClass . '@loadJsApp')
+        Route::get('page/{page}', $generalControllerClass . '@loadJsApp')
             ->name($routeNamePrefix . 'cmf_page')
             ->where('page', '^.*(?!\.html)$');
 
@@ -275,9 +270,9 @@ Route::group(
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::downloadApiRequestsCollectionForPostman()
          */
         Route::get(
-                '/utils/api_docs/requests_collection_for_postman.json',
-                $generalControllerClass . '@downloadApiRequestsCollectionForPostman'
-            )
+            '/utils/api_docs/requests_collection_for_postman.json',
+            $generalControllerClass . '@downloadApiRequestsCollectionForPostman'
+        )
             ->name($routeNamePrefix . 'cmf_api_docs_download_postman_collection');
     }
 );
@@ -287,10 +282,9 @@ Route::pattern('resource', '[a-z]+([_a-z0-9]*[a-z0-9])?');
 Route::group(
     [
         'prefix' => 'resource',
-        'middleware' => $cmfConfig->auth_middleware()
+        'middleware' => $cmfConfig->authMiddleware(),
     ],
     function () use ($apiControllerClass, $generalControllerClass, $routeNamePrefix) {
-    
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loadJsApp()
          */
@@ -298,7 +292,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_items_table',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loadJsApp()
          */
@@ -306,7 +300,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_item_add_form',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loadJsApp()
          */
@@ -314,7 +308,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_item_details',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loadJsApp()
          */
@@ -322,7 +316,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_item_edit_form',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loadJsApp()
          */
@@ -330,7 +324,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_item_clone_form',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getCustomPageForItem()
          */
@@ -338,11 +332,11 @@ Route::group(
             'middleware' => AjaxOnly::class,
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_custom_page',
-                'use_params' => true
+                'use_params' => true,
             ],
             'uses' => $apiControllerClass . '@getCustomPageForItem',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loadJsApp()
          */
@@ -350,7 +344,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_item_custom_page',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getCustomPage()
          */
@@ -358,11 +352,11 @@ Route::group(
             'middleware' => AjaxOnly::class,
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_resource_custom_page',
-                'use_params' => true
+                'use_params' => true,
             ],
             'uses' => $apiControllerClass . '@getCustomPage',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfGeneralController::loadJsApp()
          */
@@ -370,7 +364,7 @@ Route::group(
             'as' => $routeNamePrefix . 'cmf_resource_custom_page',
             'uses' => $generalControllerClass . '@loadJsApp',
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::performCustomAction()
          */
@@ -379,10 +373,10 @@ Route::group(
             'uses' => $apiControllerClass . '@performCustomAction',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::performCustomActionForItem()
          */
@@ -391,8 +385,8 @@ Route::group(
             'uses' => $apiControllerClass . '@performCustomActionForItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
     }
 );
@@ -401,14 +395,15 @@ Route::group(
 Route::group(
     [
         'prefix' => 'api',
-        'middleware' => array_unique(array_merge(
-            [AjaxOnly::class],
-            $cmfConfig->auth_middleware(),
-            $cmfConfig->middleware_for_cmf_scaffold_api_controller()
-        ))
+        'middleware' => array_unique(
+            array_merge(
+                [AjaxOnly::class],
+                $cmfConfig->authMiddleware(),
+                $cmfConfig->middlewareForCmfScaffoldApiController()
+            )
+        ),
     ],
     function () use ($apiControllerClass, $routeNamePrefix) {
-    
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getTemplates()
          */
@@ -417,10 +412,10 @@ Route::group(
             'uses' => $apiControllerClass . '@getTemplates',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getItemsList()
          */
@@ -429,10 +424,10 @@ Route::group(
             'uses' => $apiControllerClass . '@getItemsList',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getOptionsAsJson()
          */
@@ -441,10 +436,10 @@ Route::group(
             'uses' => $apiControllerClass . '@getOptionsAsJson',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getOptions()
          */
@@ -453,10 +448,10 @@ Route::group(
             'uses' => $apiControllerClass . '@getOptions',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getItemDefaults()
          */
@@ -465,10 +460,10 @@ Route::group(
             'uses' => $apiControllerClass . '@getItemDefaults',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_add_form',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getCustomData()
          */
@@ -477,10 +472,10 @@ Route::group(
             'uses' => $apiControllerClass . '@getCustomData',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::deleteBulk()
          */
@@ -489,10 +484,10 @@ Route::group(
             'uses' => $apiControllerClass . '@deleteBulk',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::updateBulk()
          */
@@ -501,10 +496,10 @@ Route::group(
             'uses' => $apiControllerClass . '@updateBulk',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::getItem()
          */
@@ -513,10 +508,10 @@ Route::group(
             'uses' => $apiControllerClass . '@getItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_edit_form',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::updateItem()
          */
@@ -525,10 +520,10 @@ Route::group(
             'uses' => $apiControllerClass . '@updateItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_edit_form',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::uploadTempFileForInput()
          */
@@ -537,10 +532,10 @@ Route::group(
             'uses' => $apiControllerClass . '@uploadTempFileForInput',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => false
-            ]
+                'use_params' => false,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::deleteTempFileForInput()
          */
@@ -549,28 +544,28 @@ Route::group(
             'uses' => $apiControllerClass . '@deleteTempFileForInput',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => false
-            ]
+                'use_params' => false,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::changeItemPosition()
          */
         Route::put('{resource}/move/{id}/{before_or_after}/{other_id}/order/{sort_column}/{sort_direction}', [
-                'as' => $routeNamePrefix . 'cmf_api_change_item_position',
-                'uses' => $apiControllerClass . '@changeItemPosition',
-                'fallback' => [
-                    'route' => $routeNamePrefix . 'cmf_items_table',
-                    'use_params' => true
-                ]
-            ])
+            'as' => $routeNamePrefix . 'cmf_api_change_item_position',
+            'uses' => $apiControllerClass . '@changeItemPosition',
+            'fallback' => [
+                'route' => $routeNamePrefix . 'cmf_items_table',
+                'use_params' => true,
+            ],
+        ])
             ->where([
                 'before_or_after' => '^(before|after|BEFORE|AFTER)$',
                 'sort_direction' => '^(asc|desc|ASC|DESC)$',
                 'other_id' => '^\d+$',
-                'sort_column' => '^[a-zA-Z_0-9]+$'
+                'sort_column' => '^[a-zA-Z_0-9]+$',
             ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::deleteItem()
          */
@@ -579,10 +574,10 @@ Route::group(
             'uses' => $apiControllerClass . '@deleteItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_items_table',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
-    
+
         /**
          * @see \PeskyCMF\Http\Controllers\CmfScaffoldApiController::addItem()
          */
@@ -591,8 +586,8 @@ Route::group(
             'uses' => $apiControllerClass . '@addItem',
             'fallback' => [
                 'route' => $routeNamePrefix . 'cmf_item_add_form',
-                'use_params' => true
-            ]
+                'use_params' => true,
+            ],
         ]);
     }
 );

@@ -1,9 +1,10 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @var \PeskyCMF\Db\Admins\CmfAdmin|\PeskyORM\ORM\RecordInterface|\Illuminate\Contracts\Auth\Authenticatable $user
- * @var bool|null $canSubmit
- * @var \PeskyCMF\Auth\CmfAuthModule $authModule
+ * @var bool|null                                                                                             $canSubmit
+ * @var \PeskyCMF\Auth\CmfAuthModule                                                                          $authModule
  */
 $cmfConfig = $authModule->getCmfConfig();
 $canSubmit = $canSubmit || $canSubmit === null;
@@ -17,7 +18,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
             <a
                 href="#"
                 data-nav="back"
-                data-default-url="{{ $cmfConfig->home_page_url() }}"
+                data-default-url="{{ $cmfConfig->homePageUrl() }}"
             >
                 <i class="glyphicon fa fa-reply"></i>
                 {{ $cmfConfig->transGeneral('action.back') }}
@@ -51,7 +52,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                         value="PUT"
                     >
                     <?php
-                    include $cmfConfig->cmf_views_dir() . '/input/password_inputs_autofill_disabler.php'; ?>
+                    include $cmfConfig->cmfViewsDir() . '/input/password_inputs_autofill_disabler.php'; ?>
                     <div class="box-body">
                         @php($loginColumn = $authModule->getUserLoginColumnName())
                         @if ($loginColumn !== 'email')
@@ -182,7 +183,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                     class="btn btn-default"
                                     href="#"
                                     data-nav="back"
-                                    data-default-url="{{ $cmfConfig->home_page_url() }}"
+                                    data-default-url="{{ $cmfConfig->homePageUrl() }}"
                                 >
                                     {{ $cmfConfig->transGeneral('form.toolbar.cancel') }}
                                 </a>

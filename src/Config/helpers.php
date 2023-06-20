@@ -322,7 +322,7 @@ if (!function_exists('cmfJsonResponseForHttp404')) {
             $message = (string)cmfTransGeneral('message.http404');
         }
         if (empty($fallbackUrl)) {
-            $fallbackUrl = cmfConfig()->home_page_url();
+            $fallbackUrl = cmfConfig()->homePageUrl();
         }
         return CmfJsonResponse::create(HttpCode::NOT_FOUND)
             ->setMessage($message)
@@ -347,7 +347,7 @@ if (!function_exists('cmfRedirectResponseWithMessage')) {
                 $cmfConfig = cmfConfig();
             }
             return (new RedirectResponse($url))->with(
-                $cmfConfig->session_message_key(),
+                $cmfConfig->sessionMessageKey(),
                 [
                     'message' => $message,
                     'type' => $type,
@@ -490,7 +490,7 @@ if (!function_exists('pickLocalization')) {
      */
     function pickLocalization(array $translations, ?string $default = null, bool $isAssociativeArray = true): ?string
     {
-        $langCodes = [app()->getLocale(), cmfConfig()->default_locale()];
+        $langCodes = [app()->getLocale(), cmfConfig()->defaultLocale()];
         foreach ($langCodes as $langCode) {
             if ($isAssociativeArray) {
                 if (

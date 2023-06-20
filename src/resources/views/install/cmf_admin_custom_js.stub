@@ -1,0 +1,25 @@
+var CmfApp = {};
+
+/* Declare custom routes using page.route()
+CmfApp.addRoutes = function () {
+
+};
+*/
+
+/* Do something before application is started by page.start()
+CmfApp.beforeStart = function () {
+
+};
+*/
+
+/* Do something after application is started by page.start()
+CmfApp.afterStart = function () {
+
+};
+*/
+
+/* Extend functionality of the router
+CmfApp.extendRouter = function () {
+
+};
+*/

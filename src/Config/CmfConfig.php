@@ -33,21 +33,22 @@ use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyCMF\UI\CmfUIModule;
-use PeskyORM\ORM\Column;
-use PeskyORM\ORM\RecordInterface;
-use PeskyORM\ORM\TableInterface;
+use PeskyORM\ORM\Record\RecordInterface;
+use PeskyORM\ORM\Table\TableInterface;
+use PeskyORM\ORM\TableStructure\TableColumn\ColumnValueValidationMessages\ColumnValueValidationMessagesFromArray;
+use PeskyORM\ORM\TableStructure\TableColumn\ColumnValueValidationMessages\ColumnValueValidationMessagesInterface;
+use PeskyORM\Utils\ServiceContainer;
 use Vluzrmos\LanguageDetector\Contracts\LanguageDetectorInterface;
 use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
-abstract class CmfConfig
+class CmfConfig
 {
-    
     protected Application $app;
     protected ConfigRepository $configs;
     protected LanguageDetectorInterface $languageDetector;
     protected ViewsFactory $viewsFactory;
     protected ?ScaffoldLoggerInterface $httpRequestsLogger = null;
-    
+
     protected static array $localeSuffixMap = [
         'en' => 'US',
         'ko' => 'KR',
@@ -63,31 +64,31 @@ abstract class CmfConfig
         'vi' => 'VN',
         'zh' => 'CN',
     ];
-    
+
     public function __construct()
     {
     }
-    
+
     public function getLaravelApp(): Application
     {
         return $this->app;
     }
-    
+
     public function getLanguageDetector(): LanguageDetectorInterface
     {
         return $this->languageDetector;
     }
-    
+
     public function getLaravelConfigs(): ConfigRepository
     {
         return $this->configs;
     }
-    
+
     public function getViewsFactory(): ViewsFactory
     {
         return $this->viewsFactory;
     }
-    
+
     /**
      * File name for this site section in 'configs' folder of project's root directory (without '.php' extension)
      * Example: 'admin' for config/admin.php;
@@ -96,7 +97,7 @@ abstract class CmfConfig
     {
         return 'peskycmf';
     }
-    
+
     /**
      * @param string $key
      * @param mixed|null $default
@@ -106,18 +107,18 @@ abstract class CmfConfig
     {
         return $this->getLaravelConfigs()->get($this->configsFileName() . '.' . $key, $default);
     }
-    
-    public function routes_files(): array
+
+    public function routesFiles(): array
     {
         return (array)$this->config('routes_files', []);
     }
-    
-    final public function cmf_views_dir(): string
+
+    final public function cmfViewsDir(): string
     {
         return __DIR__ . '/../resources/views';
     }
-    
-    public function language_detector_configs(): array
+
+    public function languageDetectorConfigs(): array
     {
         return [
             'autodetect' => true,
@@ -125,15 +126,15 @@ abstract class CmfConfig
             'cookie' => true,
             'cookie_name' => $this->makeUtilityKey('locale'),
             'cookie_encrypt' => true,
-            'languages' => $this->locales_for_language_detector(),
+            'languages' => $this->localesForLanguageDetector(),
         ];
     }
-    
+
     public function getAppSettings(): PeskyCmfAppSettings
     {
         return $this->getLaravelApp()->make(PeskyCmfAppSettings::class);
     }
-    
+
     /**
      * @return Guard|StatefulGuard|SessionGuard
      * @noinspection PhpDocSignatureInspection
@@ -142,7 +143,7 @@ abstract class CmfConfig
     {
         return $this->getAuthModule()->getAuthGuard();
     }
-    
+
     /**
      * @return CmfAdmin|Authenticatable|ResetsPasswordsViaAccessKey|RecordInterface|null
      * @noinspection PhpDocSignatureInspection
@@ -151,21 +152,21 @@ abstract class CmfConfig
     {
         return $this->getAuthModule()->getUser();
     }
-    
+
     public function getAuthModule(): CmfAuthModule
     {
         return $this->getLaravelApp()->make(CmfAuthModule::class);
     }
-    
+
     public function getUiModule(): CmfUIModule
     {
         return $this->getLaravelApp()->make(CmfUIModule::class);
     }
-    
+
     /**
      * Email address used in "From" header for emails sent to users
      */
-    public function system_email_address(): string
+    public function systemEmailAddress(): string
     {
         return $this->getLaravelConfigs()->get('system_email_address', function () {
             /** @var Request $request */
@@ -173,103 +174,103 @@ abstract class CmfConfig
             return 'noreply@' . $request->getHost();
         });
     }
-    
+
     /**
      * Url prefix for routes
      */
-    public function url_prefix(): string
+    public function urlPrefix(): string
     {
         return $this->config('url_prefix', 'admin');
     }
-    
+
     /**
      * Cmf classes subfolder in application
      */
-    public function app_subfolder(): string
+    public function appSubfolder(): string
     {
         return $this->config('app_subfolder', 'Admin');
     }
-    
-    public function recaptcha_private_key(): ?string
+
+    public function recaptchaPrivateKey(): ?string
     {
         return $this->getLaravelConfigs()->get('services.recaptcha.private_key');
     }
-    
-    public function recaptcha_public_key(): ?string
+
+    public function recaptchaPublicKey(): ?string
     {
         return $this->getLaravelConfigs()->get('services.recaptcha.public_key');
     }
-    
-    public function recaptcha_script(): string
+
+    public function recaptchaScript(): string
     {
         return 'https://www.google.com/recaptcha/api.js?hl=' . $this->getShortLocale();
     }
-    
-    public function default_page_title(): string
+
+    public function defaultPageTitle(): string
     {
         return $this->getAppSettings()->default_browser_title(function () {
             return $this->transCustom('default_page_title');
         }, true);
     }
-    
-    public function page_title_addition(): string
+
+    public function pageTitleAddition(): string
     {
         return $this->getAppSettings()->browser_title_addition(function () {
-            return $this->default_page_title();
+            return $this->defaultPageTitle();
         }, true);
     }
-    
+
     /**
      * Controller class name for CMF scaffolds API
      */
-    public function cmf_scaffold_api_controller_class(): string
+    public function cmfScaffoldApiControllerClass(): string
     {
         return CmfScaffoldApiController::class;
     }
-    
+
     /**
      * General controller class name for CMF (basic ui views, custom pages views, login/logout, etc.)
      */
-    public function cmf_general_controller_class(): string
+    public function cmfGeneralControllerClass(): string
     {
         return CmfGeneralController::class;
     }
-    
+
     /**
      * Prefix for route names in peskycmf.routes.php
      * Use with caution and only when you really know what you're doing
      */
-    public function routes_names_prefix(): string
+    public function routesNamesPrefix(): string
     {
-        return $this->url_prefix() . '/';
+        return $this->urlPrefix() . '/';
     }
-    
+
     public function getRouteName(string $routeAlias): string
     {
-        return $this->routes_names_prefix() . $routeAlias;
+        return $this->routesNamesPrefix() . $routeAlias;
     }
-    
+
     public function route(string $routeName, array $parameters = [], bool $absolute = false): string
     {
         return route($this->getRouteName($routeName), $parameters, $absolute);
     }
-    
+
     /**
      * Note: placed here to avoid problems with auth module constructor when registering routes for all cmf sections
      */
-    public function auth_middleware(): array
+    public function authMiddleware(): array
     {
         return (array)$this->config('auth.middleware', [CmfAuth::class]);
     }
-    
+
     /**
      * Basic set of middlewares for scaffold api controller
      */
-    public function middleware_for_cmf_scaffold_api_controller(): array
+    public function middlewareForCmfScaffoldApiController(): array
     {
         return [];
     }
-    
+
     /**
      * The menu structure of the site.
      * @return array
@@ -292,17 +293,18 @@ abstract class CmfConfig
      *    ]
      * Available options:
      *  - label - text of menu item (required)
-     *  - icon - icon for menu item (optinal)
+     *  - icon - icon for menu item (optional)
      *  - url - where to send user (required if no 'submenu' present; can contain empty value to hide menu item)
-     *  - submenu - array of arrays (optional); arrays may contain all keys described here except 'submenu' (3rd level of menu items not supported)
+     *  - submenu - array of arrays (optional); arrays may contain all keys described here except 'submenu'
+     *          (3rd level of menu items not supported)
      *  - additional - any html to add to menu item (optional)
      *  - counter - name of a "counter" variable (optional); adds <span class="pull-right-container"> to menu item.
      *          You can provide contents for this tag via CmfConfig::getCountersForMenu() method.
      *          Example: public function getCountersForMenu() {
-     *              return ['prending_orders' => '<span class="label label-primary pull-right">2</span>'];
+     *              return ['pending_orders' => '<span class="label label-primary pull-right">2</span>'];
      *          }
-     *          'prending_orders' here is the name of a "counter".
-     *          The idea is to add a possibility to show some autoupdatable numbers (counters) on menu items like
+     *          'pending_orders' here is the name of a "counter".
+     *          The idea is to add a possibility to show some auto-updatable numbers (counters) on menu items like
      *          pending orders count, new messages count, etc...
      *          Counters updated on every POST/PUT/DELETE request and by timeout. Also you can be manually
      *          request counters update by JS function AdminUI.updateMenuCounters();
@@ -343,7 +345,7 @@ abstract class CmfConfig
             $this->getMenuItems()
         );
     }
-    
+
     /**
      * Get values for menu items counters (details in CmfConfig::menu())
      * @return array like ['pending_orders' => '<span class="label label-primary pull-right">2</span>']
@@ -352,7 +354,7 @@ abstract class CmfConfig
     {
         return $this->getUiModule()->getValuesForMenuItemsCounters();
     }
-    
+
     /**
      * For $menuItem format see docs for menu()
      */
@@ -360,7 +362,7 @@ abstract class CmfConfig
     {
         $this->getUiModule()->addCustomMenuItem($itemKey, $menuItem);
     }
-    
+
     /**
      * @param array $itemsKeys - list of keys to return values for, if empty - will return all menu items
      * @return array
@@ -370,11 +372,11 @@ abstract class CmfConfig
         $menuItems = $this->getUiModule()->getMenuItems();
         if (empty($itemsKeys)) {
             return $menuItems;
-        } else {
-            return array_intersect_key($menuItems, array_flip($itemsKeys));
         }
+
+        return array_intersect_key($menuItems, array_flip($itemsKeys));
     }
-    
+
     /**
      * @param array $excludeItemsWithKeys - list of keys to exclude from resulting menu items array
      * @return array
@@ -384,11 +386,11 @@ abstract class CmfConfig
     {
         if (empty($excludeItemsWithKeys)) {
             return $this->getMenuItems();
-        } else {
-            return array_diff_key($this->getMenuItems(), array_flip($excludeItemsWithKeys));
         }
+
+        return array_diff_key($this->getMenuItems(), array_flip($excludeItemsWithKeys));
     }
-    
+
     /**
      * Get menu item config or null if there is no such menu item
      * @noinspection PhpUnused
@@ -397,17 +399,17 @@ abstract class CmfConfig
     {
         return Arr::get($this->getMenuItems(), $resourceName);
     }
-    
+
     /**
      * Name for custom CMF dictionary that contains translation for CMF resource sections and pages
      */
-    public function custom_dictionary_name(): string
+    public function customDictionaryName(): string
     {
         return $this->config('dictionary', 'cmf::custom');
     }
-    
+
     /**
-     * Translate from custom dictionary. You can use it via CmfConfig::transCustom() insetad of
+     * Translate from custom dictionary. You can use it via CmfConfig::transCustom() instead of
      * CmfConfig::getPrimary()->transCustom() if you need to get translation for primary config.
      * Note: if there is no translation in your dictionary - it will be imported from 'cmf::custom' dictionary
      * @param string $path - without dictionary name.
@@ -418,7 +420,7 @@ abstract class CmfConfig
      */
     public function transCustom(string $path, array $parameters = [], ?string $locale = null): array|string
     {
-        $dict = $this->custom_dictionary_name();
+        $dict = $this->customDictionaryName();
         $primaryPath = $dict . '.' . $path;
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::custom') {
@@ -430,15 +432,15 @@ abstract class CmfConfig
         }
         return $trans;
     }
-    
+
     /**
      * Dictionary that contains general ui translations for CMF
      */
-    public function cmf_general_dictionary_name(): string
+    public function cmfGeneralDictionaryName(): string
     {
         return 'cmf::cmf';
     }
-    
+
     /**
      * Translate from custom dictionary.
      * You can use it via CmfConfig->transGeneral() if you need to get translation for primary config
@@ -451,7 +453,7 @@ abstract class CmfConfig
      */
     public function transGeneral(string $path, array $parameters = [], ?string $locale = null): array|string
     {
-        $dict = $this->cmf_general_dictionary_name();
+        $dict = $this->cmfGeneralDictionaryName();
         $primaryPath = $dict . '.' . $path;
         $trans = trans($primaryPath, $parameters, $locale);
         if ($trans === $primaryPath && $dict !== 'cmf::cmf') {
@@ -463,7 +465,7 @@ abstract class CmfConfig
         }
         return $trans;
     }
-    
+
     /**
      * Translations for Api Docs
      */
@@ -472,15 +474,15 @@ abstract class CmfConfig
         $translationPath = 'api_docs.' . ltrim($translationPath, '.');
         return $this->transCustom($translationPath, $parameters, $locale);
     }
-    
+
     /**
      * Default CMF language
      */
-    public function default_locale(): string
+    public function defaultLocale(): string
     {
         return $this->config('locale', 'en');
     }
-    
+
     /**
      * Supported locales for CMF
      * @return array - each value is locale code (usually 2 chars: en, ru; rarely - 5 chars: ru_RU, en_US)
@@ -489,17 +491,17 @@ abstract class CmfConfig
     {
         return array_unique(array_values($this->config('locales', ['en'])));
     }
-    
+
     /**
      * Supported locales for CMF
      * Note: you can redirect locales using key as locale to redirect from and value as locale to redirect to
      * For details see: https://github.com/vluzrmos/laravel-language-detector
      */
-    public function locales_for_language_detector(): array
+    public function localesForLanguageDetector(): array
     {
         return (array)$this->config('locales', ['en']);
     }
-    
+
     /**
      * Change locale inside CMF/CMS area
      */
@@ -507,7 +509,7 @@ abstract class CmfConfig
     {
         $this->getLaravelApp()->setLocale($locale);
     }
-    
+
     /**
      * 2 chars in lowercase
      */
@@ -515,13 +517,18 @@ abstract class CmfConfig
     {
         return strtolower(substr($this->getLaravelApp()->getLocale(), 0, 2));
     }
-    
+
     /** @noinspection PhpUnusedParameterInspection */
     public function onLocaleChanged(string $newLocale): void
     {
-        Column::setValidationErrorsMessages((array)$this->transGeneral('form.message.column_validation_errors') ?: []);
+        ServiceContainer::getInstance()->instance(
+            ColumnValueValidationMessagesInterface::class,
+            new ColumnValueValidationMessagesFromArray(
+                (array)$this->transGeneral('form.message.column_validation_errors') ?: []
+            )
+        );
     }
-    
+
     /**
      * Get locale in format "en_US" or "ru-RU" or "it-it"
      * @param string $separator
@@ -533,12 +540,12 @@ abstract class CmfConfig
         $locale = preg_split('%[-_]%', strtolower($this->getLaravelApp()->getLocale()));
         if (count($locale) === 2) {
             return $locale[0] . $separator . ($lowercased ? $locale[1] : strtoupper($locale[1]));
-        } else {
-            $localeSuffix = static::$localeSuffixMap[$locale[0]] ?? $locale[0];
-            return $locale[0] . $separator . ($lowercased ? $localeSuffix : strtoupper($localeSuffix));
         }
+
+        $localeSuffix = static::$localeSuffixMap[$locale[0]] ?? $locale[0];
+        return $locale[0] . $separator . ($lowercased ? $localeSuffix : strtoupper($localeSuffix));
     }
-    
+
     /**
      * Detect locale from browser or subdomain
      */
@@ -546,32 +553,32 @@ abstract class CmfConfig
     {
         $this->getLaravelApp()->setLocale($this->getLanguageDetector()->getDriver()->detect());
     }
-    
-    public function session_message_key(): string
+
+    public function sessionMessageKey(): string
     {
         return $this->makeUtilityKey('message');
     }
-    
+
     /**
      * Start page URL of CMS section
      */
-    public function home_page_url(bool $absolute = false): string
+    public function homePageUrl(bool $absolute = false): string
     {
         return $this->route('cmf_start_page', [], $absolute);
     }
-    
+
     /**
      * How much rows to display in data tables
      */
-    public function rows_per_page(): int
+    public function rowsPerPage(): int
     {
         return 25;
     }
-    
+
     /**
      * Additional configs for jQuery Data Tables lib
      */
-    public function data_tables_config(): array
+    public function dataTablesConfig(): array
     {
         return [
             'scrollX' => true,
@@ -594,12 +601,12 @@ abstract class CmfConfig
                 >",
         ];
     }
-    
+
     /**
      * Additional configs for CKEditor lib
      * @return array
      */
-    public function ckeditor_config(): array
+    public function ckeditorConfig(): array
     {
         return [
             'language' => $this->getShortLocale(),
@@ -627,23 +634,23 @@ abstract class CmfConfig
             'forceEnterMode' => true,
             'removeDialogTabs' => 'image:advanced',
             'extraPlugins' => 'uploadimage',
-            'contentsCss' => $this->css_files_for_wysiwyg_editor(),
+            'contentsCss' => $this->cssFilesForWysiwygEditor(),
             // _token won't be working this way =(
             // moved to WysiwygFormInput->getWysiwygConfig()
             //'uploadUrl' => $this->route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
             //'filebrowserImageUploadUrl' => $this->route('cmf_ckeditor_upload_image', ['_token' => csrf_token()]),
         ];
     }
-    
+
     /**
-     * Add some css files inside wysuwyg editor to allow custom styling while editing wysiwyg contents
+     * Add some css files inside wysiwyg editor to allow custom styling while editing wysiwyg contents
      * @return array
      */
-    public function css_files_for_wysiwyg_editor(): array
+    public function cssFilesForWysiwygEditor(): array
     {
         return [];
     }
-    
+
     /**
      * Data inserts for CmsPage-related scaffold configs to be added to ckeditor's plugin
      * Use WysiwygFormInput::createDataInsertConfig() and WysiwygFormInput::createDataInsertConfigWithArguments()
@@ -654,7 +661,7 @@ abstract class CmfConfig
     {
         return [];
     }
-    
+
     /**
      * Html inserts for CmsPage-related scaffold configs to be added to ckeditor's plugin
      * Use WysiwygFormInput::createHtmlInsertConfig('<html>', 'menu title') to create valid config
@@ -664,7 +671,7 @@ abstract class CmfConfig
     {
         return [];
     }
-    
+
     /**
      * Get ScaffoldConfig instance by resource name
      */
@@ -672,7 +679,7 @@ abstract class CmfConfig
     {
         return $this->getUiModule()->getScaffoldConfig($resourceName);
     }
-    
+
     /**
      * Get ScaffoldConfig class name by resource name
      */
@@ -680,22 +687,22 @@ abstract class CmfConfig
     {
         return $this->getUiModule()->getScaffoldConfigClass($resourceName);
     }
-    
+
     /**
      * Get TableInterface instance by resource name
-     * Note: can be ovewritted to allow usage of fake tables in resources routes
+     * Note: can be overwritten to allow usage of fake tables in resources routes
      * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
      */
     public function getTableByResourceName(string $resourceName): TableInterface
     {
         return $this->getUiModule()->getTableByResourceName($resourceName);
     }
-    
+
     public function getApiDocumentationModule(): CmfApiDocumentationModule
     {
         return $this->getLaravelApp()->make(CmfApiDocumentationModule::class);
     }
-    
+
     public function getHttpRequestsLogger(): ?ScaffoldLoggerInterface
     {
         if (!$this->httpRequestsLogger && $this->getLaravelApp()->bound(ScaffoldLoggerInterface::class)) {
@@ -703,7 +710,7 @@ abstract class CmfConfig
         }
         return $this->httpRequestsLogger;
     }
-    
+
     /**
      * Logger will be used to logs requested records pk and changes
      * @param ScaffoldLoggerInterface $httpRequestsLogger
@@ -712,7 +719,7 @@ abstract class CmfConfig
     {
         $this->httpRequestsLogger = $httpRequestsLogger;
     }
-    
+
     /**
      * @return array
      */
@@ -722,23 +729,24 @@ abstract class CmfConfig
             $this->getCacheKeyForOptimizedUiTemplates('pages'),
             (int)$this->config('ui.optimize_ui_templates.timeout', 0),
             function () {
-                $generalControllerClass = $this->cmf_general_controller_class();
+                $generalControllerClass = $this->cmfGeneralControllerClass();
                 /** @var CmfGeneralController $controller */
                 $controller = new $generalControllerClass();
                 if ($this->getUser()) {
                     return [
                         $this->getUiModule()->getUiUrl(false) => $controller->getBasicUiView(),
                     ];
-                } else {
-                    return [
-                        $this->getAuthModule()->getLoginPageUrl(false) . '.html' => $controller->getLoginTpl(),
-                        $this->getAuthModule()->getPasswordRecoveryStartPageUrl(false) . '.html' => $controller->getForgotPasswordTpl(),
-                    ];
                 }
+
+                $authModule = $this->getAuthModule();
+                return [
+                    $authModule->getLoginPageUrl(false) . '.html' => $controller->getLoginTpl(),
+                    $authModule->getPasswordRecoveryStartPageUrl(false) . '.html' => $controller->getForgotPasswordTpl()
+                ];
             }
         );
     }
-    
+
     public function getCachedResourcesTemplates(): array
     {
         if (!$this->getUser()) {
@@ -753,7 +761,7 @@ abstract class CmfConfig
                 }
             );
     }
-    
+
     protected function collectResourcesTemplatesToBeCached(): array
     {
         $resourceTemplates = [];
@@ -767,7 +775,7 @@ abstract class CmfConfig
         }
         return $resourceTemplates;
     }
-    
+
     /**
      * User-id-based cache key
      */
@@ -775,7 +783,7 @@ abstract class CmfConfig
     {
         return $this->getCacheKeyForOptimizedUiTemplatesBasedOnUserId($group);
     }
-    
+
     /**
      * User-id-based cache key
      */
@@ -787,9 +795,9 @@ abstract class CmfConfig
             $user = $this->getUser();
             $userId = $user ? $user->getAuthIdentifier() : 'not_authenticated';
         }
-        return $this->url_prefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
+        return $this->urlPrefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
     }
-    
+
     /**
      * Role-based cache key
      * @noinspection PhpUnused
@@ -802,29 +810,30 @@ abstract class CmfConfig
             $userId = 'not_authenticated';
             $user = $this->getUser();
             if ($user && $user->existsInDb()) {
-                if ($user::hasColumn('is_superadmin')) {
+                $tableStructure = $user->getTable()->getTableStructure();
+                if ($tableStructure->hasColumn('is_superadmin')) {
                     $userId = '__superadmin__';
-                } elseif ($user::hasColumn('role')) {
+                } elseif ($tableStructure->hasColumn('role')) {
                     $userId = $user->role;
                 } else {
                     $userId = 'user';
                 }
             }
         }
-        return $this->url_prefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
+        return $this->urlPrefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
     }
-    
+
     public function makeUtilityKey(string $keySuffix): string
     {
-        return preg_replace('%[^a-zA-Z0-9]+%i', '_', $this->url_prefix()) . '_' . $keySuffix;
+        return preg_replace('%[^a-zA-Z0-9]+%i', '_', $this->urlPrefix()) . '_' . $keySuffix;
     }
-    
+
     /** @noinspection OnlyWritesOnParameterInspection */
     public function declareRoutes(Application $app, string $sectionName): void
     {
         $cmfConfig = $this;
         $groupConfig = [
-            'prefix' => $this->url_prefix(),
+            'prefix' => $this->urlPrefix(),
             'middleware' => (array)$this->config('routes_middleware', ['web']),
         ];
         $cmfSectionSelectorMiddleware = $this->getUseCmfSectionMiddleware($sectionName);
@@ -834,7 +843,7 @@ abstract class CmfConfig
             $groupConfig['namespace'] = ltrim($namespace, '\\');
         }
         // custom routes
-        $files = $this->routes_files();
+        $files = $this->routesFiles();
         $router = $app->make('router');
         if (count($files) > 0) {
             foreach ($files as $filePath) {
@@ -844,40 +853,40 @@ abstract class CmfConfig
                 });
             }
         }
-        
+
         unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
         if (!$router->has($this->getRouteName('cmf_start_page'))) {
             $router->group($groupConfig, function () use ($router) {
                 $router->get('/', [
-                    'uses' => $this->cmf_general_controller_class() . '@redirectToUserProfile',
+                    'uses' => $this->cmfGeneralControllerClass() . '@redirectToUserProfile',
                     'as' => $this->getRouteName('cmf_start_page'),
                 ]);
             });
         }
-        
+
         $router->group($groupConfig, function () use ($cmfConfig) {
             // warning! $cmfConfig may be used inside included file
             include __DIR__ . '/peskycmf.routes.php';
         });
-        
+
         // special route for ckeditor config.js file
         $groupConfig['middleware'] = [$cmfSectionSelectorMiddleware]; //< only 1 needed
         $router->group($groupConfig, function () use ($router) {
             $router->get('ckeditor/config.js', [
-                'uses' => $this->cmf_general_controller_class() . '@getCkeditorConfigJs',
+                'uses' => $this->cmfGeneralControllerClass() . '@getCkeditorConfigJs',
                 'as' => $this->getRouteName('cmf_ckeditor_config_js'),
             ]);
         });
     }
-    
+
     /**
-     * Get middleware that will tell system whick CMF section to use
+     * Get middleware that will tell system which CMF section to use
      */
     protected function getUseCmfSectionMiddleware(string $sectionName): string
     {
         return UseCmfSection::class . ':' . $sectionName;
     }
-    
+
     public function extendLaravelAppConfigs(Application $app): void
     {
         /** @var ConfigRepository $appConfigs */
@@ -885,7 +894,7 @@ abstract class CmfConfig
         // add auth guard but do not select it as primary
         $this->addAuthGuardConfigToAppConfigs($appConfigs);
     }
-    
+
     protected function addAuthGuardConfigToAppConfigs(ConfigRepository $appConfigs): void
     {
         // merge cmf guard and provider with configs in config/auth.php
@@ -894,13 +903,13 @@ abstract class CmfConfig
             // custom auth guard name provided
             return;
         }
-        
+
         $config = $appConfigs->get('auth', [
             'guards' => [],
             'providers' => [],
         ]);
-        
-        $guardName = Arr::get($cmfAuthConfig, 'name') ?: $this->url_prefix();
+
+        $guardName = Arr::get($cmfAuthConfig, 'name') ?: $this->urlPrefix();
         if (array_key_exists($guardName, $config['guards'])) {
             return; //< it is provided manually or cached
         }
@@ -917,7 +926,9 @@ abstract class CmfConfig
             $provider = null;
         }
         if (array_key_exists($providerName, $config['providers'])) {
-            throw new \UnexpectedValueException('There is already an auth provider with name "' . $guardName . '"');
+            throw new \UnexpectedValueException(
+                "There is already an auth provider with name '$guardName'"
+            );
         }
         $config['guards'][$guardName] = [
             'driver' => Arr::get($cmfAuthConfig, 'driver', 'session'),
@@ -926,21 +937,21 @@ abstract class CmfConfig
         if (!empty($provider)) {
             $config['providers'][$providerName] = $provider;
         }
-        
+
         $appConfigs->set('auth', $config);
     }
-    
+
     public function initSection(Application $app): void
     {
         $this->setLaravelApp($app);
-        
+
         // configurators
         $this->configureSession();
         $this->configureLanguageDetector();
-        
+
         // locale handlers
         $this->listenForAppLocaleChanges();
-        
+
         // init auth module
         /** @var CmfAuthModule $cmfAuthModuleClass */
         $cmfAuthModuleClass = $this->config('auth.module') ?: CmfAuthModule::class;
@@ -950,7 +961,7 @@ abstract class CmfConfig
             return $authModule;
         });
         $authModule->init();
-        
+
         // init UI module
         /** @var CmfAuthModule $cmfAuthModuleClass */
         $cmfUIModuleClass = $this->config('ui.module') ?: CmfUIModule::class;
@@ -959,70 +970,75 @@ abstract class CmfConfig
         $app->singleton(CmfUIModule::class, function () use ($uiModule) {
             return $uiModule;
         });
-        
+
         // init API Documentation module
         $app->singleton(CmfApiDocumentationModule::class, function () {
-            $cmfApiDocsModuleClass = $this->config('api_documentation.module') ?: CmfApiDocumentationModule::class;
+            $cmfApiDocsModuleClass = $this->config('api_documentation.module')
+                ?: CmfApiDocumentationModule::class;
             return new $cmfApiDocsModuleClass($this);
         });
-        
+
         // send $cmfConfig and $uiModule var to all views
         $this->getViewsFactory()->composer('*', function (View $view) use ($uiModule) {
             $view
                 ->with('cmfConfig', $this)
                 ->with('uiModule', $uiModule);
         });
-        
+
         /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
-        $langDetectorProvider = $app->register(PeskyCmfLanguageDetectorServiceProvider::class);
-        $app->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
+        $langDetectorProvider = $app->register(
+            PeskyCmfLanguageDetectorServiceProvider::class
+        );
+        $app->alias(
+            LanguageDetectorServiceProvider::class,
+            PeskyCmfLanguageDetectorServiceProvider::class
+        );
         $langDetectorProvider->importConfigsFromPeskyCmf($this);
-        
+
         if ($this->config('file_access_mask') !== null) {
             umask($this->config('file_access_mask'));
         }
-        
-        // Register resource name to ScaffoldConfig class mappings
-        //$resources = $this->getUiModule()->getScaffolds();
-        /** @var ScaffoldConfig $scaffoldConfigClass */
-        /*foreach ($resources as $scaffoldConfigClass) {
-            static::registerScaffoldConfigForResource($scaffoldConfigClass::getResourceName(), $scaffoldConfigClass);
-        }*/
     }
-    
-    protected function setLaravelApp(Application $app): void
+
+    public function setLaravelApp(Application $app): void
     {
         $this->app = $app;
         $this->languageDetector = $app->make(LanguageDetectorInterface::class);
         $this->configs = $app->make(ConfigRepository::class);
         $this->viewsFactory = $app->make('view');
     }
-    
+
     protected function configureSession(): void
     {
         $appConfigs = $this->getLaravelConfigs();
         $config = array_merge(
             $appConfigs->get('session'),
-            ['path' => '/' . trim($this->url_prefix(), '/')],
+            ['path' => '/' . trim($this->urlPrefix(), '/')],
             (array)$this->config('session', [])
         );
         $appConfigs->set('session', $config);
     }
-    
+
     protected function configureLanguageDetector(): void
     {
-        //< todo: extract language detection and updates to separate module and get rid of PeskyCmfLanguageDetectorServiceProvider
+        // todo: extract language detection and updates to separate module
+        //  and get rid of PeskyCmfLanguageDetectorServiceProvider
         /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
-        $langDetectorProvider = $this->getLaravelApp()->register(PeskyCmfLanguageDetectorServiceProvider::class);
-        $this->getLaravelApp()->alias(LanguageDetectorServiceProvider::class, PeskyCmfLanguageDetectorServiceProvider::class);
+        $langDetectorProvider = $this->getLaravelApp()->register(
+            PeskyCmfLanguageDetectorServiceProvider::class
+        );
+        $this->getLaravelApp()->alias(
+            LanguageDetectorServiceProvider::class,
+            PeskyCmfLanguageDetectorServiceProvider::class
+        );
         $langDetectorProvider->importConfigsFromPeskyCmf($this);
     }
-    
+
     protected function getEventsDispatcher(): Dispatcher
     {
         return $this->getLaravelApp()->make('events');
     }
-    
+
     protected function listenForAppLocaleChanges(): void
     {
         $this->getEventsDispatcher()->listen(
@@ -1032,5 +1048,4 @@ abstract class CmfConfig
             }
         );
     }
-    
 }

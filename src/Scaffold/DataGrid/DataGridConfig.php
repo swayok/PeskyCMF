@@ -17,16 +17,16 @@ use Swayok\Html\Tag;
 
 class DataGridConfig extends ScaffoldSectionConfig
 {
-    
+
     public const ROW_ACTIONS_COLUMN_NAME = '__actions';
-    
+
     public const ORDER_ASC = 'asc';
     public const ORDER_DESC = 'desc';
     public const ORDER_ASC_NULLS_FIRST = 'asc nulls first';
     public const ORDER_ASC_NULLS_LAST = 'asc nulls last';
     public const ORDER_DESC_NULLS_FIRST = 'desc nulls first';
     public const ORDER_DESC_NULLS_LAST = 'desc nulls last';
-    
+
     protected static array $orderOptions = [
         self::ORDER_ASC,
         self::ORDER_DESC,
@@ -35,18 +35,18 @@ class DataGridConfig extends ScaffoldSectionConfig
         self::ORDER_DESC_NULLS_FIRST,
         self::ORDER_DESC_NULLS_LAST,
     ];
-    
+
     protected bool $allowRelationsInValueViewers = true;
-    
+
     protected bool $allowComplexValueViewerNames = true;
-    
+
     protected string $template = 'cmf::scaffold.datagrid';
     protected int $recordsPerPage = 25;
     protected int $offset = 0;
     protected int $maxLimit = 100;
     protected string|DbExpr $orderBy;
     protected ?string $orderDirection = self::ORDER_ASC;
-    
+
     /**
      * Add a checkboxes column to datagrid so user can select several rows and perform bulk-actions
      */
@@ -74,14 +74,14 @@ class DataGridConfig extends ScaffoldSectionConfig
      * optimize datagrid selects for usage in big tables so that it will be faster to select rows
      */
     protected bool $isBigTable = false;
-    
+
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig)
     {
         parent::__construct($table, $scaffoldConfig);
-        $this->recordsPerPage = $this->getCmfConfig()->rows_per_page();
+        $this->recordsPerPage = $this->getCmfConfig()->rowsPerPage();
         $this->setOrderBy($table->getPkColumnName());
     }
-    
+
     /**
      * @private
      * @throws \BadMethodCallException
@@ -90,7 +90,7 @@ class DataGridConfig extends ScaffoldSectionConfig
     {
         throw new \BadMethodCallException('Data grid cannot be opened in modal');
     }
-    
+
     /**
      * Alias for setValueViewers
      */
@@ -98,7 +98,7 @@ class DataGridConfig extends ScaffoldSectionConfig
     {
         return $this->setValueViewers($datagridColumns);
     }
-    
+
     /**
      * @return DataGridColumn[]|AbstractValueViewer[]
      */
@@ -106,22 +106,22 @@ class DataGridConfig extends ScaffoldSectionConfig
     {
         return $this->getValueViewers();
     }
-    
+
     public function hasDataGridColumn(string $name): bool
     {
         return $this->hasValueViewer($name);
     }
-    
+
     protected function createValueRenderer(): DataGridCellRenderer
     {
         return DataGridCellRenderer::create();
     }
-    
+
     public function setInvisibleColumns(...$columnNames): static
     {
         return call_user_func_array([$this, 'setAdditionalColumnsToSelect'], $columnNames);
     }
-    
+
     /**
      * Mimics setInvisibleColumns()
      */
@@ -134,7 +134,7 @@ class DataGridConfig extends ScaffoldSectionConfig
         }
         return $this;
     }
-    
+
     /**
      * @param AbstractValueViewer|DataGridColumn $viewer
      * @noinspection PhpDocSignatureInspection
@@ -154,7 +154,7 @@ class DataGridConfig extends ScaffoldSectionConfig
             return -1;
         }
     }
-    
+
     /**
      * @param bool $shown - true: filter will be opened on data grid load | false: filter will be hidden
      * @return static
@@ -164,62 +164,62 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->isFilterOpened = $shown;
         return $this;
     }
-    
+
     public function openFilterByDefault(): static
     {
         $this->isFilterOpened = true;
         return $this;
     }
-    
+
     public function closeFilterByDefault(): static
     {
         $this->isFilterOpened = false;
         return $this;
     }
-    
+
     public function isFilterOpenedByDefault(): bool
     {
         return $this->isFilterOpened;
     }
-    
+
     public function setIsBigTable(bool $isBigTable = true): static
     {
         $this->isBigTable = $isBigTable;
         return $this;
     }
-    
+
     public function isBigTable(): bool
     {
         return $this->isBigTable;
     }
-    
+
     public function getRecordsPerPage(): int
     {
         return $this->recordsPerPage;
     }
-    
+
     public function setRecordsPerPage(int $recordsPerPage): static
     {
         $this->recordsPerPage = min($this->maxLimit, $recordsPerPage);
         return $this;
     }
-    
+
     public function getOffset(): int
     {
         return $this->offset;
     }
-    
+
     public function setOffset(int $offset): static
     {
         $this->offset = max($offset, 0);
         return $this;
     }
-    
+
     public function getOrderBy(): string
     {
         return $this->orderBy;
     }
-    
+
     /**
      * @param string|DbExpr $orderBy
      * @param null|string $direction - 'asc', 'desc', 'asc nulls first' or 'desc nulls last' in any case or DataGridConfig::ORDER_* constants
@@ -239,12 +239,12 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->orderBy = $orderBy;
         return $this;
     }
-    
+
     public function getOrderDirection(): ?string
     {
         return $this->orderDirection;
     }
-    
+
     /**
      * @throws \InvalidArgumentException
      */
@@ -259,18 +259,18 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->orderDirection = $orderDirection;
         return $this;
     }
-    
+
     public function isAllowedMultiRowSelection(): bool
     {
         return $this->allowMultiRowSelection;
     }
-    
+
     public function setMultiRowSelection(bool $allowMultiRowSelection): static
     {
         $this->allowMultiRowSelection = $allowMultiRowSelection;
         return $this;
     }
-    
+
     /**
      * Pass 'true' to fix/stick multi-row selection column in data grid so it will not move during
      * horisontal scrolling of data grid
@@ -280,24 +280,24 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->isMultiRowSelectionColumnFixed = $isFixed;
         return $this;
     }
-    
+
     public function isMultiRowSelectionColumnFixed(): bool
     {
         return $this->isMultiRowSelectionColumnFixed;
     }
-    
+
     public function setIsBulkItemsDeleteAllowed(bool $isAllowed): static
     {
         $this->allowBulkItemsDelete = $isAllowed;
         $this->setMultiRowSelection(true);
         return $this;
     }
-    
+
     public function isBulkItemsDeleteAllowed(): bool
     {
         return $this->allowBulkItemsDelete;
     }
-    
+
     /**
      * Bulk editable columns provided via FormConfig->setBulkEditableColumns() or FormConfig->addBulkEditableColumns()
      */
@@ -307,34 +307,34 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->setMultiRowSelection(true);
         return $this;
     }
-    
+
     public function isBulkItemsEditingAllowed(): bool
     {
         return $this->allowBulkItemsEditing;
     }
-    
+
     public function setIsFilteredItemsDeleteAllowed(bool $isAllowed): static
     {
         $this->allowFilteredItemsDelete = $isAllowed;
         return $this;
     }
-    
+
     public function isFilteredItemsDeleteAllowed(): bool
     {
         return $this->allowFilteredItemsDelete;
     }
-    
+
     public function setIsFilteredItemsEditingAllowed(bool $isAllowed): static
     {
         $this->allowFilteredItemsEditing = $isAllowed;
         return $this;
     }
-    
+
     public function isFilteredItemsEditingAllowed(): bool
     {
         return $this->allowFilteredItemsEditing;
     }
-    
+
     /**
      * @return string[]
      * @throws \UnexpectedValueException
@@ -374,7 +374,7 @@ class DataGridConfig extends ScaffoldSectionConfig
         }
         return $bulkActionsToolbarItems;
     }
-    
+
     /**
      * @param \Closure $callback - function (ScaffoldSectionConfig $scaffoldSectionConfig) { return []; }
      * Callback must return an array.
@@ -469,7 +469,7 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->bulkActionsToolbarItems = $callback;
         return $this;
     }
-    
+
     /**
      * @param array $records
      * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
@@ -495,12 +495,12 @@ class DataGridConfig extends ScaffoldSectionConfig
         }
         return $records;
     }
-    
+
     public function createValueViewer(): DataGridColumn
     {
         return DataGridColumn::create();
     }
-    
+
     /**
      * @return Tag[]|string[]
      */
@@ -508,7 +508,7 @@ class DataGridConfig extends ScaffoldSectionConfig
     {
         return $this->rowActions ? (array)call_user_func($this->rowActions, $this) : [];
     }
-    
+
     /**
      * Note: common actions: 'details', 'edit', 'clone', 'delete' will be added automatically before custom menu items.
      * You can manipulate positioning of common items using actions names as keys (ex: 'details' => null).
@@ -564,18 +564,18 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->rowActions = $rowActionsBuilder;
         return $this;
     }
-    
+
     public function setIsRowActionsEnabled(bool $isEnabled): static
     {
         $this->isRowActionsEnabled = $isEnabled;
         return $this;
     }
-    
+
     public function isRowActionsEnabled(): bool
     {
         return $this->isRowActionsEnabled;
     }
-    
+
     /**
      * Pass 'true' to fix/stick actions column in data grid so it will not move during
      * horisontal scrolling of data grid
@@ -585,28 +585,28 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->isRowActionsColumnFixed = $isFixed;
         return $this;
     }
-    
+
     public function isRowActionsColumnFixed(): bool
     {
         return $this->isRowActionsColumnFixed;
     }
-    
+
     public function setIsContextMenuEnabled(bool $isEnabled): static
     {
         $this->isContextMenuEnabled = $isEnabled;
         return $this;
     }
-    
+
     public function isContextMenuEnabled(): bool
     {
         return $this->isContextMenuEnabled;
     }
-    
+
     public function getContextMenuItems(): array
     {
         return $this->contextMenuItems ? (array)call_user_func($this->contextMenuItems, $this) : [];
     }
-    
+
     /**
      * Note: common actions: 'details', 'edit', 'clone', 'delete' will be added automatically before custom
      * menu items. You can manipulate positioning of common items using action name as key and null as value
@@ -649,18 +649,18 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->contextMenuItems = $contextMenuItems;
         return $this;
     }
-    
+
     public function getAdditionalDataTablesConfig(): array
     {
         return $this->additionalDataTablesConfig;
     }
-    
+
     public function setAdditionalDataTablesConfig(array $additionalDataTablesConfig): static
     {
         $this->additionalDataTablesConfig = $additionalDataTablesConfig;
         return $this;
     }
-    
+
     /**
      * @param string $name
      * @param AbstractValueViewer|null $tableCell
@@ -675,7 +675,7 @@ class DataGridConfig extends ScaffoldSectionConfig
             : $tableCell;
         return parent::addValueViewer($name, $tableCell, $autodetectIfLinkedToDbColumn);
     }
-    
+
     /**
      * @return DataGridColumn|RenderableValueViewer
      * @noinspection PhpDocSignatureInspection
@@ -688,7 +688,7 @@ class DataGridConfig extends ScaffoldSectionConfig
             ->setLabel($this->translateGeneral('actions.column_label'))
             ->setType(DataGridColumn::TYPE_STRING);
     }
-    
+
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
@@ -730,12 +730,12 @@ class DataGridConfig extends ScaffoldSectionConfig
             }
         }
     }
-    
+
     protected function getSectionTranslationsPrefix(?string $subtype = null): string
     {
         return $subtype === 'value_viewer' ? 'datagrid.column' : 'datagrid';
     }
-    
+
     /**
      * @param string $parentIdColumnName
      * @param int $limitNestingDepthTo - number of nested data grids. <= 0 - no limit; 1 = 1 subview only;
@@ -749,28 +749,28 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->setIsRowActionsColumnFixed(false);
         return $this;
     }
-    
+
     public function isNestedViewEnabled(): bool
     {
         return !empty($this->enableNestedViewBasedOnColumn);
     }
-    
+
     public function getColumnNameForNestedView(): ?string
     {
         return $this->enableNestedViewBasedOnColumn;
     }
-    
+
     public function setNestedViewsDepthLimit(int $maxDepth): static
     {
         $this->nestedViewsDepthLimit = $maxDepth;
         return $this;
     }
-    
+
     public function getNestedViewsDepthLimit(): int
     {
         return $this->nestedViewsDepthLimit;
     }
-    
+
     /**
      * @param array $rowsPositioningColumns - column that is used to define rows order
      */
@@ -779,17 +779,17 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->rowsPositioningColumns = $rowsPositioningColumns;
         return $this;
     }
-    
+
     public function getRowsPositioningColumns(): array
     {
         return $this->rowsPositioningColumns;
     }
-    
+
     public function isRowsReorderingEnabled(): bool
     {
         return !empty($this->rowsPositioningColumns);
     }
-    
+
     /**
      * Provide additional Laravel views to be inserted after data grid.
      * This will solve almost any problem with complex data grid cells that need to be rendered separately.
@@ -819,14 +819,14 @@ class DataGridConfig extends ScaffoldSectionConfig
         $this->additionalViewsForTemplate = $views;
         return $this;
     }
-    
+
     public function getAdditionalViewsForTemplate(): array
     {
         return $this->additionalViewsForTemplate instanceof \Closure
             ? call_user_func($this->additionalViewsForTemplate, $this)
             : $this->additionalViewsForTemplate;
     }
-    
+
     public function getRendererHelper(): DataGridRendererHelper
     {
         if (empty($this->rendererHelper)) {
@@ -834,7 +834,7 @@ class DataGridConfig extends ScaffoldSectionConfig
         }
         return $this->rendererHelper;
     }
-    
+
     public function prepareRecord(array $record, array $virtualColumns = []): array
     {
         $data = parent::prepareRecord($record, $virtualColumns);

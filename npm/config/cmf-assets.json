@@ -14,9 +14,6 @@
                 "src/cmf-vendors/FileAPI/FileAPI.exif.js",
                 "node_modules/admin-lte/dist/js/adminlte.js"
             ],
-            "future": [
-                "public/packages/cmf-vendors/cropperjs/cropper.js"
-            ]
         },
         "cmf-jquery-and-bootstrap-plugins": {
             "output": "js/cmf-jquery-and-bootstrap-plugins.js",

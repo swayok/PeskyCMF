@@ -15,14 +15,14 @@ use PeskyORM\ORM\RecordInterface;
 
 class CmfAuth
 {
-    
+
     protected CmfConfig $cmfConfig;
-    
+
     public function __construct(CmfConfig $cmfConfig)
     {
         $this->cmfConfig = $cmfConfig;
     }
-    
+
     public function handle(Request $request, \Closure $next)
     {
         $loginUrl = $this->cmfConfig->getAuthModule()->getLoginPageUrl();
@@ -36,14 +36,14 @@ class CmfAuth
             $this->cmfConfig->getLaravelApp()
                 ->make('events')
                 ->dispatch(new CmfUserAuthenticated($this->cmfConfig->getUser(), $this->cmfConfig));
-            
+
             $response = $next($request);
             if ($response->getStatusCode() === HttpCode::FORBIDDEN && stripos($response->getContent(), 'unauthorized') !== false) {
                 $message = $this->cmfConfig->transGeneral('message.access_denied');
                 $response = $request->ajax()
                     ? CmfJsonResponse::create(HttpCode::FORBIDDEN)->setMessage($message)->goBack($loginUrl)
                     : (new RedirectResponse($loginUrl))->with(
-                        $this->cmfConfig->session_message_key(),
+                        $this->cmfConfig->sessionMessageKey(),
                         [
                             'message' => $message,
                             'type' => CmfJsonResponse::MESSAGE_TYPE_INFO,
@@ -53,5 +53,5 @@ class CmfAuth
             return $response;
         }
     }
-    
+
 }

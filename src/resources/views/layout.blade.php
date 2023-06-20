@@ -1,13 +1,14 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @var \PeskyCMF\Config\CmfConfig $cmfConfig
- * @var \PeskyCMF\UI\CmfUIModule $uiModule
- * @var array $coreAssets
- * @var array $customAssets
- * @var string $scriptsVersion
- * @var array $jsAppSettings
- * @var array $jsAppData
+ * @var \PeskyCMF\UI\CmfUIModule   $uiModule
+ * @var array                      $coreAssets
+ * @var array                      $customAssets
+ * @var string                     $scriptsVersion
+ * @var array                      $jsAppSettings
+ * @var array                      $jsAppData
  */
 
 ?>
@@ -16,7 +17,9 @@ declare(strict_types=1);
 <head>
     <meta charset="UTF-8">
     <title>
-        @section('page-title'){{ $cmfConfig->default_page_title() }}@show
+        @section('page-title')
+            {{ $cmfConfig->defaultPageTitle() }}
+        @show
     </title>
     <meta
         content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
@@ -192,15 +195,15 @@ declare(strict_types=1);
 @stack('jscode')
 
 <?php
-    $message = $cmfConfig->getLaravelApp()->make('session.store')->pull($cmfConfig->session_message_key(), false);
+$message = $cmfConfig->getLaravelApp()->make('session.store')->pull($cmfConfig->sessionMessageKey(), false);
 ?>
 @if (!empty($message) && (is_string($message) || (is_array($message) && !empty($message['message']))))
     <script type="application/javascript">
-        <?php
+            <?php
             $type = is_string($message) || empty($message['type']) || !in_array($message['type'], ['success', 'info', 'warning', 'error'])
                 ? 'info'
                 : $message['type']
-        ?>
+            ?>
         $(document).ready(function () {
             if (typeof toastr !== 'undefined') {
                 toastr.{{ $type }}('{{ is_string($message) ? $message : $message['message'] }}');

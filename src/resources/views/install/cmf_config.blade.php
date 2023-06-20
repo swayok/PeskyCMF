@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 /**
  * @var string $sectionName
  * @var string $cmfConfigClassName
@@ -8,18 +10,21 @@ declare(strict_types=1);
 echo "<?php\n";
 ?>
 
+declare(strict_types=1);
+
 namespace App\{{ $sectionName }};
 
 use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\CmfUrl;
 
-class {{ $cmfConfigClassName }} extends CmfConfig {
-
+class {{ $cmfConfigClassName }} extends CmfConfig
+{
     /**
      * File name for this site section in 'configs' folder of project's root directory (without '.php' extension)
      * Example: 'admin' for config/admin.php;
      */
-    protected static function configsFileName(): string {
+    protected function configsFileName(): string
+    {
         return '{{ $configsFileName }}';
     }
 
@@ -40,11 +45,12 @@ class {{ $cmfConfigClassName }} extends CmfConfig {
      *         ),
      *    )
      */
-    public static function menu(): array {
+    public function menu(): array
+    {
         return array_merge(
             [
                 [
-                    'label' => self::transCustom('page.dashboard.menu_title'),
+                    'label' => $this->transCustom('page.dashboard.menu_title'),
                     'url' => CmfUrl::toPage('dashboard'),
                     'icon' => 'glyphicon glyphicon-dashboard',
                 ],
@@ -65,7 +71,7 @@ class {{ $cmfConfigClassName }} extends CmfConfig {
                     ]
                 ]*/
             ],
-            static::getMenuItems()
+            $this->getMenuItems()
         );
     }
 
@@ -73,8 +79,7 @@ class {{ $cmfConfigClassName }} extends CmfConfig {
      * How much rows to display in data tables
      * @return int
      */
-    /*public static function rows_per_page(): int {
+    /*public static function rowsPerPage(): int {
         return 25;
     }*/
-
 }

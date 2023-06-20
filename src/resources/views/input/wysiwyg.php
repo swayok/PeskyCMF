@@ -20,12 +20,12 @@ include __DIR__ . '/textarea.php';
 
 <script type="application/javascript">
     $(function () {
-        window.CKEDITOR_BASEPATH = '/packages/cmf/raw/ckeditor/';
-        Utils.requireFiles(['/packages/cmf/raw/ckeditor/ckeditor.js'])
+        window.CKEDITOR_BASEPATH = '/vendor/peskycmf/raw/ckeditor/';
+        Utils.requireFiles(['/vendor/cmf/peskycmf/ckeditor/ckeditor.js'])
             .done(function () {
                 Utils.requireFiles([
                         '<?php echo $sectionConfig->getCmfConfig()->route('cmf_ckeditor_config_js', ['_' => csrf_token()]) ?>',
-                        '/packages/cmf/raw/ckeditor/adapters/jquery.js'
+                        '/vendor/peskycmf/raw/ckeditor/adapters/jquery.js'
                     ])
                     .done(function () {
                         <?php

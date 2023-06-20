@@ -12,7 +12,7 @@ return [
      * List of classes that extend CmfConfig class
      */
     'cmf_configs' => [
-        'default' => \App\Admin\AdminConfig::class
+        'default' => \PeskyCMF\Config\CmfConfig::class
     ],
 
     /**
