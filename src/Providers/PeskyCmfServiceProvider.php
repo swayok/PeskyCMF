@@ -17,12 +17,8 @@ use PeskyCMF\Console\Commands\CmfInstallHttpRequestsProfilingCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
-use PeskyCMF\Db\Settings\CmfSettingsTable;
-use PeskyCMF\Db\Settings\CmfSettingsTableStructure;
 use PeskyCMF\PeskyCmfAppSettings;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Vluzrmos\LanguageDetector\Facades\LanguageDetector;
-use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
 
 class PeskyCmfServiceProvider extends ServiceProvider
 {
@@ -31,7 +27,6 @@ class PeskyCmfServiceProvider extends ServiceProvider
         $this->registerCmfBindings();
 
         $this->registerRelatedServiceProviders();
-        $this->registerServiceProvidersForConsole();
 
         $this->registerFacades();
         $this->registerCommands();
@@ -82,21 +77,12 @@ class PeskyCmfServiceProvider extends ServiceProvider
         $this->app->register(RecaptchaServiceProvider::class);
     }
 
-    protected function registerServiceProvidersForConsole(): void
-    {
-        if ($this->runningInConsole()) {
-            $this->app->register(PeskyCmfLanguageDetectorServiceProvider::class);
-            $this->app->alias(
-                LanguageDetectorServiceProvider::class,
-                PeskyCmfLanguageDetectorServiceProvider::class
-            );
-        }
-    }
-
     protected function registerFacades(): void
     {
-        AliasLoader::getInstance()->alias('LanguageDetector', LanguageDetector::class);
-        AliasLoader::getInstance()->alias('CmfManager', \PeskyCMF\Facades\CmfManager::class);
+        AliasLoader::getInstance()->alias(
+            'CmfManager',
+            \PeskyCMF\Facades\CmfManager::class
+        );
     }
 
     protected function runningInConsole(): bool

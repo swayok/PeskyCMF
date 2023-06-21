@@ -6,28 +6,24 @@ declare(strict_types=1);
 namespace PeskyCMF\Db\Settings;
 
 use Illuminate\Support\Arr;
-use PeskyCMF\Db\CmfDbTableStructure;
-use PeskyORM\ORM\Column;
-use PeskyORM\ORM\DefaultColumnClosures;
-use PeskyORMColumns\TableStructureTraits\IdColumn;
+use PeskyORM\ORM\TableStructure\TableStructure;
 
-class CmfSettingsTableStructure extends CmfDbTableStructure
+class CmfSettingsTableStructure extends TableStructure
 {
-    
     use IdColumn;
-    
+
     public static function getTableName(): string
     {
         return 'settings';
     }
-    
+
     private function key(): Column
     {
         return Column::create(Column::TYPE_STRING)
             ->uniqueValues()
             ->disallowsNullValues();
     }
-    
+
     private function value(): Column
     {
         // DO NOT USE TYPE_JSON/TYPE_JSONB here. It will add duplicate json encoding and cause
@@ -35,14 +31,14 @@ class CmfSettingsTableStructure extends CmfDbTableStructure
         return Column::create(Column::TYPE_TEXT)
             ->convertsEmptyStringToNull();
     }
-    
+
     private function default_language(): Column
     {
         return Column::create(Column::TYPE_STRING)
             ->doesNotExistInDb()
             ->setDefaultValue('en');
     }
-    
+
     private function languages(): Column
     {
         return Column::create(Column::TYPE_JSON)
@@ -54,7 +50,7 @@ class CmfSettingsTableStructure extends CmfDbTableStructure
                 return $this->languagesMapNormalizer($value, $isFromDb, $column);
             });
     }
-    
+
     private function fallback_languages(): Column
     {
         return Column::create(Column::TYPE_JSON)
@@ -64,7 +60,7 @@ class CmfSettingsTableStructure extends CmfDbTableStructure
                 return $this->languagesMapNormalizer($value, $isFromDb, $column);
             });
     }
-    
+
     protected function languagesMapNormalizer($value, $isFromDb, Column $column)
     {
         if (is_string($value)) {
@@ -90,5 +86,4 @@ class CmfSettingsTableStructure extends CmfDbTableStructure
         }
         return DefaultColumnClosures::valueNormalizer($normalized, $isFromDb, $column);
     }
-    
 }

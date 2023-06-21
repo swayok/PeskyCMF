@@ -4,24 +4,16 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Db\HttpRequestStats;
 
-use PeskyCMF\Db\CmfDbTable;
+use PeskyORM\ORM\Table\Table;
 
-class CmfHttpRequestStatsTable extends CmfDbTable
+class CmfHttpRequestStatsTable extends Table
 {
-    
-    public function getTableStructure(): CmfHttpRequestStatsTableStructure
+    public function __construct(?string $tableAlias = 'HttpRequestStats')
     {
-        return CmfHttpRequestStatsTableStructure::getInstance();
+        parent::__construct(
+            new CmfHttpRequestStatsTableStructure(),
+            CmfHttpRequestStat::class,
+            $tableAlias
+        );
     }
-    
-    public function newRecord(): CmfHttpRequestStat
-    {
-        return new CmfHttpRequestStat();
-    }
-    
-    public function getTableAlias(): string
-    {
-        return 'HttpRequestStats';
-    }
-    
 }

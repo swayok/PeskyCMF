@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace PeskyCMF\Db\Settings;
 
 use PeskyCMF\Db\Admins\CmfAdmin;
-use PeskyCMF\Db\CmfDbRecord;
-use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueRecordHelpers;
-use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface;
+use PeskyORM\ORM\Record\Record;
+use PeskyORM\ORM\Table\TableInterface;
 
 /**
  * @property-read int $id
@@ -19,17 +18,13 @@ use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface
  * @method $this    setKey($value, $isFromDb = false)
  * @method $this    setValue($value, $isFromDb = false)
  */
-class CmfSetting extends CmfDbRecord
+class CmfSetting extends Record
 {
-    
-    use LaravelKeyValueRecordHelpers;
-    
     /**
      * @return CmfSettingsTable
      */
-    public static function getTable(): LaravelKeyValueTableInterface
+    public function getTable(): TableInterface
     {
         return app(CmfSettingsTable::class);
     }
-    
 }

@@ -8,47 +8,47 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
-use PeskyCMF\Db\CmfDbRecord;
-use PeskyCMF\Db\TempRecord;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
-use PeskyORM\ORM\RecordInterface;
+use PeskyORM\DbExpr;
+use PeskyORM\ORM\Record\Record;
+use PeskyORM\ORM\Record\RecordInterface;
 use Swayok\Utils\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @property-read int $id
- * @property-read string $requester_table
- * @property-read null|int $requester_id
- * @property-read string $requester_info
- * @property-read string $url
- * @property-read string $http_method
- * @property-read string $ip
- * @property-read string $filter
- * @property-read string $section
- * @property-read null|int $response_code
+ * @property-read int         $id
+ * @property-read string      $requester_table
+ * @property-read null|int    $requester_id
+ * @property-read string      $requester_info
+ * @property-read string      $url
+ * @property-read string      $http_method
+ * @property-read string      $ip
+ * @property-read string      $filter
+ * @property-read string      $section
+ * @property-read null|int    $response_code
  * @property-read null|string $response_type
- * @property-read string $request
- * @property-read array $request_as_array
- * @property-read \stdClass $request_as_object
+ * @property-read string      $request
+ * @property-read array       $request_as_array
+ * @property-read \stdClass   $request_as_object
  * @property-read null|string $response
  * @property-read null|string $debug
  * @property-read null|string $table
- * @property-read null|int $item_id
+ * @property-read null|int    $item_id
  * @property-read null|string $data_before
- * @property-read array $data_before_as_array
- * @property-read \stdClass $data_before_as_object
+ * @property-read array       $data_before_as_array
+ * @property-read \stdClass   $data_before_as_object
  * @property-read null|string $data_after
- * @property-read array $data_after_as_array
- * @property-read \stdClass $data_after_as_object
- * @property-read string $created_at
- * @property-read string $created_at_as_date
- * @property-read string $created_at_as_time
- * @property-read int $created_at_as_unix_ts
+ * @property-read array       $data_after_as_array
+ * @property-read \stdClass   $data_after_as_object
+ * @property-read string      $created_at
+ * @property-read string      $created_at_as_date
+ * @property-read string      $created_at_as_time
+ * @property-read int         $created_at_as_unix_ts
  * @property-read null|string $responded_at
- * @property-read string $responded_at_as_date
- * @property-read string $responded_at_as_time
- * @property-read int $responded_at_as_unix_ts
+ * @property-read string      $responded_at_as_date
+ * @property-read string      $responded_at_as_time
+ * @property-read int         $responded_at_as_unix_ts
  *
  * @method $this    setId($value, $isFromDb = false)
  * @method $this    setRequesterTable($value, $isFromDb = false)
@@ -70,14 +70,13 @@ use Symfony\Component\HttpFoundation\Response;
  * @method $this    setDataAfter($value, $isFromDb = false)
  * @method $this    setRespondedAt($value, $isFromDb = false)
  */
-class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
+class CmfHttpRequestLog extends Record implements ScaffoldLoggerInterface
 {
-    
     /** @var \Closure[] */
     protected static array $requestDataMinifiers = [];
     /** @var \Closure[] */
     protected static array $responseContentMinifiers = [];
-    
+
     protected static array $serverDataKeys = [
         'HTTP_USER_AGENT',
         'REQUEST_URI',
@@ -96,16 +95,16 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         'HTTPS',
         'REQUEST_TIME',
     ];
-    
+
     protected ?\Closure $responseContentMinifier = null;
     protected ?\Closure $requestDataMinifier = null;
     protected bool $ignoreResponseLogging = false;
-    
-    public static function getTable(): CmfHttpRequestLogsTable
+
+    public function getTable(): CmfHttpRequestLogsTable
     {
         return CmfHttpRequestLogsTable::getInstance();
     }
-    
+
     /**
      * Register request data minifier that may be used by during request logging via
      * route's 'log_data_minifier' action.
@@ -114,7 +113,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
     {
         static::$requestDataMinifiers[$name] = $minifier;
     }
-    
+
     /**
      * Register response data minifier that may be used by during request logging via
      * route's 'log_response' action.
@@ -123,7 +122,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
     {
         static::$responseContentMinifiers[$name] = $minifier;
     }
-    
+
     public function fromRequest(Request $request, bool $enabledByDefault = false, bool $force = false): ?static
     {
         if ($this->hasValue('request')) {
@@ -135,8 +134,8 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
             if (!$logName) {
                 return null;
             }
-            
-            $files = array_map(function ($file) {
+
+            $files = array_map(static function ($file) {
                 if ($file instanceof UploadedFile) {
                     $fileExists = !empty($file->getPathname()) && File::exist($file->getPathname());
                     return [
@@ -147,7 +146,9 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
                         'error' => $file->getError(),
                         'error_message' => $file->getError() !== 0 ? $file->getErrorMessage() : '',
                     ];
-                } elseif ($file instanceof \SplFileInfo) {
+                }
+
+                if ($file instanceof \SplFileInfo) {
                     $fileExists = !empty($file->getPathname()) && File::exist($file->getPathname());
                     return [
                         'name' => $file->getPathname(),
@@ -156,19 +157,19 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
                         'error' => $fileExists ? 0 : -1,
                         'error_message' => $fileExists ? 'File not exists' : '',
                     ];
-                } else {
-                    return $file;
                 }
+
+                return $file;
             }, $request->file());
-            
-            // set data minifier from rotute's 'log_data_minifier' action if provided and registered
+
+            // set data minifier from route's 'log_data_minifier' action if provided and registered
             if (!$this->requestDataMinifier) {
                 $requestMinifierName = Arr::get($route->getAction(), 'log_data_minifier');
                 if (!empty($requestMinifierName) && isset(static::$requestDataMinifiers[$requestMinifierName])) {
                     $this->setRequestDataMinifier(static::$requestDataMinifiers[$requestMinifierName]);
                 }
             }
-            // set data minifier from rotute's 'log_response' action if provided and registered
+            // set data minifier from route's 'log_response' action if provided and registered
             if (!$this->responseContentMinifier) {
                 $responseMinifierName = Arr::get($route->getAction(), 'log_response');
                 if (!empty($responseMinifierName) && isset(static::$responseContentMinifiers[$responseMinifierName])) {
@@ -180,7 +181,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
                     });
                 }
             }
-            
+
             $requestData = [
                 'GET' => $this->getMinifiedRequestData($this->hidePasswords($request->query())),
                 'POST' => $this->getMinifiedRequestData($this->hidePasswords($request->post())),
@@ -208,12 +209,12 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return $this;
     }
-    
+
     protected function hidePasswords(array $data): array
     {
         return hidePasswords($data);
     }
-    
+
     /**
      * Set minifier closure to reduce size of request data to be logged.
      * Useful for heavy requests that contain lots of data or heavy data like files.
@@ -224,7 +225,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         $this->requestDataMinifier = $minifier;
         return $this;
     }
-    
+
     protected function getMinifiedRequestData(array $data): array
     {
         if ($this->requestDataMinifier !== null) {
@@ -247,42 +248,44 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return $data;
     }
-    
+
     /**
      * @param Route $route
-     * @param bool $forceLogging - true: ignores false returned from $this->getCustomLogName($route)
-     * @param bool $enabledByDefault - true: if log name not provided $this->getCustomLogName($route)
+     * @param bool  $forceLogging - true: ignores false returned from $this->getCustomLogName($route)
+     * @param bool  $enabledByDefault - true: if log name not provided $this->getCustomLogName($route)
      * @return string|null
      */
     protected function getLogName(Route $route, bool $forceLogging, bool $enabledByDefault): ?string
     {
         $logName = $this->getLogNameFromRouteActions($route, $enabledByDefault, $forceLogging);
-        
         if (is_string($logName)) {
             // custom log name or cmf resource/page props passed to route
             return $logName;
-        } elseif (!$logName) {
+        }
+        if (!$logName) {
             // logs disabled and not forced (decided in $this->getLogNameFromRouteActions())
             return null;
         }
-        
         // generate log name from URI
         return $this->normalizeDefaultLogName($route->uri());
     }
-    
+
     protected function normalizeDefaultLogName(string $logName): string
     {
         return $logName;
     }
-    
+
     /**
      * Returns:
      * - false: disable logging unless forced;
      * - true: need to generate log name automatically;
      * - string: custom log name.
      */
-    protected function getLogNameFromRouteActions(Route $route, bool $enabledByDefault, bool $forceLogging): bool|string|null
-    {
+    protected function getLogNameFromRouteActions(
+        Route $route,
+        bool $enabledByDefault,
+        bool $forceLogging
+    ): bool|string|null {
         $logName = Arr::get($route->getAction(), 'log');
         if (is_string($logName) && trim($logName) !== '') {
             // custom log name
@@ -307,18 +310,19 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
                 $logName .= '.' . $route->parameter('page');
             }
             return $logName;
-        } elseif ($route->hasParameter('page')) {
+        }
+        if ($route->hasParameter('page')) {
             return 'page' . $route->parameter('page');
         }
         // logging is allowed but have no name -> autogenerate log name
         return true;
     }
-    
+
     protected function getSectionName(Route $route): string
     {
         return $route->getAction('prefix') ?: 'web';
     }
-    
+
     /**
      * Set minifier closure to reduce size of response content to be logged.
      * @param \Closure $minifier - function (Symfony\Component\HttpFoundation\Response $response) { return $content; }
@@ -328,7 +332,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         $this->responseContentMinifier = $minifier;
         return $this;
     }
-    
+
     protected function getMinifiedResponseContent(Response $response): string
     {
         if ($this->responseContentMinifier !== null) {
@@ -345,13 +349,13 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
             ? mb_substr($responseContent, 0, $maxSize) . ' ( value length limit reached )'
             : $responseContent;
     }
-    
+
     public function ignoreResponseLogging(): static
     {
         $this->ignoreResponseLogging = true;
         return $this;
     }
-    
+
     public function logResponse(Request $request, Response $response, ?RecordInterface $user = null): static
     {
         if ($this->ignoreResponseLogging) {
@@ -367,21 +371,23 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
                         return $this;
                     }
                 }
-                
+
                 if (!empty($this->response)) {
                     throw new \BadMethodCallException('You should not call this method twice');
                 }
-                
+
                 if (!$this->isCollectingUpdates()) {
                     $this->begin();
                 }
-                
+
                 $this
                     ->logRequester($user)
                     ->setResponse($this->getMinifiedResponseContent($response))
                     ->setResponseCode($response->getStatusCode())
-                    ->setResponseType(strtolower(preg_replace('%(Response|Cmf)%', '', class_basename($response))) ?: 'text')
-                    ->setRespondedAt(static::getTable()->getCurrentTimeDbExpr())
+                    ->setResponseType(
+                        strtolower(preg_replace('%(Response|Cmf)%', '', class_basename($response))) ?: 'text'
+                    )
+                    ->setRespondedAt(DbExpr::create('NOW()'))
                     ->commit();
             } catch (\Exception $exception) {
                 $this->logException($exception);
@@ -389,13 +395,13 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return $this;
     }
-    
+
     public function logRequester(?RecordInterface $user = null): static
     {
         if ($this->isAllowed()) {
             if ($user && $user->existsInDb()) {
                 $this
-                    ->setRequesterTable($user::getTable()->getTableStructure()->getTableName())
+                    ->setRequesterTable($user->getTable()->getTableStructure()->getTableName())
                     ->setRequesterId($user->getPrimaryKeyValue())
                     ->setRequesterInfo($this->findRequesterInfo($user));
             } elseif (!isset($this->requester_id)) {
@@ -412,27 +418,30 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return $this;
     }
-    
+
     /**
      * @noinspection NotOptimalIfConditionsInspection
      */
     protected function findRequesterInfo(RecordInterface $user): ?string
     {
         try {
-            if ($user::hasColumn('email') && !empty($user->email)) {
+            $tableStructure = $user->getTable()->getTableStructure();
+            if ($tableStructure->hasColumn('email') && !empty($user->email)) {
                 return $user->email;
-            } elseif ($user::hasColumn('login') && !empty($user->login)) {
+            }
+            if ($tableStructure->hasColumn('login') && !empty($user->login)) {
                 return $user->login;
-            } elseif (
-                ($user::hasColumn('name') && !empty($user->name))
-                || ($user::hasColumn('first_name') && !empty($user->first_name))
+            }
+            if (
+                ($tableStructure->hasColumn('name') && !empty($user->name))
+                || ($tableStructure->hasColumn('first_name') && !empty($user->first_name))
             ) {
-                $name = $user::hasColumn('name') && !empty($user->name)
+                $name = $tableStructure->hasColumn('name') && !empty($user->name)
                     ? $user->getValue('name')
                     : $user->getValue('first_name');
-                if ($user::hasColumn('surname') && !empty($user->surname)) {
+                if ($tableStructure->hasColumn('surname') && !empty($user->surname)) {
                     $name .= ' ' . $user->surname;
-                } elseif ($user::hasColumn('last_name') && !empty($user->last_name)) {
+                } elseif ($tableStructure->hasColumn('last_name') && !empty($user->last_name)) {
                     $name .= ' ' . $user->last_name;
                 }
                 return $name;
@@ -445,7 +454,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return null;
     }
-    
+
     public function logDbRecordBeforeChange(
         RecordInterface $record,
         ?string $tableName = null,
@@ -455,7 +464,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         if ($this->isAllowed()) {
             try {
                 if ($columnsToLog !== null) {
-                    $columnsToLog[] = $record::getTable()->getTableStructure()->getPkColumnName();
+                    $columnsToLog[] = $record->getTable()->getTableStructure()->getPkColumnName();
                 } else {
                     $columnsToLog = [];
                 }
@@ -463,7 +472,9 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
                     ->logDbRecordUsage($record, $tableName)
                     ->setDataBefore(
                         $record->existsInDb()
-                            ? $this->normalizeDbRecordData($record->toArray($columnsToLog, $relationsToLog ?: ['*']))
+                            ? $this->normalizeDbRecordData(
+                                $record->toArray($columnsToLog, $relationsToLog ?: ['*'])
+                            )
                             : []
                     );
             } catch (\Exception $exception) {
@@ -472,7 +483,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return $this;
     }
-    
+
     private function normalizeDbRecordData(array $data): array
     {
         $data = array_filter($data, function ($value) {
@@ -481,7 +492,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         ksort($data);
         return $data;
     }
-    
+
     public function logDbRecordAfterChange(
         RecordInterface $record,
         ?array $columnsToLog = null,
@@ -490,7 +501,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         if ($this->isAllowed()) {
             try {
                 if ($columnsToLog !== null) {
-                    $columnsToLog[] = $record::getTable()->getTableStructure()->getPkColumnName();
+                    $columnsToLog[] = $record->getTable()->getTableStructure()->getPkColumnName();
                 } else {
                     $columnsToLog = [];
                 }
@@ -505,38 +516,34 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return $this;
     }
-    
+
     public function logDbRecordUsage(RecordInterface $record, ?string $tableName = null): static
     {
         if ($this->isAllowed()) {
             try {
                 if (empty($tableName)) {
-                    $tableName = $record instanceof TempRecord
-                        ? $record->getTableName()
-                        : $record::getTable()->getTableStructure()->getTableName();
+                    $tableName = $record->getTable()->getTableStructure()->getTableName();
                 }
                 $this->setTable($tableName);
-                if (!($record instanceof TempRecord)) {
-                    $this->setItemId($record->existsInDb() ? $record->getPrimaryKeyValue() : null);
-                }
+                $this->setItemId($record->existsInDb() ? $record->getPrimaryKeyValue() : null);
             } catch (\Exception $exception) {
                 $this->logException($exception);
             }
         }
         return $this;
     }
-    
+
     public function isAllowed(): bool
     {
         return $this->hasValue('request');
     }
-    
+
     protected function logException(\Exception $exception, array $context = []): void
     {
         $context['exception'] = $exception;
         Log::critical($exception->getMessage(), $context);
     }
-    
+
     /**
      * Do not pass complex objects to $value - json_encode might fail
      */
@@ -545,7 +552,13 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         if ($this->isAllowed()) {
             try {
                 $debug = $this->hasValue('debug') ? $this->debug : '';
-                $debug .= $key . ': ' . json_encode($value, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES, 10) . "\n";
+                $debug .= $key . ': '
+                    . json_encode(
+                        $value,
+                        JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES,
+                        10
+                    )
+                    . "\n";
                 $this->setDebug($debug);
             } catch (\Exception $exception) {
                 $this->logException($exception);
@@ -553,7 +566,7 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return $this;
     }
-    
+
     /**
      * Do not pass complex objects as array values - json_encode might fail
      */
@@ -566,5 +579,4 @@ class CmfHttpRequestLog extends CmfDbRecord implements ScaffoldLoggerInterface
         }
         return $this;
     }
-    
 }

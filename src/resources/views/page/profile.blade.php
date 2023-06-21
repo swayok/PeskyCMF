@@ -148,7 +148,7 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                     @if (!$isRequired)
                                         <option value="">{{ $cmfConfig->transCustom('page.profile.input.no_timezone') }}</option>
                                     @endif
-                                    @foreach($authModule->getUsersTable()->getTimezonesList(true) as $value => $label)
+                                    @foreach(\PeskyCMF\Utils\TimeZonesHelper::getListAsOptions() as $value => $label)
                                         <option value="{{ $value }}">{{ $label }}</option>
                                     @endforeach
                                 </select>

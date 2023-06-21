@@ -4,25 +4,16 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Db\Admins;
 
-use PeskyCMF\Db\CmfDbTable;
+use PeskyORM\ORM\Table\Table;
 
-class CmfAdminsTable extends CmfDbTable
+class CmfAdminsTable extends Table
 {
-    
-    public function getTableAlias(): string
+    public function __construct(?string $tableAlias = 'CmfAdmins')
     {
-        return 'CmfAdmins';
+        parent::__construct(
+            new CmfAdminsTableStructure(),
+            CmfAdmin::class,
+            $tableAlias
+        );
     }
-    
-    public function getTableStructure(): CmfAdminsTableStructure
-    {
-        return CmfAdminsTableStructure::getInstance();
-    }
-    
-    public function newRecord(): CmfAdmin
-    {
-        return CmfAdmin::newEmptyRecord();
-    }
-    
-    
 }

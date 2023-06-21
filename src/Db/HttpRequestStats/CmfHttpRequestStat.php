@@ -6,39 +6,39 @@ namespace PeskyCMF\Db\HttpRequestStats;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use PeskyCMF\Db\CmfDbRecord;
-use PeskyORM\Profiling\PeskyOrmPdoProfiler;
+use PeskyORM\ORM\Record\Record;
+use PeskyORM\Profiling\PdoProfilingHelper;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @property-read int $id
- * @property-read string $http_method
- * @property-read string $url
- * @property-read string $route
- * @property-read string $created_at
- * @property-read string $created_at_as_date
- * @property-read string $created_at_as_time
- * @property-read int $created_at_as_unix_ts
- * @property-read float $duration
- * @property-read float $duration_sql
- * @property-read float $duration_error
- * @property-read float $memory_usage_mb
- * @property-read bool $is_cache
- * @property-read string $url_params
- * @property-read array $url_params_as_array
+ * @property-read int       $id
+ * @property-read string    $http_method
+ * @property-read string    $url
+ * @property-read string    $route
+ * @property-read string    $created_at
+ * @property-read string    $created_at_as_date
+ * @property-read string    $created_at_as_time
+ * @property-read int       $created_at_as_unix_ts
+ * @property-read float     $duration
+ * @property-read float     $duration_sql
+ * @property-read float     $duration_error
+ * @property-read float     $memory_usage_mb
+ * @property-read bool      $is_cache
+ * @property-read string    $url_params
+ * @property-read array     $url_params_as_array
  * @property-read \stdClass $url_params_as_object
- * @property-read string $sql
- * @property-read array $sql_as_array
+ * @property-read string    $sql
+ * @property-read array     $sql_as_array
  * @property-read \stdClass $sql_as_object
- * @property-read integer $http_code
- * @property-read string $request_data
- * @property-read array $request_data_as_array
+ * @property-read integer   $http_code
+ * @property-read string    $request_data
+ * @property-read array     $request_data_as_array
  * @property-read \stdClass $request_data_as_object
- * @property-read string $checkpoints
- * @property-read array $checkpoints_as_array
+ * @property-read string    $checkpoints
+ * @property-read array     $checkpoints_as_array
  * @property-read \stdClass $checkpoints_as_object
- * @property-read string $counters
- * @property-read array $counters_as_array
+ * @property-read string    $counters
+ * @property-read array     $counters_as_array
  * @property-read \stdClass $counters_as_object
  *
  * @method $this    setId($value, $isFromDb = false)
@@ -58,36 +58,35 @@ use Symfony\Component\HttpFoundation\Response;
  * @method $this    setCheckpoints($value, $isFromDb = false)
  * @method $this    setCounters($value, $isFromDb = false)
  */
-class CmfHttpRequestStat extends CmfDbRecord
+class CmfHttpRequestStat extends Record
 {
-    
     protected static ?float $startedAt = null;
     protected static array $checkpointsStack = [];
     protected int $accumulatedDurationError = 0;
     protected static CmfHttpRequestStat $current;
-    
-    public static function getTable(): CmfHttpRequestStatsTable
+
+    public function getTable(): CmfHttpRequestStatsTable
     {
         return CmfHttpRequestStatsTable::getInstance();
     }
-    
+
     public static function createForProfiling(?float $startedAt = null): CmfHttpRequestStat
     {
-        static::$current = static::new1()->setCreatedAt(date('Y-m-d H:i:s'));
+        static::$current = static::newEmptyRecord()->setCreatedAt(date('Y-m-d H:i:s'));
         static::$startedAt = $startedAt ?? microtime(true);
         return static::$current;
     }
-    
+
     public static function getCurrent(): CmfHttpRequestStat
     {
         if (!static::$current) {
-            static::$current = static::new1();
+            static::$current = static::newEmptyRecord();
         }
         return static::$current;
     }
-    
+
     /**
-     * @param string $key - checkpoint key to be used to finish it
+     * @param string      $key - checkpoint key to be used to finish it
      * @param string|null $descrption
      * @throws \InvalidArgumentException
      */
@@ -120,10 +119,10 @@ class CmfHttpRequestStat extends CmfDbRecord
             $stat->accumulatedDurationError += microtime(true) - $time;
         }
     }
-    
+
     /**
      * @param string $key - checkpoint key used in static::startCheckpoint()
-     * @param array $data
+     * @param array  $data
      * @throws \InvalidArgumentException
      */
     public static function endCheckpoint(string $key, array $data = []): void
@@ -136,12 +135,14 @@ class CmfHttpRequestStat extends CmfDbRecord
             $lastKeyInStack = array_pop(static::$checkpointsStack);
             if ($key !== $lastKeyInStack) {
                 throw new \InvalidArgumentException(
-                    "You need to end checkpoint at path \"$lastKeyInStack\" before trying to end checkpoint with key \"$key\""
+                    "You need to end checkpoint at path \"$lastKeyInStack\""
+                    . " before trying to end checkpoint with key \"$key\""
                 );
             }
             if (!Arr::has($checkpoints, $path)) {
                 throw new \InvalidArgumentException(
-                    'There is no checkpoint at path "' . $path . '". Use CmfHttpRequestStat::startCheckpoint() before CmfHttpRequestStat::endCheckpoint().'
+                    'There is no checkpoint at path "' . $path
+                    . '". Use CmfHttpRequestStat::startCheckpoint() before CmfHttpRequestStat::endCheckpoint().'
                 );
             }
             $checkpoint = Arr::get($checkpoints, $path);
@@ -155,7 +156,7 @@ class CmfHttpRequestStat extends CmfDbRecord
             $stat->accumulatedDurationError += microtime(true) - $time;
         }
     }
-    
+
     public static function profileClosure(string $checkpointKey, \Closure $closure): mixed
     {
         static::startCheckpoint($checkpointKey);
@@ -163,7 +164,7 @@ class CmfHttpRequestStat extends CmfDbRecord
         static::endCheckpoint($checkpointKey);
         return $ret;
     }
-    
+
     public static function setCounterValue(string $counterName, float $value): void
     {
         if (static::$startedAt) {
@@ -175,7 +176,7 @@ class CmfHttpRequestStat extends CmfDbRecord
             $stat->accumulatedDurationError += microtime(true) - $time;
         }
     }
-    
+
     public static function increment(string $counterName, float $increment = 1): void
     {
         if (static::$startedAt) {
@@ -187,19 +188,19 @@ class CmfHttpRequestStat extends CmfDbRecord
             $stat->accumulatedDurationError += microtime(true) - $time;
         }
     }
-    
+
     public static function decrement(string $counterName, float $increment = 1): void
     {
         static::increment($counterName, -$increment);
     }
-    
+
     public static function requestUsesCachedData(): void
     {
         if (static::$startedAt) {
             static::getCurrent()->setIsCache(true);
         }
     }
-    
+
     /**
      * @param Request $request
      * @return static
@@ -220,12 +221,12 @@ class CmfHttpRequestStat extends CmfDbRecord
         $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
     }
-    
+
     protected function hidePasswords(array $data): array
     {
         return hidePasswords($data);
     }
-    
+
     public function processResponse(Response $response, ?float $startedAt = null): CmfHttpRequestStat
     {
         if ($startedAt === null) {
@@ -239,14 +240,14 @@ class CmfHttpRequestStat extends CmfDbRecord
         $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
     }
-    
+
     public function addSqlProfilingData(?float $startedAt = null): CmfHttpRequestStat
     {
         if ($startedAt === null) {
             $startedAt = static::$startedAt;
         }
         $time = microtime(true);
-        $sqlQueriesInfo = PeskyOrmPdoProfiler::collect();
+        $sqlQueriesInfo = PdoProfilingHelper::collect();
         $formattedLog = static::processSqlProfiling($sqlQueriesInfo, $startedAt);
         $this
             ->setDurationSql(round($sqlQueriesInfo['accumulated_duration'], 6))
@@ -254,7 +255,7 @@ class CmfHttpRequestStat extends CmfDbRecord
         $this->accumulatedDurationError += microtime(true) - $time;
         return $this;
     }
-    
+
     /**
      * @throws \LogicException
      */
@@ -269,21 +270,23 @@ class CmfHttpRequestStat extends CmfDbRecord
                 }
             } else {
                 throw new \LogicException(
-                    'All checkpoints must be ended. Possibly you have forgotten to call CmfHttpRequestStat::endCheckpoint() somewhere'
+                    'All checkpoints must be ended.'
+                    . ' Possibly you have forgotten to call CmfHttpRequestStat::endCheckpoint() somewhere'
                 );
             }
         }
         $this->save();
         return $this;
     }
-    
+
     protected static function processSqlProfiling(array $sqlProfilingData, float $startedAt): array
     {
         $ret = [
             'statements_count' => $sqlProfilingData['statements_count'],
             'failed_statements_count' => $sqlProfilingData['failed_statements_count'],
             'rows_affected' => 0,
-            'statements_count_str' => "{$sqlProfilingData['statements_count']} (Failed: {$sqlProfilingData['failed_statements_count']})",
+            'statements_count_str' => "{$sqlProfilingData['statements_count']}"
+                . " (Failed: {$sqlProfilingData['failed_statements_count']})",
             'total_duration' => round($sqlProfilingData['accumulated_duration'], 6) . 's',
             'max_memory_usage' => round($sqlProfilingData['max_memory_usage'] / 1024 / 1024, 4) . ' MB',
             'statements' => [],
@@ -313,9 +316,8 @@ class CmfHttpRequestStat extends CmfDbRecord
         usort($ret['statements'], function ($stat1, $stat2) {
             if ($stat1['started_at'] === $stat2['started_at']) {
                 return 0;
-            } else {
-                return $stat1['started_at'] > $stat2['started_at'] ? 1 : -1;
             }
+            return $stat1['started_at'] > $stat2['started_at'] ? 1 : -1;
         });
         return $ret;
     }

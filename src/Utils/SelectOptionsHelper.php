@@ -2,32 +2,26 @@
 
 declare(strict_types=1);
 
-namespace PeskyCMF\Db;
+namespace PeskyCMF\Utils;
 
-use PeskyORM\ORM\Record;
-
-abstract class CmfDbRecord extends Record
+abstract class SelectOptionsHelper
 {
-    
     /**
-     * @param array $values
-     * @param bool|false $withLabels
-     * @param string|\Closure $translationsPath - Closure: function ($value) { return 'translated value'; }
-     * @param bool $asValueLabelPair
+     * Make options list for <select> input from plain list of values.
+     * @param array $values Plain list of values.
+     * @param string|\Closure $translationsPath Base path to translations for trans() or translator closure.
+     * Closure: function ($value) { return 'translated value'; }
+     * @param bool $asValueLabelPair true: ['value' => 'label', ...]; false: ['label' => string, 'value' => string]
      * @return array
      */
-    public static function toOptions(
+    public static function arrayToOptions(
         array $values,
-        bool $withLabels = false,
-        string|\Closure $translationsPath = '',
+        string|\Closure $translationsPath,
         bool $asValueLabelPair = false
     ): array {
-        if (!$withLabels) {
-            return $values;
-        }
         $options = [];
         if (!($translationsPath instanceof \Closure)) {
-            $translator = function ($value) use ($translationsPath) {
+            $translator = static function ($value) use ($translationsPath) {
                 return trans($translationsPath . $value);
             };
         } else {
@@ -43,5 +37,4 @@ abstract class CmfDbRecord extends Record
         }
         return $options;
     }
-    
 }

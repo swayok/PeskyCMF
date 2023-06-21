@@ -4,46 +4,22 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Db\Settings;
 
-use PeskyCMF\Db\CmfDbTable;
-use PeskyORM\ORM\RecordInterface;
-use PeskyORM\ORM\TableStructureInterface;
-use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableHelpers;
-use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface;
+use PeskyORM\ORM\Table\Table;
 
-class CmfSettingsTable extends CmfDbTable implements LaravelKeyValueTableInterface
+class CmfSettingsTable extends Table
 {
-    
-    use LaravelKeyValueTableHelpers;
-    
+    public function __construct(?string $tableAlias = 'CmfSettings')
+    {
+        parent::__construct(new CmfSettingsTableStructure(), CmfSetting::class, $tableAlias);
+    }
+
     public function getMainForeignKeyColumnName(): ?string
     {
         return null;
     }
-    
-    public static function getCacheKeyToStoreAllValuesForAForeignKey($foreignKeyValue = null): ?string
+
+    public static function getCacheKeyToStoreAllValuesForAForeignKey(): string
     {
         return 'app-settings';
     }
-    
-    public function getTableAlias(): string
-    {
-        return 'CmfSettings';
-    }
-    
-    /**
-     * @return CmfSettingsTableStructure
-     */
-    public function getTableStructure(): TableStructureInterface
-    {
-        return app(CmfSettingsTableStructure::class);
-    }
-    
-    /**
-     * @return CmfSetting
-     */
-    public function newRecord(): RecordInterface
-    {
-        return app(CmfSetting::class);
-    }
-    
 }

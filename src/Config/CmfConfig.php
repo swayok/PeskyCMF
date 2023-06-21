@@ -9,7 +9,6 @@ use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\StatefulGuard;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Events\LocaleUpdated;
 use Illuminate\Http\Request;
@@ -28,25 +27,21 @@ use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyCMF\Http\Controllers\CmfScaffoldApiController;
 use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\PeskyCmfAppSettings;
-use PeskyCMF\Providers\PeskyCmfLanguageDetectorServiceProvider;
 use PeskyCMF\Scaffold\ScaffoldConfig;
 use PeskyCMF\Scaffold\ScaffoldConfigInterface;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyCMF\UI\CmfUIModule;
+use PeskyCMF\Utils\LocaleDetector;
 use PeskyORM\ORM\Record\RecordInterface;
 use PeskyORM\ORM\Table\TableInterface;
 use PeskyORM\ORM\TableStructure\TableColumn\ColumnValueValidationMessages\ColumnValueValidationMessagesFromArray;
 use PeskyORM\ORM\TableStructure\TableColumn\ColumnValueValidationMessages\ColumnValueValidationMessagesInterface;
 use PeskyORM\Utils\ServiceContainer;
-use Vluzrmos\LanguageDetector\Contracts\LanguageDetectorInterface;
-use Vluzrmos\LanguageDetector\Providers\LanguageDetectorServiceProvider;
+use Vluzrmos\LanguageDetector\LanguageDetector;
 
 class CmfConfig
 {
     protected Application $app;
-    protected ConfigRepository $configs;
-    protected LanguageDetectorInterface $languageDetector;
-    protected ViewsFactory $viewsFactory;
     protected ?ScaffoldLoggerInterface $httpRequestsLogger = null;
 
     protected static array $localeSuffixMap = [
@@ -74,19 +69,14 @@ class CmfConfig
         return $this->app;
     }
 
-    public function getLanguageDetector(): LanguageDetectorInterface
-    {
-        return $this->languageDetector;
-    }
-
     public function getLaravelConfigs(): ConfigRepository
     {
-        return $this->configs;
+        return $this->app->make(ConfigRepository::class);
     }
 
     public function getViewsFactory(): ViewsFactory
     {
-        return $this->viewsFactory;
+        return $this->app->make('view');
     }
 
     /**
@@ -99,7 +89,7 @@ class CmfConfig
     }
 
     /**
-     * @param string $key
+     * @param string     $key
      * @param mixed|null $default
      * @return mixed
      */
@@ -116,18 +106,6 @@ class CmfConfig
     final public function cmfViewsDir(): string
     {
         return __DIR__ . '/../resources/views';
-    }
-
-    public function languageDetectorConfigs(): array
-    {
-        return [
-            'autodetect' => true,
-            'driver' => 'browser',
-            'cookie' => true,
-            'cookie_name' => $this->makeUtilityKey('locale'),
-            'cookie_encrypt' => true,
-            'languages' => $this->localesForLanguageDetector(),
-        ];
     }
 
     public function getAppSettings(): PeskyCmfAppSettings
@@ -412,9 +390,9 @@ class CmfConfig
      * Translate from custom dictionary. You can use it via CmfConfig::transCustom() instead of
      * CmfConfig::getPrimary()->transCustom() if you need to get translation for primary config.
      * Note: if there is no translation in your dictionary - it will be imported from 'cmf::custom' dictionary
-     * @param string $path - without dictionary name.
+     * @param string      $path - without dictionary name.
      * Example: 'admins.test' will be converted to '{$this->custom_dictionary_name()}.admins.test'
-     * @param array $parameters
+     * @param array       $parameters
      * @param string|null $locale
      * @return string|array
      */
@@ -445,9 +423,9 @@ class CmfConfig
      * Translate from custom dictionary.
      * You can use it via CmfConfig->transGeneral() if you need to get translation for primary config
      * Note: if there is no translation in your dictionary - it will be imported from 'cmf::cmf' dictionary
-     * @param string $path - without dictionary name.
+     * @param string      $path - without dictionary name.
      * Example: 'admins.test' will be converted to '{$this->cmf_general_dictionary_name()}.admins.test'
-     * @param array $parameters
+     * @param array       $parameters
      * @param string|null $locale
      * @return string|array
      */
@@ -493,9 +471,8 @@ class CmfConfig
     }
 
     /**
-     * Supported locales for CMF
-     * Note: you can redirect locales using key as locale to redirect from and value as locale to redirect to
-     * For details see: https://github.com/vluzrmos/laravel-language-detector
+     * Supported locales for CMF.
+     * @see LocaleDetector::detectLocale()
      */
     public function localesForLanguageDetector(): array
     {
@@ -518,21 +495,10 @@ class CmfConfig
         return strtolower(substr($this->getLaravelApp()->getLocale(), 0, 2));
     }
 
-    /** @noinspection PhpUnusedParameterInspection */
-    public function onLocaleChanged(string $newLocale): void
-    {
-        ServiceContainer::getInstance()->instance(
-            ColumnValueValidationMessagesInterface::class,
-            new ColumnValueValidationMessagesFromArray(
-                (array)$this->transGeneral('form.message.column_validation_errors') ?: []
-            )
-        );
-    }
-
     /**
      * Get locale in format "en_US" or "ru-RU" or "it-it"
      * @param string $separator
-     * @param bool $lowercased - true: will return "it-it" instead of "it-IT"
+     * @param bool   $lowercased - true: will return "it-it" instead of "it-IT"
      * @return string
      */
     public function getLocaleWithSuffix(string $separator = '_', bool $lowercased = false): string
@@ -551,7 +517,51 @@ class CmfConfig
      */
     public function detectLocale(): void
     {
-        $this->getLaravelApp()->setLocale($this->getLanguageDetector()->getDriver()->detect());
+        $app = $this->getLaravelApp();
+        $detector = new LocaleDetector();
+        $detector->useUrlQueryArgument();
+        $cookieName = $this->makeUtilityKey('locale');
+        $detector->useCookie($cookieName);
+        $detector->useUrlParameter(null);
+        $locale = $detector->detectLocale(
+            $app->make('request'),
+            $this->localesForLanguageDetector(),
+            $this->defaultLocale()
+        );
+        // Save locale to cookies
+        $app->make('cookie')->forever(
+            $cookieName,
+            $locale,
+            $this->route('cmf_start_page', [], false)
+        );
+        $this->getLaravelApp()->setLocale($locale);
+    }
+
+    /** @noinspection PhpUnusedParameterInspection */
+    public function onLocaleChanged(string $newLocale): void
+    {
+        $app = $this->getLaravelApp();
+        $app->make('translator')->setLocale($newLocale);
+        /** @var Request $request */
+        $request = $app->make('request');
+        $request->setLocale($newLocale);
+
+        ServiceContainer::getInstance()->instance(
+            ColumnValueValidationMessagesInterface::class,
+            new ColumnValueValidationMessagesFromArray(
+                (array)$this->transGeneral('form.message.column_validation_errors') ?: []
+            )
+        );
+    }
+
+    protected function listenForAppLocaleChanges(): void
+    {
+        $this->getLaravelApp()->make('events')->listen(
+            LocaleUpdated::class,
+            function (LocaleUpdated $event) {
+                $this->onLocaleChanged($event->locale);
+            }
+        );
     }
 
     public function sessionMessageKey(): string
@@ -741,7 +751,7 @@ class CmfConfig
                 $authModule = $this->getAuthModule();
                 return [
                     $authModule->getLoginPageUrl(false) . '.html' => $controller->getLoginTpl(),
-                    $authModule->getPasswordRecoveryStartPageUrl(false) . '.html' => $controller->getForgotPasswordTpl()
+                    $authModule->getPasswordRecoveryStartPageUrl(false) . '.html' => $controller->getForgotPasswordTpl(),
                 ];
             }
         );
@@ -947,7 +957,6 @@ class CmfConfig
 
         // configurators
         $this->configureSession();
-        $this->configureLanguageDetector();
 
         // locale handlers
         $this->listenForAppLocaleChanges();
@@ -985,15 +994,7 @@ class CmfConfig
                 ->with('uiModule', $uiModule);
         });
 
-        /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
-        $langDetectorProvider = $app->register(
-            PeskyCmfLanguageDetectorServiceProvider::class
-        );
-        $app->alias(
-            LanguageDetectorServiceProvider::class,
-            PeskyCmfLanguageDetectorServiceProvider::class
-        );
-        $langDetectorProvider->importConfigsFromPeskyCmf($this);
+        $this->detectLocale();
 
         if ($this->config('file_access_mask') !== null) {
             umask($this->config('file_access_mask'));
@@ -1003,9 +1004,6 @@ class CmfConfig
     public function setLaravelApp(Application $app): void
     {
         $this->app = $app;
-        $this->languageDetector = $app->make(LanguageDetectorInterface::class);
-        $this->configs = $app->make(ConfigRepository::class);
-        $this->viewsFactory = $app->make('view');
     }
 
     protected function configureSession(): void
@@ -1017,35 +1015,5 @@ class CmfConfig
             (array)$this->config('session', [])
         );
         $appConfigs->set('session', $config);
-    }
-
-    protected function configureLanguageDetector(): void
-    {
-        // todo: extract language detection and updates to separate module
-        //  and get rid of PeskyCmfLanguageDetectorServiceProvider
-        /** @var PeskyCmfLanguageDetectorServiceProvider $langDetectorProvider */
-        $langDetectorProvider = $this->getLaravelApp()->register(
-            PeskyCmfLanguageDetectorServiceProvider::class
-        );
-        $this->getLaravelApp()->alias(
-            LanguageDetectorServiceProvider::class,
-            PeskyCmfLanguageDetectorServiceProvider::class
-        );
-        $langDetectorProvider->importConfigsFromPeskyCmf($this);
-    }
-
-    protected function getEventsDispatcher(): Dispatcher
-    {
-        return $this->getLaravelApp()->make('events');
-    }
-
-    protected function listenForAppLocaleChanges(): void
-    {
-        $this->getEventsDispatcher()->listen(
-            LocaleUpdated::class,
-            function (LocaleUpdated $event) {
-                $this->onLocaleChanged($event->locale);
-            }
-        );
     }
 }

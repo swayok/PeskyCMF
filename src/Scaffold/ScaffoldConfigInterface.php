@@ -17,7 +17,7 @@ use PeskyORM\ORM\Table\TableInterface;
 interface ScaffoldConfigInterface
 {
     /**
-     * @return TableInterface|KeyValueTableInterface|LaravelKeyValueTableInterface
+     * @return TableInterface
      */
     public static function getTable(): TableInterface;
 

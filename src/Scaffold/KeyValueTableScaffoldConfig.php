@@ -6,20 +6,17 @@ namespace PeskyCMF\Scaffold;
 
 use Illuminate\Http\JsonResponse;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\TempRecord;
 use PeskyCMF\Http\CmfJsonResponse;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\Form\FormInput;
 use PeskyCMF\Scaffold\ItemDetails\ItemDetailsConfig;
 use PeskyORM\Exception\InvalidDataException;
-use PeskyORM\ORM\KeyValueTableHelpers\KeyValueDataSaver;
-use PeskyORM\ORM\KeyValueTableHelpers\KeyValueTableInterface;
 
 abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
 {
-    
+
     protected bool $isCreateAllowed = false;
-    
+
     public function __construct(CmfConfig $cmfConfig)
     {
         parent::__construct($cmfConfig);
@@ -31,17 +28,17 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
             );
         }
     }
-    
+
     protected function createFormConfig(): FormConfig
     {
         return parent::createFormConfig()->thereIsNoDbColumns();
     }
-    
+
     protected function createItemDetailsConfig(): ItemDetailsConfig
     {
         return parent::createItemDetailsConfig()->thereIsNoDbColumns();
     }
-    
+
     public function getFormConfig(): FormConfig
     {
         $formConfig = parent::getFormConfig();
@@ -52,7 +49,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
         }
         return $formConfig;
     }
-    
+
     public function getRecordValues(?string $ownerRecordId = null): JsonResponse
     {
         $sectionConfig = $this->getScaffoldSectionConfigForRecordInfoAndValidateAccess();
@@ -65,17 +62,17 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
         $keysAndValues[$table::getPkColumnName()] = 0;
         return new CmfJsonResponse($sectionConfig->prepareRecord($keysAndValues));
     }
-    
+
     public function getDefaultValuesForFormInputs(): JsonResponse
     {
         throw new \BadMethodCallException('Default values getter is not allowed for ' . self::class);
     }
-    
+
     public function addRecord(): JsonResponse
     {
         return $this->updateRecord();
     }
-    
+
     public function updateRecord(?string $notUsed = null): JsonResponse
     {
         $formConfig = $this->getFormConfig();
@@ -137,10 +134,10 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
             ->setMessage($formConfig->translateGeneral('message.edit.success'))
             ->setRedirect('reload');
     }
-    
+
     public function changeItemPosition(string $id, string $beforeOrAfter, string $otherId, string $columnName, string $sortDirection): JsonResponse
     {
         throw new \BadMethodCallException('Rows reordering is not allowed for ' . self::class);
     }
-    
+
 }

@@ -12,55 +12,55 @@ use PeskyCMF\Scaffold\ItemDetails\ValueCell;
 use PeskyCMF\Scaffold\MenuItem\CmfMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRedirectMenuItem;
 use PeskyCMF\Scaffold\MenuItem\CmfRequestMenuItem;
-use PeskyORM\ORM\Column;
-use PeskyORM\ORM\Relation;
-use PeskyORM\ORM\TableInterface;
+use PeskyORM\ORM\Table\TableInterface;
+use PeskyORM\ORM\TableStructure\Relation;
+use PeskyORM\ORM\TableStructure\TableColumn\TableColumnDataType;
+use PeskyORM\ORM\TableStructure\TableColumn\TableColumnInterface;
 use Swayok\Html\Tag;
 
 abstract class ScaffoldSectionConfig
 {
-    
     protected TableInterface $table;
     protected ScaffoldConfig $scaffoldConfig;
-    
+
     protected ?string $title = null;
-    
+
     /**
      * This scaffold config uses no db columns
      */
     protected bool $thereIsNoDbColumns = false;
-    
+
     /**
      * Fields list
      * @var array|AbstractValueViewer[]
      */
     protected array $valueViewers = [];
-    
+
     protected array $relationsToRead = [];
-    
+
     protected ?\Closure $defaultFieldRenderer = null;
     protected ?\Closure $rawRecordDataModifier = null;
-    
+
     /**
      * Container width (percents)
      */
     protected int $width = 100;
-    
+
     protected bool $openInModal = true;
     /**
      * @var string|null - 'sm', 'md', 'lg', 'xl' | null - autodetect depending on $this->width
      */
     protected ?string $modalSize;
-    
+
     protected ?\Closure $toolbarItems = null;
-    
+
     protected \Closure|array $specialConditions = [];
-    
+
     protected array $additionalColumnsToSelect = [];
-    
+
     protected \Closure|array|null $dataToAddToRecord = null;
     protected \Closure|array|null $dataToSendToTemplate = null;
-    
+
     protected string $template;
     protected ?string $jsInitiator = null;
     protected bool $isFinished = false;
@@ -72,34 +72,34 @@ abstract class ScaffoldSectionConfig
      * Allow viewer names like "column_name:key_name" for json/jsonb DB columns
      */
     protected bool $allowComplexValueViewerNames = false;
-    
+
     public static function create(TableInterface $table, ScaffoldConfig $scaffoldConfig): ScaffoldSectionConfig|static
     {
         return new static($table, $scaffoldConfig);
     }
-    
+
     public function __construct(TableInterface $table, ScaffoldConfig $scaffoldConfig)
     {
         $this->table = $table;
         $this->scaffoldConfig = $scaffoldConfig;
     }
-    
+
     public function getScaffoldConfig(): ScaffoldConfig
     {
         return $this->scaffoldConfig;
     }
-    
+
     public function getCmfConfig(): CmfConfig
     {
         return $this->getScaffoldConfig()->getCmfConfig();
     }
-    
+
     public function setTemplate(string $template): static
     {
         $this->template = $template;
         return $this;
     }
-    
+
     /**
      * @throws ScaffoldSectionConfigException
      */
@@ -110,23 +110,31 @@ abstract class ScaffoldSectionConfig
         }
         return $this->template;
     }
-    
+
     /**
      * Translate resource-related items (column names, input labels, etc.)
      */
-    public function translate(?AbstractValueViewer $viewer = null, string $suffix = '', array $parameters = []): array|string
-    {
+    public function translate(
+        ?AbstractValueViewer $viewer = null,
+        string $suffix = '',
+        array $parameters = []
+    ): array|string {
         if ($viewer) {
             return $this
                 ->getScaffoldConfig()
-                ->translateForViewer($this->getSectionTranslationsPrefix('value_viewer'), $viewer, $suffix, $parameters);
-        } else {
-            return $this
-                ->getScaffoldConfig()
-                ->translate($this->getSectionTranslationsPrefix(), $suffix, $parameters);
+                ->translateForViewer(
+                    $this->getSectionTranslationsPrefix('value_viewer'),
+                    $viewer,
+                    $suffix,
+                    $parameters
+                );
         }
+
+        return $this
+            ->getScaffoldConfig()
+            ->translate($this->getSectionTranslationsPrefix(), $suffix, $parameters);
     }
-    
+
     /**
      * Translate general UI elements (button labels, tooltips, messages, etc..)
      */
@@ -142,7 +150,7 @@ abstract class ScaffoldSectionConfig
         }
         return $text;
     }
-    
+
     /**
      * Prefix for this section's translations (ex: 'datagrid', 'item_details', 'form')
      * Will be used in $this->translate() and $this->translateGeneral()
@@ -157,7 +165,7 @@ abstract class ScaffoldSectionConfig
      * @return string
      */
     abstract protected function getSectionTranslationsPrefix(?string $subtype = null): string;
-    
+
     /**
      * Disables any usage of TableStructure (validation, automatic field type guessing, etc)
      */
@@ -166,7 +174,7 @@ abstract class ScaffoldSectionConfig
         $this->thereIsNoDbColumns = true;
         return $this;
     }
-    
+
     /**
      * @param AbstractValueViewer[] $viewers
      */
@@ -178,9 +186,11 @@ abstract class ScaffoldSectionConfig
         }
         return $this;
     }
-    
-    protected function normalizeAndAddValueViewer(int|string $name, \Closure|string|AbstractValueViewer|null $config): static
-    {
+
+    protected function normalizeAndAddValueViewer(
+        int|string $name,
+        \Closure|string|AbstractValueViewer|null $config
+    ): static {
         $valueConverter = null;
         if (is_int($name)) {
             /** @noinspection CallableParameterUseCaseInTypeContextInspection */
@@ -194,7 +204,12 @@ abstract class ScaffoldSectionConfig
         if ($valueConverter) {
             if ($config->getType() === $config::TYPE_LINK) {
                 $config->setValueConverter(
-                    function ($value, Column $columnConfig, array $record, AbstractValueViewer $valueViewer) use ($valueConverter) {
+                    function (
+                        $value,
+                        TableColumnInterface $columnConfig,
+                        array $record,
+                        AbstractValueViewer $valueViewer
+                    ) use ($valueConverter) {
                         $linkLabel = $valueConverter($value, $columnConfig, $record, $valueViewer);
                         if (!$linkLabel || empty($record[$columnConfig->getName()])) {
                             // there is no related record
@@ -218,7 +233,7 @@ abstract class ScaffoldSectionConfig
         }
         return $this;
     }
-    
+
     /**
      * @return AbstractValueViewer[]
      */
@@ -226,7 +241,7 @@ abstract class ScaffoldSectionConfig
     {
         return $this->valueViewers;
     }
-    
+
     /**
      * Get only viewers that are linked to table columns defined in TableConfig class ($valueViewer->isDbColumn() === true)
      * @param bool $includeViewersForRelations - false: only vievers linked to main table's columns will be returned
@@ -242,7 +257,7 @@ abstract class ScaffoldSectionConfig
         }
         return $ret;
     }
-    
+
     /**
      * Get only viewers that are not linked to columns defined in TableConfig class ($valueViewer->isDbColumn() === false)
      * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
@@ -257,7 +272,7 @@ abstract class ScaffoldSectionConfig
         }
         return $ret;
     }
-    
+
     /**
      * Get only viewers that are linked to main table's relation
      * @return AbstractValueViewer[]|DataGridColumn[]|ValueCell[]|FormInput[]
@@ -272,9 +287,9 @@ abstract class ScaffoldSectionConfig
         }
         return $ret;
     }
-    
+
     abstract public function createValueViewer(): AbstractValueViewer;
-    
+
     /**
      * @return DataGridColumn|ValueCell|FormInput|AbstractValueViewer
      * @throws \InvalidArgumentException
@@ -287,12 +302,12 @@ abstract class ScaffoldSectionConfig
         }
         return $this->valueViewers[$name];
     }
-    
+
     public function hasValueViewer(string $name): bool
     {
         return !empty($name) && !empty($this->valueViewers[$name]);
     }
-    
+
     /**
      * @throws \InvalidArgumentException
      */
@@ -311,10 +326,15 @@ abstract class ScaffoldSectionConfig
             && !$this->isValidComplexValueViewerName($name) //< $name is something like "column_name:key_name"
         ) {
             if ($this->allowRelationsInValueViewers) {
-                [$relation, $relationColumnName] = $this->validateRelationValueViewerName($name, !$autodetectIfLinkedToDbColumn);
+                [$relation, $relationColumnName] = $this->validateRelationValueViewerName(
+                    $name,
+                    !$autodetectIfLinkedToDbColumn
+                );
                 $usesRelation = $relation && $relationColumnName;
             } else {
-                throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
+                throw new \InvalidArgumentException(
+                    "Table {$this->getTable()->getTableName()} has no column '{$name}'"
+                );
             }
         }
         if (!$viewer) {
@@ -342,27 +362,34 @@ abstract class ScaffoldSectionConfig
         $this->valueViewers[$name] = $viewer;
         return $this;
     }
-    
+
     /**
      * @param string $name
-     * @param bool $throwErrorIfLocalColumnNotFound
+     * @param bool   $throwErrorIfLocalColumnNotFound
      * - true: if $name is local column name (not relation or relation's column) - throw exception
      * - false: return [null, null] instead of throwing an excception
      * @return array - array(Relation, column_name)
      * @throws \InvalidArgumentException
      */
-    protected function validateRelationValueViewerName(string $name, bool $throwErrorIfLocalColumnNotFound = true): array
+    protected function validateRelationValueViewerName(
+        string $name,
+        bool $throwErrorIfLocalColumnNotFound = true
+    ): array
     {
         $nameParts = explode('.', $name);
         $hasRelation = $this->getTable()->getTableStructure()->hasRelation($nameParts[0]);
         if (!$hasRelation && count($nameParts) === 1) {
             if ($throwErrorIfLocalColumnNotFound) {
-                throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no column '{$name}'");
-            } else {
-                return [null, null];
+                throw new \InvalidArgumentException(
+                    "Table {$this->getTable()->getTableName()} has no column '{$name}'"
+                );
             }
-        } elseif (!$hasRelation) {
-            throw new \InvalidArgumentException("Table {$this->getTable()->getName()} has no relation '{$nameParts[0]}'");
+            return [null, null];
+        }
+        if (!$hasRelation) {
+            throw new \InvalidArgumentException(
+                "Table {$this->getTable()->getTableName()} has no relation '{$nameParts[0]}'"
+            );
         }
         $relation = $this->getTable()->getTableStructure()->getRelation($nameParts[0]);
         if (count($nameParts) === 1) {
@@ -371,13 +398,14 @@ abstract class ScaffoldSectionConfig
             $columnName = end($nameParts); //< allows something like RelationName.i.column_name
             if (!$relation->getForeignTable()->getTableStructure()->hasColumn($columnName)) {
                 throw new \InvalidArgumentException(
-                    "Relation {$nameParts[0]} of table {$this->getTable()->getName()} has no column '{$columnName}'"
+                    "Relation {$nameParts[0]} of table"
+                    . " {$this->getTable()->getTableName()} has no column '{$columnName}'"
                 );
             }
         }
         return [$relation, $columnName];
     }
-    
+
     /**
      * Check if $name is complex column name like "column_name:key_name"
      */
@@ -386,34 +414,34 @@ abstract class ScaffoldSectionConfig
         if ($this->allowComplexValueViewerNames && AbstractValueViewer::isComplexViewerName($name)) {
             [$colName,] = AbstractValueViewer::splitComplexViewerName($name);
             if ($this->getTable()->getTableStructure()->hasColumn($colName)) {
-                $type = $this->getTable()->getTableStructure()->getColumn($colName)->getType();
-                return in_array($type, [Column::TYPE_JSON, Column::TYPE_JSONB], true);
+                $type = $this->getTable()->getTableStructure()->getColumn($colName)->getDataType();
+                return $type === TableColumnDataType::JSON;
             }
         }
         return false;
     }
-    
+
     protected function getNextValueViewerPosition(AbstractValueViewer $viewer): int
     {
         return count($this->valueViewers);
     }
-    
+
     public function getTable(): TableInterface
     {
         return $this->table;
     }
-    
+
     public function getTitle(string $default = ''): ?string
     {
         return empty($this->title) ? $default : $this->title;
     }
-    
+
     public function setTitle(string $title): static
     {
         $this->title = $title;
         return $this;
     }
-    
+
     /**
      * @throws \UnexpectedValueException
      */
@@ -427,7 +455,7 @@ abstract class ScaffoldSectionConfig
         }
         return $record;
     }
-    
+
     /**
      * Modify record's data before it is processed by ScaffoldSectionConfig->prepareRecord().
      * Signature:
@@ -438,12 +466,12 @@ abstract class ScaffoldSectionConfig
         $this->rawRecordDataModifier = $modifier;
         return $this;
     }
-    
+
     /**
      * @param array $record
-     * @param array $virtualColumns - list of columns that are provided in TableStructure but marked as not existing in DB
+     * @param array $virtualColumns List of columns that are provided in TableStructure but marked as not existing in DB
      * @return array
-     * @noinspection NotOptimalIfConditionsInspection
+     * @throws \JsonException
      */
     public function prepareRecord(array $record, array $virtualColumns = []): array
     {
@@ -530,7 +558,7 @@ abstract class ScaffoldSectionConfig
                 if (!Arr::has($recordWithBackup, $colName) && Arr::has($record, $colName)) {
                     $value = Arr::get($record, $colName);
                     if (is_string($value) && mb_strlen($value) >= 2) {
-                        $value = json_decode($value, true);
+                        $value = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
                     }
                     Arr::set($recordWithBackup, $colName, $value);
                     Arr::set($recordWithBackup, '__' . $colName, $value);
@@ -565,11 +593,11 @@ abstract class ScaffoldSectionConfig
         }
         return array_merge($recordWithBackup, $permissionsAndServiceData);
     }
-    
+
     /**
      * Process related record's data by viewers attached to it
-     * @param string $relationName
-     * @param array $recordData
+     * @param string      $relationName
+     * @param array       $recordData
      * @param null|string $index - string: passed for HAS_MANY relation | null: for relations other than HAS_MANY
      * @return array
      */
@@ -609,7 +637,7 @@ abstract class ScaffoldSectionConfig
         }
         return $recordWithBackup;
     }
-    
+
     /**
      * Signature:
      * funciton (array $record, ScaffoldSectionConfig $scaffoldSectionConfig): array { return []; }
@@ -619,18 +647,18 @@ abstract class ScaffoldSectionConfig
         $this->dataToAddToRecord = $arrayOrClosure;
         return $this;
     }
-    
+
     public function getCustomDataForRecord(array $recordData): array
     {
         if (empty($this->dataToAddToRecord)) {
             return [];
-        } elseif ($this->dataToAddToRecord instanceof \Closure) {
-            return call_user_func($this->dataToAddToRecord, $recordData, $this);
-        } else {
-            return $this->dataToAddToRecord;
         }
+        if ($this->dataToAddToRecord instanceof \Closure) {
+            return call_user_func($this->dataToAddToRecord, $recordData, $this);
+        }
+        return $this->dataToAddToRecord;
     }
-    
+
     /**
      * Signature:
      * function (ScaffoldSectionConfig $sectionConfig): array { return [] }
@@ -640,28 +668,28 @@ abstract class ScaffoldSectionConfig
         $this->dataToSendToTemplate = $arrayOrClosure;
         return $this;
     }
-    
+
     public function getAdditionalDataForTemplate(): array
     {
         if (empty($this->dataToSendToTemplate)) {
             return [];
-        } elseif ($this->dataToSendToTemplate instanceof \Closure) {
-            return call_user_func($this->dataToSendToTemplate, $this);
-        } else {
-            return $this->dataToSendToTemplate;
         }
+        if ($this->dataToSendToTemplate instanceof \Closure) {
+            return call_user_func($this->dataToSendToTemplate, $this);
+        }
+        return $this->dataToSendToTemplate;
     }
-    
+
     public function getRelationsToRead(): array
     {
         return $this->relationsToRead;
     }
-    
+
     public function hasRelationsToRead(): bool
     {
         return !empty($this->relationsToRead);
     }
-    
+
     /**
      * Set relations to join.
      * Notes:
@@ -676,11 +704,15 @@ abstract class ScaffoldSectionConfig
         $this->relationsToRead = $relationNames;
         return $this;
     }
-    
+
     public function getDefaultValueRenderer(): ?\Closure
     {
         if (empty($this->defaultFieldRenderer)) {
-            $this->setDefaultValueRenderer(function (RenderableValueViewer $valueViewer, $sectionConfig, array $dataForView) {
+            $this->setDefaultValueRenderer(function (
+                RenderableValueViewer $valueViewer,
+                $sectionConfig,
+                array $dataForView
+            ) {
                 $rendererConfig = $this->createValueRenderer()->setData($dataForView);
                 $this->configureDefaultValueRenderer($rendererConfig, $valueViewer);
                 return $rendererConfig;
@@ -688,27 +720,27 @@ abstract class ScaffoldSectionConfig
         }
         return $this->defaultFieldRenderer;
     }
-    
+
     abstract protected function createValueRenderer(): ValueRenderer;
-    
+
     protected function configureDefaultValueRenderer(
         ValueRenderer $renderer,
         RenderableValueViewer $valueViewer
     ): void {
         $valueViewer->configureDefaultRenderer($renderer);
     }
-    
+
     public function setDefaultValueRenderer(\Closure $defaultFieldRenderer): static
     {
         $this->defaultFieldRenderer = $defaultFieldRenderer;
         return $this;
     }
-    
+
     public function hasDefaultValueRenderer(): bool
     {
         return !empty($this->defaultFieldRenderer);
     }
-    
+
     /**
      * @return string[]
      * @throws \UnexpectedValueException
@@ -723,7 +755,7 @@ abstract class ScaffoldSectionConfig
             throw new \UnexpectedValueException(get_class($this) . '->toolbarItems closure must return an array');
         }
         /**
-         * @var array $toolbarItems
+         * @var array      $toolbarItems
          * @var Tag|string $item
          */
         foreach ($toolbarItems as &$item) {
@@ -738,18 +770,20 @@ abstract class ScaffoldSectionConfig
                     $item = (string)$item;
                 } else {
                     throw new \UnexpectedValueException(
-                        get_class($this) . '->toolbarItems: array may contain only strings and objects with build() or __toString() methods'
+                        get_class($this) . '->toolbarItems:'
+                        . ' array may contain only strings and objects with build() or __toString() methods'
                     );
                 }
             } elseif (!is_string($item)) {
                 throw new \UnexpectedValueException(
-                    get_class($this) . '->toolbarItems: array may contain only strings and objects with build() or __toString() methods'
+                    get_class($this) . '->toolbarItems:'
+                    . ' array may contain only strings and objects with build() or __toString() methods'
                 );
             }
         }
         return $toolbarItems;
     }
-    
+
     /**
      * Note: common actions: 'details', 'edit', 'clone', 'delete', 'create' will be added automatically
      * before custom menu items. You can manipulate positioning of common items using actions names as keys
@@ -855,44 +889,44 @@ abstract class ScaffoldSectionConfig
         $this->toolbarItems = $callback;
         return $this;
     }
-    
+
     public function isCreateAllowed(): bool
     {
         return $this->getScaffoldConfig()->isCreateAllowed();
     }
-    
+
     public function isEditAllowed(): bool
     {
         return $this->getScaffoldConfig()->isEditAllowed();
     }
-    
+
     public function isCloningAllowed(): bool
     {
         return $this->getScaffoldConfig()->isCloningAllowed();
     }
-    
+
     public function isDeleteAllowed(): bool
     {
         return $this->getScaffoldConfig()->isDeleteAllowed();
     }
-    
+
     public function isDetailsViewerAllowed(): bool
     {
         return $this->getScaffoldConfig()->isDetailsViewerAllowed();
     }
-    
+
     public function hasSpecialConditions(): bool
     {
         return !empty($this->specialConditions);
     }
-    
+
     public function getSpecialConditions(): array
     {
         return $this->specialConditions instanceof \Closure
             ? call_user_func($this->specialConditions, $this)
             : $this->specialConditions;
     }
-    
+
     /**
      * Signature:
      * function (ScaffoldSectionConfig $scaffoldSectionConfig): array { return []; }
@@ -902,18 +936,18 @@ abstract class ScaffoldSectionConfig
         $this->specialConditions = $specialConditions;
         return $this;
     }
-    
+
     public function getWidth(): int
     {
         return min($this->width, 100);
     }
-    
+
     public function setWidth(int $percents): static
     {
         $this->width = $percents;
         return $this;
     }
-    
+
     /**
      * Get css classes for content container.
      * Uses witdh to collect col-??-?? and col-??-offset?? classes
@@ -926,9 +960,9 @@ abstract class ScaffoldSectionConfig
         $colsLgLeft = floor((12 - $colsLg) / 2);
         return "col-xs-12 col-xl-{$colsXl} col-lg-{$colsLg} col-xl-offset-{$colsXlLeft} col-lg-offset-{$colsLgLeft}";
     }
-    
+
     /**
-     * @param bool $isEnabled
+     * @param bool        $isEnabled
      * @param string|null $size - 'sm', 'md', 'lg', 'xl' | null - autodetect depending on $this->width
      * @return static
      */
@@ -938,7 +972,7 @@ abstract class ScaffoldSectionConfig
         $this->modalSize = in_array($size, ['sm', 'md', 'lg', 'xl']) ? $size : null;
         return $this;
     }
-    
+
     public function getModalSize(): string
     {
         if ($this->modalSize) {
@@ -946,22 +980,22 @@ abstract class ScaffoldSectionConfig
         }
         return $this->getWidth() > 60 ? 'lg' : 'md';
     }
-    
+
     public function isUsingModal(): bool
     {
         return $this->openInModal;
     }
-    
+
     public function getJsInitiator(): ?string
     {
         return $this->jsInitiator;
     }
-    
+
     public function hasJsInitiator(): bool
     {
         return !empty($this->jsInitiator);
     }
-    
+
     /**
      * For data grids:
      * - JS function will be called instead of ScaffoldDataGridHelper.init()
@@ -988,14 +1022,14 @@ abstract class ScaffoldSectionConfig
         $this->jsInitiator = $jsFunctionName;
         return $this;
     }
-    
+
     /**
      * Called before scaffold template rendering
      */
     public function beforeRender(): void
     {
     }
-    
+
     /**
      * Finish building config.
      * This may trigger some actions that should be applied after all configurations were provided
@@ -1005,11 +1039,10 @@ abstract class ScaffoldSectionConfig
     {
         if ($this->isFinished) {
             throw new \BadMethodCallException('Attempt to call ' . get_class($this) . '->finish() twice');
-        } else {
-            $this->isFinished = true;
         }
+        $this->isFinished = true;
     }
-    
+
     public function setAdditionalColumnsToSelect(...$columnNames): static
     {
         if (count($columnNames) && is_array($columnNames[0])) {
@@ -1018,7 +1051,7 @@ abstract class ScaffoldSectionConfig
         $this->additionalColumnsToSelect = $columnNames;
         return $this;
     }
-    
+
     /**
      * @return array
      */
@@ -1026,7 +1059,7 @@ abstract class ScaffoldSectionConfig
     {
         return $this->additionalColumnsToSelect;
     }
-    
+
     public function getItemEditMenuItem(string $section = 'toolbar'): CmfRedirectMenuItem
     {
         $url = $this->getScaffoldConfig()->getUrlToItemEditForm('{{= it.___pk_value}}', false, true);
@@ -1040,7 +1073,7 @@ abstract class ScaffoldSectionConfig
             })
             ->setConditionToShow('it.___edit_allowed');
     }
-    
+
     public function getItemCloneMenuItem(string $section = 'toolbar'): CmfRedirectMenuItem
     {
         $url = $this->getScaffoldConfig()->getUrlToItemCloneForm('{{= it.___pk_value}}', false, true);
@@ -1054,7 +1087,7 @@ abstract class ScaffoldSectionConfig
             })
             ->setConditionToShow('it.___cloning_allowed');
     }
-    
+
     public function getItemCreateMenuItem(string $section = 'toolbar'): CmfRedirectMenuItem
     {
         $url = $this->getScaffoldConfig()->getUrlToItemAddForm([], false, true);
@@ -1068,7 +1101,7 @@ abstract class ScaffoldSectionConfig
             })
             ->setConditionToShow('it.___create_allowed');
     }
-    
+
     public function getItemDetailsMenuItem(string $section = 'toolbar'): CmfRedirectMenuItem
     {
         $url = $this->getScaffoldConfig()->getUrlToItemDetails('{{= it.___pk_value}}', false, true);
@@ -1082,7 +1115,7 @@ abstract class ScaffoldSectionConfig
             })
             ->setConditionToShow('it.___details_allowed');
     }
-    
+
     public function getItemDeleteMenuItem(string $section = 'toolbar'): CmfRequestMenuItem
     {
         $url = $this->getScaffoldConfig()->getUrlToItemDelete('{{= it.___pk_value}}', false, true);
@@ -1098,5 +1131,5 @@ abstract class ScaffoldSectionConfig
             })
             ->setConditionToShow('it.___delete_allowed');
     }
-    
+
 }

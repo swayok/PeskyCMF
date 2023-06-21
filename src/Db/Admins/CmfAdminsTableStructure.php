@@ -1,5 +1,4 @@
 <?php
-/** @noinspection PhpUnusedPrivateMethodInspection */
 
 declare(strict_types=1);
 
@@ -7,23 +6,16 @@ namespace PeskyCMF\Db\Admins;
 
 use PeskyCMF\CmfManager;
 use PeskyCMF\Config\CmfConfig;
-use PeskyCMF\Db\CmfDbTableStructure;
-use PeskyORM\ORM\Column;
-use PeskyORM\ORM\Relation;
-use PeskyORMColumns\TableStructureTraits\IdColumn;
-use PeskyORMColumns\TableStructureTraits\IsActiveColumn;
-use PeskyORMColumns\TableStructureTraits\TimestampColumns;
-use PeskyORMColumns\TableStructureTraits\UserAuthColumns;
+use PeskyORM\ORM\TableStructure\TableStructure;
 
-class CmfAdminsTableStructure extends CmfDbTableStructure
+class CmfAdminsTableStructure extends TableStructure
 {
-
     use IdColumn;
     use TimestampColumns;
     use IsActiveColumn;
     use UserAuthColumns;
 
-    public static function getTableName(): string
+    public function getTableName(): string
     {
         return 'admins';
     }
@@ -121,4 +113,13 @@ class CmfAdminsTableStructure extends CmfDbTableStructure
         return app(CmfManager::class)->getCurrentCmfConfig();
     }
 
+    protected function registerColumns(): void
+    {
+        // TODO: Implement registerColumns() method.
+    }
+
+    protected function registerRelations(): void
+    {
+        // TODO: Implement registerRelations() method.
+    }
 }
