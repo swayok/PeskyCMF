@@ -6,8 +6,8 @@ return [
 
     /**
      * Prefix used to separate cmf-based site section from other site sections,
-     * Example: for prefix "admin" urrl will look like http://localhost/admin
-     * You can use '/' inside prefix but it is not tested wel enough to be sure it works correctly
+     * Example: for prefix "admin" url will look like http://localhost/admin
+     * You can use '/' inside prefix, but it is not tested wel enough to be sure it works correctly
      */
     'url_prefix' => 'admin',
 
@@ -27,7 +27,7 @@ return [
          * Auth Guard configuration.
          * Notes:
          * - you can use string as 'auth_guard_config' or 'auth_guard_config.provider' to use
-         *   guard or provider decalred in config/auth.php
+         *   guard or provider declared in config/auth.php
          * - use RecordInterface object with Authenticatable interface/trait as 'auth_guard_config.provider.model'
          */
         'guard' => [
@@ -54,7 +54,7 @@ return [
         /**
          * Access policy to use for authorisation
          */
-        'acceess_policy_class' => \PeskyCMF\Auth\CmfAccessPolicy::class,
+        'access_policy_class' => \PeskyCMF\Auth\CmfAccessPolicy::class,
 
         /**
          * Enable/disable password restoration
@@ -87,7 +87,7 @@ return [
          * List of middleware for cmf routes and routes provided in 'routes_files' that require user to be authenticated
          */
         'middleware' => [
-            \PeskyCMF\Auth\Middleware\CmfAuth::class
+            \PeskyCMF\Http\Middleware\CmfAuth::class
         ],
 
         /**
@@ -111,7 +111,7 @@ return [
      */
     'routes_middleware' => [
         //\PeskyCMF\Http\Middleware\LogHttpRequest::class . ':admin,1,post,put,delete', //< http requests logging
-        'web'
+        'web',
     ],
 
     /**
@@ -175,7 +175,7 @@ return [
 
         /**
          * JS code blocks to add to CMF layout.
-         * Example: google analytics, google firebase, other vendor script blocks.
+         * Example: Google Analytics, Google Firebase, other vendor script blocks.
          * Notes:
          *  - keys of this array are not used - you may use them to label blocks
          *  - all code you provide via this array will be added to layout AS IS.
@@ -197,7 +197,7 @@ return [
          * Timeout (minutes): how long optimized templates should be cached. Set to 0 to cache forever
          * Don't forget to clean cache after you change something in CMF.
          * Note: by default cache key is based on user ID because it is not possible to cache more globally due to
-         * 'acceess_policy_class'. Though if you use default PeskyCMF\Config\CmfAccessPolicy - then cache key will be
+         * 'access_policy_class'. Though if you use default PeskyCMF\Config\CmfAccessPolicy - then cache key will be
          * more global. If you use role-based access policy (access is not determined by user ID) - you can overwrite
          * getCacheKeyForOptimizedUiTemplates() method in your 'cmf_config' to use roles instead of user IDs
          */
@@ -279,7 +279,7 @@ return [
          * List of class names that extend \PeskyCMF\ApiDocs\CmfApiMethodDocumentation
          * or \PeskyCMF\ApiDocs\CmfApiDocumentation class.
          * Note: there is a possibility to load classes automatically using 'api_documentation_classes_folder'.
-         * More details in CmfApiDocumentationModule->loadApiMethodsDocumentationClassesFromFileSystem().
+         * @see \PeskyCMF\ApiDocs\CmfApiDocumentationModule::loadApiMethodsDocumentationClassesFromFileSystem()
          */
         'classes' => [
 

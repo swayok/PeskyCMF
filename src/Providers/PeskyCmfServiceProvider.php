@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Providers;
 
+use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 use PeskyCMF\CmfManager;
+use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Console\Commands\CmfAddAdminCommand;
 use PeskyCMF\Console\Commands\CmfAddSectionCommand;
 use PeskyCMF\Console\Commands\CmfCleanUploadedTempFilesCommand;
@@ -18,7 +21,6 @@ use PeskyCMF\Console\Commands\CmfMakeApiDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeApiMethodDocCommand;
 use PeskyCMF\Console\Commands\CmfMakeScaffoldCommand;
 use PeskyCMF\PeskyCmfAppSettings;
-use Symfony\Component\HttpFoundation\ParameterBag;
 
 class PeskyCmfServiceProvider extends ServiceProvider
 {
@@ -54,21 +56,14 @@ class PeskyCmfServiceProvider extends ServiceProvider
             return new CmfManager($app);
         });
         $this->app->alias(CmfManager::class, 'cmf.manager');
-
-        $this->app->singleton(PeskyCmfAppSettings::class, function () {
-            /** @var PeskyCmfAppSettings $appSettingsClass */
-            $appSettingsClass = $this->getAppConfigs()->get('peskycmf.app_settings_class')
-                ?: PeskyCmfAppSettings::class;
-            return new $appSettingsClass($this->app);
+        $this->app->singleton(CmfConfig::class, function (Application $app) {
+            return $app->make(CmfManager::class)->getCmfConfigForSection(null);
         });
 
-        // $this->app->singleton(CmfSettingsTable::class, function () {
-        //     return CmfSettingsTable::getInstance();
-        // });
-        //
-        // $this->app->singleton(CmfSettingsTableStructure::class, function () {
-        //     return CmfSettingsTableStructure::getInstance();
-        // });
+        $this->app->singleton(
+            PeskyCmfAppSettings::class,
+            $this->getAppConfigs()->get('peskycmf.app_settings_class')
+        );
     }
 
     protected function registerRelatedServiceProviders(): void
@@ -90,10 +85,7 @@ class PeskyCmfServiceProvider extends ServiceProvider
         return $this->app->runningInConsole();
     }
 
-    /**
-     * @return ParameterBag
-     */
-    protected function getAppConfigs(): ParameterBag
+    protected function getAppConfigs(): ConfigRepository
     {
         return $this->app['config'];
     }

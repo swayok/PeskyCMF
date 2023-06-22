@@ -73,8 +73,7 @@ class CmfManager
                 );
             }
             /** @var CmfConfig $className */
-            $this->loadedCmfConfigs[$cmfSectionName] = new $className();
-            $this->loadedCmfConfigs[$cmfSectionName]->setLaravelApp($this->app);
+            $this->loadedCmfConfigs[$cmfSectionName] = new $className($this->app);
         }
         return $this->loadedCmfConfigs[$cmfSectionName];
     }

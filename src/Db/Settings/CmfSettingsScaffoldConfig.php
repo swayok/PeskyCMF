@@ -6,23 +6,23 @@ namespace PeskyCMF\Db\Settings;
 
 use Illuminate\Http\JsonResponse;
 use PeskyCMF\Http\CmfJsonResponse;
+use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Scaffold\Form\FormConfig;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
-use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface;
+use PeskyORM\ORM\Table\TableInterface;
 
 class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig
 {
-    
     protected bool $isDetailsViewerAllowed = false;
     protected bool $isCreateAllowed = false;
     protected bool $isEditAllowed = true;
     protected bool $isDeleteAllowed = false;
-    
-    public static function getTable(): LaravelKeyValueTableInterface
+
+    public static function getTable(): TableInterface
     {
-        return app(CmfSettingsTable::class);
+        return app(PeskyCmfAppSettings::class)->getTable();
     }
-    
+
     public function getMainMenuItem(): ?array
     {
         $resoureName = static::getResourceName();
@@ -37,12 +37,12 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig
             'url' => $url,
         ];
     }
-    
+
     public static function getIconForMenuItem(): ?string
     {
         return 'fa fa-cog';
     }
-    
+
     protected function createFormConfig(): FormConfig
     {
         $formConfig = parent::createFormConfig()
@@ -55,11 +55,11 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig
                 return $appSettings::getValidatorsForScaffoldFormConfig();
             })
             ->setIncomingDataModifier(function (array $data) use ($appSettings) {
-                return $appSettings::modifyIncomingData($data);
+                return $appSettings->modifyIncomingData($data);
             });
         return $formConfig;
     }
-    
+
     public function renderTemplates(): string
     {
         return view(
@@ -70,34 +70,33 @@ class CmfSettingsScaffoldConfig extends KeyValueTableScaffoldConfig
             )
         )->render();
     }
-    
+
     public function getRecordsForDataGrid(): JsonResponse
     {
         throw new \BadMethodCallException('Section is not allowed');
     }
-    
+
     public function getDefaultValuesForFormInputs(): JsonResponse
     {
         return $this->getRecordValues('all');
     }
-    
+
     public function getRecordValues(?string $id = null): JsonResponse
     {
-        $settings = $this->cmfConfig->getAppSettings()->getAllValues(true);
-        $settings[static::getTable()->getPkColumnName()] = 0;
+        $settings = $this->cmfConfig->getAppSettings()->getSettings(true);
         return new CmfJsonResponse($this->getFormConfig()->prepareRecord($settings));
     }
-    
+
     public function updateBulkOfRecords(): JsonResponse
     {
         throw new \BadMethodCallException('Action is not allowed');
     }
-    
+
     public function deleteRecord(string $id): JsonResponse
     {
         throw new \BadMethodCallException('Action is not allowed');
     }
-    
+
     public function deleteBulkOfRecords(): JsonResponse
     {
         throw new \BadMethodCallException('Action is not allowed');

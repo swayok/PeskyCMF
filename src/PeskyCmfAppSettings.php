@@ -4,99 +4,109 @@ declare(strict_types=1);
 
 namespace PeskyCMF;
 
+use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
+use PeskyCMF\Db\Settings\CmfSetting;
 use PeskyCMF\Db\Settings\CmfSettingsTable;
 use PeskyCMF\Scaffold\Form\FormConfig;
-use PeskyCMF\Scaffold\Form\FormInput;
-use PeskyCMF\Scaffold\Form\KeyValueSetFormInput;
-use PeskyORM\Core\DbExpr;
-use PeskyORMLaravel\Db\LaravelKeyValueTableHelpers\LaravelKeyValueTableInterface;
+use PeskyORM\Exception\InvalidDataException;
+use PeskyORM\ORM\RecordsCollection\KeyValuePair;
+use PeskyORM\ORM\Table\TableInterface;
+use PeskyORM\ORM\TableStructure\TableColumn\TableColumnInterface;
 
-/**
- * @method static string default_browser_title($default = null, $ignoreEmptyValue = true)
- * @method static string browser_title_addition($default = null, $ignoreEmptyValue = true)
- * @method static array languages($default = null, $ignoreEmptyValue = true)
- * @method static string default_language($default = null, $ignoreEmptyValue = true)
- * @method static array fallback_languages($default = null, $ignoreEmptyValue = true)
- */
-class PeskyCmfAppSettings
+abstract class PeskyCmfAppSettings
 {
-    
-    public const DEFAULT_BROWSER_TITLE = 'default_browser_title';
-    public const BROWSER_TITLE_ADDITION = 'browser_title_addition';
-    public const LANGUAGES = 'languages';
-    public const DEFAULT_LANGUAGE = 'default_language';
-    public const FALLBACK_LANGUAGES = 'fallback_languages';
-    
-    protected static array $settingsForWysiwygDataIsnserts = [];
-    
-    private ?array $defaultValues = null;
-    protected Application $app;
-    
+    protected array $settingsForWysiwygDataIsnserts = [];
+
+    /**
+     * @var TableColumnInterface[]
+     */
+    private array $valueConfigs = [];
+    protected ?array $defaultValues = null;
+    /** @var array[] */
+    protected ?array $records = null;
+
     public static function getInstance(): static
     {
         return app(__CLASS__);
     }
-    
-    public function __construct()
-    {
+
+    public function __construct(
+        protected Application $app,
+        protected CacheRepository $cacheRepository
+    ) {
+        $this->registerValueConfigs();
     }
-    
-    public static function getSettingsForWysiwygDataIsnserts(): array
+
+    public function getTable(): TableInterface
     {
-        return static::$settingsForWysiwygDataIsnserts;
+        return CmfSettingsTable::getInstance();
     }
-    
+
+    abstract protected function registerValueConfigs(): void;
+
     /**
      * Get form inputs for app settings (used in CmfSettingsScaffoldConfig)
      * You can use setting name as form input - it will be simple text input;
      * In order to make non-text input - use instance of FormInput class or its descendants as value and
      * setting name as key;
      */
-    public static function configureScaffoldFormConfig(FormConfig $scaffold): FormConfig
+    abstract public function configureScaffoldFormConfig(FormConfig $formConfig): FormConfig;
+
+    abstract public function getValidatorsForScaffoldFormConfig(): array;
+
+    protected function addValueConfig(TableColumnInterface $column): void
     {
-        return $scaffold
-            ->addTab($scaffold->translate(null, 'tab.general'), [
-                static::DEFAULT_BROWSER_TITLE,
-                static::BROWSER_TITLE_ADDITION,
-            ])
-            ->addTab($scaffold->translate(null, 'tab.localization'), [
-                static::LANGUAGES => KeyValueSetFormInput::create()
-                    ->setMinValuesCount(1)
-                    ->setAddRowButtonLabel($scaffold->translate(null, 'input.languages_add'))
-                    ->setDeleteRowButtonLabel($scaffold->translate(null, 'input.languages_delete')),
-                static::DEFAULT_LANGUAGE => FormInput::create()
-                    ->setType(FormInput::TYPE_SELECT)
-                    ->setOptions(function () {
-                        return static::languages();
-                    }),
-                static::FALLBACK_LANGUAGES => KeyValueSetFormInput::create()
-                    ->setAddRowButtonLabel($scaffold->translate(null, 'input.fallback_languages_add'))
-                    ->setDeleteRowButtonLabel($scaffold->translate(null, 'input.fallback_languages_delete')),
-            ]);
+        $this->valueConfigs[$column->getName()] = $column;
     }
-    
-    public static function getValidatorsForScaffoldFormConfig(): array
+
+    /**
+     * @return TableColumnInterface[]
+     */
+    public function getValueConfigs(): array
     {
-        return [
-            static::DEFAULT_LANGUAGE => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%|in:' . implode(',', array_keys(static::languages())),
-            static::LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
-            static::LANGUAGES . '.*.value' => 'required|string|max:88',
-            static::FALLBACK_LANGUAGES . '.*.key' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
-            static::FALLBACK_LANGUAGES . '.*.value' => 'required|string|size:2|alpha|regex:%^[a-zA-Z]{2}$%',
-        ];
+        return $this->valueConfigs;
     }
-    
+
+    public function getValueConfig(string $key): TableColumnInterface
+    {
+        if (!$this->hasValueConfig($key)) {
+            throw new \InvalidArgumentException(
+                static::class . " does not know about key named '{$key}'"
+            );
+        }
+        return $this->valueConfigs[$key];
+    }
+
+    public function hasValueConfig(string $key): bool
+    {
+        return isset($this->valueConfigs[$key]);
+    }
+
+    protected function getCacheKey(): string
+    {
+        return 'app-settings';
+    }
+
+    protected function getCacheDuration(): ?int
+    {
+        return 28800;
+    }
+
+    public function getSettingsForWysiwygDataIsnserts(): array
+    {
+        return $this->settingsForWysiwygDataIsnserts;
+    }
+
     /**
      * Get all validators for specific key.
      * Override this if you need some specific validation for keys that are not present in scaffold config form and
      * can only be updated via static::update() method.
      */
-    protected static function getValidatorsForKey(string $key): array
+    protected function getValidatorsForKey(string $key): array
     {
-        $validators = static::getValidatorsForScaffoldFormConfig();
+        $validators = $this->getValidatorsForScaffoldFormConfig();
         $validatorsForKey = [];
         foreach ($validators as $setting => $rules) {
             if (preg_match("%^{$key}($|\.)%", $setting)) {
@@ -105,105 +115,182 @@ class PeskyCmfAppSettings
         }
         return $validatorsForKey;
     }
-    
+
     /**
      * Passed to FormConfig->setIncomingDataModifier()
      */
-    public static function modifyIncomingData(array $data): array
+    public function modifyIncomingData(array $data): array
     {
         return $data;
     }
-    
+
+    /**
+     * Get all default values for all settings
+     */
+    public function getDefaultValues(): array
+    {
+        if ($this->defaultValues === null) {
+            $this->defaultValues = [];
+            foreach ($this->valueConfigs as $column) {
+                $this->defaultValues[$column->getName()] = $column->hasDefaultValue()
+                    ? $column->getValidDefaultValue()
+                    : null;
+            }
+        }
+        return $this->defaultValues;
+    }
+
     /**
      * Get default value for setting $name
      */
-    public static function getDefaultValue(string $name): mixed
+    public function getDefaultValue(string $name): mixed
     {
-        $instance = static::getInstance();
-        if ($instance->defaultValues === null) {
-            $instance->defaultValues = static::getAllDefaultValues();
-        }
-        if (Arr::has($instance->defaultValues, $name)) {
-            if ($instance->defaultValues[$name] instanceof \Closure) {
-                $instance->defaultValues[$name] = $instance->defaultValues[$name]();
-            }
-            return $instance->defaultValues[$name];
-        }
-        return null;
+        return Arr::get($this->getDefaultValues(), $name, null);
     }
-    
-    public static function getAllDefaultValues(): array
+
+    public function getSettings(bool $ignoreCache = false): array
     {
-        return [
-            static::LANGUAGES => ['en' => 'English'],
-            static::DEFAULT_LANGUAGE => 'en',
-            static::FALLBACK_LANGUAGES => [],
-        ];
-    }
-    
-    /**
-     * @return CmfSettingsTable|LaravelKeyValueTableInterface
-     * @noinspection PhpDocSignatureInspection
-     */
-    protected static function getTable(): LaravelKeyValueTableInterface
-    {
-        return app(CmfSettingsTable::class);
-    }
-    
-    public static function getAllValues(bool $ignoreCache = false): array
-    {
-        $settings = static::getTable()->getValuesForForeignKey(null, $ignoreCache, true);
-        foreach (static::getAllDefaultValues() as $name => $defaultValue) {
-            if (!array_key_exists($name, $settings) || $settings[$name] === null) {
-                $settings[$name] = value($defaultValue);
-            }
+        $records = $this->getRecords($ignoreCache);
+        $settings = $this->getDefaultValues();
+        foreach ($records as $record) {
+            $settings[$record['key']] = $record['value'];
         }
         return $settings;
     }
-    
-    /** @noinspection MagicMethodsValidityInspection */
-    public function __get($name)
-    {
-        static::$name();
+
+    public function getSetting(
+        string $name,
+        bool $ignoreCache = false,
+        mixed $default = null,
+        bool $ignoreEmptyValue = false
+    ): mixed {
+        $this->getValueConfig($name); //< validate setting existence
+        $allValues = $this->getSettings($ignoreCache);
+        if (!isset($allValues[$name]) || ($ignoreEmptyValue && empty($allValues[$name]))) {
+            return $default;
+        }
+        return $allValues[$name];
     }
-    
-    public static function __callStatic($name, $arguments)
+
+    /**
+     * Get DB records as arrays. Prefer cached data unless $ignoreCache is true.
+     */
+    protected function getRecords(bool $ignoreCache = false): array
     {
-        $default = Arr::get($arguments, 0, static::getDefaultValue($name));
-        $ignoreEmptyValue = (bool)Arr::get($arguments, 1, true);
-        return static::getTable()->getValue($name, null, $default, $ignoreEmptyValue);
+        $cacheKey = $this->getCacheKey();
+        $records = null;
+        if (!$ignoreCache) {
+            if ($this->records !== null) {
+                $records = $this->records;
+            } else {
+                $this->records = $records = $this->cacheRepository->get($cacheKey);
+            }
+        }
+        if ($records === null) {
+            $tempRecord = $this->getTable()->newRecord();
+            $this->records = $records = $this->getTable()->select('*')
+                ->toArrays(function (CmfSetting $setting) use ($tempRecord) {
+                    $data = $setting->toArray();
+                    $valueConfig = $this->getValueConfig($data['key']);
+                    $valueContainer = $valueConfig->setValue(
+                        $valueConfig->getNewRecordValueContainer($tempRecord),
+                        $data['value'],
+                        true,
+                        true
+                    );
+                    $data['value'] = $valueConfig->getValue($valueContainer, null);
+                    return new KeyValuePair($setting->key, $data);
+                });
+        }
+        $this->cacheRepository->put($cacheKey, $records, $this->getCacheDuration());
+        return $this->records;
     }
-    
-    public function __call($name, $arguments)
+
+    public function __get(string $key)
     {
-        return static::__callStatic($name, (array)$arguments);
+        return $this->$key();
     }
-    
+
+    public function __set(string $key, mixed $value): void
+    {
+        $this->update($key, $value, true);
+    }
+
+    public function __isset(string $key): bool
+    {
+        $this->getValueConfig($key); //< validate setting existence
+        $records = $this->getRecords(false);
+        return isset($records[$key]);
+    }
+
+    /**
+     * @param string $key Setting name
+     * @param array  $arguments [0 => mixed $default, 1 => bool $ignoreEmptyValue]
+     * @return mixed
+     */
+    public function __call(string $key, array $arguments): mixed
+    {
+        $default = $arguments[0] ?? null;
+        $ignoreEmptyValue = (bool)($arguments[1] ?? true);
+        return $this->getSetting($key, false, $default, $ignoreEmptyValue);
+    }
+
     /**
      * @throws \InvalidArgumentException
      */
-    public static function update(string $key, mixed $value, bool $validate = true): void
+    public function update(string $key, mixed $value, bool $validate = true): mixed
     {
-        $data = [$key => $value];
-        if ($validate && !($value instanceof DbExpr)) {
-            $rules = static::getValidatorsForKey($key);
-            if (!empty($rules)) {
-                $validator = Validator::make($data, $rules);
-                if ($validator->fails()) {
-                    throw new \InvalidArgumentException(
-                        "Invalid value received for setting '$key'. Errors: "
-                        . var_export($validator->getMessageBag()->toArray(), true)
-                    );
-                }
-            }
+        $valueConfig = $this->getValueConfig($key);
+        try {
+            $valueContainer = $valueConfig->setValue(
+                $valueConfig->getNewRecordValueContainer($this->getTable()->newRecord()),
+                $value,
+                !$validate,
+                true
+            );
+        } catch (InvalidDataException $exception) {
+            throw new \InvalidArgumentException(
+                "Invalid value received for setting '$key'. Errors: "
+                . var_export($exception->getErrors(), true)
+            );
         }
-        $table = static::getTable();
-        $table::updateOrCreateRecord($table::makeDataForRecord($key, $value));
+        $records = $this->getRecords(true);
+        /** @var CmfSetting $record */
+        $record = $this->getTable()->newRecord();
+        if (isset($records[$key])) {
+            $record->fromDbData($records[$key]);
+        } else {
+            $record->setKey($key);
+        }
+        $record->setValue($valueConfig->getValue($valueContainer, null), false);
+        $record->save();
+        $this->records[$key] = $record->toArray();
+        return $this->getSetting($key);
     }
-    
-    public static function delete(string $key): void
+
+    /**
+     * @param array $settings Key-value pairs of settings.
+     * @param bool  $validate Run validation on values or not.
+     * @return array Updated settings.
+     * @throws \InvalidArgumentException
+     */
+    public function updateMany(array $settings, bool $validate = true): array
     {
-        static::getTable()->delete([static::getTable()->getKeysColumnName() => $key]);
+        $table = $this->getTable();
+        $table::beginTransaction();
+        $ret = [];
+        foreach ($settings as $key => $value) {
+            $ret[$key] = $this->update($key, $value, $validate);
+        }
+        $table::commitTransaction();
+        return $ret;
     }
-    
+
+    /**
+     * Delete single setting
+     */
+    public function delete(string $key): void
+    {
+        $this->getTable()->delete(['key' => $key]);
+    }
 }

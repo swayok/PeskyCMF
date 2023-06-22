@@ -10,16 +10,10 @@ class CmfSettingsTable extends Table
 {
     public function __construct(?string $tableAlias = 'CmfSettings')
     {
-        parent::__construct(new CmfSettingsTableStructure(), CmfSetting::class, $tableAlias);
-    }
-
-    public function getMainForeignKeyColumnName(): ?string
-    {
-        return null;
-    }
-
-    public static function getCacheKeyToStoreAllValuesForAForeignKey(): string
-    {
-        return 'app-settings';
+        parent::__construct(
+            new CmfSettingsTableStructure(),
+            CmfSetting::class,
+            $tableAlias
+        );
     }
 }

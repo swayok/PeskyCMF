@@ -50,15 +50,15 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
         return $formConfig;
     }
 
-    public function getRecordValues(?string $ownerRecordId = null): JsonResponse
+    public function getRecordValues(?string $id = null): JsonResponse
     {
         $sectionConfig = $this->getScaffoldSectionConfigForRecordInfoAndValidateAccess();
         $table = static::getTable();
         $fkColumn = $table->getMainForeignKeyColumnName();
-        if (empty($ownerRecordId) && !empty($fkColumn)) {
+        if (empty($id) && !empty($fkColumn)) {
             return $this->makeRecordNotFoundResponse();
         }
-        $keysAndValues = $table::getValuesForForeignKey(empty($fkColumn) ? null : $ownerRecordId, true);
+        $keysAndValues = $table::getValuesForForeignKey(empty($fkColumn) ? null : $id, true);
         $keysAndValues[$table::getPkColumnName()] = 0;
         return new CmfJsonResponse($sectionConfig->prepareRecord($keysAndValues));
     }
@@ -73,6 +73,7 @@ abstract class KeyValueTableScaffoldConfig extends ScaffoldConfig
         return $this->updateRecord();
     }
 
+    /** @noinspection PhpParameterNameChangedDuringInheritanceInspection */
     public function updateRecord(?string $notUsed = null): JsonResponse
     {
         $formConfig = $this->getFormConfig();

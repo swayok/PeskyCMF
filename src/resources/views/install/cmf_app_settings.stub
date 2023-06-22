@@ -8,5 +8,17 @@ use PeskyCMF\PeskyCmfAppSettings;
 
 class AppSettings extends PeskyCmfAppSettings
 {
+    protected function registerValueConfigs(): void
+    {
+    }
 
+    public function configureScaffoldFormConfig(FormConfig $formConfig): FormConfig
+    {
+        return $formConfig;
+    }
+
+    public function getValidatorsForScaffoldFormConfig(): array
+    {
+        return [];
+    }
 }

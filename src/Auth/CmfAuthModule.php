@@ -223,6 +223,7 @@ class CmfAuthModule
             return new JsonResponse([], HttpCode::NOT_FOUND);
         }
         $data = $this->validateAndGetDataForRegistration($request);
+        /** @var RecordInterface|Authenticatable $user */
         $user = $this->getUsersTable()->newRecord();
         $user->fromData($data, false);
         $this->addCustomRegistrationData($user);
@@ -340,7 +341,7 @@ class CmfAuthModule
 
     public function getAccessPolicyClassName(): string
     {
-        return $this->getCmfConfig()->config('auth.acceess_policy_class') ?: CmfAccessPolicy::class;
+        return $this->getCmfConfig()->config('auth.access_policy_class') ?: CmfAccessPolicy::class;
     }
 
     public function processUserLoginRequest(Request $request): JsonResponse

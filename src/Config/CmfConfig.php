@@ -19,12 +19,13 @@ use Illuminate\View\View;
 use PeskyCMF\ApiDocs\CmfApiDocumentationModule;
 use PeskyCMF\Auth\CmfAccessPolicy;
 use PeskyCMF\Auth\CmfAuthModule;
-use PeskyCMF\Auth\Middleware\CmfAuth;
+use PeskyCMF\CmfManager;
 use PeskyCMF\CmfUrl;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Http\Controllers\CmfGeneralController;
 use PeskyCMF\Http\Controllers\CmfScaffoldApiController;
+use PeskyCMF\Http\Middleware\CmfAuth;
 use PeskyCMF\Http\Middleware\UseCmfSection;
 use PeskyCMF\PeskyCmfAppSettings;
 use PeskyCMF\Scaffold\ScaffoldConfig;
@@ -37,7 +38,6 @@ use PeskyORM\ORM\Table\TableInterface;
 use PeskyORM\ORM\TableStructure\TableColumn\ColumnValueValidationMessages\ColumnValueValidationMessagesFromArray;
 use PeskyORM\ORM\TableStructure\TableColumn\ColumnValueValidationMessages\ColumnValueValidationMessagesInterface;
 use PeskyORM\Utils\ServiceContainer;
-use Vluzrmos\LanguageDetector\LanguageDetector;
 
 class CmfConfig
 {
@@ -60,13 +60,19 @@ class CmfConfig
         'zh' => 'CN',
     ];
 
-    public function __construct()
+    public function __construct(Application $app)
     {
+        $this->setLaravelApp($app);
     }
 
     public function getLaravelApp(): Application
     {
         return $this->app;
+    }
+
+    public function setLaravelApp(Application $app): void
+    {
+        $this->app = $app;
     }
 
     public function getLaravelConfigs(): ConfigRepository
@@ -186,16 +192,16 @@ class CmfConfig
 
     public function defaultPageTitle(): string
     {
-        return $this->getAppSettings()->default_browser_title(function () {
-            return $this->transCustom('default_page_title');
-        }, true);
+        return $this->transCustom('default_page_title');
     }
 
+    /**
+     * Addition to page title (<header> -> <title>).
+     * Example: 'Page title - {$pageTitleAddition}'
+     */
     public function pageTitleAddition(): string
     {
-        return $this->getAppSettings()->browser_title_addition(function () {
-            return $this->defaultPageTitle();
-        }, true);
+        return $this->defaultPageTitle();
     }
 
     /**
@@ -730,9 +736,6 @@ class CmfConfig
         $this->httpRequestsLogger = $httpRequestsLogger;
     }
 
-    /**
-     * @return array
-     */
     public function getCachedPagesTemplates(): array
     {
         return Cache::remember(
@@ -751,7 +754,8 @@ class CmfConfig
                 $authModule = $this->getAuthModule();
                 return [
                     $authModule->getLoginPageUrl(false) . '.html' => $controller->getLoginTpl(),
-                    $authModule->getPasswordRecoveryStartPageUrl(false) . '.html' => $controller->getForgotPasswordTpl(),
+                    $authModule->getPasswordRecoveryStartPageUrl(false) . '.html'
+                        => $controller->getForgotPasswordTpl(),
                 ];
             }
         );
@@ -961,6 +965,11 @@ class CmfConfig
         // locale handlers
         $this->listenForAppLocaleChanges();
 
+        // Bind to container
+        $this->app->singleton(__CLASS__, function () {
+            return $this;
+        });
+
         // init auth module
         /** @var CmfAuthModule $cmfAuthModuleClass */
         $cmfAuthModuleClass = $this->config('auth.module') ?: CmfAuthModule::class;
@@ -999,11 +1008,6 @@ class CmfConfig
         if ($this->config('file_access_mask') !== null) {
             umask($this->config('file_access_mask'));
         }
-    }
-
-    public function setLaravelApp(Application $app): void
-    {
-        $this->app = $app;
     }
 
     protected function configureSession(): void
