@@ -4,60 +4,60 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
-use PeskyCMF\CmfManager;
-use PeskyORM\Core\DbConnectionsManager;
-use PeskyORM\Core\DbExpr;
-use PeskyORM\Core\Utils;
-
-class CmfAddAdminCommand extends Command
+class CmfAddAdminCommand extends CmfCommand
 {
-    
     protected $description = 'Create administrator in DB';
-    
-    protected $signature = 'cmf:add-admin 
-        {email_or_login} 
-        {role=admin} 
-        {table=admins} 
-        {schema?} 
-        {--login : use [login] field instead of [email]}';
-    
+
+    protected $signature = 'cmf:add-admin
+        {email_or_login}
+        {role=admin}
+        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\')}
+        {--login}
+    ';
+
     public function handle(): int
     {
-        $db = DbConnectionsManager::getConnection('default');
+        $adminsTable = $this->getCmfConfig()->getAuthModule()->getUsersTable();
         $args = $this->input->getArguments();
         $emailOrLogin = strtolower(trim($args['email_or_login']));
         $authField = $this->input->getOption('login') ? 'login' : 'email';
-        $table = empty($args['schema']) ? $args['table'] : "{$args['schema']}.{$args['table']}";
-        $exists = $db->query(
-            DbExpr::create("SELECT 1 FROM {$table} WHERE `{$authField}`=``{$emailOrLogin}``"),
-            Utils::FETCH_VALUE
-        );
+        $admin = $adminsTable->newRecord()->fetch([
+            $authField => [$emailOrLogin, strtolower(trim($emailOrLogin))],
+        ]);
         $password = $this->secret('Enter password for admin');
         if (empty($password)) {
             $this->line('Cannot continue: password is empty');
             return 1;
         }
         try {
-            $data = [
-                'password' => Hash::make($password),
-                'role' => $args['role'],
-                'is_superadmin' => true,
-                $authField => $emailOrLogin,
-                'language' => app(CmfManager::class)->getCurrentCmfConfig(),
-            ];
-            if ($exists > 0) {
-                $result = $db->update($table, $data, DbExpr::create("`{$authField}`=``{$emailOrLogin}``"));
-            } else {
-                $result = $db->insert($table, $data);
+            $adminsTableStructure = $adminsTable->getTableStructure();
+            $isCreation = !$admin->existsInDb();
+            if (!$isCreation) {
+                $admin->begin();
             }
-            
-            if ($result > 0) {
-                $this->line($exists > 0 ? 'Admin updated' : 'Admin created');
-            } else {
-                $this->line('Fail. DB returned "0 rows updated"');
+            $admin->updateValue('password', $password, false);
+            if ($adminsTableStructure->hasColumn('role')) {
+                $admin->updateValue('role', $args['role'] ?? 'admin', false);
             }
+            if ($adminsTableStructure->hasColumn('is_superadmin')) {
+                $admin->updateValue('is_superadmin', true, false);
+            }
+
+            if ($isCreation) {
+                $admin->updateValue($authField, $emailOrLogin, false);
+                if ($adminsTableStructure->hasColumn('language')) {
+                    $admin->updateValue(
+                        'language',
+                        $this->getCmfConfig()->defaultLocale(),
+                        false
+                    );
+                }
+                $admin->save();
+            } else {
+                $admin->commit();
+            }
+
+            $this->line($isCreation ? 'Admin created' : 'Admin updated');
         } catch (\Exception $exc) {
             $this->line('Fail. DB Exception:');
             $this->line($exc->getMessage());

@@ -7,12 +7,14 @@ declare(strict_types=1);
 echo "<?php\n";
 ?>
 
+declare(strict_types=1);
+
 namespace App\{{ $sectionName }}\Http\Controllers;
 
 use PeskyCMF\Http\Controllers\CmfController;
 
-class PagesController extends CmfController {
-
+class PagesController extends CmfController
+{
     public function redirectFromStartPage() {
         return redirectToCmfPage('dashboard');
     }
@@ -20,5 +22,4 @@ class PagesController extends CmfController {
     public function dashboard() {
         return view('cmf::page.dashboard');
     }
-
 }

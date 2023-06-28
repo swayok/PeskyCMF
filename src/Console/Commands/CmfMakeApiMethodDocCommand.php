@@ -10,17 +10,16 @@ use Swayok\Utils\File;
 
 class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand
 {
-    
     protected $description = 'Create class that extends CmfApiMethodDocumentation class';
-    
+
     protected $signature = 'cmf:make-api-method-doc
         {class_name}
         {docs_group}
-        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by CmfManager}
-        {--folder= : folder path relative to app_path(); default = CmfConfig::getPrimary()->api_documentation_classes_folder()}
+        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\')}
+        {--folder= : folder path relative to app_path(); default = CmfApiDocumentationModule->getClassesFolderPath()}
         {--cmf-config-class= : full class name to a class that extends CmfConfig}
         {--auto : automatically set url, http method, translation paths, etc..}';
-    
+
     protected function makeClass(string $className, string $namespace, string $filePath): void
     {
         $this->line('Writing class ' . $namespace . '\\' . $className . ' to file ' . $filePath);
@@ -48,59 +47,32 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand
                 $httpMethod = in_array($httpMethod, ['PUT', 'DELETE'], true) ? 'POST' : 'GET';
             }
         } else {
-            $postParams = "    public \$postParameters = [\n        //'key' => 'value',\n    ];\n";
-            $urlParams = "    public \$urlParameters = [\n        //'key' => 'value',\n    ];\n";
-            $urlQueryParams = "    public \$urlQueryParameters = [\n        //'_method' => 'PUT',\n    ];\n";
-            $validationErrors = "    public \$validationErrors = [\n        //'key' => 'required|string',\n    ];\n";
+            $postParams = [];
+            $urlParams = [];
+            $urlQueryParams = [];
+            $validationErrors = [];
         }
-        
-        $fileContents = <<<CLASS
-<?php
 
-namespace {$namespace};
+        $inserts = [
+            ':namespace' => $namespace,
+            ':base_class' => $baseClass,
+            ':base_class_name' => $baseClassName,
+            ':class_name' => $className,
+            ':translation_group' => $translationGroup,
+            ':url' => $url,
+            ':http_method' => $httpMethod,
+            ':post_params' => implode("\n        ", $postParams),
+            ':url_params' => implode("\n        ", $urlParams),
+            ':url_query_params' => implode("\n        ", $urlQueryParams),
+            ':validation_errors' => implode("\n        ", $validationErrors),
+        ];
 
-use {$baseClass};
-use PeskyCMF\ApiDocs\ApiMethodErrorResponseInfo;
-
-class {$className} extends {$baseClassName} {
-
-    //protected static \$position = 10;
-
-    protected \$translationsBasePath = '{$translationGroup}';
-
-    //protected \$title = '{{$translationGroup}.title}';
-    //protected \$titleForPostman = '{{$translationGroup}.title_for_postman}';
-    //protected \$description = '{{$translationGroup}.description}';
-
-    protected \$url = '{$url}';
-    public \$httpMethod = '{$httpMethod}';
-
-{$urlParams}{$urlQueryParams}{$postParams}
-{$validationErrors}
-
-    public \$onSuccess = [
-//        'name' => 'string',
-    ];
-
-    /**
-     * @return array|ApiMethodErrorResponseInfo[]
-     */
-    protected function getPossibleErrors() {
-        /* Example:
-            ApiMethodErrorResponseInfo::create()
-                ->setTitle('{{$translationGroup}.error.item_not_found.title}')
-                ->setDescription('{{$translationGroup}.error.item_not_found.description}')
-                ->setHttpCode(HttpCode::NOT_FOUND)
-                ->setResponse([
-                    'message' => 'Record not found in DB.'
-                ]),
-        */
-        return [];
-    }
-
-}
-CLASS;
-        File::save($filePath, $fileContents, 0644, 0755);
+        File::save(
+            $filePath,
+            $this->renderStubFile('api_docs_api_method_class', $inserts),
+            0644,
+            0755
+        );
         $this->line("File $filePath created");
         $this->line('Add next translations to you dictionaries:');
         $translations = [];
@@ -114,7 +86,7 @@ CLASS;
         Arr::set($translations, $translationGroup . '.error', []);
         $this->line($this->arrayToString($translations));
     }
-    
+
     protected function guessUrl(string $group, string $method): string
     {
         $url = '/api/';
@@ -123,7 +95,7 @@ CLASS;
         }
         return $url . $method;
     }
-    
+
     protected function askQuestions(string $url, string $translationGroup): array
     {
         $url = $this->ask('API method url (use "{param}" to mark variable part of URL):', $url);
@@ -131,7 +103,7 @@ CLASS;
         $translationGroup = $this->ask('Translation path:', $translationGroup);
         return [$url, $httpMethod, $translationGroup];
     }
-    
+
     protected function askParams(string $url, string $httpMethod): array
     {
         $urlParams = [];
@@ -143,30 +115,40 @@ CLASS;
                 $urlParams[$paramName] = 'string';
             }
         }
-        $urlParams = '    public $urlParameters = ' . rtrim($this->arrayToString($urlParams, 1), " ,\n") . ";\n";
+        $urlParams = $this->buildParamsList($urlParams);
         // url query params
         if (!in_array($httpMethod, ['GET', 'POST'], true)) {
             $urlQueryParams['_method'] = $httpMethod;
         }
-        [$urlQueryParams, $validationErrors] = $this->askParamsFor('URL Query', $urlQueryParams);
-        $urlQueryParams = '    public $urlQueryParameters = ' . rtrim($this->arrayToString($urlQueryParams, 1), " ,\n") . ";\n";
+        [$urlQueryParams, $validationErrors] = $this->askParamsFor(
+            'URL Query',
+            $urlQueryParams
+        );
+        $urlQueryParams = $this->buildParamsList($urlQueryParams);
         // post params
         if (in_array($httpMethod, ['POST', 'PUT'], true)) {
             [$postParams, $validationErrors] = $this->askParamsFor('POST');
-            $postParams = '    public $postParameters = ' . rtrim($this->arrayToString($postParams, 1), " ,\n") . ";\n";
+            $postParams = $this->buildParamsList($postParams);
         }
-        $validationErrors = '    protected $validationErrors = ' . rtrim($this->arrayToString($validationErrors, 1), " ,\n") . ";\n";
+        $validationErrors = $this->buildParamsList($validationErrors);
         return [$urlParams, $urlQueryParams, $postParams, $validationErrors];
     }
-    
-    protected function askParamsFor(string $type, array $predefinedParams = []): array
-    {
+
+    protected function askParamsFor(
+        string $type,
+        array $predefinedParams = []
+    ): array {
         $validationErrors = [];
         $params = $predefinedParams;
         if ($this->confirm("Do you want to provide $type parameters?", true)) {
-            $this->line('Format: "param_name:comment" (ex: "id:integer, required") or "parent.key:comment" to nest params');
+            $this->line(
+                'Format: "param_name:comment" (ex: "id:integer, required")'
+                . ' or "parent.key:comment" to nest params'
+            );
             if (!empty($predefinedParams)) {
-                $this->line('Predefined parameters: ' . $this->arrayToString($predefinedParams, 0));
+                $this->line(
+                    'Predefined parameters: ' . $this->arrayToString($predefinedParams, 0)
+                );
             }
             do {
                 $param = $this->ask("Input $type parameter or press Enter to stop");
@@ -184,5 +166,26 @@ CLASS;
             } while (true);
         }
         return [$params, $validationErrors];
+    }
+
+    protected function buildParamsList(
+        array $assocArray,
+        string $padding = ''
+    ): array {
+        $ret = [];
+        $nextPadding = $padding . '    ';
+        foreach ($assocArray as $key => $value) {
+            if (is_array($value)) {
+                $ret[] = "$padding'$key' => [";
+                $ret = array_merge(
+                    $ret,
+                    $this->buildParamsList($value, $nextPadding)
+                );
+                $ret[] = "$padding],";
+            } else {
+                $ret[] = "$padding'$key' => '$value',";
+            }
+        }
+        return $ret;
     }
 }

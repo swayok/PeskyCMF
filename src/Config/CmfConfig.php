@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace PeskyCMF\Config;
 
 use Illuminate\Auth\SessionGuard;
-use Illuminate\Config\Repository as ConfigRepository;
+use Illuminate\Config\Repository as ConfigsRepository;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\StatefulGuard;
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Events\LocaleUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -19,7 +19,6 @@ use Illuminate\View\View;
 use PeskyCMF\ApiDocs\CmfApiDocumentationModule;
 use PeskyCMF\Auth\CmfAccessPolicy;
 use PeskyCMF\Auth\CmfAuthModule;
-use PeskyCMF\CmfManager;
 use PeskyCMF\CmfUrl;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey;
@@ -75,9 +74,9 @@ class CmfConfig
         $this->app = $app;
     }
 
-    public function getLaravelConfigs(): ConfigRepository
+    public function getLaravelConfigs(): ConfigsRepository
     {
-        return $this->app->make(ConfigRepository::class);
+        return $this->app->make(ConfigsRepository::class);
     }
 
     public function getViewsFactory(): ViewsFactory
@@ -903,13 +902,13 @@ class CmfConfig
 
     public function extendLaravelAppConfigs(Application $app): void
     {
-        /** @var ConfigRepository $appConfigs */
+        /** @var ConfigsRepository $appConfigs */
         $appConfigs = $app->make('config');
         // add auth guard but do not select it as primary
         $this->addAuthGuardConfigToAppConfigs($appConfigs);
     }
 
-    protected function addAuthGuardConfigToAppConfigs(ConfigRepository $appConfigs): void
+    protected function addAuthGuardConfigToAppConfigs(ConfigsRepository $appConfigs): void
     {
         // merge cmf guard and provider with configs in config/auth.php
         $cmfAuthConfig = $this->config('auth.guard');

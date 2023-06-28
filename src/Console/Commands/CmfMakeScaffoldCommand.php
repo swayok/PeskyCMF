@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Console\Commands;
 
+use Illuminate\Config\Repository as ConfigsRepository;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
-use PeskyORM\ORM\Column;
-use PeskyORM\ORM\TableInterface;
-use PeskyORMLaravel\Db\OrmClassesCreationUtils;
+use PeskyORM\ORM\ClassBuilder\ClassBuilder;
+use PeskyORM\ORM\Table\TableInterface;
+use PeskyORM\ORM\TableStructure\TableColumn\TableColumnDataType;
+use PeskyORM\Utils\StringUtils;
 use Swayok\Utils\File;
-use Swayok\Utils\StringUtils;
 
 class CmfMakeScaffoldCommand extends CmfCommand
 {
-
     protected $signature = 'cmf:make-scaffold
         {table_name}
-        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\') and accessiblr by CmfManager}
+        {cmf-section? : cmf section name (key) that exists in config(\'peskycmf.cmf_configs\')}
         {--resource= : name of resource if it differs from table_name}
         {--cmf-config-class= : full class name to a class that extends CmfConfig}
         {--class-name= : short scaffold class name}
@@ -59,9 +59,9 @@ class CmfMakeScaffoldCommand extends CmfCommand
 
 Translations:
     '{$table->getTableStructure()->getTableName()}' => [
-        'menu_title' => '',
+        'menu_title' => ,
         'datagrid' => [
-            'header' => '',
+            'header' => ,
             'column' => [
                 $columnsTranslations
             ],
@@ -72,14 +72,14 @@ Translations:
             ],
         ],
         'form' => [
-            'header_create' => '',
-            'header_edit' => '',
+            'header_create' => ,
+            'header_edit' => ,
             'input' => [
                 $columnsTranslations
             ],
         ],
         'item_details' => [
-            'header' => '',
+            'header' => ,
             'field' => [
                 $columnsTranslations
             ],
@@ -94,10 +94,11 @@ INFO
     protected function getScaffoldConfigParentClass(): string
     {
         if ($this->option('keyvalue')) {
-            return $this->getCmfConfig()->config('ui.scaffold_configs_base_class_for_key_value_tables') ?: KeyValueTableScaffoldConfig::class;
-        } else {
-            return $this->getCmfConfig()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
+            return $this->getCmfConfig()->config(
+                'ui.scaffold_configs_base_class_for_key_value_tables'
+            ) ?: KeyValueTableScaffoldConfig::class;
         }
+        return $this->getCmfConfig()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
     }
 
     /**
@@ -107,14 +108,27 @@ INFO
     {
         $scaffoldClassName = $this->option('class-name');
         if (empty($scaffoldClassName)) {
-            return StringUtils::classify($resourceName ?: $table::getName()) . 'ScaffoldConfig';
+            return StringUtils::toPascalCase($resourceName ?: $table->getTableName()) . 'ScaffoldConfig';
         }
         return $scaffoldClassName;
     }
 
     protected function getTableInstanceByTableName(string $tableName): TableInterface
     {
-        return OrmClassesCreationUtils::getTableInstanceByTableNameInDb($tableName);
+        /** @var ClassBuilder $tableClass */
+        $dbClassBuilder = $this->getConfigsRepository()->get(
+            'peskyorm.class_builder',
+            ClassBuilder::class
+        );
+        $namespace = $this->getConfigsRepository()->get(
+            'peskyorm.classes_namespace',
+            'App\\Db'
+        );
+        /** @var TableInterface $tableClass */
+        $tableClass = trim($namespace, ' \\')
+            . '\\' . StringUtils::toPascalCase($tableName)
+            . '\\' . $dbClassBuilder::makeClassName($tableName, $dbClassBuilder::TEMPLATE_TABLE);
+        return $tableClass::getInstance();
     }
 
     protected function getScaffoldsNamespace(): string
@@ -132,18 +146,17 @@ INFO
     protected function getFolder(): string
     {
         $appSubfolder = str_replace('/', '\\', $this->getCmfConfig()->appSubfolder());
-        return $this->getBasePathToApp() . DIRECTORY_SEPARATOR
+        return $this->app->path() . DIRECTORY_SEPARATOR
             . $appSubfolder . DIRECTORY_SEPARATOR
             . $this->getScaffoldsFolderName() . DIRECTORY_SEPARATOR;
     }
 
-    protected function getBasePathToApp(): string
-    {
-        return app_path();
-    }
-
-    protected function createScaffoldClassFile(TableInterface $table, string $namespace, string $className, string $filePath): void
-    {
+    protected function createScaffoldClassFile(
+        TableInterface $table,
+        string $namespace,
+        string $className,
+        string $filePath
+    ): void {
         $parentClass = $this->getScaffoldConfigParentClass();
         $parentClassShort = class_basename($parentClass);
         $tableClass = get_class($table);
@@ -251,14 +264,7 @@ VIEW;
     {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
-//            if ($column->isItAForeignKey()) {
-//                $valueViewers[] = <<<VIEW
-//'{$column->getName()}' => DataGridColumn::create()
-//                    ->setType(DataGridColumn::TYPE_LINK),
-//VIEW;
-//            } else if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)){
             $valueViewers[] = "'{$column->getName()}',";
-//            }
         }
         return implode("\n                ", $valueViewers);
     }
@@ -267,7 +273,17 @@ VIEW;
     {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
-            if (!in_array($column->getType(), [Column::TYPE_TEXT, Column::TYPE_JSON, Column::TYPE_JSONB, Column::TYPE_BLOB], true)) {
+            if (
+                !in_array(
+                    $column->getDataType(),
+                    [
+                        TableColumnDataType::TEXT,
+                        TableColumnDataType::JSON,
+                        TableColumnDataType::BLOB,
+                    ],
+                    true
+                )
+            ) {
                 $valueViewers[] = "'{$column->getName()}',";
             }
         }
@@ -278,14 +294,7 @@ VIEW;
     {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
-//            if ($column->isItAForeignKey()) {
-//                $valueViewers[] = <<<VIEW
-//'{$column->getName()}' => ValueCell::create()
-//                    ->setType(ValueCell::TYPE_LINK),
-//VIEW;
-//            } else {
             $valueViewers[] = "'{$column->getName()}',";
-//            }
         }
         return implode("\n                ", $valueViewers);
     }
@@ -294,7 +303,11 @@ VIEW;
     {
         $valueViewers = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
-            if ($column->isValueCanBeSetOrChanged() && !$column->isAutoUpdatingValue() && !$column->isItPrimaryKey()) {
+            if (
+                $column->isReadonly()
+                && !$column->isAutoUpdatingValues()
+                && !$column->isPrimaryKey()
+            ) {
                 if ($column->getName() === 'admin_id') {
                     $valueViewers[] = <<<VIEW
 '{$column->getName()}' => FormInput::create()
@@ -310,5 +323,4 @@ VIEW;
         }
         return implode("\n                ", $valueViewers);
     }
-
 }

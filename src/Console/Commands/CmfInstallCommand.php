@@ -23,19 +23,18 @@ class CmfInstallCommand extends CmfCommand
     public function handle(): int
     {
         $appSubfolder = ucfirst(trim(trim($this->input->getArgument('app_subfolder')), '/\\'));
-        $baseFolderPath = app_path($appSubfolder);
+        $baseFolderPath = $this->app->path($appSubfolder);
         if (Folder::exist($baseFolderPath)) {
             $this->line('Terminated. Folder [' . $baseFolderPath . '] already exist');
             return 1;
         }
-        $viewsPath = __DIR__ . '/../../resources/views/install/';
         $dataForViews = [
             'sectionName' => $appSubfolder,
             'urlPrefix' => trim(trim($this->input->getArgument('url_prefix'), '/\\')),
             'dbClassesAppSubfolder' => $this->input->getArgument('database_classes_app_subfolder'),
             'cmfConfigClassName' => $appSubfolder . 'Config',
         ];
-        $this->createPagesController($baseFolderPath, $viewsPath, $dataForViews);
+        $this->createPagesController($baseFolderPath, $dataForViews);
         $publicFiles = $this->createJsCssLessFiles($dataForViews);
         $this->cleanLaravelOrmClassesAndMigrations();
         $this->createAppSettingsClass();
@@ -48,7 +47,6 @@ class CmfInstallCommand extends CmfCommand
         );
         $this->createCmfConfigClassForCmfSection(
             $appSubfolder,
-            $viewsPath,
             $baseFolderPath,
             $dataForViews,
             $cmfSectionConfigFileNameWithoutExtension
@@ -94,15 +92,15 @@ class CmfInstallCommand extends CmfCommand
 
     protected function getAppSettignsClassContents(): string
     {
-        return File::contents(
-            __DIR__ . '/../../resources/views/install/cmf_app_settings.stub'
-        );
+        return $this->getStubFileContents('cmf_app_settings');
     }
 
-    protected function createPagesController(string $baseFolderPath, string $viewsPath, array $dataForViews): void
-    {
+    protected function createPagesController(
+        string $baseFolderPath,
+        array $dataForViews
+    ): void {
         File::load($baseFolderPath . '/Http/Controllers/PagesController.php', true, 0755, 0644)
-            ->write(View::file($viewsPath . 'pages_controller.blade.php', $dataForViews)->render());
+            ->write($this->renderStubView('pages_controller', $dataForViews));
     }
 
     protected function createJsCssLessFiles(array $dataForViews): array
@@ -115,19 +113,17 @@ class CmfInstallCommand extends CmfCommand
         ];
         $createdFilesByType = [];
         foreach ($publicFilesContents as $type => $contents) {
-            $relativePath = $relativePathToPublicFiles . $type . '/' . $dataForViews['urlPrefix'] . '.custom.' . $type;
-            File::save(public_path($relativePath), $contents, 0664, 0755);
+            $relativePath = $relativePathToPublicFiles . $type
+                . '/' . $dataForViews['urlPrefix'] . '.custom.' . $type;
+            File::save($this->app->publicPath($relativePath), $contents, 0664, 0755);
             $createdFilesByType[$type] = $relativePath;
         }
         return $createdFilesByType;
     }
 
-    /** @noinspection JSUnusedLocalSymbols */
     protected function getCustomJsFileContents(): string
     {
-        return File::contents(
-            __DIR__ . '/../../resources/views/install/cmf_admin_custom_js.stub'
-        );
+        return $this->getStubFileContents('cmf_admin_custom_js');
     }
 
     protected function createMigrations(): void
@@ -144,7 +140,7 @@ class CmfInstallCommand extends CmfCommand
 
     protected function getMigrationsPath(): string
     {
-        return database_path('migrations') . DIRECTORY_SEPARATOR;
+        return $this->app->databasePath('migrations') . DIRECTORY_SEPARATOR;
     }
 
     protected function cleanLaravelOrmClassesAndMigrations(): void
@@ -153,12 +149,12 @@ class CmfInstallCommand extends CmfCommand
         // remove laravel's migrations
         File::remove($migrationsPath . '2014_10_12_000000_create_users_table.php');
         File::remove($migrationsPath . '2014_10_12_100000_create_password_resets_table.php');
-        File::remove(app_path('User.php'));
+        File::remove($this->app->path('User.php'));
     }
 
     protected function createAppSettingsClass(): void
     {
-        $appSettingsPath = app_path('AppSettings.php');
+        $appSettingsPath = $this->app->path('AppSettings.php');
         if (!File::exist($appSettingsPath)) {
             File::save($appSettingsPath, $this->getAppSettignsClassContents());
             $this->line($appSettingsPath . ' created');
@@ -169,7 +165,7 @@ class CmfInstallCommand extends CmfCommand
 
     protected function createPeskyOrmConfigFile(): string
     {
-        $peskyOrmConfigFilePath = config_path('peskyorm.php');
+        $peskyOrmConfigFilePath = $this->app->configPath('peskyorm.php');
         $writeOrmConfigFile = (
             !File::exist($peskyOrmConfigFilePath)
             || $this->confirm('PeskyORM config file ' . $peskyOrmConfigFilePath . ' already exist. Overwrite?')
@@ -183,7 +179,7 @@ class CmfInstallCommand extends CmfCommand
 
     protected function createPeskyCmfConfigFile(string $appSubfolder, array $dataForViews): void
     {
-        $generalCmfConfigFilePath = config_path('peskycmf.php');
+        $generalCmfConfigFilePath = $this->app->configPath('peskycmf.php');
         if (!File::exist($generalCmfConfigFilePath)) {
             $configContents = File::contents(__DIR__ . '/../../Config/peskycmf.config.php');
             $replacements = [
@@ -222,10 +218,14 @@ class CmfInstallCommand extends CmfCommand
         array $publicFiles
     ): string {
         $cmfSectionConfigFileNameWithoutExtension = Str::snake($appSubfolder);
-        $cmfSectionConfigFilePath = config_path($cmfSectionConfigFileNameWithoutExtension . '.php');
+        $cmfSectionConfigFilePath = $this->app->configPath(
+            $cmfSectionConfigFileNameWithoutExtension . '.php'
+        );
         $writeCmfSectionConfigFile = (
             !File::exist($cmfSectionConfigFilePath)
-            || $this->confirm('CMF section config file ' . $cmfSectionConfigFilePath . ' already exist. Overwrite?')
+            || $this->confirm(
+                'CMF section config file ' . $cmfSectionConfigFilePath . ' already exist. Overwrite?'
+            )
         );
         if (
             !$writeCmfSectionConfigFile
@@ -235,7 +235,9 @@ class CmfInstallCommand extends CmfCommand
             if (trim($customConfigFileName) !== '') {
                 $cmfSectionConfigFileNameWithoutExtension = $customConfigFileName;
                 $writeCmfSectionConfigFile = true;
-                $cmfSectionConfigFilePath = config_path($cmfSectionConfigFileNameWithoutExtension . '.php');
+                $cmfSectionConfigFilePath = $this->app->configPath(
+                    $cmfSectionConfigFileNameWithoutExtension . '.php'
+                );
             }
         }
         $updateKeysInConfigs = null;
@@ -290,7 +292,6 @@ class CmfInstallCommand extends CmfCommand
 
     protected function createCmfConfigClassForCmfSection(
         string $appSubfolder,
-        string $viewsPath,
         string $baseFolderPath,
         array $dataForViews,
         string $cmfSectionConfigFileNameWithoutExtension
@@ -303,19 +304,19 @@ class CmfInstallCommand extends CmfCommand
         if ($writeCmfSectionConfigFile) {
             $dataForViews['configsFileName'] = $cmfSectionConfigFileNameWithoutExtension;
             File::load($cmfConfigFilePath, true, 0755, 0644)
-                ->write(View::file($viewsPath . 'cmf_config.blade.php', $dataForViews)->render());
+                ->write($this->renderStubView('cmf_config', $dataForViews));
             $this->line($cmfConfigFilePath . ' created');
         }
         // create routes file
         $routesFileRelativePath = $this->getRoutesFileRelativePath($appSubfolder);
-        $routesFilePath = base_path($routesFileRelativePath);
+        $routesFilePath = $this->app->basePath($routesFileRelativePath);
         $writeRoutesFile = (
             !File::exist($routesFilePath)
             || $this->confirm('Routes file ' . $routesFilePath . ' already exist. Overwrite?')
         );
         if ($writeRoutesFile) {
             File::load($routesFilePath, true, 0755, 0644)
-                ->write(View::file($viewsPath . 'cmf_routes.blade.php', $dataForViews)->render());
+                ->write($this->renderStubView('cmf_routes', $dataForViews));
             $this->line($routesFilePath . ' created');
         }
     }

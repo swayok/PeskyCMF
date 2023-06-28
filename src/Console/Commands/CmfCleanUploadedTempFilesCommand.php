@@ -10,11 +10,10 @@ use Swayok\Utils\Folder;
 
 class CmfCleanUploadedTempFilesCommand extends Command
 {
-    
     protected $description = 'Clean old uploaded temp files';
-    
+
     protected $signature = 'cmf:clean-uploaded-temp-files';
-    
+
     public function handle(): int
     {
         $this->line('> Deleting old uploaded temp files');

@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace :namespace;
+
+use :base_class;
+
+class :class_name extends :base_class_name
+{
+    protected $translationsBasePath = ':translation_group';
+
+    //protected $title = '{:translation_group.title}';
+    //protected $description = '{:translation_group.description}';
+}

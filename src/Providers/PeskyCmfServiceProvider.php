@@ -139,61 +139,61 @@ class PeskyCmfServiceProvider extends ServiceProvider
 
     protected function registerInstallCommand(): void
     {
-        $this->app->singleton('command.cmf.install', function () {
-            return new CmfInstallCommand();
+        $this->app->singleton('command.cmf.install', function (Application $app) {
+            return new CmfInstallCommand($app);
         });
         $this->commands('command.cmf.install');
     }
 
     protected function registerAddSectionCommand(): void
     {
-        $this->app->singleton('command.cmf.add-section', function () {
-            return new CmfAddSectionCommand();
+        $this->app->singleton('command.cmf.add-section', function (Application $app) {
+            return new CmfAddSectionCommand($app);
         });
         $this->commands('command.cmf.add-section');
     }
 
     protected function registerAddAdminCommand(): void
     {
-        $this->app->singleton('command.cmf.add-admin', function () {
-            return new CmfAddAdminCommand();
+        $this->app->singleton('command.cmf.add-admin', function (Application $app) {
+            return new CmfAddAdminCommand($app);
         });
         $this->commands('command.cmf.add-admin');
     }
 
     protected function registerMakeScaffoldCommand(): void
     {
-        $this->app->singleton('command.cmf.make-scaffold', function () {
-            return new CmfMakeScaffoldCommand();
+        $this->app->singleton('command.cmf.make-scaffold', function (Application $app) {
+            return new CmfMakeScaffoldCommand($app);
         });
         $this->commands('command.cmf.make-scaffold');
     }
 
     protected function registerInstallHttpRequestsLoggingCommand(): void
     {
-        $this->app->singleton('command.cmf.install-http-requests-logging', function () {
-            return new CmfInstallHttpRequestsLoggingCommand();
+        $this->app->singleton('command.cmf.install-http-requests-logging', function (Application $app) {
+            return new CmfInstallHttpRequestsLoggingCommand($app);
         });
         $this->commands('command.cmf.install-http-requests-logging');
     }
 
     protected function registerInstallHttpRequestsProfilingCommand(): void
     {
-        $this->app->singleton('command.cmf.install-http-requests-profiling', function () {
-            return new CmfInstallHttpRequestsProfilingCommand();
+        $this->app->singleton('command.cmf.install-http-requests-profiling', function (Application $app) {
+            return new CmfInstallHttpRequestsProfilingCommand($app);
         });
         $this->commands('command.cmf.install-http-requests-profiling');
     }
 
     protected function registerMakeApiDocsCommands(): void
     {
-        $this->app->singleton('command.cmf.make-api-docs', function () {
-            return new CmfMakeApiDocCommand();
+        $this->app->singleton('command.cmf.make-api-docs', function (Application $app) {
+            return new CmfMakeApiDocCommand($app);
         });
         $this->commands('command.cmf.make-api-docs');
 
-        $this->app->singleton('command.cmf.make-api-method-docs', function () {
-            return new CmfMakeApiMethodDocCommand();
+        $this->app->singleton('command.cmf.make-api-method-docs', function (Application $app) {
+            return new CmfMakeApiMethodDocCommand($app);
         });
         $this->commands('command.cmf.make-api-method-docs');
     }

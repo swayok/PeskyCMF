@@ -1,0 +1,71 @@
+<?php
+
+declare(strict_types=1);
+
+namespace :namespace;
+
+use :base_class;
+use PeskyCMF\ApiDocs\ApiMethodErrorResponseInfo;
+
+class :class_name extends :base_class_name
+{
+    //protected static $position = 10;
+
+    protected $translationsBasePath = ':translation_group';
+
+    //protected $title = '{:translation_group.title}';
+    //protected $titleForPostman = '{:translation_group.title_for_postman}';
+    //protected $description = '{:translation_group.description}';
+
+    protected $url = ':url';
+    public $httpMethod = ':http_method';
+
+    public $postParameters = [
+        //'key' => 'value or data type',
+        //'_method' => 'PUT',
+        :post_params
+    ];
+
+    public $urlParams = [
+        //'key' => 'data type',
+        :url_params
+    ];
+
+    public $urlQueryParams = [
+        //'key' => 'value or data type',
+        //'_method' => 'PUT',
+        :url_query_params
+    ];
+
+    public $validationErrors = [
+        //'key' => 'validators list or explatanion',
+        //'name' => 'required|string',
+        :validation_errors
+    ];
+
+    public $onSuccess = [
+        //'key' => 'type',
+
+    ];
+
+    /**
+     * @return array|ApiMethodErrorResponseInfo[]
+     */
+    protected function getPossibleErrors() {
+        /* Example:
+            ApiMethodErrorResponseInfo::create()
+                ->setTitle(
+                    $this->translatePath(':translation_group.error.item_not_found.title'
+                )
+                ->setDescription(
+                    $this->translatePath(':translation_group.error.item_not_found.description')
+                )
+                ->setHttpCode(HttpCode::NOT_FOUND)
+                ->setResponse([
+                    'message' => 'Record not found in DB.'
+                ]),
+        */
+        return [];
+    }
+
+}
