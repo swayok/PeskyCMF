@@ -5,129 +5,107 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Db\HttpRequestLogs;
 
+use PeskyORM\DbExpr;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\CreatedAtColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\DateColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\IdColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\IntegerColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\IpV4AddressColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\JsonObjectColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\StringColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\TextColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\TimestampColumn;
 use PeskyORM\ORM\TableStructure\TableStructure;
 
 class CmfHttpRequestLogsTableStructure extends TableStructure
 {
-    use IdColumn;
-
     public function getTableName(): string
     {
         return 'http_request_logs';
     }
 
-    private function requester_table(): Column
-    {
-        return Column::create(Column::TYPE_STRING);
-    }
-
-    private function requester_id(): Column
-    {
-        return Column::create(Column::TYPE_INT);
-    }
-
-    private function requester_info(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->trimsValue();
-    }
-
-    private function url(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues();
-    }
-
-    private function http_method(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues();
-    }
-
-    private function ip(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues();
-    }
-
-    private function filter(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues();
-    }
-
-    private function section(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues();
-    }
-
-    private function response_code(): Column
-    {
-        return Column::create(Column::TYPE_INT);
-    }
-
-    private function response_type(): Column
-    {
-        return Column::create(Column::TYPE_STRING);
-    }
-
-    private function request(): Column
-    {
-        return Column::create(Column::TYPE_JSON)
-            ->disallowsNullValues()
-            ->convertsEmptyStringToNull()
-            ->setDefaultValue('{}');
-    }
-
-    private function response(): Column
-    {
-        return Column::create(Column::TYPE_TEXT);
-    }
-
-    private function debug(): Column
-    {
-        return Column::create(Column::TYPE_TEXT);
-    }
-
-    private function table(): Column
-    {
-        return Column::create(Column::TYPE_STRING);
-    }
-
-    private function item_id(): Column
-    {
-        return Column::create(Column::TYPE_INT);
-    }
-
-    private function data_before(): Column
-    {
-        return Column::create(Column::TYPE_JSON);
-    }
-
-    private function data_after(): Column
-    {
-        return Column::create(Column::TYPE_JSON);
-    }
-
-    private function created_at(): Column
-    {
-        return Column::create(Column::TYPE_TIMESTAMP_WITH_TZ)
-            ->valueCannotBeSetOrChanged();
-    }
-
-    private function responded_at(): Column
-    {
-        return Column::create(Column::TYPE_TIMESTAMP_WITH_TZ);
-    }
-
     protected function registerColumns(): void
     {
-        // TODO: Implement registerColumns() method.
+        $this->addColumn(new IdColumn());
+        $this->addColumn(
+            (new StringColumn('requester_table'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new IntegerColumn('requester_id'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new StringColumn('requester_info'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new StringColumn('url'))
+        );
+        $this->addColumn(
+            (new StringColumn('http_method'))
+        );
+        $this->addColumn(
+            (new IpV4AddressColumn('ip'))
+        );
+        $this->addColumn(
+            (new StringColumn('filter'))
+        );
+        $this->addColumn(
+            (new StringColumn('section'))
+        );
+        $this->addColumn(
+            (new IntegerColumn('response_code'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new StringColumn('response_type'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new JsonObjectColumn('request'))
+                ->setDefaultValue('{}')
+        );
+        $this->addColumn(
+            (new TextColumn('response'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new TextColumn('debug'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new StringColumn('table'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new IntegerColumn('item_id'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new JsonObjectColumn('data_before'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new JsonObjectColumn('data_after'))
+                ->allowsNullValues()
+        );
+        $this->addColumn(
+            (new DateColumn('creation_date'))
+                ->setDefaultValue(new DbExpr('NOW()::date'))
+        );
+        $this->addColumn(
+            (new CreatedAtColumn())
+                ->withTimezone()
+        );
+        $this->addColumn(
+            (new TimestampColumn('responded_at'))
+                ->withTimezone()
+                ->allowsNullValues()
+        );
     }
 
     protected function registerRelations(): void
     {
-        // TODO: Implement registerRelations() method.
     }
 }

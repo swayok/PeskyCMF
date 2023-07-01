@@ -47,7 +47,7 @@ class CmfMakeScaffoldCommand extends CmfCommand
 
         $dataForView = [
             'tableName' => $table->getTableStructure()->getTableName(),
-            'columns' => array_keys($table->getTableStructure()->getColumns())
+            'columns' => array_keys($table->getTableStructure()->getColumns()),
         ];
         $this->comment(
             "\n\nTranslations:\n"
@@ -63,14 +63,17 @@ class CmfMakeScaffoldCommand extends CmfCommand
                 'ui.scaffold_configs_base_class_for_key_value_tables'
             ) ?: KeyValueTableScaffoldConfig::class;
         }
-        return $this->getCmfConfig()->config('ui.scaffold_configs_base_class') ?: NormalTableScaffoldConfig::class;
+        return $this->getCmfConfig()->config('ui.scaffold_configs_base_class')
+            ?: NormalTableScaffoldConfig::class;
     }
 
     /**
      * @return string - short name of scaffold class to be created
      */
-    protected function getScaffoldClassName(TableInterface $table, ?string $resourceName = null): string
-    {
+    protected function getScaffoldClassName(
+        TableInterface $table,
+        ?string $resourceName = null
+    ): string {
         $scaffoldClassName = $this->option('class-name');
         if (empty($scaffoldClassName)) {
             return StringUtils::toPascalCase($resourceName ?: $table->getTableName()) . 'ScaffoldConfig';

@@ -101,8 +101,9 @@ abstract class PeskyCmfAppSettings
 
     /**
      * Get all validators for specific key.
-     * Override this if you need some specific validation for keys that are not present in scaffold config form and
-     * can only be updated via static::update() method.
+     * Override this if you need some specific validation for keys that are
+     * not present in scaffold config form and can only be updated
+     * via static::update() method.
      */
     protected function getValidatorsForKey(string $key): array
     {
@@ -226,6 +227,7 @@ abstract class PeskyCmfAppSettings
     /**
      * @param string $key Setting name
      * @param array  $arguments [0 => mixed $default, 1 => bool $ignoreEmptyValue]
+     *
      * @return mixed
      */
     public function __call(string $key, array $arguments): mixed
@@ -271,6 +273,7 @@ abstract class PeskyCmfAppSettings
     /**
      * @param array $settings Key-value pairs of settings.
      * @param bool  $validate Run validation on values or not.
+     *
      * @return array Updated settings.
      * @throws \InvalidArgumentException
      */

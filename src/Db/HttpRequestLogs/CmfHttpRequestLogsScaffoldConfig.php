@@ -16,27 +16,33 @@ use Swayok\Html\Tag;
 
 class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
 {
-    
     protected bool $isDetailsViewerAllowed = true;
     protected bool $isCreateAllowed = false;
     protected bool $isEditAllowed = false;
     protected bool $isDeleteAllowed = false;
-    
+
     public static function getTable(): CmfHttpRequestLogsTable
     {
         return CmfHttpRequestLogsTable::getInstance();
     }
-    
+
     public static function getIconForMenuItem(): ?string
     {
         return 'fa fa-exchange';
     }
-    
+
     protected function createDataGridConfig(): DataGridConfig
     {
         return parent::createDataGridConfig()
             ->setOrderBy('id', 'desc')
-            ->setInvisibleColumns('table', 'http_method', 'response_type', 'requester_table', 'requester_info')
+            ->setInvisibleColumns(
+                'table',
+                'http_method',
+                'response_type',
+                'requester_table',
+                'requester_info',
+                'creation_date'
+            )
             ->setColumns([
                 'id',
                 'url' => DataGridColumn::create()
@@ -61,12 +67,12 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
                     }),
             ]);
     }
-    
+
     protected function createDataGridFilterConfig(): FilterConfig
     {
         return parent::createDataGridFilterConfig()
             ->setFilters([
-                'created_at',
+                'creation_date',
                 'id',
                 'url',
                 'http_method',
@@ -81,9 +87,9 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
                 'requester_id',
                 'requester_info',
             ])
-            ->addDefaultCondition('created_at', ColumnFilter::OPERATOR_EQUAL, date('Y-m-d'));
+            ->addDefaultCondition('creation_date', ColumnFilter::OPERATOR_EQUAL, date('Y-m-d'));
     }
-    
+
     protected function createItemDetailsConfig(): ItemDetailsConfig
     {
         return parent::createItemDetailsConfig()
@@ -113,20 +119,33 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
                     }),
                 'request',
                 'response' => ValueCell::create()
-                    ->setValueConverter(function ($value, $columnConfig, array $record, ValueCell $valueViewer) {
+                    ->setValueConverter(function (
+                        $value,
+                        $columnConfig,
+                        array $record,
+                        ValueCell $valueViewer
+                    ) {
                         if (!empty($value) && $value[0] === '{') {
-                            $json = json_decode($value, true);
+                            $json = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
                             if (is_array($json)) {
-                                return $valueViewer->doDefaultValueConversionByType($json, $valueViewer::TYPE_JSON, $record);
+                                return $valueViewer->doDefaultValueConversionByType(
+                                    $json,
+                                    $valueViewer::TYPE_JSON,
+                                    $record
+                                );
                             }
                         }
-                        return $valueViewer->doDefaultValueConversionByType(htmlentities($value), $valueViewer::TYPE_MULTILINE, $record);
+                        return $valueViewer->doDefaultValueConversionByType(
+                            htmlentities($value),
+                            $valueViewer::TYPE_MULTILINE,
+                            $record
+                        );
                     }),
                 'debug' => ValueCell::create()
                     ->setType(ValueCell::TYPE_MULTILINE),
             ]);
     }
-    
+
     protected function getLinkToItem(array $record): string
     {
         if (!empty($record['table'])) {
@@ -134,11 +153,21 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
                 try {
                     $this->cmfConfig->getScaffoldConfigClass($record['table']);
                     if (!empty($record['item_id'])) {
-                        $url = CmfUrl::toItemDetails($record['table'], $record['item_id'], false, $this->cmfConfig);
+                        $url = CmfUrl::toItemDetails(
+                            $record['table'],
+                            $record['item_id'],
+                            false,
+                            $this->cmfConfig
+                        );
                     } else {
-                        $url = CmfUrl::toItemsTable($record['table'], [], false, $this->cmfConfig);
+                        $url = CmfUrl::toItemsTable(
+                            $record['table'],
+                            [],
+                            false,
+                            $this->cmfConfig
+                        );
                     }
-                    
+
                     return Tag::a(rtrim($record['table'] . ' -> ' . $record['item_id'], '-> '))
                         ->setHref($url)
                         ->setTarget('_blank')
@@ -150,7 +179,7 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
         }
         return '';
     }
-    
+
     protected function getLinkToRequester(array $record)
     {
         if (!empty($record['requester_table'])) {
@@ -161,11 +190,21 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
             try {
                 $this->cmfConfig->getScaffoldConfigClass($record['requester_table']);
                 if (!empty($record['requester_id'])) {
-                    $url = CmfUrl::toItemDetails($record['requester_table'], $record['requester_id'], false, $this->cmfConfig);
+                    $url = CmfUrl::toItemDetails(
+                        $record['requester_table'],
+                        $record['requester_id'],
+                        false,
+                        $this->cmfConfig
+                    );
                 } else {
-                    $url = CmfUrl::toItemsTable($record['requester_table'], [], false, $this->cmfConfig);
+                    $url = CmfUrl::toItemsTable(
+                        $record['requester_table'],
+                        [],
+                        false,
+                        $this->cmfConfig
+                    );
                 }
-                
+
                 return Tag::a($label)
                     ->setHref($url)
                     ->setTarget('_blank')
@@ -176,5 +215,4 @@ class CmfHttpRequestLogsScaffoldConfig extends NormalTableScaffoldConfig
         }
         return $record['requester_info'];
     }
-    
 }

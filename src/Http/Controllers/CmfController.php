@@ -13,28 +13,27 @@ use PeskyCMF\Config\CmfConfig;
 use PeskyCMF\Db\Admins\CmfAdmin;
 use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey;
 use PeskyCMF\Traits\DataValidationHelper;
-use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\Record\RecordInterface;
 
 abstract class CmfController extends Controller
 {
-    
     use DataValidationHelper;
     use AuthorizesRequests;
-    
+
     protected CmfConfig $cmfConfig;
     protected Application $app;
-    
+
     public function __construct(CmfConfig $cmfConfig, Application $app)
     {
         $this->cmfConfig = $cmfConfig;
         $this->app = $app;
     }
-    
+
     public function getAuthGuard(): Guard
     {
         return $this->getCmfConfig()->getAuthGuard();
     }
-    
+
     /**
      * @return Authenticatable|CmfAdmin|ResetsPasswordsViaAccessKey|RecordInterface
      * @noinspection PhpDocSignatureInspection
@@ -44,17 +43,18 @@ abstract class CmfController extends Controller
         $user = $this->getCmfConfig()->getUser();
         if (!$user) {
             throw new \BadMethodCallException(
-                'User is not authenticated. Use CmfController::isUserAuthenticated() to check auth status.'
+                'User is not authenticated.'
+                . ' Use CmfController::isUserAuthenticated() to check auth status.'
             );
         }
         return $user;
     }
-    
+
     public function isUserAuthenticated(): bool
     {
         return $this->getCmfConfig()->getUser() !== null;
     }
-    
+
     public function getCmfConfig(): CmfConfig
     {
         return $this->cmfConfig;

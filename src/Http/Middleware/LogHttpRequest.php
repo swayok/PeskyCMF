@@ -13,24 +13,23 @@ use PeskyCMF\Db\HttpRequestLogs\CmfHttpRequestLog;
 use PeskyCMF\Db\HttpRequestLogs\CmfHttpRequestLogsTable;
 use PeskyCMF\HttpCode;
 use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
-use PeskyORM\ORM\RecordInterface;
+use PeskyORM\ORM\Record\RecordInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class LogHttpRequest
 {
-    
     /**
      * list of logs with urls
      * @var CmfHttpRequestLog[]
      */
     private static array $logs = [];
-    
+
     protected Application $app;
     protected LoggerInterface $logger;
     protected AuthFactory $auth;
     protected ExceptionHandler $exceptionHandler;
-    
+
     public function __construct(
         Application $app,
         LoggerInterface $logger,
@@ -42,7 +41,7 @@ class LogHttpRequest
         $this->auth = $auth;
         $this->exceptionHandler = $exceptionHandler;
     }
-    
+
     /**
      * Middleware examples:
      * 1. Use default auth guard and log all requests with any HTTP method:
@@ -50,32 +49,46 @@ class LogHttpRequest
      * 2. Use custom auth guard and log all requests with any HTTP method:
      *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api'
      *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,1'
-     * 3. Use custom auth guard and log only requests with 'log' action in route with any HTTP method:
+     * 3. Use custom auth guard and log only requests with 'log' action
+     *    in route with any HTTP method:
      *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,0'
      * 4. Use custom auth guard and log all requests with custom HTTP methods list:
      *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,1,post,put,delete'
-     * 5. Use custom auth guard and log only requests with 'log' action in route and custom HTTP methods list:
+     * 5. Use custom auth guard and log only requests with 'log' action
+     *    in route and custom HTTP methods list:
      *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':api,0,post,put,delete'
      * 6. Use default auth guard and log all requests with custom HTTP methods list:
      *      \PeskyCMF\Http\Middleware\LogHttpRequest::class . ':,1,post,put,delete'
      *
-     * If you use $enableByDefault = false then to activate logging for a route - add 'log' action to a route.
-     * 'log' must be a string and will be recorded to DB in order to group requests by short name like 'user.me'.
+     * If you use $enableByDefault = false then to activate logging for
+     * a route - add 'log' action to a route.
+     * 'log' must be a string and will be recorded to DB in order to
+     * group requests by short name like 'user.me'.
      * Route example: Route::get('/user/me', ['log' => 'user.me'])
      *
-     * If you use $enableByDefault = true then in order to disable logging you need to set 'log' action to false:
+     * If you use $enableByDefault = true then in order to disable
+     * logging you need to set 'log' action to false:
      * Route example: Route::get('/user/me', ['log' => false])
      *
-     * Note: if there was a server error during any request - it will be forcefully logged ignoring any restrictions.
-     * @param Request $request
-     * @param \Closure $next
+     * Note: if there was a server error during any request - it will be
+     * forcefully logged ignoring any restrictions.
+     *
+     * @param Request     $request
+     * @param \Closure    $next
      * @param string|null $authGuard
-     * @param bool $enableByDefault - true: logs requests even if route has no 'log' action in its description
-     * @param array $methods - list of HTTP methods to log. If empty - log all methods
+     * @param bool        $enableByDefault - true: logs requests even if route has
+     *  no 'log' action in its description
+     * @param array       $methods - list of HTTP methods to log. If empty - log all methods
+     *
      * @return mixed
      */
-    public function handle(Request $request, \Closure $next, ?string $authGuard = null, bool $enableByDefault = true, ...$methods): mixed
-    {
+    public function handle(
+        Request $request,
+        \Closure $next,
+        ?string $authGuard = null,
+        bool $enableByDefault = true,
+        ...$methods
+    ): mixed {
         $route = $request->route();
         $isAllowed = (
             empty($methods)
@@ -90,10 +103,13 @@ class LogHttpRequest
         }
         $logKey = $request->getMethod() . ': ' . $request->fullUrl();
         if (isset(static::$logs[$logKey])) {
-            // request already logged (sitaution when middleware was declared 2 times - in Kernel and in route)
-            // unexpectedly when you use middleware with parameters - each one is called resulting in duplicate logs
+            // request already logged
+            // (situation when middleware was declared 2 times - in Kernel and in route)
+            // unexpectedly when you use middleware with parameters - each
+            // one is called resulting in duplicate logs.
             if ($isAllowed && !static::$logs[$logKey]->hasValue('request')) {
-                // start logging of existing request if it was not logged yet (in previous call it was not allowed)
+                // start logging of existing request if it was not logged yet
+                // (in previous call it was not allowed)
                 $this->logRequest(static::$logs[$logKey], $request, $enableByDefault);
             }
             // stop here because previous instance of this middleware will handle the rest
@@ -124,17 +140,24 @@ class LogHttpRequest
                 $this->exceptionHandler->report($exception);
             }
         } else {
-            $this->logger->error('LogHttpRequest: cannot log this response (not a Symfony response)', ['response' => $response]);
+            $this->logger->error(
+                'LogHttpRequest: cannot log this response (not a Symfony response)',
+                ['response' => $response]
+            );
         }
         return $response;
     }
-    
+
     /**
      * @param CmfHttpRequestLog|ScaffoldLoggerInterface $log
+     *
      * @noinspection PhpDocSignatureInspection
      */
-    protected function logRequest(ScaffoldLoggerInterface $log, $request, bool $enableByDefault): void
-    {
+    protected function logRequest(
+        ScaffoldLoggerInterface $log,
+        Request $request,
+        bool $enableByDefault
+    ): void {
         try {
             $log->fromRequest($request, $enableByDefault);
         } catch (\Throwable $exception) {

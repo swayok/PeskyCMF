@@ -42,7 +42,10 @@ class CmfMakeApiDocCommand extends CmfCommand
         $namespace = '\\App' . rtrim(str_ireplace([$this->app->path(), '/'], ['', '\\'], $folder), '\\ ');
         $folder = Folder::load($folder, true, 0755);
         $filePath = $folder->pwd() . DIRECTORY_SEPARATOR . $className . '.php';
-        if (File::exist($filePath) && !$this->confirm("File $filePath already exists. Overwrite?")) {
+        if (
+            File::exist($filePath)
+            && !$this->confirm("File $filePath already exists. Overwrite?")
+        ) {
             $this->line('Cancelled');
             return 0;
         }

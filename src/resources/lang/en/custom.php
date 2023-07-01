@@ -53,8 +53,13 @@ $dictionary = [
         'button_label' => 'Send instructions',
         'instructions_sent' => 'Password recovery instructions were sent to your E-mail',
         'email_subject' => 'Password recovery instructions',
-        'email_content' => '<p>To set new password, visit your personal <a href=":url" target="_blank">Password recovery page</a></p>
-            <p>This page will be available for an hour</p>',
+        'email_content' => '
+            <p>
+                To set new password, visit your personal
+                <a href=":url" target="_blank">Password recovery page</a>
+            </p>
+            <p>This page will be available for an hour</p>
+        ',
     ],
     'replace_password' => [
         'header' => 'Replace password',
@@ -93,6 +98,7 @@ $dictionary = [
                 'role' => 'Role',
                 'language' => 'Language',
                 'ip' => 'IP',
+                'creation_date' => 'Date',
                 'created_at' => 'Created',
                 'timezone' => 'Timezone',
             ],
@@ -108,6 +114,7 @@ $dictionary = [
                     'role' => 'Role',
                     'language' => 'Language',
                     'ip' => 'IP',
+                    'creation_date' => 'Date',
                     'created_at' => 'Created',
                     'timezone' => 'Timezone',
                 ],
@@ -149,6 +156,7 @@ $dictionary = [
                 'role' => 'Role',
                 'is_superadmin' => 'Has full access (superadmin)?',
                 'parent_id' => 'Administrator who created this account',
+                'creation_date' => 'Date',
                 'created_at' => 'Created',
                 'updated_at' => 'Updated',
                 'timezone' => 'Timezone',
@@ -230,15 +238,15 @@ $dictionary = [
                 'fallback_languages_delete' => 'Delete language replacement',
             ],
             'tooltip' => [
-                'browser_title_addition' => 'Will not be added if pages title provided by "Default page title in browser" setting',
+                'browser_title_addition' => 'Will not be added if pages title provided by "Default page title in browser" setting', // phpcs:ignore
                 'languages' => [
                     'It is required to have at least 1 language configured',
                     'Language code must contain exactly 2 latin letters'
                 ],
                 'fallback_languages' => [
                     'Language codes must contain exactly 2 latin letters',
-                    'This mapping may be used when to provide correct translation language when "Main language" is not preferred',
-                    'For example: "de" (German) as "Main language" is not preferred when "fr" language code is requred. "en" language will fit better here'
+                    'This mapping may be used when to provide correct translation language when "Main language" is not preferred', // phpcs:ignore
+                    'For example: "de" (German) as "Main language" is not preferred when "fr" language code is requred. "en" language will fit better here' // phpcs:ignore
                 ]
             ],
             'tab' => [
@@ -404,19 +412,19 @@ $dictionary = [
                     'part_of_other_page' => 'Part of other page',
                     'page_id_arg_label' => 'Select page',
                     'page_field_arg_label' => 'Select page\'s field',
-                    'page_insert_widget_title_template' => 'Insert field ":page_field.label" from texts ":page_id.label"',
+                    'page_insert_widget_title_template' => 'Insert field ":page_field.label" from texts ":page_id.label"', // phpcs:ignore
                     'text_block' => 'Text block',
                     'text_block_id_arg_label' => 'Select text block',
                     'text_block_insert_widget_title_template' => 'Insert text block ":page_id.label"',
                     'link_to_other_page' => 'Link to page',
-                    'page_link_title_arg_label' => 'Link label (by default: "Short title" field value of selected page)',
+                    'page_link_title_arg_label' => 'Link label (by default: "Short title" field value of selected page)', // phpcs:ignore
                     'insert_link_to_page_widget_title_template' => 'Link to ":page_id.label" (Label: :title)',
                 ],
             ],
             'tooltip' => [
                 'meta_description' => 'Used in cases when Meta-description is not provided by attached texts',
                 'meta_keywords' => 'Used in cases when Meta-keywords is not provided by attached texts',
-                'url_alias' => 'Must start with "/" symbol and may only contain latin letters, digits, "-", "_" and "/"',
+                'url_alias' => 'Must start with "/" symbol and may only contain latin letters, digits, "-", "_" and "/"', // phpcs:ignore
             ],
             'validation' => [
                 'unique_page_url' => 'Page with same URL already <a href=":url" target="_blank">exists</a>'
@@ -750,10 +758,25 @@ $dictionary = [
 ];
 
 /** @noinspection DuplicatedCode */
-$dictionary['cms_news'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_news']);
-$dictionary['cms_shop_categories'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_shop_categories']);
-$dictionary['cms_shop_items'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_shop_items']);
-$dictionary['cms_text_elements'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_text_elements']);
-$dictionary['cms_menus'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_menus']);
+$dictionary['cms_news'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_news']
+);
+$dictionary['cms_shop_categories'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_shop_categories']
+);
+$dictionary['cms_shop_items'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_shop_items']
+);
+$dictionary['cms_text_elements'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_text_elements']
+);
+$dictionary['cms_menus'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_menus']
+);
 
 return $dictionary;

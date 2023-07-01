@@ -1,10 +1,11 @@
 <?php
 
 declare(strict_types=1);
+
 /**
- * @var \PeskyCMF\Db\Admins\CmfAdmin|\PeskyORM\ORM\RecordInterface|\Illuminate\Contracts\Auth\Authenticatable $user
- * @var bool|null                                                                                             $canSubmit
- * @var \PeskyCMF\Auth\CmfAuthModule                                                                          $authModule
+ * @var \PeskyORM\ORM\Record\RecordInterface $user
+ * @var bool|null $canSubmit
+ * @var \PeskyCMF\Auth\CmfAuthModule $authModule
  */
 $cmfConfig = $authModule->getCmfConfig();
 $canSubmit = $canSubmit || $canSubmit === null;
@@ -68,13 +69,13 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                     @if(!$canSubmit) disabled @endif>
                             </div>
                         @endif
-                        @if ($user::hasColumn('email'))
-                            @php($emailRequired = !$user::getColumn('email')->isValueCanBeNull())
+                        @if ($user->hasColumn('email'))
+                            @php($emailRequired = !$user->getTableStructure()->getColumn('email')->isNullableValues())
                             <div class="form-group">
                                 <label for="email-input">{{ $cmfConfig->transCustom('page.profile.input.email') . ($emailRequired ? '*' : '') }}</label>
                                 <input
                                     class="form-control"
-                                    value="{{ $user->email }}"
+                                    value="{{ $user->getValue('email') }}"
                                     name="email"
                                     id="email-input"
                                     type="email"
@@ -102,24 +103,24 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                 autocomplete="new-password"
                                 @if(!$canSubmit) disabled @endif>
                         </div>
-                        @if ($user::hasColumn('name'))
+                        @if ($user->hasColumn('name'))
                             <div class="form-group">
                                 <label for="name-input">{{ $cmfConfig->transCustom('page.profile.input.name') }}</label>
                                 <input
                                     class="form-control"
-                                    value="{{ $user->name }}"
+                                    value="{{ $user->getValue('name') }}"
                                     name="name"
                                     id="name-input"
                                     type="text"
                                     @if(!$canSubmit) disabled @endif>
                             </div>
                         @endif
-                        @if ($user::hasColumn('language'))
+                        @if ($user->hasColumn('language'))
                             <div class="form-group">
                                 <label for="language-input">{{ $cmfConfig->transCustom('page.profile.input.language') }}</label>
                                 <select
                                     class="form-control"
-                                    data-value="{{ $user->language }}"
+                                    data-value="{{ $user->getValue('language') }}"
                                     name="language"
                                     id="language-input"
                                     required="required"
@@ -130,13 +131,13 @@ $canSubmit = $canSubmit || $canSubmit === null;
                                 </select>
                             </div>
                         @endif
-                        @if ($user::hasColumn('timezone'))
+                        @if ($user->hasColumn('timezone'))
                             <div class="form-group">
                                 <label for="timezone-input">{{ $cmfConfig->transCustom('page.profile.input.timezone') }}</label>
-                                @php($isRequired = !$user::getColumn('timezone')->allowsNullValues())
+                                @php($isRequired = !$user->getTableStructure()->getColumn('timezone')->isNullableValues())
                                 <select
                                     class="form-control selectpicker"
-                                    data-value="{{ $user->timezone }}"
+                                    data-value="{{ $user->getValue('timezone') }}"
                                     name="timezone"
                                     id="timezone-input"
                                     @if ($isRequired) required="required"

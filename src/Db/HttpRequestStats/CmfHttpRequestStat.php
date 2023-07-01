@@ -7,7 +7,6 @@ namespace PeskyCMF\Db\HttpRequestStats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use PeskyORM\ORM\Record\Record;
-use PeskyORM\ORM\Table\TableInterface;
 use PeskyORM\Profiling\PdoProfilingHelper;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -106,13 +105,18 @@ class CmfHttpRequestStat extends Record
             ];
             if (count(static::$checkpointsStack) === 0) {
                 if (array_key_exists($key, $checkpoints)) {
-                    throw new \InvalidArgumentException("Checkpoint with key \"$key\" already exists");
+                    throw new \InvalidArgumentException(
+                        "Checkpoint with key \"$key\" already exists"
+                    );
                 }
                 $checkpoints[$key] = $data;
             } else {
-                $path = implode('.checkpoints.', static::$checkpointsStack) . '.checkpoints.' . $key;
+                $path = implode('.checkpoints.', static::$checkpointsStack)
+                    . '.checkpoints.' . $key;
                 if (Arr::has($checkpoints, $path)) {
-                    throw new \InvalidArgumentException("Checkpoint at path \"$path\" already exists");
+                    throw new \InvalidArgumentException(
+                        "Checkpoint at path \"$path\" already exists"
+                    );
                 }
                 Arr::set($checkpoints, $path, $data);
             }
@@ -145,7 +149,8 @@ class CmfHttpRequestStat extends Record
             if (!Arr::has($checkpoints, $path)) {
                 throw new \InvalidArgumentException(
                     'There is no checkpoint at path "' . $path
-                    . '". Use CmfHttpRequestStat::startCheckpoint() before CmfHttpRequestStat::endCheckpoint().'
+                    . '". Use CmfHttpRequestStat::startCheckpoint()'
+                    . ' before CmfHttpRequestStat::endCheckpoint().'
                 );
             }
             $checkpoint = Arr::get($checkpoints, $path);
@@ -231,8 +236,10 @@ class CmfHttpRequestStat extends Record
         return hidePasswords($data);
     }
 
-    public function processResponse(Response $response, ?float $startedAt = null): CmfHttpRequestStat
-    {
+    public function processResponse(
+        Response $response,
+        ?float $startedAt = null
+    ): CmfHttpRequestStat {
         if ($startedAt === null) {
             $startedAt = static::$startedAt;
         }
@@ -274,8 +281,8 @@ class CmfHttpRequestStat extends Record
                 }
             } else {
                 throw new \LogicException(
-                    'All checkpoints must be ended.'
-                    . ' Possibly you have forgotten to call CmfHttpRequestStat::endCheckpoint() somewhere'
+                    'All checkpoints must be ended. Possibly you have forgotten'
+                    . ' to call CmfHttpRequestStat::endCheckpoint() somewhere'
                 );
             }
         }

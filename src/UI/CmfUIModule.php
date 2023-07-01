@@ -22,7 +22,8 @@ class CmfUIModule
     protected string $scaffoldTemplatesForNormalTableViewPath = 'cmf::scaffold.templates';
     protected string $scaffoldTemplatesForKeyValueTableViewPath = 'cmf::scaffold.templates';
 
-    protected string $defaultSidebarLogo = '<img src="/vendor/peskycmf/raw/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
+    protected string $defaultSidebarLogo =
+        '<img src="/vendor/peskycmf/raw/img/peskycmf-logo-white.svg" height="30" alt=" " class="va-t mt10">';
 
     protected array $uiViews = [
         'layout' => 'cmf::layout',
@@ -88,7 +89,7 @@ class CmfUIModule
             ],
             'js' => [
                 'cmf-libs' => "/vendor/peskycmf/{$subFolder}/js/cmf-libs.js",
-                'cmf-jquery-and-bootstrap-plugins' => "/vendor/peskycmf/{$subFolder}/js/cmf-jquery-and-bootstrap-plugins.js",
+                'cmf-jquery-and-bootstrap-plugins' => "/vendor/peskycmf/{$subFolder}/js/cmf-jquery-and-bootstrap-plugins.js", // phpcs:ignore
                 'cmf-core' => "/vendor/peskycmf/{$subFolder}/js/cmf-core.js",
                 'localization' => "/vendor/peskycmf/{$subFolder}/js/locale/{$locale}.js",
                 'app' => '/vendor/peskycmf/raw/js/cmf-app.js',
@@ -243,11 +244,15 @@ class CmfUIModule
      */
     public function getScaffoldConfigClass(string $resourceName): string
     {
-        return Arr::get($this->getResources(), $resourceName, function () use ($resourceName) {
-            throw new \InvalidArgumentException(
-                'Cannot find ScaffoldConfig class for resource "' . $resourceName . '"'
-            );
-        });
+        return Arr::get(
+            $this->getResources(),
+            $resourceName,
+            static function () use ($resourceName) {
+                throw new \InvalidArgumentException(
+                    'Cannot find ScaffoldConfig class for resource "' . $resourceName . '"'
+                );
+            }
+        );
     }
 
     /**
@@ -352,7 +357,8 @@ class CmfUIModule
             $this->menuItemsFromScaffoldConfigs = [];
             /** @var ScaffoldConfig $scaffoldConfigClass */
             foreach ($this->getResources() as $resourceName => $scaffoldConfigClass) {
-                $this->menuItemsFromScaffoldConfigs[$resourceName] = $this->getScaffoldConfig($resourceName)->getMainMenuItem();
+                $this->menuItemsFromScaffoldConfigs[$resourceName]
+                    = $this->getScaffoldConfig($resourceName)->getMainMenuItem();
             }
         }
         return $this->menuItemsFromScaffoldConfigs;
@@ -365,11 +371,10 @@ class CmfUIModule
                 // inner dotjs template - needs to be encoded and decoded later
                 $encoded = base64_encode($matches[2]);
                 return "{{= '<' + 'script{$matches[1]}>' }}{{= Base64.decode('$encoded') }}{{= '</' + 'script>'}}";
-            } else {
-                $script = preg_replace('%(^|\s)//.*$%m', '$1', $matches[2]); //< remove "//" comments from a script
-                return "{{= '<' + 'script{$matches[1]}>' }}$script{{= '</' + 'script>'}}";
             }
+            // remove "//" comments from a script
+            $script = preg_replace('%(^|\s)//.*$%m', '$1', $matches[2]);
+            return "{{= '<' + 'script{$matches[1]}>' }}$script{{= '</' + 'script>'}}";
         }, $dotJsTemplate);
     }
-
 }

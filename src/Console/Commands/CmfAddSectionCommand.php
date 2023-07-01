@@ -25,8 +25,10 @@ class CmfAddSectionCommand extends CmfInstallCommand
     {
     }
 
-    protected function copyBaseDbClasses(string $viewsPath, array $dataForViews): void
-    {
+    protected function copyBaseDbClasses(
+        string $viewsPath,
+        array $dataForViews
+    ): void {
     }
 
     protected function cleanLaravelOrmClassesAndMigrations(): void
@@ -42,8 +44,10 @@ class CmfAddSectionCommand extends CmfInstallCommand
         return config_path('peskyorm.php');
     }
 
-    protected function createPeskyCmfConfigFile(string $appSubfolder, array $dataForViews): void
-    {
+    protected function createPeskyCmfConfigFile(
+        string $appSubfolder,
+        array $dataForViews
+    ): void {
     }
 
     protected function createMigrations(): void

@@ -85,7 +85,8 @@ class CmfConfig
     }
 
     /**
-     * File name for this site section in 'configs' folder of project's root directory (without '.php' extension)
+     * File name for this site section in 'configs' folder of
+     * project's root directory (without '.php' extension)
      * Example: 'admin' for config/admin.php;
      */
     protected function configsFileName(): string
@@ -96,11 +97,13 @@ class CmfConfig
     /**
      * @param string     $key
      * @param mixed|null $default
+     *
      * @return mixed
      */
     public function config(string $key, mixed $default = null): mixed
     {
-        return $this->getLaravelConfigs()->get($this->configsFileName() . '.' . $key, $default);
+        return $this->getLaravelConfigs()
+            ->get($this->configsFileName() . '.' . $key, $default);
     }
 
     public function routesFiles(): array
@@ -212,7 +215,8 @@ class CmfConfig
     }
 
     /**
-     * General controller class name for CMF (basic ui views, custom pages views, login/logout, etc.)
+     * General controller class name for CMF
+     * (basic ui views, custom pages views, login/logout, etc.)
      */
     public function cmfGeneralControllerClass(): string
     {
@@ -233,13 +237,17 @@ class CmfConfig
         return $this->routesNamesPrefix() . $routeAlias;
     }
 
-    public function route(string $routeName, array $parameters = [], bool $absolute = false): string
-    {
+    public function route(
+        string $routeName,
+        array $parameters = [],
+        bool $absolute = false
+    ): string {
         return route($this->getRouteName($routeName), $parameters, $absolute);
     }
 
     /**
-     * Note: placed here to avoid problems with auth module constructor when registering routes for all cmf sections
+     * Note: placed here to avoid problems with auth module
+     * constructor when registering routes for all cmf sections
      */
     public function authMiddleware(): array
     {
@@ -348,6 +356,7 @@ class CmfConfig
 
     /**
      * @param array $itemsKeys - list of keys to return values for, if empty - will return all menu items
+     *
      * @return array
      */
     protected function getMenuItems(...$itemsKeys): array
@@ -362,6 +371,7 @@ class CmfConfig
 
     /**
      * @param array $excludeItemsWithKeys - list of keys to exclude from resulting menu items array
+     *
      * @return array
      * @noinspection PhpUnused
      */
@@ -384,7 +394,8 @@ class CmfConfig
     }
 
     /**
-     * Name for custom CMF dictionary that contains translation for CMF resource sections and pages
+     * Name for custom CMF dictionary that contains translation
+     * for CMF resource sections and pages
      */
     public function customDictionaryName(): string
     {
@@ -395,10 +406,12 @@ class CmfConfig
      * Translate from custom dictionary. You can use it via CmfConfig::transCustom() instead of
      * CmfConfig::getPrimary()->transCustom() if you need to get translation for primary config.
      * Note: if there is no translation in your dictionary - it will be imported from 'cmf::custom' dictionary
+     *
      * @param string      $path - without dictionary name.
      * Example: 'admins.test' will be converted to '{$this->custom_dictionary_name()}.admins.test'
      * @param array       $parameters
      * @param string|null $locale
+     *
      * @return string|array
      */
     public function transCustom(string $path, array $parameters = [], ?string $locale = null): array|string
@@ -428,10 +441,12 @@ class CmfConfig
      * Translate from custom dictionary.
      * You can use it via CmfConfig->transGeneral() if you need to get translation for primary config
      * Note: if there is no translation in your dictionary - it will be imported from 'cmf::cmf' dictionary
+     *
      * @param string      $path - without dictionary name.
      * Example: 'admins.test' will be converted to '{$this->cmf_general_dictionary_name()}.admins.test'
      * @param array       $parameters
      * @param string|null $locale
+     *
      * @return string|array
      */
     public function transGeneral(string $path, array $parameters = [], ?string $locale = null): array|string
@@ -502,19 +517,28 @@ class CmfConfig
 
     /**
      * Get locale in format "en_US" or "ru-RU" or "it-it"
+     *
      * @param string $separator
      * @param bool   $lowercased - true: will return "it-it" instead of "it-IT"
+     *
      * @return string
      */
-    public function getLocaleWithSuffix(string $separator = '_', bool $lowercased = false): string
-    {
-        $locale = preg_split('%[-_]%', strtolower($this->getLaravelApp()->getLocale()));
+    public function getLocaleWithSuffix(
+        string $separator = '_',
+        bool $lowercased = false
+    ): string {
+        $locale = preg_split(
+            '%[-_]%',
+            strtolower($this->getLaravelApp()->getLocale())
+        );
         if (count($locale) === 2) {
-            return $locale[0] . $separator . ($lowercased ? $locale[1] : strtoupper($locale[1]));
+            return $locale[0] . $separator
+                . ($lowercased ? $locale[1] : strtoupper($locale[1]));
         }
 
         $localeSuffix = static::$localeSuffixMap[$locale[0]] ?? $locale[0];
-        return $locale[0] . $separator . ($lowercased ? $localeSuffix : strtoupper($localeSuffix));
+        return $locale[0] . $separator
+            . ($lowercased ? $localeSuffix : strtoupper($localeSuffix));
     }
 
     /**
@@ -704,9 +728,10 @@ class CmfConfig
     }
 
     /**
-     * Get TableInterface instance by resource name
-     * Note: can be overwritten to allow usage of fake tables in resources routes
-     * It is possible to use this with static::getScaffoldConfig() to alter default scaffold configs
+     * Get TableInterface instance by resource name.
+     * Note: can be overwritten to allow usage of fake tables in resources routes.
+     * It is possible to use this with static::getScaffoldConfig()
+     * to alter default scaffold configs.
      */
     public function getTableByResourceName(string $resourceName): TableInterface
     {
@@ -720,14 +745,20 @@ class CmfConfig
 
     public function getHttpRequestsLogger(): ?ScaffoldLoggerInterface
     {
-        if (!$this->httpRequestsLogger && $this->getLaravelApp()->bound(ScaffoldLoggerInterface::class)) {
-            $this->setHttpRequestsLogger($this->getLaravelApp()->make(ScaffoldLoggerInterface::class));
+        if (
+            !$this->httpRequestsLogger
+            && $this->getLaravelApp()->bound(ScaffoldLoggerInterface::class)
+        ) {
+            $this->setHttpRequestsLogger(
+                $this->getLaravelApp()->make(ScaffoldLoggerInterface::class)
+            );
         }
         return $this->httpRequestsLogger;
     }
 
     /**
      * Logger will be used to logs requested records pk and changes
+     *
      * @param ScaffoldLoggerInterface $httpRequestsLogger
      */
     public function setHttpRequestsLogger(ScaffoldLoggerInterface $httpRequestsLogger): void
@@ -754,7 +785,7 @@ class CmfConfig
                 return [
                     $authModule->getLoginPageUrl(false) . '.html' => $controller->getLoginTpl(),
                     $authModule->getPasswordRecoveryStartPageUrl(false) . '.html'
-                        => $controller->getForgotPasswordTpl(),
+                    => $controller->getForgotPasswordTpl(),
                 ];
             }
         );
@@ -808,7 +839,8 @@ class CmfConfig
             $user = $this->getUser();
             $userId = $user ? $user->getAuthIdentifier() : 'not_authenticated';
         }
-        return $this->urlPrefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
+        return $this->urlPrefix() . '_templates_' . $this->getShortLocale()
+            . '_' . $group . '_user_' . $userId;
     }
 
     /**
@@ -833,7 +865,8 @@ class CmfConfig
                 }
             }
         }
-        return $this->urlPrefix() . '_templates_' . $this->getShortLocale() . '_' . $group . '_user_' . $userId;
+        return $this->urlPrefix() . '_templates_' . $this->getShortLocale()
+            . '_' . $group . '_user_' . $userId;
     }
 
     public function makeUtilityKey(string $keySuffix): string
@@ -867,7 +900,8 @@ class CmfConfig
             }
         }
 
-        unset($groupConfig['namespace']); //< cmf routes should be able to use controllers from vendors dir
+        // CMF routes should be able to use controllers from vendors dir
+        unset($groupConfig['namespace']);
         if (!$router->has($this->getRouteName('cmf_start_page'))) {
             $router->group($groupConfig, function () use ($router) {
                 $router->get('/', [
@@ -931,7 +965,9 @@ class CmfConfig
             $providerName = Arr::get($provider, 'name', $guardName);
             if (empty($provider['model'])) {
                 $provider['model'] = $this->config('auth.user_record_class', function () {
-                    throw new \UnexpectedValueException('You need to provide a DB Record class for users');
+                    throw new \UnexpectedValueException(
+                        'You need to provide a DB Record class for users'
+                    );
                 });
             }
         } else {

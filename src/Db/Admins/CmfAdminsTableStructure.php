@@ -38,7 +38,9 @@ class CmfAdminsTableStructure extends TableStructure
 
         $this->addColumn(new IdColumn());
         $this->addColumn(new EmailColumn());
-        $this->addColumn(new IntegerColumn('parent_id'));
+        $this->addColumn(
+            new IntegerColumn('parent_id')
+        );
 
         $loginColumn = new StringColumn('login');
         $loginColumn->convertsEmptyStringValuesToNull()
@@ -73,14 +75,24 @@ class CmfAdminsTableStructure extends TableStructure
                 ->convertsEmptyStringValuesToNull()
         );
 
-        $this->addColumn(new IpV4AddressColumn('ip'));
+        $this->addColumn(
+            new IpV4AddressColumn('ip')
+        );
         $this->addColumn(
             (new BooleanColumn('is_superadmin'))
                 ->setDefaultValue(false)
         );
-        $this->addColumn(new IsActiveColumn());
-        $this->addColumn(new CreatedAtColumn());
-        $this->addColumn(new UpdatedAtColumn());
+        $this->addColumn(
+            new IsActiveColumn()
+        );
+        $this->addColumn(
+            (new CreatedAtColumn())
+                ->withTimezone()
+        );
+        $this->addColumn(
+            (new UpdatedAtColumn())
+                ->withTimezone()
+        );
     }
 
     protected function registerRelations(): void

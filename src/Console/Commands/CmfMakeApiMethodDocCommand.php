@@ -24,10 +24,14 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand
     {
         $this->line('Writing class ' . $namespace . '\\' . $className . ' to file ' . $filePath);
         $namespace = ltrim($namespace, '\\');
-        $baseClass = $this->getCmfConfig()->getApiDocumentationModule()->getMethodBaseClass();
+        $baseClass = $this->getCmfConfig()
+            ->getApiDocumentationModule()
+            ->getMethodBaseClass();
         /** @noinspection DuplicatedCode */
         $baseClassName = class_basename($baseClass);
-        $classSuffix = $this->getCmfConfig()->getApiDocumentationModule()->getClassNameSuffix();
+        $classSuffix = $this->getCmfConfig()
+            ->getApiDocumentationModule()
+            ->getClassNameSuffix();
         $translationSubGroup = Str::snake(
             preg_replace(
                 '%(ApiDocs?|(Method)?(Doc(umentation)?)?|' . preg_quote($classSuffix, '%') . '$)%',
@@ -37,10 +41,16 @@ class CmfMakeApiMethodDocCommand extends CmfMakeApiDocCommand
         );
         $docsGroup = $this->argument('docs_group');
         $translationGroup = empty($docsGroup) ? 'method' : Str::snake($docsGroup);
-        $url = $this->guessUrl($translationGroup === 'method' ? null : $translationGroup, $translationSubGroup);
+        $url = $this->guessUrl(
+            $translationGroup === 'method' ? null : $translationGroup,
+            $translationSubGroup
+        );
         $translationGroup .= '.' . $translationSubGroup;
         $httpMethod = 'GET';
-        if (!$this->option('auto') && $this->confirm('Do you want to configure documentation class?', true)) {
+        if (
+            !$this->option('auto')
+            && $this->confirm('Do you want to configure documentation class?', true)
+        ) {
             [$url, $httpMethod, $translationGroup] = $this->askQuestions($url, $translationGroup);
             [$urlParams, $urlQueryParams, $postParams, $validationErrors] = $this->askParams($url, $httpMethod);
             if (!in_array($httpMethod, ['GET', 'POST'], true)) {

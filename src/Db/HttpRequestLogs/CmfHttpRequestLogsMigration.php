@@ -14,7 +14,7 @@ class CmfHttpRequestLogsMigration extends Migration
     public function up(): void
     {
         if (!Schema::hasTable($this->getTableName())) {
-            Schema::create($this->getTableName(), function (Blueprint $table) {
+            Schema::create($this->getTableName(), static function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->integer('requester_id')->unsigned()->nullable();
                 $table->string('requester_table')->nullable();
@@ -33,6 +33,7 @@ class CmfHttpRequestLogsMigration extends Migration
                 $table->integer('item_id')->unsigned()->nullable();
                 $table->json('data_before')->nullable();
                 $table->json('data_after')->nullable();
+                $table->date('creation_date')->default(DB::raw('NOW()'));
                 $table->timestampTz('created_at')->default(DB::raw('NOW()'));
                 $table->timestampTz('responded_at')->nullable();
 
@@ -42,6 +43,7 @@ class CmfHttpRequestLogsMigration extends Migration
                 $table->index('requester_table');
                 $table->index('requester_info');
                 $table->index('requester_id');
+                $table->index('creation_date');
             });
         }
     }

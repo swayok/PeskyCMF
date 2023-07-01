@@ -11,7 +11,6 @@ use Illuminate\Http\JsonResponse;
  */
 class CmfJsonResponse extends JsonResponse
 {
-    
     public static string $messageKey = '_message';
     public static string $messageTypeKey = '_message_type';
     public static string $redirectKey = 'redirect';
@@ -24,35 +23,44 @@ class CmfJsonResponse extends JsonResponse
     public static string $modalFooterKey = 'footer';
     public static string $modalUrlKey = 'url';
     public static string $modalSizeKey = 'size';
-    
+
     public const MODAL_SIZE_MEDIUM = 'medium';
     public const MODAL_SIZE_SMALL = 'small';
     public const MODAL_SIZE_LARGE = 'large';
-    
+
     public const MESSAGE_TYPE_INFO = 'info';
     public const MESSAGE_TYPE_SUCCESS = 'success';
     public const MESSAGE_TYPE_WARNING = 'warning';
     public const MESSAGE_TYPE_ERROR = 'error';
-    
-    public static function create(int $status = 200, array $headers = [], int $options = JSON_UNESCAPED_UNICODE): CmfJsonResponse
-    {
+
+    public static function create(
+        int $status = 200,
+        array $headers = [],
+        int $options = JSON_UNESCAPED_UNICODE
+    ): CmfJsonResponse {
         return new static([], $status, $headers, $options);
     }
-    
-    public function __construct(?array $data = null, int $status = 200, array $headers = [], int $options = JSON_UNESCAPED_UNICODE)
-    {
+
+    public function __construct(
+        ?array $data = null,
+        int $status = 200,
+        array $headers = [],
+        int $options = JSON_UNESCAPED_UNICODE
+    ) {
         parent::__construct($data ?? [], $status, $headers, $options, false);
     }
-    
+
     public function addData(array $additionalData): CmfJsonResponse
     {
         $data = $this->getData(true);
         $data = array_merge($data, $additionalData);
         return $this->setData($data);
     }
-    
-    public function setMessage(string $message, ?string $messageType = null): CmfJsonResponse
-    {
+
+    public function setMessage(
+        string $message,
+        ?string $messageType = null
+    ): CmfJsonResponse {
         if (!empty($message)) {
             $data = $this->getData(true);
             $data[static::$messageKey] = $message;
@@ -63,9 +71,11 @@ class CmfJsonResponse extends JsonResponse
         }
         return $this;
     }
-    
-    public function setRedirect(string $url, ?string $fallbackUrl = null): CmfJsonResponse
-    {
+
+    public function setRedirect(
+        string $url,
+        ?string $fallbackUrl = null
+    ): CmfJsonResponse {
         $data = $this->getData(true);
         $data[static::$redirectKey] = $url;
         if (!empty($fallbackUrl)) {
@@ -73,26 +83,28 @@ class CmfJsonResponse extends JsonResponse
         }
         return $this->setData($data);
     }
-    
+
     public function setForcedRedirect(string $url): CmfJsonResponse
     {
         $data = $this->getData(true);
         $data[static::$forcedRedirectKey] = $url;
         return $this->setData($data);
     }
-    
+
     public function goBack(?string $fallbackUrl = null): CmfJsonResponse
     {
         return $this->setRedirect('back', $fallbackUrl);
     }
-    
+
     public function reloadPage(): CmfJsonResponse
     {
         return $this->setRedirect('reload');
     }
-    
-    public function setErrors(array $errors, ?string $message = null): CmfJsonResponse
-    {
+
+    public function setErrors(
+        array $errors,
+        ?string $message = null
+    ): CmfJsonResponse {
         $data = $this->getData(true);
         if (!empty($message)) {
             $data[static::$messageKey] = $message;
@@ -100,7 +112,7 @@ class CmfJsonResponse extends JsonResponse
         $data[static::$errorsKey] = $errors;
         return $this->setData($data);
     }
-    
+
     public function setModalContent(
         string $title,
         string $content,
@@ -124,5 +136,4 @@ class CmfJsonResponse extends JsonResponse
         }
         return $this->setData($data);
     }
-    
 }

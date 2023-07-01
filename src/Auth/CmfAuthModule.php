@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection HtmlUnknownTarget */
+
 declare(strict_types=1);
 
 namespace PeskyCMF\Auth;
@@ -257,7 +259,7 @@ class CmfAuthModule
                 'required',
                 'regex:%^[a-zA-Z0-9_@.-]+$%is',
                 'min:4',
-                "unique:$usersTable,$userLoginCol"
+                "unique:$usersTable,$userLoginCol",
             ];
         }
         $columnsToSave = array_keys($validationRules);
@@ -290,7 +292,7 @@ class CmfAuthModule
             $role = $admin->role;
             /** @noinspection NotOptimalIfConditionsInspection */
             if (
-                $admin->getTable()->getTableStructure()->hasColumn('is_superadmin')
+                $admin->hasColumn('is_superadmin')
                 && $admin->is_superadmin
             ) {
                 $role = 'superadmin';
@@ -316,7 +318,7 @@ class CmfAuthModule
         $user = $this->getUser();
         $this->authorize('resource.update', ['cmf_profile', $user]);
         $updates = $this->validateAndGetUserProfileUpdates($request, $user);
-        $oldEmail = $user->getTable()->getTableStructure()->hasColumn('email')
+        $oldEmail = $user->hasColumn('email')
             ? $user->email
             : null;
         $user
@@ -328,7 +330,7 @@ class CmfAuthModule
         $user->commit();
         if (
             isset($updates['email'])
-            && $user->getTable()->getTableStructure()->hasColumn('email')
+            && $user->hasColumn('email')
             && strtolower(trim($oldEmail)) !== strtolower(trim($updates['email']))
         ) {
             $this->onUserEmailAddressChange($user, $oldEmail);
@@ -453,8 +455,9 @@ class CmfAuthModule
             $user = $this->getAuthGuard()->getLastAttempted();
             if (!($user instanceof ResetsPasswordsViaAccessKey)) {
                 throw new \BadMethodCallException(
-                    'Class ' . get_class($user) . ' does not support password recovery. You should implement ' .
-                    ResetsPasswordsViaAccessKey::class . ' interface or use '
+                    'Class ' . get_class($user)
+                    . ' does not support password recovery. You should implement '
+                    . ResetsPasswordsViaAccessKey::class . ' interface or use '
                     . \PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey::class . ' trait.'
                 );
             }
@@ -462,12 +465,17 @@ class CmfAuthModule
         }
 
         return CmfJsonResponse::create()
-            ->setMessage($this->getCmfConfig()->transCustom('forgot_password.instructions_sent'))
+            ->setMessage(
+                $this->getCmfConfig()
+                    ->transCustom('forgot_password.instructions_sent')
+            )
             ->setRedirect($this->getLoginPageUrl());
     }
 
-    public function finishPasswordRecoveryProcess(Request $request, string $accessKey): JsonResponse
-    {
+    public function finishPasswordRecoveryProcess(
+        Request $request,
+        string $accessKey
+    ): JsonResponse {
         if (!$this->isPasswordRestoreAllowed()) {
             return new JsonResponse([], HttpCode::NOT_FOUND);
         }
@@ -484,12 +492,18 @@ class CmfAuthModule
                 ->updateValue('password', $data['password'], false)
                 ->commit();
             return CmfJsonResponse::create()
-                ->setMessage($this->getCmfConfig()->transCustom('replace_password.password_replaced'))
+                ->setMessage(
+                    $this->getCmfConfig()
+                        ->transCustom('replace_password.password_replaced')
+                )
                 ->setForcedRedirect($this->getLoginPageUrl());
         }
 
         return CmfJsonResponse::create(HttpCode::FORBIDDEN)
-            ->setMessage($this->getCmfConfig()->transCustom('replace_password.invalid_access_key'))
+            ->setMessage(
+                $this->getCmfConfig()
+                    ->transCustom('replace_password.invalid_access_key')
+            )
             ->setForcedRedirect($this->getLoginPageUrl());
     }
 
@@ -515,7 +529,10 @@ class CmfAuthModule
 
         abort(
             CmfJsonResponse::create(HttpCode::FORBIDDEN)
-                ->setMessage($this->getCmfConfig()->transCustom('replace_password.invalid_access_key'))
+                ->setMessage(
+                    $this->getCmfConfig()
+                        ->transCustom('replace_password.invalid_access_key')
+                )
                 ->setRedirect($this->getLoginPageUrl())
         );
     }
@@ -590,6 +607,7 @@ class CmfAuthModule
 
     /**
      * @param ResetsPasswordsViaAccessKey|RecordInterface $user
+     *
      * @noinspection PhpDocSignatureInspection
      */
     protected function sendPasswordRecoveryInstructionsEmail(RecordInterface $user): void
@@ -646,7 +664,8 @@ class CmfAuthModule
     }
 
     /**
-     * In this method you should place authorisation gates and policies according to Laravel's docs:
+     * In this method you should place authorisation gates and
+     * policies according to Laravel's docs:
      * https://laravel.com/docs/5.4/authorization
      * Predefined authorisation tests are available for:
      * 1. Resources (scaffolds) - use
@@ -656,8 +675,8 @@ class CmfAuthModule
      *          'create' => 'create',
      *          'update' => 'update',
      *          'delete' => 'delete',
-     *          'update_bulk' => 'update_bulk',
-     *          'delete_bulk' => 'delete_bulk',
+     *          'updateBulk' => 'update_bulk',
+     *          'deleteBulk' => 'delete_bulk',
      *      ]);
      *      or Gate::define('resource.{ability}', \Closure) to provide rules for some resource.
      *      List of abilities used in scaffolds:
@@ -665,13 +684,13 @@ class CmfAuthModule
      *      - 'details' => 'cmf_api_get_item',
      *      - 'create' => 'cmf_api_create_item',
      *      - 'update' => 'cmf_api_update_item'
-     *      - 'update_bulk' => 'cmf_api_edit_bulk'
+     *      - 'updateBulk' => 'cmf_api_edit_bulk'
      *      - 'delete' => 'cmf_api_delete_item'
-     *      - 'delete_bulk' => 'cmf_api_delete_bulk'
-     *      - 'custom_page' => 'cmf_resource_custom_page'
-     *      - 'custom_action' => 'cmf_api_resource_custom_action'
-     *      - 'custom_page_for_item' => 'cmf_item_custom_page'
-     *      - 'custom_action_for_item' => 'cmf_api_item_custom_action'
+     *      - 'deleteBulk' => 'cmf_api_delete_bulk'
+     *      - 'customPage' => 'cmf_resource_custom_page'
+     *      - 'customAction' => 'cmf_api_resource_custom_action'
+     *      - 'customPageForItem' => 'cmf_item_custom_page'
+     *      - 'customActionForItem' => 'cmf_api_item_custom_action'
      *      For all abilities you will receive $tableName argument and RecordInterface $record or int $itemId argument
      *      for 'details', 'update' and 'delete' abilities.
      *      For KeyValueScaffoldConfig for 'update' ability you will receive $fkValue instead of $itemId/$record.
@@ -693,7 +712,10 @@ class CmfAuthModule
      */
     public function configureAuthorizationGatesAndPolicies(): void
     {
-        $this->getLaravelApp()->singleton(CmfAccessPolicy::class, $this->getAccessPolicyClassName());
+        $this->getLaravelApp()->singleton(
+            CmfAccessPolicy::class,
+            $this->getAccessPolicyClassName()
+        );
         $this->getAuthGate()->resource('resource', CmfAccessPolicy::class, [
             'view' => 'view',
             'details' => 'details',
@@ -701,16 +723,19 @@ class CmfAuthModule
             'update' => 'update',
             'edit' => 'edit',
             'delete' => 'delete',
-            'update_bulk' => 'update_bulk',
-            'delete_bulk' => 'delete_bulk',
+            'updateBulk' => 'updateBulk',
+            'deleteBulk' => 'deleteBulk',
             'other' => 'others',
             'others' => 'others',
-            'custom_page' => 'custom_page',
-            'custom_action' => 'custom_action',
-            'custom_page_for_item' => 'custom_page_for_item',
-            'custom_action_for_item' => 'custom_action_for_item',
+            'customPage' => 'customPage',
+            'customAction' => 'customAction',
+            'customPageForItem' => 'customPageForItem',
+            'customActionForItem' => 'customActionForItem',
         ]);
-        $this->getAuthGate()->define('cmf_page', CmfAccessPolicy::class . '@cmf_page');
+        $this->getAuthGate()->define(
+            'cmfPage',
+            CmfAccessPolicy::class . '@cmfPage'
+        );
     }
 
     public function listenForUserAuthenticationEvents(): void
@@ -735,7 +760,8 @@ class CmfAuthModule
     public function getIntendedUrl(): string
     {
         $cmfConfig = $this->getCmfConfig();
-        $intendedUrl = $this->getSessionStore()->pull($cmfConfig->makeUtilityKey('intended_url'));
+        $intendedUrl = $this->getSessionStore()
+            ->pull($cmfConfig->makeUtilityKey('intended_url'));
         if (empty($intendedUrl)) {
             return $cmfConfig->homePageUrl();
         }
@@ -745,7 +771,13 @@ class CmfAuthModule
         if (preg_match('%/api/([^/]+?)/service/%i', $intendedUrl, $matches)) {
             return CmfUrl::toItemsTable($matches[1], [], false, $cmfConfig);
         }
-        if (preg_match('%/api/([^/]+?)/([^/?]+?)/?(?:\?details=(\d)|$)%i', $intendedUrl, $matches)) {
+        if (
+            preg_match(
+                '%/api/([^/]+?)/([^/?]+?)/?(?:\?details=(\d)|$)%i',
+                $intendedUrl,
+                $matches
+            )
+        ) {
             if (!empty($matches[3]) && $matches[3] === '1') {
                 return CmfUrl::toItemDetails($matches[1], $matches[2], false, $cmfConfig);
             }
@@ -761,16 +793,22 @@ class CmfAuthModule
     }
 
     /**
-     * @param Request                         $request
+     * @param Request $request
      * @param RecordInterface|Authenticatable $admin
+     *
      * @return array
      * @noinspection PhpDocSignatureInspection
      */
-    protected function validateAndGetUserProfileUpdates(Request $request, RecordInterface $admin): array
-    {
-        $requirePassword = $this->getCmfConfig()->config('auth.profile_update_requires_current_password', true);
+    protected function validateAndGetUserProfileUpdates(
+        Request $request,
+        RecordInterface $admin
+    ): array {
+        $requirePassword = $this->getCmfConfig()
+            ->config('auth.profile_update_requires_current_password', true);
         $validationRules = [
-            'old_password' => $requirePassword ? 'required|string' : 'nullable|required_with:new_password|string',
+            'old_password' => $requirePassword
+                ? 'required|string'
+                : 'nullable|required_with:new_password|string',
             'new_password' => 'nullable|min:6',
         ];
         $columnsToUpdate = [];
@@ -826,7 +864,8 @@ class CmfAuthModule
             // do nothing
         } elseif (method_exists($admin, 'checkPassword')) {
             if (!$admin->checkPassword($request->input('old_password'))) {
-                $errors['old_password'] = $this->getCmfConfig()->transCustom('page.profile.errors.old_password.match');
+                $errors['old_password'] = $this->getCmfConfig()
+                    ->transCustom('page.profile.errors.old_password.match');
             }
         } elseif (
             !$this->getLaravelApp()->make('hash')->check(
@@ -834,7 +873,8 @@ class CmfAuthModule
                 $admin->getAuthPassword()
             )
         ) {
-            $errors['old_password'] = $this->getCmfConfig()->transCustom('page.profile.errors.old_password.match');
+            $errors['old_password'] = $this->getCmfConfig()
+                ->transCustom('page.profile.errors.old_password.match');
         }
         if (count($errors) > 0) {
             $this->throwValidationErrorsResponse($errors);
@@ -869,7 +909,9 @@ class CmfAuthModule
     /**
      * Additional non-editable data to save into user record.
      * For example: role, language
+     *
      * @param RecordInterface|Authenticatable $user - user record with submitted data already set
+     *
      * @noinspection PhpDocSignatureInspection
      */
     protected function addCustomRegistrationData(RecordInterface $user): void
@@ -879,7 +921,9 @@ class CmfAuthModule
     /**
      * Additional actions after user's account created.
      * For example: send confirmation email
+     *
      * @param RecordInterface|Authenticatable $user
+     *
      * @noinspection PhpDocSignatureInspection
      */
     protected function afterRegistration(RecordInterface $user): void
@@ -889,11 +933,15 @@ class CmfAuthModule
     /**
      * Called when user have changed his emails address.
      * Here you can modify email confirmation status and send confirmation email
+     *
      * @param RecordInterface|Authenticatable $user
      * @param string|null                     $oldEmail
+     *
      * @noinspection PhpDocSignatureInspection
      */
-    protected function onUserEmailAddressChange(RecordInterface $user, ?string $oldEmail): void
-    {
+    protected function onUserEmailAddressChange(
+        RecordInterface $user,
+        ?string $oldEmail
+    ): void {
     }
 }

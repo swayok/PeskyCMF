@@ -20,7 +20,6 @@ use PeskyCMF\Config\CmfConfig;
  */
 class CmfManager extends Facade
 {
-    
     protected static function getFacadeAccessor(): string
     {
         return RealCmfManager::class;

@@ -22,7 +22,9 @@ class CmfInstallCommand extends CmfCommand
 
     public function handle(): int
     {
-        $appSubfolder = ucfirst(trim(trim($this->input->getArgument('app_subfolder')), '/\\'));
+        $appSubfolder = ucfirst(
+            trim(trim($this->input->getArgument('app_subfolder')), '/\\')
+        );
         $baseFolderPath = $this->app->path($appSubfolder);
         if (Folder::exist($baseFolderPath)) {
             $this->line('Terminated. Folder [' . $baseFolderPath . '] already exist');
@@ -31,7 +33,9 @@ class CmfInstallCommand extends CmfCommand
         $dataForViews = [
             'sectionName' => $appSubfolder,
             'urlPrefix' => trim(trim($this->input->getArgument('url_prefix'), '/\\')),
-            'dbClassesAppSubfolder' => $this->input->getArgument('database_classes_app_subfolder'),
+            'dbClassesAppSubfolder' => $this->input->getArgument(
+                'database_classes_app_subfolder'
+            ),
             'cmfConfigClassName' => $appSubfolder . 'Config',
         ];
         $this->createPagesController($baseFolderPath, $dataForViews);
@@ -75,14 +79,21 @@ class CmfInstallCommand extends CmfCommand
             '1. Add ' . PeskyCmfServiceProvider::class
             . ' to you app.providers config (not needed if you use PeskyCMS)'
         );
-        $this->line('2. Remove ' . PeskyOrmServiceProvider::class . ' from you app.providers config');
-        $this->line('3. Run "php artisan vendor:publish --tag=public --force" to publish vendor public files');
+        $this->line(
+            '2. Remove ' . PeskyOrmServiceProvider::class
+            . ' from you app.providers config'
+        );
+        $this->line(
+            '3. Run "php artisan vendor:publish --tag=public --force" to publish vendor public files'
+        );
         $this->line(
             '4. Add "php artisan vendor:publish --tag=public --force" to your composer.json'
             . ' into "scripts"."post-autoload-dump" array to make all public vendor files be up to date'
         );
         $this->line('5. Run "php artisan migrate" to create tables in database');
-        $this->line('6. Run "php artisan cmf:add-admin your-email@address.com" to create superadmin for CMS');
+        $this->line(
+            '6. Run "php artisan cmf:add-admin your-email@address.com" to create superadmin for CMS'
+        );
     }
 
     protected function suggestions(string $peskyOrmConfigFilePath): void
@@ -99,7 +110,12 @@ class CmfInstallCommand extends CmfCommand
         string $baseFolderPath,
         array $dataForViews
     ): void {
-        File::load($baseFolderPath . '/Http/Controllers/PagesController.php', true, 0755, 0644)
+        File::load(
+            $baseFolderPath . '/Http/Controllers/PagesController.php',
+            true,
+            0755,
+            0644
+        )
             ->write($this->renderStubView('pages_controller', $dataForViews));
     }
 
@@ -168,17 +184,22 @@ class CmfInstallCommand extends CmfCommand
         $peskyOrmConfigFilePath = $this->app->configPath('peskyorm.php');
         $writeOrmConfigFile = (
             !File::exist($peskyOrmConfigFilePath)
-            || $this->confirm('PeskyORM config file ' . $peskyOrmConfigFilePath . ' already exist. Overwrite?')
+            || $this->confirm(
+                'PeskyORM config file ' . $peskyOrmConfigFilePath . ' already exist. Overwrite?'
+            )
         );
         if ($writeOrmConfigFile) {
-            File::load(__DIR__ . '/../../Config/peskyorm.config.php')->copy($peskyOrmConfigFilePath, true, 0664);
+            File::load(__DIR__ . '/../../Config/peskyorm.config.php')
+                ->copy($peskyOrmConfigFilePath, true, 0664);
             $this->line($peskyOrmConfigFilePath . ' created');
         }
         return $peskyOrmConfigFilePath;
     }
 
-    protected function createPeskyCmfConfigFile(string $appSubfolder, array $dataForViews): void
-    {
+    protected function createPeskyCmfConfigFile(
+        string $appSubfolder,
+        array $dataForViews
+    ): void {
         $generalCmfConfigFilePath = $this->app->configPath('peskycmf.php');
         if (!File::exist($generalCmfConfigFilePath)) {
             $configContents = File::contents(__DIR__ . '/../../Config/peskycmf.config.php');
@@ -224,14 +245,19 @@ class CmfInstallCommand extends CmfCommand
         $writeCmfSectionConfigFile = (
             !File::exist($cmfSectionConfigFilePath)
             || $this->confirm(
-                'CMF section config file ' . $cmfSectionConfigFilePath . ' already exist. Overwrite?'
+                'CMF section config file ' . $cmfSectionConfigFilePath
+                . ' already exist. Overwrite?'
             )
         );
         if (
             !$writeCmfSectionConfigFile
-            && $this->confirm('Would you like to provide custom name for a cmf section config file?')
+            && $this->confirm(
+                'Would you like to provide custom name for a cmf section config file?'
+            )
         ) {
-            $customConfigFileName = $this->ask('Enter file name without ".php" or emty string to skip');
+            $customConfigFileName = $this->ask(
+                'Enter file name without ".php" or emty string to skip'
+            );
             if (trim($customConfigFileName) !== '') {
                 $cmfSectionConfigFileNameWithoutExtension = $customConfigFileName;
                 $writeCmfSectionConfigFile = true;
@@ -248,7 +274,8 @@ class CmfInstallCommand extends CmfCommand
         }
         if ($updateKeysInConfigs === null) {
             $updateKeysInConfigs = $this->confirm(
-                'Do you wish to update some keys in ' . $cmfSectionConfigFilePath . ' by actual values?'
+                'Do you wish to update some keys in '
+                . $cmfSectionConfigFilePath . ' by actual values?'
             );
         }
         $subfolderName = preg_replace('%[^a-zA-Z0-9]+%', '_', $dataForViews['urlPrefix']);
@@ -266,11 +293,17 @@ class CmfInstallCommand extends CmfCommand
                 "%('css_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['css']}',\n        ],",
                 "%('js_files')\s*=>\s*\[[^\]]*\],%is" => "$1 => [\n            '{$publicFiles['js']}',\n        ],",
             ];
-            $configContents = preg_replace(array_keys($replacements), array_values($replacements), $configContents);
+            $configContents = preg_replace(
+                array_keys($replacements),
+                array_values($replacements),
+                $configContents
+            );
             File::save($cmfSectionConfigFilePath, $configContents, 0664, 0755);
             $this->line($cmfSectionConfigFilePath . ' updated');
         } else {
-            $this->line("Update next keys in '$cmfSectionConfigFilePath' file to activate CMF:");
+            $this->line(
+                "Update next keys in '$cmfSectionConfigFilePath' file to activate CMF:"
+            );
             $this->line(' ');
 
             $this->line("'url_prefix' => '{$dataForViews['urlPrefix']}',");
@@ -296,10 +329,13 @@ class CmfInstallCommand extends CmfCommand
         array $dataForViews,
         string $cmfSectionConfigFileNameWithoutExtension
     ): void {
-        $cmfConfigFilePath = $baseFolderPath . '/' . $dataForViews['cmfConfigClassName'] . '.php';
+        $cmfConfigFilePath = $baseFolderPath . '/'
+            . $dataForViews['cmfConfigClassName'] . '.php';
         $writeCmfSectionConfigFile = (
             !File::exist($cmfConfigFilePath)
-            || $this->confirm('CmfConfig file ' . $cmfConfigFilePath . ' already exist. Overwrite?')
+            || $this->confirm(
+                'CmfConfig file ' . $cmfConfigFilePath . ' already exist. Overwrite?'
+            )
         );
         if ($writeCmfSectionConfigFile) {
             $dataForViews['configsFileName'] = $cmfSectionConfigFileNameWithoutExtension;
@@ -312,7 +348,9 @@ class CmfInstallCommand extends CmfCommand
         $routesFilePath = $this->app->basePath($routesFileRelativePath);
         $writeRoutesFile = (
             !File::exist($routesFilePath)
-            || $this->confirm('Routes file ' . $routesFilePath . ' already exist. Overwrite?')
+            || $this->confirm(
+                'Routes file ' . $routesFilePath . ' already exist. Overwrite?'
+            )
         );
         if ($writeRoutesFile) {
             File::load($routesFilePath, true, 0755, 0644)

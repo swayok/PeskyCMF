@@ -29,7 +29,7 @@ abstract class CmfCommand extends Command
             if ($class) {
                 if (!class_exists($class)) {
                     throw new \InvalidArgumentException(
-                        'Class ' . $class . ' provided through option --cmf-config-class does not exist'
+                        "Class $class provided through option --cmf-config-class does not exist"
                     );
                 }
                 if (

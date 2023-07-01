@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace PeskyCMF;
 
-class HttpCode {
+class HttpCode
+{
     public const OK = 200;
     public const INVALID = 400;
     public const UNAUTHORISED = 401;

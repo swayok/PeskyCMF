@@ -351,7 +351,9 @@ if (!function_exists('transChoiceAlt')) {
     ): string {
         $trans = StringUtils::pluralizeRu(
             $itemsCount,
-            is_array($idOrTranslations) ? $idOrTranslations : trans($idOrTranslations, [], $locale)
+            is_array($idOrTranslations)
+                ? $idOrTranslations
+                : trans($idOrTranslations, [], $locale)
         );
         if (!empty($parameters)) {
             $trans = StringUtils::insert($trans, $parameters, ['before' => ':']);
@@ -609,7 +611,8 @@ if (!function_exists('formatSeconds')) {
 
 if (!function_exists('pickLocalization')) {
     /**
-     * Pick correct localization strings from specially formatted array. Useful for localizations stored in DB
+     * Pick correct localization strings from specially formatted array.
+     * Useful for localizations stored in DB.
      * @param array       $translations
      *  - associative array format ($isAssociativeArray = true):
      *      ['lang1_code' => 'translation1', 'lang2_code' => 'translation2', ...]
@@ -656,7 +659,8 @@ if (!function_exists('pickLocalization')) {
 
 if (!function_exists('pickLocalizationFromJson')) {
     /**
-     * Pick correct localization strings from specially formatted array. Useful for localizations stored in DB
+     * Pick correct localization strings from specially formatted array.
+     * Useful for localizations stored in DB.
      * @param array|string $translationsJson Format: '{"lang1_code": "translation1", "lang2_code": "translation2", ...}'
      * @param null|string  $default Default value to return when there is no translation for app()->getLocale()
      *      language and for CmfConfig::getPrimary()->default_locale()

@@ -53,8 +53,13 @@ $dictionary = [
         'button_label' => 'Выслать инструкции',
         'instructions_sent' => 'Инструкции по восстановлению пароля высланы на Ваш E-mail',
         'email_subject' => 'Инструкции по восстановлению пароля',
-        'email_content' => '<p>Для задания нового пароля, пройдите по ссылке <a href=":url" target="_blank">Восстановить пароль</a></p>
-            <p>Восстановление пароля будет доступно в течении часа</p>',
+        'email_content' => '
+            <p>
+                Для задания нового пароля, пройдите по ссылке
+                <a href=":url" target="_blank">Восстановить пароль</a>
+            </p>
+            <p>Восстановление пароля будет доступно в течении часа</p>
+        ',
     ],
     'replace_password' => [
         'header' => 'Задание нового пароля',
@@ -71,7 +76,7 @@ $dictionary = [
     'admins' => [
         'menu_title' => 'Администраторы',
         'login_as' => [
-            'success' => 'Вы вошли под учетной записью :user. Чтобы вернуться в свою учетную запись нажмите кнопку "Выйти".',
+            'success' => 'Вы вошли под учетной записью :user. Чтобы вернуться в свою учетную запись нажмите кнопку "Выйти".', // phpcs:ignore
             'fail' => 'Не удалось войти под учетной записью c ID :id',
             'same_user' => 'Вы пытаетесь зайти в свою же учетную запись',
             'no_auth_token' => 'У текущего пользователя отсутствует токен авторизации',
@@ -94,6 +99,7 @@ $dictionary = [
                 'language' => 'Язык',
                 'ip' => 'IP',
                 'created_at' => 'Создан',
+                'creation_date' => 'Дата',
                 'timezone' => 'Временная зона',
             ],
             'filter' => [
@@ -109,6 +115,7 @@ $dictionary = [
                     'language' => 'Язык',
                     'ip' => 'IP',
                     'created_at' => 'Создан',
+                    'creation_date' => 'Дата',
                     'timezone' => 'Временная зона',
                 ],
                 'parent_admin' => [
@@ -150,6 +157,7 @@ $dictionary = [
                 'is_superadmin' => 'Имеет доступ ко всему (суперадмин)?',
                 'parent_id' => 'Админ, создавший этот акаунт',
                 'created_at' => 'Создан',
+                'creation_date' => 'Дата',
                 'updated_at' => 'Изменен',
                 'timezone' => 'Временная зона',
             ],
@@ -204,7 +212,7 @@ $dictionary = [
                 ],
                 'timezone' => [
                     'required' => 'Выберите временную зону',
-                    'exists' => 'Выбранная временная зона не найдена среди допустимых временных зон. Выберите другую временную зону.'
+                    'exists' => 'Выбранная временная зона не найдена среди допустимых временных зон. Выберите другую временную зону.' // phpcs:ignore
                 ]
             ]
         ]
@@ -230,15 +238,15 @@ $dictionary = [
                 'fallback_languages_delete' => 'Удалить замену',
             ],
             'tooltip' => [
-                'browser_title_addition' => 'Не добавляется в случаях когда используется "Заголовок вкладки браузера по умолчанию"',
+                'browser_title_addition' => 'Не добавляется в случаях когда используется "Заголовок вкладки браузера по умолчанию"', // phpcs:ignore
                 'languages' => [
                     'Требуется указать как минимум 1 язык',
                     'Код языка должен содержать точно 2 латиских буквы, Пример: ru, en, fr'
                 ],
                 'fallback_languages' => [
                     'Код языка должен содержать точно 2 латиских буквы, Пример: ru, en, fr',
-                    'Эта таблица будет использоваться в случаях когда не найден перевод на требуемый язык, но при этом "Основной язык" не подходит',
-                    'Пример: английский язык выставленный как "Основной язык" не подходит для замены украинского. В этом случае русский язык будет подходящей заменой'
+                    'Эта таблица будет использоваться в случаях когда не найден перевод на требуемый язык, но при этом "Основной язык" не подходит', // phpcs:ignore
+                    'Пример: английский язык выставленный как "Основной язык" не подходит для замены украинского. В этом случае русский язык будет подходящей заменой' // phpcs:ignore
                 ]
             ],
             'tab' => [
@@ -396,19 +404,19 @@ $dictionary = [
                     'part_of_other_page' => 'Часть другой страницы',
                     'page_id_arg_label' => 'Выберите страницу',
                     'page_field_arg_label' => 'Выберите какую часть выбранной страницы вставить',
-                    'page_insert_widget_title_template' => 'Вставка поля ":page_field.label" со страницы ":page_id.label"',
+                    'page_insert_widget_title_template' => 'Вставка поля ":page_field.label" со страницы ":page_id.label"', // phpcs:ignore
                     'text_block' => 'Текстовый блок',
                     'text_block_id_arg_label' => 'Выберите текстовый блок',
                     'text_block_insert_widget_title_template' => 'Вставка текстового блока ":page_id.label"',
                     'link_to_other_page' => 'Ссылка на страницу',
-                    'page_link_title_arg_label' => 'Текст ссылки (по умолчанию берется из поля "Короткое название" страницы)',
-                    'insert_link_to_page_widget_title_template' => 'Ссылка на страницу ":page_id.label" (Текст: :title)',
+                    'page_link_title_arg_label' => 'Текст ссылки (по умолчанию берется из поля "Короткое название" страницы)', // phpcs:ignore
+                    'insert_link_to_page_widget_title_template' => 'Ссылка на страницу ":page_id.label" (Текст: :title)', // phpcs:ignore
                 ],
             ],
             'tooltip' => [
                 'meta_description' => 'Используется в случае если Meta-description не указан в прикрепленных текстах',
                 'meta_keywords' => 'Используется в случае если Meta-keywords не указан в прикрепленных текстах',
-                'url_alias' => 'Должен начинаться с символа "/" и может содержать только латинские буквы, цифры, "-", "_" и "/"',
+                'url_alias' => 'Должен начинаться с символа "/" и может содержать только латинские буквы, цифры, "-", "_" и "/"', // phpcs:ignore
             ],
             'validation' => [
                 'unique_page_url' => 'Страница с тким URL уже <a href=":url" target="_blank">существует</a>'
@@ -742,10 +750,25 @@ $dictionary = [
 ];
 
 /** @noinspection DuplicatedCode */
-$dictionary['cms_news'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_news']);
-$dictionary['cms_shop_categories'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_shop_categories']);
-$dictionary['cms_shop_items'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_shop_items']);
-$dictionary['cms_text_elements'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_text_elements']);
-$dictionary['cms_menus'] = array_replace_recursive($dictionary['cms_pages'], $dictionary['cms_menus']);
+$dictionary['cms_news'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_news']
+);
+$dictionary['cms_shop_categories'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_shop_categories']
+);
+$dictionary['cms_shop_items'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_shop_items']
+);
+$dictionary['cms_text_elements'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_text_elements']
+);
+$dictionary['cms_menus'] = array_replace_recursive(
+    $dictionary['cms_pages'],
+    $dictionary['cms_menus']
+);
 
 return $dictionary;

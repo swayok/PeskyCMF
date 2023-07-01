@@ -79,7 +79,7 @@ class RecaptchaServiceProvider extends ServiceProvider
             return null;
         }
 
-        $json = json_decode($curlResponse['data'], true);
+        $json = json_decode($curlResponse['data'], true, 512, JSON_THROW_ON_ERROR);
         if (empty($json) || empty($json['success']) || !empty($json['error-codes'])) {
             return null;
         }
