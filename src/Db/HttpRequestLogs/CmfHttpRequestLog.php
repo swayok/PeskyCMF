@@ -12,6 +12,7 @@ use PeskyCMF\Scaffold\ScaffoldLoggerInterface;
 use PeskyORM\DbExpr;
 use PeskyORM\ORM\Record\Record;
 use PeskyORM\ORM\Record\RecordInterface;
+use PeskyORM\ORM\Table\TableInterface;
 use Swayok\Utils\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
@@ -100,9 +101,9 @@ class CmfHttpRequestLog extends Record implements ScaffoldLoggerInterface
     protected ?\Closure $requestDataMinifier = null;
     protected bool $ignoreResponseLogging = false;
 
-    public function getTable(): CmfHttpRequestLogsTable
+    public function __construct()
     {
-        return CmfHttpRequestLogsTable::getInstance();
+        parent::__construct(CmfHttpRequestLogsTable::getInstance());
     }
 
     /**

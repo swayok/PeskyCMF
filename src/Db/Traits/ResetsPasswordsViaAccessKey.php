@@ -6,20 +6,22 @@ namespace PeskyCMF\Db\Traits;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
-use PeskyORM\Core\DbExpr;
-use PeskyORM\ORM\Column;
-use PeskyORM\ORM\RecordInterface;
+use PeskyORM\DbExpr;
+use PeskyORM\ORM\Record\RecordInterface;
+use PeskyORM\ORM\TableStructure\TableColumn\TableColumnDataType;
 
 trait ResetsPasswordsViaAccessKey
 {
-    
     /**
-     * @{@inheritDoc}
+     * {@inheritDoc}
      * If $additionalColumns is null then $this->getAdditionalColumnsForPasswordRecoveryAccessKey() will be used
      */
     public function getPasswordRecoveryAccessKey(?int $expiresIn = null, ?array $additionalColumns = null): string
     {
-        $expiresInMinutes = $expiresIn > 0 ? $expiresIn : (int)config('auth.passwords.' . app('auth')->getDefaultDriver() . '.expire', 60);
+        $expiresInMinutes = $expiresIn > 0 ? $expiresIn : (int)config(
+            'auth.passwords.' . app('auth')->getDefaultDriver() . '.expire',
+            60
+        );
         $data = [
             'account_id' => $this->getPrimaryKeyValue(),
             'expires_at' => (new \DateTime('now', new \DateTimeZone('UTC')))->getTimestamp() + $expiresInMinutes * 60,
@@ -34,18 +36,18 @@ trait ResetsPasswordsViaAccessKey
         }
         return Crypt::encrypt(json_encode($data));
     }
-    
+
     public function getAdditionalColumnsForPasswordRecoveryAccessKey(): array
     {
         $columns = [];
-        if ($this::hasColumn('updated_at')) {
+        if ($this->hasColumn('updated_at')) {
             $columns[] = 'updated_at';
-        } elseif ($this::hasColumn('password')) {
+        } elseif ($this->hasColumn('password')) {
             $columns[] = 'password';
         }
         return $columns;
     }
-    
+
     public static function loadFromPasswordRecoveryAccessKey(
         string $accessKey,
         ?array $requiredAdditionalColumns = null
@@ -85,16 +87,18 @@ trait ResetsPasswordsViaAccessKey
             if (!array_key_exists($columnName, $data)) {
                 return null;
             }
-            $fieldType = $user::getColumn($columnName)->getType();
+            $fieldType = $user->getTableStructure()->getColumn($columnName)->getDataType();
             switch ($fieldType) {
-                case Column::TYPE_DATE:
+                case TableColumnDataType::DATE:
                     $conditions[$columnName . '::date'] = DbExpr::create("``$data[$columnName]``::date");
                     break;
-                case Column::TYPE_TIME:
+                case TableColumnDataType::TIME:
                     $conditions[$columnName . '::time'] = DbExpr::create("``$data[$columnName]``::time");
                     break;
-                case Column::TYPE_TIMESTAMP:
-                    $conditions[] = DbExpr::create("`{$columnName}`::timestamp(0) = ``{$data[$columnName]}``::timestamp(0)");
+                case TableColumnDataType::TIMESTAMP:
+                    $conditions[] = DbExpr::create(
+                        "`{$columnName}`::timestamp(0) = ``{$data[$columnName]}``::timestamp(0)"
+                    );
                     break;
                 default:
                     $conditions[$columnName] = $data[$columnName];

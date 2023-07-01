@@ -178,7 +178,7 @@ class CmfAuthModule
     public function getUsersTable(): TableInterface
     {
         $recordClass = $this->getUserRecordClass(); //< do not merge with next line!!!
-        return $recordClass::getTable();
+        return (new $recordClass())->getTable();
     }
 
     public function loginOnceUsingEmail(string $email): bool

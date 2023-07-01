@@ -1,5 +1,4 @@
 <?php
-/** @noinspection PhpUnusedPrivateMethodInspection */
 
 declare(strict_types=1);
 
@@ -11,7 +10,7 @@ class CmfHttpRequestStatsTableStructure extends TableStructure
 {
     use IdColumn;
 
-    public static function getTableName(): string
+    public function getTableName(): string
     {
         return 'http_request_stats';
     }

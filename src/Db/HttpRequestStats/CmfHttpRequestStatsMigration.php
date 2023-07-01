@@ -8,14 +8,14 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use PeskyCMF\Db\HttpRequestLogs\CmfHttpRequestLogsTableStructure;
 
 class CmfHttpRequestStatsMigration extends Migration
 {
-    
     public function up(): void
     {
-        if (!Schema::hasTable(CmfHttpRequestStatsTableStructure::getTableName())) {
-            Schema::create(CmfHttpRequestStatsTableStructure::getTableName(), function (Blueprint $table) {
+        if (!Schema::hasTable($this->getTableName())) {
+            Schema::create($this->getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('http_method');
                 $table->string('url');
@@ -27,8 +27,10 @@ class CmfHttpRequestStatsMigration extends Migration
                 $table->float('memory_usage_mb', 10, 6);
                 $table->integer('http_code');
                 $table->boolean('is_cache')->default(false);
-                
-                if (config('database.connections.' . ($this->getConnection() ?: config('database.default')) . '.driver') === 'pgsql') {
+
+                $connection = ($this->getConnection() ?: config('database.default'));
+                $dbType = config("database.connections.{$connection}.driver");
+                if ($dbType === 'pgsql') {
                     $table->jsonb('url_params')->default('{}');
                     $table->jsonb('sql')->default('{}');
                     $table->jsonb('request_data')->default('{}');
@@ -41,16 +43,21 @@ class CmfHttpRequestStatsMigration extends Migration
                     $table->text('checkpoints')->default('{}');
                     $table->text('counters')->default('{}');
                 }
-                
+
                 $table->index('url');
                 $table->index('route');
                 $table->index('is_cache');
             });
         }
     }
-    
+
     public function down(): void
     {
-        Schema::dropIfExists(CmfHttpRequestStatsTableStructure::getTableName());
+        Schema::dropIfExists($this->getTableName());
+    }
+
+    protected function getTableName(): string
+    {
+        return (new CmfHttpRequestStatsTableStructure())->getTableName();
     }
 }

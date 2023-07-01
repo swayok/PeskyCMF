@@ -12,13 +12,12 @@ class CmfSettingsMigration extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable(CmfSettingsTableStructure::getTableName())) {
-            Schema::create(CmfSettingsTableStructure::getTableName(), function (Blueprint $table) {
+        if (!Schema::hasTable($this->getTableName())) {
+            Schema::create($this->getTableName(), function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('key');
-                $dbDriver = config(
-                    'database.connections.' . ($this->getConnection() ?: config('database.default')) . '.driver'
-                );
+                $connectionName = $this->getConnection() ?: config('database.default');
+                $dbDriver = config("database.connections.{$connectionName}.driver");
                 if ($dbDriver === 'pgsql') {
                     $table->jsonb('value')->nullable();
                 } else {
@@ -32,6 +31,11 @@ class CmfSettingsMigration extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists(CmfSettingsTableStructure::getTableName());
+        Schema::dropIfExists($this->getTableName());
+    }
+
+    protected function getTableName(): string
+    {
+        return (new CmfSettingsTableStructure())->getTableName();
     }
 }

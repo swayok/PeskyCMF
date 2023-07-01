@@ -6,106 +6,25 @@ namespace PeskyCMF\Db\Admins;
 
 use PeskyCMF\CmfManager;
 use PeskyCMF\Config\CmfConfig;
+use PeskyORM\ORM\TableStructure\Relation;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\BooleanColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\CreatedAtColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\EmailColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\IdColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\IntegerColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\IpV4AddressColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\PasswordColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\StringColumn;
+use PeskyORM\ORM\TableStructure\TableColumn\Column\UpdatedAtColumn;
 use PeskyORM\ORM\TableStructure\TableStructure;
+use PeskyORMColumns\TableColumn\IsActiveColumn;
+use PeskyORMColumns\TableColumn\RememberTokenColumn;
 
 class CmfAdminsTableStructure extends TableStructure
 {
-    use IdColumn;
-    use TimestampColumns;
-    use IsActiveColumn;
-    use UserAuthColumns;
-
     public function getTableName(): string
     {
         return 'admins';
-    }
-
-    private function parent_id(): Column
-    {
-        return Column::create(Column::TYPE_INT)
-            ->convertsEmptyStringToNull();
-    }
-
-    private function email(): Column
-    {
-        $column = Column::create(Column::TYPE_EMAIL)
-            ->convertsEmptyStringToNull()
-            ->trimsValue()
-            ->lowercasesValue()
-            ->uniqueValues();
-        if ($this->getCmfConfig()->getAuthModule()->getUserLoginColumnName() === 'email') {
-            $column->disallowsNullValues();
-        }
-        return $column;
-    }
-
-    private function login(): Column
-    {
-        $column = Column::create(Column::TYPE_STRING)
-            ->convertsEmptyStringToNull()
-            ->trimsValue()
-            ->lowercasesValue()
-            ->uniqueValues();
-        if ($this->getCmfConfig()->getAuthModule()->getUserLoginColumnName() === 'login') {
-            $column->disallowsNullValues();
-        }
-        return $column;
-    }
-
-    private function name(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues()
-            ->setDefaultValue('');
-    }
-
-    private function ip(): Column
-    {
-        return Column::create(Column::TYPE_IPV4_ADDRESS)
-            ->convertsEmptyStringToNull();
-    }
-
-    private function is_superadmin(): Column
-    {
-        return Column::create(Column::TYPE_BOOL)
-            ->disallowsNullValues()
-            ->convertsEmptyStringToNull()
-            ->setDefaultValue(false);
-    }
-
-    private function role(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues()
-            ->convertsEmptyStringToNull()
-            ->setDefaultValue($this->getCmfConfig()->getAuthModule()->getDefaultUserRole());
-    }
-
-    private function language(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->disallowsNullValues()
-            ->convertsEmptyStringToNull()
-            ->setDefaultValue($this->getCmfConfig()->defaultLocale());
-    }
-
-    private function timezone(): Column
-    {
-        return Column::create(Column::TYPE_STRING)
-            ->convertsEmptyStringToNull();
-    }
-
-    private function ParentAdmin(): Relation
-    {
-        return Relation::create(
-            'parent_id',
-            Relation::BELONGS_TO,
-            $this->getCmfConfig()->getAuthModule()->getUsersTable(),
-            'id'
-        )
-            ->setDisplayColumnName(function () {
-                return $this->getCmfConfig()->getAuthModule()->getUserLoginColumnName();
-            });
     }
 
     public function getCmfConfig(): CmfConfig
@@ -115,11 +34,69 @@ class CmfAdminsTableStructure extends TableStructure
 
     protected function registerColumns(): void
     {
-        // TODO: Implement registerColumns() method.
+        $cmfConfig = $this->getCmfConfig();
+
+        $this->addColumn(new IdColumn());
+        $this->addColumn(new EmailColumn());
+        $this->addColumn(new IntegerColumn('parent_id'));
+
+        $loginColumn = new StringColumn('login');
+        $loginColumn->convertsEmptyStringValuesToNull()
+            ->trimsValues()
+            ->lowercasesValues()
+            ->uniqueValues();
+        if ($cmfConfig->getAuthModule()->getUserLoginColumnName() !== 'login') {
+            $loginColumn->allowsNullValues();
+        }
+        $this->addColumn($loginColumn);
+        $this->addColumn(new PasswordColumn());
+        $this->addColumn(new RememberTokenColumn());
+
+        $this->addColumn(
+            (new StringColumn('name'))
+                ->setDefaultValue('')
+        );
+        $this->addColumn(
+            (new StringColumn('role'))
+                ->convertsEmptyStringValuesToNull()
+                ->setDefaultValue($cmfConfig->getAuthModule()->getDefaultUserRole())
+        );
+
+        $this->addColumn(
+            (new StringColumn('language'))
+                ->convertsEmptyStringValuesToNull()
+                ->setDefaultValue($cmfConfig->defaultLocale())
+        );
+
+        $this->addColumn(
+            (new StringColumn('timezone'))
+                ->convertsEmptyStringValuesToNull()
+        );
+
+        $this->addColumn(new IpV4AddressColumn('ip'));
+        $this->addColumn(
+            (new BooleanColumn('is_superadmin'))
+                ->setDefaultValue(false)
+        );
+        $this->addColumn(new IsActiveColumn());
+        $this->addColumn(new CreatedAtColumn());
+        $this->addColumn(new UpdatedAtColumn());
     }
 
     protected function registerRelations(): void
     {
-        // TODO: Implement registerRelations() method.
+        $this->addRelation(
+            (new Relation(
+                'parent_id',
+                Relation::BELONGS_TO,
+                // Recursion when $this->getCmfConfig()->getAuthModule()->getUsersTable()::class used
+                CmfAdminsTable::class,
+                'id',
+                'ParentAdmin'
+            ))
+                ->setDisplayColumnName(function () {
+                    return $this->getCmfConfig()->getAuthModule()->getUserLoginColumnName();
+                })
+        );
     }
 }

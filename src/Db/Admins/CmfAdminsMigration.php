@@ -8,15 +8,17 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use PeskyORM\ORM\TableStructure\TableStructureInterface;
 
 class CmfAdminsMigration extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable(CmfAdminsTableStructure::getTableName())) {
+        $tableStructure = $this->getTableStructure();
+        if (!Schema::hasTable($tableStructure->getTableName())) {
             Schema::create(
-                CmfAdminsTableStructure::getTableName(),
-                function (Blueprint $table) {
+                $tableStructure->getTableName(),
+                function (Blueprint $table) use ($tableStructure) {
                     $table->increments('id');
                     $table->integer('parent_id')->nullable()->unsigned();
                     $table->string('name')->default('');
@@ -27,10 +29,10 @@ class CmfAdminsMigration extends Migration
                     $table->boolean('is_superadmin')->default(false);
                     $table->boolean('is_active')->default(true);
                     $table->string('role', 50)->default(
-                        CmfAdminsTableStructure::getColumn('role')->getDefaultValue()
+                        $tableStructure->getColumn('role')->getDefaultValue()
                     );
                     $table->char('language', 2)->default(
-                        CmfAdminsTableStructure::getColumn('language')->getDefaultValue()
+                        $tableStructure->getColumn('language')->getDefaultValue()
                     );
                     $table->timestampTz('created_at')->default(DB::raw('NOW()'));
                     $table->timestampTz('updated_at')->default(DB::raw('NOW()'));
@@ -44,7 +46,7 @@ class CmfAdminsMigration extends Migration
 
                     $table->foreign('parent_id')
                         ->references('id')
-                        ->on(CmfAdminsTableStructure::getTableName())
+                        ->on($tableStructure->getTableName())
                         ->onDelete('set null')
                         ->onUpdate('cascade');
                 }
@@ -54,6 +56,11 @@ class CmfAdminsMigration extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists(CmfAdminsTableStructure::getTableName());
+        Schema::dropIfExists($this->getTableStructure()->getTableName());
+    }
+
+    protected function getTableStructure(): TableStructureInterface
+    {
+        return new CmfAdminsTableStructure();
     }
 }

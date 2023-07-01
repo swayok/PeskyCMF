@@ -11,11 +11,10 @@ use Illuminate\Support\Facades\Schema;
 
 class CmfHttpRequestLogsMigration extends Migration
 {
-    
     public function up(): void
     {
-        if (!Schema::hasTable(CmfHttpRequestLogsTableStructure::getTableName())) {
-            Schema::create(CmfHttpRequestLogsTableStructure::getTableName(), function (Blueprint $table) {
+        if (!Schema::hasTable($this->getTableName())) {
+            Schema::create($this->getTableName(), function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->integer('requester_id')->unsigned()->nullable();
                 $table->string('requester_table')->nullable();
@@ -36,7 +35,7 @@ class CmfHttpRequestLogsMigration extends Migration
                 $table->json('data_after')->nullable();
                 $table->timestampTz('created_at')->default(DB::raw('NOW()'));
                 $table->timestampTz('responded_at')->nullable();
-                
+
                 $table->index('response_code');
                 $table->index('section');
                 $table->index('filter');
@@ -46,9 +45,14 @@ class CmfHttpRequestLogsMigration extends Migration
             });
         }
     }
-    
+
     public function down(): void
     {
-        Schema::dropIfExists(CmfHttpRequestLogsTableStructure::getTableName());
+        Schema::dropIfExists($this->getTableName());
+    }
+
+    protected function getTableName(): string
+    {
+        return (new CmfHttpRequestLogsTableStructure())->getTableName();
     }
 }

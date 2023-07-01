@@ -1,0 +1,4 @@
+CREATE TRIGGER `trigger_after_{$columnName}_update_in_{$tableName}`
+AFTER UPDATE OF `{$columnName}` ON `{$schema}`.`{$tableName}`
+FOR EACH ROW EXECUTE PROCEDURE `{$schema}`.`{$triggerFunctionName}`
+    (``{$columnName}``,``{$pkName}``,``{$seqName}``,``{$seqStep}``);

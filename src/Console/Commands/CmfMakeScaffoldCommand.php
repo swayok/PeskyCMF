@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PeskyCMF\Console\Commands;
 
-use Illuminate\Config\Repository as ConfigsRepository;
 use PeskyCMF\Scaffold\KeyValueTableScaffoldConfig;
 use PeskyCMF\Scaffold\NormalTableScaffoldConfig;
 use PeskyORM\ORM\ClassBuilder\ClassBuilder;
@@ -44,49 +43,15 @@ class CmfMakeScaffoldCommand extends CmfCommand
 
         $this->createScaffoldClassFile($table, $namespace, $className, $filePath);
 
-
         $this->line($filePath . ' created');
 
-        $columnsTranslations = [];
-        foreach ($table->getTableStructure()->getColumns() as $column) {
-            $columnsTranslations[] = "'{$column->getName()}' => ''";
-        }
-        $columnsTranslationsFilter = implode(",\n                    ", $columnsTranslations) . ",";
-        $columnsTranslations = implode(",\n                ", $columnsTranslations) . ",";
-
+        $dataForView = [
+            'tableName' => $table->getTableStructure()->getTableName(),
+            'columns' => array_keys($table->getTableStructure()->getColumns())
+        ];
         $this->comment(
-            <<<INFO
-
-Translations:
-    '{$table->getTableStructure()->getTableName()}' => [
-        'menu_title' => ,
-        'datagrid' => [
-            'header' => ,
-            'column' => [
-                $columnsTranslations
-            ],
-            'filter' => [
-                '{$table->getTableStructure()->getTableName()}' => [
-                    $columnsTranslationsFilter
-                ],
-            ],
-        ],
-        'form' => [
-            'header_create' => ,
-            'header_edit' => ,
-            'input' => [
-                $columnsTranslations
-            ],
-        ],
-        'item_details' => [
-            'header' => ,
-            'field' => [
-                $columnsTranslations
-            ],
-        ]
-    ]
-
-INFO
+            "\n\nTranslations:\n"
+            . $this->renderStubView('scaffold_translations', $dataForView)
         );
         return 0;
     }
@@ -158,95 +123,26 @@ INFO
         string $filePath
     ): void {
         $parentClass = $this->getScaffoldConfigParentClass();
-        $parentClassShort = class_basename($parentClass);
         $tableClass = get_class($table);
-        $tableClassShort = class_basename($table);
 
-        $contents = <<<VIEW
-<?php
+        $dataForView = [
+            'namespace' => $namespace,
+            'parentClass' => $parentClass,
+            'className' => $className,
+            'tableClass' => $tableClass,
+            'pkName' => $table::getPkColumnName(),
+            'contains' => $this->getJoinableRelationNames($table),
+            'columns' => $table->getTableStructure()->getColumns(),
+            'filters' => $this->getFilterableColumns($table),
+            'inputs' => $this->makeFieldsListForItemForms($table),
+        ];
 
-namespace $namespace;
-
-use {$parentClass};
-use {$tableClass};
-use PeskyCMF\Scaffold\DataGrid\DataGridColumn;
-use PeskyCMF\Scaffold\Form\FormInput;
-use PeskyCMF\Scaffold\Form\InputRenderer;
-use PeskyCMF\Scaffold\ItemDetails\ValueCell;
-
-class {$className} extends {$parentClassShort} {
-
-    protected \$isDetailsViewerAllowed = true;
-    protected \$isCreateAllowed = true;
-    protected \$isEditAllowed = true;
-    protected \$isCloningAllowed = false;
-    protected \$isDeleteAllowed = true;
-
-    public static function getTable() {
-        return {$tableClassShort}::getInstance();
-    }
-
-    protected static function getIconForMenuItem() {
-        // icon classes like: 'fa fa-cog' or just delete if you do not want an icon
-        return '';
-    }
-
-    protected function createDataGridConfig() {
-        return parent::createDataGridConfig()
-            ->readRelations([
-                {$this->makeContainsForDataGrid($table)}
-            ])
-            ->setOrderBy('{$table::getPkColumnName()}', 'asc')
-            ->setColumns([
-                {$this->makeFieldsListForDataGrid($table)}
-            ]);
-    }
-
-    protected function createDataGridFilterConfig() {
-        return parent::createDataGridFilterConfig()
-            ->setFilters([
-                {$this->makeFiltersList($table)}
-            ]);
-    }
-
-    protected function createItemDetailsConfig() {
-        return parent::createItemDetailsConfig()
-            ->readRelations([
-                {$this->makeContainsForItemDetailsViewer($table)}
-            ])
-            ->setValueCells([
-                {$this->makeFieldsListForItemDetailsViewer($table)}
-            ]);
-    }
-
-    protected function createFormConfig() {
-        return parent::createFormConfig()
-            ->setWidth(50)
-            ->setFormInputs([
-                {$this->makeFieldsListForItemForms($table)}
-            ]);
-    }
-}
-VIEW;
-        File::save($filePath, $contents, 0664, 0755);
-    }
-
-    protected function makeContainsForDataGrid(TableInterface $table): string
-    {
-        $contains = [];
-        foreach ($this->getJoinableRelationNames($table) as $relationName) {
-            $contains[] = "'{$relationName}' => ['*'],";
-        }
-        return implode("\n                ", $contains);
-    }
-
-    protected function makeContainsForItemDetailsViewer(TableInterface $table): string
-    {
-        $contains = [];
-        foreach ($this->getJoinableRelationNames($table) as $relationName) {
-            $contains[] = "'{$relationName}' => ['*'],";
-        }
-        return implode("\n                ", $contains);
+        File::save(
+            $filePath,
+            $this->renderStubView('scaffold_config', $dataForView),
+            0664,
+            0755
+        );
     }
 
     protected function getJoinableRelationNames(TableInterface $table): array
@@ -260,18 +156,9 @@ VIEW;
         return $ret;
     }
 
-    protected function makeFieldsListForDataGrid(TableInterface $table): string
+    protected function getFilterableColumns(TableInterface $table): array
     {
-        $valueViewers = [];
-        foreach ($table->getTableStructure()->getColumns() as $column) {
-            $valueViewers[] = "'{$column->getName()}',";
-        }
-        return implode("\n                ", $valueViewers);
-    }
-
-    protected function makeFiltersList(TableInterface $table): string
-    {
-        $valueViewers = [];
+        $filters = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if (
                 !in_array(
@@ -284,43 +171,24 @@ VIEW;
                     true
                 )
             ) {
-                $valueViewers[] = "'{$column->getName()}',";
+                $filters[] = $column->getName();
             }
         }
-        return implode("\n                ", $valueViewers);
+        return $filters;
     }
 
-    protected function makeFieldsListForItemDetailsViewer(TableInterface $table): string
+    protected function makeFieldsListForItemForms(TableInterface $table): array
     {
-        $valueViewers = [];
-        foreach ($table->getTableStructure()->getColumns() as $column) {
-            $valueViewers[] = "'{$column->getName()}',";
-        }
-        return implode("\n                ", $valueViewers);
-    }
-
-    protected function makeFieldsListForItemForms(TableInterface $table): string
-    {
-        $valueViewers = [];
+        $inputs = [];
         foreach ($table->getTableStructure()->getColumns() as $column) {
             if (
                 $column->isReadonly()
                 && !$column->isAutoUpdatingValues()
                 && !$column->isPrimaryKey()
             ) {
-                if ($column->getName() === 'admin_id') {
-                    $valueViewers[] = <<<VIEW
-'{$column->getName()}' => FormInput::create()
-                    ->setType(FormInput::TYPE_HIDDEN)
-                    ->setSubmittedValueModifier(function () {
-                        return static::getUser()->id;
-                    }),
-VIEW;
-                } else {
-                    $valueViewers[] = "'{$column->getName()}',";
-                }
+                $inputs[] = $column->getName();
             }
         }
-        return implode("\n                ", $valueViewers);
+        return $inputs;
     }
 }

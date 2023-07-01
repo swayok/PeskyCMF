@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use PeskyCMF\Db\Contracts\ResetsPasswordsViaAccessKey as ResetsPasswordsViaAccessKeyContract;
 use PeskyCMF\Db\Traits\ResetsPasswordsViaAccessKey;
 use PeskyORM\ORM\Record\Record;
+use PeskyORM\ORM\Table\TableInterface;
 use PeskyORMLaravel\Db\Traits\Authenticatable;
 
 /**
@@ -54,8 +55,8 @@ class CmfAdmin extends Record implements AuthenticatableContract, ResetsPassword
     use Authenticatable;
     use ResetsPasswordsViaAccessKey;
 
-    public function getTable(): CmfAdminsTable
+    public function __construct()
     {
-        return CmfAdminsTable::getInstance();
+        parent::__construct(CmfAdminsTable::getInstance());
     }
 }

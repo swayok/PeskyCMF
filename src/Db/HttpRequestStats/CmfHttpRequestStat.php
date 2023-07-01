@@ -7,6 +7,7 @@ namespace PeskyCMF\Db\HttpRequestStats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use PeskyORM\ORM\Record\Record;
+use PeskyORM\ORM\Table\TableInterface;
 use PeskyORM\Profiling\PdoProfilingHelper;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -65,9 +66,9 @@ class CmfHttpRequestStat extends Record
     protected int $accumulatedDurationError = 0;
     protected static CmfHttpRequestStat $current;
 
-    public function getTable(): CmfHttpRequestStatsTable
+    public function __construct()
     {
-        return CmfHttpRequestStatsTable::getInstance();
+        parent::__construct(CmfHttpRequestStatsTable::getInstance());
     }
 
     public static function createForProfiling(?float $startedAt = null): CmfHttpRequestStat
@@ -88,6 +89,7 @@ class CmfHttpRequestStat extends Record
     /**
      * @param string      $key - checkpoint key to be used to finish it
      * @param string|null $descrption
+     *
      * @throws \InvalidArgumentException
      */
     public static function startCheckpoint(string $key, ?string $descrption = null): void
@@ -123,6 +125,7 @@ class CmfHttpRequestStat extends Record
     /**
      * @param string $key - checkpoint key used in static::startCheckpoint()
      * @param array  $data
+     *
      * @throws \InvalidArgumentException
      */
     public static function endCheckpoint(string $key, array $data = []): void
@@ -203,6 +206,7 @@ class CmfHttpRequestStat extends Record
 
     /**
      * @param Request $request
+     *
      * @return static
      */
     public function processRequest(Request $request): CmfHttpRequestStat
