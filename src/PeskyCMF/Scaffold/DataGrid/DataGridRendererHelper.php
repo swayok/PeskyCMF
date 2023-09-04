@@ -579,16 +579,13 @@ class DataGridRendererHelper {
                     $freeFormGroup[] = $contextMenuItems['common'][$key];
                     unset($contextMenuItems['common'][$key]);
                 }
-                continue;
-            } else if ($menuItem instanceof Tag) {
-                $freeFormGroup[] = $menuItem->build();
-            } else if ($menuItem instanceof CmfMenuItem) {
-                $freeFormGroup[] = $menuItem->renderAsBootstrapDropdownMenuItem();
-            } else if (is_string($menuItem)) {
-                $freeFormGroup[] = $menuItem;
             } else if (is_array($menuItem)) {
                 // group of menu items
                 if (count($freeFormGroup) > 0) {
+                    // If there are any items in $freeFormGroup - then
+                    // we place them into $contextMenuItems and start
+                    // collecting new $freeFormGroup.
+                    // Result: $freeFormGroup / $menuItem / $newFreeFormGroup
                     $contextMenuItems[] = $freeFormGroup;
                     $freeFormGroup = [];
                 }
@@ -596,9 +593,7 @@ class DataGridRendererHelper {
                     $contextMenuItems[] = $menuItem;
                 }
             } else {
-                throw new \UnexpectedValueException(
-                    '$menuItem must be an array. ' . gettype($menuItem) . ' received for key/index ' . $key
-                );
+                $freeFormGroup[] = $menuItem;
             }
         }
         if (count($freeFormGroup) > 0) {
@@ -606,24 +601,27 @@ class DataGridRendererHelper {
         }
         // normalize menu items and create dot.js template
         $template = [];
-        foreach ($contextMenuItems as &$group) {
+        foreach ($contextMenuItems as $group) {
             if (count($group) === 0) {
                 continue;
             }
             $groupTemplate = '';
-            foreach ($group as &$menuItem) {
+            foreach ($group as $menuItem) {
                 if ($menuItem instanceof Tag) {
                     $menuItem = $menuItem->build();
                 } else if ($menuItem instanceof CmfMenuItem) {
                     $menuItem = $menuItem->renderAsBootstrapDropdownMenuItem();
                 } else if (!is_string($menuItem)) {
                     throw new \UnexpectedValueException(
-                        '$menuItem must be an string or instance of Tag or CmfMenuItem class. ' . gettype($menuItem) . ' received'
+                        '$menuItem must be a string or instance of Tag or CmfMenuItem class. ' . gettype($menuItem) . ' received'
                     );
                 }
-                $groupTemplate .= '<li>' . $menuItem . '</li>';
+                if (stripos($menuItem, '<li') === 0) {
+                    $groupTemplate .= $menuItem;
+                } else {
+                    $groupTemplate .= '<li>' . $menuItem . '</li>';
+                }
             }
-            unset($menuItem);
             $template[] = $groupTemplate;
         }
         return '<ul class="dropdown-menu datagrid-context-menu">'
