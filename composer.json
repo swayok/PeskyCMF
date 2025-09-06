@@ -35,7 +35,7 @@
     "require": {
         "php": ">=7.0",
         "laravel/framework": ">=5.3",
-        "swayok/utils": "dev-master",
+        "swayok/utils": "1.6.3",
         "swayok/peskyorm": "dev-feature-fix-a",
         "swayok/peskyorm-laravel": "dev-feature-fix-a",
         "swayok/html-tag-helper": "dev-master",
