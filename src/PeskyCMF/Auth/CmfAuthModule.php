@@ -311,7 +311,7 @@ class CmfAuthModule {
             'password' => 'required',
         ]);
         $credentials = [
-            DbExpr::create("LOWER(`{$userLoginColumn}`) = LOWER(``" . trim($data[$userLoginColumn]) . '``)'),
+            $userLoginColumn => mb_strtolower(trim($data[$userLoginColumn])),
             'password' => $data['password'],
         ];
         if (!$this->getAuthGuard()->attempt($credentials)) {

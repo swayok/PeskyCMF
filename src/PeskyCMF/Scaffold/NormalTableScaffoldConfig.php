@@ -57,20 +57,24 @@ abstract class NormalTableScaffoldConfig extends ScaffoldConfig {
                 $config['column'] = $columns[$config['column']]['name'];
             }
             if (!empty($config['column']) && !is_numeric($config['column'])) {
+                $direction = mb_strtolower($config['dir']);
+                if (!in_array($direction, ['asc', 'desc', 'asc nulls last', 'asc nulls first', 'desc nulls last', 'desc nulls first'])) {
+                    $direction = $defaultOrderByDirection;
+                }
                 if ($config['column'] instanceof DbExpr) {
-                    $conditions['ORDER'][] = DbExpr::create($config['column']->get() . ' ' . $config['dir'], false);
+                    $conditions['ORDER'][] = DbExpr::create($config['column']->get() . ' ' . $direction, false);
                 } else {
                     if (AbstractValueViewer::isComplexViewerName($config['column'])) {
                         list($colName, $keyName) = AbstractValueViewer::splitComplexViewerName($config['column']);
-                        $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$config['dir']}", false);
+                        $conditions['ORDER'][] = DbExpr::create("`$colName`->>``$keyName`` {$direction}", false);
                     } else if (
                         $defaultDirectionWithNulls
                         && $config['column'] === $defaultOrderByColumn
-                        && stripos($defaultOrderByDirection, $config['dir']) !== false
+                        && stripos($defaultOrderByDirection, $direction) !== false
                     ) {
                         $conditions['ORDER'][$config['column']] = $defaultOrderByDirection;
                     } else {
-                        $conditions['ORDER'][$config['column']] = $config['dir'];
+                        $conditions['ORDER'][$config['column']] = $direction;
                     }
 
                     if ($dataGridConfig->hasValueViewer($config['column'])) {
