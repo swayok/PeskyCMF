@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use PeskyORM\ORM\RecordInterface;
 use PeskyORMLaravel\Db\Column\Utils\FileConfig;
 use PeskyORMLaravel\Db\Column\Utils\FileInfo;
+use PeskyORMLaravel\Db\Column\Utils\MimeTypesHelper;
 use Ramsey\Uuid\Uuid;
 use Swayok\Utils\File;
 use Swayok\Utils\Folder;
@@ -57,6 +58,9 @@ class UploadedTempFileInfo extends \SplFileInfo {
         } else {
             $this->name = $file->getClientOriginalName();
             $this->type = $file->getClientMimeType();
+            if ($this->type === MimeTypesHelper::UNKNOWN) {
+                $this->type = $file->getMimeType();
+            }
             $this->realPath = $file->getRealPath();
         }
         if (!$this->relativePath) {
