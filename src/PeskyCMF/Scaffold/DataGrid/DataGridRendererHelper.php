@@ -131,7 +131,7 @@ class DataGridRendererHelper {
                 /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $a */
                 /** @var \PeskyCMF\Scaffold\DataGrid\DataGridColumn $b */
                 /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                return ($a->getPosition() > $b->getPosition());
+                return ($a->getPosition() > $b->getPosition()) ? 1 : -1;
             });
         }
         return $this->sortedColumnConfigs;
