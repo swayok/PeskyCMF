@@ -16,6 +16,7 @@ abstract class ConfigsContainer implements \IteratorAggregate, \Countable, Array
      * <b>Traversable</b>
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function getIterator() {
         return new \ArrayIterator($this->toArray());
     }
@@ -25,6 +26,7 @@ abstract class ConfigsContainer implements \IteratorAggregate, \Countable, Array
      * @link http://php.net/manual/en/countable.count.php
      * @return int The custom count as an integer.
      */
+    #[\ReturnTypeWillChange]
     public function count() {
         return count($this->toArray());
     }
