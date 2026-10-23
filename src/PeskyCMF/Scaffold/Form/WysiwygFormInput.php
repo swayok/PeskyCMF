@@ -198,7 +198,13 @@ class WysiwygFormInput extends FormInput {
      * @return array
      * @throws \InvalidArgumentException
      */
-    static public function createDataInsertConfigWithArguments($phpCode, $title, $showAsBlock = false, array $optionsForArguments, $widgetTitleTpl = null) {
+    static public function createDataInsertConfigWithArguments(
+        $phpCode,
+        $title,
+        $showAsBlock = false,
+        array $optionsForArguments = [],
+        $widgetTitleTpl = null
+    ) {
         $config = static::createDataInsertConfig($phpCode, $title, $showAsBlock);
         $config['args_options'] = $optionsForArguments;
         $config['widget_title_tpl'] = $widgetTitleTpl;

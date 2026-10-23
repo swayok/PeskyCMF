@@ -278,7 +278,7 @@ class CmfHttpRequestStatsScaffoldConfig extends NormalTableScaffoldConfig {
             ";
     }
 
-    protected function buildSqlQueryLog(array $statement, string $numeration = '', float $totalDuration): string {
+    protected function buildSqlQueryLog(array $statement, string $numeration = '', float $totalDuration = 0.0): string {
         $query = trim(preg_replace(
             '%(?: |^)(WITH|SELECT|INSERT|UPDATE|DELETE|FROM|ORDER BY|WHERE|GROUP BY|HAVING|SET|VALUES|INTO|LIMIT|OFFSET|(?:INNER|OUTER|LEFT|RIGHT)? ?JOIN) %is',
             "\n  <b>$1</b> ",
